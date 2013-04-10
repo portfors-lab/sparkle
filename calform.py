@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Thu May 30 20:15:15 2013
+# Created: Fri May 31 10:36:50 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,12 +31,23 @@ class Ui_CalibrationWindow(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         self.label = QtGui.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(16)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
-        self.verticalLayout_4.addWidget(self.label)
+        self.horizontalLayout_5.addWidget(self.label)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem)
+        self.running_label = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.running_label.setFont(font)
+        self.running_label.setObjectName(_fromUtf8("running_label"))
+        self.horizontalLayout_5.addWidget(self.running_label)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.tabs = QtGui.QTabWidget(self.centralwidget)
@@ -84,7 +95,7 @@ class Ui_CalibrationWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.dur_spnbx.setFont(font)
-        self.dur_spnbx.setMinimum(100)
+        self.dur_spnbx.setMinimum(1)
         self.dur_spnbx.setMaximum(50000)
         self.dur_spnbx.setSingleStep(100)
         self.dur_spnbx.setProperty("value", 1000)
@@ -313,8 +324,8 @@ class Ui_CalibrationWindow(object):
         self.label_28 = QtGui.QLabel(self.tab_2)
         self.label_28.setObjectName(_fromUtf8("label_28"))
         self.gridLayout_2.addWidget(self.label_28, 0, 3, 1, 1)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.gridLayout_2.addItem(spacerItem, 3, 0, 1, 1)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout_2.addItem(spacerItem1, 3, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_2)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
@@ -462,8 +473,8 @@ class Ui_CalibrationWindow(object):
         self.horizontalLayout_3.addWidget(self.tabs)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        spacerItem1 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Maximum)
-        self.verticalLayout_3.addItem(spacerItem1)
+        spacerItem2 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Maximum)
+        self.verticalLayout_3.addItem(spacerItem2)
         self.gridLayout_4 = QtGui.QGridLayout()
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
         self.label_29 = QtGui.QLabel(self.centralwidget)
@@ -573,22 +584,27 @@ class Ui_CalibrationWindow(object):
         CalibrationWindow.setStatusBar(self.statusbar)
         self.actionDisplay_Options = QtGui.QAction(CalibrationWindow)
         self.actionDisplay_Options.setObjectName(_fromUtf8("actionDisplay_Options"))
+        self.actionScale_Factors = QtGui.QAction(CalibrationWindow)
+        self.actionScale_Factors.setObjectName(_fromUtf8("actionScale_Factors"))
         self.menuAdvanced.addAction(self.actionDisplay_Options)
+        self.menuAdvanced.addAction(self.actionScale_Factors)
         self.menubar.addAction(self.menuAdvanced.menuAction())
 
         self.retranslateUi(CalibrationWindow)
-        self.tabs.setCurrentIndex(1)
+        self.tabs.setCurrentIndex(0)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_interval_min)
         QtCore.QObject.connect(self.reprate_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), CalibrationWindow.set_dur_max)
         QtCore.QObject.connect(self.actionDisplay_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_display_dlg)
         QtCore.QObject.connect(self.sr_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.aisr_spnbx.setValue)
         QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWindow.xor_savecal)
         QtCore.QObject.connect(self.savecal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWindow.xor_applycal)
+        QtCore.QObject.connect(self.actionScale_Factors, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_scaledlg)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWindow)
 
     def retranslateUi(self, CalibrationWindow):
         CalibrationWindow.setWindowTitle(_translate("CalibrationWindow", "MainWindow", None))
         self.label.setText(_translate("CalibrationWindow", "Speaker Calibration", None))
+        self.running_label.setText(_translate("CalibrationWindow", "OFF", None))
         self.label_6.setText(_translate("CalibrationWindow", "Rise fall time", None))
         self.label_32.setText(_translate("CalibrationWindow", "Acq rate", None))
         self.label_33.setText(_translate("CalibrationWindow", "kHz", None))
@@ -636,7 +652,8 @@ class Ui_CalibrationWindow(object):
         self.start_button.setText(_translate("CalibrationWindow", "Start", None))
         self.stop_button.setText(_translate("CalibrationWindow", "Stop", None))
         self.menuAdvanced.setTitle(_translate("CalibrationWindow", "Advanced", None))
-        self.actionDisplay_Options.setText(_translate("CalibrationWindow", "Display Options", None))
+        self.actionDisplay_Options.setText(_translate("CalibrationWindow", "Other Parameters", None))
+        self.actionScale_Factors.setText(_translate("CalibrationWindow", "Scale Factors", None))
 
 
 if __name__ == "__main__":

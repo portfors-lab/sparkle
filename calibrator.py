@@ -3,7 +3,7 @@ import time
 import pickle
 import queue
 from scipy.integrate import simps, trapz
-
+0
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
 import numpy as np
@@ -12,6 +12,7 @@ from daq_tasks import *
 from plotz import *
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
+from scale_dlg import ScaleDialog
 
 #defauts used only if user data not saved
 AIPOINTS = 100
@@ -28,12 +29,12 @@ SAVE_FFT_DATA = True
 USE_FINITE = True
 VERBOSE = True
 SAVE_NOISE = False
-SAVE_OUTPUT = False
+SAVE_OUTPUT = True
 
 NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
 #NBPATH = 'C:\\Users\\Leeloo\\src\\python\\notebooks\\'
 
-FFT_FNAME = NBPATH + 'caltest_data'
+FFT_FNAME = NBPATH + 'ffttraces'
 PEAKS_FNAME =  NBPATH + 'fftpeaks'
 DB_FNAME =  NBPATH + 'resultdb'
 INDEX_FNAME =  NBPATH + "index"
@@ -56,12 +57,20 @@ class Calibrator(QtGui.QMainWindow):
         self.ui.start_button.clicked.connect(self.on_start)
         self.ui.stop_button.clicked.connect(self.on_stop)
 
+        self.red = QtGui.QPalette()
+        self.red.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
+        self.green = QtGui.QPalette()
+        self.green.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
+        self.ui.running_label.setPalette(self.red)
+
         self.tone = []
         self.display = None
         self.ainpts = AIPOINTS # gets overriden (hopefully)
         self.caldb = CALDB
         self.calv = CALV
         self.calf = CALF
+        self.fscale = 1000
+        self.tscale = 0.001
 
         inlist = load_inputs()
         if len(inlist) > 0:
@@ -131,7 +140,7 @@ class Calibrator(QtGui.QMainWindow):
             with open("calibration_index.pkl", 'rb') as pf:
                 self.calibration_index = pickle.load(pf)
             print(self.calibration_index)
-        
+
         if self.ui.tabs.currentIndex() == 0 :
             # on the fly
             self.current_operation = 0
@@ -150,6 +159,9 @@ class Calibrator(QtGui.QMainWindow):
             if SAVE_DATA_CHART or SAVE_DATA_TRACES:
                 self.a = []
             
+            if SAVE_FFT_DATA:
+                self.full_fft_data = []
+
             self.ndata = 0
             self.current_line_data = []
 
@@ -168,6 +180,8 @@ class Calibrator(QtGui.QMainWindow):
                     if SAVE_OUTPUT:
                         self.tone_array.append(self.tone[:])
 
+                    self.ui.running_label.setPalette(self.green)
+                    self.ui.running_label.setText("RUNNING")
                     self.daq_timer = self.startTimer(interval)
                 else:
                     # use continuous acquisition task, using NIDAQ everyncallback
@@ -198,17 +212,17 @@ class Calibrator(QtGui.QMainWindow):
             self.ui.label4.setText("")
             
             try:
-                scale_factor = 1000
-                f_start = self.ui.freq_start_spnbx.value()*scale_factor
-                f_stop = self.ui.freq_stop_spnbx.value()*scale_factor
-                f_step = self.ui.freq_step_spnbx.value()*scale_factor
+                #scale_factor = 1000
+                f_start = self.ui.freq_start_spnbx.value()*self.fscale
+                f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
+                f_step = self.ui.freq_step_spnbx.value()*self.fscale
                 db_start = self.ui.db_start_spnbx.value()
                 db_stop = self.ui.db_stop_spnbx.value()
                 db_step = self.ui.db_step_spnbx.value()
-                dur = self.ui.dur_spnbx_2.value()/scale_factor
-                rft = self.ui.risefall_spnbx_2.value()/scale_factor
+                dur = self.ui.dur_spnbx_2.value()*self.tscale
+                rft = self.ui.risefall_spnbx_2.value()*self.tscale
                 reprate = self.ui.reprate_spnbx.value()
-                sr = self.ui.sr_spnbx_2.value()*scale_factor
+                sr = self.ui.sr_spnbx_2.value()*self.fscale
                 nreps = self.ui.nreps_spnbx.value()
                 
                 # acquisitions threads must access the following data
@@ -265,6 +279,8 @@ class Calibrator(QtGui.QMainWindow):
                             # also catalog where these values go in fft_max_vals
                             self.fft_vals_lookup[(f,db)] = (ifreq,idb)
 
+                self.ui.running_label.setText("RUNNING")
+                self.ui.running_label.setPalette(self.green)
                 self.daq_timer = self.startTimer(interval)
                 
                 # save these lists for easier plotting later
@@ -332,19 +348,22 @@ class Calibrator(QtGui.QMainWindow):
         self.signals.done.emit(f,db)
 
     def process_caldata(self):
+        #After running curve do calculations and save data to file
+
         print("job finished")
         print(self.fft_peaks)
         print(self.reject_list)
         # go through FFT peaks and calculate playback resultant dB
         #for freq in self.fft_peaks
         vfunc = np.vectorize(calc_db)
-        print("Using FFT peak data from ", self.caldb, " dB, ", self.calf, " Hz tone to calculate calibration curve")
+        
         try:
             ifreq, idb = self.fft_vals_lookup[(self.calf,self.caldb)]
             cal_fft_peak = self.fft_peaks[ifreq][idb]
+            print("Using FFT peak data from ", self.caldb, " dB, ", self.calf, " Hz tone to calculate calibration curve")
         except:
-            print("using manual 0.224 fft peak")
-            cal_fft_peak = CAL_HACK
+            print("WARNING : using manual %.4f fft peak" % (CALHACK))
+            cal_fft_peak = CALHACK
 
         resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
 
@@ -412,6 +431,14 @@ class Calibrator(QtGui.QMainWindow):
                 except:
                     pass
                     #raise
+            if SAVE_OUTPUT:
+                print("saving output tones, shape : ", len(self.tone_array), ', ', len(self.tone_array[0]))
+                filename = OUTPUT_FNAME
+                np.save(filename, self.tone_array)
+            if SAVE_FFT_DATA:
+                print("saving fft traces, shape : ", len(self.full_fft_data), ', ', len(self.full_fft_data[0]))
+                filename = FFT_FNAME
+                np.save(filename, self.full_fft_data)
         elif self.current_operation == 1:
             self.killTimer(self.daq_timer)
             self.ui.tab_2.setEnabled(True)
@@ -422,16 +449,18 @@ class Calibrator(QtGui.QMainWindow):
             self.aotask = None
         else:
             print("No task currently running")
+        self.ui.running_label.setText("OFF")
+        self.ui.running_label.setPalette(self.red)
 
     def update_stim(self):
         scale_factor = 1000
         time_scale = 1000
-        f = self.ui.freq_spnbx.value()*scale_factor
-        sr = self.ui.sr_spnbx.value()*scale_factor
-        dur = self.ui.dur_spnbx.value()/scale_factor
+        f = self.ui.freq_spnbx.value()*self.fscale
+        sr = self.ui.sr_spnbx.value()*self.fscale
+        dur = self.ui.dur_spnbx.value()*self.tscale
         db = self.ui.db_spnbx.value()
-        rft = self.ui.risefall_spnbx.value()/scale_factor
-        aisr =  self.ui.aisr_spnbx.value()*scale_factor
+        rft = self.ui.risefall_spnbx.value()*self.tscale
+        aisr =  self.ui.aisr_spnbx.value()*self.fscale
 
         if self.apply_calibration:
             cidx = self.calibration_index[f]
@@ -510,14 +539,16 @@ class Calibrator(QtGui.QMainWindow):
             spec_max = np.amax(spectrum)
 
             fidx = np.where(freq==f)
+            #where returns a tuple of a list of indices and type           
+            fidx = fidx[0][0]
             spec_peak_at_f = spectrum[fidx]
 
             vmax = np.amax(abs(data))
-
+            
             self.ui.label1.setText("AI Vmax : %.5f" % (np.amax(abs(data))))
             self.ui.label2.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), max_freq))
             self.ui.label3.setText("FFT peak at %d kHz : %.6f" % (f/1000, spec_peak_at_f))
-            if self.current_operation == 0:
+            if self.current_operation == 0 and self.apply_calibration:
                 self.ui.label4.setText("Response dB : %.2f" % (calc_db(spec_peak_at_f, self.caldb, CALHACK)))
 
             if vmax < 0.005:
@@ -548,7 +579,7 @@ class Calibrator(QtGui.QMainWindow):
 
             if self.current_operation == 1:
                 self.curve_data_lock.lock()        
-                self.rep_temp.append(spec_max)
+                self.rep_temp.append(spec_peak_at_f)
                 if len(self.rep_temp) == self.nreps:
                     ifreq, idb = self.fft_vals_lookup[(f,db)]
                     self.fft_peaks[ifreq][idb] =  np.mean(self.rep_temp)
@@ -567,7 +598,13 @@ class Calibrator(QtGui.QMainWindow):
                     self.full_fft_data[ifreq][idb][irep] = spectrum
 
                     if SAVE_DATA_TRACES: 
-                        self.data_traces[ifreq][idb][irep] = data    
+                        self.data_traces[ifreq][idb][irep] = data
+
+            elif self.current_operation ==0:
+                if SAVE_FFT_DATA:
+                    self.full_fft_data.append(spectrum)
+            else:
+                raise Exception("Unknown Operation Error")
         except:
             print("Error processing response data")
             #self.on_stop()
@@ -732,6 +769,14 @@ class Calibrator(QtGui.QMainWindow):
             self.caldb = caldb
             self.calv = calv
             self.calf = calf
+
+    def launch_scaledlg(self):
+        field_vals = {'fscale' : self.fscale, 'tscale' : self.tscale}
+        dlg = ScaleDialog(default_vals=field_vals)
+        if dlg.exec_():
+            fscale, tscale = dlg.get_values()
+            self.fscale = fscale
+            self.tscale = tscale
 
     def keyPressEvent(self,event):
         print("keypress from calibrator")
