@@ -3,6 +3,7 @@ import sys, os
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
 import numpy as np
+from scipy import signal
 
 from fg_form import Ui_fgform
 from daq_tasks import AOTask,AITask
@@ -29,23 +30,29 @@ class FGenerator(QtGui.QMainWindow):
         freq = int(self.ui.freq_edit.text())
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
+        self.readnpts = 10
+        self.readnpts = npts
 
         #in/out data
-        #sin wave
-        outdata = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
-        #square wave
-        outdata = amp * np.sign(np.sin(freq * np.linspace(0, 2*np.pi, npts))
+        if self.ui.sin_radio.isChecked():
+            outdata = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
+        elif self.ui.square_radio.isChecked():
+            outdata = amp * np.sign(np.sin(freq * np.linspace(0, 2*np.pi, npts)))
+        else:
+            outdata = amp * signal.sawtooth(freq * np.linspace(0, 2*np.pi, npts))
         self.indata = []
         self.npts = npts
+        self.ncollected = 0
 
         #plot data we intend to generate
         self.ui.outplot.axes.plot(range(len(outdata)),outdata)
-        self.inplot, = self.ui.inplot.axes.plot([],[])
+        self.aiplot, = self.ui.inplot.axes.plot([],[])
         
         self.ui.outplot.axes.set_xlim(0,npts)
         self.ui.outplot.axes.set_ylim(-amp,amp)
         self.ui.inplot.axes.set_xlim(0,npts)
         self.ui.inplot.axes.set_ylim(-amp,amp)
+        self.ui.inplot.axes.hold(True)
 
         self.ui.outplot.draw()
         self.ui.inplot.draw()
@@ -56,7 +63,7 @@ class FGenerator(QtGui.QMainWindow):
             self.ao = AOTask(aochan,sr,npts)
             self.ao.write(outdata)
             #register callback to plot after npts samples acquired into buffer
-            self.ai.register_callback(self.every_n_callback,self.npts)
+            self.ai.register_callback(self.every_n_callback,self.readnpts)
             self.ao.start()
             self.ai.StartTask()
         except:
@@ -68,13 +75,17 @@ class FGenerator(QtGui.QMainWindow):
     def every_n_callback(self,task):
         #print("booya you watery tart")
         r = c_int32()
-        inbuffer = np.zeros(self.npts)
-        task.ReadAnalogF64(self.npts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
-                           self.npts,byref(r),None)
+        inbuffer = np.zeros(self.readnpts)
+        task.ReadAnalogF64(self.readnpts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
+                           self.readnpts,byref(r),None)
+        #print("****************************dddd")
+        self.ncollected += r.value
+        print(self.ncollected)
         #store data in a numpy array where columns are trace sweeps
-        print(inbuffer.shape)
+        #print(inbuffer.shape)
         self.indata.append(inbuffer.tolist())
-        self.inplot.set_data(range(len(inbuffer)),inbuffer)
+        self.aiplot.set_data(range(len(inbuffer)),inbuffer)
+        #self.ui.inplot.axes.plot(range(self.ncollected-self.readnpts,self.ncollected),inbuffer)
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
 

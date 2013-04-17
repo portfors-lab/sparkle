@@ -21,8 +21,8 @@ class AITask(Task):
         self.StartTask()
     def register_callback(self, fun, npts):
         self.callback_fun = fun
-        print('npts is : ' + str(npts))
-        self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,npts,0,name="run_callback")
+        self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,
+                                            npts,0,name="run_callback")
     def run_callback(self):
         self.callback_fun(self)
     """
@@ -67,4 +67,17 @@ class AOTask(Task):
         self.ClearTask()
     def DoneCallback(self,status):
         print("Status"+str(status))
+        return 0
+
+
+class AIContTask(Task):
+    def __init__(self, chan, samplerate, clksrc=b""):
+        Task.__init__(self)
+        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,-10.0,10.0,DAQmx_Val_Volts,None)
+        self.CfgSampClkTiming(clksrc,1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps,100)
+        #self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,100,0)
+        self.AutoRegisterDoneEvent(0)
+
+    def DoneCallback(self,status):
+        print("Status"+status.value)
         return 0
