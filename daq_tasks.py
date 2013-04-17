@@ -25,6 +25,7 @@ class AITask(Task):
         self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,npts,0,name="run_callback")
     def run_callback(self):
         self.callback_fun(self)
+    """
     def EveryNCallback(self):
         r = c_int32()
         self.ReadAnalogF64(self.npoints,10.0,DAQmx_Val_GroupByScanNumber,self.data,
@@ -35,6 +36,7 @@ class AITask(Task):
         if self.aplot:
             self.aplot.set_data(range(len(self.a)-100,len(self.a)),self.data)
             #print('x')
+    """
     def stop(self):
         self.StopTask()
         self.ClearTask()
