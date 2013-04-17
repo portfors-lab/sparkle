@@ -5,16 +5,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class AITask(Task):
-    def __init__(self, chan, samplerate, npoints, clksrc=b""):
+    def __init__(self, chan, samplerate, bufsize, clksrc=b""):
         Task.__init__(self)
+        """
         self.data = np.zeros(npoints)
         self.a = []
         self.ndata = 0
         self.npoints = npoints
-        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,
+        """
+        self.CreateAIVoltageChan(chan,b"a",DAQmx_Val_Cfg_Default,
             -10.0,10.0,DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
-                              DAQmx_Val_ContSamps,npoints)
+                              DAQmx_Val_ContSamps,bufsize)
         #self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,100,0)
         self.AutoRegisterDoneEvent(0)
     def start(self):
@@ -40,7 +42,7 @@ class AITask(Task):
     def stop(self):
         self.StopTask()
         self.ClearTask()
-        self.alldata = np.array(self.a).transpose()
+        #self.alldata = np.array(self.a).transpose()
         
 class AOTask(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=b""):
@@ -50,10 +52,11 @@ class AOTask(Task):
         #create some data to ouput
         #for i in range(NPOINTS):
             #self.data[i] = 9.95*np.sin(i*2.0*np.pi/NPOINTS)
-        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, 
+        self.CreateAOVoltageChan(chan,b"b",-10.0,10.0, 
             DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,npoints)
+        #starts the AO and AI at the same time
         #self.CfgDigEdgeStartTrig(b"ai/StartTrigger",DAQmx_Val_Rising)
         self.AutoRegisterDoneEvent(0)
     def start(self):
@@ -69,29 +72,17 @@ class AOTask(Task):
         print("Status"+str(status))
         return 0
 
-
-class AIContTask(Task):
-    def __init__(self, chan, samplerate, clksrc=b""):
-        Task.__init__(self)
-        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,-10.0,10.0,DAQmx_Val_Volts,None)
-        self.CfgSampClkTiming(clksrc,1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps,100)
-        #self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,100,0)
-        self.AutoRegisterDoneEvent(0)
-
-    def DoneCallback(self,status):
-        print("Status"+status.value)
-        return 0
-
-
-class SyncAIAO():
+class SyncAIAO_Trigger():
     def __init__(self, chan, samplerate, npoints, aochan, aichan):
         # same as above(sample clock "") but just set digedgestarttrig 
-        # to ai/starttrigger; may need two separate tasks -- see Sync_AIAO_F.c
+        # to ai/starttrigger; may need two separate tasks -- see Sync_AIAO_F.c or the shipped example
         self.aitask = AITask(aichan, samplerate, npoints)
-        self.aotask - AOTask(aochan, samplerate, npoints)
+        self.aotask = AOTask(aochan, samplerate, npoints)
         self.aotask.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
 
-#another methods is to have the AI task use the onboard clock, the AO task use "ai/SampleClock", write first, and then start the tasks (still continuous acq) -- see Synchronized_AIAO_Shared_clock.c
 
-#And finnally the example DAQmx ships with, this is very similar to the first only it also registers everyNSamples event and DoneEvent
-
+class SyncAIAO_SharedClock():
+    def __init__(self, chan, samplerate, npoints, aochan, aichan):
+        #another methods is to have the AI task use the onboard clock, the AO task use "ai/SampleClock", write first, and then start the tasks (still continuous acq) -- see Synchronized_AIAO_Shared_clock.c
+        self.aitask = AITask(aichan, samplerate, npoints)
+        self.aotask = AOTask(aochan, samplerate, npoints, b"ai/SampleClock")
