@@ -81,3 +81,17 @@ class AIContTask(Task):
     def DoneCallback(self,status):
         print("Status"+status.value)
         return 0
+
+
+class SyncAIAO():
+    def __init__(self, chan, samplerate, npoints, aochan, aichan):
+        # same as above(sample clock "") but just set digedgestarttrig 
+        # to ai/starttrigger; may need two separate tasks -- see Sync_AIAO_F.c
+        self.aitask = AITask(aichan, samplerate, npoints)
+        self.aotask - AOTask(aochan, samplerate, npoints)
+        self.aotask.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
+
+#another methods is to have the AI task use the onboard clock, the AO task use "ai/SampleClock", write first, and then start the tasks (still continuous acq) -- see Synchronized_AIAO_Shared_clock.c
+
+#And finnally the example DAQmx ships with, this is very similar to the first only it also registers everyNSamples event and DoneEvent
+
