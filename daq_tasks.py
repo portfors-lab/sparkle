@@ -72,17 +72,43 @@ class AOTask(Task):
         print("Status"+str(status))
         return 0
 
-class SyncAIAO_Trigger():
-    def __init__(self, chan, samplerate, npoints, aochan, aichan):
-        # same as above(sample clock "") but just set digedgestarttrig 
-        # to ai/starttrigger; may need two separate tasks -- see Sync_AIAO_F.c or the shipped example
-        self.aitask = AITask(aichan, samplerate, npoints)
-        self.aotask = AOTask(aochan, samplerate, npoints)
-        self.aotask.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
+class AITaskFinite(Task):
+    def __init__(self, chan, samplerate, npts, clksrc=b""):
+        Task.__init__(self)
+        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,
+                                 -10.0,10.0,DAQmx_Val_Volts,None)
+        self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
+                              DAQmx_Val_FiniteSamps,npts)
+        #self.AutoRegisterDoneEvent(0)
+        self.npts = npts
+    def start(self):
+        self.StartTask()
+    def read(self):
+        r = c_int32()
+        inbuffer = np.zeros(self.npts)
+        self.ReadAnalogF64(self.npts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
+                      self.npts,byref(r),None)
+        return inbuffer
+    def stop(self):
+        self.StopTask()
+        self.ClearTask()
 
-
-class SyncAIAO_SharedClock():
-    def __init__(self, chan, samplerate, npoints, aochan, aichan):
-        #another methods is to have the AI task use the onboard clock, the AO task use "ai/SampleClock", write first, and then start the tasks (still continuous acq) -- see Synchronized_AIAO_Shared_clock.c
-        self.aitask = AITask(aichan, samplerate, npoints)
-        self.aotask = AOTask(aochan, samplerate, npoints, b"ai/SampleClock")
+class AOTaskFinite(Task):
+    def __init__(self, chan, samplerate, npoints, clksrc=b""):
+        Task.__init__(self)
+        self.npoints = npoints
+        self.data = np.zeros(npoints)
+        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts,None)
+        self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
+                              DAQmx_Val_FiniteSamps,npoints)
+        #starts the AO and AI at the same time
+        #self.CfgDigEdgeStartTrig(b"ai/StartTrigger",DAQmx_Val_Rising)
+    def start(self):
+        self.StartTask()
+    def write(self,output):
+        w = c_int32()
+        self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,output,
+            w,None);
+    def stop(self):
+        self.StopTask()
+        self.ClearTask()

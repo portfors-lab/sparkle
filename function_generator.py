@@ -7,7 +7,7 @@ from scipy import signal
 import scipy.io.wavfile as wv
 
 from fg_form import Ui_fgform
-from daq_tasks import AOTask,AITask
+from daq_tasks import *
 
 class FGenerator(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -45,8 +45,7 @@ class FGenerator(QtGui.QMainWindow):
     def start_gen(self):
         sr = int(self.ui.sr_edit.text())
         npts = int(self.ui.npts_edit.text())
-        amp = int(self.ui.amp_edit.text())
-        freq = int(self.ui.freq_edit.text())
+        
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
         self.readnpts = int(self.ui.ainpts_edit.text())
@@ -63,32 +62,30 @@ class FGenerator(QtGui.QMainWindow):
         self.aiplot, = self.ui.inplot.axes.plot([],[])
         
         self.ui.outplot.axes.set_xlim(0,npts)
-        self.ui.outplot.axes.set_ylim(-amp,amp)
-        self.ui.inplot.axes.set_ylim(-amp,amp)
+        
         if self.reset_plot:
             self.ui.inplot.axes.set_xlim(0,self.readnpts)   
         else:
             self.ui.inplot.axes.set_xlim(0,npts)   
         self.ui.inplot.axes.hold(True)
 
+        if self.ui.sin_radio.isChecked() or self.ui.square_radio.isChecked() or self.ui.saw_radio.isChecked():
+            self.continuous_gen(aichan,aochan,sr,npts,airate,self.readnpts)
+        else:
+            self.restart_gen(aichan,aochan,sr,airate,self.readnpts)
+
+    def continuous_gen(self,aichan,aochan,sr,npts,aisr,ainpts):
         #in/out data
+        amp = int(self.ui.amp_edit.text())
+        freq = int(self.ui.freq_edit.text())
+        self.ui.outplot.axes.set_ylim(-amp,amp)
+        self.ui.inplot.axes.set_ylim(-amp,amp)        
         if self.ui.sin_radio.isChecked():
             outdata = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
         elif self.ui.square_radio.isChecked():
             outdata = amp * np.sign(np.sin(freq * np.linspace(0, 2*np.pi, npts)))
         elif self.ui.saw_radio.isChecked():
             outdata = amp * signal.sawtooth(freq * np.linspace(0, 2*np.pi, npts))
-        else:
-            #import audio files to output
-            stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
-            stimFileList = os.listdir(stimFolder)
-            print('Found '+str(len(stimFileList))+' stim files')
-            #ok, so how to cycle through files...
-            sr,outdata = wv.read(stimFolder+"\\"+stimFileList[0])
-            outdata = outdata.astype(float)
-            mx = np.amax(outdata)
-            outdata = outdata/mx
-            self.ui.outplot.axes.set_xlim(0,len(outdata))
 
         self.ui.outplot.axes.plot(range(len(outdata)),outdata)
 
@@ -97,7 +94,7 @@ class FGenerator(QtGui.QMainWindow):
         QtGui.QApplication.processEvents()
 
         try:
-            self.ai = AITask(aichan,airate,npts)
+            self.ai = AITask(aichan,aisr,npts)
 
             # two ways to sync -- give the AOTask the ai sample clock for its source,
             # or have it trigger off the ai
@@ -121,13 +118,82 @@ class FGenerator(QtGui.QMainWindow):
             self.ao.stop()
             raise
 
+    
+    def restart_gen(self,aichan,aochan,sr,aisr,npts):
+        #import audio files to output
+        stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
+        #stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
+        stimFileList = os.listdir(stimFolder)
+        print('Found '+str(len(stimFileList))+' stim files')
+                
+        self.ui.inplot.draw()
+        QtGui.QApplication.processEvents()
+
+        try:
+            for istim in stimFileList:
+                
+                #ok, so how to cycle through files...
+                sr,outdata = wv.read(stimFolder+"\\"+istim)
+                outdata = outdata.astype(float)
+                mx = np.amax(outdata)
+                outdata = outdata/mx
+
+                self.ui.outplot.axes.set_xlim(0,len(outdata))
+                self.ui.outplot.axes.plot(range(len(outdata)),outdata)
+                self.ui.outplot.draw()
+
+                self.ai = AITaskFinite(aichan,aisr,npts)
+
+                # two ways to sync -- give the AOTask the ai sample clock for its source,
+                # or have it trigger off the ai
+
+                #first way
+                self.ao = AOTaskFinite(aochan,sr,len(outdata),b"ai/SampleClock")
+
+                #second way
+                #self.ao = AOTaskFinite(aochan,sr,npts)
+                #self.ao.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
+
+                self.ao.write(outdata)
+                self.ao.start()
+                self.ai.StartTask()
+
+                #ao.WaitUntilTaskDone(10.0)
+                data = self.ai.read()
+                
+                self.ncollected += npts
+                self.curr_plot_point += npts
+                #print(self.ncollected)
+                #store data in a numpy array where columns are trace sweeps
+                #print(inbuffer.shape)
+                self.indata.append(data.tolist())
+                if self.reset_plot:
+                    self.aiplot.set_data(range(len(data)),data)
+                else:
+                    xl = self.ui.inplot.axes.axis() #axis limits
+                    #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
+                    if self.ncollected > xl[1]:
+                        #print('reset')
+                        self.ui.inplot.axes.set_xlim(self.ncollected,self.ncollected+self.npts)
+                    self.ui.inplot.axes.plot(range(self.ncollected-self.readnpts,self.ncollected),data)
+                self.ui.inplot.draw()
+                QtGui.QApplication.processEvents()
+                self.ai.stop()
+                self.ao.stop()
+        except:
+            print('ERROR! TERMINATE!')
+            self.ai.stop()
+            self.ao.stop()
+            raise
+        print('done')
+
     def every_n_callback(self,task):
         #print("booya you watery tart")
         r = c_int32()
         inbuffer = np.zeros(self.readnpts)
         task.ReadAnalogF64(self.readnpts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
                            self.readnpts,byref(r),None)
-        #print("****************************dddd")
+        
         self.ncollected += r.value
         self.curr_plot_point += r.value
         #print(self.ncollected)
