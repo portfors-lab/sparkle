@@ -31,7 +31,7 @@ class FGenerator(QtGui.QMainWindow):
         self.update_time()
         self.ui.wav_radio.toggled.connect(self.update_npts)
         self.ui.browse_button.clicked.connect(self.getdir)
-
+        """
         axis_action = QtGui.QAction('adjust axis', self)
         axis_action.triggered.connect(self.adjust_axis)
         self.popMenu = QtGui.QMenu( self )
@@ -39,7 +39,7 @@ class FGenerator(QtGui.QMainWindow):
 
         self.ui.inplot.setContextMenuPolicy(QtCore.Qt.CustomContextMenu);
         self.ui.inplot.customContextMenuRequest.connect(on_context_menu)
-
+        """
     def on_context_menu(self, point):
         # show context menu
         self.popMenu.exec_(self.ui.inplot.mapToGlobal(point))
@@ -136,12 +136,12 @@ class FGenerator(QtGui.QMainWindow):
             # or have it trigger off the ai
 
             #first way
-            self.ao = AOTask(aochan,sr,npts,b"ai/SampleClock")
+            #self.ao = AOTask(aochan,sr,npts,b"ai/SampleClock")
 
             #second way
-            #self.ao = AOTask(aochan,sr,npts)
-            #self.ao.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
-            print("amax of outdata: " + str(np.amax(outdata)))
+            self.ao = AOTask(aochan,sr,npts,trigsrc=b"ai/StartTrigger")
+            
+            #print("amax of outdata: " + str(np.amax(outdata)))
             
             self.ao.write(outdata)
             #register callback to plot after npts samples acquired into buffer
@@ -169,7 +169,7 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
 
-        for istim in stimFileList[:6]:
+        for istim in stimFileList:
                 
             try:
                 sr,outdata = wv.read(stimFolder+"\\"+istim)
@@ -199,12 +199,7 @@ class FGenerator(QtGui.QMainWindow):
                 # two ways to sync -- give the AOTask the ai sample clock for its source,
                 # or have it trigger off the ai
 
-                #first way
-                self.ao = AOTaskFinite(aochan,sr,len(outdata),b"")
-
-                #second way
-                #self.ao = AOTaskFinite(aochan,sr,npts)
-                self.ao.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
+                self.ao = AOTaskFinite(aochan,sr,len(outdata),b"",b"ai/StartTrigger")
 
                 self.ao.write(outdata)
                 self.ao.start()
@@ -269,9 +264,11 @@ class FGenerator(QtGui.QMainWindow):
         QtGui.QApplication.processEvents()
 
     def stop_gen(self):
-        self.ao.stop()
-        self.ai.stop()
-        self.ui.inplot.axes.hold(False)
+        try:
+            self.ao.stop()
+            self.ai.stop()
+        except:
+            print("Task already stopped, or does not exist")
 
 def get_ao_chans(dev):
     buf = create_string_buffer(256)

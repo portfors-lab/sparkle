@@ -28,7 +28,7 @@ class AITask(Task):
         #self.alldata = np.array(self.a).transpose()
         
 class AOTask(Task):
-    def __init__(self, chan, samplerate, npoints, clksrc=b""):
+    def __init__(self, chan, samplerate, npoints, clksrc=b"", trigsrc=b""):
         Task.__init__(self)
         self.npoints = npoints
         self.CreateAOVoltageChan(chan,b"b",-10.0,10.0, 
@@ -36,7 +36,8 @@ class AOTask(Task):
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,npoints)
         #starts the AO and AI at the same time
-        #self.CfgDigEdgeStartTrig(b"ai/StartTrigger",DAQmx_Val_Rising)
+        if len(trigsrc) > 0:
+            self.CfgDigEdgeStartTrig(trigsrc,DAQmx_Val_Rising)
         self.AutoRegisterDoneEvent(0)
     def start(self):
         self.StartTask()
@@ -74,13 +75,15 @@ class AITaskFinite(Task):
         self.ClearTask()
 
 class AOTaskFinite(Task):
-    def __init__(self, chan, samplerate, npoints, clksrc=b""):
+    def __init__(self, chan, samplerate, npoints, clksrc=b"", trigsrc=b""):
         Task.__init__(self)
         self.npoints = npoints
         #self.data = np.zeros(npoints)
         self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps,npoints)
+        if len(trigsrc) > 0:
+            self.CfgDigEdgeStartTrig(trigsrc,DAQmx_Val_Rising)
         #starts the AO and AI at the same time
         #self.CfgDigEdgeStartTrig(b"ai/StartTrigger",DAQmx_Val_Rising)
     def start(self):
