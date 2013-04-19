@@ -8,6 +8,7 @@ import scipy.io.wavfile as wv
 
 from fg_form import Ui_fgform
 from daq_tasks import *
+from plotresults import ResultsPlot
 
 class FGenerator(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -28,6 +29,7 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.aisr_edit.textChanged.connect(self.update_time)
         self.ui.ainpts_edit.textChanged.connect(self.update_time)        
         self.update_time()
+        self.ui.wav_radio.clicked.connect(self.update_npts)
 
     def update_time(self):
         #update the time display if one of the parameters changes
@@ -40,7 +42,10 @@ class FGenerator(QtGui.QMainWindow):
         ait = readnpts/airate
 
         self.ui.aotime.setText("AO time: " + str(aot))
-        self.ui.aitime.setText("AI time: " + str(ait))
+        self.ui.aitime.setText("AI time: " + str(ait))        
+
+    def update_npts(self):
+        pass
 
     def start_gen(self):
         sr = int(self.ui.sr_edit.text())
@@ -67,12 +72,12 @@ class FGenerator(QtGui.QMainWindow):
             self.ui.inplot.axes.set_xlim(0,self.readnpts)   
         else:
             self.ui.inplot.axes.set_xlim(0,npts)   
-        self.ui.inplot.axes.hold(True)
+        #
 
         if self.ui.sin_radio.isChecked() or self.ui.square_radio.isChecked() or self.ui.saw_radio.isChecked():
             self.continuous_gen(aichan,aochan,sr,npts,airate,self.readnpts)
         else:
-            self.restart_gen(aichan,aochan,sr,airate,self.readnpts)
+            self.finite_gen(aichan,aochan,sr,airate,self.readnpts)
 
     def continuous_gen(self,aichan,aochan,sr,npts,aisr,ainpts):
         #in/out data
@@ -83,11 +88,14 @@ class FGenerator(QtGui.QMainWindow):
         if self.ui.sin_radio.isChecked():
             outdata = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
         elif self.ui.square_radio.isChecked():
-            outdata = amp * np.sign(np.sin(freq * np.linspace(0, 2*np.pi, npts)))
+            outdata = amp * np.sign(np.sin(freq * np.linspace(0, 2*np.pi, npts
+                                            )))
         elif self.ui.saw_radio.isChecked():
-            outdata = amp * signal.sawtooth(freq * np.linspace(0, 2*np.pi, npts))
+            outdata = amp * signal.sawtooth(freq * np.linspace(0, 2*np.pi, 
+                                            npts))
 
         self.ui.outplot.axes.plot(range(len(outdata)),outdata)
+        self.ui.inplot.axes.hold(True)
 
         self.ui.outplot.draw()
         self.ui.inplot.draw()
@@ -119,53 +127,65 @@ class FGenerator(QtGui.QMainWindow):
             raise
 
     
-    def restart_gen(self,aichan,aochan,sr,aisr,npts):
+    def finite_gen(self,aichan,aochan,sr,aisr,npts):
         #import audio files to output
-        stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
-        #stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
+        #stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
+        stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
         stimFileList = os.listdir(stimFolder)
         print('Found '+str(len(stimFileList))+' stim files')
                 
+        self.ui.inplot.axes.hold(False)
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
 
-        try:
-            for istim in stimFileList:
+        for istim in stimFileList[:6]:
                 
-                #ok, so how to cycle through files...
+            try:
                 sr,outdata = wv.read(stimFolder+"\\"+istim)
-                outdata = outdata.astype(float)
-                mx = np.amax(outdata)
-                outdata = outdata/mx
+            except:
+                print("Problem reading wav file")
+                raise
+            outdata = outdata.astype(float)
+            mx = np.amax(outdata)
+            outdata = outdata/mx
+                
+            #overwrite npts and aisr with the output data length --FIXME!!!!!!!!
+            #npts = len(outdata)
+            aisr = sr
 
-                self.ui.outplot.axes.set_xlim(0,len(outdata))
-                self.ui.outplot.axes.plot(range(len(outdata)),outdata)
-                self.ui.outplot.draw()
+            self.ui.outplot.axes.set_xlim(0,len(outdata))
+            self.ui.outplot.axes.plot(range(len(outdata)),outdata)
+            
+            #also set ai to same - FIXME!!!!!
+            self.ui.inplot.axes.set_xlim(0,len(outdata))
+            self.aiplot, = self.ui.inplot.axes.plot(range(len(outdata)),outdata)
 
+            self.ui.outplot.draw()
+
+            try:
                 self.ai = AITaskFinite(aichan,aisr,npts)
 
                 # two ways to sync -- give the AOTask the ai sample clock for its source,
                 # or have it trigger off the ai
 
                 #first way
-                self.ao = AOTaskFinite(aochan,sr,len(outdata),b"ai/SampleClock")
+                self.ao = AOTaskFinite(aochan,sr,len(outdata),b"")
 
                 #second way
                 #self.ao = AOTaskFinite(aochan,sr,npts)
-                #self.ao.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
+                self.ao.CfgDigEdgeStartTrig(b"ai/StartTrigger", DAQmx_Val_Rising)
 
                 self.ao.write(outdata)
                 self.ao.start()
                 self.ai.StartTask()
-
-                #ao.WaitUntilTaskDone(10.0)
-                data = self.ai.read()
                 
+                #blocking read
+                data = self.ai.read()
+
                 self.ncollected += npts
                 self.curr_plot_point += npts
-                #print(self.ncollected)
+        
                 #store data in a numpy array where columns are trace sweeps
-                #print(inbuffer.shape)
                 self.indata.append(data.tolist())
                 if self.reset_plot:
                     self.aiplot.set_data(range(len(data)),data)
@@ -180,12 +200,17 @@ class FGenerator(QtGui.QMainWindow):
                 QtGui.QApplication.processEvents()
                 self.ai.stop()
                 self.ao.stop()
-        except:
-            print('ERROR! TERMINATE!')
-            self.ai.stop()
-            self.ao.stop()
-            raise
+            except:
+                print('ERROR! TERMINATE!')
+                self.ai.stop()
+                self.ao.stop()
+                raise
         print('done')
+        print("indata len: " + str(len(self.indata[0])))
+        aggdata = np.array(self.indata).transpose()
+        print(aggdata.shape)
+        rp = ResultsPlot(aggdata,self)
+        rp.show()
 
     def every_n_callback(self,task):
         #print("booya you watery tart")
@@ -216,7 +241,6 @@ class FGenerator(QtGui.QMainWindow):
         self.ao.stop()
         self.ai.stop()
         self.ui.inplot.axes.hold(False)
-
 
 def get_ao_chans(dev):
     buf = create_string_buffer(256)
