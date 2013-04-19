@@ -7,12 +7,6 @@ import matplotlib.pyplot as plt
 class AITask(Task):
     def __init__(self, chan, samplerate, bufsize, clksrc=b""):
         Task.__init__(self)
-        """
-        self.data = np.zeros(npoints)
-        self.a = []
-        self.ndata = 0
-        self.npoints = npoints
-        """
         self.CreateAIVoltageChan(chan,b"a",DAQmx_Val_Cfg_Default,
             -10.0,10.0,DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
@@ -27,18 +21,7 @@ class AITask(Task):
                                             npts,0,name="run_callback")
     def run_callback(self):
         self.callback_fun(self)
-    """
-    def EveryNCallback(self):
-        r = c_int32()
-        self.ReadAnalogF64(self.npoints,10.0,DAQmx_Val_GroupByScanNumber,self.data,
-                           self.npoints,byref(r),None)
-        #store data in a numpy array where columns are trace sweeps
-        self.a.append(self.data.tolist())
-        #print(self.aplot)
-        if self.aplot:
-            self.aplot.set_data(range(len(self.a)-100,len(self.a)),self.data)
-            #print('x')
-    """
+
     def stop(self):
         self.StopTask()
         self.ClearTask()
@@ -48,10 +31,6 @@ class AOTask(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=b""):
         Task.__init__(self)
         self.npoints = npoints
-        self.data = np.zeros(npoints)
-        #create some data to ouput
-        #for i in range(NPOINTS):
-            #self.data[i] = 9.95*np.sin(i*2.0*np.pi/NPOINTS)
         self.CreateAOVoltageChan(chan,b"b",-10.0,10.0, 
             DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
@@ -88,6 +67,7 @@ class AITaskFinite(Task):
         inbuffer = np.zeros(self.npts)
         self.ReadAnalogF64(self.npts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
                       self.npts,byref(r),None)
+        self.WaitUntilTaskDone(10.0)
         return inbuffer
     def stop(self):
         self.StopTask()
@@ -97,7 +77,7 @@ class AOTaskFinite(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=b""):
         Task.__init__(self)
         self.npoints = npoints
-        self.data = np.zeros(npoints)
+        #self.data = np.zeros(npoints)
         self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps,npoints)
