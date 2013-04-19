@@ -29,7 +29,23 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.aisr_edit.textChanged.connect(self.update_time)
         self.ui.ainpts_edit.textChanged.connect(self.update_time)        
         self.update_time()
-        self.ui.wav_radio.clicked.connect(self.update_npts)
+        self.ui.wav_radio.toggled.connect(self.update_npts)
+        self.ui.browse_button.clicked.connect(self.getdir)
+
+        axis_action = QtGui.QAction('adjust axis', self)
+        axis_action.triggered.connect(self.adjust_axis)
+        self.popMenu = QtGui.QMenu( self )
+        self.popMenu.addAction( axis_action )
+
+        self.ui.inplot.setContextMenuPolicy(QtCore.Qt.CustomContextMenu);
+        self.ui.inplot.customContextMenuRequest.connect(on_context_menu)
+
+    def on_context_menu(self, point):
+        # show context menu
+        self.popMenu.exec_(self.ui.inplot.mapToGlobal(point))
+
+    def adjust_axis(self):
+        print("no one expects the spanish inquisition")
 
     def update_time(self):
         #update the time display if one of the parameters changes
@@ -45,7 +61,19 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.aitime.setText("AI time: " + str(ait))        
 
     def update_npts(self):
-        pass
+        if self.ui.wav_radio.isChecked():
+            self.ui.reset_box.setEnabled(False)
+            self.ui.ainpts_edit.setEnabled(False)
+            self.ui.folder_edit.setEnabled(True)
+        else:
+            self.ui.folder_edit.setEnabled(False)
+            self.ui.reset_box.setEnabled(True)
+            self.ui.ainpts_edit.setEnabled(True)
+
+    def getdir(self):
+        fname = QtGui.QFileDialog.getExistingDirectory(self, 'Open folder', 
+                                                  'C:\\Users')
+        self.ui.folder_edit.setText(fname)
 
     def start_gen(self):
         sr = int(self.ui.sr_edit.text())
@@ -72,11 +100,11 @@ class FGenerator(QtGui.QMainWindow):
             self.ui.inplot.axes.set_xlim(0,self.readnpts)   
         else:
             self.ui.inplot.axes.set_xlim(0,npts)   
-        #
 
         if self.ui.sin_radio.isChecked() or self.ui.square_radio.isChecked() or self.ui.saw_radio.isChecked():
             self.continuous_gen(aichan,aochan,sr,npts,airate,self.readnpts)
         else:
+            self.readnpts=30000
             self.finite_gen(aichan,aochan,sr,airate,self.readnpts)
 
     def continuous_gen(self,aichan,aochan,sr,npts,aisr,ainpts):
@@ -131,6 +159,9 @@ class FGenerator(QtGui.QMainWindow):
         #import audio files to output
         #stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
         stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
+        print(stimFolder)
+        stimFolder = self.ui.folder_edit.text()        
+        print(stimFolder)
         stimFileList = os.listdir(stimFolder)
         print('Found '+str(len(stimFileList))+' stim files')
                 
