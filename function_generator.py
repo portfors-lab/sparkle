@@ -31,15 +31,27 @@ class FGenerator(QtGui.QMainWindow):
         self.update_time()
         self.ui.wav_radio.toggled.connect(self.update_npts)
         self.ui.browse_button.clicked.connect(self.getdir)
-        """
+        
         axis_action = QtGui.QAction('adjust axis', self)
         axis_action.triggered.connect(self.adjust_axis)
         self.popMenu = QtGui.QMenu( self )
         self.popMenu.addAction( axis_action )
 
-        self.ui.inplot.setContextMenuPolicy(QtCore.Qt.CustomContextMenu);
-        self.ui.inplot.customContextMenuRequest.connect(on_context_menu)
-        """
+        #self.ui.inplot.setContextMenuPolicy(QtCore.Qt.CustomContextMenu);
+        #self.ui.inplot.customContextMenuRequested.connect(self.on_context_menu)
+        self.ui.inplot.figure.canvas.mpl_connect('button_press_event', 
+                                                 self.on_figure_press)
+
+    def on_figure_press(self,event):
+        if event.inaxes != self.ui.inplot.axes:
+            return
+        if event.button == 3:
+            #print('xdata: {}, ydata: {}, x: {}, y: {}'.format(event.xdata,event.ydata, event.x, event.y))
+            #print(self.ui.inplot.height())
+            figheight = self.ui.inplot.height()
+            point = QtCore.QPoint(event.x, figheight-event.y)
+            self.popMenu.exec_(self.ui.inplot.mapToGlobal(point))
+
     def on_context_menu(self, point):
         # show context menu
         self.popMenu.exec_(self.ui.inplot.mapToGlobal(point))
@@ -157,10 +169,10 @@ class FGenerator(QtGui.QMainWindow):
     
     def finite_gen(self,aichan,aochan,sr,aisr,npts):
         #import audio files to output
-        #stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
-        stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
-        print(stimFolder)
-        stimFolder = self.ui.folder_edit.text()        
+        stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
+        #stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
+        #print(stimFolder)
+        #stimFolder = self.ui.folder_edit.text()        
         print(stimFolder)
         stimFileList = os.listdir(stimFolder)
         print('Found '+str(len(stimFileList))+' stim files')

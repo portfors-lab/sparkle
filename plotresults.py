@@ -29,12 +29,16 @@ class ResultsPlot(QtGui.QMainWindow):
 
         self.axes = [None]*self.data.shape[1]
         #make a new window to display acquired data
-        for i in range(self.data.shape[1]):
+        for itrace in range(self.data.shape[1]):
             #add the axes in subplots
-            self.axes[i] = self.fig.add_subplot(subplotrows,subplotcols,i)
-            self.axes[i].plot(self.data[:,i])
+            #self.axes[iplot] = self.fig.add_subplot(subplotrows,subplotcols,
+                                                    #iplot)
+            #self.axes[iplot].plot(self.data[:,iplot])
 
         #self.main_frame.addWidget(self.canvas)
+            ax = self.fig.add_subplot(subplotrows,subplotcols,itrace)
+            ax.plot(self.data[:,itrace])
+
         grid = QtGui.QGridLayout()
         grid.addWidget(self.canvas,0,0)
 
