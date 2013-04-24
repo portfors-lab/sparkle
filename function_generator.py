@@ -144,8 +144,8 @@ class FGenerator(QtGui.QMainWindow):
         try:
             self.ai = AITask(aichan,aisr,npts)
 
-            # two ways to sync -- give the AOTask the ai sample clock for its source,
-            # or have it trigger off the ai
+            # two ways to sync -- give the AOTask the ai sample clock 
+            # for its source, or have it trigger off the ai
 
             #first way
             #self.ao = AOTask(aochan,sr,npts,b"ai/SampleClock")
@@ -169,10 +169,10 @@ class FGenerator(QtGui.QMainWindow):
     
     def finite_gen(self,aichan,aochan,sr,aisr,npts):
         #import audio files to output
-        stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
+        #stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
         #stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
         #print(stimFolder)
-        #stimFolder = self.ui.folder_edit.text()        
+        stimFolder = self.ui.folder_edit.text()        
         print(stimFolder)
         stimFileList = os.listdir(stimFolder)
         print('Found '+str(len(stimFileList))+' stim files')
@@ -181,7 +181,7 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
 
-        for istim in stimFileList:
+        for istim in stimFileList[:6]:
                 
             try:
                 sr,outdata = wv.read(stimFolder+"\\"+istim)
@@ -208,8 +208,8 @@ class FGenerator(QtGui.QMainWindow):
             try:
                 self.ai = AITaskFinite(aichan,aisr,npts)
 
-                # two ways to sync -- give the AOTask the ai sample clock for its source,
-                # or have it trigger off the ai
+                # two ways to sync -- give the AOTask the ai sample clock 
+                # for its source, or have it trigger off the ai
 
                 self.ao = AOTaskFinite(aochan,sr,len(outdata),b"",b"ai/StartTrigger")
 
