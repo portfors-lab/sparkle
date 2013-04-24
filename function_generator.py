@@ -189,7 +189,7 @@ class FGenerator(QtGui.QMainWindow):
             
             #also set ai to same - FIXME!!!!!
             self.ui.inplot.axes.set_xlim(0,len(outdata))
-            self.aiplot, = self.ui.inplot.axes.plot(range(len(outdata)),outdata)
+            self.ui.inplot.axes.plot(range(len(outdata)),outdata)
 
             self.ui.outplot.draw()
 
@@ -214,7 +214,8 @@ class FGenerator(QtGui.QMainWindow):
                 #store data in a numpy array where columns are trace sweeps
                 self.indata.append(data.tolist())
                 if self.reset_plot:
-                    self.aiplot.set_data(range(len(data)),data)
+                    #there is only one line of data, reset it to current acquisition
+                    self.ui.inplot.axes.lines[0].set_data(range(len(data)),data)
                 else:
                     xl = self.ui.inplot.axes.axis() #axis limits
                     #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
