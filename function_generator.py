@@ -116,6 +116,7 @@ class FGenerator(QtGui.QMainWindow):
         ait = self.readnpts/airate 
         self.in_time_vals = np.linspace(0,ait,self.readnpts)       
         self.out_time_vals = np.linspace(0,aot,npts)
+        self.display_line_data = []
 
         self.ui.outplot.axes.set_xlim(0,aot)
         
@@ -151,6 +152,7 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.outplot.draw()
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
+
 
         try:
             self.ai = AITask(aichan,aisr,npts)
@@ -192,13 +194,18 @@ class FGenerator(QtGui.QMainWindow):
         self.indata.append(inbuffer.tolist())
         if self.reset_plot:
             self.ui.inplot.axes.lines[0].set_data(self.in_time_vals,inbuffer)
+
         else:
             xl = self.ui.inplot.axes.axis() #axis limits
             #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
-            if self.ncollected/self.airate > xl[1]:
-                self.ui.inplot.axes.set_xlim(self.ncollected/self.airate,(self.ncollected/self.airate)+self.aot)
-            #self.ui.inplot.axes.plot(range(self.ncollected-self.readnpts,self.ncollected),inbuffer)
-            self.ui.inplot.axes.plot(np.linspace((self.ncollected-self.readnpts)/self.airate,self.ncollected/self.airate, self.readnpts),inbuffer)
+            if self.ncollected/self.airate > xl[1]+1:
+                self.ui.inplot.axes.set_xlim(self.ncollected/self.airate,
+                                             (self.ncollected/self.airate)+self.aot)
+                self.display_line_data = []
+            self.display_line_data.extend(inbuffer.tolist())
+            tdata = np.linspace(xl[0], xl[0]+(len(self.display_line_data)/self.airate), 
+                                len(self.display_line_data))
+            self.ui.inplot.axes.lines[0].set_data(tdata,self.display_line_data)
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
     
