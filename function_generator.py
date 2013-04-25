@@ -42,6 +42,10 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.inplot.figure.canvas.mpl_connect('button_press_event', 
                                                  self.on_figure_press)
 
+
+        #mainbox = QtGui.QHBoxLayout()
+        #mainbox.addLayout(self.ui.main_layout)
+
     def on_figure_press(self,event):
         if event.inaxes != self.ui.inplot.axes:
             return
@@ -68,6 +72,7 @@ class FGenerator(QtGui.QMainWindow):
 
         aot = npts/sr
         ait = readnpts/airate
+        self.aot = aot
 
         self.ui.aotime.setText("AO time: " + str(aot))
         self.ui.aitime.setText("AI time: " + str(ait))        
@@ -97,6 +102,7 @@ class FGenerator(QtGui.QMainWindow):
         airate = int(self.ui.aisr_edit.text())
         self.reset_plot = self.ui.reset_box.isChecked()
 
+        self.airate = airate
         self.indata = []
         self.npts = npts
         self.ncollected = 0
@@ -104,14 +110,19 @@ class FGenerator(QtGui.QMainWindow):
 
         #plot data we intend to generate
         self.ui.inplot.axes.cla()
-        self.aiplot, = self.ui.inplot.axes.plot([],[])
-        
-        self.ui.outplot.axes.set_xlim(0,npts)
+        self.ui.inplot.axes.plot([],[])
+
+        aot = npts/sr
+        ait = self.readnpts/airate 
+        self.in_time_vals = np.linspace(0,ait,self.readnpts)       
+        self.out_time_vals = np.linspace(0,aot,npts)
+
+        self.ui.outplot.axes.set_xlim(0,aot)
         
         if self.reset_plot:
-            self.ui.inplot.axes.set_xlim(0,self.readnpts)   
+            self.ui.inplot.axes.set_xlim(0,ait)   
         else:
-            self.ui.inplot.axes.set_xlim(0,npts)   
+            self.ui.inplot.axes.set_xlim(0,aot)   
 
         if self.ui.sin_radio.isChecked() or self.ui.square_radio.isChecked() or self.ui.saw_radio.isChecked():
             self.continuous_gen(aichan,aochan,sr,npts,airate,self.readnpts)
@@ -134,7 +145,7 @@ class FGenerator(QtGui.QMainWindow):
             outdata = amp * signal.sawtooth(freq * np.linspace(0, 2*np.pi, 
                                             npts))
 
-        self.ui.outplot.axes.plot(range(len(outdata)),outdata)
+        self.ui.outplot.axes.plot(self.out_time_vals,outdata)
         self.ui.inplot.axes.hold(True)
 
         self.ui.outplot.draw()
@@ -166,6 +177,30 @@ class FGenerator(QtGui.QMainWindow):
             self.ao.stop()
             raise
 
+    def every_n_callback(self,task):
+        #print("booya you watery tart")
+        r = c_int32()
+        inbuffer = np.zeros(self.readnpts)
+        task.ReadAnalogF64(self.readnpts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
+                           self.readnpts,byref(r),None)
+        
+        self.ncollected += r.value
+        self.curr_plot_point += r.value
+        #print(self.ncollected)
+        #store data in a numpy array where columns are trace sweeps
+        #print(inbuffer.shape)
+        self.indata.append(inbuffer.tolist())
+        if self.reset_plot:
+            self.ui.inplot.axes.lines[0].set_data(self.in_time_vals,inbuffer)
+        else:
+            xl = self.ui.inplot.axes.axis() #axis limits
+            #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
+            if self.ncollected/self.airate > xl[1]:
+                self.ui.inplot.axes.set_xlim(self.ncollected/self.airate,(self.ncollected/self.airate)+self.aot)
+            #self.ui.inplot.axes.plot(range(self.ncollected-self.readnpts,self.ncollected),inbuffer)
+            self.ui.inplot.axes.plot(np.linspace((self.ncollected-self.readnpts)/self.airate,self.ncollected/self.airate, self.readnpts),inbuffer)
+        self.ui.inplot.draw()
+        QtGui.QApplication.processEvents()
     
     def finite_gen(self,aichan,aochan,sr,aisr,npts):
         #import audio files to output
@@ -250,31 +285,6 @@ class FGenerator(QtGui.QMainWindow):
         print(aggdata.shape)
         rp = ResultsPlot(aggdata,self)
         rp.show()
-
-    def every_n_callback(self,task):
-        #print("booya you watery tart")
-        r = c_int32()
-        inbuffer = np.zeros(self.readnpts)
-        task.ReadAnalogF64(self.readnpts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
-                           self.readnpts,byref(r),None)
-        
-        self.ncollected += r.value
-        self.curr_plot_point += r.value
-        #print(self.ncollected)
-        #store data in a numpy array where columns are trace sweeps
-        #print(inbuffer.shape)
-        self.indata.append(inbuffer.tolist())
-        if self.reset_plot:
-            self.aiplot.set_data(range(len(inbuffer)),inbuffer)
-        else:
-            xl = self.ui.inplot.axes.axis() #axis limits
-            #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
-            if self.ncollected > xl[1]:
-                #print('reset')
-                self.ui.inplot.axes.set_xlim(self.ncollected,self.ncollected+self.npts)
-            self.ui.inplot.axes.plot(range(self.ncollected-self.readnpts,self.ncollected),inbuffer)
-        self.ui.inplot.draw()
-        QtGui.QApplication.processEvents()
 
     def stop_gen(self):
         try:

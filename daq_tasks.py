@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 class AITask(Task):
     def __init__(self, chan, samplerate, bufsize, clksrc=b""):
         Task.__init__(self)
-        self.CreateAIVoltageChan(chan,b"a",DAQmx_Val_Cfg_Default,
+        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,
             -10.0,10.0,DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,bufsize)
@@ -21,17 +21,18 @@ class AITask(Task):
                                             npts,0,name="run_callback")
     def run_callback(self):
         self.callback_fun(self)
-
+    def DoneCallback(self,status):
+        print("Status"+str(status))
+        return 0
     def stop(self):
         self.StopTask()
         self.ClearTask()
-        #self.alldata = np.array(self.a).transpose()
         
 class AOTask(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=b"", trigsrc=b""):
         Task.__init__(self)
         self.npoints = npoints
-        self.CreateAOVoltageChan(chan,b"b",-10.0,10.0, 
+        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, 
             DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,npoints)

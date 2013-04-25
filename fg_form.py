@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'function_generator.ui'
 #
-# Created: Thu Apr 18 23:47:55 2013
+# Created: Wed Apr 24 15:09:07 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,13 +26,16 @@ except AttributeError:
 class Ui_fgform(object):
     def setupUi(self, fgform):
         fgform.setObjectName(_fromUtf8("fgform"))
-        fgform.resize(726, 666)
+        fgform.resize(659, 662)
         self.layoutWidget = QtGui.QWidget(fgform)
-        self.layoutWidget.setGeometry(QtCore.QRect(0, 0, 721, 661))
+        self.layoutWidget.setGeometry(QtCore.QRect(0, 0, 657, 661))
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.gridLayout_2 = QtGui.QGridLayout(self.layoutWidget)
-        self.gridLayout_2.setMargin(0)
-        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.main_layout = QtGui.QGridLayout(self.layoutWidget)
+        self.main_layout.setMargin(0)
+        self.main_layout.setObjectName(_fromUtf8("main_layout"))
+        self.outplot = MatplotlibWidget(self.layoutWidget)
+        self.outplot.setObjectName(_fromUtf8("outplot"))
+        self.main_layout.addWidget(self.outplot, 0, 1, 1, 1)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.label_9 = QtGui.QLabel(self.layoutWidget)
@@ -70,10 +73,7 @@ class Ui_fgform(object):
         self.reset_box.setChecked(True)
         self.reset_box.setObjectName(_fromUtf8("reset_box"))
         self.gridLayout_3.addWidget(self.reset_box, 3, 2, 1, 1)
-        self.gridLayout_2.addLayout(self.gridLayout_3, 1, 0, 1, 1)
-        self.inplot = MatplotlibWidget(self.layoutWidget)
-        self.inplot.setObjectName(_fromUtf8("inplot"))
-        self.gridLayout_2.addWidget(self.inplot, 1, 1, 1, 1)
+        self.main_layout.addLayout(self.gridLayout_3, 1, 0, 1, 1)
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.ttl = QtGui.QLabel(self.layoutWidget)
@@ -180,10 +180,10 @@ class Ui_fgform(object):
         self.stop_button.setObjectName(_fromUtf8("stop_button"))
         self.horizontalLayout_2.addWidget(self.stop_button)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        self.gridLayout_2.addLayout(self.verticalLayout, 0, 0, 1, 1)
-        self.outplot = MatplotlibWidget(self.layoutWidget)
-        self.outplot.setObjectName(_fromUtf8("outplot"))
-        self.gridLayout_2.addWidget(self.outplot, 0, 1, 1, 1)
+        self.main_layout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.inplot = MatplotlibWidget(self.layoutWidget)
+        self.inplot.setObjectName(_fromUtf8("inplot"))
+        self.main_layout.addWidget(self.inplot, 1, 1, 1, 1)
 
         self.retranslateUi(fgform)
         QtCore.QMetaObject.connectSlotsByName(fgform)
