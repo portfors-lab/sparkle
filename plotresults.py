@@ -2,6 +2,9 @@ from PyQt4 import QtCore, QtGui
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+from custom_toolbar import CustomToolbar
 
 class ResultsPlot(QtGui.QMainWindow):
     def __init__(self,data,parent=None):
@@ -39,11 +42,14 @@ class ResultsPlot(QtGui.QMainWindow):
         self.fig.canvas.mpl_connect('pick_event', self.line_click)
         self.fig.canvas.mpl_connect('button_release_event', self.line_drop)
 
-        grid = QtGui.QGridLayout()
-        grid.addWidget(self.canvas,0,0)
+        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.canvas)
+        vbox.addWidget(self.mpl_toolbar)
 
         self.main_frame.resize(500,500)
-        self.main_frame.setLayout(grid)
+        self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
         self.from_axes = None
 

@@ -42,7 +42,6 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.inplot.figure.canvas.mpl_connect('button_press_event', 
                                                  self.on_figure_press)
 
-
         #mainbox = QtGui.QHBoxLayout()
         #mainbox.addLayout(self.ui.main_layout)
 
@@ -100,13 +99,12 @@ class FGenerator(QtGui.QMainWindow):
         aichan = self.ui.aichan_box.currentText().encode()
         self.readnpts = int(self.ui.ainpts_edit.text())
         airate = int(self.ui.aisr_edit.text())
-        self.reset_plot = self.ui.reset_box.isChecked()
+        self.scroll_plot = False
 
         self.airate = airate
         self.indata = []
         self.npts = npts
         self.ncollected = 0
-        self.curr_plot_point = 0
 
         #plot data we intend to generate
         self.ui.inplot.axes.cla()
@@ -120,10 +118,10 @@ class FGenerator(QtGui.QMainWindow):
 
         self.ui.outplot.axes.set_xlim(0,aot)
         
-        if self.reset_plot:
-            self.ui.inplot.axes.set_xlim(0,ait)   
-        else:
+        if aot > ait:
             self.ui.inplot.axes.set_xlim(0,aot)   
+        else:
+            self.ui.inplot.axes.set_xlim(0,ait)   
 
         if self.ui.sin_radio.isChecked() or self.ui.square_radio.isChecked() or self.ui.saw_radio.isChecked():
             self.continuous_gen(aichan,aochan,sr,npts,airate,self.readnpts)
@@ -136,7 +134,8 @@ class FGenerator(QtGui.QMainWindow):
         amp = int(self.ui.amp_edit.text())
         freq = int(self.ui.freq_edit.text())
         self.ui.outplot.axes.set_ylim(-amp,amp)
-        self.ui.inplot.axes.set_ylim(-amp,amp)        
+        #self.ui.inplot.axes.set_ylim(-amp,amp) 
+        self.ui.inplot.axes.set_ylim(-10,10)       
         if self.ui.sin_radio.isChecked():
             outdata = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
         elif self.ui.square_radio.isChecked():
@@ -187,34 +186,34 @@ class FGenerator(QtGui.QMainWindow):
                            self.readnpts,byref(r),None)
         
         self.ncollected += r.value
-        self.curr_plot_point += r.value
         #print(self.ncollected)
         #store data in a numpy array where columns are trace sweeps
         #print(inbuffer.shape)
         self.indata.append(inbuffer.tolist())
-        if self.reset_plot:
-            self.ui.inplot.axes.lines[0].set_data(self.in_time_vals,inbuffer)
-
+        if self.scroll_plot:
+            # Todo: make scrolling plot
+            pass
         else:
             xl = self.ui.inplot.axes.axis() #axis limits
-            #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
-            if self.ncollected/self.airate > xl[1]+1:
-                self.ui.inplot.axes.set_xlim(self.ncollected/self.airate,
-                                             (self.ncollected/self.airate)+self.aot)
+            if self.ncollected/self.airate > xl[1]:
+                self.ui.inplot.axes.set_xlim((self.ncollected-r.value)/self.airate,
+                                             ((self.ncollected-r.value)/self.airate)+self.aot)
                 self.display_line_data = []
             self.display_line_data.extend(inbuffer.tolist())
+            xl = self.ui.inplot.axes.axis()
             tdata = np.linspace(xl[0], xl[0]+(len(self.display_line_data)/self.airate), 
                                 len(self.display_line_data))
             self.ui.inplot.axes.lines[0].set_data(tdata,self.display_line_data)
+        
         self.ui.inplot.draw()
         QtGui.QApplication.processEvents()
     
     def finite_gen(self,aichan,aochan,sr,aisr,npts):
         #import audio files to output
-        #stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
+        stimFolder = "C:\\Users\\Leeloo\\Dropbox\\daqstuff\\M1_FD024"
         #stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
         #print(stimFolder)
-        stimFolder = self.ui.folder_edit.text()        
+        #stimFolder = self.ui.folder_edit.text()        
         print(stimFolder)
         stimFileList = os.listdir(stimFolder)
         print('Found '+str(len(stimFileList))+' stim files')
@@ -263,22 +262,14 @@ class FGenerator(QtGui.QMainWindow):
                 data = self.ai.read()
 
                 self.ncollected += npts
-                self.curr_plot_point += npts
         
                 #store data in a numpy array where columns are trace sweeps
                 self.indata.append(data.tolist())
-                if self.reset_plot:
-                    #there is only one line of data, reset it to current acquisition
-                    self.ui.inplot.axes.lines[0].set_data(range(len(data)),data)
-                else:
-                    xl = self.ui.inplot.axes.axis() #axis limits
-                    #print("axis "+str(xl[1]) + ", ncollected " + str(self.ncollected))
-                    if self.ncollected > xl[1]:
-                        #print('reset')
-                        self.ui.inplot.axes.set_xlim(self.ncollected,self.ncollected+self.npts)
-                    self.ui.inplot.axes.plot(range(self.ncollected-self.readnpts,self.ncollected),data)
+                #there is only one line of data, reset it to current acquisition
+                self.ui.inplot.axes.lines[0].set_data(range(len(data)),data)
                 self.ui.inplot.draw()
                 QtGui.QApplication.processEvents()
+
                 self.ai.stop()
                 self.ao.stop()
             except:
