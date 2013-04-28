@@ -44,7 +44,8 @@ class AOTask(Task):
         self.StartTask()
     def write(self,output):
         w = c_int32()
-        self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,output,
+        self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,
+                            output,
             w,None);
     def stop(self):
         self.StopTask()
