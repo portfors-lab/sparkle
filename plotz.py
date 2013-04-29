@@ -2,7 +2,7 @@ from PyQt4 import QtCore, QtGui
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib.pyplot as plt
+#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 from custom_toolbar import CustomToolbar
 
@@ -31,6 +31,7 @@ class ResultsPlot(QtGui.QMainWindow):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
 
+        self.axes = [None]*self.data.shape[1]
         #make a new window to display acquired data
         for itrace in range(self.data.shape[1]):
             #add the axes in subplots
@@ -111,36 +112,4 @@ class ResultsPlot(QtGui.QMainWindow):
         else:
             self.from_axes = None
             
-class SimplePlot(QtGui.QMainWindow):
-    def __init__(self,*args,parent=None):
-        #parent=None
-        QtGui.QMainWindow.__init__(self,parent)
 
-        if len(args) == 1:
-            data = args[0]
-            xvals = range(len(data))
-        else:
-            xvals = args[0]
-            data = args[1]
-        self.setWindowTitle('Display')
-
-        self.main_frame = QtGui.QWidget()
-
-        self.fig = Figure((5.0,4.0), dpi=100)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self.main_frame)
-
-        ax = self.fig.add_subplot(111)
-        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
-
-        ax.plot(xvals,data)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.canvas)
-        vbox.addWidget(self.mpl_toolbar)
-
-        self.main_frame.resize(500,500)
-        self.main_frame.setLayout(vbox)
-        self.setCentralWidget(self.main_frame)
-
-        self.show()

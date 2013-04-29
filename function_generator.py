@@ -8,7 +8,7 @@ import scipy.io.wavfile as wv
 
 from fg_form import Ui_fgform
 from daq_tasks import *
-from plotresults import ResultsPlot
+from plotz import ResultsPlot
 
 class FGenerator(QtGui.QMainWindow):
     def __init__(self, parent=None):
