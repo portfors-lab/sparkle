@@ -13,19 +13,21 @@ from daq_tasks import *
 from plotz import *
 
 class ToneGenerator(QtGui.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, dev_name, parent=None):
         #auto generated code intialization
         QtGui.QMainWindow.__init__(self, parent)
         self.ui = Ui_tgform()
         self.ui.setupUi(self)
 
-        cnames = get_ao_chans(b"Dev1")
+        cnames = get_ao_chans(dev_name.encode())
         self.ui.aochan_box.addItems(cnames)
-        cnames = get_ai_chans(b"Dev1")
+        cnames = get_ai_chans(dev_name.encode())
         self.ui.aichan_box.addItems(cnames)
 
         self.ui.start_button.clicked.connect(self.on_start)
         self.ui.stop_button.clicked.connect(self.on_stop)
+
+        #self.setFocusPolicy()
 
         self.sp = None
         self.keep_playing = True
@@ -36,20 +38,20 @@ class ToneGenerator(QtGui.QMainWindow):
         #repeatedly present tone stimulus until user presses stop
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
+
+        #update the stimulus, this will also set some of the class IO parameters
         self.update_stim()
 
-        sr = self.ui.sr_spnbx.value()*1000
-        npts = self.tone.size
-        self.statusBar().showMessage('npts: {}'.format(npts))
-
-        t = threading.Thread(target=self.acq_loop, args =(aichan,aochan,sr,npts))
+        t = threading.Thread(target=self.acq_loop, args =(aichan,aochan))
         t.daemon = True
         t.start()
 
-    def acq_loop(self,aichan,aochan,sr,npts):
+    def acq_loop(self,aichan,aochan):
         #self.keep_playing = False
         while self.keep_playing:
             self.ai_lock.acquire()
+            sr = self.sr
+            npts = self.tone.size
             try:
                 self.ai = AITaskFinite(aichan,sr,npts)
                 
@@ -79,8 +81,18 @@ class ToneGenerator(QtGui.QMainWindow):
                 raise
 
             self.ai_lock.release()
-            t = threading.Thread(target=self.update_plot, args = (1,range(len(data)),data))
-            t.daemon = True
+            #print("data size {} or {}".format(data.shape[0],data.size))
+            timevals = (np.arange(data.shape[0]))/sr
+            t = threading.Thread(target=self.update_plot, args = (1,timevals,data))
+            t.start()
+            #also plot FFT
+            sp = np.fft.fft(data)/npts
+            freq = np.arange(npts)/(npts/sr)
+            sp = sp[:(npts/2)]
+            freq = freq[:(npts/2)] #single sided
+            #print('fft max: {}, min: {}, freq max: {}, min: {}'.format(np.amax(sp), np.amin(sp), 
+            #                                                           np.amax(freq), np.amin(freq)))
+            t = threading.Thread(target=self.update_plot, args = (2,freq,abs(sp)))
             t.start()
 
         print("Stopped")
@@ -99,10 +111,16 @@ class ToneGenerator(QtGui.QMainWindow):
         #acquire lock first because the ai counts on there being a figure existing to plot to
         self.ai_lock.acquire()
 
-        self.sp = SubPlots(timevals,tone,[],[],parent=None)
+        self.sp = SubPlots(timevals,tone,[],[],[],[],parent=None)
         #set axes limits?
         self.sp.fig.axes[0].set_ylim(-10,10)
+        # set input y scale to match stimulus (since we are trying to measure it back right?)
+        self.sp.fig.axes[1].set_ylim(-10,10)
         self.sp.fig.axes[0].set_xlim(0,5)
+        self.sp.fig.axes[1].set_xlim(0,5)
+        #Set fft bounds by range expected
+        self.sp.fig.axes[2].set_ylim(0,10)
+        self.sp.fig.axes[2].set_xlim(0,200000)
         self.sp.fig.canvas.draw()
         QtGui.QApplication.processEvents()
 
@@ -119,8 +137,18 @@ class ToneGenerator(QtGui.QMainWindow):
         #print('freq: {}, rft: {}'.format(f,rft))
         tone = make_tone(f,db,dur,rft,sr)
         
-        timevals = (np.arange(tone.shape[0]))/sr
-        
+        npts = tone.size
+        timevals = np.arange(npts)/sr
+
+        #acquire lock and update IO parameters
+        self.ai_lock.acquire()
+        self.tone = tone
+        self.sr = sr
+        self.npts = npts
+        self.ai_lock.release()
+
+        self.statusBar().showMessage('npts: {}'.format(npts))
+
         if self.sp == None or not(self.sp.active):
             #print('create new')
             #t = threading.Thread(target= self.spawn_fig, args=(timevals,tone))
@@ -131,17 +159,25 @@ class ToneGenerator(QtGui.QMainWindow):
         else:
             #always only single axes and line
             #print('update')
-            t = threading.Thread(target= self.update_plot, args=(0,timevals,tone))
+            t = threading.Thread(target=self.update_plot, args=(0,timevals,tone))
             t.daemon=True
             t.start()
-            #self.sp.fig.axes[0].lines[0].set_data(timevals,tone)
-        
-        self.tone = tone
 
     def keyPressEvent(self,event):
+        print("keypress")
         print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
-           self.update_stim()
+            self.update_stim()
+            self.setFocus()
+        elif event.key () == QtCore.Qt.Key_Escape:
+            self.setFocus()
+        elif event.text() == 'a':
+            self.ui.dur_spnbx.stepUp()
+        elif event.text() == 's':
+            self.ui.dur_spnbx.stepDown()
+
+    def mousePressEvent(self,event):
+        self.setFocus()
 
     def closeEvent(self,event):
         # halt acquisition loop
@@ -197,6 +233,7 @@ def get_ai_chans(dev):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    myapp = ToneGenerator()
+    devName = "PCI-6259"
+    myapp = ToneGenerator(devName)
     myapp.show()
     sys.exit(app.exec_())
