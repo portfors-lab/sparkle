@@ -176,8 +176,15 @@ class SubPlots(QtGui.QMainWindow):
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
 
+        self.nsubplots = nsubplots
+
         self.active = True
-        self.show()
+        #self.show()
+
+    def update_data(self, xdata, ydata, axnum=1):
+
+        self.fig.axes[axnum].lines[0].set_data(xdata,ydata)
+        self.fig.canvas.draw()
 
     def closeEvent(self,event):
         #added this so that I can test whether user has closed figure - is there are better way?

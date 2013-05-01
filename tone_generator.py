@@ -3,7 +3,10 @@ import sys, os
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
 import numpy as np
+import matplotlib
+matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
+import threading
 
 from tgform import Ui_tgform
 from daq_tasks import *
@@ -27,6 +30,7 @@ class ToneGenerator(QtGui.QMainWindow):
         self.sp = None
         self.keep_playing = True
         self.tone = []
+        self.ai_lock = threading.Lock()
 
     def on_start(self):
         #repeatedly present tone stimulus until user presses stop
@@ -38,8 +42,14 @@ class ToneGenerator(QtGui.QMainWindow):
         npts = self.tone.size
         self.statusBar().showMessage('npts: {}'.format(npts))
 
+        t = threading.Thread(target=self.acq_loop, args =(aichan,aochan,sr,npts))
+        t.daemon = True
+        t.start()
+
+    def acq_loop(self,aichan,aochan,sr,npts):
         #self.keep_playing = False
         while self.keep_playing:
+            self.ai_lock.acquire()
             try:
                 self.ai = AITaskFinite(aichan,sr,npts)
                 
@@ -53,22 +63,51 @@ class ToneGenerator(QtGui.QMainWindow):
                 #blocking read
                 data = self.ai.read()
 
-                #Do something with AI data
-                self.sp.fig.axes[1].lines[0].set_data(range(len(data)),data)
-                self.sp.fig.canvas.draw()
-                QtGui.QApplication.processEvents()
-
+                #spin off update thread
+                #update_thread = GenericThread(self.update_plot, 1, range(len(data)), data)
+                #update_thread.start()
+                
                 self.ai.stop()
                 self.ao.stop()
+        
+                #self.update_plot(1,range(len(data)),data)
+
             except:
                 print('ERROR! TERMINATE!')
                 self.ai.stop()
                 self.ao.stop()
                 raise
+
+            self.ai_lock.release()
+            t = threading.Thread(target=self.update_plot, args = (1,range(len(data)),data))
+            t.daemon = True
+            t.start()
+
         print("Stopped")
+
+    def update_plot(self,axnum,xdata,ydata):
+        #Do something with AI data
+        #print("update plot")
+        self.sp.fig.axes[axnum].lines[0].set_data(xdata,ydata)
+        self.sp.fig.canvas.draw()
+        QtGui.QApplication.processEvents()
 
     def on_stop(self):
         self.keep_playing = False
+
+    def spawn_fig(self,timevals,tone):
+        #acquire lock first because the ai counts on there being a figure existing to plot to
+        self.ai_lock.acquire()
+
+        self.sp = SubPlots(timevals,tone,[],[],parent=None)
+        #set axes limits?
+        self.sp.fig.axes[0].set_ylim(-10,10)
+        self.sp.fig.axes[0].set_xlim(0,5)
+        self.sp.fig.canvas.draw()
+        QtGui.QApplication.processEvents()
+
+        self.ai_lock.release()
+        self.sp.show()
 
     def update_stim(self):
         f = self.ui.freq_spnbx.value()*1000
@@ -77,23 +116,26 @@ class ToneGenerator(QtGui.QMainWindow):
         db = self.ui.db_spnbx.value()
         rft = self.ui.risefall_spnbx.value()/1000
 
-        print('freq: {}, rft: {}'.format(f,rft))
+        #print('freq: {}, rft: {}'.format(f,rft))
         tone = make_tone(f,db,dur,rft,sr)
         
         timevals = (np.arange(tone.shape[0]))/sr
         
         if self.sp == None or not(self.sp.active):
-            print('create new')
-            self.sp = SubPlots(timevals,tone,[],[],parent=self)
-            #set axes limits?
-            self.sp.fig.axes[0].set_ylim(-10,10)
-            self.sp.fig.axes[0].set_xlim(0,5)
+            #print('create new')
+            #t = threading.Thread(target= self.spawn_fig, args=(timevals,tone))
+            #t.daemon=True
+            #t = GenericThread(self.spawn_fig, timevals, tone)
+            #t.start()
+            self.spawn_fig(timevals,tone)
         else:
             #always only single axes and line
-            print('update')
-            self.sp.fig.axes[0].lines[0].set_data(timevals,tone)
-        self.sp.fig.canvas.draw()
-        QtGui.QApplication.processEvents()
+            #print('update')
+            t = threading.Thread(target= self.update_plot, args=(0,timevals,tone))
+            t.daemon=True
+            t.start()
+            #self.sp.fig.axes[0].lines[0].set_data(timevals,tone)
+        
         self.tone = tone
 
     def keyPressEvent(self,event):
@@ -114,7 +156,7 @@ def make_tone(freq,db,dur,risefall,samplerate):
         # 10^(db/20)
         amp = 10 ** (db/20)
         rf_npts = risefall * samplerate
-        print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
+        #print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
         tone = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
         #add rise fall
         if risefall > 0:
@@ -122,6 +164,20 @@ def make_tone(freq,db,dur,risefall,samplerate):
             tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
 
         return tone
+
+class GenericThread(threading.Thread):
+    def __init__(self, function, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+
+    #def __del__(self):
+        #self.wait()
+
+    def run(self):
+        self.function(*self.args, **self.kwargs)
+        return
 
 def get_ao_chans(dev):
     buf = create_string_buffer(256)
