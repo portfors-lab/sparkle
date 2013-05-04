@@ -83,8 +83,8 @@ class ToneGenerator(QtGui.QMainWindow):
             self.ai_lock.release()
             #print("data size {} or {}".format(data.shape[0],data.size))
             timevals = (np.arange(data.shape[0]))/sr
-            t = threading.Thread(target=self.update_plot, args = (1,timevals,data))
-            t.start()
+            #t = threading.Thread(target=self.update_plot, args = (1,timevals,data))
+            #t.start()
             #also plot FFT
             sp = np.fft.fft(data)/npts
             freq = np.arange(npts)/(npts/sr)
@@ -92,7 +92,9 @@ class ToneGenerator(QtGui.QMainWindow):
             freq = freq[:(npts/2)] #single sided
             #print('fft max: {}, min: {}, freq max: {}, min: {}'.format(np.amax(sp), np.amin(sp), 
             #                                                           np.amax(freq), np.amin(freq)))
-            t = threading.Thread(target=self.update_plot, args = (2,freq,abs(sp)))
+            #t = threading.Thread(target=self.update_plot, args = (2,freq,abs(sp)))
+            #t.start()
+            t = threading.Thread(target=self.update_plots, args = ([1,2],[timevals, freq],[data,abs(sp)]))
             t.start()
 
         print("Stopped")
@@ -101,6 +103,14 @@ class ToneGenerator(QtGui.QMainWindow):
         #Do something with AI data
         #print("update plot")
         self.sp.fig.axes[axnum].lines[0].set_data(xdata,ydata)
+        self.sp.fig.canvas.draw()
+        QtGui.QApplication.processEvents()
+
+    def update_plots(self,axnums,xdata,ydata):
+        #Do something with AI data
+        #print("update plot")
+        for iax in range(len(axnums)):
+            self.sp.fig.axes[axnums[iax]].lines[0].set_data(xdata[iax],ydata[iax])
         self.sp.fig.canvas.draw()
         QtGui.QApplication.processEvents()
 
@@ -128,11 +138,12 @@ class ToneGenerator(QtGui.QMainWindow):
         self.sp.show()
 
     def update_stim(self):
-        f = self.ui.freq_spnbx.value()*1000
-        sr = self.ui.sr_spnbx.value()*1000
-        dur = self.ui.dur_spnbx.value()/1000
+        scale_factor = 1000
+        f = self.ui.freq_spnbx.value()*scale_factor
+        sr = self.ui.sr_spnbx.value()*scale_factor
+        dur = self.ui.dur_spnbx.value()/scale_factor
         db = self.ui.db_spnbx.value()
-        rft = self.ui.risefall_spnbx.value()/1000
+        rft = self.ui.risefall_spnbx.value()/scale_factor
 
         #print('freq: {}, rft: {}'.format(f,rft))
         tone = make_tone(f,db,dur,rft,sr)
@@ -190,7 +201,8 @@ def make_tone(freq,db,dur,risefall,samplerate):
 
         # equation for db from voltage is db = 20 * log10(V2/V1))
         # 10^(db/20)
-        amp = 10 ** (db/20)
+        maxv = 10
+        amp = maxv/(10 ** (db/20))
         rf_npts = risefall * samplerate
         #print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
         tone = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
