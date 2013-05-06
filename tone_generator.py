@@ -1,4 +1,5 @@
 import sys, os
+import threading
 
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
@@ -6,7 +7,9 @@ import numpy as np
 import matplotlib
 matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
-import threading
+from IPython import embed
+from IPython.config.loader import Config
+from IPython.frontend.terminal.embed import InteractiveShellEmbed
 
 from tgform import Ui_tgform
 from daq_tasks import *
@@ -30,9 +33,18 @@ class ToneGenerator(QtGui.QMainWindow):
         #self.setFocusPolicy()
 
         self.sp = None
-        self.keep_playing = True
+       
         self.tone = []
         self.ai_lock = threading.Lock()
+
+        inlist = load_inputs()
+        self.ui.freq_spnbx.setValue(inlist[0])
+        self.ui.sr_spnbx.setValue(inlist[1])
+        self.ui.dur_spnbx.setValue(inlist[2])
+        self.ui.db_spnbx.setValue(inlist[3])
+        self.ui.risefall_spnbx.setValue(inlist[4])
+        self.ui.aochan_box.setCurrentIndex(inlist[5])
+        self.ui.aichan_box.setCurrentIndex(inlist[6])
 
     def on_start(self):
         #repeatedly present tone stimulus until user presses stop
@@ -41,6 +53,7 @@ class ToneGenerator(QtGui.QMainWindow):
 
         #update the stimulus, this will also set some of the class IO parameters
         self.update_stim()
+        self.keep_playing = True
 
         t = threading.Thread(target=self.acq_loop, args =(aichan,aochan))
         t.daemon = True
@@ -119,6 +132,8 @@ class ToneGenerator(QtGui.QMainWindow):
 
     def on_stop(self):
         self.keep_playing = False
+        #ips = setup_ipshell()
+        #ips()
 
     def spawn_fig(self,timevals,tone,fft_xrange):
         #acquire lock first because the ai counts on there being a figure existing to plot to
@@ -205,19 +220,51 @@ class ToneGenerator(QtGui.QMainWindow):
     def closeEvent(self,event):
         # halt acquisition loop
         self.on_stop()
+
+        #save inputs into file to load up next time
+        f = self.ui.freq_spnbx.value()
+        sr = self.ui.sr_spnbx.value()
+        dur = self.ui.dur_spnbx.value()
+        db = self.ui.db_spnbx.value()
+        rft = self.ui.risefall_spnbx.value()
+        aochan_index = self.ui.aochan_box.currentIndex()
+        aichan_index = self.ui.aichan_box.currentIndex()
+
+        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index)
+
         QtGui.QMainWindow.closeEvent(self,event)
+
+def load_inputs():
+    cfgfile = "inputs.cfg"
+    input_list = []
+    try:
+        with open(cfgfile, 'r') as cfo:
+            for line in cfo:
+                input_list.append(int(line.strip()))
+        cfo.close()
+    except:
+        print("error loading user inputs file")
+    return input_list
+
+def save_inputs(*args):
+    #should really do this with a dict
+    cfgfile = "inputs.cfg"
+    cf = open(cfgfile, 'w')
+    for arg in args:
+        cf.write("{}\n".format(arg))
+    cf.close()
 
 def make_tone(freq,db,dur,risefall,samplerate):
         #create portable tone generator class that allows the ability to generate tones that modifyable on-the-fly
         npts = dur * samplerate
-
+        print("duration (s) :{}".format(dur))
         # equation for db from voltage is db = 20 * log10(V2/V1))
         # 10^(db/20)
         maxv = 10
         amp = maxv/(10 ** (db/20))
         rf_npts = risefall * samplerate
         #print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
-        tone = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
+        tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
         #add rise fall
         if risefall > 0:
             tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
@@ -254,6 +301,35 @@ def get_ai_chans(dev):
     pybuf = buf.value
     chans = pybuf.decode('utf-8').split(",")
     return chans
+
+
+def setup_ipshell():
+    try:
+        get_ipython
+    except NameError:
+        nested = 0
+        cfg = Config()
+        prompt_config = cfg.PromptManager
+        prompt_config.in_template = 'In <\\#>: '
+        prompt_config.in2_template = '   .\\D.: '
+        prompt_config.out_template = 'Out<\\#>: '
+    else:
+        print("Running nested copies of IPython.")
+        print("The prompts for the nested copy have been modified")
+        cfg = Config()
+        nested = 1
+
+    # First import the embeddable shell class
+
+
+    # Now create an instance of the embeddable shell. The first argument is a
+    # string with options exactly as you would type them if you were starting
+    # IPython at the system command line. Any parameters you want to define for
+    # configuration can thus be specified here.
+    ipshell = InteractiveShellEmbed(config=cfg,
+                                    banner1 = 'Dropping into IPython',
+                                    exit_msg = 'Leaving Interpreter, back to program.')
+    return ipshell
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
