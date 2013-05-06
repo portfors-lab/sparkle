@@ -18,9 +18,9 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
         #manual costumization
-        cnames = get_ao_chans(b"Dev1")
+        cnames = get_ao_chans(b"PCI-6259")
         self.ui.aochan_box.addItems(cnames)
-        cnames = get_ai_chans(b"Dev1")
+        cnames = get_ai_chans(b"PCI-6259")
         self.ui.aichan_box.addItems(cnames)
         self.ui.start_button.clicked.connect(self.start_gen)
         self.ui.stop_button.clicked.connect(self.stop_gen)
@@ -92,8 +92,6 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.folder_edit.setText(fname)
 
     def start_gen(self):
-        sr = int(self.ui.sr_edit.text())
-        npts = int(self.ui.npts_edit.text())
         
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
@@ -129,13 +127,13 @@ class FGenerator(QtGui.QMainWindow):
             self.readnpts=30000
             self.finite_gen(aichan,aochan,sr,airate,self.readnpts)
 
-    def continuous_gen(self,aichan,aochan,sr,npts,aisr,ainpts):
-        #in/out data
+    def set_stim():
         amp = int(self.ui.amp_edit.text())
         freq = int(self.ui.freq_edit.text())
-        self.ui.outplot.axes.set_ylim(-amp,amp)
-        #self.ui.inplot.axes.set_ylim(-amp,amp) 
-        self.ui.inplot.axes.set_ylim(-10,10)       
+        sr = int(self.ui.sr_edit.text())
+        npts = int(self.ui.npts_edit.text())
+        aot = npts/sr
+
         if self.ui.sin_radio.isChecked():
             outdata = amp * np.sin(freq * np.linspace(0, 2*np.pi, npts))
         elif self.ui.square_radio.isChecked():
@@ -144,8 +142,20 @@ class FGenerator(QtGui.QMainWindow):
         elif self.ui.saw_radio.isChecked():
             outdata = amp * signal.sawtooth(freq * np.linspace(0, 2*np.pi, 
                                             npts))
+        
+        self.ui.outplot.axes.set_ylim(-amp,amp)
+        stim_time_vals = np.linspace(0,aot,npts)
+        self.ui.outplot.axes.plot(stim_time_vals,outdata)
+        self.stim = outdata
 
-        self.ui.outplot.axes.plot(self.out_time_vals,outdata)
+    def continuous_gen(self,aichan,aochan,sr,npts,aisr,ainpts):
+        #in/out data
+        
+        self.set_stim()
+
+        #self.ui.inplot.axes.set_ylim(-amp,amp) 
+        self.ui.inplot.axes.set_ylim(-10,10)       
+        
         self.ui.inplot.axes.hold(True)
 
         self.ui.outplot.draw()
