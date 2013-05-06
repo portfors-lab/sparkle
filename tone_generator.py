@@ -94,7 +94,7 @@ class ToneGenerator(QtGui.QMainWindow):
             #                                                           np.amax(freq), np.amin(freq)))
             #t = threading.Thread(target=self.update_plot, args = (2,freq,abs(sp)))
             #t.start()
-            t = threading.Thread(target=self.update_plots, args = ([1,2],[timevals, freq],[data,abs(sp)]))
+            t = threading.Thread(target=self.update_plots, args = ([1,2],[0,1],[timevals, freq],[data,abs(sp)]))
             t.start()
 
         print("Stopped")
@@ -106,22 +106,25 @@ class ToneGenerator(QtGui.QMainWindow):
         self.sp.fig.canvas.draw()
         QtGui.QApplication.processEvents()
 
-    def update_plots(self,axnums,xdata,ydata):
+    def update_plots(self,axnums,linenums,xdata,ydata):
         #Do something with AI data
         #print("update plot")
         for iax in range(len(axnums)):
-            self.sp.fig.axes[axnums[iax]].lines[0].set_data(xdata[iax],ydata[iax])
+            #print(iax)
+            #print("ax {}, line {}, axlen {}, linelen {}, datalen {},{}".format(axnums[iax], linenums[iax], len(self.sp.fig.axes),len(self.sp.fig.axes[iax].lines) ,len(xdata[iax]),len(ydata[iax])))
+            #print("line obj {}".format(self.sp.fig.axes[iax].lines))
+            self.sp.fig.axes[axnums[iax]].lines[linenums[iax]].set_data(xdata[iax],ydata[iax])
         self.sp.fig.canvas.draw()
         QtGui.QApplication.processEvents()
 
     def on_stop(self):
         self.keep_playing = False
 
-    def spawn_fig(self,timevals,tone):
+    def spawn_fig(self,timevals,tone,fft_xrange):
         #acquire lock first because the ai counts on there being a figure existing to plot to
         self.ai_lock.acquire()
 
-        self.sp = SubPlots(timevals,tone,[],[],[],[],parent=None)
+        self.sp = SubPlots(timevals,tone,[],[],[[],[]],[[],[]],parent=None)
         #set axes limits?
         self.sp.fig.axes[0].set_ylim(-10,10)
         # set input y scale to match stimulus (since we are trying to measure it back right?)
@@ -129,8 +132,8 @@ class ToneGenerator(QtGui.QMainWindow):
         self.sp.fig.axes[0].set_xlim(0,5)
         self.sp.fig.axes[1].set_xlim(0,5)
         #Set fft bounds by range expected
-        self.sp.fig.axes[2].set_ylim(0,10)
-        self.sp.fig.axes[2].set_xlim(0,200000)
+        self.sp.fig.axes[2].set_ylim(0,2)
+        self.sp.fig.axes[2].set_xlim(0,fft_xrange*2)
         self.sp.fig.canvas.draw()
         QtGui.QApplication.processEvents()
 
@@ -151,6 +154,12 @@ class ToneGenerator(QtGui.QMainWindow):
         npts = tone.size
         timevals = np.arange(npts)/sr
 
+        #also plot stim FFT
+        sp = np.fft.fft(tone)/npts
+        freq = np.arange(npts)/(npts/sr)
+        sp = sp[:(npts/2)]
+        freq = freq[:(npts/2)] #single sided
+
         #acquire lock and update IO parameters
         self.ai_lock.acquire()
         self.tone = tone
@@ -166,13 +175,16 @@ class ToneGenerator(QtGui.QMainWindow):
             #t.daemon=True
             #t = GenericThread(self.spawn_fig, timevals, tone)
             #t.start()
-            self.spawn_fig(timevals,tone)
+            self.spawn_fig(timevals,tone,f)
         else:
             #always only single axes and line
-            #print('update')
-            t = threading.Thread(target=self.update_plot, args=(0,timevals,tone))
+            #adjust the FFT x axis
+            self.sp.fig.axes[2].set_xlim(0,f*2)
+            t = threading.Thread(target=self.update_plots, args=([0,2],[0,0],[timevals, freq],[tone, sp]))
             t.daemon=True
             t.start()
+
+       
 
     def keyPressEvent(self,event):
         print("keypress")

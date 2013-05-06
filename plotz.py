@@ -164,7 +164,13 @@ class SubPlots(QtGui.QMainWindow):
 
         for isubplot in range(nsubplots):
             ax = self.fig.add_subplot(nsubplots,1,isubplot+1)
-            ax.plot(args[isubplot*2],args[(isubplot*2)+1])
+            #test to see if argument is nested list -- meaning multiple lines in plot
+            if len(args[isubplot*2]) > 0 and isinstance(args[isubplot*2][0], list):
+                #add multiple lines to plot
+                for iline in range(len(args[isubplot*2])):
+                    ax.plot(args[isubplot*2][iline],args[(isubplot*2)+1][iline])
+            else:
+                ax.plot(args[isubplot*2],args[(isubplot*2)+1])
 
         self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
 
