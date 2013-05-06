@@ -38,13 +38,14 @@ class ToneGenerator(QtGui.QMainWindow):
         self.ai_lock = threading.Lock()
 
         inlist = load_inputs()
-        self.ui.freq_spnbx.setValue(inlist[0])
-        self.ui.sr_spnbx.setValue(inlist[1])
-        self.ui.dur_spnbx.setValue(inlist[2])
-        self.ui.db_spnbx.setValue(inlist[3])
-        self.ui.risefall_spnbx.setValue(inlist[4])
-        self.ui.aochan_box.setCurrentIndex(inlist[5])
-        self.ui.aichan_box.setCurrentIndex(inlist[6])
+        if len(inlist) > 0:
+            self.ui.freq_spnbx.setValue(inlist[0])
+            self.ui.sr_spnbx.setValue(inlist[1])
+            self.ui.dur_spnbx.setValue(inlist[2])
+            self.ui.db_spnbx.setValue(inlist[3])
+            self.ui.risefall_spnbx.setValue(inlist[4])
+            self.ui.aochan_box.setCurrentIndex(inlist[5])
+            self.ui.aichan_box.setCurrentIndex(inlist[6])
 
     def on_start(self):
         #repeatedly present tone stimulus until user presses stop
@@ -199,20 +200,34 @@ class ToneGenerator(QtGui.QMainWindow):
             t.daemon=True
             t.start()
 
-       
-
     def keyPressEvent(self,event):
-        print("keypress")
-        print(event.text())
+        #print("keypress")
+        #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
             self.update_stim()
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
         elif event.text() == 'a':
-            self.ui.dur_spnbx.stepUp()
+            self.ui.sr_spnbx.stepDown()
         elif event.text() == 's':
+            self.ui.sr_spnbx.stepUp()
+        elif event.text() == 'q':
+            self.ui.freq_spnbx.stepDown()
+        elif event.text() == 'w':
+            self.ui.freq_spnbx.stepUp()
+        elif event.text() == 'z':
             self.ui.dur_spnbx.stepDown()
+        elif event.text() == 'x':
+            self.ui.dur_spnbx.stepUp()
+        elif event.text() == 'e':
+            self.ui.db_spnbx.stepDown()
+        elif event.text() == 'r':
+            self.ui.db_spnbx.stepUp()
+        elif event.text() == 'd':
+            self.ui.risefall_spnbx.stepDown()
+        elif event.text() == 'f':
+            self.ui.risefall_spnbx.stepUp()
 
     def mousePressEvent(self,event):
         self.setFocus()
@@ -257,7 +272,7 @@ def save_inputs(*args):
 def make_tone(freq,db,dur,risefall,samplerate):
         #create portable tone generator class that allows the ability to generate tones that modifyable on-the-fly
         npts = dur * samplerate
-        print("duration (s) :{}".format(dur))
+        #print("duration (s) :{}".format(dur))
         # equation for db from voltage is db = 20 * log10(V2/V1))
         # 10^(db/20)
         maxv = 10
