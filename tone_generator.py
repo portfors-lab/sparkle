@@ -1,5 +1,6 @@
 import sys, os
 import threading
+import time
 
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
@@ -68,10 +69,10 @@ class ToneGenerator(QtGui.QMainWindow):
             npts = self.tone.size
             try:
                 self.ai = AITaskFinite(aichan,sr,npts)
-                
                 self.ao = AOTaskFinite(aochan,sr,npts,b"",b"ai/StartTrigger")
 
                 self.ao.write(self.tone)
+                print("%.8f AO V" % np.amax(self.tone))
 
                 self.ao.start()
                 self.ai.StartTask()
@@ -85,7 +86,7 @@ class ToneGenerator(QtGui.QMainWindow):
                 
                 self.ai.stop()
                 self.ao.stop()
-        
+                time.sleep(1)
                 #self.update_plot(1,range(len(data)),data)
 
             except:
@@ -100,10 +101,14 @@ class ToneGenerator(QtGui.QMainWindow):
             #t = threading.Thread(target=self.update_plot, args = (1,timevals,data))
             #t.start()
             #also plot FFT
-            sp = np.fft.fft(data)/npts
+            print("%.5f AI V" % (np.amax(data)))
+            sp = np.real(np.fft.fft(data)/npts)
             freq = np.arange(npts)/(npts/sr)
             sp = sp[:(npts/2)]
             freq = freq[:(npts/2)] #single sided
+            maxidx = sp.argmax(axis=0)
+            #print(maxidx)
+            print("%.6f FFT, at %d Hz\n" % (np.amax(abs(sp)), freq[maxidx]))
             #print('fft max: {}, min: {}, freq max: {}, min: {}'.format(np.amax(sp), np.amin(sp), 
             #                                                           np.amax(freq), np.amin(freq)))
             #t = threading.Thread(target=self.update_plot, args = (2,freq,abs(sp)))
@@ -228,6 +233,8 @@ class ToneGenerator(QtGui.QMainWindow):
             self.ui.risefall_spnbx.stepDown()
         elif event.text() == 'f':
             self.ui.risefall_spnbx.stepUp()
+        elif event.text() == 'u':
+            self.print_caldata()
 
     def mousePressEvent(self,event):
         self.setFocus()
@@ -275,8 +282,11 @@ def make_tone(freq,db,dur,risefall,samplerate):
         #print("duration (s) :{}".format(dur))
         # equation for db from voltage is db = 20 * log10(V2/V1))
         # 10^(db/20)
-        maxv = 10
-        amp = maxv/(10 ** (db/20))
+        v_at_caldB = 0.175
+        caldB = 100
+        amp = (10 ** ((db-caldB)/20)*v_at_caldB)
+        print('*'*40)
+        print("AO Amp: {}, current dB: {}, cal dB: {}, V at cal dB: {}".format(amp, db, caldB, v_at_caldB))
         rf_npts = risefall * samplerate
         #print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
         tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))

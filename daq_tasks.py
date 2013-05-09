@@ -17,6 +17,7 @@ class AITask(Task):
         self.StartTask()
     def register_callback(self, fun, npts):
         self.callback_fun = fun
+        self.n = npts
         self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,
                                             npts,0,name="run_callback")
     def run_callback(self):
@@ -45,8 +46,7 @@ class AOTask(Task):
     def write(self,output):
         w = c_int32()
         self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,
-                            output,
-            w,None);
+                            output,w,None);
     def stop(self):
         self.StopTask()
         self.ClearTask()

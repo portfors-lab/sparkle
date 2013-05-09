@@ -187,10 +187,35 @@ class SubPlots(QtGui.QMainWindow):
         self.active = True
         #self.show()
 
+        axis_action = QtGui.QAction('adjust axis', self)
+        axis_action.triggered.connect(self.adjust_axis)
+        self.popMenu = QtGui.QMenu( self )
+        self.popMenu.addAction( axis_action )
+
+        self.canvas.mpl_connect('button_press_event', 
+                                    self.on_figure_press)
+
+    def on_figure_press(self,event):
+        if event.inaxes != None:
+            if event.button == 3:
+                #print('xdata: {}, ydata: {}, x: {}, y: {}'.format(event.xdata,event.ydata, event.x, event.y))
+                #print(self.ui.inplot.height())
+                figheight = self.canvas.height()
+                point = QtCore.QPoint(event.x, figheight-event.y)
+                self.popMenu.exec_(self.mapToGlobal(point))
+
     def update_data(self, xdata, ydata, axnum=1):
 
         self.fig.axes[axnum].lines[0].set_data(xdata,ydata)
         self.fig.canvas.draw()
+
+    def on_context_menu(self, point):
+        # show context menu
+        self.popMenu.exec_(self.mapToGlobal(point))
+
+    def adjust_axis(self):
+        print("no one expects the spanish inquisition")
+        datamax = 
 
     def closeEvent(self,event):
         #added this so that I can test whether user has closed figure - is there are better way?

@@ -192,7 +192,10 @@
              </font>
             </property>
             <property name="maximum">
-             <number>100</number>
+             <number>150</number>
+            </property>
+            <property name="singleStep">
+             <number>5</number>
             </property>
             <property name="value">
              <number>20</number>
@@ -318,8 +321,6 @@
      </layout>
     </item>
    </layout>
-   <zorder></zorder>
-   <zorder>label</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
