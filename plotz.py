@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
+import functools
 
 from custom_toolbar import CustomToolbar
 
@@ -117,11 +118,15 @@ class SimplePlot(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self,parent)
 
         if len(args) == 1:
-            data = args[0]
-            xvals = range(len(data))
+            [data] = args[0]
+            [xvals] = range(len(data))
         else:
-            xvals = args[0]
+            if len(args) != 2:
+                print("data arguments must be in x,y array lists")
+                return
             data = args[1]
+            xvals = args[0]
+
         self.setWindowTitle('Display')
 
         self.main_frame = QtGui.QWidget()
@@ -132,8 +137,8 @@ class SimplePlot(QtGui.QMainWindow):
 
         ax = self.fig.add_subplot(111)
         self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
-
-        ax.plot(xvals,data)
+        for idata in range(len(data)):
+            ax.plot(xvals[idata],data[idata])
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.canvas)
@@ -143,7 +148,6 @@ class SimplePlot(QtGui.QMainWindow):
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
 
-        self.show()
 
 class SubPlots(QtGui.QMainWindow):
     def __init__(self,*args,parent=None):
@@ -187,6 +191,7 @@ class SubPlots(QtGui.QMainWindow):
         self.active = True
         #self.show()
 
+        """
         axis_action = QtGui.QAction('adjust axis', self)
         axis_action.triggered.connect(self.adjust_axis)
         self.popMenu = QtGui.QMenu( self )
@@ -194,28 +199,86 @@ class SubPlots(QtGui.QMainWindow):
 
         self.canvas.mpl_connect('button_press_event', 
                                     self.on_figure_press)
+        """
 
-    def on_figure_press(self,event):
-        if event.inaxes != None:
-            if event.button == 3:
-                #print('xdata: {}, ydata: {}, x: {}, y: {}'.format(event.xdata,event.ydata, event.x, event.y))
-                #print(self.ui.inplot.height())
-                figheight = self.canvas.height()
-                point = QtCore.QPoint(event.x, figheight-event.y)
-                self.popMenu.exec_(self.mapToGlobal(point))
+        self.fig.canvas.mpl_connect('button_release_event', self.canvas_context)
+
+        self.children = []
 
     def update_data(self, xdata, ydata, axnum=1):
-
         self.fig.axes[axnum].lines[0].set_data(xdata,ydata)
         self.fig.canvas.draw()
 
-    def on_context_menu(self, point):
-        # show context menu
-        self.popMenu.exec_(self.mapToGlobal(point))
+    def autoscale_y(self, event):
+        for ax in self.fig.axes:
+            if ax.contains(event)[0]:
+                x0, x1 = ax.get_xlim()
+                #set to zero so that we may use to get the max of multiple lines in an axes
+                y0, y1 = float("inf"), float("-inf")
+                #find y max and min for current x range
+                for iline in ax.lines:
+                    xdata, ydata = iline.get_data()
+                    if len(xdata) > 0:
+                        #placeholder lines have empty data
+                        print("xdata len %r, ydata len %r, x0 %r, x1 %r" % (len(xdata), len(ydata), x0, x1))
+                        #find the indicies of the xlims and use to take the min and max of same y range
+                        xind0 = (np.abs(xdata-x0)).argmin()
+                        xind1 = (np.abs(xdata-x1)).argmin()
+                        print("x indices %r, %r" % (xdata[xind0], xdata[xind1]))
+                        y0 = min(np.amin(ydata[xind0:xind1]),y0)
+                        y1 = max(np.amax(ydata[xind0:xind1]),y1)
+                        print("y data lims %r %r" % (y0, y1))
+                ax.set_ylim(y0,y1)
+                self.fig.canvas.draw()
 
-    def adjust_axis(self):
-        print("no one expects the spanish inquisition")
-        datamax = 
+
+    def autoscale_x(self,event):
+        for ax in self.fig.axes:
+            if ax.contains(event)[0]:
+                x0 = float("inf")
+                x1 = float("-inf")
+                for iline in ax.lines:
+                    xdata = iline.get_xdata()
+                    if len(xdata) > 0:
+                        #placeholder lines have empty data
+                        x0 = min(xdata[0], x0)
+                        x1 = max(xdata[-1], x1)
+                ax.set_xlim(x0,x1)
+                self.fig.canvas.draw()
+
+    def spawn_child(self, event):
+        for ax in self.fig.axes:
+            if ax.contains(event)[0]:
+                #copy data to new figure (not live)
+                xdatas = []
+                ydatas = []
+                for iline in ax.lines:
+                    xdata, ydata = iline.get_data()
+                    xdatas.append(xdata)
+                    ydatas.append(ydata)
+                new_fig = SimplePlot(xdatas, ydatas)
+                new_fig.show()
+                #we must keep a reference to the plots, otherwise they go away
+                self.children.append(new_fig)
+
+    def canvas_context(self, event):
+        if event.button == 3:
+            if event.inaxes:
+                yaxis_action = QtGui.QAction('autoscale y', self)
+                yaxis_action.triggered.connect(functools.partial(self.autoscale_y,event))
+                xaxis_action = QtGui.QAction('autoscale x', self)
+                xaxis_action.triggered.connect(functools.partial(self.autoscale_x,event))
+                spawn_action = QtGui.QAction('spawn', self)
+                spawn_action.triggered.connect(functools.partial(self.spawn_child,event))
+                popMenu = QtGui.QMenu(self)
+                popMenu.addAction(yaxis_action)
+                popMenu.addAction(xaxis_action)
+                popMenu.addAction(spawn_action)
+                figheight = self.canvas.height()
+                point = QtCore.QPoint(event.x, figheight - event.y)
+                popMenu.exec(self.canvas.mapToGlobal(point))
+
+    #def contextMenuEvent(self, event):
 
     def closeEvent(self,event):
         #added this so that I can test whether user has closed figure - is there are better way?
