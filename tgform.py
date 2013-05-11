@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tone_generator.ui'
 #
-# Created: Mon Apr 29 10:44:42 2013
+# Created: Wed May  8 11:12:31 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -132,7 +132,8 @@ class Ui_tgform(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.db_spnbx.setFont(font)
-        self.db_spnbx.setMaximum(100)
+        self.db_spnbx.setMaximum(150)
+        self.db_spnbx.setSingleStep(5)
         self.db_spnbx.setProperty("value", 20)
         self.db_spnbx.setObjectName(_fromUtf8("db_spnbx"))
         self.gridLayout.addWidget(self.db_spnbx, 3, 1, 1, 1)

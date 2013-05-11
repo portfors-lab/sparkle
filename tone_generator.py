@@ -277,24 +277,24 @@ def save_inputs(*args):
     cf.close()
 
 def make_tone(freq,db,dur,risefall,samplerate):
-        #create portable tone generator class that allows the ability to generate tones that modifyable on-the-fly
-        npts = dur * samplerate
-        #print("duration (s) :{}".format(dur))
-        # equation for db from voltage is db = 20 * log10(V2/V1))
-        # 10^(db/20)
-        v_at_caldB = 0.175
-        caldB = 100
-        amp = (10 ** ((db-caldB)/20)*v_at_caldB)
-        print('*'*40)
-        print("AO Amp: {}, current dB: {}, cal dB: {}, V at cal dB: {}".format(amp, db, caldB, v_at_caldB))
-        rf_npts = risefall * samplerate
-        #print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
-        tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
-        #add rise fall
-        if risefall > 0:
-            tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
-            tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
-
+    #create portable tone generator class that allows the ability to generate tones that modifyable on-the-fly
+    npts = dur * samplerate
+    #print("duration (s) :{}".format(dur))
+    # equation for db from voltage is db = 20 * log10(V2/V1))
+    # 10^(db/20)
+    v_at_caldB = 0.175
+    caldB = 100
+    amp = (10 ** ((db-caldB)/20)*v_at_caldB)
+    print('*'*40)
+    print("AO Amp: {}, current dB: {}, cal dB: {}, V at cal dB: {}".format(amp, db, caldB, v_at_caldB))
+    rf_npts = risefall * samplerate
+    #print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
+    tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
+    #add rise fall
+    if risefall > 0:
+        tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
+        tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
+        
         return tone
 
 class GenericThread(threading.Thread):

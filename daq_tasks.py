@@ -97,3 +97,19 @@ class AOTaskFinite(Task):
     def stop(self):
         self.StopTask()
         self.ClearTask()
+
+def get_ao_chans(dev):
+    buf = create_string_buffer(256)
+    buflen = c_uint32(sizeof(buf))
+    DAQmxGetDevAOPhysicalChans(dev, buf, buflen)
+    pybuf = buf.value
+    chans = pybuf.decode('utf-8').split(",")
+    return chans  
+
+def get_ai_chans(dev):
+    buf = create_string_buffer(512)
+    buflen = c_uint32(sizeof(buf))
+    DAQmxGetDevAIPhysicalChans(dev, buf, buflen)
+    pybuf = buf.value
+    chans = pybuf.decode('utf-8').split(",")
+    return chans
