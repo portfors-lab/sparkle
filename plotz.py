@@ -281,6 +281,51 @@ class SubPlots(QtGui.QMainWindow):
     #def contextMenuEvent(self, event):
 
     def closeEvent(self,event):
-        #added this so that I can test whether user has closed figure - is there are better way?
+        #added this so that I can test whether user has closed figure 
+        # - is there are better way?
         self.active = False
         QtGui.QMainWindow.closeEvent(self,event)
+
+
+class AnimatedDisplay(FigureCanvas):
+    def __init__(self,*args,interval=False,callback=None,parent=None):
+        FigureCanvas.__init__(self, Figure())
+
+        if len(args)%2 != 0:
+            print("data arguments must be in x,y array pairs")
+            return
+
+        nsubplots = int(len(args)/2)
+
+        for isubplot in range(nsubplots):
+            ax = self.figure.add_subplot(nsubplots,1,isubplot+1)
+            ax.set_xlim(0,10)
+            ax.set_ylim(-10,10)
+
+        self.draw()
+
+        # save this background for animation
+        self.old_size = self.figure.axes[1].bbox.width, self.figure.axes[1].bbox.height
+        self.ax_background = self.copy_from_bbox(self.figure.axes[1].bbox)
+
+        for ax in self.figure.axes:
+
+            #test to see if argument is nested list 
+            # -- meaning multiple lines in plot
+            if len(args[isubplot*2]) > 0 and isinstance(args[isubplot*2][0], list):
+                #add multiple lines to plot
+                for iline in range(len(args[isubplot*2])):
+                    ax.plot(args[isubplot*2][iline],
+                            args[(isubplot*2)+1][iline], 
+                            animated=True)
+            else:
+                ax.plot(args[isubplot*2],args[(isubplot*2)+1], 
+                        animated=True)
+
+        #self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
+        if interval:
+            self.callback = callback
+            self.startTimer(interval)
+
+    def timerEvent(self, evt):
+        self.callback(self)

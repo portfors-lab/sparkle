@@ -53,7 +53,8 @@ class ToneGenerator(QtGui.QMainWindow):
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
 
-        #update the stimulus, this will also set some of the class IO parameters
+        # update the stimulus, 
+        # this will also set some of the class IO parameters
         self.update_stim()
         self.keep_playing = True
 
@@ -310,7 +311,7 @@ class GenericThread(threading.Thread):
     def run(self):
         self.function(*self.args, **self.kwargs)
         return
-
+"""
 def get_ao_chans(dev):
     buf = create_string_buffer(256)
     buflen = c_uint32(sizeof(buf))
@@ -326,7 +327,7 @@ def get_ai_chans(dev):
     pybuf = buf.value
     chans = pybuf.decode('utf-8').split(",")
     return chans
-
+"""
 
 def setup_ipshell():
     try:
