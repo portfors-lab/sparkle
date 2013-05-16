@@ -299,10 +299,11 @@ class AnimatedDisplay(FigureCanvas):
 
         for isubplot in range(nsubplots):
             ax = self.figure.add_subplot(nsubplots,1,isubplot+1)
-            ax.set_xlim(0,10)
+            ax.set_xlim(0,5)
             ax.set_ylim(-10,10)
 
         self.draw()
+        self.active = True
 
         # save this background for animation
         self.old_size = self.figure.axes[1].bbox.width, self.figure.axes[1].bbox.height
@@ -310,7 +311,7 @@ class AnimatedDisplay(FigureCanvas):
 
         for ax in self.figure.axes:
 
-            #test to see if argument is nested list 
+            # test to see if argument is nested list 
             # -- meaning multiple lines in plot
             if len(args[isubplot*2]) > 0 and isinstance(args[isubplot*2][0], list):
                 #add multiple lines to plot
@@ -329,3 +330,9 @@ class AnimatedDisplay(FigureCanvas):
 
     def timerEvent(self, evt):
         self.callback(self)
+
+    def closeEvent(self,event):
+        #added this so that I can test whether user has closed figure 
+        # - is there are better way?
+        self.active = False
+        QtGui.QWidget.closeEvent(self,event)

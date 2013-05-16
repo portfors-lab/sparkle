@@ -9,7 +9,7 @@ from daq_tasks import *
 from plotz import *
 from calform import Ui_CalibrationWindow
 
-AIPOINTS = 10
+AIPOINTS = 1000
 XLEN = 5 #seconds
 
 class Calibrator(QtGui.QMainWindow):
@@ -51,7 +51,7 @@ class Calibrator(QtGui.QMainWindow):
         tone_tab = True
         if tone_tab:
             
-           
+            self.cnt = 0
             self.update_stim()
 
             sr = self.sr
@@ -105,28 +105,34 @@ class Calibrator(QtGui.QMainWindow):
         # I think I need to put in some sort of lock here?
         self.tone = tone
         self.sr = sr
+        self.aitime = dur
 
         self.statusBar().showMessage('npts: {}'.format(npts))
 
         # now update the display of the stim
         if self.sp == None or not(self.sp.active):
-            self.spawn_display(timevals,tone,f)
+            self.spawn_display(timevals, tone, f)
         else:
             self.stim_display(timevals, tone, freq, sp)
 
     def spawn_display(self,timevals,tone,f):
         self.sp = AnimatedDisplay(timevals,tone,[],[],[[],[]],[[],[]],
                                   interval=10, callback=self.ai_display)
+        #unset animation on first axes for stim
+        self.sp.figure.axes[0].lines[0].set_animated(False)
         self.sp.show()
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
+        print("update stim display")
+        print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
         self.sp.figure.axes[0].lines[0].set_data(xdata,ydata)
         self.sp.figure.axes[2].lines[0].set_data(xfft,yfft)
         self.sp.draw()
+        QtGui.QApplication.processEvents()
 
     def ai_display(self,task):
-
+            
         current_size = self.sp.figure.axes[1].bbox.width, self.sp.figure.axes[1].bbox.height
         if self.sp.old_size != current_size:
             self.sp.old_size = current_size
@@ -135,7 +141,7 @@ class Calibrator(QtGui.QMainWindow):
             self.sp.figure.axes[1].set_ylim(-10,10)
             self.sp.draw()
             self.sp.ax_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
-
+        
         self.sp.restore_region(self.sp.ax_background)
         lims = self.sp.figure.axes[1].axis()
 
@@ -149,6 +155,12 @@ class Calibrator(QtGui.QMainWindow):
         self.sp.figure.axes[1].draw_artist(self.sp.figure.axes[1].lines[0])
         self.sp.blit(self.sp.figure.axes[1].bbox)
 
+        if self.cnt == 0:
+            # TODO: this shouldn't be necessary, but if it is excluded the
+            # canvas outside the axes is not initially painted.
+            self.sp.draw()
+        self.cnt += 1
+
     def every_n_callback(self,task):
         # read in the data as it is acquired and append to data structure
         try:
@@ -161,17 +173,21 @@ class Calibrator(QtGui.QMainWindow):
             self.ndata += read.value
             #print(self.ndata)
             
+            n = read.value
             lims = self.sp.figure.axes[1].axis()
             #print("lims {}".format(lims))
             #print("ndata {}".format(self.ndata))
             
-            ndata = self.ndata
+            ndata = len(self.current_line_data)
             aisr = self.sr
-            if ndata/aisr > lims[1]:
-                print("change x lim")
-                self.sp.figure.axes[1].set_xlim(ndata/aisr,(ndata/aisr)+XLEN)
+            if ndata/aisr > self.aitime:
+            #if ndata/aisr > lims[1]:
+                #print("change x lim, {} to {}".format((ndata-n)/aisr,((ndata-n)/aisr)+XLEN))
+                #self.sp.figure.axes[1].set_xlim((ndata-n)/aisr,((ndata-n)/aisr)+XLEN)
                 # must use regular draw to update axes tick labels
-                self.sp.draw() 
+                #self.sp.draw()
+                # update saved background so scale stays accurate
+                #self.sp.ax_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
                 self.current_line_data = []
             
             self.current_line_data.extend(inbuffer.tolist())
@@ -186,6 +202,15 @@ class Calibrator(QtGui.QMainWindow):
 
     def set_dur_max(self):
         print("also need to set dur_max")
+
+    def keyPressEvent(self,event):
+        #print("keypress")
+        #print(event.text())
+        if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
+            self.update_stim()
+            self.setFocus()
+        elif event.key () == QtCore.Qt.Key_Escape:
+            self.setFocus()
 
 def make_tone(freq,db,dur,risefall,samplerate):
     # create portable tone generator class that allows the 
