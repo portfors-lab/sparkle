@@ -47,10 +47,9 @@ class Calibrator(QtGui.QMainWindow):
 
         # depending on currently displayed tab, present
         # tuning curve, or on-the-fly modifyabe tone
-
-        tone_tab = True
-        if tone_tab:
-            
+        
+        if self.ui.tabs.currentIndex() == 0 :
+            print("vroom")
             self.cnt = 0
             self.update_stim()
 
@@ -63,8 +62,8 @@ class Calibrator(QtGui.QMainWindow):
             self.current_line_data = []
 
             try:
-                self.aitask = AITask(b"PCI-6259/ai0",sr, AIPOINTS)
-                self.aotask = AOTask(b"PCI-6259/ao0",sr, npts, 
+                self.aitask = AITask(aichan,sr, AIPOINTS)
+                self.aotask = AOTask(aochan,sr, npts, 
                                      trigsrc=b"ai/StartTrigger")
                 self.aitask.register_callback(self.every_n_callback,AIPOINTS)
 
@@ -136,9 +135,11 @@ class Calibrator(QtGui.QMainWindow):
         current_size = self.sp.figure.axes[1].bbox.width, self.sp.figure.axes[1].bbox.height
         if self.sp.old_size != current_size:
             self.sp.old_size = current_size
+            xlims = self.sp.figure.axes[1].axis()
             self.sp.figure.axes[1].clear()
             self.sp.figure.axes[1].plot([],[])
             self.sp.figure.axes[1].set_ylim(-10,10)
+            self.sp.figure.axes[1].set_xlim(xlims[0], xlims[1])
             self.sp.draw()
             self.sp.ax_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
         
