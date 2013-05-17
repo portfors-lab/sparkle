@@ -4,12 +4,13 @@ import time
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
 import numpy as np
+import threading
 
 from daq_tasks import *
 from plotz import *
 from calform import Ui_CalibrationWindow
 
-AIPOINTS = 1000
+AIPOINTS = 10
 XLEN = 5 #seconds
 
 class Calibrator(QtGui.QMainWindow):
@@ -40,6 +41,8 @@ class Calibrator(QtGui.QMainWindow):
             self.ui.aochan_box.setCurrentIndex(inlist[5])
             self.ui.aichan_box.setCurrentIndex(inlist[6])
 
+        self.display_lock = threading.Lock()
+
     def on_start(self):
 
         aochan = self.ui.aochan_box.currentText().encode()
@@ -66,6 +69,7 @@ class Calibrator(QtGui.QMainWindow):
                 self.aotask = AOTask(aochan,sr, npts, 
                                      trigsrc=b"ai/StartTrigger")
                 self.aitask.register_callback(self.every_n_callback,AIPOINTS)
+                self.aotask.write(self.tone)
 
                 self.aotask.StartTask()
                 self.aitask.StartTask()
@@ -80,14 +84,17 @@ class Calibrator(QtGui.QMainWindow):
     def on_stop(self):
         self.aitask.stop()
         self.aotask.stop()
+        self.sp.killTimer(self.sp.timer)
 
     def update_stim(self):
-        scale_factor = 1000
+        scale_factor = 1
+        time_scale = 1000
         f = self.ui.freq_spnbx.value()*scale_factor
         sr = self.ui.sr_spnbx.value()*scale_factor
         dur = self.ui.dur_spnbx.value()/scale_factor
         db = self.ui.db_spnbx.value()
         rft = self.ui.risefall_spnbx.value()/scale_factor
+        dur = 1
 
         #print('freq: {}, rft: {}'.format(f,rft))
         tone = make_tone(f,db,dur,rft,sr)
@@ -115,54 +122,54 @@ class Calibrator(QtGui.QMainWindow):
             self.stim_display(timevals, tone, freq, sp)
 
     def spawn_display(self,timevals,tone,f):
-        self.sp = AnimatedDisplay(timevals,tone,[],[],[[],[]],[[],[]],
-                                  interval=10, callback=self.ai_display)
+        self.sp = AnimatedWindow((timevals,tone), ([],[]), ([[],[]],[[],[]]),
+                                  update_rate=100, callback=self.ai_display)
+
         #unset animation on first axes for stim
-        self.sp.figure.axes[0].lines[0].set_animated(False)
+        #self.sp.figure.axes[0].lines[0].set_animated(False)
         self.sp.show()
+
+        # draw stim
+        self.sp.ax[0].draw_artist(self.sp.ax[0].lines[0])
+        self.sp.canvas.blit(self.sp.ax[0].bbox)
+        #time.sleep(10)
+
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
         print("update stim display")
+        self.sp.canvas.restore_region(self.sp.ax_background[0])
         print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
-        self.sp.figure.axes[0].lines[0].set_data(xdata,ydata)
-        self.sp.figure.axes[2].lines[0].set_data(xfft,yfft)
-        self.sp.draw()
-        QtGui.QApplication.processEvents()
-
-    def ai_display(self,task):
-            
-        current_size = self.sp.figure.axes[1].bbox.width, self.sp.figure.axes[1].bbox.height
-        if self.sp.old_size != current_size:
-            self.sp.old_size = current_size
-            xlims = self.sp.figure.axes[1].axis()
-            self.sp.figure.axes[1].clear()
-            self.sp.figure.axes[1].plot([],[])
-            self.sp.figure.axes[1].set_ylim(-10,10)
-            self.sp.figure.axes[1].set_xlim(xlims[0], xlims[1])
-            self.sp.draw()
-            self.sp.ax_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
+        self.sp.ax[0].lines[0].set_data(xdata,ydata)
+        self.sp.ax[2].lines[0].set_data(xfft,yfft)
         
-        self.sp.restore_region(self.sp.ax_background)
-        lims = self.sp.figure.axes[1].axis()
+        self.sp.ax[0].draw_artist(self.sp.ax[0].lines[0])
+        self.sp.canvas.blit(self.sp.ax[0].bbox)
 
+    def ai_display(self):
+        self.sp.canvas.restore_region(self.sp.ax_background[1])
+
+        lims = self.sp.ax[1].axis()
         data = self.current_line_data[:]
         
         t = len(data)/self.sr
         #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
         xdata = np.linspace(lims[0], lims[0]+t, len(data))
-        self.sp.figure.axes[1].lines[0].set_data(xdata,data)
+        #self.sp.figure.axes[1].lines[0].set_data(xdata,data)
+        self.sp.ax[1].lines[0].set_data(xdata,data)
         
-        self.sp.figure.axes[1].draw_artist(self.sp.figure.axes[1].lines[0])
-        self.sp.blit(self.sp.figure.axes[1].bbox)
+        #self.sp.figure.axes[1].draw_artist(self.sp.figure.axes[1].lines[0])
+        self.sp.ax[1].draw_artist(self.sp.ax[1].lines[0])
+        self.sp.canvas.blit(self.sp.ax[1].bbox)
 
         if self.cnt == 0:
             # TODO: this shouldn't be necessary, but if it is excluded the
             # canvas outside the axes is not initially painted.
-            self.sp.draw()
+            self.sp.canvas.draw()
         self.cnt += 1
 
     def every_n_callback(self,task):
+        
         # read in the data as it is acquired and append to data structure
         try:
             read = c_int32()
@@ -175,12 +182,13 @@ class Calibrator(QtGui.QMainWindow):
             #print(self.ndata)
             
             n = read.value
-            lims = self.sp.figure.axes[1].axis()
+            lims = self.sp.ax[1].axis()
             #print("lims {}".format(lims))
             #print("ndata {}".format(self.ndata))
             
             ndata = len(self.current_line_data)
             aisr = self.sr
+
             if ndata/aisr > self.aitime:
             #if ndata/aisr > lims[1]:
                 #print("change x lim, {} to {}".format((ndata-n)/aisr,((ndata-n)/aisr)+XLEN))
@@ -213,6 +221,23 @@ class Calibrator(QtGui.QMainWindow):
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
 
+    def closeEvent(self,event):
+        # halt acquisition loop
+        self.on_stop()
+
+        #save inputs into file to load up next time
+        f = self.ui.freq_spnbx.value()
+        sr = self.ui.sr_spnbx.value()
+        dur = self.ui.dur_spnbx.value()
+        db = self.ui.db_spnbx.value()
+        rft = self.ui.risefall_spnbx.value()
+        aochan_index = self.ui.aochan_box.currentIndex()
+        aichan_index = self.ui.aichan_box.currentIndex()
+
+        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index)
+
+        QtGui.QMainWindow.closeEvent(self,event)
+
 def make_tone(freq,db,dur,risefall,samplerate):
     # create portable tone generator class that allows the 
     # ability to generate tones that modifyable on-the-fly
@@ -236,7 +261,7 @@ def make_tone(freq,db,dur,risefall,samplerate):
         tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
         tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
         
-        return tone
+    return tone
 
 def load_inputs():
     cfgfile = "inputs.cfg"

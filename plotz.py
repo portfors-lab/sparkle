@@ -336,3 +336,104 @@ class AnimatedDisplay(FigureCanvas):
         # - is there are better way?
         self.active = False
         QtGui.QWidget.closeEvent(self,event)
+
+class AnimatedWindow(QtGui.QMainWindow):
+    def __init__(self,*args,update_rate=False,callback=None,parent=None):
+        QtGui.QMainWindow.__init__(self,parent)
+                     
+        self.main_frame = QtGui.QWidget()
+
+        nsubplots = int(len(args))
+
+        fig = Figure()
+        self.canvas = FigureCanvas(fig)
+
+        self.canvas.setParent(self.main_frame)
+
+        self.ax = []
+        for isubplot in range(nsubplots):
+            ax = fig.add_subplot(nsubplots,1,isubplot+1)
+            ax.set_xlim(0,5)
+            ax.set_ylim(-10,10)
+            self.ax.append(ax)
+
+        self.canvas.draw()
+
+        # save these backgrounds for animation
+        self.old_size = [None]*nsubplots
+        self.ax_background = [None]*nsubplots
+        for isubplot in range(nsubplots):
+            self.old_size[isubplot] = fig.axes[isubplot].bbox.width, fig.axes[isubplot].bbox.height
+            self.ax_background[isubplot] = self.canvas.copy_from_bbox(fig.axes[isubplot].bbox)
+
+        # now do first plot with provided data, 
+        # this will also set how many line each plot will contain
+
+        for ax in self.canvas.figure.axes:
+            # divide argument tuple into x ,y data
+            iplot = self.canvas.figure.axes.index(ax)
+            xdata = args[iplot][0]
+            ydata = args[iplot][1]
+
+            # the data could either be a single list representing data, or a list of sets of data
+
+            # test to see if argument is nested list 
+            # -- meaning multiple lines in plot
+            if len(xdata) > 0 and isinstance(xdata[0], list):
+                #add multiple lines to plot
+                for iline in range(len(xdata)):
+                     ax.plot(xdata[iline], ydata[iline], animated=True)
+            else:
+                ax.plot(xdata, ydata, animated=True)
+        
+
+        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.canvas)
+        vbox.addWidget(self.mpl_toolbar)
+
+        self.main_frame.resize(500,500)
+        self.main_frame.setLayout(vbox)
+        self.setCentralWidget(self.main_frame)
+
+        #self.nsubplots = nsubplots
+
+        self.active = True
+
+        # timer takes interval in ms. assuming rate in Hz, convert
+        interval = int(max(1000/update_rate, 1))
+        #if interval:
+        self.callback = callback
+        self.timer = self.startTimer(interval)
+
+    def timerEvent(self, evt):
+        self.callback()
+
+    def resizeEvent(self, evt):
+        print("resizing yehaw")
+        saved_data = []
+        for ax in self.ax:
+            xlims = ax.axis()
+            saved_data.append(ax.lines[0].get_data())
+            ax.clear()
+            ax.plot([],[])
+            ax.set_ylim(-10,10)
+            ax.set_xlim(xlims[0], xlims[1])
+            
+        self.canvas.draw()
+        for iax in range(len(self.ax)):
+            self.ax_background[iax] = self.canvas.copy_from_bbox(self.ax[iax].bbox)
+
+        for iax in range(len(self.ax)):
+            xvals, yvals = saved_data[iax]
+            self.ax[iax].lines[0].set_data(xvals,yvals)
+            self.ax[iax].draw_artist(self.ax[iax].lines[0])
+            self.canvas.blit(self.ax[iax].bbox)
+            
+
+    def closeEvent(self,event):
+        #added this so that I can test whether user has closed figure 
+        # - is there are better way?
+        self.active = False
+        QtGui.QMainWindow.closeEvent(self,event)
