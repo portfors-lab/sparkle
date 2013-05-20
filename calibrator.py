@@ -147,7 +147,6 @@ class Calibrator(QtGui.QMainWindow):
         self.sp.canvas.blit(self.sp.ax[0].bbox)
 
     def ai_display(self):
-        self.sp.canvas.restore_region(self.sp.ax_background[1])
 
         lims = self.sp.ax[1].axis()
         data = self.current_line_data[:]
@@ -155,18 +154,8 @@ class Calibrator(QtGui.QMainWindow):
         t = len(data)/self.sr
         #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
         xdata = np.linspace(lims[0], lims[0]+t, len(data))
-        #self.sp.figure.axes[1].lines[0].set_data(xdata,data)
-        self.sp.ax[1].lines[0].set_data(xdata,data)
         
-        #self.sp.figure.axes[1].draw_artist(self.sp.figure.axes[1].lines[0])
-        self.sp.ax[1].draw_artist(self.sp.ax[1].lines[0])
-        self.sp.canvas.blit(self.sp.ax[1].bbox)
-
-        if self.cnt == 0:
-            # TODO: this shouldn't be necessary, but if it is excluded the
-            # canvas outside the axes is not initially painted.
-            self.sp.canvas.draw()
-        self.cnt += 1
+        self.sp.draw_line(1,0,xdata,data)
 
     def every_n_callback(self,task):
         

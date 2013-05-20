@@ -407,6 +407,22 @@ class AnimatedWindow(QtGui.QMainWindow):
         self.callback = callback
         self.timer = self.startTimer(interval)
 
+        self.cnt = 0
+
+    def draw_line(self, axnum, linenum, xdata, ydata):
+        self.canvas.restore_region(self.ax_background[axnum])
+        self.ax[axnum].lines[linenum].set_data(xdata,ydata)
+
+        self.ax[axnum].draw_artist(self.ax[axnum].lines[0])
+        self.canvas.blit(self.ax[axnum].bbox)
+
+        if self.cnt == 0:
+            # TODO: this shouldn't be necessary, but if it is excluded the
+            # canvas outside the axes is not initially painted.
+            self.canvas.draw()
+            self.cnt += 1
+
+
     def timerEvent(self, evt):
         self.callback()
 
@@ -424,6 +440,9 @@ class AnimatedWindow(QtGui.QMainWindow):
         self.canvas.draw()
         for iax in range(len(self.ax)):
             self.ax_background[iax] = self.canvas.copy_from_bbox(self.ax[iax].bbox)
+
+        # this seems to be necessary to get background to show properly
+        self.canvas.draw()
 
         for iax in range(len(self.ax)):
             xvals, yvals = saved_data[iax]
