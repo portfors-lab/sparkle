@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>659</width>
-    <height>299</height>
+    <width>685</width>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,6 +41,24 @@
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="freq_spnbx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="maximum">
+               <number>200</number>
+              </property>
+              <property name="singleStep">
+               <number>5</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
             <item row="5" column="0">
              <widget class="QLabel" name="label_6">
               <property name="font">
@@ -50,6 +68,30 @@
               </property>
               <property name="text">
                <string>Rise fall time</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_32">
+              <property name="text">
+               <string>Acq rate</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QSpinBox" name="aisr_spnbx">
+              <property name="minimum">
+               <number>10</number>
+              </property>
+              <property name="maximum">
+               <number>400</number>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="2">
+             <widget class="QLabel" name="label_33">
+              <property name="text">
+               <string>kHz</string>
               </property>
              </widget>
             </item>
@@ -140,24 +182,6 @@
               </property>
               <property name="text">
                <string>kHz</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="freq_spnbx">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="maximum">
-               <number>200</number>
-              </property>
-              <property name="singleStep">
-               <number>5</number>
-              </property>
-              <property name="value">
-               <number>5</number>
               </property>
              </widget>
             </item>
@@ -780,12 +804,24 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>659</width>
+     <width>685</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuAdvanced">
+    <property name="title">
+     <string>Advanced</string>
+    </property>
+    <addaction name="actionDisplay_Options"/>
+   </widget>
+   <addaction name="menuAdvanced"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionDisplay_Options">
+   <property name="text">
+    <string>Display Options</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -812,8 +848,8 @@
    <slot>set_dur_max()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>304</x>
-     <y>281</y>
+     <x>302</x>
+     <y>323</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -821,9 +857,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionDisplay_Options</sender>
+   <signal>triggered()</signal>
+   <receiver>CalibrationWindow</receiver>
+   <slot>launch_display_dlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>set_interval_min()</slot>
   <slot>set_dur_max()</slot>
+  <slot>launch_display_dlg()</slot>
  </slots>
 </ui>

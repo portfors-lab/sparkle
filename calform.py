@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Fri May 10 16:45:15 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Tue May 21 11:55:28 2013
+#      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_CalibrationWindow(object):
     def setupUi(self, CalibrationWindow):
         CalibrationWindow.setObjectName(_fromUtf8("CalibrationWindow"))
-        CalibrationWindow.resize(659, 299)
+        CalibrationWindow.resize(685, 368)
         self.centralwidget = QtGui.QWidget(CalibrationWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.centralwidget)
@@ -47,12 +47,32 @@ class Ui_CalibrationWindow(object):
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.freq_spnbx = QtGui.QSpinBox(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.freq_spnbx.setFont(font)
+        self.freq_spnbx.setMaximum(200)
+        self.freq_spnbx.setSingleStep(5)
+        self.freq_spnbx.setProperty("value", 5)
+        self.freq_spnbx.setObjectName(_fromUtf8("freq_spnbx"))
+        self.gridLayout.addWidget(self.freq_spnbx, 0, 1, 1, 1)
         self.label_6 = QtGui.QLabel(self.tab)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.label_6.setFont(font)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout.addWidget(self.label_6, 5, 0, 1, 1)
+        self.label_32 = QtGui.QLabel(self.tab)
+        self.label_32.setObjectName(_fromUtf8("label_32"))
+        self.gridLayout.addWidget(self.label_32, 6, 0, 1, 1)
+        self.aisr_spnbx = QtGui.QSpinBox(self.tab)
+        self.aisr_spnbx.setMinimum(10)
+        self.aisr_spnbx.setMaximum(400)
+        self.aisr_spnbx.setObjectName(_fromUtf8("aisr_spnbx"))
+        self.gridLayout.addWidget(self.aisr_spnbx, 6, 1, 1, 1)
+        self.label_33 = QtGui.QLabel(self.tab)
+        self.label_33.setObjectName(_fromUtf8("label_33"))
+        self.gridLayout.addWidget(self.label_33, 6, 2, 1, 1)
         self.dur_spnbx = QtGui.QSpinBox(self.tab)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -104,15 +124,6 @@ class Ui_CalibrationWindow(object):
         self.label_7.setSizePolicy(sizePolicy)
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.gridLayout.addWidget(self.label_7, 0, 2, 1, 1)
-        self.freq_spnbx = QtGui.QSpinBox(self.tab)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.freq_spnbx.setFont(font)
-        self.freq_spnbx.setMaximum(200)
-        self.freq_spnbx.setSingleStep(5)
-        self.freq_spnbx.setProperty("value", 5)
-        self.freq_spnbx.setObjectName(_fromUtf8("freq_spnbx"))
-        self.gridLayout.addWidget(self.freq_spnbx, 0, 1, 1, 1)
         self.sr_spnbx = QtGui.QSpinBox(self.tab)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -452,23 +463,32 @@ class Ui_CalibrationWindow(object):
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         CalibrationWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(CalibrationWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 659, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 685, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
+        self.menuAdvanced = QtGui.QMenu(self.menubar)
+        self.menuAdvanced.setObjectName(_fromUtf8("menuAdvanced"))
         CalibrationWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(CalibrationWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         CalibrationWindow.setStatusBar(self.statusbar)
+        self.actionDisplay_Options = QtGui.QAction(CalibrationWindow)
+        self.actionDisplay_Options.setObjectName(_fromUtf8("actionDisplay_Options"))
+        self.menuAdvanced.addAction(self.actionDisplay_Options)
+        self.menubar.addAction(self.menuAdvanced.menuAction())
 
         self.retranslateUi(CalibrationWindow)
         self.tabs.setCurrentIndex(0)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_interval_min)
         QtCore.QObject.connect(self.sr_spnbx_2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_dur_max)
+        QtCore.QObject.connect(self.actionDisplay_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_display_dlg)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWindow)
 
     def retranslateUi(self, CalibrationWindow):
         CalibrationWindow.setWindowTitle(_translate("CalibrationWindow", "MainWindow", None))
         self.label.setText(_translate("CalibrationWindow", "Speaker Calibration", None))
         self.label_6.setText(_translate("CalibrationWindow", "Rise fall time", None))
+        self.label_32.setText(_translate("CalibrationWindow", "Acq rate", None))
+        self.label_33.setText(_translate("CalibrationWindow", "kHz", None))
         self.label_9.setText(_translate("CalibrationWindow", "ms", None))
         self.label_8.setText(_translate("CalibrationWindow", "kHz", None))
         self.label_3.setText(_translate("CalibrationWindow", "Sample rate", None))
@@ -504,6 +524,8 @@ class Ui_CalibrationWindow(object):
         self.db_label.setText(_translate("CalibrationWindow", "Intensity : 100 dB", None))
         self.start_button.setText(_translate("CalibrationWindow", "Start", None))
         self.stop_button.setText(_translate("CalibrationWindow", "Stop", None))
+        self.menuAdvanced.setTitle(_translate("CalibrationWindow", "Advanced", None))
+        self.actionDisplay_Options.setText(_translate("CalibrationWindow", "Display Options", None))
 
 
 if __name__ == "__main__":

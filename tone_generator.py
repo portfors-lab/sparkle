@@ -122,8 +122,8 @@ class ToneGenerator(QtGui.QMainWindow):
     def update_plot(self,axnum,xdata,ydata):
         #Do something with AI data
         #print("update plot")
-        self.sp.fig.axes[axnum].lines[0].set_data(xdata,ydata)
-        self.sp.fig.canvas.draw()
+        self.sp.axs[axnum].lines[0].set_data(xdata,ydata)
+        self.sp.canvas.draw()
         QtGui.QApplication.processEvents()
 
     def update_plots(self,axnums,linenums,xdata,ydata):
@@ -131,10 +131,10 @@ class ToneGenerator(QtGui.QMainWindow):
         #print("update plot")
         for iax in range(len(axnums)):
             #print(iax)
-            #print("ax {}, line {}, axlen {}, linelen {}, datalen {},{}".format(axnums[iax], linenums[iax], len(self.sp.fig.axes),len(self.sp.fig.axes[iax].lines) ,len(xdata[iax]),len(ydata[iax])))
-            #print("line obj {}".format(self.sp.fig.axes[iax].lines))
-            self.sp.fig.axes[axnums[iax]].lines[linenums[iax]].set_data(xdata[iax],ydata[iax])
-        self.sp.fig.canvas.draw()
+            #print("ax {}, line {}, axlen {}, linelen {}, datalen {},{}".format(axnums[iax], linenums[iax], len(self.sp.axs),len(self.sp.axs[iax].lines) ,len(xdata[iax]),len(ydata[iax])))
+            #print("line obj {}".format(self.sp.axs[iax].lines))
+            self.sp.axs[axnums[iax]].lines[linenums[iax]].set_data(xdata[iax],ydata[iax])
+        self.sp.canvas.draw()
         QtGui.QApplication.processEvents()
 
     def on_stop(self):
@@ -148,15 +148,15 @@ class ToneGenerator(QtGui.QMainWindow):
 
         self.sp = SubPlots(timevals,tone,[],[],[[],[]],[[],[]],parent=None)
         #set axes limits?
-        self.sp.fig.axes[0].set_ylim(-10,10)
+        self.sp.axs[0].set_ylim(-10,10)
         # set input y scale to match stimulus (since we are trying to measure it back right?)
-        self.sp.fig.axes[1].set_ylim(-10,10)
-        self.sp.fig.axes[0].set_xlim(0,5)
-        self.sp.fig.axes[1].set_xlim(0,5)
+        self.sp.axs[1].set_ylim(-10,10)
+        self.sp.axs[0].set_xlim(0,5)
+        self.sp.axs[1].set_xlim(0,5)
         #Set fft bounds by range expected
-        self.sp.fig.axes[2].set_ylim(0,2)
-        self.sp.fig.axes[2].set_xlim(0,fft_xrange*2)
-        self.sp.fig.canvas.draw()
+        self.sp.axs[2].set_ylim(0,2)
+        self.sp.axs[2].set_xlim(0,fft_xrange*2)
+        self.sp.canvas.draw()
         QtGui.QApplication.processEvents()
 
         self.ai_lock.release()
@@ -201,7 +201,7 @@ class ToneGenerator(QtGui.QMainWindow):
         else:
             #always only single axes and line
             #adjust the FFT x axis
-            self.sp.fig.axes[2].set_xlim(0,f*2)
+            self.sp.axs[2].set_xlim(0,f*2)
             t = threading.Thread(target=self.update_plots, args=([0,2],[0,0],[timevals, freq],[tone, sp]))
             t.daemon=True
             t.start()
@@ -296,7 +296,7 @@ def make_tone(freq,db,dur,risefall,samplerate):
         tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
         tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
         
-        return tone
+    return tone
 
 class GenericThread(threading.Thread):
     def __init__(self, function, *args, **kwargs):

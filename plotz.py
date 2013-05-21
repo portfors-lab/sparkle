@@ -3,58 +3,41 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-import functools
+from abstract_figures import BasePlot
 
-from custom_toolbar import CustomToolbar
-
-class ResultsPlot(QtGui.QMainWindow):
+class ResultsPlot(BasePlot):
     def __init__(self,data,parent=None):
-        #parent=None
-        QtGui.QMainWindow.__init__(self,parent)
+        ncols = np.floor(np.sqrt(data.shape[1]))
+        nrows = np.ceil(data.shape[1]/subplotcols)
+        BasePlot.__init__(self,(nrows,ncols),arent)
         self.setWindowTitle('Results')
         self.data=data
         self.create_main_frame()
         self.create_menu()
-        #self.show()
-        #self.exec_()
+        
     def create_main_frame(self):
-        self.main_frame = QtGui.QWidget()
+        
         #assume columns are traces
         print("data size: "+str(self.data.shape))
         print(self.data.shape[0])
         print(self.data.shape[1])
-        subplotcols = np.floor(np.sqrt(self.data.shape[1]))
-        subplotrows = np.ceil(self.data.shape[1]/subplotcols)
+        
         print('rows: '+str(subplotrows)+' cols: '+str(subplotcols))
 
         #make a new window to display acquired data
-        self.fig = Figure((5.0,4.0), dpi=100)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self.main_frame)
-
-        #make a new window to display acquired data
-        for itrace in range(self.data.shape[1]):
-            #add the axes in subplots
-            ax = self.fig.add_subplot(subplotrows,subplotcols,itrace)
+        for itrace, ax in enumerate(self.axs):
+            # add the axes in subplots
             ax.plot(self.data[:,itrace], picker=5)
 
         #self.fig.canvas.mpl_connect('button_press_event', self.axes_click)
         self.fig.canvas.mpl_connect('pick_event', self.line_click)
         self.fig.canvas.mpl_connect('button_release_event', self.line_drop)
 
-        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.canvas)
-        vbox.addWidget(self.mpl_toolbar)
-
-        self.main_frame.resize(500,500)
-        self.main_frame.setLayout(vbox)
-        self.setCentralWidget(self.main_frame)
         self.from_axes = None
 
     def create_menu(self):
-        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)        
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self) 
+
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(QtGui.qApp.quit)
@@ -112,10 +95,9 @@ class ResultsPlot(QtGui.QMainWindow):
         else:
             self.from_axes = None
             
-class SimplePlot(QtGui.QMainWindow):
+class SimplePlot(BasePlot):
     def __init__(self,*args,parent=None):
-        #parent=None
-        QtGui.QMainWindow.__init__(self,parent)
+        BasePlot.__init__(self,(1,1),parent)
 
         if len(args) == 1:
             [data] = args[0]
@@ -129,242 +111,51 @@ class SimplePlot(QtGui.QMainWindow):
 
         self.setWindowTitle('Display')
 
-        self.main_frame = QtGui.QWidget()
-
-        self.fig = Figure((5.0,4.0), dpi=100)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self.main_frame)
-
-        ax = self.fig.add_subplot(111)
-        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
         for idata in range(len(data)):
-            ax.plot(xvals[idata],data[idata])
+            self.ax[0].plot(xvals[idata],data[idata])
 
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.canvas)
-        vbox.addWidget(self.mpl_toolbar)
-
-        self.main_frame.resize(500,500)
-        self.main_frame.setLayout(vbox)
-        self.setCentralWidget(self.main_frame)
-
-
-class SubPlots(QtGui.QMainWindow):
-    def __init__(self,*args,parent=None):
-        #parent=None
-        QtGui.QMainWindow.__init__(self,parent)
+class SubPlots(BasePlot):
+    def __init__(self,*args,callback=None,parent=None):
+        nsubplots = int(len(args)/2)
+        BasePlot.__init__(self,(nsubplots,1),parent)
  
         if len(args)%2 != 0:
             print("data arguments must be in x,y array pairs")
             return
 
-        self.main_frame = QtGui.QWidget()
-
-        nsubplots = int(len(args)/2)
-
-        self.fig = Figure()
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self.main_frame)
-
-        for isubplot in range(nsubplots):
-            ax = self.fig.add_subplot(nsubplots,1,isubplot+1)
+        for isubplot, ax in enumerate(self.axs):
             #test to see if argument is nested list -- meaning multiple lines in plot
             if len(args[isubplot*2]) > 0 and isinstance(args[isubplot*2][0], list):
                 #add multiple lines to plot
                 for iline in range(len(args[isubplot*2])):
-                    ax.plot(args[isubplot*2][iline],args[(isubplot*2)+1][iline])
+                    ax.plot(args[isubplot*2][iline],
+                            args[(isubplot*2)+1][iline])
             else:
                 ax.plot(args[isubplot*2],args[(isubplot*2)+1])
 
-        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.canvas)
-        vbox.addWidget(self.mpl_toolbar)
-
-        self.main_frame.resize(500,500)
-        self.main_frame.setLayout(vbox)
-        self.setCentralWidget(self.main_frame)
-
         self.nsubplots = nsubplots
 
-        self.active = True
-        #self.show()
-
-        """
-        axis_action = QtGui.QAction('adjust axis', self)
-        axis_action.triggered.connect(self.adjust_axis)
-        self.popMenu = QtGui.QMenu( self )
-        self.popMenu.addAction( axis_action )
-
-        self.canvas.mpl_connect('button_press_event', 
-                                    self.on_figure_press)
-        """
-
-        self.fig.canvas.mpl_connect('button_release_event', self.canvas_context)
-
-        self.children = []
 
     def update_data(self, xdata, ydata, axnum=1):
         self.fig.axes[axnum].lines[0].set_data(xdata,ydata)
         self.fig.canvas.draw()
 
-    def autoscale_y(self, event):
-        for ax in self.fig.axes:
-            if ax.contains(event)[0]:
-                x0, x1 = ax.get_xlim()
-                #set to zero so that we may use to get the max of multiple lines in an axes
-                y0, y1 = float("inf"), float("-inf")
-                #find y max and min for current x range
-                for iline in ax.lines:
-                    xdata, ydata = iline.get_data()
-                    if len(xdata) > 0:
-                        #placeholder lines have empty data
-                        print("xdata len %r, ydata len %r, x0 %r, x1 %r" % (len(xdata), len(ydata), x0, x1))
-                        #find the indicies of the xlims and use to take the min and max of same y range
-                        xind0 = (np.abs(xdata-x0)).argmin()
-                        xind1 = (np.abs(xdata-x1)).argmin()
-                        print("x indices %r, %r" % (xdata[xind0], xdata[xind1]))
-                        y0 = min(np.amin(ydata[xind0:xind1]),y0)
-                        y1 = max(np.amax(ydata[xind0:xind1]),y1)
-                        print("y data lims %r %r" % (y0, y1))
-                ax.set_ylim(y0,y1)
-                self.fig.canvas.draw()
 
+class AnimatedWindow(BasePlot):
+    def __init__(self,*args,callback=None,parent=None):
+        nsubplots = len(args)
+        BasePlot.__init__(self,(nsubplots,1),parent)
 
-    def autoscale_x(self,event):
-        for ax in self.fig.axes:
-            if ax.contains(event)[0]:
-                x0 = float("inf")
-                x1 = float("-inf")
-                for iline in ax.lines:
-                    xdata = iline.get_xdata()
-                    if len(xdata) > 0:
-                        #placeholder lines have empty data
-                        x0 = min(xdata[0], x0)
-                        x1 = max(xdata[-1], x1)
-                ax.set_xlim(x0,x1)
-                self.fig.canvas.draw()
-
-    def spawn_child(self, event):
-        for ax in self.fig.axes:
-            if ax.contains(event)[0]:
-                #copy data to new figure (not live)
-                xdatas = []
-                ydatas = []
-                for iline in ax.lines:
-                    xdata, ydata = iline.get_data()
-                    xdatas.append(xdata)
-                    ydatas.append(ydata)
-                new_fig = SimplePlot(xdatas, ydatas)
-                new_fig.show()
-                #we must keep a reference to the plots, otherwise they go away
-                self.children.append(new_fig)
-
-    def canvas_context(self, event):
-        if event.button == 3:
-            if event.inaxes:
-                yaxis_action = QtGui.QAction('autoscale y', self)
-                yaxis_action.triggered.connect(functools.partial(self.autoscale_y,event))
-                xaxis_action = QtGui.QAction('autoscale x', self)
-                xaxis_action.triggered.connect(functools.partial(self.autoscale_x,event))
-                spawn_action = QtGui.QAction('spawn', self)
-                spawn_action.triggered.connect(functools.partial(self.spawn_child,event))
-                popMenu = QtGui.QMenu(self)
-                popMenu.addAction(yaxis_action)
-                popMenu.addAction(xaxis_action)
-                popMenu.addAction(spawn_action)
-                figheight = self.canvas.height()
-                point = QtCore.QPoint(event.x, figheight - event.y)
-                popMenu.exec(self.canvas.mapToGlobal(point))
-
-    #def contextMenuEvent(self, event):
-
-    def closeEvent(self,event):
-        #added this so that I can test whether user has closed figure 
-        # - is there are better way?
-        self.active = False
-        QtGui.QMainWindow.closeEvent(self,event)
-
-
-class AnimatedDisplay(FigureCanvas):
-    def __init__(self,*args,interval=False,callback=None,parent=None):
-        FigureCanvas.__init__(self, Figure())
-
-        if len(args)%2 != 0:
-            print("data arguments must be in x,y array pairs")
-            return
-
-        nsubplots = int(len(args)/2)
-
-        for isubplot in range(nsubplots):
-            ax = self.figure.add_subplot(nsubplots,1,isubplot+1)
+        for ax in self.axs:
             ax.set_xlim(0,5)
             ax.set_ylim(-10,10)
-
-        self.draw()
-        self.active = True
-
-        # save this background for animation
-        self.old_size = self.figure.axes[1].bbox.width, self.figure.axes[1].bbox.height
-        self.ax_background = self.copy_from_bbox(self.figure.axes[1].bbox)
-
-        for ax in self.figure.axes:
-
-            # test to see if argument is nested list 
-            # -- meaning multiple lines in plot
-            if len(args[isubplot*2]) > 0 and isinstance(args[isubplot*2][0], list):
-                #add multiple lines to plot
-                for iline in range(len(args[isubplot*2])):
-                    ax.plot(args[isubplot*2][iline],
-                            args[(isubplot*2)+1][iline], 
-                            animated=True)
-            else:
-                ax.plot(args[isubplot*2],args[(isubplot*2)+1], 
-                        animated=True)
-
-        #self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
-        if interval:
-            self.callback = callback
-            self.startTimer(interval)
-
-    def timerEvent(self, evt):
-        self.callback(self)
-
-    def closeEvent(self,event):
-        #added this so that I can test whether user has closed figure 
-        # - is there are better way?
-        self.active = False
-        QtGui.QWidget.closeEvent(self,event)
-
-class AnimatedWindow(QtGui.QMainWindow):
-    def __init__(self,*args,update_rate=False,callback=None,parent=None):
-        QtGui.QMainWindow.__init__(self,parent)
-                     
-        self.main_frame = QtGui.QWidget()
-
-        nsubplots = int(len(args))
-
-        fig = Figure()
-        self.canvas = FigureCanvas(fig)
-
-        self.canvas.setParent(self.main_frame)
-
-        self.ax = []
-        for isubplot in range(nsubplots):
-            ax = fig.add_subplot(nsubplots,1,isubplot+1)
-            ax.set_xlim(0,5)
-            ax.set_ylim(-10,10)
-            self.ax.append(ax)
 
         self.canvas.draw()
 
         # save these backgrounds for animation
-        self.old_size = [None]*nsubplots
-        self.ax_background = [None]*nsubplots
+        self.ax_backgrounds = [None]*nsubplots
         for isubplot in range(nsubplots):
-            self.old_size[isubplot] = fig.axes[isubplot].bbox.width, fig.axes[isubplot].bbox.height
-            self.ax_background[isubplot] = self.canvas.copy_from_bbox(fig.axes[isubplot].bbox)
+            self.ax_backgrounds[isubplot] = self.canvas.copy_from_bbox(self.axs[isubplot].bbox)
 
         # now do first plot with provided data, 
         # this will also set how many line each plot will contain
@@ -387,34 +178,16 @@ class AnimatedWindow(QtGui.QMainWindow):
                 ax.plot(xdata, ydata, animated=True)
         
 
-        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.canvas)
-        vbox.addWidget(self.mpl_toolbar)
-
-        self.main_frame.resize(500,500)
-        self.main_frame.setLayout(vbox)
-        self.setCentralWidget(self.main_frame)
-
-        #self.nsubplots = nsubplots
-
-        self.active = True
-
-        # timer takes interval in ms. assuming rate in Hz, convert
-        interval = int(max(1000/update_rate, 1))
-        #if interval:
         self.callback = callback
-        self.timer = self.startTimer(interval)
-
+        
         self.cnt = 0
 
     def draw_line(self, axnum, linenum, xdata, ydata):
-        self.canvas.restore_region(self.ax_background[axnum])
-        self.ax[axnum].lines[linenum].set_data(xdata,ydata)
+        self.canvas.restore_region(self.ax_backgrounds[axnum])
+        self.axs[axnum].lines[linenum].set_data(xdata,ydata)
 
-        self.ax[axnum].draw_artist(self.ax[axnum].lines[0])
-        self.canvas.blit(self.ax[axnum].bbox)
+        self.axs[axnum].draw_artist(self.axs[axnum].lines[0])
+        self.canvas.blit(self.axs[axnum].bbox)
 
         if self.cnt == 0:
             # TODO: this shouldn't be necessary, but if it is excluded the
@@ -422,14 +195,17 @@ class AnimatedWindow(QtGui.QMainWindow):
             self.canvas.draw()
             self.cnt += 1
 
+    def start_update(self, update_rate):
+        # timer takes interval in ms. assuming rate in Hz, convert
+        interval = int(max(1000/update_rate, 1))
+        self.timer = self.startTimer(interval)
 
     def timerEvent(self, evt):
         self.callback()
 
     def resizeEvent(self, evt):
-        print("resizing yehaw")
         saved_data = []
-        for ax in self.ax:
+        for ax in self.axs:
             xlims = ax.axis()
             saved_data.append(ax.lines[0].get_data())
             ax.clear()
@@ -438,21 +214,16 @@ class AnimatedWindow(QtGui.QMainWindow):
             ax.set_xlim(xlims[0], xlims[1])
             
         self.canvas.draw()
-        for iax in range(len(self.ax)):
-            self.ax_background[iax] = self.canvas.copy_from_bbox(self.ax[iax].bbox)
+        for iax in range(len(self.axs)):
+            self.ax_backgrounds[iax] = self.canvas.copy_from_bbox(self.axs[iax].bbox)
 
+        for iax in range(len(self.axs)):
+            xvals, yvals = saved_data[iax]
+            self.axs[iax].lines[0].set_data(xvals,yvals)
+            self.axs[iax].draw_artist(self.axs[iax].lines[0])
+            self.canvas.blit(self.axs[iax].bbox)
+            
         # this seems to be necessary to get background to show properly
         self.canvas.draw()
 
-        for iax in range(len(self.ax)):
-            xvals, yvals = saved_data[iax]
-            self.ax[iax].lines[0].set_data(xvals,yvals)
-            self.ax[iax].draw_artist(self.ax[iax].lines[0])
-            self.canvas.blit(self.ax[iax].bbox)
-            
-
-    def closeEvent(self,event):
-        #added this so that I can test whether user has closed figure 
-        # - is there are better way?
-        self.active = False
-        QtGui.QMainWindow.closeEvent(self,event)
+    

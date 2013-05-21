@@ -1,5 +1,6 @@
 import sys, os
 import time
+import pickle
 
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
@@ -9,9 +10,12 @@ import threading
 from daq_tasks import *
 from plotz import *
 from calform import Ui_CalibrationWindow
+from disp_dlg import DisplayDialog
 
-AIPOINTS = 10
+AIPOINTS = 100
 XLEN = 5 #seconds
+SAVE_DATA_CHART = False
+SAVE_DATA_TRACES = False
 
 class Calibrator(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -33,14 +37,19 @@ class Calibrator(QtGui.QMainWindow):
 
         inlist = load_inputs()
         if len(inlist) > 0:
-            self.ui.freq_spnbx.setValue(inlist[0])
-            self.ui.sr_spnbx.setValue(inlist[1])
-            self.ui.dur_spnbx.setValue(inlist[2])
-            self.ui.db_spnbx.setValue(inlist[3])
-            self.ui.risefall_spnbx.setValue(inlist[4])
-            self.ui.aochan_box.setCurrentIndex(inlist[5])
-            self.ui.aichan_box.setCurrentIndex(inlist[6])
-
+            try:
+                self.ui.freq_spnbx.setValue(inlist[0])
+                self.ui.sr_spnbx.setValue(inlist[1])
+                self.ui.dur_spnbx.setValue(inlist[2])
+                self.ui.db_spnbx.setValue(inlist[3])
+                self.ui.risefall_spnbx.setValue(inlist[4])
+                self.ui.aochan_box.setCurrentIndex(inlist[5])
+                self.ui.aichan_box.setCurrentIndex(inlist[6])
+                self.ainpts = inlist[7]
+                self.ui.aisr_spnbx.setValue(inlist[8])
+            except:
+                print("failed to find all defaults")
+                self.ainpts = AIPOINTS
         self.display_lock = threading.Lock()
 
     def on_start(self):
@@ -49,26 +58,30 @@ class Calibrator(QtGui.QMainWindow):
         aichan = self.ui.aichan_box.currentText().encode()
 
         # depending on currently displayed tab, present
-        # tuning curve, or on-the-fly modifyabe tone
+        # tuning curve, or on-the-fly modifyable tone
         
         if self.ui.tabs.currentIndex() == 0 :
-            print("vroom")
+
             self.cnt = 0
             self.update_stim()
 
             sr = self.sr
+            self.aisr = self.ui.aisr_spnbx.value()*1000
             npts = self.tone.size
 
-            #self.data = np.zeros(npts)
-            self.a = []
+            if SAVE_DATA_CHART or SAVE_DATA_TRACES:
+                self.a = []
+            
             self.ndata = 0
             self.current_line_data = []
+            self.sp.start_update(100)
 
             try:
-                self.aitask = AITask(aichan,sr, AIPOINTS)
-                self.aotask = AOTask(aochan,sr, npts, 
+                self.aitask = AITask(aichan, self.aisr, self.ainpts)
+                self.aotask = AOTask(aochan, sr, npts, 
                                      trigsrc=b"ai/StartTrigger")
-                self.aitask.register_callback(self.every_n_callback,AIPOINTS)
+                self.aitask.register_callback(self.every_n_callback,
+                                              self.ainpts)
                 self.aotask.write(self.tone)
 
                 self.aotask.StartTask()
@@ -82,19 +95,24 @@ class Calibrator(QtGui.QMainWindow):
             pass
 
     def on_stop(self):
-        self.aitask.stop()
-        self.aotask.stop()
-        self.sp.killTimer(self.sp.timer)
+        try:
+            self.aitask.stop()
+            self.aotask.stop()
+            self.sp.killTimer(self.sp.timer)
+        except DAQError:
+            print("No task running")
+        except:
+            raise
 
     def update_stim(self):
-        scale_factor = 1
+        scale_factor = 1000
         time_scale = 1000
         f = self.ui.freq_spnbx.value()*scale_factor
         sr = self.ui.sr_spnbx.value()*scale_factor
         dur = self.ui.dur_spnbx.value()/scale_factor
         db = self.ui.db_spnbx.value()
         rft = self.ui.risefall_spnbx.value()/scale_factor
-        dur = 1
+        #dur = 1
 
         #print('freq: {}, rft: {}'.format(f,rft))
         tone = make_tone(f,db,dur,rft,sr)
@@ -122,40 +140,44 @@ class Calibrator(QtGui.QMainWindow):
             self.stim_display(timevals, tone, freq, sp)
 
     def spawn_display(self,timevals,tone,f):
-        self.sp = AnimatedWindow((timevals,tone), ([],[]), ([[],[]],[[],[]]),
-                                  update_rate=100, callback=self.ai_display)
+        self.sp = AnimatedWindow((timevals,tone), ([],[]), 
+                                 ([[],[]],[[],[]]), callback=self.ai_display)
 
         #unset animation on first axes for stim
         #self.sp.figure.axes[0].lines[0].set_animated(False)
         self.sp.show()
 
         # draw stim
-        self.sp.ax[0].draw_artist(self.sp.ax[0].lines[0])
-        self.sp.canvas.blit(self.sp.ax[0].bbox)
+        self.sp.axs[0].draw_artist(self.sp.axs[0].lines[0])
+        self.sp.canvas.blit(self.sp.axs[0].bbox)
         #time.sleep(10)
 
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
         print("update stim display")
-        self.sp.canvas.restore_region(self.sp.ax_background[0])
+        self.sp.canvas.restore_region(self.sp.ax_backgrounds[0])
         print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
-        self.sp.ax[0].lines[0].set_data(xdata,ydata)
-        self.sp.ax[2].lines[0].set_data(xfft,yfft)
+        self.sp.axs[0].lines[0].set_data(xdata,ydata)
+        self.sp.axs[2].lines[0].set_data(xfft,yfft)
         
-        self.sp.ax[0].draw_artist(self.sp.ax[0].lines[0])
-        self.sp.canvas.blit(self.sp.ax[0].bbox)
+        self.sp.axs[0].draw_artist(self.sp.axs[0].lines[0])
+        self.sp.canvas.blit(self.sp.axs[0].bbox)
 
     def ai_display(self):
-
-        lims = self.sp.ax[1].axis()
-        data = self.current_line_data[:]
+        try:
+            lims = self.sp.axs[1].axis()
+            data = self.current_line_data[:]
         
-        t = len(data)/self.sr
-        #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
-        xdata = np.linspace(lims[0], lims[0]+t, len(data))
+            t = len(data)/self.aisr
+            #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
+            xdata = np.linspace(lims[0], lims[0]+t, len(data))
         
-        self.sp.draw_line(1,0,xdata,data)
+            self.sp.draw_line(1,0,xdata,data)
+        except:
+            print("Error drawing line data")
+            self.sp.killTimer(self.sp.timer)
+            raise
 
     def every_n_callback(self,task):
         
@@ -165,32 +187,48 @@ class Calibrator(QtGui.QMainWindow):
             inbuffer = np.zeros(task.n)
             task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,
                                inbuffer,task.n,byref(read),None)
-            self.a.extend(inbuffer.tolist())
+            if SAVE_DATA_CHART:
+                self.a.extend(inbuffer.tolist())
+                # for now use stimulus data size also for acquisition
+                #ainpts = len(self.tone)
+
             #print(self.data[0])
             self.ndata += read.value
             #print(self.ndata)
             
             n = read.value
-            lims = self.sp.ax[1].axis()
+            lims = self.sp.axs[1].axis()
             #print("lims {}".format(lims))
             #print("ndata {}".format(self.ndata))
             
+            # for display purposes only
             ndata = len(self.current_line_data)
-            aisr = self.sr
+            aisr = self.aisr
 
-            if ndata/aisr > self.aitime:
+            #print(self.aisr, self.aitime, ndata/aisr)
+            if ndata/aisr >= self.aitime:
             #if ndata/aisr > lims[1]:
                 #print("change x lim, {} to {}".format((ndata-n)/aisr,((ndata-n)/aisr)+XLEN))
                 #self.sp.figure.axes[1].set_xlim((ndata-n)/aisr,((ndata-n)/aisr)+XLEN)
                 # must use regular draw to update axes tick labels
                 #self.sp.draw()
                 # update saved background so scale stays accurate
-                #self.sp.ax_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
+                #self.sp.axs_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
+                if len(self.current_line_data) != self.aitime*self.aisr:
+                    print("incorrect number of data points saved")
+                if SAVE_DATA_TRACES:
+                    self.a.append(self.current_line_data)
                 self.current_line_data = []
             
             self.current_line_data.extend(inbuffer.tolist())
+        except MemoryError:
+            print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
+            self.aitask.stop()
+            self.aotask.stop()
+            raise
         except: 
             print('ERROR! TERMINATE!')
+            #print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
             self.aitask.stop()
             self.aotask.stop()
             raise
@@ -201,11 +239,20 @@ class Calibrator(QtGui.QMainWindow):
     def set_dur_max(self):
         print("also need to set dur_max")
 
+    def launch_display_dlg(self):
+        field_vals = {'chunksz' : self.ainpts}
+        dlg = DisplayDialog(default_vals=field_vals)
+        if dlg.exec_():
+            ainpts = dlg.get_values()
+            self.ainpts = ainpts
+        print(self.ainpts)
+
     def keyPressEvent(self,event):
         #print("keypress")
         #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
-            self.update_stim()
+            self.on_stop()
+            self.on_start()
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
@@ -214,7 +261,7 @@ class Calibrator(QtGui.QMainWindow):
         # halt acquisition loop
         self.on_stop()
 
-        #save inputs into file to load up next time
+        #save inputs into file to load up next time - order is important
         f = self.ui.freq_spnbx.value()
         sr = self.ui.sr_spnbx.value()
         dur = self.ui.dur_spnbx.value()
@@ -222,8 +269,10 @@ class Calibrator(QtGui.QMainWindow):
         rft = self.ui.risefall_spnbx.value()
         aochan_index = self.ui.aochan_box.currentIndex()
         aichan_index = self.ui.aichan_box.currentIndex()
+        ainpts = self.ainpts
+        aisr = self.ui.aisr_spnbx.value()
 
-        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index)
+        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index, ainpts, aisr)
 
         QtGui.QMainWindow.closeEvent(self,event)
 
