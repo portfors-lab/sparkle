@@ -137,9 +137,12 @@ class SubPlots(BasePlot):
 
 
     def update_data(self, xdata, ydata, axnum=1):
-        self.fig.axes[axnum].lines[0].set_data(xdata,ydata)
-        self.fig.canvas.draw()
+        self.axs[axnum].lines[0].set_data(xdata,ydata)
+        self.canvas.draw()
 
+    def draw_line(self, axnum, linenum, xdata, ydata):
+        self.axs[axnum].lines[linenum].set_data(xdata,ydata)
+        self.canvas.draw()
 
 class AnimatedWindow(BasePlot):
     def __init__(self,*args,callback=None,parent=None):

@@ -1,8 +1,6 @@
 import sys, os
 import time
 import pickle
-import threading
-import time
 
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
@@ -53,9 +51,17 @@ class Calibrator(QtGui.QMainWindow):
             except:
                 print("failed to find all defaults")
                 self.ainpts = AIPOINTS
-        self.display_lock = threading.Lock()
-        self.daq_lock = threading.Lock()
+
+        self.daq_lock = QtCore.QMutex()
+        self.stim_lock = QtCore.QMutex()
         self.daq_timer = None
+        self.thread_pool = []
+
+        self.pool = QtCore.QThreadPool()
+        self.pool.setMaxThreadCount(5)
+
+        self.signal = WorkerSignal()
+        self.signal.done.connect(self.ai_display)
 
     def on_start(self):
         self.on_stop()
@@ -80,7 +86,7 @@ class Calibrator(QtGui.QMainWindow):
             
             self.ndata = 0
             self.current_line_data = []
-            self.sp.start_update(100)
+            #self.sp.start_update(100)
 
             # cannot change interval on the fly
             self.ui.interval_spnbx.setEnabled(False)
@@ -149,24 +155,25 @@ class Calibrator(QtGui.QMainWindow):
         freq = freq[:(npts/2)] #single sided
 
         # I think I need to put in some sort of lock here?
-        self.daq_lock.acquire()
+        self.stim_lock.lock()
         self.tone = tone
         self.sr = sr
         self.aitime = dur
         self.aisr = aisr
-        self.daq_lock.release()
+        self.stim_lock.unlock()
 
         self.statusBar().showMessage('npts: {}'.format(npts))
 
         # now update the display of the stim
         if self.sp == None or not(self.sp.active):
-            self.spawn_display(timevals, tone, f)
+            self.spawn_display(timevals, tone)
+            self.sp.draw_line(2,0,freq,sp)
         else:
             self.stim_display(timevals, tone, freq, sp)
 
-    def spawn_display(self,timevals,tone,f):
+    def spawn_display(self,timevals,tone):
         self.sp = AnimatedWindow((timevals,tone), ([],[]), 
-                                 ([[],[]],[[],[]]), callback=self.ai_display)
+                                 ([[],[]],[[],[]]))
 
         #unset animation on first axes for stim
         #self.sp.figure.axes[0].lines[0].set_animated(False)
@@ -175,20 +182,13 @@ class Calibrator(QtGui.QMainWindow):
         # draw stim
         self.sp.axs[0].draw_artist(self.sp.axs[0].lines[0])
         self.sp.canvas.blit(self.sp.axs[0].bbox)
-        #time.sleep(10)
-
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
-        print("update stim display")
-        self.sp.canvas.restore_region(self.sp.ax_backgrounds[0])
         print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
-        self.sp.axs[0].lines[0].set_data(xdata,ydata)
-        self.sp.axs[2].lines[0].set_data(xfft,yfft)
+        self.sp.draw_line(0,0,xdata,ydata)
+        self.sp.draw_line(2,0,xfft,yfft)
         
-        self.sp.axs[0].draw_artist(self.sp.axs[0].lines[0])
-        self.sp.canvas.blit(self.sp.axs[0].bbox)
-
     def ai_display(self):
         try:
             lims = self.sp.axs[1].axis()
@@ -198,6 +198,8 @@ class Calibrator(QtGui.QMainWindow):
             t = len(data)/self.aisr
             #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
             xdata = np.linspace(lims[0], lims[0]+t, len(data))
+
+            print("response x range {}".format(xdata[0], xdata[-1]))
         
             self.sp.draw_line(1,0,xdata,data)
         except:
@@ -207,28 +209,33 @@ class Calibrator(QtGui.QMainWindow):
 
     def timerEvent(self, evt):
         print("tick")
-        t = threading.Thread(target=self.finite_worker)
-        t.daemon = True
-        t.start()
+
+        #self.thread_pool.append( GenericThread(self.finite_worker) )
+        t  = GenericThread(self.finite_worker)
+        #t.start()
+        #self.thread_pool[len(self.thread_pool)-1].start()
+        #print("threadpool size {}".format(len(self.thread_pool)))
+        self.pool.start(t)
 
     def finite_worker(self):
         # acquire data and reset task to be read for next timer event
+        self.daq_lock.lock()
         self.aotask.StartTask()
         self.aitask.StartTask()
-
+        
         # blocking read
         data = self.aitask.read()
         self.current_line_data = data
 
+        print("data max {}, min {}".format(np.amax(data), np.amin(data)))
+
         self.aitask.stop()
         self.aotask.stop()
-
-        self.ai_display()
 
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
 
-        self.daq_lock.acquire()
+        self.stim_lock.lock()
 
         npts =  self.tone.size
         response_npts = int(self.aitime*self.aisr)
@@ -237,8 +244,12 @@ class Calibrator(QtGui.QMainWindow):
         self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
         self.aotask.write(self.tone)
 
-        self.daq_lock.release()
+        self.daq_lock.unlock()
+        self.stim_lock.unlock()
 
+        #self.emit(QtCore.SIGNAL('ai_display()'))
+        self.signal.done.emit()
+        
     def every_n_callback(self,task):
         
         # read in the data as it is acquired and append to data structure
@@ -345,6 +356,23 @@ class Calibrator(QtGui.QMainWindow):
         save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index, ainpts, aisr, interval)
 
         QtGui.QMainWindow.closeEvent(self,event)
+
+class GenericThread(QtCore.QRunnable):
+    def __init__(self, function, *args, **kwargs):
+        QtCore.QRunnable.__init__(self)
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+    """
+    def __del__(self):
+        self.wait()
+    """
+    def run(self):
+        self.function(*self.args,**self.kwargs)
+        return
+
+class WorkerSignal(QtCore.QObject):
+    done = QtCore.pyqtSignal()
 
 def make_tone(freq,db,dur,risefall,samplerate):
     # create portable tone generator class that allows the 
