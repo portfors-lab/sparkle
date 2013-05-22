@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Tue May 21 11:55:28 2013
+# Created: Tue May 21 18:25:38 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -186,12 +186,12 @@ class Ui_CalibrationWindow(object):
         self.label_12 = QtGui.QLabel(self.tab)
         self.label_12.setObjectName(_fromUtf8("label_12"))
         self.gridLayout.addWidget(self.label_12, 3, 2, 1, 1)
-        self.pause_spnbx = QtGui.QSpinBox(self.tab)
-        self.pause_spnbx.setMinimum(0)
-        self.pause_spnbx.setMaximum(6000)
-        self.pause_spnbx.setSingleStep(100)
-        self.pause_spnbx.setObjectName(_fromUtf8("pause_spnbx"))
-        self.gridLayout.addWidget(self.pause_spnbx, 3, 1, 1, 1)
+        self.interval_spnbx = QtGui.QSpinBox(self.tab)
+        self.interval_spnbx.setMinimum(0)
+        self.interval_spnbx.setMaximum(6000)
+        self.interval_spnbx.setSingleStep(100)
+        self.interval_spnbx.setObjectName(_fromUtf8("interval_spnbx"))
+        self.gridLayout.addWidget(self.interval_spnbx, 3, 1, 1, 1)
         self.label_13 = QtGui.QLabel(self.tab)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)

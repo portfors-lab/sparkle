@@ -1,21 +1,23 @@
 import sys, os
 import time
 import pickle
+import threading
+import time
 
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
 import numpy as np
-import threading
 
 from daq_tasks import *
 from plotz import *
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 
-AIPOINTS = 100
-XLEN = 5 #seconds
+AIPOINTS = 100 #only used if default not saved
+XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
+USE_FINITE = True
 
 class Calibrator(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -47,12 +49,16 @@ class Calibrator(QtGui.QMainWindow):
                 self.ui.aichan_box.setCurrentIndex(inlist[6])
                 self.ainpts = inlist[7]
                 self.ui.aisr_spnbx.setValue(inlist[8])
+                self.ui.interval_spnbx.setValue(inlist[9])
             except:
                 print("failed to find all defaults")
                 self.ainpts = AIPOINTS
         self.display_lock = threading.Lock()
+        self.daq_lock = threading.Lock()
+        self.daq_timer = None
 
     def on_start(self):
+        self.on_stop()
 
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
@@ -66,8 +72,8 @@ class Calibrator(QtGui.QMainWindow):
             self.update_stim()
 
             sr = self.sr
-            self.aisr = self.ui.aisr_spnbx.value()*1000
             npts = self.tone.size
+            interval = self.ui.interval_spnbx.value()
 
             if SAVE_DATA_CHART or SAVE_DATA_TRACES:
                 self.a = []
@@ -76,33 +82,48 @@ class Calibrator(QtGui.QMainWindow):
             self.current_line_data = []
             self.sp.start_update(100)
 
+            # cannot change interval on the fly
+            self.ui.interval_spnbx.setEnabled(False)
             try:
-                self.aitask = AITask(aichan, self.aisr, self.ainpts)
-                self.aotask = AOTask(aochan, sr, npts, 
-                                     trigsrc=b"ai/StartTrigger")
-                self.aitask.register_callback(self.every_n_callback,
-                                              self.ainpts)
-                self.aotask.write(self.tone)
-
-                self.aotask.StartTask()
-                self.aitask.StartTask()
+                if USE_FINITE:
+                    # set a timer to repeatedly start ao and ai tasks
+                    # set up first go before timer, so that the task starts as soon as timer fires
+                    response_npts = int(self.aitime*self.aisr)
+                    self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
+                    self.aotask = AOTaskFinite(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
+                    self.aotask.write(self.tone)
+                    self.daq_timer = self.startTimer(interval)
+                else:
+                    self.aitask = AITask(aichan, self.aisr, self.ainpts)
+                    self.aotask = AOTask(aochan, sr, npts, 
+                                         trigsrc=b"ai/StartTrigger")
+                    self.aitask.register_callback(self.every_n_callback,
+                                                  self.ainpts)
+                    self.aotask.write(self.tone)
+                    
+                    self.aotask.StartTask()
+                    self.aitask.StartTask()
             except:
                 print('ERROR! TERMINATE!')
-                self.aitask.stop()
-                self.aotask.stop()
+                self.on_stop
                 raise
         else:
             pass
 
     def on_stop(self):
-        try:
-            self.aitask.stop()
-            self.aotask.stop()
-            self.sp.killTimer(self.sp.timer)
-        except DAQError:
-            print("No task running")
-        except:
-            raise
+        self.ui.interval_spnbx.setEnabled(True)
+        if USE_FINITE:
+            if self.daq_timer is not None:
+                self.killTimer(self.daq_timer)
+        else:
+            try:
+                self.aitask.stop()
+                self.aotask.stop()
+                self.sp.killTimer(self.sp.timer)
+            except DAQError:
+                print("No task running")
+            except:
+                raise
 
     def update_stim(self):
         scale_factor = 1000
@@ -112,6 +133,7 @@ class Calibrator(QtGui.QMainWindow):
         dur = self.ui.dur_spnbx.value()/scale_factor
         db = self.ui.db_spnbx.value()
         rft = self.ui.risefall_spnbx.value()/scale_factor
+        aisr =  self.ui.aisr_spnbx.value()*scale_factor
         #dur = 1
 
         #print('freq: {}, rft: {}'.format(f,rft))
@@ -127,9 +149,12 @@ class Calibrator(QtGui.QMainWindow):
         freq = freq[:(npts/2)] #single sided
 
         # I think I need to put in some sort of lock here?
+        self.daq_lock.acquire()
         self.tone = tone
         self.sr = sr
         self.aitime = dur
+        self.aisr = aisr
+        self.daq_lock.release()
 
         self.statusBar().showMessage('npts: {}'.format(npts))
 
@@ -167,6 +192,7 @@ class Calibrator(QtGui.QMainWindow):
     def ai_display(self):
         try:
             lims = self.sp.axs[1].axis()
+            # copy data to variable as data structures not synchronized :(
             data = self.current_line_data[:]
         
             t = len(data)/self.aisr
@@ -178,6 +204,40 @@ class Calibrator(QtGui.QMainWindow):
             print("Error drawing line data")
             self.sp.killTimer(self.sp.timer)
             raise
+
+    def timerEvent(self, evt):
+        print("tick")
+        t = threading.Thread(target=self.finite_worker)
+        t.daemon = True
+        t.start()
+
+    def finite_worker(self):
+        # acquire data and reset task to be read for next timer event
+        self.aotask.StartTask()
+        self.aitask.StartTask()
+
+        # blocking read
+        data = self.aitask.read()
+        self.current_line_data = data
+
+        self.aitask.stop()
+        self.aotask.stop()
+
+        self.ai_display()
+
+        aochan = self.ui.aochan_box.currentText().encode()
+        aichan = self.ui.aichan_box.currentText().encode()
+
+        self.daq_lock.acquire()
+
+        npts =  self.tone.size
+        response_npts = int(self.aitime*self.aisr)
+
+        self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
+        self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
+        self.aotask.write(self.tone)
+
+        self.daq_lock.release()
 
     def every_n_callback(self,task):
         
@@ -234,7 +294,13 @@ class Calibrator(QtGui.QMainWindow):
             raise
 
     def set_interval_min(self):
-        print("to do: interval min")
+        dur = self.ui.dur_spnbx.value()
+        interval = self.ui.interval_spnbx.value()
+        if interval < dur:
+            print("interval less than duration, increasing interval")
+            self.ui.interval_spnbx.setValue(dur)
+        if interval == dur:
+            print("Warning: No interval down-time, consider using continuous acquisition to avoid failure.")
 
     def set_dur_max(self):
         print("also need to set dur_max")
@@ -251,8 +317,11 @@ class Calibrator(QtGui.QMainWindow):
         #print("keypress")
         #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
-            self.on_stop()
-            self.on_start()
+            if USE_FINITE:
+                self.update_stim()
+            else:
+                self.on_stop()
+                self.on_start()
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
@@ -271,8 +340,9 @@ class Calibrator(QtGui.QMainWindow):
         aichan_index = self.ui.aichan_box.currentIndex()
         ainpts = self.ainpts
         aisr = self.ui.aisr_spnbx.value()
+        interval = self.ui.interval_spnbx.value()
 
-        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index, ainpts, aisr)
+        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index, ainpts, aisr, interval)
 
         QtGui.QMainWindow.closeEvent(self,event)
 
