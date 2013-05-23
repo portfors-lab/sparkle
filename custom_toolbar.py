@@ -45,9 +45,3 @@ class CustomToolbar(NavigationToolbar):
     def draw_update(self,event):
         print('updating after button release')
         self.canvas.draw()
-
-    def keyPressEvent(self,event):
-        if event.text () == 'u':
-            self.canvas.draw()
-            #QtGui.QApplication.processEvents()
-            print('update key')

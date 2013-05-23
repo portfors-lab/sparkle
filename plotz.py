@@ -5,6 +5,8 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from abstract_figures import BasePlot
 
+import time
+
 class ResultsPlot(BasePlot):
     def __init__(self,data,parent=None):
         ncols = np.floor(np.sqrt(data.shape[1]))
@@ -116,25 +118,31 @@ class SimplePlot(BasePlot):
 
 class SubPlots(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
-        nsubplots = int(len(args)/2)
+        nsubplots = len(args)
         BasePlot.__init__(self,(nsubplots,1),parent)
  
-        if len(args)%2 != 0:
-            print("data arguments must be in x,y array pairs")
-            return
+        for iplot, ax in enumerate(self.axs):
+            # divide argument tuple into x ,y data
+            xdata = args[iplot][0]
+            ydata = args[iplot][1]
 
-        for isubplot, ax in enumerate(self.axs):
-            #test to see if argument is nested list -- meaning multiple lines in plot
-            if len(args[isubplot*2]) > 0 and isinstance(args[isubplot*2][0], list):
+            # the data could either be a single list representing data, 
+            # or a list of sets of data
+
+            # test to see if argument is nested list 
+            # -- meaning multiple lines in plot
+            if len(xdata) > 0 and isinstance(xdata[0], list):
                 #add multiple lines to plot
-                for iline in range(len(args[isubplot*2])):
-                    ax.plot(args[isubplot*2][iline],
-                            args[(isubplot*2)+1][iline])
+                for iline in range(len(xdata)):
+                    ax.plot(xdata[iline], ydata[iline])
             else:
-                ax.plot(args[isubplot*2],args[(isubplot*2)+1])
+                ax.plot(xdata, ydata)
+
+        for ax in self.axs:
+            ax.set_xlim(0,5)
+            ax.set_ylim(-10,10)
 
         self.nsubplots = nsubplots
-
 
     def update_data(self, xdata, ydata, axnum=1):
         self.axs[axnum].lines[0].set_data(xdata,ydata)
@@ -143,6 +151,7 @@ class SubPlots(BasePlot):
     def draw_line(self, axnum, linenum, xdata, ydata):
         self.axs[axnum].lines[linenum].set_data(xdata,ydata)
         self.canvas.draw()
+        
 
 class AnimatedWindow(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
@@ -176,12 +185,13 @@ class AnimatedWindow(BasePlot):
             if len(xdata) > 0 and isinstance(xdata[0], list):
                 #add multiple lines to plot
                 for iline in range(len(xdata)):
-                     ax.plot(xdata[iline], ydata[iline], animated=True)
+                    ax.plot(xdata[iline], ydata[iline], animated=True)
             else:
                 ax.plot(xdata, ydata, animated=True)
-        
 
         self.callback = callback
+
+        self.resize_mutex = QtCore.QMutex()
         
         self.cnt = 0
 
@@ -189,7 +199,9 @@ class AnimatedWindow(BasePlot):
         self.canvas.restore_region(self.ax_backgrounds[axnum])
         self.axs[axnum].lines[linenum].set_data(xdata,ydata)
 
-        self.axs[axnum].draw_artist(self.axs[axnum].lines[0])
+        # draw everything in this axis, to not loose other lines
+        for line in self.axs[axnum].lines:
+            self.axs[axnum].draw_artist(line)
         self.canvas.blit(self.axs[axnum].bbox)
 
         if self.cnt == 0:
@@ -206,27 +218,55 @@ class AnimatedWindow(BasePlot):
     def timerEvent(self, evt):
         self.callback()
 
-    def resizeEvent(self, evt):
-        saved_data = []
-        for ax in self.axs:
-            xlims = ax.axis()
-            saved_data.append(ax.lines[0].get_data())
-            ax.clear()
-            ax.plot([],[])
-            ax.set_ylim(-10,10)
-            ax.set_xlim(xlims[0], xlims[1])
+    def redraw(self):
+        if self.resize_mutex.tryLock():
+            print("redraw")
+            saved_data = []
+            for ax in self.axs:
+                nlines = len(ax.lines)
+                for line in ax.lines:
+                    saved_data.append(line.get_data())
+                axlims = ax.axis()
+                ax.clear()
+                for i in range(nlines):
+                    ax.plot([],[])
+                ax.set_ylim(axlims[2], axlims[3])
+                ax.set_xlim(axlims[0], axlims[1])
             
-        self.canvas.draw()
-        for iax in range(len(self.axs)):
-            self.ax_backgrounds[iax] = self.canvas.copy_from_bbox(self.axs[iax].bbox)
+            self.canvas.draw()
 
-        for iax in range(len(self.axs)):
-            xvals, yvals = saved_data[iax]
-            self.axs[iax].lines[0].set_data(xvals,yvals)
-            self.axs[iax].draw_artist(self.axs[iax].lines[0])
-            self.canvas.blit(self.axs[iax].bbox)
+            for iax in range(len(self.axs)):
+                self.ax_backgrounds[iax] = self.canvas.copy_from_bbox(self.axs[iax].bbox)
+
+            for xvals, yvals in saved_data:
+                #xvals, yvals = saved_data[iax]
+                for ax in self.axs:
+                    for line in ax.lines:
+                        line.set_data(xvals,yvals)
+                        ax.draw_artist(line)
+                    self.canvas.blit(ax.bbox)
             
-        # this seems to be necessary to get background to show properly
-        self.canvas.draw()
+            # this seems to be necessary to get background to show properly
+            self.canvas.draw()
+            self.resize_mutex.unlock()
 
+    def keyPressEvent(self,event):
+        print("key press event from AnimatedWindow")
+        if event.text() == 'r':
+            print("arrrrrrr")
+            self.redraw()
+        else:
+            super().keyPressEvent(event)
     
+class ScrollingPlot(BasePlot):
+    def __init__(self,*args,callback=None,parent=None):
+        nsubplots = len(args)
+        BasePlot.__init__(self,(nsubplots,1),parent)
+        # TODO : write this class
+ #if ndata/aisr > lims[1]:
+                #print("change x lim, {} to {}".format((ndata-n)/aisr,((ndata-n)/aisr)+XLEN))
+                #self.sp.figure.axes[1].set_xlim((ndata-n)/aisr,((ndata-n)/aisr)+XLEN)
+                # must use regular draw to update axes tick labels
+                #self.sp.draw()
+                # update saved background so scale stays accurate
+                #self.sp.axs_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)

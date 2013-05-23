@@ -71,15 +71,16 @@ class BasePlot(QtGui.QMainWindow):
                 for iline in ax.lines:
                     xdata, ydata = iline.get_data()
                     if len(xdata) > 0:
-                        #placeholder lines have empty data
-                        print("xdata len %r, ydata len %r, x0 %r, x1 %r" % (len(xdata), len(ydata), x0, x1))
-                        #find the indicies of the xlims and use to take the min and max of same y range
+                        # placeholder lines have empty data
+                        
+                        # find the indicies of the xlims and use to take 
+                        # the min and max of same y range
                         xind0 = (np.abs(xdata-x0)).argmin()
                         xind1 = (np.abs(xdata-x1)).argmin()
-                        print("x indices %r, %r" % (xdata[xind0], xdata[xind1]))
+                        
                         y0 = min(np.amin(ydata[xind0:xind1]),y0)
                         y1 = max(np.amax(ydata[xind0:xind1]),y1)
-                        print("y data lims %r %r" % (y0, y1))
+                       
                 ax.set_ylim(y0,y1)
                 self.canvas.draw()
 
@@ -112,6 +113,11 @@ class BasePlot(QtGui.QMainWindow):
                 new_fig.show()
                 #we must keep a reference to the plots, otherwise they go away
                 self.progeny.append(new_fig)
+
+    def keyPressEvent(self,event):
+        print("key press event from BasePlot")
+        if event.text() == 'r':
+            print("gaaaaarr")
 
     def closeEvent(self,event):
         # added this so that I can test whether user has closed figure 

@@ -146,7 +146,7 @@ class ToneGenerator(QtGui.QMainWindow):
         #acquire lock first because the ai counts on there being a figure existing to plot to
         self.ai_lock.acquire()
 
-        self.sp = SubPlots(timevals,tone,[],[],[[],[]],[[],[]],parent=None)
+        self.sp = SubPlots((timevals,tone),([],[]),([[],[]],[[],[]]),parent=None)
         #set axes limits?
         self.sp.axs[0].set_ylim(-10,10)
         # set input y scale to match stimulus (since we are trying to measure it back right?)

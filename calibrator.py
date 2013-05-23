@@ -16,6 +16,7 @@ XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
 USE_FINITE = True
+VERBOSE = False
 
 class Calibrator(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -52,10 +53,10 @@ class Calibrator(QtGui.QMainWindow):
                 print("failed to find all defaults")
                 self.ainpts = AIPOINTS
 
+        self.set_interval_min()
         self.daq_lock = QtCore.QMutex()
         self.stim_lock = QtCore.QMutex()
         self.daq_timer = None
-        self.thread_pool = []
 
         self.pool = QtCore.QThreadPool()
         self.pool.setMaxThreadCount(5)
@@ -117,10 +118,12 @@ class Calibrator(QtGui.QMainWindow):
             pass
 
     def on_stop(self):
-        self.ui.interval_spnbx.setEnabled(True)
         if USE_FINITE:
+            self.ui.interval_spnbx.setEnabled(True)
             if self.daq_timer is not None:
                 self.killTimer(self.daq_timer)
+                #self.pool.waitForDone()
+                #print("pool done :)")
         else:
             try:
                 self.aitask.stop()
@@ -154,7 +157,6 @@ class Calibrator(QtGui.QMainWindow):
         sp = sp[:(npts/2)]
         freq = freq[:(npts/2)] #single sided
 
-        # I think I need to put in some sort of lock here?
         self.stim_lock.lock()
         self.tone = tone
         self.sr = sr
@@ -164,51 +166,66 @@ class Calibrator(QtGui.QMainWindow):
 
         self.statusBar().showMessage('npts: {}'.format(npts))
 
+        print("update_stim")
         # now update the display of the stim
         if self.sp == None or not(self.sp.active):
             self.spawn_display(timevals, tone)
-            self.sp.draw_line(2,0,freq,sp)
+            #self.sp.draw_line(2,0,freq,sp)
         else:
             self.stim_display(timevals, tone, freq, sp)
 
     def spawn_display(self,timevals,tone):
-        self.sp = AnimatedWindow((timevals,tone), ([],[]), 
+        self.sp = AnimatedWindow(([],[]), ([],[]), 
                                  ([[],[]],[[],[]]))
-
-        #unset animation on first axes for stim
-        #self.sp.figure.axes[0].lines[0].set_animated(False)
         self.sp.show()
-
-        # draw stim
-        self.sp.axs[0].draw_artist(self.sp.axs[0].lines[0])
-        self.sp.canvas.blit(self.sp.axs[0].bbox)
+        self.sp.draw_line(0, 0, timevals, tone)
+        time.sleep(3)
+        print("ok")
+        #self.sp.canvas.draw()
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
         print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
-        self.sp.draw_line(0,0,xdata,ydata)
-        self.sp.draw_line(2,0,xfft,yfft)
+        self.sp.draw_line(0, 0, xdata, ydata)
+        #self.sp.draw_line(2, 0, xfft, yfft)
         
     def ai_display(self):
         try:
+            # if usin a scrolling plot, use the leftmost axis lim 
+            # to start the time data from, otherwise start from 0
             lims = self.sp.axs[1].axis()
+            lims = [0]
             # copy data to variable as data structures not synchronized :(
             data = self.current_line_data[:]
         
             t = len(data)/self.aisr
             #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
-            xdata = np.linspace(lims[0], lims[0]+t, len(data))
+            xdata= np.linspace(lims[0], lims[0]+t, len(data)) #time vals
+            
+            npts = len(data)
+           
+            sp = np.real(np.fft.fft(data)/npts)
+            freq = np.arange(npts)/(npts/self.aisr)
+            sp = sp[:(npts/2)]
+            freq = freq[:(npts/2)] #single sided
+            maxidx = sp.argmax(axis=0)
 
-            print("response x range {}".format(xdata[0], xdata[-1]))
-        
+            if VERBOSE:
+                #print(maxidx)
+                print("response x range {}, {}".format(xdata[0], xdata[-1]))
+                print("%.5f AI V" % (np.amax(data)))
+                print("%.6f FFT, at %d Hz\n" % (np.amax(abs(sp)), freq[maxidx]))
+
+            self.sp.draw_line(2,1,freq, abs(sp))
             self.sp.draw_line(1,0,xdata,data)
+                      
         except:
             print("Error drawing line data")
-            self.sp.killTimer(self.sp.timer)
+            self.killTimer(self.daq_timer)
             raise
 
     def timerEvent(self, evt):
-        print("tick")
+        #print("tick")
 
         #self.thread_pool.append( GenericThread(self.finite_worker) )
         t  = GenericThread(self.finite_worker)
@@ -219,6 +236,7 @@ class Calibrator(QtGui.QMainWindow):
 
     def finite_worker(self):
         # acquire data and reset task to be read for next timer event
+        print("worker")
         self.daq_lock.lock()
         self.aotask.StartTask()
         self.aitask.StartTask()
@@ -226,8 +244,6 @@ class Calibrator(QtGui.QMainWindow):
         # blocking read
         data = self.aitask.read()
         self.current_line_data = data
-
-        print("data max {}, min {}".format(np.amax(data), np.amin(data)))
 
         self.aitask.stop()
         self.aotask.stop()
@@ -278,13 +294,6 @@ class Calibrator(QtGui.QMainWindow):
 
             #print(self.aisr, self.aitime, ndata/aisr)
             if ndata/aisr >= self.aitime:
-            #if ndata/aisr > lims[1]:
-                #print("change x lim, {} to {}".format((ndata-n)/aisr,((ndata-n)/aisr)+XLEN))
-                #self.sp.figure.axes[1].set_xlim((ndata-n)/aisr,((ndata-n)/aisr)+XLEN)
-                # must use regular draw to update axes tick labels
-                #self.sp.draw()
-                # update saved background so scale stays accurate
-                #self.sp.axs_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
                 if len(self.current_line_data) != self.aitime*self.aisr:
                     print("incorrect number of data points saved")
                 if SAVE_DATA_TRACES:
@@ -325,17 +334,24 @@ class Calibrator(QtGui.QMainWindow):
         print(self.ainpts)
 
     def keyPressEvent(self,event):
-        #print("keypress")
+        print("keypress from calibrator")
         #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
             if USE_FINITE:
                 self.update_stim()
+                time.sleep(3)
+                print("alright")
             else:
                 self.on_stop()
                 self.on_start()
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
+        elif event.text() == 'r':
+            print("redraw")
+            self.sp.redraw()
+        time.sleep(3)
+        print("keypress clear")
 
     def closeEvent(self,event):
         # halt acquisition loop
@@ -384,9 +400,12 @@ def make_tone(freq,db,dur,risefall,samplerate):
     v_at_caldB = 0.175
     caldB = 100
     amp = (10 ** ((db-caldB)/20)*v_at_caldB)
+
     print('*'*40)
-    print("AO Amp: {}, current dB: {}, cal dB: {}, V at cal dB: {}"
-          .format(amp, db, caldB, v_at_caldB))
+    if VERBOSE:
+        print("AO Amp: {}, current dB: {}, cal dB: {}, V at cal dB: {}"
+              .format(amp, db, caldB, v_at_caldB))
+
     rf_npts = risefall * samplerate
     #print('amp {}, freq {}, npts {}, rf_npts {}'
     # .format(amp,freq,npts,rf_npts))

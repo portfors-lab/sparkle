@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Tue May 21 18:25:38 2013
+# Created: Wed May 22 11:37:38 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -63,9 +63,15 @@ class Ui_CalibrationWindow(object):
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout.addWidget(self.label_6, 5, 0, 1, 1)
         self.label_32 = QtGui.QLabel(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label_32.setFont(font)
         self.label_32.setObjectName(_fromUtf8("label_32"))
         self.gridLayout.addWidget(self.label_32, 6, 0, 1, 1)
         self.aisr_spnbx = QtGui.QSpinBox(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.aisr_spnbx.setFont(font)
         self.aisr_spnbx.setMinimum(10)
         self.aisr_spnbx.setMaximum(400)
         self.aisr_spnbx.setObjectName(_fromUtf8("aisr_spnbx"))
@@ -138,7 +144,7 @@ class Ui_CalibrationWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.risefall_spnbx.setFont(font)
-        self.risefall_spnbx.setMaximum(100)
+        self.risefall_spnbx.setMaximum(1000)
         self.risefall_spnbx.setObjectName(_fromUtf8("risefall_spnbx"))
         self.gridLayout.addWidget(self.risefall_spnbx, 5, 1, 1, 1)
         self.db_spnbx = QtGui.QSpinBox(self.tab)
@@ -187,6 +193,9 @@ class Ui_CalibrationWindow(object):
         self.label_12.setObjectName(_fromUtf8("label_12"))
         self.gridLayout.addWidget(self.label_12, 3, 2, 1, 1)
         self.interval_spnbx = QtGui.QSpinBox(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.interval_spnbx.setFont(font)
         self.interval_spnbx.setMinimum(0)
         self.interval_spnbx.setMaximum(6000)
         self.interval_spnbx.setSingleStep(100)
