@@ -64,40 +64,48 @@ class BasePlot(QtGui.QMainWindow):
     def autoscale_y(self, event):
         for ax in self.axs:
             if ax.contains(event)[0]:
-                x0, x1 = ax.get_xlim()
-                #set to zero so that we may use to get the max of multiple lines in an axes
-                y0, y1 = float("inf"), float("-inf")
-                #find y max and min for current x range
-                for iline in ax.lines:
-                    xdata, ydata = iline.get_data()
-                    if len(xdata) > 0:
-                        # placeholder lines have empty data
+                self.ylim_auto(self,[ax])
+
+    def ylim_auto(self,axs):
+        for ax in axs:
+            x0, x1 = ax.get_xlim()
+            #set to zero so that we may use to get the max of multiple lines in an axes
+            y0, y1 = float("inf"), float("-inf")
+            #find y max and min for current x range
+            for iline in ax.lines:
+                xdata, ydata = iline.get_data()
+                if len(xdata) > 0:
+                    # placeholder lines have empty data
+                
+                    # find the indicies of the xlims and use to take 
+                    # the min and max of same y range
+                    xind0 = (np.abs(xdata-x0)).argmin()
+                    xind1 = (np.abs(xdata-x1)).argmin()
                         
-                        # find the indicies of the xlims and use to take 
-                        # the min and max of same y range
-                        xind0 = (np.abs(xdata-x0)).argmin()
-                        xind1 = (np.abs(xdata-x1)).argmin()
-                        
-                        y0 = min(np.amin(ydata[xind0:xind1]),y0)
-                        y1 = max(np.amax(ydata[xind0:xind1]),y1)
+                    y0 = min(np.amin(ydata[xind0:xind1]),y0)
+                    y1 = max(np.amax(ydata[xind0:xind1]),y1)
                        
-                ax.set_ylim(y0,y1)
-                self.canvas.draw()
+            ax.set_ylim(y0,y1)
+            self.canvas.draw()
 
 
     def autoscale_x(self,event):
         for ax in self.axs:
             if ax.contains(event)[0]:
-                x0 = float("inf")
-                x1 = float("-inf")
-                for iline in ax.lines:
-                    xdata = iline.get_xdata()
-                    if len(xdata) > 0:
-                        #placeholder lines have empty data
-                        x0 = min(xdata[0], x0)
-                        x1 = max(xdata[-1], x1)
-                ax.set_xlim(x0,x1)
-                self.canvas.draw()
+                self.xlim_auto([ax])
+
+    def xlim_auto(self, axs):
+        for ax in axs:
+            x0 = float("inf")
+            x1 = float("-inf")
+            for iline in ax.lines:
+                xdata = iline.get_xdata()
+                if len(xdata) > 0:
+                    #placeholder lines have empty data
+                    x0 = min(xdata[0], x0)
+                    x1 = max(xdata[-1], x1)
+            ax.set_xlim(x0,x1)
+            self.canvas.draw()
 
     def spawn_child(self, event):
         for ax in self.axs:

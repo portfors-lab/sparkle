@@ -99,6 +99,7 @@ class Calibrator(QtGui.QMainWindow):
                     self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
                     self.aotask = AOTaskFinite(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
                     self.aotask.write(self.tone)
+                
                     self.daq_timer = self.startTimer(interval)
                 else:
                     self.aitask = AITask(aichan, self.aisr, self.ainpts)
@@ -169,25 +170,26 @@ class Calibrator(QtGui.QMainWindow):
         print("update_stim")
         # now update the display of the stim
         if self.sp == None or not(self.sp.active):
-            self.spawn_display(timevals, tone)
-            #self.sp.draw_line(2,0,freq,sp)
+            self.spawn_display(timevals, tone, freq, sp)
+            
         else:
             self.stim_display(timevals, tone, freq, sp)
 
-    def spawn_display(self,timevals,tone):
+    def spawn_display(self,timevals,tone, freq, sp):
         self.sp = AnimatedWindow(([],[]), ([],[]), 
                                  ([[],[]],[[],[]]))
         self.sp.show()
         self.sp.draw_line(0, 0, timevals, tone)
-        time.sleep(3)
-        print("ok")
+        self.sp.draw_line(2,0,freq,sp)
+        self.sp.xlim_auto([self.sp.axs[2]])
+        self.sp.ylim_auto([self.sp.axs[2]])
         #self.sp.canvas.draw()
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
         print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
         self.sp.draw_line(0, 0, xdata, ydata)
-        #self.sp.draw_line(2, 0, xfft, yfft)
+        self.sp.draw_line(2, 0, xfft, yfft)
         
     def ai_display(self):
         try:
@@ -216,6 +218,11 @@ class Calibrator(QtGui.QMainWindow):
                 print("%.5f AI V" % (np.amax(data)))
                 print("%.6f FFT, at %d Hz\n" % (np.amax(abs(sp)), freq[maxidx]))
 
+            # update labels on GUI with FFT data
+
+            self.ui.label1.setText("AI Vmax : %.5f" % (np.amax(abs(data))))
+            self.ui.label2.setText("%.6f FFT, at %d Hz\n" % (np.amax(abs(sp)), freq[maxidx]))
+
             self.sp.draw_line(2,1,freq, abs(sp))
             self.sp.draw_line(1,0,xdata,data)
                       
@@ -236,7 +243,6 @@ class Calibrator(QtGui.QMainWindow):
 
     def finite_worker(self):
         # acquire data and reset task to be read for next timer event
-        print("worker")
         self.daq_lock.lock()
         self.aotask.StartTask()
         self.aitask.StartTask()
@@ -339,8 +345,6 @@ class Calibrator(QtGui.QMainWindow):
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
             if USE_FINITE:
                 self.update_stim()
-                time.sleep(3)
-                print("alright")
             else:
                 self.on_stop()
                 self.on_start()
@@ -350,9 +354,7 @@ class Calibrator(QtGui.QMainWindow):
         elif event.text() == 'r':
             print("redraw")
             self.sp.redraw()
-        time.sleep(3)
-        print("keypress clear")
-
+        
     def closeEvent(self,event):
         # halt acquisition loop
         self.on_stop()

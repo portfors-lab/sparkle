@@ -195,6 +195,8 @@ class AnimatedWindow(BasePlot):
         
         self.cnt = 0
 
+        self.redraw()
+
     def draw_line(self, axnum, linenum, xdata, ydata):
         self.canvas.restore_region(self.ax_backgrounds[axnum])
         self.axs[axnum].lines[linenum].set_data(xdata,ydata)
@@ -220,7 +222,6 @@ class AnimatedWindow(BasePlot):
 
     def redraw(self):
         if self.resize_mutex.tryLock():
-            print("redraw")
             saved_data = []
             for ax in self.axs:
                 nlines = len(ax.lines)
@@ -237,17 +238,17 @@ class AnimatedWindow(BasePlot):
 
             for iax in range(len(self.axs)):
                 self.ax_backgrounds[iax] = self.canvas.copy_from_bbox(self.axs[iax].bbox)
-
-            for xvals, yvals in saved_data:
-                #xvals, yvals = saved_data[iax]
-                for ax in self.axs:
-                    for line in ax.lines:
-                        line.set_data(xvals,yvals)
-                        ax.draw_artist(line)
-                    self.canvas.blit(ax.bbox)
+                
+            for iax, ax in enumerate(self.axs):
+                xvals, yvals = saved_data[iax]                
+                for line in ax.lines:
+                    line.set_data(xvals,yvals)
+                    ax.draw_artist(line)
+                self.canvas.blit(ax.bbox)
             
             # this seems to be necessary to get background to show properly
             self.canvas.draw()
+            
             self.resize_mutex.unlock()
 
     def keyPressEvent(self,event):

@@ -761,7 +761,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="freq_label">
+         <widget class="QLabel" name="label1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -774,19 +774,31 @@
            </font>
           </property>
           <property name="text">
-           <string>Frquency : 15kHz</string>
+           <string>Frquency :</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="db_label">
+         <widget class="QLabel" name="label2">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Intensity : 100 dB</string>
+           <string>Intensity :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label3">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Other</string>
           </property>
          </widget>
         </item>
