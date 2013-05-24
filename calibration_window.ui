@@ -358,6 +358,11 @@
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="2" column="2">
              <widget class="QSpinBox" name="db_stop_spnbx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="maximum">
                <number>150</number>
               </property>
@@ -368,6 +373,11 @@
             </item>
             <item row="1" column="3">
              <widget class="QSpinBox" name="freq_step_spnbx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="maximum">
                <number>100</number>
               </property>
@@ -378,6 +388,11 @@
             </item>
             <item row="1" column="2">
              <widget class="QSpinBox" name="freq_stop_spnbx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="maximum">
                <number>200</number>
               </property>
@@ -432,6 +447,11 @@
             </item>
             <item row="2" column="3">
              <widget class="QSpinBox" name="db_step_spnbx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="maximum">
                <number>50</number>
               </property>
@@ -718,6 +738,11 @@
             </item>
             <item row="2" column="1">
              <widget class="QSpinBox" name="nreps_spnbx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="minimum">
                <number>1</number>
               </property>
@@ -922,14 +947,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>sr_spnbx_2</sender>
-   <signal>valueChanged(int)</signal>
+   <sender>reprate_spnbx</sender>
+   <signal>valueChanged(double)</signal>
    <receiver>CalibrationWindow</receiver>
    <slot>set_dur_max()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>302</x>
-     <y>323</y>
+     <x>105</x>
+     <y>284</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>

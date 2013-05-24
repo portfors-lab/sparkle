@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Thu May 23 20:06:07 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Fri May 24 15:47:05 2013
+#      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -221,16 +221,25 @@ class Ui_CalibrationWindow(object):
         self.gridLayout_2 = QtGui.QGridLayout()
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.db_stop_spnbx = QtGui.QSpinBox(self.tab_2)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.db_stop_spnbx.setFont(font)
         self.db_stop_spnbx.setMaximum(150)
         self.db_stop_spnbx.setProperty("value", 110)
         self.db_stop_spnbx.setObjectName(_fromUtf8("db_stop_spnbx"))
         self.gridLayout_2.addWidget(self.db_stop_spnbx, 2, 2, 1, 1)
         self.freq_step_spnbx = QtGui.QSpinBox(self.tab_2)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.freq_step_spnbx.setFont(font)
         self.freq_step_spnbx.setMaximum(100)
         self.freq_step_spnbx.setProperty("value", 1)
         self.freq_step_spnbx.setObjectName(_fromUtf8("freq_step_spnbx"))
         self.gridLayout_2.addWidget(self.freq_step_spnbx, 1, 3, 1, 1)
         self.freq_stop_spnbx = QtGui.QSpinBox(self.tab_2)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.freq_stop_spnbx.setFont(font)
         self.freq_stop_spnbx.setMaximum(200)
         self.freq_stop_spnbx.setProperty("value", 150)
         self.freq_stop_spnbx.setObjectName(_fromUtf8("freq_stop_spnbx"))
@@ -261,6 +270,9 @@ class Ui_CalibrationWindow(object):
         self.freq_start_spnbx.setObjectName(_fromUtf8("freq_start_spnbx"))
         self.gridLayout_2.addWidget(self.freq_start_spnbx, 1, 1, 1, 1)
         self.db_step_spnbx = QtGui.QSpinBox(self.tab_2)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.db_step_spnbx.setFont(font)
         self.db_step_spnbx.setMaximum(50)
         self.db_step_spnbx.setProperty("value", 5)
         self.db_step_spnbx.setObjectName(_fromUtf8("db_step_spnbx"))
@@ -413,6 +425,9 @@ class Ui_CalibrationWindow(object):
         self.reprate_spnbx.setObjectName(_fromUtf8("reprate_spnbx"))
         self.gridLayout_3.addWidget(self.reprate_spnbx, 1, 1, 1, 1)
         self.nreps_spnbx = QtGui.QSpinBox(self.tab_2)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.nreps_spnbx.setFont(font)
         self.nreps_spnbx.setMinimum(1)
         self.nreps_spnbx.setMaximum(100)
         self.nreps_spnbx.setProperty("value", 5)
@@ -514,7 +529,7 @@ class Ui_CalibrationWindow(object):
         self.retranslateUi(CalibrationWindow)
         self.tabs.setCurrentIndex(1)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_interval_min)
-        QtCore.QObject.connect(self.sr_spnbx_2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_dur_max)
+        QtCore.QObject.connect(self.reprate_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), CalibrationWindow.set_dur_max)
         QtCore.QObject.connect(self.actionDisplay_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_display_dlg)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWindow)
 

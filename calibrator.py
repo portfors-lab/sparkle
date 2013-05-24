@@ -1,6 +1,7 @@
 import sys, os
 import time
 import pickle
+import queue
 
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
@@ -35,6 +36,7 @@ class Calibrator(QtGui.QMainWindow):
 
         self.tone = []
         self.sp = None
+        self.ainpts = AIPOINTS # gets overriden (hopefully)
 
         inlist = load_inputs()
         if len(inlist) > 0:
@@ -49,21 +51,37 @@ class Calibrator(QtGui.QMainWindow):
                 self.ainpts = inlist[7]
                 self.ui.aisr_spnbx.setValue(inlist[8])
                 self.ui.interval_spnbx.setValue(inlist[9])
+
+                # tab 2
+                self.ui.freq_start_spnbx.setValue(inlist[10])
+                self.ui.freq_stop_spnbx.setValue(inlist[11])
+                self.ui.freq_step_spnbx.setValue(inlist[12])
+                self.ui.db_start_spnbx.setValue(inlist[13])
+                self.ui.db_stop_spnbx.setValue(inlist[14])
+                self.ui.db_step_spnbx.setValue(inlist[15])
+                self.ui.dur_spnbx_2.setValue(inlist[16])
+                self.ui.risefall_spnbx_2.setValue(inlist[17])
+                self.ui.reprate_spnbx.setValue(inlist[18])
+                self.ui.sr_spnbx_2.setValue(inlist[19])
+                self.ui.nreps_spnbx.setValue(inlist[20])
             except:
                 print("failed to find all defaults")
-                self.ainpts = AIPOINTS
+                #raise
 
         self.set_interval_min()
         self.daq_lock = QtCore.QMutex()
         self.stim_lock = QtCore.QMutex()
+        self.curve_data_lock = QtCore.QMutex()
         self.daq_timer = None
         self.aitask = None
 
+        self.thread_pool = []
         self.pool = QtCore.QThreadPool()
         self.pool.setMaxThreadCount(5)
 
-        self.signal = WorkerSignal()
-        self.signal.done.connect(self.ai_display)
+        self.signals = WorkerSignals()
+        self.signals.done.connect(self.ai_display)
+        self.signals.curve_finished.connect(self.process_caldata)
 
     def on_start(self):
        
@@ -74,6 +92,7 @@ class Calibrator(QtGui.QMainWindow):
         # tuning curve, or on-the-fly modifyable tone
         
         if self.ui.tabs.currentIndex() == 0 :
+            self.current_operation = 1
             if self.aitask is not None:
                 self.on_stop()
             self.cnt = 0
@@ -117,101 +136,141 @@ class Calibrator(QtGui.QMainWindow):
                 self.on_stop
                 raise
         else:
-            self.halt_curve = False
             # tuning curve style run-through
-            scale_factor = 1000
-            f_start = self.ui.freq_start_spnbx.value()*scale_factor
-            f_stop = self.ui.freq_stop_spnbx.value()*scale_factor
-            f_step = self.ui.freq_step_spnbx.value()*scale_factor
-            db_start = self.ui.db_start_spnbx.value()
-            db_stop = self.ui.db_stop_spnbx.value()
-            db_step = self.ui.db_step_spnbx.value()
-            dur = self.ui.dur_spnbx_2.value()/scale_factor
-            rft = self.ui.risefall_spnbx_2.value()/scale_factor
-            reprate = self.ui.reprate_spnbx.value()
-            sr = self.ui.sr_spnbx_2.value()
-            nreps = self.ui.nreps_spnbx.value()
-
-            if f_start < f_stop:
-                freqs = range(f_start, f_stop, f_step)
-            else:
-                freqs = range(f_start, f_stop, -f_step)
-            if db_start < db_stop:
-                intensities = range(db_start, db_stop, db_step)
-            else:
-                intensities = range(db_start, db_stop, -db_step)
+            self.current_operation = 1
+            self.halt_curve = False
 
             # grey out interface during curve
             self.ui.tab_2.setEnabled(False)
             self.ui.start_button.setEnabled(False)
-
-            # set up display
-            display = SubPlots( ([],[]), ([],[]), ([[],[]],[[],[]]) )
-            display.show()
+            
             try:
-                fft_max_vals = np.zeros((len(freqs),len(intensities)))
-                npts = int(dur*sr)
+                scale_factor = 1000
+                f_start = self.ui.freq_start_spnbx.value()*scale_factor
+                f_stop = self.ui.freq_stop_spnbx.value()*scale_factor
+                f_step = self.ui.freq_step_spnbx.value()*scale_factor
+                db_start = self.ui.db_start_spnbx.value()
+                db_stop = self.ui.db_stop_spnbx.value()
+                db_step = self.ui.db_step_spnbx.value()
+                dur = self.ui.dur_spnbx_2.value()/scale_factor
+                rft = self.ui.risefall_spnbx_2.value()/scale_factor
+                reprate = self.ui.reprate_spnbx.value()
+                sr = self.ui.sr_spnbx_2.value()*scale_factor
+                nreps = self.ui.nreps_spnbx.value()
                 
+                # acquisitions threads must access the following data
+                self.dur = dur
+                self.sr = sr
+                self.rft = rft
+                self.nreps = nreps
+                self.aichan = aichan
+                self.aochan = aochan
+
+                if f_start < f_stop:
+                    freqs = range(f_start, f_stop, f_step)
+                else:
+                    freqs = range(f_start, f_stop, -f_step)
+                if db_start < db_stop:
+                    intensities = range(db_start, db_stop, db_step)
+                else:
+                    intensities = range(db_start, db_stop, -db_step)
+
+                # calculate ms interval from reprate
+                interval = (1/reprate)*1000
+
+                # set up display
+                self.display = SubPlots( ([],[]), ([],[]), ([[],[]],[[],[]]) )
+                self.display.axs[2].set_xlim(0,sr/2)
+                #self.display.canvas.draw()
+                self.display.show()
+            
+                # data structure to store the averages of the resultant FFT peaks
+                self.fft_max_vals = np.zeros((len(freqs),len(intensities)))
+                self.fft_vals_lookup = {}
+
+                # data structure to hold repetitions, for averaging
+                self.rep_temp = []
+                
+                self.work_queue = queue.Queue()
                 for ifreq, f in enumerate(freqs):
                     for idb, db in enumerate(intensities):
-                        self.ui.label1.setText("Frequency : %d" % (f))
-                        self.ui.label2.setText("Intensity : %d" % (db))
-                        # make a tone a present it some number of times
-                        tone, times = make_tone(f,db,dur,rft,sr)
-                        xfft, yfft = calc_spectrum(tone, sr)
-                        display.draw_line(0, 0, times, tone)
-                        display.draw_line(2,0, xfft, yfft)
-                        # data structure to hold repetitions, for averaging
-                        rep_temp = []
                         for irep in range(nreps):
-                            if self.halt_curve:
-                                break
+                            self.work_queue.put((f,db))
+                            # also catalog where these values go in fft_max_vals
+                            self.fft_vals_lookup[(f,db)] = (ifreq,idb)
 
-                            aitask = AITaskFinite(aichan, sr, npts)
-                            aotask = AOTaskFinite(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
-                            aotask.write(tone)
-                            aotask.StartTask()
-                            aitask.StartTask()
-                        
-                            # blocking read
-                            data = aitask.read()
+                self.daq_timer = self.startTimer(interval)
 
-                            aitask.stop()
-                            aotask.stop()
-
-                            # extract information from acquired tone, and save
-                            freq, spectrum = calc_spectrum(data, sr)
-
-                            maxidx = spectrum.argmax(axis=0)
-                            max_freq = freq[maxidx]
-                            spec_max = np.amax(abs(spectrum))
-                            vmax = np.amax(abs(data))
-
-                            if max_freq < f-1 or max_freq > f+1:
-                                print("WARNING: MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
-                                print("Sent : {}, Received : {}".format(f, max_freq))
-
-                            if VERBOSE:
-                                #print(maxidx)
-                                print("%.5f AI V" % (vmax))
-                                print("%.6f FFT, at %d Hz\n" % (spec_max, max_freq))
-                            
-                            display.draw_line(1,0, times, data)
-                            display.draw_line(2,1, freq, spectrum)
-
-                            rep_temp.append(spec_max)
-                            fft_max_vals[ifreq][idb] = np.mean(rep_temp)
             except:
+                print("handle curve set-up exception")
                 self.ui.tab_2.setEnabled(True)
                 self.ui.start_button.setEnabled(True)
                 raise
 
-            print(fft_max_vals)
-            self.ui.tab_2.setEnabled(True)
-            self.ui.start_button.setEnabled(True)
+    def curve_worker(self, f, db):
 
+        self.ui.label1.setText("Frequency : %d" % (f))
+        self.ui.label2.setText("Intensity : %d" % (db))
+
+        sr = self.sr
+        dur = self.dur
+        rft = self.rft
+
+        # make a tone and present it once
+        tone, times = make_tone(f,db,dur,rft,sr)
+        xfft, yfft = calc_spectrum(tone, sr)
+        self.display.draw_line(0, 0, times, tone)
+        self.display.draw_line(2,0, xfft, yfft)
+        
+        self.daq_lock.lock()
+
+        aitask = AITaskFinite(self.aichan, sr, len(tone))
+        aotask = AOTaskFinite(self.aochan, sr, len(tone), trigsrc=b"ai/StartTrigger")
+        aotask.write(tone)
+        aotask.StartTask()
+        aitask.StartTask()
+                        
+        # blocking read
+        data = aitask.read()
+        
+        aitask.stop()
+        aotask.stop()
+
+        self.daq_lock.unlock()
+
+        # extract information from acquired tone, and save
+        freq, spectrum = calc_spectrum(data, sr)
+
+        maxidx = spectrum.argmax(axis=0)
+        max_freq = freq[maxidx]
+        spec_max = np.amax(abs(spectrum))
+        vmax = np.amax(abs(data))
+
+        if max_freq < f-1 or max_freq > f+1:
+            print("WARNING: MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
+            print("Sent : {}, Received : {}".format(f, max_freq))
+            
+        if VERBOSE:
+            #print(maxidx)
+            print("%.5f AI V" % (vmax))
+            print("%.6f FFT, at %d Hz\n" % (spec_max, max_freq))
+            
+        self.display.draw_line(1,0, times, data)
+        self.display.draw_line(2,1, freq, spectrum)
+
+        self.curve_data_lock.lock()        
+        self.rep_temp.append(spec_max)
+        if len(self.rep_temp) == 10:
+            ifreq, idb = self.fft_vals_lookup[(f,db)]
+            self.fft_max_vals[ifreq][idb] = np.mean(self.rep_temp)
+            rep_temp = []
+        self.curve_data_lock.unlock()
+
+    def process_caldata(self):
+        print(self.fft_max_vals)
+            
     def on_stop(self):
-        if self.ui.tabs.currentIndex() == 0 :
+        if self.current_operation == 0 :
             if USE_FINITE:
                 self.ui.interval_spnbx.setEnabled(True)
                 if self.daq_timer is not None:
@@ -227,8 +286,12 @@ class Calibrator(QtGui.QMainWindow):
                         print("No task running")
                     except:
                         raise
+        elif self.current_operation == 1:
+            self.killTimer(self.daq_timer)
+            self.ui.tab_2.setEnabled(True)
+            self.ui.start_button.setEnabled(True)
         else:
-            self.halt_curve = True
+            print("No task currently running")
 
     def update_stim(self):
         scale_factor = 1000
@@ -245,7 +308,6 @@ class Calibrator(QtGui.QMainWindow):
         tone, timevals = make_tone(f,db,dur,rft,sr)
         
         npts = tone.size
-       
 
         #also plot stim FFT
         freq, spectrum = calc_spectrum(tone,sr)
@@ -262,10 +324,10 @@ class Calibrator(QtGui.QMainWindow):
         print("update_stim")
         # now update the display of the stim
         if self.sp == None or not(self.sp.active):
-            self.spawn_display(timevals, tone, freq, spectrum)
+            self.spawn_display(timevals, tone, freq, abs(spectrum))
             
         else:
-            self.stim_display(timevals, tone, freq, spectrum)
+            self.stim_display(timevals, tone, freq, abs(spectrum))
 
     def spawn_display(self,timevals,tone, freq, sp):
         self.sp = AnimatedWindow(([],[]), ([],[]), 
@@ -319,16 +381,47 @@ class Calibrator(QtGui.QMainWindow):
             raise
 
     def timerEvent(self, evt):
-        #print("tick")
 
-        #self.thread_pool.append( GenericThread(self.finite_worker) )
-        t  = GenericThread(self.finite_worker)
-        #t.start()
-        #self.thread_pool[len(self.thread_pool)-1].start()
-        #print("threadpool size {}".format(len(self.thread_pool)))
-        self.pool.start(t)
+        if self.current_operation == 0:
+            #w = WorkerObj(self.finite_worker)
+
+            #t = QtCore.QThread()     
+            #t = ShadowThread() 
+            #w.moveToThread(t)
+            #w.finished.connect(t.quit)
+            #t.started.connect(w.process)
+            #t.finished.connect(t.deleteLater)
+            #w.finished.connect(t.deleteLater)
+            #t.start()
+            #self.thread_pool.append(t)
+            t  = GenericThread(self.finite_worker)
+            #t.start()
+            
+            #self.thread_pool.append( GenericThread(self.finite_worker) )        
+            #self.thread_pool[len(self.thread_pool)-1].start()
+            #print("threadpool size {}".format(len(self.thread_pool)))
+        elif self.current_operation == 1:
+
+            # if timing is correct and feasible (i.e. interval >= duration), locking 
+            # shouldn't strictly be necessesary, but for posterity...
+            self.stim_lock.lock()
+            if self.work_queue.empty():
+                # no more work, quit
+                self.stim_lock.unlock()
+                self.on_stop()
+                # or should I emit a signal to execute this?
+                self.process_caldata
+                return
+            else:
+                f, db = self.work_queue.get()
+            self.stim_lock.unlock()
+
+            # spawn thread for next item in queue
+            t  = GenericThread(self.curve_worker, f, db)
+            self.pool.start(t)
 
     def finite_worker(self):
+
         # acquire data and reset task to be read for next timer event
         self.daq_lock.lock()
         self.aotask.StartTask()
@@ -451,19 +544,32 @@ class Calibrator(QtGui.QMainWindow):
         # halt acquisition loop
         self.on_stop()
 
+        outlist = []
         #save inputs into file to load up next time - order is important
-        f = self.ui.freq_spnbx.value()
-        sr = self.ui.sr_spnbx.value()
-        dur = self.ui.dur_spnbx.value()
-        db = self.ui.db_spnbx.value()
-        rft = self.ui.risefall_spnbx.value()
-        aochan_index = self.ui.aochan_box.currentIndex()
-        aichan_index = self.ui.aichan_box.currentIndex()
-        ainpts = self.ainpts
-        aisr = self.ui.aisr_spnbx.value()
-        interval = self.ui.interval_spnbx.value()
+        outlist.append(self.ui.freq_spnbx.value())
+        outlist.append(self.ui.sr_spnbx.value())
+        outlist.append(self.ui.dur_spnbx.value())
+        outlist.append(self.ui.db_spnbx.value())
+        outlist.append(self.ui.risefall_spnbx.value())
+        outlist.append(self.ui.aochan_box.currentIndex())
+        outlist.append(self.ui.aichan_box.currentIndex())
+        outlist.append(self.ainpts)
+        outlist.append(self.ui.aisr_spnbx.value())
+        outlist.append(self.ui.interval_spnbx.value())
 
-        save_inputs(f,sr,dur,db,rft,aochan_index,aichan_index, ainpts, aisr, interval)
+        outlist.append( self.ui.freq_start_spnbx.value())
+        outlist.append(self.ui.freq_stop_spnbx.value())
+        outlist.append(self.ui.freq_step_spnbx.value())
+        outlist.append(self.ui.db_start_spnbx.value())
+        outlist.append(self.ui.db_stop_spnbx.value())
+        outlist.append(self.ui.db_step_spnbx.value())
+        outlist.append(self.ui.dur_spnbx_2.value())
+        outlist.append(self.ui.risefall_spnbx_2.value())
+        outlist.append( self.ui.reprate_spnbx.value())
+        outlist.append(self.ui.sr_spnbx_2.value())
+        outlist.append(self.ui.nreps_spnbx.value())
+
+        save_inputs(outlist)
 
         QtGui.QMainWindow.closeEvent(self,event)
 
@@ -481,8 +587,34 @@ class GenericThread(QtCore.QRunnable):
         self.function(*self.args,**self.kwargs)
         return
 
-class WorkerSignal(QtCore.QObject):
+class WorkerSignals(QtCore.QObject):
     done = QtCore.pyqtSignal()
+    curve_finished = QtCore.pyqtSignal()
+
+# the below classes are all attempts to make QThread work according
+# to recommendations on 
+# http://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
+# see also: http://stackoverflow.com/questions/6783194/background-thread-with-qthread-in-pyqt
+class WorkerObj(QtCore.QObject):
+
+    finished = QtCore.pyqtSignal()
+
+    def __init__(self,function, *args, **kwargs):
+        QtCore.QObject.__init__(self)
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+
+    def process(self):
+        print("processing...")
+        self.function(*self.args,**self.kwargs)
+
+
+class ShadowThread(QtCore.QThread):
+    def __init__(self):
+        QtCore.QThread.__init__(self)
+    def run(self):
+        QtCore.QThread.run(self)
 
 def make_tone(freq,db,dur,risefall,samplerate):
     # create portable tone generator class that allows the 
@@ -528,23 +660,20 @@ def calc_spectrum(signal,rate):
 
 def load_inputs():
     cfgfile = "inputs.cfg"
-    input_list = []
     try:
-        with open(cfgfile, 'r') as cfo:
-            for line in cfo:
-                input_list.append(int(line.strip()))
-        cfo.close()
+        with open(cfgfile, 'rb') as cfo:
+            input_list = pickle.load(cfo)
     except:
         print("error loading user inputs file")
+        #raise
+        input_list = []
     return input_list
 
-def save_inputs(*args):
+def save_inputs(savelist):
     #should really do this with a dict
     cfgfile = "inputs.cfg"
-    cf = open(cfgfile, 'w')
-    for arg in args:
-        cf.write("{}\n".format(arg))
-    cf.close()
+    with open(cfgfile, 'wb') as cfo:
+        pickle.dump(savelist,cfo)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
