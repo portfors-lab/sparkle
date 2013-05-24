@@ -19,7 +19,7 @@ class CustomToolbar(NavigationToolbar):
         builtin_buttons[7].setParent(None)
 
         # try to edit callback
-        builtin_buttons[5].toggled.connect(self.new_zoom)
+        builtin_buttons[5].toggled.connect(self.zoom_mod)
 
         #add new toolbar items
         self.grid_cb = QtGui.QCheckBox("Show &Grid")
@@ -33,8 +33,7 @@ class CustomToolbar(NavigationToolbar):
             ax.grid(self.grid_cb.isChecked())
         self.canvas.draw()
 
-    def new_zoom(self, checked):
-        #print("update canvas draw")
+    def zoom_mod(self, checked):
         if checked:
             # add a draw command after every button up event
             self.cid = self.canvas.mpl_connect('button_release_event', self.draw_update)
@@ -43,5 +42,6 @@ class CustomToolbar(NavigationToolbar):
             self.canvas.mpl_disconnect(self.cid)
 
     def draw_update(self,event):
-        print('updating after button release')
+        # repaint canvas after button release -- this is to
+        # make sure the toolbar works properly with animated windows
         self.canvas.draw()

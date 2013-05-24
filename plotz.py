@@ -252,9 +252,8 @@ class AnimatedWindow(BasePlot):
             self.resize_mutex.unlock()
 
     def keyPressEvent(self,event):
-        print("key press event from AnimatedWindow")
+        #print("key press event from AnimatedWindow")
         if event.text() == 'r':
-            print("arrrrrrr")
             self.redraw()
         else:
             super().keyPressEvent(event)

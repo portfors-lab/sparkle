@@ -48,9 +48,9 @@ class BasePlot(QtGui.QMainWindow):
         if event.button == 3:
             if event.inaxes:
                 yaxis_action = QtGui.QAction('autoscale y', self)
-                yaxis_action.triggered.connect(functools.partial(self.autoscale_y,event))
+                yaxis_action.triggered.connect(functools.partial(self._autoscale_y,event))
                 xaxis_action = QtGui.QAction('autoscale x', self)
-                xaxis_action.triggered.connect(functools.partial(self.autoscale_x,event))
+                xaxis_action.triggered.connect(functools.partial(self._autoscale_x,event))
                 spawn_action = QtGui.QAction('spawn', self)
                 spawn_action.triggered.connect(functools.partial(self.spawn_child,event))
                 popMenu = QtGui.QMenu(self)
@@ -61,10 +61,10 @@ class BasePlot(QtGui.QMainWindow):
                 point = QtCore.QPoint(event.x, figheight - event.y)
                 popMenu.exec(self.canvas.mapToGlobal(point))
 
-    def autoscale_y(self, event):
+    def _autoscale_y(self, event):
         for ax in self.axs:
             if ax.contains(event)[0]:
-                self.ylim_auto(self,[ax])
+                self.ylim_auto([ax])
 
     def ylim_auto(self,axs):
         for ax in axs:
@@ -85,11 +85,12 @@ class BasePlot(QtGui.QMainWindow):
                     y0 = min(np.amin(ydata[xind0:xind1]),y0)
                     y1 = max(np.amax(ydata[xind0:xind1]),y1)
                        
-            ax.set_ylim(y0,y1)
+            buf = (y1-y0)*0.1
+            ax.set_ylim(y0-buf,y1+buf)
             self.canvas.draw()
 
 
-    def autoscale_x(self,event):
+    def _autoscale_x(self,event):
         for ax in self.axs:
             if ax.contains(event)[0]:
                 self.xlim_auto([ax])

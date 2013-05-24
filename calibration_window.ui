@@ -32,7 +32,7 @@
       <item>
        <widget class="QTabWidget" name="tabs">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -357,13 +357,34 @@
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="2" column="2">
-             <widget class="QSpinBox" name="db_stop_spnbx"/>
+             <widget class="QSpinBox" name="db_stop_spnbx">
+              <property name="maximum">
+               <number>150</number>
+              </property>
+              <property name="value">
+               <number>110</number>
+              </property>
+             </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QSpinBox" name="freq_step_spnbx"/>
+             <widget class="QSpinBox" name="freq_step_spnbx">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
+             </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QSpinBox" name="freq_stop_spnbx"/>
+             <widget class="QSpinBox" name="freq_stop_spnbx">
+              <property name="maximum">
+               <number>200</number>
+              </property>
+              <property name="value">
+               <number>150</number>
+              </property>
+             </widget>
             </item>
             <item row="2" column="4">
              <widget class="QLabel" name="label_21">
@@ -410,7 +431,14 @@
              </widget>
             </item>
             <item row="2" column="3">
-             <widget class="QSpinBox" name="db_step_spnbx"/>
+             <widget class="QSpinBox" name="db_step_spnbx">
+              <property name="maximum">
+               <number>50</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
             </item>
             <item row="2" column="1">
              <widget class="QSpinBox" name="db_start_spnbx">
@@ -426,7 +454,7 @@
                <number>5</number>
               </property>
               <property name="value">
-               <number>20</number>
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -688,6 +716,31 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="nreps_spnbx">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_31">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Reps</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -749,7 +802,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label_31">
+         <widget class="QLabel" name="info_title">
           <property name="font">
            <font>
             <pointsize>12</pointsize>

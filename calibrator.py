@@ -57,6 +57,7 @@ class Calibrator(QtGui.QMainWindow):
         self.daq_lock = QtCore.QMutex()
         self.stim_lock = QtCore.QMutex()
         self.daq_timer = None
+        self.aitask = None
 
         self.pool = QtCore.QThreadPool()
         self.pool.setMaxThreadCount(5)
@@ -65,8 +66,7 @@ class Calibrator(QtGui.QMainWindow):
         self.signal.done.connect(self.ai_display)
 
     def on_start(self):
-        self.on_stop()
-
+       
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
 
@@ -74,7 +74,8 @@ class Calibrator(QtGui.QMainWindow):
         # tuning curve, or on-the-fly modifyable tone
         
         if self.ui.tabs.currentIndex() == 0 :
-
+            if self.aitask is not None:
+                self.on_stop()
             self.cnt = 0
             self.update_stim()
 
@@ -116,24 +117,118 @@ class Calibrator(QtGui.QMainWindow):
                 self.on_stop
                 raise
         else:
-            pass
+            self.halt_curve = False
+            # tuning curve style run-through
+            scale_factor = 1000
+            f_start = self.ui.freq_start_spnbx.value()*scale_factor
+            f_stop = self.ui.freq_stop_spnbx.value()*scale_factor
+            f_step = self.ui.freq_step_spnbx.value()*scale_factor
+            db_start = self.ui.db_start_spnbx.value()
+            db_stop = self.ui.db_stop_spnbx.value()
+            db_step = self.ui.db_step_spnbx.value()
+            dur = self.ui.dur_spnbx_2.value()/scale_factor
+            rft = self.ui.risefall_spnbx_2.value()/scale_factor
+            reprate = self.ui.reprate_spnbx.value()
+            sr = self.ui.sr_spnbx_2.value()
+            nreps = self.ui.nreps_spnbx.value()
+
+            if f_start < f_stop:
+                freqs = range(f_start, f_stop, f_step)
+            else:
+                freqs = range(f_start, f_stop, -f_step)
+            if db_start < db_stop:
+                intensities = range(db_start, db_stop, db_step)
+            else:
+                intensities = range(db_start, db_stop, -db_step)
+
+            # grey out interface during curve
+            self.ui.tab_2.setEnabled(False)
+            self.ui.start_button.setEnabled(False)
+
+            # set up display
+            display = SubPlots( ([],[]), ([],[]), ([[],[]],[[],[]]) )
+            display.show()
+            try:
+                fft_max_vals = np.zeros((len(freqs),len(intensities)))
+                npts = int(dur*sr)
+                
+                for ifreq, f in enumerate(freqs):
+                    for idb, db in enumerate(intensities):
+                        self.ui.label1.setText("Frequency : %d" % (f))
+                        self.ui.label2.setText("Intensity : %d" % (db))
+                        # make a tone a present it some number of times
+                        tone, times = make_tone(f,db,dur,rft,sr)
+                        xfft, yfft = calc_spectrum(tone, sr)
+                        display.draw_line(0, 0, times, tone)
+                        display.draw_line(2,0, xfft, yfft)
+                        # data structure to hold repetitions, for averaging
+                        rep_temp = []
+                        for irep in range(nreps):
+                            if self.halt_curve:
+                                break
+
+                            aitask = AITaskFinite(aichan, sr, npts)
+                            aotask = AOTaskFinite(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
+                            aotask.write(tone)
+                            aotask.StartTask()
+                            aitask.StartTask()
+                        
+                            # blocking read
+                            data = aitask.read()
+
+                            aitask.stop()
+                            aotask.stop()
+
+                            # extract information from acquired tone, and save
+                            freq, spectrum = calc_spectrum(data, sr)
+
+                            maxidx = spectrum.argmax(axis=0)
+                            max_freq = freq[maxidx]
+                            spec_max = np.amax(abs(spectrum))
+                            vmax = np.amax(abs(data))
+
+                            if max_freq < f-1 or max_freq > f+1:
+                                print("WARNING: MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
+                                print("Sent : {}, Received : {}".format(f, max_freq))
+
+                            if VERBOSE:
+                                #print(maxidx)
+                                print("%.5f AI V" % (vmax))
+                                print("%.6f FFT, at %d Hz\n" % (spec_max, max_freq))
+                            
+                            display.draw_line(1,0, times, data)
+                            display.draw_line(2,1, freq, spectrum)
+
+                            rep_temp.append(spec_max)
+                            fft_max_vals[ifreq][idb] = np.mean(rep_temp)
+            except:
+                self.ui.tab_2.setEnabled(True)
+                self.ui.start_button.setEnabled(True)
+                raise
+
+            print(fft_max_vals)
+            self.ui.tab_2.setEnabled(True)
+            self.ui.start_button.setEnabled(True)
 
     def on_stop(self):
-        if USE_FINITE:
-            self.ui.interval_spnbx.setEnabled(True)
-            if self.daq_timer is not None:
-                self.killTimer(self.daq_timer)
-                #self.pool.waitForDone()
-                #print("pool done :)")
+        if self.ui.tabs.currentIndex() == 0 :
+            if USE_FINITE:
+                self.ui.interval_spnbx.setEnabled(True)
+                if self.daq_timer is not None:
+                    self.killTimer(self.daq_timer)
+                    #self.pool.waitForDone()
+                    #print("pool done :)")
+                else:
+                    try:
+                        self.aitask.stop()
+                        self.aotask.stop()
+                        self.sp.killTimer(self.sp.timer)
+                    except DAQError:
+                        print("No task running")
+                    except:
+                        raise
         else:
-            try:
-                self.aitask.stop()
-                self.aotask.stop()
-                self.sp.killTimer(self.sp.timer)
-            except DAQError:
-                print("No task running")
-            except:
-                raise
+            self.halt_curve = True
 
     def update_stim(self):
         scale_factor = 1000
@@ -147,17 +242,14 @@ class Calibrator(QtGui.QMainWindow):
         #dur = 1
 
         #print('freq: {}, rft: {}'.format(f,rft))
-        tone = make_tone(f,db,dur,rft,sr)
+        tone, timevals = make_tone(f,db,dur,rft,sr)
         
         npts = tone.size
-        timevals = np.arange(npts)/sr
+       
 
         #also plot stim FFT
-        sp = np.fft.fft(tone)/npts
-        freq = np.arange(npts)/(npts/sr)
-        sp = sp[:(npts/2)]
-        freq = freq[:(npts/2)] #single sided
-
+        freq, spectrum = calc_spectrum(tone,sr)
+       
         self.stim_lock.lock()
         self.tone = tone
         self.sr = sr
@@ -170,10 +262,10 @@ class Calibrator(QtGui.QMainWindow):
         print("update_stim")
         # now update the display of the stim
         if self.sp == None or not(self.sp.active):
-            self.spawn_display(timevals, tone, freq, sp)
+            self.spawn_display(timevals, tone, freq, spectrum)
             
         else:
-            self.stim_display(timevals, tone, freq, sp)
+            self.stim_display(timevals, tone, freq, spectrum)
 
     def spawn_display(self,timevals,tone, freq, sp):
         self.sp = AnimatedWindow(([],[]), ([],[]), 
@@ -187,7 +279,6 @@ class Calibrator(QtGui.QMainWindow):
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
-        print('x0: {}, xend: {}'.format(xdata[0], xdata[-1]))
         self.sp.draw_line(0, 0, xdata, ydata)
         self.sp.draw_line(2, 0, xfft, yfft)
         
@@ -203,27 +294,23 @@ class Calibrator(QtGui.QMainWindow):
             t = len(data)/self.aisr
             #xdata = np.arange(lims[0], lims[0]+len(self.current_line_data))
             xdata= np.linspace(lims[0], lims[0]+t, len(data)) #time vals
-            
-            npts = len(data)
            
-            sp = np.real(np.fft.fft(data)/npts)
-            freq = np.arange(npts)/(npts/self.aisr)
-            sp = sp[:(npts/2)]
-            freq = freq[:(npts/2)] #single sided
-            maxidx = sp.argmax(axis=0)
+            freq, spectrum = calc_spectrum(data, self.aisr)
+
+            maxidx = spectrum.argmax(axis=0)
 
             if VERBOSE:
                 #print(maxidx)
                 print("response x range {}, {}".format(xdata[0], xdata[-1]))
                 print("%.5f AI V" % (np.amax(data)))
-                print("%.6f FFT, at %d Hz\n" % (np.amax(abs(sp)), freq[maxidx]))
+                print("%.6f FFT, at %d Hz\n" % (np.amax(abs(spectrum)), freq[maxidx]))
 
             # update labels on GUI with FFT data
 
             self.ui.label1.setText("AI Vmax : %.5f" % (np.amax(abs(data))))
-            self.ui.label2.setText("%.6f FFT, at %d Hz\n" % (np.amax(abs(sp)), freq[maxidx]))
+            self.ui.label2.setText("%.6f FFT, at %d Hz\n" % (np.amax(abs(spectrum)), freq[maxidx]))
 
-            self.sp.draw_line(2,1,freq, abs(sp))
+            self.sp.draw_line(2,1,freq, abs(spectrum))
             self.sp.draw_line(1,0,xdata,data)
                       
         except:
@@ -308,7 +395,8 @@ class Calibrator(QtGui.QMainWindow):
             
             self.current_line_data.extend(inbuffer.tolist())
         except MemoryError:
-            print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
+            print("data size: {}, elements: {}"
+                  .format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
             self.aitask.stop()
             self.aotask.stop()
             raise
@@ -330,6 +418,10 @@ class Calibrator(QtGui.QMainWindow):
 
     def set_dur_max(self):
         print("also need to set dur_max")
+        dur = self.ui.dur_spnbx_2.value()
+        reprate = self.ui.reprate_spnbx.value()
+        if reprate < (dur/1000):
+            self.ui.dur_spnbx_2.setValue(reprate*1000)
 
     def launch_display_dlg(self):
         field_vals = {'chunksz' : self.ainpts}
@@ -418,7 +510,21 @@ def make_tone(freq,db,dur,risefall,samplerate):
         tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
         tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
         
-    return tone
+
+    timevals = np.arange(npts)/samplerate
+
+    return tone, timevals
+
+def calc_spectrum(signal,rate):
+    #calculate complex fft
+    npts = len(signal)
+    freq = np.arange(npts)/(npts/rate)
+    freq = freq[:(npts/2)] #single sided
+
+    sp = np.fft.fft(signal)/npts
+    sp = sp[:(npts/2)]
+
+    return freq, sp.real
 
 def load_inputs():
     cfgfile = "inputs.cfg"
