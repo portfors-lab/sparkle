@@ -9,6 +9,11 @@ class DisplayDialog(QtGui.QDialog):
 
         if default_vals is not None:
             self.ui.chunksz_lnedt.setText(str(default_vals['chunksz']))
+            self.ui.caldb_lnedt.setText(str(default_vals['caldb']))
+            self.ui.calV_lnedt.setText(str(default_vals['calv']))
 
     def get_values(self):
-        return int(self.ui.chunksz_lnedt.text())
+        chsz = int(self.ui.chunksz_lnedt.text())
+        caldb = int(self.ui.caldb_lnedt.text())
+        calv = float(self.ui.calV_lnedt.text())
+        return chsz, caldb, calv

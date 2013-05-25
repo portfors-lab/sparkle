@@ -12,12 +12,17 @@ from plotz import *
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 
-AIPOINTS = 100 #only used if default not saved
+#defauts used only if user data not saved
+AIPOINTS = 100
+CALDB = 100
+CALV = 0.175
+
 XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
+SAVE_FFT_DATA = True
 USE_FINITE = True
-VERBOSE = False
+VERBOSE = True
 
 class Calibrator(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -37,6 +42,8 @@ class Calibrator(QtGui.QMainWindow):
         self.tone = []
         self.sp = None
         self.ainpts = AIPOINTS # gets overriden (hopefully)
+        self.caldb = CALDB
+        self.calv = CALV
 
         inlist = load_inputs()
         if len(inlist) > 0:
@@ -64,6 +71,9 @@ class Calibrator(QtGui.QMainWindow):
                 self.ui.reprate_spnbx.setValue(inlist[18])
                 self.ui.sr_spnbx_2.setValue(inlist[19])
                 self.ui.nreps_spnbx.setValue(inlist[20])
+
+                self.caldb = inlist[21]
+                self.calv = inlist[22]
             except:
                 print("failed to find all defaults")
                 #raise
@@ -179,7 +189,7 @@ class Calibrator(QtGui.QMainWindow):
                 interval = (1/reprate)*1000
 
                 # set up display
-                self.display = SubPlots( ([],[]), ([],[]), ([[],[]],[[],[]]) )
+                self.display = AnimatedWindow( ([],[]), ([],[]), ([[],[]],[[],[]]) )
                 self.display.axs[2].set_xlim(0,sr/2)
                 #self.display.canvas.draw()
                 self.display.show()
@@ -188,8 +198,13 @@ class Calibrator(QtGui.QMainWindow):
                 self.fft_max_vals = np.zeros((len(freqs),len(intensities)))
                 self.fft_vals_lookup = {}
 
+                if SAVE_FFT_DATA:
+                    # 4D array nfrequencies x nintensities x nreps x npoints
+                    self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((dur*sr)/2)))
+
                 # data structure to hold repetitions, for averaging
                 self.rep_temp = []
+                self.reject_list = []
                 
                 self.work_queue = queue.Queue()
                 for ifreq, f in enumerate(freqs):
@@ -216,12 +231,13 @@ class Calibrator(QtGui.QMainWindow):
         dur = self.dur
         rft = self.rft
 
-        # make a tone and present it once
-        tone, times = make_tone(f,db,dur,rft,sr)
+        # make a tone, calculate it's fft and display
+        tone, times = make_tone(f, db, dur, rft, sr, self.caldb, self.calv)
         xfft, yfft = calc_spectrum(tone, sr)
         self.display.draw_line(0, 0, times, tone)
-        self.display.draw_line(2,0, xfft, yfft)
+        self.display.draw_line(2,0, xfft, abs(yfft))
         
+        # now present the tone once
         self.daq_lock.lock()
 
         aitask = AITaskFinite(self.aichan, sr, len(tone))
@@ -241,15 +257,20 @@ class Calibrator(QtGui.QMainWindow):
         # extract information from acquired tone, and save
         freq, spectrum = calc_spectrum(data, sr)
 
+        # take the abs (should I do this?), and get the highest peak
+        spectrum = abs(spectrum)
         maxidx = spectrum.argmax(axis=0)
         max_freq = freq[maxidx]
-        spec_max = np.amax(abs(spectrum))
+        spec_max = np.amax(spectrum)
         vmax = np.amax(abs(data))
 
+        #tolerance of 1 Hz for frequency matching
         if max_freq < f-1 or max_freq > f+1:
             print("WARNING: MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
-            print("Sent : {}, Received : {}".format(f, max_freq))
-            
+            print("Target : {}, Received : {}".format(f, max_freq))
+            ifreq, idb = self.fft_vals_lookup[(f,db)]
+            self.reject_list.append((f, db, ifreq, idb))            
+
         if VERBOSE:
             #print(maxidx)
             print("%.5f AI V" % (vmax))
@@ -257,17 +278,37 @@ class Calibrator(QtGui.QMainWindow):
             
         self.display.draw_line(1,0, times, data)
         self.display.draw_line(2,1, freq, spectrum)
-
+        
         self.curve_data_lock.lock()        
         self.rep_temp.append(spec_max)
-        if len(self.rep_temp) == 10:
+        if len(self.rep_temp) == self.nreps:
             ifreq, idb = self.fft_vals_lookup[(f,db)]
             self.fft_max_vals[ifreq][idb] = np.mean(self.rep_temp)
-            rep_temp = []
+            if VERBOSE:
+                print('\n' + '*'*40)
+                print("Rep values: {}, Rep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
+                print('*'*40 + '\n')
+            self.rep_temp = []
         self.curve_data_lock.unlock()
 
+        if SAVE_FFT_DATA:
+            irep = len(self.rep_temp) - 1
+            if irep < 0 :
+                irep - self.nreps - 1 
+            ifreq, idb = self.fft_vals_lookup[(f,db)]
+            self.full_fft_data[ifreq][idb][irep] = spectrum        
+
     def process_caldata(self):
+        print("job finished")
         print(self.fft_max_vals)
+        print(self.reject_list)
+        if SAVE_FFT_DATA:
+            filename = 'exp_test_data.npy'
+            np.save(filename, self.full_fft_data)
+
+            with open("etd_index.pkl", 'wb') as cfo:
+                pickle.dump(self.reject_list,cfo)
+
             
     def on_stop(self):
         if self.current_operation == 0 :
@@ -305,7 +346,7 @@ class Calibrator(QtGui.QMainWindow):
         #dur = 1
 
         #print('freq: {}, rft: {}'.format(f,rft))
-        tone, timevals = make_tone(f,db,dur,rft,sr)
+        tone, timevals = make_tone(f,db,dur,rft,sr, self.caldb, self.calv)
         
         npts = tone.size
 
@@ -407,10 +448,12 @@ class Calibrator(QtGui.QMainWindow):
             self.stim_lock.lock()
             if self.work_queue.empty():
                 # no more work, quit
+                print("outta work")
                 self.stim_lock.unlock()
                 self.on_stop()
                 # or should I emit a signal to execute this?
-                self.process_caldata
+                print("send to processor")
+                self.process_caldata()
                 return
             else:
                 f, db = self.work_queue.get()
@@ -517,11 +560,13 @@ class Calibrator(QtGui.QMainWindow):
             self.ui.dur_spnbx_2.setValue(reprate*1000)
 
     def launch_display_dlg(self):
-        field_vals = {'chunksz' : self.ainpts}
+        field_vals = {'chunksz' : self.ainpts, 'caldb': self.caldb, 'calv': self.calv}
         dlg = DisplayDialog(default_vals=field_vals)
         if dlg.exec_():
-            ainpts = dlg.get_values()
+            ainpts, caldb, calv = dlg.get_values()
             self.ainpts = ainpts
+            self.caldb = caldb
+            self.calv = calv
         print(self.ainpts)
 
     def keyPressEvent(self,event):
@@ -616,21 +661,21 @@ class ShadowThread(QtCore.QThread):
     def run(self):
         QtCore.QThread.run(self)
 
-def make_tone(freq,db,dur,risefall,samplerate):
+def make_tone(freq,db,dur,risefall,samplerate, caldb, calv):
     # create portable tone generator class that allows the 
     # ability to generate tones that modifyable on-the-fly
     npts = dur * samplerate
     #print("duration (s) :{}".format(dur))
     # equation for db from voltage is db = 20 * log10(V2/V1))
     # 10^(db/20)
-    v_at_caldB = 0.175
-    caldB = 100
+    v_at_caldB = calv
+    caldB = caldb
     amp = (10 ** ((db-caldB)/20)*v_at_caldB)
 
-    print('*'*40)
     if VERBOSE:
-        print("AO Amp: {}, current dB: {}, cal dB: {}, V at cal dB: {}"
-              .format(amp, db, caldB, v_at_caldB))
+        print("AO Amp: {:.6f}, current dB: {}, current frequency: {} kHz"
+              .format(amp, db, freq/1000))
+        print("cal dB: {}, V at cal dB: {}".format(caldB, v_at_caldB))
 
     rf_npts = risefall * samplerate
     #print('amp {}, freq {}, npts {}, rf_npts {}'
@@ -642,7 +687,6 @@ def make_tone(freq,db,dur,risefall,samplerate):
         tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
         tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
         
-
     timevals = np.arange(npts)/samplerate
 
     return tone, timevals

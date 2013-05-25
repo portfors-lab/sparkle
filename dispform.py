@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\display_dlg.ui'
 #
-# Created: Tue May 21 11:52:46 2013
-#      by: PyQt4 UI code generator 4.10.1
+# Created: Fri May 24 17:47:01 2013
+#      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,21 +26,39 @@ except AttributeError:
 class Ui_DisplayDlg(object):
     def setupUi(self, DisplayDlg):
         DisplayDlg.setObjectName(_fromUtf8("DisplayDlg"))
-        DisplayDlg.resize(354, 84)
+        DisplayDlg.resize(280, 121)
         self.verticalLayout = QtGui.QVBoxLayout(DisplayDlg)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.gridLayout = QtGui.QGridLayout()
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label = QtGui.QLabel(DisplayDlg)
         self.label.setObjectName(_fromUtf8("label"))
-        self.horizontalLayout.addWidget(self.label)
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.chunksz_lnedt = QtGui.QLineEdit(DisplayDlg)
         self.chunksz_lnedt.setObjectName(_fromUtf8("chunksz_lnedt"))
-        self.horizontalLayout.addWidget(self.chunksz_lnedt)
+        self.gridLayout.addWidget(self.chunksz_lnedt, 0, 1, 1, 1)
         self.label_2 = QtGui.QLabel(DisplayDlg)
         self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.horizontalLayout.addWidget(self.label_2)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.gridLayout.addWidget(self.label_2, 0, 2, 1, 1)
+        self.label_3 = QtGui.QLabel(DisplayDlg)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
+        self.caldb_lnedt = QtGui.QLineEdit(DisplayDlg)
+        self.caldb_lnedt.setObjectName(_fromUtf8("caldb_lnedt"))
+        self.gridLayout.addWidget(self.caldb_lnedt, 1, 1, 1, 1)
+        self.label_6 = QtGui.QLabel(DisplayDlg)
+        self.label_6.setObjectName(_fromUtf8("label_6"))
+        self.gridLayout.addWidget(self.label_6, 1, 2, 1, 1)
+        self.label_4 = QtGui.QLabel(DisplayDlg)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.gridLayout.addWidget(self.label_4, 2, 0, 1, 1)
+        self.calV_lnedt = QtGui.QLineEdit(DisplayDlg)
+        self.calV_lnedt.setObjectName(_fromUtf8("calV_lnedt"))
+        self.gridLayout.addWidget(self.calV_lnedt, 2, 1, 1, 1)
+        self.label_5 = QtGui.QLabel(DisplayDlg)
+        self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.gridLayout.addWidget(self.label_5, 2, 2, 1, 1)
+        self.verticalLayout.addLayout(self.gridLayout)
         self.buttonBox = QtGui.QDialogButtonBox(DisplayDlg)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
@@ -56,6 +74,10 @@ class Ui_DisplayDlg(object):
         DisplayDlg.setWindowTitle(_translate("DisplayDlg", "Display Options", None))
         self.label.setText(_translate("DisplayDlg", "acquisition chunk size", None))
         self.label_2.setText(_translate("DisplayDlg", "samples", None))
+        self.label_3.setText(_translate("DisplayDlg", "Calibration intensity", None))
+        self.label_6.setText(_translate("DisplayDlg", "dB", None))
+        self.label_4.setText(_translate("DisplayDlg", "Voltage at  cal dB", None))
+        self.label_5.setText(_translate("DisplayDlg", "V", None))
 
 
 if __name__ == "__main__":
