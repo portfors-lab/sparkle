@@ -42,6 +42,7 @@ class BasePlot(QtGui.QMainWindow):
                                 self.canvas_context)
 
         self.progeny = []
+        self.custom_menu_actions = []
         self.active = True
 
     def canvas_context(self, event):
@@ -57,9 +58,17 @@ class BasePlot(QtGui.QMainWindow):
                 popMenu.addAction(yaxis_action)
                 popMenu.addAction(xaxis_action)
                 popMenu.addAction(spawn_action)
+
+                for act, funct in self.custom_menu_actions:
+                    act.triggered.connect(functools.partial(funct, event))
+                    popMenu.addAction(act)
+     
                 figheight = self.canvas.height()
                 point = QtCore.QPoint(event.x, figheight - event.y)
                 popMenu.exec(self.canvas.mapToGlobal(point))
+
+    def add_context_item(self, item):
+        self.custom_menu_actions.append(item)
 
     def _autoscale_y(self, event):
         for ax in self.axs:

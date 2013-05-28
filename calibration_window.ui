@@ -839,6 +839,18 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="label0">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Voltage out:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">

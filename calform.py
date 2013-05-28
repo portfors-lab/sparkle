@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Fri May 24 15:47:05 2013
+# Created: Mon May 27 13:44:32 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -477,6 +477,12 @@ class Ui_CalibrationWindow(object):
         self.info_title.setFont(font)
         self.info_title.setObjectName(_fromUtf8("info_title"))
         self.verticalLayout_3.addWidget(self.info_title)
+        self.label0 = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label0.setFont(font)
+        self.label0.setObjectName(_fromUtf8("label0"))
+        self.verticalLayout_3.addWidget(self.label0)
         self.label1 = QtGui.QLabel(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -571,6 +577,7 @@ class Ui_CalibrationWindow(object):
         self.label_29.setText(_translate("CalibrationWindow", "Stim channel", None))
         self.label_30.setText(_translate("CalibrationWindow", "AI channel", None))
         self.info_title.setText(_translate("CalibrationWindow", "Now Playing:", None))
+        self.label0.setText(_translate("CalibrationWindow", "Voltage out:", None))
         self.label1.setText(_translate("CalibrationWindow", "Frquency :", None))
         self.label2.setText(_translate("CalibrationWindow", "Intensity :", None))
         self.label3.setText(_translate("CalibrationWindow", "Other", None))

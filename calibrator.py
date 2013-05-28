@@ -40,7 +40,7 @@ class Calibrator(QtGui.QMainWindow):
         self.ui.stop_button.clicked.connect(self.on_stop)
 
         self.tone = []
-        self.sp = None
+        self.display = None
         self.ainpts = AIPOINTS # gets overriden (hopefully)
         self.caldb = CALDB
         self.calv = CALV
@@ -102,7 +102,7 @@ class Calibrator(QtGui.QMainWindow):
         # tuning curve, or on-the-fly modifyable tone
         
         if self.ui.tabs.currentIndex() == 0 :
-            self.current_operation = 1
+            self.current_operation = 0
             if self.aitask is not None:
                 self.on_stop()
             self.cnt = 0
@@ -189,13 +189,19 @@ class Calibrator(QtGui.QMainWindow):
                 interval = (1/reprate)*1000
 
                 # set up display
-                self.display = AnimatedWindow( ([],[]), ([],[]), ([[],[]],[[],[]]) )
+                if self.display == None or not(self.display.active):
+                    self.display = AnimatedWindow( ([],[]), ([],[]), ([[],[]],[[],[]]) )
+                self.display.axs[0].set_xlim(0,3)
+                self.display.axs[0].set_ylim(-10,10)
+                self.display.axs[1].set_xlim(0,3)
+                self.display.axs[1].set_ylim(-10,10)
                 self.display.axs[2].set_xlim(0,sr/2)
                 #self.display.canvas.draw()
                 self.display.show()
             
                 # data structure to store the averages of the resultant FFT peaks
-                self.fft_max_vals = np.zeros((len(freqs),len(intensities)))
+                self.fft_peaks = np.zeros((len(freqs),len(intensities)))
+                self.playback_dB = np.zeros((len(freqs),len(intensities)))
                 self.fft_vals_lookup = {}
 
                 if SAVE_FFT_DATA:
@@ -224,8 +230,9 @@ class Calibrator(QtGui.QMainWindow):
 
     def curve_worker(self, f, db):
 
-        self.ui.label1.setText("Frequency : %d" % (f))
-        self.ui.label2.setText("Intensity : %d" % (db))
+        self.ui.label0.setText("Frequency : %d" % (f))
+        self.ui.label1.setText("Intensity : %d" % (db))
+        
 
         sr = self.sr
         dur = self.dur
@@ -233,9 +240,13 @@ class Calibrator(QtGui.QMainWindow):
 
         # make a tone, calculate it's fft and display
         tone, times = make_tone(f, db, dur, rft, sr, self.caldb, self.calv)
+        self.ui.label2.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
+
+        if np.amax(abs(tone)) < 0.1:
+            print("WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM")
         xfft, yfft = calc_spectrum(tone, sr)
         self.display.draw_line(0, 0, times, tone)
-        self.display.draw_line(2,0, xfft, abs(yfft))
+        self.display.draw_line(2, 0, xfft, abs(yfft))
         
         # now present the tone once
         self.daq_lock.lock()
@@ -264,17 +275,21 @@ class Calibrator(QtGui.QMainWindow):
         spec_max = np.amax(spectrum)
         vmax = np.amax(abs(data))
 
+        self.ui.label3.setText("AI Vmax : %.5f" % (np.amax(abs(data))))
+        if vmax < 0.1:
+            print("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
+
         #tolerance of 1 Hz for frequency matching
         if max_freq < f-1 or max_freq > f+1:
             print("WARNING: MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
-            print("Target : {}, Received : {}".format(f, max_freq))
+            print("\tTarget : {}, Received : {}".format(f, max_freq))
             ifreq, idb = self.fft_vals_lookup[(f,db)]
             self.reject_list.append((f, db, ifreq, idb))            
 
         if VERBOSE:
             #print(maxidx)
             print("%.5f AI V" % (vmax))
-            print("%.6f FFT, at %d Hz\n" % (spec_max, max_freq))
+            print("%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq))
             
         self.display.draw_line(1,0, times, data)
         self.display.draw_line(2,1, freq, spectrum)
@@ -283,10 +298,10 @@ class Calibrator(QtGui.QMainWindow):
         self.rep_temp.append(spec_max)
         if len(self.rep_temp) == self.nreps:
             ifreq, idb = self.fft_vals_lookup[(f,db)]
-            self.fft_max_vals[ifreq][idb] = np.mean(self.rep_temp)
+            self.fft_peaks[ifreq][idb] =  np.mean(self.rep_temp)
             if VERBOSE:
                 print('\n' + '*'*40)
-                print("Rep values: {}, Rep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
+                print("Rep values: {}\nRep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
                 print('*'*40 + '\n')
             self.rep_temp = []
         self.curve_data_lock.unlock()
@@ -294,24 +309,38 @@ class Calibrator(QtGui.QMainWindow):
         if SAVE_FFT_DATA:
             irep = len(self.rep_temp) - 1
             if irep < 0 :
-                irep - self.nreps - 1 
+                irep = self.nreps - 1 
             ifreq, idb = self.fft_vals_lookup[(f,db)]
             self.full_fft_data[ifreq][idb][irep] = spectrum        
 
     def process_caldata(self):
         print("job finished")
-        print(self.fft_max_vals)
+        print(self.fft_peaks)
         print(self.reject_list)
+        # go through FFT peaks and calculate playback resultant dB
+        #for freq in self.fft_peaks
+        vfunc = np.vectorize(calc_db)
+        f = 15000 #??????????????????????????? FIX ME!!!!!!!!
+        ifreq, idb = self.fft_vals_lookup[(f,self.caldb)]
+        cal_fft_peak = self.fft_peaks[ifreq][idb]
+        resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
+
         if SAVE_FFT_DATA:
-            filename = 'exp_test_data.npy'
+            filename = 'caltest_data.npy'
             np.save(filename, self.full_fft_data)
 
-            with open("etd_index.pkl", 'wb') as cfo:
+            filename = 'fftpeaks.npy'
+            np.save(filename, self.fft_peaks)
+
+            filename = 'resultdb.npy'
+            np.save(filename, resultant_dB)
+
+            with open("reject_index.pkl", 'wb') as cfo:
                 pickle.dump(self.reject_list,cfo)
 
-            
+
     def on_stop(self):
-        if self.current_operation == 0 :
+        if self.current_operation == 0 : 
             if USE_FINITE:
                 self.ui.interval_spnbx.setEnabled(True)
                 if self.daq_timer is not None:
@@ -322,7 +351,7 @@ class Calibrator(QtGui.QMainWindow):
                     try:
                         self.aitask.stop()
                         self.aotask.stop()
-                        self.sp.killTimer(self.sp.timer)
+                        self.display.killTimer(self.display.timer)
                     except DAQError:
                         print("No task running")
                     except:
@@ -361,35 +390,42 @@ class Calibrator(QtGui.QMainWindow):
         self.stim_lock.unlock()
 
         self.statusBar().showMessage('npts: {}'.format(npts))
+        print('\n' + '*'*40 + '\n')
+        self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
 
         print("update_stim")
         # now update the display of the stim
-        if self.sp == None or not(self.sp.active):
+        if self.display == None or not(self.display.active):
             self.spawn_display(timevals, tone, freq, abs(spectrum))
             
         else:
             self.stim_display(timevals, tone, freq, abs(spectrum))
 
     def spawn_display(self,timevals,tone, freq, sp):
-        self.sp = AnimatedWindow(([],[]), ([],[]), 
+        self.display = AnimatedWindow(([],[]), ([],[]), 
                                  ([[],[]],[[],[]]))
-        self.sp.show()
-        self.sp.draw_line(0, 0, timevals, tone)
-        self.sp.draw_line(2,0,freq,sp)
-        self.sp.xlim_auto([self.sp.axs[2]])
-        self.sp.ylim_auto([self.sp.axs[2]])
-        #self.sp.canvas.draw()
+        self.display.show()
+        self.display.draw_line(0, 0, timevals, tone)
+        self.display.draw_line(2, 0, freq,sp)
+        # set axes limits appropriately
+        self.display.axs[0].set_xlim(0,3)
+        self.display.axs[0].set_ylim(-10,10)
+        self.display.axs[1].set_xlim(0,3)
+        self.display.axs[1].set_ylim(-10,10)
+        self.display.xlim_auto([self.display.axs[2]])
+        self.display.ylim_auto([self.display.axs[2]])
+        #self.display.canvas.draw()
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
-        self.sp.draw_line(0, 0, xdata, ydata)
-        self.sp.draw_line(2, 0, xfft, yfft)
+        self.display.draw_line(0, 0, xdata, ydata)
+        self.display.draw_line(2, 0, xfft, yfft)
         
     def ai_display(self):
         try:
-            # if usin a scrolling plot, use the leftmost axis lim 
+            # if using a scrolling plot, use the leftmost axis lim 
             # to start the time data from, otherwise start from 0
-            lims = self.sp.axs[1].axis()
+            lims = self.display.axs[1].axis()
             lims = [0]
             # copy data to variable as data structures not synchronized :(
             data = self.current_line_data[:]
@@ -404,17 +440,17 @@ class Calibrator(QtGui.QMainWindow):
 
             if VERBOSE:
                 #print(maxidx)
-                print("response x range {}, {}".format(xdata[0], xdata[-1]))
+                #print("response x range {}, {}".format(xdata[0], xdata[-1]))
                 print("%.5f AI V" % (np.amax(data)))
-                print("%.6f FFT, at %d Hz\n" % (np.amax(abs(spectrum)), freq[maxidx]))
+                print("%.6f FFT peak, at %d Hz\n" % (np.amax(abs(spectrum)), freq[maxidx]))
 
             # update labels on GUI with FFT data
 
             self.ui.label1.setText("AI Vmax : %.5f" % (np.amax(abs(data))))
-            self.ui.label2.setText("%.6f FFT, at %d Hz\n" % (np.amax(abs(spectrum)), freq[maxidx]))
+            self.ui.label2.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(abs(spectrum)), freq[maxidx]))
 
-            self.sp.draw_line(2,1,freq, abs(spectrum))
-            self.sp.draw_line(1,0,xdata,data)
+            self.display.draw_line(2,1,freq, abs(spectrum))
+            self.display.draw_line(1,0,xdata,data)
                       
         except:
             print("Error drawing line data")
@@ -422,7 +458,7 @@ class Calibrator(QtGui.QMainWindow):
             raise
 
     def timerEvent(self, evt):
-
+        #print("tick")
         if self.current_operation == 0:
             #w = WorkerObj(self.finite_worker)
 
@@ -452,6 +488,7 @@ class Calibrator(QtGui.QMainWindow):
                 self.stim_lock.unlock()
                 self.on_stop()
                 # or should I emit a signal to execute this?
+                self.pool.waitForDone()
                 print("send to processor")
                 self.process_caldata()
                 return
@@ -461,7 +498,7 @@ class Calibrator(QtGui.QMainWindow):
 
             # spawn thread for next item in queue
             t  = GenericThread(self.curve_worker, f, db)
-            self.pool.start(t)
+        self.pool.start(t)
 
     def finite_worker(self):
 
@@ -493,7 +530,7 @@ class Calibrator(QtGui.QMainWindow):
         self.stim_lock.unlock()
 
         #self.emit(QtCore.SIGNAL('ai_display()'))
-        self.signal.done.emit()
+        self.signals.done.emit()
         
     def every_n_callback(self,task):
         
@@ -513,7 +550,7 @@ class Calibrator(QtGui.QMainWindow):
             #print(self.ndata)
             
             n = read.value
-            lims = self.sp.axs[1].axis()
+            lims = self.display.axs[1].axis()
             #print("lims {}".format(lims))
             #print("ndata {}".format(self.ndata))
             
@@ -553,7 +590,6 @@ class Calibrator(QtGui.QMainWindow):
             print("Warning: No interval down-time, consider using continuous acquisition to avoid failure.")
 
     def set_dur_max(self):
-        print("also need to set dur_max")
         dur = self.ui.dur_spnbx_2.value()
         reprate = self.ui.reprate_spnbx.value()
         if reprate < (dur/1000):
@@ -583,7 +619,7 @@ class Calibrator(QtGui.QMainWindow):
             self.setFocus()
         elif event.text() == 'r':
             print("redraw")
-            self.sp.redraw()
+            self.display.redraw()
         
     def closeEvent(self,event):
         # halt acquisition loop
@@ -610,9 +646,12 @@ class Calibrator(QtGui.QMainWindow):
         outlist.append(self.ui.db_step_spnbx.value())
         outlist.append(self.ui.dur_spnbx_2.value())
         outlist.append(self.ui.risefall_spnbx_2.value())
-        outlist.append( self.ui.reprate_spnbx.value())
+        outlist.append(self.ui.reprate_spnbx.value())
         outlist.append(self.ui.sr_spnbx_2.value())
         outlist.append(self.ui.nreps_spnbx.value())
+
+        outlist.append(self.caldb)
+        outlist.append(self.calv)
 
         save_inputs(outlist)
 
@@ -673,8 +712,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb, calv):
     amp = (10 ** ((db-caldB)/20)*v_at_caldB)
 
     if VERBOSE:
-        print("AO Amp: {:.6f}, current dB: {}, current frequency: {} kHz"
-              .format(amp, db, freq/1000))
+        print("current dB: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, freq/1000, amp))
         print("cal dB: {}, V at cal dB: {}".format(caldB, v_at_caldB))
 
     rf_npts = risefall * samplerate
@@ -701,6 +739,10 @@ def calc_spectrum(signal,rate):
     sp = sp[:(npts/2)]
 
     return freq, sp.real
+
+def calc_db(peak, caldB, fft_peak_cal):
+    pbdB = 20 * np.log10(peak/fft_peak_cal) + caldB
+    return pbdB
 
 def load_inputs():
     cfgfile = "inputs.cfg"

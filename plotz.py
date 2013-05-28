@@ -96,25 +96,6 @@ class ResultsPlot(BasePlot):
             self.from_axes = None
         else:
             self.from_axes = None
-            
-class SimplePlot(BasePlot):
-    def __init__(self,*args,parent=None):
-        BasePlot.__init__(self,(1,1),parent)
-
-        if len(args) == 1:
-            [data] = args[0]
-            [xvals] = range(len(data))
-        else:
-            if len(args) != 2:
-                print("data arguments must be in x,y array lists")
-                return
-            data = args[1]
-            xvals = args[0]
-
-        self.setWindowTitle('Display')
-
-        for idata in range(len(data)):
-            self.ax[0].plot(xvals[idata],data[idata])
 
 class SubPlots(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
@@ -151,17 +132,18 @@ class SubPlots(BasePlot):
     def draw_line(self, axnum, linenum, xdata, ydata):
         self.axs[axnum].lines[linenum].set_data(xdata,ydata)
         self.canvas.draw()
-        
+
 
 class AnimatedWindow(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
         nsubplots = len(args)
         BasePlot.__init__(self,(nsubplots,1),parent)
 
+        """
         for ax in self.axs:
-            ax.set_xlim(0,5)
+            ax.set_xlim(0,3)
             ax.set_ylim(-10,10)
-
+        """
         self.canvas.draw()
 
         # save these backgrounds for animation
@@ -189,13 +171,35 @@ class AnimatedWindow(BasePlot):
             else:
                 ax.plot(xdata, ydata, animated=True)
 
+        # custom menu action
+        live_subwindow = QtGui.QAction('live spawn', self)
+        self.add_context_item((live_subwindow,self.spawn_live))
+
         self.callback = callback
 
         self.resize_mutex = QtCore.QMutex()
         
         self.cnt = 0
+        self.live_progeny = []
 
         self.redraw()
+
+    def spawn_live(self, event):
+        for axnum, ax in enumerate(self.axs):
+            if ax.contains(event)[0]:
+                print("creating live sub window of axes ", axnum)
+                #copy data to new figure (not live)
+                lines = []
+                for iline in ax.lines:
+                    ldata = iline.get_data()
+                    lines.append(ldata)
+                new_fig = AnimatedWindow(*lines)
+                new_fig.show()
+                #new_fig.xlim_auto(new_fig.axs[0])
+                #new_fig.ylim_auto(new_fig.axs[0])
+                #we must keep a reference to the plots, otherwise they go away
+                self.live_progeny.append((new_fig, axnum))
+    
 
     def draw_line(self, axnum, linenum, xdata, ydata):
         self.canvas.restore_region(self.ax_backgrounds[axnum])
@@ -211,6 +215,17 @@ class AnimatedWindow(BasePlot):
             # canvas outside the axes is not initially painted.
             self.canvas.draw()
             self.cnt += 1
+
+        # call this function on all linked subwindows
+        for child, axn in self.live_progeny:
+            if axn == axnum:
+                if child.active:
+                    # live progeny only have 1 axes
+                    child.draw_line(linenum, 0, xdata, ydata)
+                else:
+                    # window was closed, remove from progeny list
+                    pass
+                    #self.live_progeny.remove(child)
 
     def start_update(self, update_rate):
         # timer takes interval in ms. assuming rate in Hz, convert
