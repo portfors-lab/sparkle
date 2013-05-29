@@ -7,6 +7,16 @@ from abstract_figures import BasePlot
 
 import time
 
+class BasicPlot(BasePlot):
+    def __init__(self,*args,parent=None):
+        BasePlot.__init__(self, (1,1), parent)
+        # assumes input in the form of (xdata,ydata) tuples
+
+        nlines = len(args)
+        for arg in args:
+            xdata, ydata = arg
+            self.axs[0].plot(xdata,ydata)
+
 class ResultsPlot(BasePlot):
     def __init__(self,data,parent=None):
         ncols = np.floor(np.sqrt(data.shape[1]))
@@ -184,22 +194,27 @@ class AnimatedWindow(BasePlot):
 
         self.redraw()
 
-    def spawn_live(self, event):
+    def spawn_live(self):
+        print("event received")
+        event = self.last_event
         for axnum, ax in enumerate(self.axs):
             if ax.contains(event)[0]:
                 print("creating live sub window of axes ", axnum)
                 #copy data to new figure (not live)
                 lines = []
-                for iline in ax.lines:
-                    ldata = iline.get_data()
+                for line in ax.lines:
+                    ldata = line.get_data()
                     lines.append(ldata)
                 new_fig = AnimatedWindow(*lines)
+
+                # now go through and make colors match
+                for iline, line in enumerate(ax.lines):
+                    c = line.get_color()
+                    new_fig.axs[iline].lines[0].set_color(c)
                 new_fig.show()
-                #new_fig.xlim_auto(new_fig.axs[0])
-                #new_fig.ylim_auto(new_fig.axs[0])
+                
                 #we must keep a reference to the plots, otherwise they go away
                 self.live_progeny.append((new_fig, axnum))
-    
 
     def draw_line(self, axnum, linenum, xdata, ydata):
         self.canvas.restore_region(self.ax_backgrounds[axnum])
@@ -224,8 +239,8 @@ class AnimatedWindow(BasePlot):
                     child.draw_line(linenum, 0, xdata, ydata)
                 else:
                     # window was closed, remove from progeny list
-                    pass
-                    #self.live_progeny.remove(child)
+                    #pass
+                    self.live_progeny.remove((child, axn))
 
     def start_update(self, update_rate):
         # timer takes interval in ms. assuming rate in Hz, convert
@@ -265,6 +280,9 @@ class AnimatedWindow(BasePlot):
             self.canvas.draw()
             
             self.resize_mutex.unlock()
+
+    def resize_event(self):
+        print("mpl resize event")
 
     def keyPressEvent(self,event):
         #print("key press event from AnimatedWindow")

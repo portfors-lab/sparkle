@@ -38,39 +38,46 @@ class BasePlot(QtGui.QMainWindow):
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
 
+        yaxis_action = QtGui.QAction('autoscale y', self)
+        #yaxis_action.triggered.connect(functools.partial(self._autoscale_y,event))
+        yaxis_action.triggered.connect(self._autoscale_y)
+        xaxis_action = QtGui.QAction('autoscale x', self)
+        #xaxis_action.triggered.connect(functools.partial(self._autoscale_x,event))
+        xaxis_action.triggered.connect(self._autoscale_x)
+
+        spawn_action = QtGui.QAction('spawn', self)
+        #spawn_action.triggered.connect(functools.partial(self.spawn_child,event))
+        spawn_action.triggered.connect(self.spawn_child)
+
+        popMenu = QtGui.QMenu(self)
+        popMenu.addAction(yaxis_action)
+        popMenu.addAction(xaxis_action)
+        popMenu.addAction(spawn_action)
+        self.popMenu = popMenu
+
         self.canvas.mpl_connect('button_release_event', 
                                 self.canvas_context)
 
         self.progeny = []
         self.custom_menu_actions = []
         self.active = True
+        self.cids = []
 
     def canvas_context(self, event):
         if event.button == 3:
             if event.inaxes:
-                yaxis_action = QtGui.QAction('autoscale y', self)
-                yaxis_action.triggered.connect(functools.partial(self._autoscale_y,event))
-                xaxis_action = QtGui.QAction('autoscale x', self)
-                xaxis_action.triggered.connect(functools.partial(self._autoscale_x,event))
-                spawn_action = QtGui.QAction('spawn', self)
-                spawn_action.triggered.connect(functools.partial(self.spawn_child,event))
-                popMenu = QtGui.QMenu(self)
-                popMenu.addAction(yaxis_action)
-                popMenu.addAction(xaxis_action)
-                popMenu.addAction(spawn_action)
-
-                for act, funct in self.custom_menu_actions:
-                    act.triggered.connect(functools.partial(funct, event))
-                    popMenu.addAction(act)
-     
+                self.last_event = event
                 figheight = self.canvas.height()
                 point = QtCore.QPoint(event.x, figheight - event.y)
-                popMenu.exec(self.canvas.mapToGlobal(point))
+                self.popMenu.exec(self.canvas.mapToGlobal(point))
 
     def add_context_item(self, item):
-        self.custom_menu_actions.append(item)
+        act, funct = item
+        act.triggered.connect(funct)
+        self.popMenu.addAction(act)
 
-    def _autoscale_y(self, event):
+    def _autoscale_y(self):
+        event = self.last_event
         for ax in self.axs:
             if ax.contains(event)[0]:
                 self.ylim_auto([ax])
@@ -99,7 +106,8 @@ class BasePlot(QtGui.QMainWindow):
             self.canvas.draw()
 
 
-    def _autoscale_x(self,event):
+    def _autoscale_x(self):
+        event = self.last_event
         for ax in self.axs:
             if ax.contains(event)[0]:
                 self.xlim_auto([ax])
@@ -117,7 +125,8 @@ class BasePlot(QtGui.QMainWindow):
             ax.set_xlim(x0,x1)
             self.canvas.draw()
 
-    def spawn_child(self, event):
+    def spawn_child(self):
+        event = self.last_event
         for ax in self.axs:
             if ax.contains(event)[0]:
                 #copy data to new figure (not live)
@@ -142,3 +151,22 @@ class BasePlot(QtGui.QMainWindow):
         # - is there are better way?
         self.active = False
         QtGui.QMainWindow.closeEvent(self,event)
+
+class SimplePlot(BasePlot):
+    def __init__(self,*args,parent=None):
+        BasePlot.__init__(self,(1,1),parent)
+
+        if len(args) == 1:
+            [data] = args[0]
+            [xvals] = range(len(data))
+        else:
+            if len(args) != 2:
+                print("data arguments must be in x,y array lists")
+                return
+            data = args[1]
+            xvals = args[0]
+
+        self.setWindowTitle('Display')
+
+        for idata in range(len(data)):
+            self.axs[0].plot(xvals[idata],data[idata])
