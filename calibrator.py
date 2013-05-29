@@ -16,7 +16,7 @@ from disp_dlg import DisplayDialog
 AIPOINTS = 100
 CALDB = 100
 CALV = 0.175
-CALF = 15000
+CALF = int(15000)
 
 XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
@@ -45,6 +45,7 @@ class Calibrator(QtGui.QMainWindow):
         self.ainpts = AIPOINTS # gets overriden (hopefully)
         self.caldb = CALDB
         self.calv = CALV
+        self.calf = CALF
 
         inlist = load_inputs()
         if len(inlist) > 0:
@@ -279,6 +280,7 @@ class Calibrator(QtGui.QMainWindow):
         vmax = np.amax(abs(data))
 
         self.ui.label3.setText("AI Vmax : %.5f" % (np.amax(abs(data))))
+        self.ui.label4.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), max_freq))
         if vmax < 0.1:
             print("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
 
@@ -323,8 +325,8 @@ class Calibrator(QtGui.QMainWindow):
         # go through FFT peaks and calculate playback resultant dB
         #for freq in self.fft_peaks
         vfunc = np.vectorize(calc_db)
-        f = CALF #??????????????????????????? FIX ME!!!!!!!!
-        ifreq, idb = self.fft_vals_lookup[(f,self.caldb)]
+        print("Using FFT peak data from ", self.caldb, " dB, ", self.calf, " Hz tone to calculate calibration curve")
+        ifreq, idb = self.fft_vals_lookup[(self.calf,self.caldb)]
         cal_fft_peak = self.fft_peaks[ifreq][idb]
         resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
 
@@ -402,7 +404,11 @@ class Calibrator(QtGui.QMainWindow):
 
         self.statusBar().showMessage('npts: {}'.format(npts))
         print('\n' + '*'*40 + '\n')
-        self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
+        #self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
+
+        self.ui.label0.setText("Frequency : %d" % (f))
+        self.ui.label1.setText("Intensity : %d" % (db))
+        self.ui.label2.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
 
         print("update_stim")
         # now update the display of the stim
@@ -460,8 +466,8 @@ class Calibrator(QtGui.QMainWindow):
 
             # update labels on GUI with FFT data
 
-            self.ui.label1.setText("AI Vmax : %.5f" % (vmax))
-            self.ui.label2.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), freq[maxidx]))
+            self.ui.label3.setText("AI Vmax : %.5f" % (vmax))
+            self.ui.label4.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), freq[maxidx]))
 
             if vmax < 0.1:
                 self.statusBar().showMessage("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
@@ -614,14 +620,14 @@ class Calibrator(QtGui.QMainWindow):
             self.ui.dur_spnbx_2.setValue(reprate*1000)
 
     def launch_display_dlg(self):
-        field_vals = {'chunksz' : self.ainpts, 'caldb': self.caldb, 'calv': self.calv}
+        field_vals = {'chunksz' : self.ainpts, 'caldb': self.caldb, 'calv': self.calv, 'calf' : self.calf}
         dlg = DisplayDialog(default_vals=field_vals)
         if dlg.exec_():
-            ainpts, caldb, calv = dlg.get_values()
+            ainpts, caldb, calv, calf = dlg.get_values()
             self.ainpts = ainpts
             self.caldb = caldb
             self.calv = calv
-        print(self.ainpts)
+            self.calf = calf
 
     def keyPressEvent(self,event):
         print("keypress from calibrator")

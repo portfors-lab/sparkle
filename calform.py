@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Tue May 28 22:40:23 2013
+# Created: Tue May 28 23:46:27 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -402,7 +402,7 @@ class Ui_CalibrationWindow(object):
         font.setPointSize(10)
         self.sr_spnbx_2.setFont(font)
         self.sr_spnbx_2.setMinimum(10)
-        self.sr_spnbx_2.setMaximum(400)
+        self.sr_spnbx_2.setMaximum(1000)
         self.sr_spnbx_2.setSingleStep(10)
         self.sr_spnbx_2.setProperty("value", 100)
         self.sr_spnbx_2.setObjectName(_fromUtf8("sr_spnbx_2"))
@@ -506,6 +506,12 @@ class Ui_CalibrationWindow(object):
         self.label3.setFont(font)
         self.label3.setObjectName(_fromUtf8("label3"))
         self.verticalLayout_3.addWidget(self.label3)
+        self.label4 = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label4.setFont(font)
+        self.label4.setObjectName(_fromUtf8("label4"))
+        self.verticalLayout_3.addWidget(self.label4)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.start_button = QtGui.QPushButton(self.centralwidget)
@@ -533,7 +539,7 @@ class Ui_CalibrationWindow(object):
         self.menubar.addAction(self.menuAdvanced.menuAction())
 
         self.retranslateUi(CalibrationWindow)
-        self.tabs.setCurrentIndex(1)
+        self.tabs.setCurrentIndex(0)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_interval_min)
         QtCore.QObject.connect(self.reprate_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), CalibrationWindow.set_dur_max)
         QtCore.QObject.connect(self.actionDisplay_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_display_dlg)
@@ -581,6 +587,7 @@ class Ui_CalibrationWindow(object):
         self.label1.setText(_translate("CalibrationWindow", "Frquency :", None))
         self.label2.setText(_translate("CalibrationWindow", "Intensity :", None))
         self.label3.setText(_translate("CalibrationWindow", "Other", None))
+        self.label4.setText(_translate("CalibrationWindow", "Ni", None))
         self.start_button.setText(_translate("CalibrationWindow", "Start", None))
         self.stop_button.setText(_translate("CalibrationWindow", "Stop", None))
         self.menuAdvanced.setTitle(_translate("CalibrationWindow", "Advanced", None))
