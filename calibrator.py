@@ -85,6 +85,7 @@ class Calibrator(QtGui.QMainWindow):
         self.curve_data_lock = QtCore.QMutex()
         self.daq_timer = None
         self.aitask = None
+        self.current_operation = None
 
         self.thread_pool = []
         self.pool = QtCore.QThreadPool()
@@ -103,14 +104,18 @@ class Calibrator(QtGui.QMainWindow):
         # tuning curve, or on-the-fly modifyable tone
         
         if self.ui.tabs.currentIndex() == 0 :
+            # on the fly
             self.current_operation = 0
             if self.aitask is not None:
                 self.on_stop()
+
             self.cnt = 0
+            # gets info from UI and creates tone
             self.update_stim()
 
             sr = self.sr
             npts = self.tone.size
+            aisr = self.aisr
             interval = self.ui.interval_spnbx.value()
 
             if SAVE_DATA_CHART or SAVE_DATA_TRACES:
@@ -118,22 +123,23 @@ class Calibrator(QtGui.QMainWindow):
             
             self.ndata = 0
             self.current_line_data = []
-            #self.sp.start_update(100)
 
-            # cannot change interval on the fly
+            # do not change interval on the fly
             self.ui.interval_spnbx.setEnabled(False)
             try:
                 if USE_FINITE:
                     # set a timer to repeatedly start ao and ai tasks
-                    # set up first go before timer, so that the task starts as soon as timer fires
-                    response_npts = int(self.aitime*self.aisr)
-                    self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
+                    # set up first go before timer, so that the task starts as soon 
+                    # as timer fires, to get most accurate rate
+                    response_npts = int(self.aitime*aisr)
+                    self.aitask = AITaskFinite(aichan, aisr, response_npts)
                     self.aotask = AOTaskFinite(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
                     self.aotask.write(self.tone)
                 
                     self.daq_timer = self.startTimer(interval)
                 else:
-                    self.aitask = AITask(aichan, self.aisr, self.ainpts)
+                    # use continuous acquisition task, using NIDAQ everyncallback
+                    self.aitask = AITask(aichan, aisr, self.ainpts)
                     self.aotask = AOTask(aochan, sr, npts, 
                                          trigsrc=b"ai/StartTrigger")
                     self.aitask.register_callback(self.every_n_callback,
@@ -334,18 +340,9 @@ class Calibrator(QtGui.QMainWindow):
 
             with open("index.pkl", 'wb') as cfo:
                 pickle.dump([self.fft_vals_lookup, self.reject_list], cfo)
-        # plot calibration curve: frequency against resultant dB by
-        # target dB
-        curve_lines = []
-        freqs = self.freqs
-        for idb in range(resultant_dB.shape[1]):
-            ydata = resultant_dB[:,idb]
-            curve_lines.append((freqs,ydata))
-        self.fig = BasicPlot(*curve_lines)
-        self.fig.setWindowTitle("Calibration Curve")
-        self.fig.axs[0].set_xlabel("Frequency (Hz)")
-        self.fig.axs[0].set_ylabel("Recorded dB")
-        self.fig.show()
+
+        plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
+        
 
     def on_stop(self):
         if self.current_operation == 0 : 
@@ -355,18 +352,25 @@ class Calibrator(QtGui.QMainWindow):
                     self.killTimer(self.daq_timer)
                     self.pool.waitForDone()
                 else:
-                    try:
-                        self.aitask.stop()
-                        self.aotask.stop()
-                        self.display.killTimer(self.display.timer)
-                    except DAQError:
-                        print("No task running")
-                    except:
-                        raise
+                    self.display.killTimer(self.display.timer)
+                    
+                try:
+                    self.aitask.stop()
+                    self.aotask.stop()
+                    self.aitask = None
+                    self.aotask = None
+                except DAQError:
+                    print("No task running")
+                except:
+                    raise
         elif self.current_operation == 1:
             self.killTimer(self.daq_timer)
             self.ui.tab_2.setEnabled(True)
             self.ui.start_button.setEnabled(True)
+            # no need to kill tasks since they will finish in the thread
+            self.pool.waitForDone()
+            self.aitask = None
+            self.aotask = None
         else:
             print("No task currently running")
 
@@ -410,13 +414,16 @@ class Calibrator(QtGui.QMainWindow):
 
     def spawn_display(self):
         self.display = AnimatedWindow(([],[]), ([],[]), 
-                                 ([[],[]],[[],[]]))
+                                      ([[],[]],[[],[]]), parent=self)
         self.display.show()
         # set axes limits appropriately
+        self.display.axs[0].set_title("Stimulus")
         self.display.axs[0].set_xlim(0,3)
         self.display.axs[0].set_ylim(-10,10)
+        self.display.axs[1].set_title("Response")
         self.display.axs[1].set_xlim(0,3)
         self.display.axs[1].set_ylim(-10,10)
+        self.display.axs[2].set_title("FFTs")
         self.display.axs[2].set_xlim(0,self.sr/2)
         self.display.axs[1].lines[0].set_color('g')
         #self.display.canvas.draw()
@@ -500,7 +507,6 @@ class Calibrator(QtGui.QMainWindow):
                 self.stim_lock.unlock()
                 self.on_stop()
                 # or should I emit a signal to execute this?
-                self.pool.waitForDone()
                 print("send to processor")
                 self.process_caldata()
                 return
@@ -778,6 +784,23 @@ def save_inputs(savelist):
     cfgfile = "inputs.cfg"
     with open(cfgfile, 'wb') as cfo:
         pickle.dump(savelist,cfo)
+
+def plot_cal_curve(results_array, freqs, intensities, p):
+    # plot calibration curve: frequency against resultant dB by
+    # target dB
+    curve_lines = []
+    for idb in range(results_array.shape[1]):
+        ydata = results_array[:,idb]
+        curve_lines.append((freqs,ydata))
+    calcurve_plot = BasicPlot(*curve_lines, parent=p)
+    calcurve_plot.setWindowTitle("Calibration Curve")
+    calcurve_plot.axs[0].set_xlabel("Frequency (Hz)")
+    calcurve_plot.axs[0].set_ylabel("Recorded dB")
+    # set the labels on the lines for the legend
+    for iline, line in enumerate(calcurve_plot.axs[0].lines):
+        line.set_label(intensities[iline])
+    calcurve_plot.axs[0].legend()
+    calcurve_plot.show()
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

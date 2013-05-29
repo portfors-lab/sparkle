@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Mon May 27 13:44:32 2013
+# Created: Tue May 28 22:40:23 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,7 +73,7 @@ class Ui_CalibrationWindow(object):
         font.setPointSize(10)
         self.aisr_spnbx.setFont(font)
         self.aisr_spnbx.setMinimum(10)
-        self.aisr_spnbx.setMaximum(400)
+        self.aisr_spnbx.setMaximum(1000)
         self.aisr_spnbx.setObjectName(_fromUtf8("aisr_spnbx"))
         self.gridLayout.addWidget(self.aisr_spnbx, 6, 1, 1, 1)
         self.label_33 = QtGui.QLabel(self.tab)
@@ -135,7 +135,7 @@ class Ui_CalibrationWindow(object):
         font.setPointSize(10)
         self.sr_spnbx.setFont(font)
         self.sr_spnbx.setMinimum(10)
-        self.sr_spnbx.setMaximum(400)
+        self.sr_spnbx.setMaximum(1000)
         self.sr_spnbx.setSingleStep(10)
         self.sr_spnbx.setProperty("value", 10)
         self.sr_spnbx.setObjectName(_fromUtf8("sr_spnbx"))
