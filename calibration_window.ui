@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>685</width>
-    <height>368</height>
+    <width>754</width>
+    <height>389</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QTabWidget" name="tabs">
         <property name="currentIndex">
@@ -85,6 +85,9 @@
             </item>
             <item row="6" column="1">
              <widget class="QSpinBox" name="aisr_spnbx">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
@@ -827,16 +830,56 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="info_title">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Now Playing:</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="info_title">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Now Playing:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="flabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Frequency:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="dblabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Intensity:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QLabel" name="label0">
@@ -846,25 +889,19 @@
            </font>
           </property>
           <property name="text">
-           <string>Voltage out:</string>
+           <string>AO Voltage :</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label1">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="font">
            <font>
             <pointsize>10</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Frquency :</string>
+           <string>AI Voltage</string>
           </property>
          </widget>
         </item>
@@ -876,7 +913,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Intensity :</string>
+           <string>FFT peak</string>
           </property>
          </widget>
         </item>
@@ -888,7 +925,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Other</string>
+           <string>FFT at f</string>
           </property>
          </widget>
         </item>
@@ -900,7 +937,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Ni</string>
+           <string>db SPL</string>
           </property>
          </widget>
         </item>
@@ -933,7 +970,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>685</width>
+     <width>754</width>
      <height>21</height>
     </rect>
    </property>
@@ -977,8 +1014,8 @@
    <slot>set_dur_max()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>105</x>
-     <y>284</y>
+     <x>145</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -999,6 +1036,22 @@
     <hint type="destinationlabel">
      <x>342</x>
      <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sr_spnbx</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>aisr_spnbx</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>168</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>186</x>
+     <y>324</y>
     </hint>
    </hints>
   </connection>

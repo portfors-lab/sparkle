@@ -15,8 +15,9 @@ class CustomToolbar(NavigationToolbar):
             #print(child.__class__.__name__)
             if type(child) == QtGui.QToolButton:
                 builtin_buttons.append(child)
+
         #buttons in order, 7 == save 
-        builtin_buttons[7].setParent(None)
+        #builtin_buttons[7].setParent(None)
 
         # try to edit callback
         builtin_buttons[5].toggled.connect(self.zoom_mod)
