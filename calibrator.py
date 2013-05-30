@@ -26,17 +26,19 @@ SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
 SAVE_FFT_DATA = True
 USE_FINITE = True
-VERBOSE = True
+VERBOSE = False
 SAVE_NOISE = True
 
 NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
+NBPATH = 'C:\\Users\\Leeloo\\src\\python\\notebooks\\'
 
-FFT_FNAME = NBPATH + 'caltest_data.npy'
-PEAKS_FNAME =  NBPATH + 'fftpeaks.npy'
-DB_FNAME =  NBPATH + 'resultdb.npy'
-INDEX_FNAME =  NBPATH + "index.pkl"
-DATA_FNAME = NBPATH + "rawdata.npy"
-NOISE_FNAME = NBPATH + "noise.npy"
+
+FFT_FNAME = NBPATH + 'caltest_data'
+PEAKS_FNAME =  NBPATH + 'fftpeaks'
+DB_FNAME =  NBPATH + 'resultdb'
+INDEX_FNAME =  NBPATH + "index"
+DATA_FNAME = NBPATH + "rawdata"
+NOISE_FNAME = NBPATH + "noise"
 
 class Calibrator(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -267,9 +269,13 @@ class Calibrator(QtGui.QMainWindow):
         if np.amax(abs(tone)) < 0.1:
             print("WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM")
         xfft, yfft = calc_spectrum(tone, sr)
-        self.display.draw_line(0, 0, times, tone)
-        self.display.draw_line(2, 0, xfft, abs(yfft))
-        
+
+        try:
+            self.display.draw_line(0, 0, times, tone)
+            self.display.draw_line(2, 0, xfft, abs(yfft))
+         except:
+             print("WARNING : Problem drawing stim to Window")
+
         # now present the tone once
         self.daq_lock.lock()
 
@@ -374,8 +380,9 @@ class Calibrator(QtGui.QMainWindow):
 
             filename = DB_FNAME
             np.save(filename, resultant_dB)
+            np.savetxt(filename+".txt", resultant_dB)
 
-            with open(INDEX_FNAME, 'wb') as cfo:
+            with open(INDEX_FNAME + ".pkl", 'wb') as cfo:
                 pickle.dump([self.fft_vals_lookup, self.reject_list], cfo)
 
             if SAVE_DATA_TRACES:
@@ -436,9 +443,7 @@ class Calibrator(QtGui.QMainWindow):
         db = self.ui.db_spnbx.value()
         rft = self.ui.risefall_spnbx.value()/scale_factor
         aisr =  self.ui.aisr_spnbx.value()*scale_factor
-        #dur = 1
 
-        #print('freq: {}, rft: {}'.format(f,rft))
         tone, timevals = make_tone(f,db,dur,rft,sr, self.caldb, self.calv)
         
         npts = tone.size
@@ -456,7 +461,6 @@ class Calibrator(QtGui.QMainWindow):
 
         self.statusBar().showMessage('npts: {}'.format(npts))
         print('\n' + '*'*40 + '\n')
-        #self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
 
         self.ui.flabel.setText("Frequency : %d" % (f))
         self.ui.dblabel.setText("Intensity : %d" % (db))
@@ -468,7 +472,7 @@ class Calibrator(QtGui.QMainWindow):
             self.spawn_display()
             
         self.stim_display(timevals, tone, freq, abs(spectrum))
-        self.display.ylim_auto([self.display.axs[2]])
+        #self.display.ylim_auto([self.display.axs[2]])
 
     def spawn_display(self):
         self.display = AnimatedWindow(([],[]), ([],[]), 
@@ -488,8 +492,11 @@ class Calibrator(QtGui.QMainWindow):
 
     def stim_display(self, xdata, ydata, xfft, yfft):
         # hard coded for stim in axes 0 and FFT in 2
-        self.display.draw_line(0, 0, xdata, ydata)
-        self.display.draw_line(2, 0, xfft, yfft)
+        try:
+            self.display.draw_line(0, 0, xdata, ydata)
+            self.display.draw_line(2, 0, xfft, yfft)
+        except:
+            print("WARNING : Problem drawing stim to Window")
 
     def process_response(self, f, db):
         try:
@@ -525,7 +532,7 @@ class Calibrator(QtGui.QMainWindow):
 
             #tolerance of 1 Hz for frequency matching
             if max_freq < f-1 or max_freq > f+1:
-                print("WARNING: MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
+                print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
                 print("\tTarget : {}, Received : {}".format(f, max_freq))
                 if self.current_operation == 1:
                     ifreq, idb = self.fft_vals_lookup[(f,db)]
@@ -536,10 +543,13 @@ class Calibrator(QtGui.QMainWindow):
                 print("%.5f AI V" % (vmax))
                 print("%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq))
             
-            times = np.arange(len(data))/sr
-            self.display.draw_line(1,0, times, data)
-            self.display.draw_line(2,1, freq, spectrum)
-        
+                try:
+                    times = np.arange(len(data))/sr
+                    self.display.draw_line(1,0, times, data)
+                    self.display.draw_line(2,1, freq, spectrum)
+                except:
+                    print("WARNING : Problem drawing to Window")        
+
             if self.current_operation == 1:
                 self.curve_data_lock.lock()        
                 self.rep_temp.append(spec_max)

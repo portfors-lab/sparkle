@@ -217,30 +217,33 @@ class AnimatedWindow(BasePlot):
                 self.live_progeny.append((new_fig, axnum))
 
     def draw_line(self, axnum, linenum, xdata, ydata):
-        self.canvas.restore_region(self.ax_backgrounds[axnum])
-        self.axs[axnum].lines[linenum].set_data(xdata,ydata)
+        try:
+            self.canvas.restore_region(self.ax_backgrounds[axnum])
+            self.axs[axnum].lines[linenum].set_data(xdata,ydata)
+            
+            # draw everything in this axis, to not loose other lines
+            for line in self.axs[axnum].lines:
+                self.axs[axnum].draw_artist(line)
+            self.canvas.blit(self.axs[axnum].bbox)
 
-        # draw everything in this axis, to not loose other lines
-        for line in self.axs[axnum].lines:
-            self.axs[axnum].draw_artist(line)
-        self.canvas.blit(self.axs[axnum].bbox)
+            if self.cnt == 0:
+                # TODO: this shouldn't be necessary, but if it is excluded the
+                # canvas outside the axes is not initially painted.
+                self.canvas.draw()
+                self.cnt += 1
 
-        if self.cnt == 0:
-            # TODO: this shouldn't be necessary, but if it is excluded the
-            # canvas outside the axes is not initially painted.
-            self.canvas.draw()
-            self.cnt += 1
-
-        # call this function on all linked subwindows
-        for child, axn in self.live_progeny:
-            if axn == axnum:
-                if child.active:
-                    # live progeny only have 1 axes
-                    child.draw_line(linenum, 0, xdata, ydata)
-                else:
-                    # window was closed, remove from progeny list
-                    #pass
-                    self.live_progeny.remove((child, axn))
+            # call this function on all linked subwindows
+            for child, axn in self.live_progeny:
+                if axn == axnum:
+                    if child.active:
+                        # live progeny only have 1 axes
+                        child.draw_line(linenum, 0, xdata, ydata)
+                    else:
+                        # window was closed, remove from progeny list
+                        #pass
+                        self.live_progeny.remove((child, axn))
+        except:
+            print("WARNING : Problem drawing from Animated Window")
 
     def start_update(self, update_rate):
         # timer takes interval in ms. assuming rate in Hz, convert
