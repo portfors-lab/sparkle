@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Wed May 29 17:24:45 2013
+# Created: Thu May 30 20:15:15 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_CalibrationWindow(object):
     def setupUi(self, CalibrationWindow):
         CalibrationWindow.setObjectName(_fromUtf8("CalibrationWindow"))
-        CalibrationWindow.resize(754, 389)
+        CalibrationWindow.resize(796, 439)
         self.centralwidget = QtGui.QWidget(CalibrationWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.centralwidget)
@@ -440,6 +440,23 @@ class Ui_CalibrationWindow(object):
         self.label_31.setFont(font)
         self.label_31.setObjectName(_fromUtf8("label_31"))
         self.gridLayout_3.addWidget(self.label_31, 2, 0, 1, 1)
+        self.calgroup = QtGui.QGroupBox(self.tab_2)
+        font = QtGui.QFont()
+        font.setKerning(True)
+        self.calgroup.setFont(font)
+        self.calgroup.setTitle(_fromUtf8(""))
+        self.calgroup.setFlat(False)
+        self.calgroup.setCheckable(False)
+        self.calgroup.setObjectName(_fromUtf8("calgroup"))
+        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.calgroup)
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.savecal_ckbx = QtGui.QCheckBox(self.calgroup)
+        self.savecal_ckbx.setObjectName(_fromUtf8("savecal_ckbx"))
+        self.horizontalLayout_4.addWidget(self.savecal_ckbx)
+        self.applycal_ckbx = QtGui.QCheckBox(self.calgroup)
+        self.applycal_ckbx.setObjectName(_fromUtf8("applycal_ckbx"))
+        self.horizontalLayout_4.addWidget(self.applycal_ckbx)
+        self.gridLayout_3.addWidget(self.calgroup, 2, 2, 1, 4)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.tabs.addTab(self.tab_2, _fromUtf8(""))
         self.horizontalLayout_3.addWidget(self.tabs)
@@ -546,7 +563,7 @@ class Ui_CalibrationWindow(object):
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
         CalibrationWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(CalibrationWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 754, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 796, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuAdvanced = QtGui.QMenu(self.menubar)
         self.menuAdvanced.setObjectName(_fromUtf8("menuAdvanced"))
@@ -560,11 +577,13 @@ class Ui_CalibrationWindow(object):
         self.menubar.addAction(self.menuAdvanced.menuAction())
 
         self.retranslateUi(CalibrationWindow)
-        self.tabs.setCurrentIndex(0)
+        self.tabs.setCurrentIndex(1)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), CalibrationWindow.set_interval_min)
         QtCore.QObject.connect(self.reprate_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), CalibrationWindow.set_dur_max)
         QtCore.QObject.connect(self.actionDisplay_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_display_dlg)
         QtCore.QObject.connect(self.sr_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.aisr_spnbx.setValue)
+        QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWindow.xor_savecal)
+        QtCore.QObject.connect(self.savecal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWindow.xor_applycal)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWindow)
 
     def retranslateUi(self, CalibrationWindow):
@@ -601,6 +620,8 @@ class Ui_CalibrationWindow(object):
         self.label_17.setText(_translate("CalibrationWindow", "Sample rate", None))
         self.label_16.setText(_translate("CalibrationWindow", "kHz", None))
         self.label_31.setText(_translate("CalibrationWindow", "Reps", None))
+        self.savecal_ckbx.setText(_translate("CalibrationWindow", "Save calibration", None))
+        self.applycal_ckbx.setText(_translate("CalibrationWindow", "Apply calibration", None))
         self.tabs.setTabText(self.tabs.indexOf(self.tab_2), _translate("CalibrationWindow", "Tab 2", None))
         self.label_29.setText(_translate("CalibrationWindow", "Stim channel", None))
         self.label_30.setText(_translate("CalibrationWindow", "AI channel", None))

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>754</width>
-    <height>389</height>
+    <width>796</width>
+    <height>439</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
       <item>
        <widget class="QTabWidget" name="tabs">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -769,6 +769,40 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="2" colspan="4">
+             <widget class="QGroupBox" name="calgroup">
+              <property name="font">
+               <font>
+                <kerning>true</kerning>
+               </font>
+              </property>
+              <property name="title">
+               <string/>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QCheckBox" name="savecal_ckbx">
+                 <property name="text">
+                  <string>Save calibration</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="applycal_ckbx">
+                 <property name="text">
+                  <string>Apply calibration</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -970,7 +1004,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>754</width>
+     <width>796</width>
      <height>21</height>
     </rect>
    </property>
@@ -998,8 +1032,8 @@
    <slot>set_interval_min()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>185</y>
+     <x>325</x>
+     <y>228</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
@@ -1014,8 +1048,8 @@
    <slot>set_dur_max()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>145</x>
-     <y>316</y>
+     <x>159</x>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -1046,12 +1080,44 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>154</y>
+     <x>261</x>
+     <y>181</y>
     </hint>
     <hint type="destinationlabel">
-     <x>186</x>
-     <y>324</y>
+     <x>279</x>
+     <y>416</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applycal_ckbx</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CalibrationWindow</receiver>
+   <slot>xor_savecal(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>336</x>
+     <y>423</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>808</x>
+     <y>443</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>savecal_ckbx</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CalibrationWindow</receiver>
+   <slot>xor_applycal(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>455</y>
     </hint>
    </hints>
   </connection>
@@ -1060,5 +1126,7 @@
   <slot>set_interval_min()</slot>
   <slot>set_dur_max()</slot>
   <slot>launch_display_dlg()</slot>
+  <slot>xor_savecal(bool)</slot>
+  <slot>xor_applycal(bool)</slot>
  </slots>
 </ui>

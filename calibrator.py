@@ -27,14 +27,11 @@ SAVE_DATA_TRACES = False
 SAVE_FFT_DATA = True
 USE_FINITE = True
 VERBOSE = True
-SAVE_NOISE = True
+SAVE_NOISE = False
 SAVE_OUTPUT = False
-SAVE_AS_CALIBRATION = False
-APPLY_CALIBRATION = False
 
 NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
 #NBPATH = 'C:\\Users\\Leeloo\\src\\python\\notebooks\\'
-
 
 FFT_FNAME = NBPATH + 'caltest_data'
 PEAKS_FNAME =  NBPATH + 'fftpeaks'
@@ -126,7 +123,10 @@ class Calibrator(QtGui.QMainWindow):
         if SAVE_OUTPUT:
             self.tone_array = []
 
-        if APPLY_CALIBRATION:
+        self.apply_calibration = self.ui.applycal_ckbx.isChecked()
+        self.save_as_calibration = self.ui.savecal_ckbx.isChecked()
+
+        if self.apply_calibration:
             self.calibration_vector = np.load("calibration_data.npy")
             with open("calibration_index.pkl", 'rb') as pf:
                 self.calibration_index = pickle.load(pf)
@@ -252,12 +252,12 @@ class Calibrator(QtGui.QMainWindow):
                 self.rep_temp = []
                 self.reject_list = []
 
-                if SAVE_AS_CALIBRATION:
+                if self.save_as_calibration:
                     self.freq_index = {}
                 
                 self.work_queue = queue.Queue()
                 for ifreq, f in enumerate(freqs):
-                    if SAVE_AS_CALIBRATION:
+                    if self.save_as_calibration:
                         self.freq_index[f] = ifreq
                     for idb, db in enumerate(intensities):
                         for irep in range(nreps):
@@ -285,7 +285,7 @@ class Calibrator(QtGui.QMainWindow):
         dur = self.dur
         rft = self.rft
 
-        if APPLY_CALIBRATION:
+        if self.apply_calibration:
             cidx = self.calibration_index[f]
             adjdb = self.calibration_vector[cidx]
             adjdb = 100 - adjdb
@@ -296,7 +296,7 @@ class Calibrator(QtGui.QMainWindow):
         tone, times = make_tone(f, db, dur, rft, sr, self.caldb, self.calv, adjustdb=adjdb)
         self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
 
-        if np.amax(abs(tone)) < 0.1:
+        if np.amax(abs(tone)) < 0.005:
             print("WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM")
         xfft, yfft = calc_spectrum(tone, sr)
 
@@ -370,7 +370,7 @@ class Calibrator(QtGui.QMainWindow):
         np.save(filename, resultant_dB)
         np.savetxt(filename+".txt", resultant_dB)
 
-        if SAVE_AS_CALIBRATION:
+        if self.save_as_calibration:
             filename = "calibration_data"
             calibration_vector = resultant_dB[:,0]
             np.save(filename,calibration_vector)
@@ -433,7 +433,7 @@ class Calibrator(QtGui.QMainWindow):
         rft = self.ui.risefall_spnbx.value()/scale_factor
         aisr =  self.ui.aisr_spnbx.value()*scale_factor
 
-        if APPLY_CALIBRATION:
+        if self.apply_calibration:
             cidx = self.calibration_index[f]
             adjdb = self.calibration_vector[cidx]
             adjdb = 100 - adjdb
@@ -520,7 +520,7 @@ class Calibrator(QtGui.QMainWindow):
             if self.current_operation == 0:
                 self.ui.label4.setText("Response dB : %.2f" % (calc_db(spec_peak_at_f, self.caldb, CALHACK)))
 
-            if vmax < 0.1:
+            if vmax < 0.005:
                 print("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
                 self.statusBar().showMessage("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
             else:
@@ -714,6 +714,14 @@ class Calibrator(QtGui.QMainWindow):
         reprate = self.ui.reprate_spnbx.value()
         if reprate < (dur/1000):
             self.ui.dur_spnbx_2.setValue(reprate*1000)
+
+    def xor_applycal(self,checked):
+        if checked:
+            self.ui.applycal_ckbx.setChecked(False)
+
+    def xor_savecal(self,checked):
+        if checked:
+            self.ui.savecal_ckbx.setChecked(False)
 
     def launch_display_dlg(self):
         field_vals = {'chunksz' : self.ainpts, 'caldb': self.caldb, 'calv': self.calv, 'calf' : self.calf}
