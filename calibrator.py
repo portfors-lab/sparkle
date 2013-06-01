@@ -3,7 +3,6 @@ import time
 import pickle
 import queue
 from scipy.integrate import simps, trapz
-0
 from PyQt4 import QtCore, QtGui
 from PyDAQmx import *
 import numpy as np
@@ -121,6 +120,7 @@ class Calibrator(QtGui.QMainWindow):
         self.signals = WorkerSignals()
         self.signals.done.connect(self.process_response)
         self.signals.curve_finished.connect(self.process_caldata)
+        self.signals.update_stim_display.connect(self.stim_display)
 
     def on_start(self):
        
@@ -317,8 +317,9 @@ class Calibrator(QtGui.QMainWindow):
         xfft, yfft = calc_spectrum(tone, sr)
 
         try:
-            self.display.draw_line(0, 0, times, tone)
-            self.display.draw_line(2, 0, xfft, abs(yfft))
+            self.signals.update_stim_display.emit(times, tone, xfft, abs(yfft))
+            #self.display.draw_line(0, 0, times, tone)
+            #self.display.draw_line(2, 0, xfft, abs(yfft))
         except:
             print("WARNING : Problem drawing stim to Window")
 
@@ -539,7 +540,10 @@ class Calibrator(QtGui.QMainWindow):
             spec_max = np.amax(spectrum)
 
             fidx = np.where(freq==f)
-            #where returns a tuple of a list of indices and type           
+            #where returns a tuple of a list of indices and type          
+            print(fidx)
+            print('len freq ', len(freq))
+            print('f ', f)
             fidx = fidx[0][0]
             spec_peak_at_f = spectrum[fidx]
 
@@ -848,6 +852,7 @@ class GenericThread(QtCore.QRunnable):
 class WorkerSignals(QtCore.QObject):
     done = QtCore.pyqtSignal(int,int)
     curve_finished = QtCore.pyqtSignal()
+    update_stim_display = QtCore.pyqtSignal(numpy.ndarray,numpy.ndarray, numpy.ndarray, numpy.ndarray)
 
 # the below classes are all attempts to make QThread work according
 # to recommendations on 
@@ -917,11 +922,13 @@ def calc_spectrum(signal,rate):
     #signal = padded_signal
     npts = len(signal)
 
-    freq = np.arange(npts)/(npts/rate)
+    freq = np.arange(npts) #/(npts/rate)
     freq = freq[:(npts/2)] #single sided
+    #print('freq len ', len(freq))
 
     sp = np.fft.fft(signal)/npts
     sp = sp[:(npts/2)]
+    #print('sp len ', len(sp))
 
     return freq, sp.real
 
