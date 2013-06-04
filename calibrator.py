@@ -12,6 +12,7 @@ from plotz import *
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 from scale_dlg import ScaleDialog
+from saving_dlg import SavingDialog
 
 #defauts used only if user data not saved
 AIPOINTS = 100
@@ -34,13 +35,13 @@ PRINT_WARNINGS = True
 NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
 #NBPATH = 'C:\\Users\\Leeloo\\src\\python\\notebooks\\'
 
-FFT_FNAME = NBPATH + 'ffttraces'
-PEAKS_FNAME =  NBPATH + 'fftpeaks'
-DB_FNAME =  NBPATH + 'resultdb'
-INDEX_FNAME =  NBPATH + "index"
-DATA_FNAME = NBPATH + "rawdata"
-NOISE_FNAME = NBPATH + "noise"
-OUTPUT_FNAME = NBPATH + "outtones"
+FFT_FNAME = '_ffttraces'
+PEAKS_FNAME =  '_fftpeaks'
+DB_FNAME = '_resultdb'
+INDEX_FNAME =  '_index'
+DATA_FNAME = "_rawdata"
+NOISE_FNAME = "_noise"
+OUTPUT_FNAME = "_outtones"
 
 class Calibrator(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -72,6 +73,9 @@ class Calibrator(QtGui.QMainWindow):
         self.fscale = 1000
         self.tscale = 0.001
 
+        self.savefolder = NBPATH
+        self.savename = "cal"
+
         inlist = load_inputs()
         if len(inlist) > 0:
             try:
@@ -102,6 +106,8 @@ class Calibrator(QtGui.QMainWindow):
                 self.caldb = inlist[21]
                 self.calv = inlist[22]
                 self.calf = inlist[23]
+                self.savefolder = inlist[24]
+                self.savename = inlist[25]
             except:
                 print("failed to find all defaults")
                 #raise
@@ -405,28 +411,39 @@ class Calibrator(QtGui.QMainWindow):
         #resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
         resultant_dB = vfunc(self.vin, self.caldb, cal_vmax)
 
+        fname = self.savename
+        while os.path.isfile(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl")):
+            #increment filename until we come across one that doesn't exist
+            if not fname[-1].isdigit():
+                fname = fname + '0'
+            else:
+                currentno = re.search('(\d+)$', fname).group(0)
+                prefix = fname[:-(len(currentno))]
+                currentno = int(currentno) +1
+                fname = prefix + str(currentno)
+
         if SAVE_FFT_DATA:
             self.response_data_lock.lock()
-            filename = FFT_FNAME
+            filename = os.path.join(self.savefolder, fname + FFT_FNAME)
             np.save(filename, self.full_fft_data)
 
-            filename = PEAKS_FNAME
+            filename = os.path.join(self.savefolder, fname + PEAKS_FNAME)
             np.save(filename, self.fft_peaks)
 
-            with open(INDEX_FNAME + ".pkl", 'wb') as cfo:
+            with open(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl"), 'wb') as cfo:
                 pickle.dump([self.fft_vals_lookup, self.reject_list], cfo)
 
             if SAVE_DATA_TRACES:
-                filename = DATA_FNAME
+                filename = os.path.join(self.savefolder, fname + DATA_FNAME)
                 np.save(filename, self.data_traces)
 
             self.response_data_lock.unlock()
 
             if SAVE_OUTPUT:
-                filename = OUTPUT_FNAME
+                filename = os.path.join(self.savefolder, fname + OUTPUT_FNAME)
                 np.save(filename, self.tone_array)
 
-        filename = DB_FNAME
+        filename = os.path.join(self.savefolder, fname + DB_FNAME)
         np.save(filename, resultant_dB)
         np.savetxt(filename+".txt", resultant_dB)
 
@@ -449,7 +466,7 @@ class Calibrator(QtGui.QMainWindow):
                     for irep in range(self.nreps):
                         noise_array[ifreq,idb,irep] = calc_noise(self.full_fft_data[ifreq,idb,irep], 0, 2000)
 
-            np.save(NOISE_FNAME, noise_array)
+            np.save(self.savefolder + fname + NOISE_FNAME, noise_array)
 
 
     def on_stop(self):
@@ -854,13 +871,13 @@ class Calibrator(QtGui.QMainWindow):
             self.tscale = tscale
 
     def launch_savedlg(self):
-        field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : self.saveformat}
+        field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : 'npy'}
         dlg = SavingDialog(default_vals = field_vals)
         if dlg.exec_():
             savefolder, savename, saveformat = dlg.get_values()
             self.savefolder = savefolder
             self.savename = savename
-            self.saveformat = saveformat
+            #self.saveformat = saveformat
 
     def keyPressEvent(self,event):
         print("keypress from calibrator")
@@ -910,6 +927,8 @@ class Calibrator(QtGui.QMainWindow):
         outlist.append(self.caldb)
         outlist.append(self.calv)
         outlist.append(self.calf)
+        outlist.append(self.savefolder)
+        outlist.append(self.savename)
 
         save_inputs(outlist)
 
