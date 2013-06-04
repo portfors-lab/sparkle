@@ -28,7 +28,7 @@ SAVE_FFT_DATA = True
 USE_FINITE = True
 VERBOSE = True
 SAVE_NOISE = False
-SAVE_OUTPUT = True
+SAVE_OUTPUT = False
 PRINT_WARNINGS = True
 
 NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
@@ -853,6 +853,15 @@ class Calibrator(QtGui.QMainWindow):
             self.fscale = fscale
             self.tscale = tscale
 
+    def launch_savedlg(self):
+        field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : self.saveformat}
+        dlg = SavingDialog(default_vals = field_vals)
+        if dlg.exec_():
+            savefolder, savename, saveformat = dlg.get_values()
+            self.savefolder = savefolder
+            self.savename = savename
+            self.saveformat = saveformat
+
     def keyPressEvent(self,event):
         print("keypress from calibrator")
         #print(event.text())
@@ -994,7 +1003,7 @@ def calc_spectrum(signal,rate):
     #signal = padded_signal
     npts = len(signal)
 
-    freq = np.arange(npts) #/(npts/rate)
+    freq = np.arange(npts)/(npts/rate)
     freq = freq[:(npts/2)] #single sided
     #print('freq len ', len(freq))
 

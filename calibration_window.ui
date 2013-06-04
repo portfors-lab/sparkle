@@ -1043,6 +1043,7 @@
     </property>
     <addaction name="actionDisplay_Options"/>
     <addaction name="actionScale_Factors"/>
+    <addaction name="actionSave_Options"/>
    </widget>
    <addaction name="menuAdvanced"/>
   </widget>
@@ -1055,6 +1056,11 @@
   <action name="actionScale_Factors">
    <property name="text">
     <string>Scale Factors</string>
+   </property>
+  </action>
+  <action name="actionSave_Options">
+   <property name="text">
+    <string>Save Options</string>
    </property>
   </action>
  </widget>
@@ -1131,7 +1137,7 @@
    <slot>xor_savecal(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
+     <x>368</x>
      <y>384</y>
     </hint>
     <hint type="destinationlabel">
@@ -1172,6 +1178,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSave_Options</sender>
+   <signal>triggered()</signal>
+   <receiver>CalibrationWindow</receiver>
+   <slot>launch_savedlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>219</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>set_interval_min()</slot>
@@ -1180,5 +1202,6 @@
   <slot>xor_savecal(bool)</slot>
   <slot>xor_applycal(bool)</slot>
   <slot>launch_scaledlg()</slot>
+  <slot>launch_savedlg()</slot>
  </slots>
 </ui>

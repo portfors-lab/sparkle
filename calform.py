@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\calibration_window.ui'
 #
-# Created: Fri May 31 10:36:50 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Tue Jun  4 08:47:21 2013
+#      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -586,8 +586,11 @@ class Ui_CalibrationWindow(object):
         self.actionDisplay_Options.setObjectName(_fromUtf8("actionDisplay_Options"))
         self.actionScale_Factors = QtGui.QAction(CalibrationWindow)
         self.actionScale_Factors.setObjectName(_fromUtf8("actionScale_Factors"))
+        self.actionSave_Options = QtGui.QAction(CalibrationWindow)
+        self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.menuAdvanced.addAction(self.actionDisplay_Options)
         self.menuAdvanced.addAction(self.actionScale_Factors)
+        self.menuAdvanced.addAction(self.actionSave_Options)
         self.menubar.addAction(self.menuAdvanced.menuAction())
 
         self.retranslateUi(CalibrationWindow)
@@ -599,6 +602,7 @@ class Ui_CalibrationWindow(object):
         QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWindow.xor_savecal)
         QtCore.QObject.connect(self.savecal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWindow.xor_applycal)
         QtCore.QObject.connect(self.actionScale_Factors, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_scaledlg)
+        QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), CalibrationWindow.launch_savedlg)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWindow)
 
     def retranslateUi(self, CalibrationWindow):
@@ -654,6 +658,7 @@ class Ui_CalibrationWindow(object):
         self.menuAdvanced.setTitle(_translate("CalibrationWindow", "Advanced", None))
         self.actionDisplay_Options.setText(_translate("CalibrationWindow", "Other Parameters", None))
         self.actionScale_Factors.setText(_translate("CalibrationWindow", "Scale Factors", None))
+        self.actionSave_Options.setText(_translate("CalibrationWindow", "Save Options", None))
 
 
 if __name__ == "__main__":
