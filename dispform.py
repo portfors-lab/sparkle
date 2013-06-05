@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\display_dlg.ui'
 #
-# Created: Tue May 28 23:46:44 2013
-#      by: PyQt4 UI code generator 4.10.1
+# Created: Tue Jun  4 14:24:38 2013
+#      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -38,12 +38,15 @@ class Ui_DisplayDlg(object):
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
         self.label = QtGui.QLabel(DisplayDlg)
+        self.label.setEnabled(False)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.chunksz_lnedt = QtGui.QLineEdit(DisplayDlg)
+        self.chunksz_lnedt.setEnabled(False)
         self.chunksz_lnedt.setObjectName(_fromUtf8("chunksz_lnedt"))
         self.gridLayout.addWidget(self.chunksz_lnedt, 0, 1, 1, 1)
         self.label_2 = QtGui.QLabel(DisplayDlg)
+        self.label_2.setEnabled(False)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 0, 2, 1, 1)
         self.calV_lnedt = QtGui.QLineEdit(DisplayDlg)

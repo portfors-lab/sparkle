@@ -21,6 +21,7 @@ CALV = 0.175
 CALF = int(15000)
 DBFACTOR = 20
 CALHACK = 0.136
+NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
 
 XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
@@ -32,13 +33,10 @@ SAVE_NOISE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = True
 
-NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
-#NBPATH = 'C:\\Users\\Leeloo\\src\\python\\notebooks\\'
-
 FFT_FNAME = '_ffttraces'
 PEAKS_FNAME =  '_fftpeaks'
 DB_FNAME = '_resultdb'
-INDEX_FNAME =  '_index'
+INDEX_FNAME = '_index'
 DATA_FNAME = "_rawdata"
 NOISE_FNAME = "_noise"
 OUTPUT_FNAME = "_outtones"
@@ -57,7 +55,6 @@ class Calibrator(QtGui.QMainWindow):
 
         self.ui.start_button.clicked.connect(self.on_start)
         self.ui.stop_button.clicked.connect(self.on_stop)
-
         self.red = QtGui.QPalette()
         self.red.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
         self.green = QtGui.QPalette()
@@ -431,7 +428,10 @@ class Calibrator(QtGui.QMainWindow):
             np.save(filename, self.fft_peaks)
 
             with open(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl"), 'wb') as cfo:
-                pickle.dump([self.fft_vals_lookup, self.reject_list], cfo)
+                # make a dictionary of the other paramters used to generate this roll-off curve
+                params = {'calV': self.calv, 'caldB' : self.caldb, 'calf' : self.calf, 'rft' : self.rft, 
+                          'samplerate' : self.sr, 'duration' : self.dur}
+                pickle.dump([self.fft_vals_lookup, self.reject_list, params], cfo)
 
             if SAVE_DATA_TRACES:
                 filename = os.path.join(self.savefolder, fname + DATA_FNAME)
@@ -705,23 +705,9 @@ class Calibrator(QtGui.QMainWindow):
     def timerEvent(self, evt):
         #print("tick")
         if self.current_operation == 0:
-            #w = WorkerObj(self.finite_worker)
 
-            #t = QtCore.QThread()     
-            #t = ShadowThread() 
-            #w.moveToThread(t)
-            #w.finished.connect(t.quit)
-            #t.started.connect(w.process)
-            #t.finished.connect(t.deleteLater)
-            #w.finished.connect(t.deleteLater)
-            #t.start()
-            #self.thread_pool.append(t)
             t  = GenericThread(self.finite_worker)
-            #t.start()
-            
-            #self.thread_pool.append( GenericThread(self.finite_worker) )        
-            #self.thread_pool[len(self.thread_pool)-1].start()
-            #print("threadpool size {}".format(len(self.thread_pool)))
+           
         elif self.current_operation == 1:
 
             # if timing is correct and feasible (i.e. interval >= duration), locking 
@@ -732,7 +718,8 @@ class Calibrator(QtGui.QMainWindow):
                 print("outta work")
                 self.stim_lock.unlock()
                 self.on_stop()
-                # or should I emit a signal to execute this?
+                # or should I emit a signal to execute this? 
+                # I don't think it matters in the main thread
                 print("send to processor")
                 self.process_caldata()
                 return
@@ -869,6 +856,7 @@ class Calibrator(QtGui.QMainWindow):
             fscale, tscale = dlg.get_values()
             self.fscale = fscale
             self.tscale = tscale
+        self.update_unit_labels()
 
     def launch_savedlg(self):
         field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : 'npy'}
@@ -879,6 +867,31 @@ class Calibrator(QtGui.QMainWindow):
             self.savename = savename
             #self.saveformat = saveformat
 
+    def update_unit_labels(self):
+        if self.fscale == 1000:
+            self.ui.f_units.setText('kHz')
+            self.ui.sr_units.setText('kHz')
+            self.ui.aisr_units.setText('kHz')
+        elif self.fscale == 1:
+            self.ui.f_units.setText('Hz')
+            self.ui.sr_units.setText('Hz')
+            self.ui.aisr_units.setText('Hz')
+        else:
+            print(self.fscale)
+            raise Exception("Invalid frequency scale")
+            
+        if self.tscale == 0.001:
+            self.ui.dur_units.setText('ms')
+            self.ui.interval_units.setText('ms')
+            self.ui.risefall_units.setText('ms')
+        elif self.tscale == 1:
+            self.ui.dur_units.setText('s')
+            self.ui.interval_units.setText('s')
+            self.ui.risefall_units.setText('s')
+        else:
+            print(self.tscale)
+            raise Exception("Invalid time scale")
+            
     def keyPressEvent(self,event):
         print("keypress from calibrator")
         #print(event.text())
@@ -953,30 +966,6 @@ class WorkerSignals(QtCore.QObject):
     curve_finished = QtCore.pyqtSignal()
     update_stim_display = QtCore.pyqtSignal(numpy.ndarray,numpy.ndarray, numpy.ndarray, numpy.ndarray)
 
-# the below classes are all attempts to make QThread work according
-# to recommendations on 
-# http://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
-# see also: http://stackoverflow.com/questions/6783194/background-thread-with-qthread-in-pyqt
-class WorkerObj(QtCore.QObject):
-
-    finished = QtCore.pyqtSignal()
-
-    def __init__(self,function, *args, **kwargs):
-        QtCore.QObject.__init__(self)
-        self.function = function
-        self.args = args
-        self.kwargs = kwargs
-
-    def process(self):
-        print("processing...")
-        self.function(*self.args,**self.kwargs)
-
-
-class ShadowThread(QtCore.QThread):
-    def __init__(self):
-        QtCore.QThread.__init__(self)
-    def run(self):
-        QtCore.QThread.run(self)
 
 def make_tone(freq,db,dur,risefall,samplerate, caldb, calv, adjustdb=0):
     # create portable tone generator class that allows the 

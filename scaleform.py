@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\scale_dlg.ui'
 #
-# Created: Fri May 31 10:31:08 2013
+# Created: Tue Jun  4 13:54:51 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,31 +26,29 @@ except AttributeError:
 class Ui_ScaleDlg(object):
     def setupUi(self, ScaleDlg):
         ScaleDlg.setObjectName(_fromUtf8("ScaleDlg"))
-        ScaleDlg.resize(258, 112)
+        ScaleDlg.resize(218, 133)
         self.verticalLayout = QtGui.QVBoxLayout(ScaleDlg)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.gridLayout = QtGui.QGridLayout()
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.label_2 = QtGui.QLabel(ScaleDlg)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
-        self.tscale_spnbx = QtGui.QDoubleSpinBox(ScaleDlg)
-        self.tscale_spnbx.setDecimals(6)
-        self.tscale_spnbx.setMaximum(60.0)
-        self.tscale_spnbx.setSingleStep(0.0)
-        self.tscale_spnbx.setProperty("value", 0.001)
-        self.tscale_spnbx.setObjectName(_fromUtf8("tscale_spnbx"))
-        self.gridLayout.addWidget(self.tscale_spnbx, 0, 1, 1, 1)
-        self.label = QtGui.QLabel(ScaleDlg)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
-        self.fscale_spnbx = QtGui.QSpinBox(ScaleDlg)
-        self.fscale_spnbx.setMinimum(1)
-        self.fscale_spnbx.setMaximum(100000)
-        self.fscale_spnbx.setProperty("value", 1000)
-        self.fscale_spnbx.setObjectName(_fromUtf8("fscale_spnbx"))
-        self.gridLayout.addWidget(self.fscale_spnbx, 1, 1, 1, 1)
-        self.verticalLayout.addLayout(self.gridLayout)
+        self.groupBox = QtGui.QGroupBox(ScaleDlg)
+        self.groupBox.setObjectName(_fromUtf8("groupBox"))
+        self.sec_btn = QtGui.QRadioButton(self.groupBox)
+        self.sec_btn.setGeometry(QtCore.QRect(10, 20, 82, 17))
+        self.sec_btn.setObjectName(_fromUtf8("sec_btn"))
+        self.ms_btn = QtGui.QRadioButton(self.groupBox)
+        self.ms_btn.setGeometry(QtCore.QRect(110, 20, 82, 17))
+        self.ms_btn.setChecked(True)
+        self.ms_btn.setObjectName(_fromUtf8("ms_btn"))
+        self.verticalLayout.addWidget(self.groupBox)
+        self.groupBox_2 = QtGui.QGroupBox(ScaleDlg)
+        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
+        self.hz_btn = QtGui.QRadioButton(self.groupBox_2)
+        self.hz_btn.setGeometry(QtCore.QRect(10, 20, 82, 17))
+        self.hz_btn.setObjectName(_fromUtf8("hz_btn"))
+        self.khz_btn = QtGui.QRadioButton(self.groupBox_2)
+        self.khz_btn.setGeometry(QtCore.QRect(110, 20, 82, 17))
+        self.khz_btn.setChecked(True)
+        self.khz_btn.setObjectName(_fromUtf8("khz_btn"))
+        self.verticalLayout.addWidget(self.groupBox_2)
         self.buttonBox = QtGui.QDialogButtonBox(ScaleDlg)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
@@ -64,8 +62,12 @@ class Ui_ScaleDlg(object):
 
     def retranslateUi(self, ScaleDlg):
         ScaleDlg.setWindowTitle(_translate("ScaleDlg", "Dialog", None))
-        self.label_2.setText(_translate("ScaleDlg", "time factor", None))
-        self.label.setText(_translate("ScaleDlg", "frequency factor", None))
+        self.groupBox.setTitle(_translate("ScaleDlg", "Time scale", None))
+        self.sec_btn.setText(_translate("ScaleDlg", "seconds", None))
+        self.ms_btn.setText(_translate("ScaleDlg", "ms", None))
+        self.groupBox_2.setTitle(_translate("ScaleDlg", "Frequency scale", None))
+        self.hz_btn.setText(_translate("ScaleDlg", "Hz", None))
+        self.khz_btn.setText(_translate("ScaleDlg", "kHz", None))
 
 
 if __name__ == "__main__":

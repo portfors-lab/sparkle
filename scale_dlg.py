@@ -7,12 +7,31 @@ class ScaleDialog(QtGui.QDialog):
         self.ui = Ui_ScaleDlg()
         self.ui.setupUi(self)
 
-
         if default_vals is not None:
-            self.ui.fscale_spnbx.setValue(default_vals['fscale'])
-            self.ui.tscale_spnbx.setValue(default_vals['tscale'])
+            if default_vals['fscale'] == 1:
+                self.ui.hz_btn.setChecked(True)
+            elif default_vals['fscale'] == 1000:
+                self.ui.khz_btn.setChecked(True)
+            else:
+                raise Exception("Invalid frequency scale")
+
+            if default_vals['tscale'] == 1:
+                self.ui.sec_btn.setChecked(True)
+            elif default_vals['tscale'] == 0.001:
+                self.ui.ms_btn.setChecked(True)
+            else:
+                raise Exception("Invalid time scale")
 
     def get_values(self):
-        fscale = self.ui.fscale_spnbx.value()
-        tscale = self.ui.tscale_spnbx.value()
+
+        if self.ui.hz_btn.isChecked():
+            fscale = 1
+        else:
+            fscale = 1000
+
+        if self.ui.ms_btn.isChecked():
+            tscale = 0.001
+        else:
+            tscale = 1
+
         return fscale, tscale
