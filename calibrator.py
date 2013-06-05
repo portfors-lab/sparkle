@@ -116,10 +116,12 @@ class Calibrator(QtGui.QMainWindow):
         self.stim_lock = QtCore.QMutex()
         # lock for saving to acquired data structure
         self.response_data_lock = QtCore.QMutex()
-        # lock for live acquisition vs. processing data -- maybe a better way to do this with signals?
+        # lock for live acquisition vs. processing data 
+        # -- maybe a better way to do this with signals?
         self.live_lock = QtCore.QMutex()
         self.ngenerated = 0
         self.nacquired = 0
+        self.apply_calibration = 0
 
         self.daq_timer = None
         self.aitask = None
@@ -152,6 +154,8 @@ class Calibrator(QtGui.QMainWindow):
             with open("calibration_index.pkl", 'rb') as pf:
                 self.calibration_index = pickle.load(pf)
             print(self.calibration_index)
+
+        self.halt = False
 
         if self.ui.tabs.currentIndex() == 0 :
             if self.live_lock.tryLock():
@@ -384,7 +388,7 @@ class Calibrator(QtGui.QMainWindow):
 
     def process_caldata(self):
         #After running curve do calculations and save data to file
-
+        self.live_lock.lock()
         print("job finished")
         #print('fft peaks ', self.fft_peaks)
         print('rejects ', self.reject_list)
@@ -399,7 +403,8 @@ class Calibrator(QtGui.QMainWindow):
             cal_fft_peak = self.fft_peaks[ifreq][idb]
             cal_vmax =  self.vin[ifreq][idb]
             self.response_data_lock.unlock()
-            print("Using FFT peak data from ", self.caldb, " dB, ", self.calf, " Hz tone to calculate calibration curve")
+            print("Using FFT peak data from ", self.caldb, " dB, ", 
+                  self.calf, " Hz tone to calculate calibration curve")
         except:
             print("WARNING : using manual %.4f fft peak" % (CALHACK))
             cal_fft_peak = CALHACK
@@ -410,7 +415,8 @@ class Calibrator(QtGui.QMainWindow):
 
         fname = self.savename
         while os.path.isfile(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl")):
-            #increment filename until we come across one that doesn't exist
+            # increment filename until we come across one that 
+            # doesn't exist
             if not fname[-1].isdigit():
                 fname = fname + '0'
             else:
@@ -428,8 +434,10 @@ class Calibrator(QtGui.QMainWindow):
             np.save(filename, self.fft_peaks)
 
             with open(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl"), 'wb') as cfo:
-                # make a dictionary of the other paramters used to generate this roll-off curve
-                params = {'calV': self.calv, 'caldB' : self.caldb, 'calf' : self.calf, 'rft' : self.rft, 
+                # make a dictionary of the other paramters used to 
+                # generate this roll-off curve
+                params = {'calV': self.calv, 'caldB' : self.caldb, 
+                          'calf' : self.calf, 'rft' : self.rft, 
                           'samplerate' : self.sr, 'duration' : self.dur}
                 pickle.dump([self.fft_vals_lookup, self.reject_list, params], cfo)
 
@@ -468,6 +476,7 @@ class Calibrator(QtGui.QMainWindow):
 
             np.save(self.savefolder + fname + NOISE_FNAME, noise_array)
 
+        self.live_lock.unlock()
 
     def on_stop(self):
         if self.current_operation == 0 : 
@@ -477,31 +486,12 @@ class Calibrator(QtGui.QMainWindow):
                     self.ui.running_label.setText("STOPPING")
                     self.killTimer(self.daq_timer)
                     self.daq_timer = None
+                    self.halt = True
                     self.pool.waitForDone()
                     self.ui.running_label.setText("BUSY")
                     self.ui.running_label.setPalette(self.red)
-                    # also wait for acquisition to finish
-                    """
-                    print('ngenerated ', self.ngenerated, ', nacquired ', self.nacquired)
-                    print('tone_array len ', len(self.tone_array))
-                    while self.ngenerated > self.nacquired:
-                        print('ngenerated ', self.ngenerated, ', nacquired ', self.nacquired)
-                        print("waiting for acquisition to finish")
-                        time.sleep(1)
-                    """
-                    self.live_lock.unlock()
-                    if SAVE_OUTPUT:
-                        # due to the method of loading the write the last tone in
-                        # tone array was never generated, so delete it
-                        del self.tone_array[-1]
-                        print("saving output tones, shape : ", len(self.tone_array), ', ', len(self.tone_array[0]))
-                        filename = OUTPUT_FNAME
-                        np.save(filename, self.tone_array)
-                    if SAVE_FFT_DATA:
-                        print("saving fft traces, shape : ", len(self.full_fft_data), ', ', len(self.full_fft_data[0]))
-                        filename = FFT_FNAME
-                        np.save(filename, self.full_fft_data)
-                    self.live_lock.unlock()
+                    QtGui.QApplication.processEvents()
+                    self.save_speculative_data()
                 try:
                     self.aitask.stop()
                     self.aotask.stop()
@@ -515,23 +505,33 @@ class Calibrator(QtGui.QMainWindow):
            
         elif self.current_operation == 1:
             self.killTimer(self.daq_timer)
+            self.halt = True
             self.ui.tab_2.setEnabled(True)
             self.ui.start_button.setEnabled(True)
             # no need to kill tasks since they will finish in the thread
             self.pool.waitForDone()
-            # also wait for acquisition to finish
-            """
-            while self.ngenerated > self.nacquired:
-                print("waiting for acquisition to finish")
-                time.sleep(1)
-            """
-            self.live_lock.unlock()
+
             self.aitask = None
             self.aotask = None
         else:
             print("No task currently running")
         self.ui.running_label.setText("OFF")
         self.ui.running_label.setPalette(self.red)
+
+    def save_speculative_data(self):
+        self.live_lock.lock()
+        if SAVE_OUTPUT:
+            # due to the method of loading the write the last tone in
+            # tone array was never generated, so delete it
+            del self.tone_array[-1]
+            print("saving output tones, shape : ", len(self.tone_array), ', ', len(self.tone_array[0]))
+            filename = OUTPUT_FNAME
+            np.save(filename, self.tone_array)
+        if SAVE_FFT_DATA:
+            print("saving fft traces, shape : ", len(self.full_fft_data), ', ', len(self.full_fft_data[0]))
+            filename = FFT_FNAME
+            np.save(filename, self.full_fft_data)
+        self.live_lock.unlock()
 
     def update_stim(self):
         scale_factor = 1000
@@ -700,8 +700,22 @@ class Calibrator(QtGui.QMainWindow):
             print("Error processing response data")
             #self.on_stop()
             raise   
-        
 
+        print('generated ', self.ngenerated, ', acquired ', self.nacquired, ', halted ', self.halt)
+        
+        if self.current_operation == 0:
+            if self.halt and self.ngenerated == self.nacquired:
+                print("finished collecting, wrapping up...")
+                self.live_lock.unlock()
+        elif self.current_operation == 1:
+            # or should I emit a signal to execute this? 
+            # I don't think it matters in the main thread
+            if self.nacquired == len(self.freqs) * len(self.intensities) * self.nreps:
+                print("unlock live")
+                self.live_lock.unlock()
+        else:
+            print('ERROR: NO TASK DETECTED AFTER PROCESS REPSONSE')
+           
     def timerEvent(self, evt):
         #print("tick")
         if self.current_operation == 0:
@@ -718,9 +732,6 @@ class Calibrator(QtGui.QMainWindow):
                 print("outta work")
                 self.stim_lock.unlock()
                 self.on_stop()
-                # or should I emit a signal to execute this? 
-                # I don't think it matters in the main thread
-                print("send to processor")
                 self.process_caldata()
                 return
             else:
