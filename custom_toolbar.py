@@ -1,6 +1,8 @@
 from PyQt4 import QtCore, QtGui
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib import cbook
+from matplotlib import offsetbox
+from matplotlib import text
 import numpy as np
 
 CONFIGURE_SUBPLOTS_BTN_POS = 6
@@ -10,33 +12,47 @@ class CustomToolbar(NavigationToolbar):
         NavigationToolbar.__init__(self,canvas,parent)
         self.canvas = canvas
         #remove unwanted buttons
-        children = self.children()
+        layout = self.layout()
+        #children = self.children()
         builtin_buttons = []
-        for child in children:
-            #print(child.__class__.__name__)
-            if type(child) == QtGui.QToolButton:
-                builtin_buttons.append(child)
+        for ichild in range(layout.count()):
+            child = layout.itemAt(ichild)
+            print(child.widget().__class__.__name__)
+            #if type(child) == QtGui.QToolButton:
+            builtin_buttons.append(child.widget())
+        print(len(builtin_buttons))
 
         # to remove default button from toolbar...
         #buttons in order, 7 == save 
         #builtin_buttons[7].setParent(None)
 
+        # in order to insert buttons it seems I must take
+        # the last widget off and put it back on when finished
+        xylabel =  builtin_buttons[10]
+        xylabel.setParent(None)
+
         # try to edit callback
         builtin_buttons[5].toggled.connect(self.zoom_mod)
 
         #add new toolbar items
-        self.grid_cb = QtGui.QCheckBox("Show &Grid")
-        self.grid_cb.setChecked(False)
+        #self.grid_cb = QtGui.QCheckBox("Show &Grid")
+        #self.grid_cb.setChecked(False)
         
-        self.grid_cb.stateChanged.connect(self.toggle_grid)
-        self.addWidget(self.grid_cb)
+        #self.grid_cb.stateChanged.connect(self.toggle_grid)
+        #self.addWidget(self.grid_cb)
 
         # datacursor toggle button
-        self.datacursor_tb = QtGui.QPushButton("dc")
+        #self.datacursor_tb = QtGui.QPushButton("dc")
+        
+        self.datacursor_tb = QtGui.QToolButton(self)
+        self.datacursor_tb.setIcon(QtGui.QIcon("dc_icon.png"))
         self.datacursor_tb.setCheckable(True)
         self.datacursor_tb.clicked[bool].connect(self.use_cursors)
 
         self.addWidget(self.datacursor_tb)
+
+        print(xylabel)
+        self.addWidget(xylabel)
 
     def toggle_grid(self):
         for ax in self.canvas.figure.axes:
@@ -112,16 +128,19 @@ class DataCursor(object):
         """Draws and hides the annotation box for the given axis "ax"."""
         annotation = ax.annotate(self.template, xy=(0, 0), ha='right',
                 xytext=self.offsets, textcoords='offset points', va='bottom',
-                bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                #bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
                 arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0')
                 )
         annotation.set_visible(False)
+        offsetbox.DraggableAnnotation(annotation)
         return annotation
 
     def __call__(self, event):
         """Intended to be called through "mpl_connect"."""
         # Rather than trying to interpolate, just display the clicked coords
         # This will only be called if it's within "tolerance", anyway.
+        if type(event.artist) == text.Annotation:
+            return
         xdata, ydata = event.artist.get_data()
         if len(event.ind) > 1 :
             # select by closest x value of picked points
