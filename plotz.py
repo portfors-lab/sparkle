@@ -4,7 +4,9 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from abstract_figures import BasePlot
+import collections
 
+import sys
 import time
 
 class BasicPlot(BasePlot):
@@ -112,6 +114,7 @@ class SubPlots(BasePlot):
         nsubplots = len(args)
         BasePlot.__init__(self,(nsubplots,1),parent)
  
+        # args are (xdata,ydata) tuples
         for iplot, ax in enumerate(self.axs):
             # divide argument tuple into x ,y data
             xdata = args[iplot][0]
@@ -122,7 +125,7 @@ class SubPlots(BasePlot):
 
             # test to see if argument is nested list 
             # -- meaning multiple lines in plot
-            if len(xdata) > 0 and isinstance(xdata[0], list):
+            if len(xdata) > 0 and isinstance(xdata[0], collections.Iterable): #isinstance(xdata[0], list):
                 #add multiple lines to plot
                 for iline in range(len(xdata)):
                     ax.plot(xdata[iline], ydata[iline])
@@ -143,17 +146,71 @@ class SubPlots(BasePlot):
         self.axs[axnum].lines[linenum].set_data(xdata,ydata)
         self.canvas.draw()
 
+class FlickPlot(BasePlot):
+    def __init__(self,*args,callback=None,parent=None, titlelist=None):
+        BasePlot.__init__(self,(1,1),parent,flickable=True)
+
+        # accepts as args either a list of axes tuples... or a nd numpy array
+        # and an xdata vector and iterate through the array
+        if isinstance(args[0], np.ndarray):
+            # convert into tuple list first?
+            # not most efficient, but makes flick mehods simpler
+            data_array = args[0]
+            dims = data_array.shape
+            new_dim = 1
+            for d in dims[:-1]:
+                new_dim = new_dim*d
+      
+            ydatalist = data_array.reshape((new_dim,dims[-1]))
+            xdata = args[1]
+            datalist = []
+            for idata in range(ydatalist.shape[0]):
+                datalist.append((xdata,ydatalist[idata,:]))
+            self.datalist = datalist
+        else:
+
+            nsubplots = len(args)
+            self.datalist = args
+
+        # plot the first set of data
+        self.current_plot = 0
+        self.plot_data(self.datalist[0])
+
+    def next_plot(self):
+        if self.current_plot < len(self.datalist)-1:
+            self.current_plot +=1
+            self.axs[0].cla()
+            self.plot_data(self.datalist[self.current_plot])
+            self.canvas.draw()
+
+    def previous_plot(self):
+        if self.current_plot > 0:
+            self.current_plot -=1
+            self.axs[0].cla()
+            self.plot_data(self.datalist[self.current_plot])
+            self.canvas.draw()
+
+    def plot_data(self, data):
+        #print(len(data))
+        xdata = data[0]
+        ydata = data[1]
+
+        ax = self.axs[0]
+        # test to see if argument is nested list 
+        # -- meaning multiple lines in plot
+        if len(xdata) > 0 and  isinstance(xdata[0], collections.Iterable): #isinstance(xdata[0], list):
+            #add multiple lines to plot
+            for iline in range(len(xdata)):
+                #print(xdata.shape, ydata.shape)
+                ax.plot(xdata[iline], ydata[iline])
+        else:
+            ax.plot(xdata, ydata)
 
 class AnimatedWindow(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
         nsubplots = len(args)
         BasePlot.__init__(self,(nsubplots,1),parent)
 
-        """
-        for ax in self.axs:
-            ax.set_xlim(0,3)
-            ax.set_ylim(-10,10)
-        """
         self.canvas.draw()
 
         # save these backgrounds for animation
@@ -174,7 +231,7 @@ class AnimatedWindow(BasePlot):
 
             # test to see if argument is nested list 
             # -- meaning multiple lines in plot
-            if len(xdata) > 0 and isinstance(xdata[0], list):
+            if len(xdata) > 0 and isinstance(xdata[0], collections.Iterable): #isinstance(xdata[0], list):
                 #add multiple lines to plot
                 for iline in range(len(xdata)):
                     ax.plot(xdata[iline], ydata[iline], animated=True)
@@ -292,6 +349,7 @@ class AnimatedWindow(BasePlot):
         if event.text() == 'r':
             self.redraw()
         else:
+            # pass keypress to parent classes
             super().keyPressEvent(event)
     
 class ScrollingPlot(BasePlot):
@@ -306,3 +364,28 @@ class ScrollingPlot(BasePlot):
                 #self.sp.draw()
                 # update saved background so scale stays accurate
                 #self.sp.axs_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
+
+
+
+if __name__ == '__main__':
+
+    t0 = np.arange(0.0, 10.0, 0.1)
+    t1 = np.arange(0.0, 5.0, 0.02)
+
+    y0 = np.sin(2*np.pi*t0)
+    y1 = np.sin(2*np.pi*t1)
+    y2 = 2*np.sin(4*2*np.pi*t0)
+    y3 = np.cos(4*np.pi*t0)
+    y4 = np.sin(6*np.pi*t1)
+
+    d = [(t0,y0), (t1,y1), ((t0,y2),(t0,y3)), (t1,y4)]
+
+    fft_data = np.load("cal0_ffttraces.npy")
+    npts = fft_data.shape[-1]*2
+    freq = np.arange(npts)/(npts/400000)
+    freq = freq[:(npts/2)] #single sided    
+
+    app = QtGui.QApplication(sys.argv)
+    myapp = FlickPlot(fft_data,freq)
+    myapp.show()
+    sys.exit(app.exec_())

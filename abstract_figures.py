@@ -8,7 +8,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from custom_toolbar import CustomToolbar
 
 class BasePlot(QtGui.QMainWindow):
-    def __init__(self,dims,parent=None):
+    def __init__(self,dims,parent=None,flickable=False):
         QtGui.QMainWindow.__init__(self,parent)
 
         if len(dims) != 2:
@@ -28,7 +28,7 @@ class BasePlot(QtGui.QMainWindow):
         for iax in range(nsubplots):
             self.axs.append( fig.add_subplot(nrows,ncols,iax+1) )
 
-        self.mpl_toolbar = CustomToolbar(self.canvas, self.main_frame)
+        self.mpl_toolbar = CustomToolbar(self.canvas, self, flickable=flickable)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.canvas)
@@ -145,6 +145,7 @@ class BasePlot(QtGui.QMainWindow):
         print("key press event from BasePlot")
         if event.text() == 'r':
             print("gaaaaarr")
+        super().keyPressEvent(event)
 
     def closeEvent(self,event):
         # added this so that I can test whether user has closed figure 
