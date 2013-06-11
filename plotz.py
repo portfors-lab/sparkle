@@ -152,68 +152,71 @@ class FlickPlot(BasePlot):
 
         # accepts as args either a list of axes tuples... or a nd numpy array
         # and an xdata vector and iterate through the array
+        self.titles = titles
 
         if isinstance(args[0], np.ndarray):
-            is_ndarray = True
+            self.is_ndarray = True
             # convert into tuple list first?
             # not most efficient, but makes flick mehods simpler
             self.xvector = args[1]
             data_array = args[0]
             dims = data_array.shape
             self.dims = dims
-            self.current_plot = (0,)*(len(dims)-1)
+            self.current_plot = [0,]*(len(dims)-1)
             self.data_array = data_array
-            print('current plot ', self.current_plot)
-            self.plot_data((self.xvector,data_array[self.current_plot]))
+            self.plot_data((self.xvector,data_array[tuple(self.current_plot)]))
             print('title and data shape ', titles.shape,  data_array.shape)
-            if titles is not None:
-                if len(titles.shape) == len(data_array.shape)-1:
-                    self.axs[0].set_title(titles[self.current_plot])
-                elif len(titles.shape) == len(data_array.shape)-2:
-                    self.axs[0].set_title(titles[self.current_plot[:-1]]+ ' rep '+ str(self.current_plot[-1]))
-                else:
-                    self.axs[0].set_title(str(self.current_plot))
-            """
-            new_dim = 1
-            for d in dims[:-1]:
-                new_dim = new_dim*d
-
-            ydatalist = data_array.reshape((new_dim,dims[-1]))
-            xdata = args[1]
-            datalist = []
-            # pair up each data trace with the x values vector
-            for idata in range(ydatalist.shape[0]):
-                datalist.append((xdata,ydatalist[idata,:]))
-            self.datalist = datalist
-            """
 
         else:
-            is_ndarray = False
+            self.is_ndarray = False
             nsubplots = len(args)
             self.datalist = args
 
+            # save dims for purposes of title - does not update atm!!!
+            self.dims = (nsubplots, len(self.datalist[0][0]))
+
             # plot the first set of data
-            self.plot_data(self.datalist[0])
             self.current_plot = 0
+            self.plot_data(self.datalist[0])
+            
+
+    def increment_current(self):
+        # increment from rightmost index to leftmost
+        ndims = len(self.dims)-1
+        for idim in range(ndims):
+            if self.current_plot[-idim - 1] < (self.dims[-idim - 2] - 1):
+                self.current_plot[-idim-1] += 1
+                #break when we find the lowest available increment
+                break
+            # reset this index to zero and move on to higher
+            self.current_plot[-idim -1] = 0
+
+    def decrement_current(self):
+        ndims = len(self.dims)-1
+        for idim in range(ndims):
+            if self.current_plot[-idim - 1] > 0:
+                self.current_plot[-idim-1] -= 1
+                break
+            self.current_plot[-idim -1] = self.dims[-idim -2] - 1
 
     def next_plot(self):
         if self.is_ndarray:
-            pass
+            self.increment_current()
+            self.plot_data((self.xvector,self.data_array[tuple(self.current_plot)]))
         else:
             if self.current_plot < len(self.datalist)-1:
                 self.current_plot +=1
-                self.axs[0].cla()
                 self.plot_data(self.datalist[self.current_plot])
         
         self.canvas.draw()
 
     def previous_plot(self):
         if self.is_ndarray:
-            pass
+            self.decrement_current()
+            self.plot_data((self.xvector,self.data_array[tuple(self.current_plot)]))
         else:
             if self.current_plot > 0:
                 self.current_plot -=1
-                self.axs[0].cla()
                 self.plot_data(self.datalist[self.current_plot])
 
         self.canvas.draw()
@@ -222,9 +225,9 @@ class FlickPlot(BasePlot):
         #print(len(data))
         xdata = data[0]
         ydata = data[1]
-        print('shapes ',xdata.shape, ydata.shape)
 
         ax = self.axs[0]
+        ax.cla()
         # test to see if argument is nested list 
         # -- meaning multiple lines in plot
         if len(xdata) > 0 and  isinstance(xdata[0], collections.Iterable): #isinstance(xdata[0], list):
@@ -234,6 +237,25 @@ class FlickPlot(BasePlot):
                 ax.plot(xdata[iline], ydata[iline])
         else:
             ax.plot(xdata, ydata)
+        self.update_title()
+
+    def update_title(self):
+        if self.is_ndarray:
+            current_plot = tuple(self.current_plot)
+        else:
+            current_plot = self.current_plot
+
+        if self.titles is not None:
+            titles = self.titles
+            if len(titles.shape) == len(self.dims)-1:
+                self.axs[0].set_title(titles[(current_plot)])
+            elif len(titles.shape) == len(self.dims)-2:
+                self.axs[0].set_title(titles[current_plot[:-1]] + ' rep ' + str(current_plot[-1]))
+            else:
+                self.axs[0].set_title(str(current_plot))
+        else:
+            self.axs[0].set_title('Data set ' + str(current_plot))
+
 
 class AnimatedWindow(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
@@ -426,5 +448,6 @@ if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
     myapp = FlickPlot(fft_data,freq,titles=label_array)
+    #myapp = FlickPlot(*d, titles=np.array(['meow', 'spam', 'wow', 'ducks']))
     myapp.show()
     sys.exit(app.exec_())
