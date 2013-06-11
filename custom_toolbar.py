@@ -2,13 +2,12 @@ from PyQt4 import QtCore, QtGui
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from datacursor import DataCursor
 
-CONFIGURE_SUBPLOTS_BTN_POS = 6
-
 class CustomToolbar(NavigationToolbar):
     def __init__(self, canvas, parent=None, flickable=False):
         NavigationToolbar.__init__(self,canvas,parent)
         self.canvas = canvas
         self.parent = parent
+
         #remove unwanted buttons
         layout = self.layout()
         builtin_buttons = []
@@ -18,15 +17,16 @@ class CustomToolbar(NavigationToolbar):
             builtin_buttons.append(child.widget())
         
         # to remove default button from toolbar...
-        #buttons in order, 8 == save 
+        # buttons in order, 8 == save 
         #builtin_buttons[8].setParent(None)
 
         # in order to insert buttons it seems I must take
         # the last widget off and put it back on when finished
+        # except I don't know how to put it back on...
         xylabel =  builtin_buttons[10]
         xylabel.setParent(None)
 
-        # try to edit callback
+        # edit callback
         builtin_buttons[5].toggled.connect(self.zoom_mod)
 
         #add new toolbar items
@@ -37,8 +37,6 @@ class CustomToolbar(NavigationToolbar):
         #self.addWidget(self.grid_cb)
 
         # datacursor toggle button
-        #self.datacursor_tb = QtGui.QPushButton("dc")
-        
         self.datacursor_tb = QtGui.QToolButton(self)
         self.datacursor_tb.setIcon(QtGui.QIcon("dc_icon.png"))
         self.datacursor_tb.setCheckable(True)
@@ -79,12 +77,15 @@ class CustomToolbar(NavigationToolbar):
 
     def use_cursors(self, active):
         if active:
+            lines = []
             for ax in self.canvas.figure.axes:
                 #self.canvas.mpl_connect('pick_event', DataCursor(ax))
                 for line in ax.lines:
                     #line.set_picker(5)
-                    pass
-            self.dc = DataCursor([self.canvas.figure.axes[2].lines[0]], template='x: %d\ny: %0.5f')
+                    # not sure that adding abunch of empty annotations to
+                    # all lines is the best way, but works for now
+                    lines.append(line)
+            self.dc = DataCursor(lines, template='x: %d\ny: %0.5f')
         else:
             while len(self.dc.pick_events) > 0:
                 pe = self.dc.pick_events.pop()

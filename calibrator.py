@@ -9,6 +9,7 @@ import numpy as np
 
 from daq_tasks import *
 from plotz import *
+from audiotools import *
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 from scale_dlg import ScaleDialog
@@ -25,7 +26,7 @@ NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
 
 XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
-SAVE_DATA_TRACES = False
+SAVE_DATA_TRACES = True
 SAVE_FFT_DATA = True
 USE_FINITE = True
 VERBOSE = True
@@ -287,6 +288,7 @@ class Calibrator(QtGui.QMainWindow):
                     self.playback_dB = np.zeros((len(freqs),len(intensities)))
                     self.vin = np.zeros((len(freqs),len(intensities)))
                     self.fft_vals_lookup = {}
+                    self.fft_vals_index = np.zeros((len(freqs),len(intensities)))
 
                     if SAVE_FFT_DATA:
                         # 4D array nfrequencies x nintensities x nreps x npoints
@@ -312,6 +314,8 @@ class Calibrator(QtGui.QMainWindow):
                                 self.work_queue.put((f,db))
                                 # also catalog where these values go in fft_max_vals
                                 self.fft_vals_lookup[(f,db)] = (ifreq,idb)
+                                #print(ifreq,idb)
+                                #self.fft_vals_index[ifreq,idb] = (f,db)
 
                     self.ui.running_label.setText("RUNNING")
                     self.ui.running_label.setPalette(self.green)
@@ -425,6 +429,7 @@ class Calibrator(QtGui.QMainWindow):
                 currentno = int(currentno) +1
                 fname = prefix + str(currentno)
 
+        self.statusBar().showMessage("writing " + fname)
         if SAVE_FFT_DATA:
             self.response_data_lock.lock()
             filename = os.path.join(self.savefolder, fname + FFT_FNAME)
@@ -519,9 +524,10 @@ class Calibrator(QtGui.QMainWindow):
         self.ui.running_label.setPalette(self.red)
 
     def save_speculative_data(self):
-        self.live_lock.lock()
+        #print("locking")
+        #self.live_lock.lock()
         if SAVE_OUTPUT:
-            # due to the method of loading the write the last tone in
+            # due to the method of loading the write, the last tone in
             # tone array was never generated, so delete it
             del self.tone_array[-1]
             print("saving output tones, shape : ", len(self.tone_array), ', ', len(self.tone_array[0]))
@@ -713,6 +719,7 @@ class Calibrator(QtGui.QMainWindow):
             if self.nacquired == len(self.freqs) * len(self.intensities) * self.nreps:
                 print("unlock live")
                 self.live_lock.unlock()
+                self.process_caldata()
         else:
             print('ERROR: NO TASK DETECTED AFTER PROCESS REPSONSE')
            
@@ -732,7 +739,7 @@ class Calibrator(QtGui.QMainWindow):
                 print("outta work")
                 self.stim_lock.unlock()
                 self.on_stop()
-                self.process_caldata()
+                #self.process_caldata()
                 return
             else:
                 f, db = self.work_queue.get()
@@ -976,74 +983,6 @@ class WorkerSignals(QtCore.QObject):
     done = QtCore.pyqtSignal(int, int, numpy.ndarray)
     curve_finished = QtCore.pyqtSignal()
     update_stim_display = QtCore.pyqtSignal(numpy.ndarray,numpy.ndarray, numpy.ndarray, numpy.ndarray)
-
-
-def make_tone(freq,db,dur,risefall,samplerate, caldb, calv, adjustdb=0):
-    # create portable tone generator class that allows the 
-    # ability to generate tones that modifyable on-the-fly
-    npts = dur * samplerate
-    #print("duration (s) :{}".format(dur))
-    # equation for db from voltage is db = 20 * log10(V2/V1))
-    # 10^(db/20)
-    db = db + adjustdb
-    v_at_caldB = calv
-    caldB = caldb
-    amp = (10 ** ((db-caldB)/DBFACTOR)*v_at_caldB)
-
-    if VERBOSE:
-        print("current dB: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, freq/1000, amp))
-        print("cal dB: {}, V at cal dB: {}".format(caldB, v_at_caldB))
-
-    rf_npts = risefall * samplerate
-    #print('amp {}, freq {}, npts {}, rf_npts {}'
-    # .format(amp,freq,npts,rf_npts))
-    
-    tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
-    #add rise fall
-    if risefall > 0:
-        tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
-        tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
-        
-    timevals = np.arange(npts)/samplerate
-
-    # in the interest of not blowing out the speakers I am going to set this to 5?
-    if np.amax(abs(tone)) > 5:
-        print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM, RECALULATING".format(np.amax(abs(tone))))
-        tone = tone/np.amax(abs(tone))
-
-    return tone, timevals
-
-def calc_spectrum(signal,rate):
-    #calculate complex fft
-
-    # pad with zeros?
-    #padded_signal = np.zeros(len(signal*2))
-    #padded_signal[:len(signal)] = signal
-    #signal = padded_signal
-    npts = len(signal)
-
-    freq = np.arange(npts)/(npts/rate)
-    freq = freq[:(npts/2)] #single sided
-    #print('freq len ', len(freq))
-
-    sp = np.fft.fft(signal)/npts
-    sp = sp[:(npts/2)]
-    #print('sp len ', len(sp))
-
-    return freq, sp.real
-
-def calc_db(peak, caldB, cal_peak):
-    pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldB
-    return pbdB
-
-def calc_db_from_v(v, caldB, calv):
-    pbdB = DBFACTOR * np.log10(v/calv) + caldB
-    return pbdB
-
-def calc_noise(fft_vector, ix1,ix2):
-    fft_slice = fft_vector[ix1:ix2]
-    area = trapz(fft_slice)
-    return area
 
 def load_inputs():
     cfgfile = "inputs.cfg"

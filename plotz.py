@@ -36,7 +36,7 @@ class ResultsPlot(BasePlot):
         print(self.data.shape[0])
         print(self.data.shape[1])
         
-        print('rows: '+str(subplotrows)+' cols: '+str(subplotcols))
+        print('rows: ' + str(subplotrows) + ' cols: ' + str(subplotcols))
 
         #make a new window to display acquired data
         for itrace, ax in enumerate(self.axs):

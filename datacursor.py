@@ -55,9 +55,9 @@ class DataCursor(object):
 
     def __call__(self, event):
         """Intended to be called through "mpl_connect"."""
-        # Rather than trying to interpolate, just display the clicked coords
-        # This will only be called if it's within "tolerance", anyway.
-        print(event.mouseevent)
+        
+        #print(event.mouseevent)
+        
         # if we picked an annotation, ignore
         if type(event.artist) == Annotation:
             return
