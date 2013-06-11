@@ -147,53 +147,82 @@ class SubPlots(BasePlot):
         self.canvas.draw()
 
 class FlickPlot(BasePlot):
-    def __init__(self,*args,callback=None,parent=None, titlelist=None):
+    def __init__(self,*args,callback=None,parent=None, titles=None):
         BasePlot.__init__(self,(1,1),parent,flickable=True)
 
         # accepts as args either a list of axes tuples... or a nd numpy array
         # and an xdata vector and iterate through the array
+
         if isinstance(args[0], np.ndarray):
+            is_ndarray = True
             # convert into tuple list first?
             # not most efficient, but makes flick mehods simpler
+            self.xvector = args[1]
             data_array = args[0]
             dims = data_array.shape
+            self.dims = dims
+            self.current_plot = (0,)*(len(dims)-1)
+            self.data_array = data_array
+            print('current plot ', self.current_plot)
+            self.plot_data((self.xvector,data_array[self.current_plot]))
+            print('title and data shape ', titles.shape,  data_array.shape)
+            if titles is not None:
+                if len(titles.shape) == len(data_array.shape)-1:
+                    self.axs[0].set_title(titles[self.current_plot])
+                elif len(titles.shape) == len(data_array.shape)-2:
+                    self.axs[0].set_title(titles[self.current_plot[:-1]]+ ' rep '+ str(self.current_plot[-1]))
+                else:
+                    self.axs[0].set_title(str(self.current_plot))
+            """
             new_dim = 1
             for d in dims[:-1]:
                 new_dim = new_dim*d
-      
+
             ydatalist = data_array.reshape((new_dim,dims[-1]))
             xdata = args[1]
             datalist = []
+            # pair up each data trace with the x values vector
             for idata in range(ydatalist.shape[0]):
                 datalist.append((xdata,ydatalist[idata,:]))
             self.datalist = datalist
-        else:
+            """
 
+        else:
+            is_ndarray = False
             nsubplots = len(args)
             self.datalist = args
 
-        # plot the first set of data
-        self.current_plot = 0
-        self.plot_data(self.datalist[0])
+            # plot the first set of data
+            self.plot_data(self.datalist[0])
+            self.current_plot = 0
 
     def next_plot(self):
-        if self.current_plot < len(self.datalist)-1:
-            self.current_plot +=1
-            self.axs[0].cla()
-            self.plot_data(self.datalist[self.current_plot])
-            self.canvas.draw()
+        if self.is_ndarray:
+            pass
+        else:
+            if self.current_plot < len(self.datalist)-1:
+                self.current_plot +=1
+                self.axs[0].cla()
+                self.plot_data(self.datalist[self.current_plot])
+        
+        self.canvas.draw()
 
     def previous_plot(self):
-        if self.current_plot > 0:
-            self.current_plot -=1
-            self.axs[0].cla()
-            self.plot_data(self.datalist[self.current_plot])
-            self.canvas.draw()
+        if self.is_ndarray:
+            pass
+        else:
+            if self.current_plot > 0:
+                self.current_plot -=1
+                self.axs[0].cla()
+                self.plot_data(self.datalist[self.current_plot])
+
+        self.canvas.draw()
 
     def plot_data(self, data):
         #print(len(data))
         xdata = data[0]
         ydata = data[1]
+        print('shapes ',xdata.shape, ydata.shape)
 
         ax = self.axs[0]
         # test to see if argument is nested list 
@@ -368,6 +397,7 @@ class ScrollingPlot(BasePlot):
 
 
 if __name__ == '__main__':
+    import pickle
 
     t0 = np.arange(0.0, 10.0, 0.1)
     t1 = np.arange(0.0, 5.0, 0.02)
@@ -381,11 +411,20 @@ if __name__ == '__main__':
     d = [(t0,y0), (t1,y1), ((t0,y2),(t0,y3)), (t1,y4)]
 
     fft_data = np.load("cal0_ffttraces.npy")
+    with open("cal0_index.pkl", 'rb') as cfo:
+        index = pickle.load(cfo)
     npts = fft_data.shape[-1]*2
     freq = np.arange(npts)/(npts/400000)
     freq = freq[:(npts/2)] #single sided    
 
+    fdb_dict = index[0]
+    #label_array = [['' for x in range(fft_data.shape[1])] for y in range(fft_data.shape[0])]
+    #label_array = np.array(fft_data.shape[:-2], itemsize=60)
+    label_array = np.empty(fft_data.shape[:-2], dtype=np.dtype(('U',60)))
+    for fdb, ifdb in fdb_dict.items():
+        label_array[ifdb[0],ifdb[1]] = "Frequency: %d, Intensity: %d" % fdb
+
     app = QtGui.QApplication(sys.argv)
-    myapp = FlickPlot(fft_data,freq)
+    myapp = FlickPlot(fft_data,freq,titles=label_array)
     myapp.show()
     sys.exit(app.exec_())
