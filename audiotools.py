@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.integrate import simps, trapz
 
 VERBOSE = True
 DBFACTOR = 20
@@ -35,8 +36,18 @@ def calc_spectrum(signal,rate):
 
     return freq, sp.real
 
+def get_fft_peak(spectrum, freq, atfrequency=None):
+    # find the peak values for spectrum
+    if atfrequency is None:
+        maxidx = spectrum.argmax(axis=0)
+        f = freq[maxidx]
+        spec_peak = np.amax(spectrum)
+    else:
+        f = atfrequency
+        spec_peak = spectrum[freq==f]
+    return spec_peak, f
 
-def make_tone(freq,db,dur,risefall,samplerate, caldb, calv, adjustdb=0):
+def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
     # create portable tone generator class that allows the 
     # ability to generate tones that modifyable on-the-fly
     npts = dur * samplerate

@@ -1,10 +1,9 @@
 import sys, os
 import time
 import pickle
-import queue
-from scipy.integrate import simps, trapz
+
 from PyQt4 import QtCore, QtGui
-from PyDAQmx import *
+
 import numpy as np
 
 from daq_tasks import *
@@ -14,6 +13,8 @@ from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 from scale_dlg import ScaleDialog
 from saving_dlg import SavingDialog
+from calibration import TonePlayer, ToneCurve
+from qthreading import GenericThread, WorkerSignals
 
 #defauts used only if user data not saved
 AIPOINTS = 100
@@ -29,7 +30,7 @@ SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = True
 SAVE_FFT_DATA = True
 USE_FINITE = True
-VERBOSE = True
+VERBOSE = False
 SAVE_NOISE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = True
@@ -42,7 +43,7 @@ DATA_FNAME = "_rawdata"
 NOISE_FNAME = "_noise"
 OUTPUT_FNAME = "_outtones"
 
-class Calibrator(QtGui.QMainWindow):
+class CalibrationWindow(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
         #auto generated code intialization
         QtGui.QMainWindow.__init__(self, parent)
@@ -62,12 +63,9 @@ class Calibrator(QtGui.QMainWindow):
         self.green.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
         self.ui.running_label.setPalette(self.red)
 
-        self.tone = []
         self.display = None
         self.ainpts = AIPOINTS # gets overriden (hopefully)
-        self.caldb = CALDB
-        self.calv = CALV
-        self.calf = CALF
+        
         self.fscale = 1000
         self.tscale = 0.001
 
@@ -120,12 +118,11 @@ class Calibrator(QtGui.QMainWindow):
         # lock for live acquisition vs. processing data 
         # -- maybe a better way to do this with signals?
         self.live_lock = QtCore.QMutex()
-        self.ngenerated = 0
-        self.nacquired = 0
+        
         self.apply_calibration = 0
 
         self.daq_timer = None
-        self.aitask = None
+        
         self.current_operation = None
 
         self.thread_pool = []
@@ -151,41 +148,34 @@ class Calibrator(QtGui.QMainWindow):
         self.save_as_calibration = self.ui.savecal_ckbx.isChecked()
 
         if self.apply_calibration:
-            self.calibration_vector = np.load("calibration_data.npy")
-            with open("calibration_index.pkl", 'rb') as pf:
-                self.calibration_index = pickle.load(pf)
-            print(self.calibration_index)
+            calibration_vector = np.load("calibration_dbdata.npy")
+            calibration_freqs = np.load("calibration_frq.npy")
 
         self.halt = False
+
+        self.ngenerated = 0
+        self.nacquired = 0
+
+        #datastore = DataTraces()
 
         if self.ui.tabs.currentIndex() == 0 :
             if self.live_lock.tryLock():
                 # on the fly
                 self.current_operation = 0
-
-                # this shouldn't actually be possible still...
-                if self.aitask is not None:
-                    self.on_stop()
-                    print("FIX ME : NESTED START OPERATIONS ALLOWED")
                     
-                self.ngenerated = 0
-                self.nacquired = 0
+                self.toneplayer = TonePlayer((self.caldb,self.calv))
+                if self.apply_calibration:
+                    self.toneplayer.set_calibration(calibration_vector, calibration_freqs)
                 # gets info from UI and creates tone
                 self.update_stim()
 
-                sr = self.sr
-                npts = self.tone.size
-                aisr = self.aisr
                 interval = self.ui.interval_spnbx.value()
-
-                if SAVE_DATA_CHART or SAVE_DATA_TRACES:
-                    self.a = []
-            
-                if SAVE_FFT_DATA:
-                    self.full_fft_data = []
 
                 self.ndata = 0
                 self.current_line_data = []
+
+                if SAVE_FFT_DATA:
+                    self.full_fft_data = []
 
                 # do not change interval on the fly
                 self.ui.interval_spnbx.setEnabled(False)
@@ -194,13 +184,7 @@ class Calibrator(QtGui.QMainWindow):
                         # set a timer to repeatedly start ao and ai tasks
                         # set up first go before timer, so that the task starts as soon 
                         # as timer fires, to get most accurate rate
-                        response_npts = int(self.aitime*aisr)
-                        self.aitask = AITaskFinite(aichan, aisr, response_npts)
-                        self.aotask = AOTaskFinite(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
-                        self.aotask.write(self.tone)
-                
-                        if SAVE_OUTPUT:
-                            self.tone_array.append(self.tone[:])
+                        self.toneplayer.start(aochan,aichan)
                             
                         self.ui.running_label.setPalette(self.green)
                         self.ui.running_label.setText("RUNNING")
@@ -258,14 +242,6 @@ class Calibrator(QtGui.QMainWindow):
                     sr = self.ui.sr_spnbx_2.value()*self.fscale
                     nreps = self.ui.nreps_spnbx.value()
 
-                    # acquisitions threads must access the following data
-                    self.dur = dur
-                    self.sr = sr
-                    self.rft = rft
-                    self.nreps = nreps
-                    self.aichan = aichan
-                    self.aochan = aochan
-
                     if f_start < f_stop:
                         freqs = range(f_start, f_stop+1, f_step)
                     else:
@@ -277,45 +253,19 @@ class Calibrator(QtGui.QMainWindow):
 
                     # calculate ms interval from reprate
                     interval = (1/reprate)*1000
+                    self.sr = sr
 
                     # set up display
                     if self.display == None or not(self.display.active):
                         self.spawn_display()
                     self.display.show()
 
-                    # data structure to store the averages of the resultant FFT peaks
-                    self.fft_peaks = np.zeros((len(freqs),len(intensities)))
-                    self.playback_dB = np.zeros((len(freqs),len(intensities)))
-                    self.vin = np.zeros((len(freqs),len(intensities)))
-                    self.fft_vals_lookup = {}
-                    self.fft_vals_index = np.zeros((len(freqs),len(intensities)))
+                    self.tonecurve = ToneCurve(dur,sr,rft,nreps,freqs,intensities, (self.caldb, self.calv))
+                    if self.apply_calibration:
+                        self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
-                    if SAVE_FFT_DATA:
-                        # 4D array nfrequencies x nintensities x nreps x npoints
-                        self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((dur*sr)/2)))
-
-                    if SAVE_DATA_TRACES:
-                        self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(dur*sr)))
-
-                    # data structure to hold repetitions, for averaging
-                    self.rep_temp = []
-                    self.vrep_temp = []
-                    self.reject_list = []
-
-                    if self.save_as_calibration:
-                        self.freq_index = {}
-
-                    self.work_queue = queue.Queue()
-                    for ifreq, f in enumerate(freqs):
-                        if self.save_as_calibration:
-                            self.freq_index[f] = ifreq
-                        for idb, db in enumerate(intensities):
-                            for irep in range(nreps):
-                                self.work_queue.put((f,db))
-                                # also catalog where these values go in fft_max_vals
-                                self.fft_vals_lookup[(f,db)] = (ifreq,idb)
-                                #print(ifreq,idb)
-                                #self.fft_vals_index[ifreq,idb] = (f,db)
+                    self.tonecurve.arm(aochan,aichan)
+                    self.ngenerated +=1
 
                     self.ui.running_label.setText("RUNNING")
                     self.ui.running_label.setPalette(self.green)
@@ -333,58 +283,22 @@ class Calibrator(QtGui.QMainWindow):
             else:
                 print("Operation alread in progress")
 
-    def curve_worker(self, f, db):
+    def curve_worker(self):
         print("curve worker")
+
+        tone, data, times, f, db = self.tonecurve.next()
 
         self.ui.flabel.setText("Frequency : %d" % (f))
         self.ui.dblabel.setText("Intensity : %d" % (db))
 
-        sr = self.sr
-        dur = self.dur
-        rft = self.rft
-
-        if self.apply_calibration:
-            cidx = self.calibration_index[f]
-            adjdb = self.calibration_vector[cidx]
-            adjdb = 100 - adjdb
-        else:
-            adjdb = 0
-
-        # make a tone, calculate it's fft and display
-        tone, times = make_tone(f, db, dur, rft, sr, self.caldb, self.calv, adjustdb=adjdb)
         self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
 
-        if PRINT_WARNINGS:
-            if np.amax(abs(tone)) < 0.005:
-                print("WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM")
-        xfft, yfft = calc_spectrum(tone, sr)
+        xfft, yfft = calc_spectrum(tone, self.tonecurve.player.get_samplerate())
 
         try:
             self.signals.update_stim_display.emit(times, tone, xfft, abs(yfft))
         except:
             print("WARNING : Problem drawing stim to Window")
-
-        # now present the tone once
-        self.daq_lock.lock()
-
-        aitask = AITaskFinite(self.aichan, sr, len(tone))
-        aotask = AOTaskFinite(self.aochan, sr, len(tone), trigsrc=b"ai/StartTrigger")
-        aotask.write(tone)
-
-        if SAVE_OUTPUT:
-            self.tone_array.append(self.tone[:])
-        
-        aotask.StartTask()
-        aitask.StartTask()
-                        
-        self.ngenerated +=1
-        # blocking read
-        data = aitask.read()
-        
-        aitask.stop()
-        aotask.stop()
-
-        self.daq_lock.unlock()
 
         #self.current_line_data = data
         #self.process_response(f,db)
@@ -497,16 +411,7 @@ class Calibrator(QtGui.QMainWindow):
                     self.ui.running_label.setPalette(self.red)
                     QtGui.QApplication.processEvents()
                     self.save_speculative_data()
-                try:
-                    self.aitask.stop()
-                    self.aotask.stop()
-                    self.aitask = None
-                    self.aotask = None
-                except DAQError:
-                    print("No task running")
-                except:
-                    pass
-                    #raise
+                    self.toneplayer.stop()
            
         elif self.current_operation == 1:
             self.killTimer(self.daq_timer)
@@ -515,11 +420,10 @@ class Calibrator(QtGui.QMainWindow):
             self.ui.start_button.setEnabled(True)
             # no need to kill tasks since they will finish in the thread
             self.pool.waitForDone()
-
-            self.aitask = None
-            self.aotask = None
+            
         else:
             print("No task currently running")
+        self.live_lock.unlock()
         self.ui.running_label.setText("OFF")
         self.ui.running_label.setPalette(self.red)
 
@@ -549,26 +453,13 @@ class Calibrator(QtGui.QMainWindow):
         rft = self.ui.risefall_spnbx.value()*self.tscale
         aisr =  self.ui.aisr_spnbx.value()*self.fscale
 
-        if self.apply_calibration:
-            cidx = self.calibration_index[f]
-            adjdb = self.calibration_vector[cidx]
-            adjdb = 100 - adjdb
-        else:
-            adjdb=0
-
-        tone, timevals = make_tone(f,db,dur,rft,sr, self.caldb, self.calv, adjustdb=adjdb)
+        tone, timevals = self.toneplayer.set_tone(f,db,dur,rft,sr)
         
         npts = tone.size
 
         #also plot stim FFT
         freq, spectrum = calc_spectrum(tone,sr)
-       
-        self.stim_lock.lock()
-        self.tone = tone
-        self.sr = sr
-        self.aitime = dur
-        self.aisr = aisr
-        self.stim_lock.unlock()
+
         self.fdb = (f,db)
 
         self.statusBar().showMessage('npts: {}'.format(npts))
@@ -592,13 +483,13 @@ class Calibrator(QtGui.QMainWindow):
         self.display.show()
         # set axes limits appropriately
         self.display.axs[0].set_title("Stimulus")
-        self.display.axs[0].set_xlim(0,3)
+        self.display.axs[0].set_xlim(0,2)
         self.display.axs[0].set_ylim(-10,10)
         self.display.axs[1].set_title("Response")
-        self.display.axs[1].set_xlim(0,3)
+        self.display.axs[1].set_xlim(0,2)
         self.display.axs[1].set_ylim(-10,10)
         self.display.axs[2].set_title("FFTs")
-        self.display.axs[2].set_xlim(0,self.sr/2)
+        self.display.axs[2].set_xlim(0,200000)
         self.display.axs[1].lines[0].set_color('g')
         #self.display.canvas.draw()
 
@@ -613,7 +504,10 @@ class Calibrator(QtGui.QMainWindow):
     def process_response(self, f, db, data):
         try:
             #print("process response")
-            sr = self.sr
+            if self.current_operation == 0:
+                sr = self.toneplayer.get_samplerate()
+            else:
+                sr = self.tonecurve.player.get_samplerate()
 
             # extract information from acquired tone, and save
             freq, spectrum = calc_spectrum(data, sr)
@@ -621,14 +515,8 @@ class Calibrator(QtGui.QMainWindow):
             # take the abs (should I do this?), and get the highest peak
             spectrum = abs(spectrum)
 
-            maxidx = spectrum.argmax(axis=0)
-            max_freq = freq[maxidx]
-            spec_max = np.amax(spectrum)
-
-            fidx = np.where(freq==f)
-            #where returns a tuple of a list of indices and type          
-            fidx = fidx[0][0]
-            spec_peak_at_f = spectrum[fidx]
+            spec_max, max_freq = get_fft_peak(spectrum,freq)
+            spec_peak_at_f = spectrum[freq == f]
 
             vmax = np.amax(abs(data))
             
@@ -650,10 +538,7 @@ class Calibrator(QtGui.QMainWindow):
                 if PRINT_WARNINGS:
                     print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
                     print("\tTarget : {}, Received : {}".format(f, max_freq))
-                if self.current_operation == 1:
-                    ifreq, idb = self.fft_vals_lookup[(f,db)]
-                    self.reject_list.append((f, db, ifreq, idb))            
-
+          
             if VERBOSE:
                 #print(maxidx)
                 print("%.5f AI V" % (vmax))
@@ -666,41 +551,13 @@ class Calibrator(QtGui.QMainWindow):
             except:
                 print("WARNING : Problem drawing to Window")        
 
-            if self.current_operation == 1:
-                self.response_data_lock.lock()        
-                self.rep_temp.append(spec_peak_at_f)
-                self.vrep_temp.append(vmax)
-                if len(self.rep_temp) == self.nreps:
-                    ifreq, idb = self.fft_vals_lookup[(f,db)]
-                    self.fft_peaks[ifreq][idb] =  np.mean(self.rep_temp)
-                    self.vin[ifreq][idb] = np.mean(self.vrep_temp)
-                    if VERBOSE:
-                        print('\n' + '*'*40)
-                        print("Rep values: {}\nRep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
-                        print("V rep values: {}\nV rep mean: {}".format(self.vrep_temp, np.mean(self.vrep_temp)))
-                        print('*'*40 + '\n')
-                    self.rep_temp = []
-                    self.vrep_temp = []
-                self.response_data_lock.unlock()
 
-                if SAVE_FFT_DATA:
-                    irep = len(self.rep_temp) - 1
-                    if irep < 0 :
-                        irep = self.nreps - 1 
-                    ifreq, idb = self.fft_vals_lookup[(f,db)]
-                    self.full_fft_data[ifreq][idb][irep] = spectrum
-
-                    if SAVE_DATA_TRACES: 
-                        self.data_traces[ifreq][idb][irep] = data
-                self.response_data_lock.unlock()
-
-            elif self.current_operation == 0:
+            if self.current_operation == 0:
                 if SAVE_FFT_DATA:
                     self.response_data_lock.lock()
                     self.full_fft_data.append(spectrum)
                     self.response_data_lock.unlock()
-            else:
-                raise Exception("Unknown Operation Error")
+
             self.nacquired +=1
         except:
             print("Error processing response data")
@@ -709,79 +566,44 @@ class Calibrator(QtGui.QMainWindow):
 
         print('generated ', self.ngenerated, ', acquired ', self.nacquired, ', halted ', self.halt)
         
-        if self.current_operation == 0:
-            if self.halt and self.ngenerated == self.nacquired:
-                print("finished collecting, wrapping up...")
-                self.live_lock.unlock()
-        elif self.current_operation == 1:
-            # or should I emit a signal to execute this? 
-            # I don't think it matters in the main thread
-            if self.nacquired == len(self.freqs) * len(self.intensities) * self.nreps:
-                print("unlock live")
-                self.live_lock.unlock()
+        if self.halt and self.ngenerated == self.nacquired:
+            print("finished collecting, wrapping up...")
+            self.live_lock.unlock()
+                
+            if self.current_operation == 1:
+                # or should I emit a signal to execute this? 
+                # I don't think it matters in the main thread
                 self.process_caldata()
-        else:
-            print('ERROR: NO TASK DETECTED AFTER PROCESS REPSONSE')
+
            
     def timerEvent(self, evt):
         #print("tick")
         if self.current_operation == 0:
-
+            self.ngenerated +=1
             t  = GenericThread(self.finite_worker)
            
         elif self.current_operation == 1:
 
             # if timing is correct and feasible (i.e. interval >= duration), locking 
             # shouldn't strictly be necessesary, but for posterity...
-            self.stim_lock.lock()
-            if self.work_queue.empty():
-                # no more work, quit
+            if not self.tonecurve.haswork():
+                # due to the nature of generation, we must collect the last dataset,
+                # then halt.
                 print("outta work")
-                self.stim_lock.unlock()
                 self.on_stop()
-                #self.process_caldata()
-                return
+                self.halt = True
             else:
-                f, db = self.work_queue.get()
-            self.stim_lock.unlock()
-
+                self.ngenerated +=1
             # spawn thread for next item in queue
-            t  = GenericThread(self.curve_worker, f, db)
+            t  = GenericThread(self.curve_worker)
+        
         self.pool.start(t)
 
     def finite_worker(self):
         #print("finite worker")
 
-        # acquire data and reset task to be read for next timer event
-        self.daq_lock.lock()
-        self.aotask.StartTask()
-        self.aitask.StartTask()
-        
-        self.ngenerated +=1
-
-        # blocking read
-        data = self.aitask.read()
-
-        self.aitask.stop()
-        self.aotask.stop()
-
-        aochan = self.ui.aochan_box.currentText().encode()
-        aichan = self.ui.aichan_box.currentText().encode()
-
-        self.stim_lock.lock()
-
-        npts =  self.tone.size
-        response_npts = int(self.aitime*self.aisr)
-
-        self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
-        self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
-        self.aotask.write(self.tone)
-
-        if SAVE_OUTPUT:
-            self.tone_array.append(self.tone[:])
-
-        self.daq_lock.unlock()
-        self.stim_lock.unlock()
+        data = self.toneplayer.read()
+        self.toneplayer.reset()
 
         f, db = self.fdb
         self.signals.done.emit(f, db, data[:])
@@ -965,24 +787,6 @@ class Calibrator(QtGui.QMainWindow):
 
         QtGui.QMainWindow.closeEvent(self,event)
 
-class GenericThread(QtCore.QRunnable):
-    def __init__(self, function, *args, **kwargs):
-        QtCore.QRunnable.__init__(self)
-        self.function = function
-        self.args = args
-        self.kwargs = kwargs
-    """
-    def __del__(self):
-        self.wait()
-    """
-    def run(self):
-        self.function(*self.args,**self.kwargs)
-        return
-
-class WorkerSignals(QtCore.QObject):
-    done = QtCore.pyqtSignal(int, int, numpy.ndarray)
-    curve_finished = QtCore.pyqtSignal()
-    update_stim_display = QtCore.pyqtSignal(numpy.ndarray,numpy.ndarray, numpy.ndarray, numpy.ndarray)
 
 def load_inputs():
     cfgfile = "inputs.cfg"
@@ -1021,6 +825,6 @@ def plot_cal_curve(results_array, freqs, intensities, p):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     devName = "PCI-6259"
-    myapp = Calibrator(devName)
+    myapp = CalibrationWindow(devName)
     myapp.show()
     sys.exit(app.exec_())
