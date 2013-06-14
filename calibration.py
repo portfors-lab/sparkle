@@ -2,14 +2,26 @@ from daq_tasks import *
 from audiotools import *
 import threading
 import queue
+import os
+import pickle
 
 from PyDAQmx import *
 
 SAVE_OUTPUT = False
 PRINT_WARNINGS = True
 SAVE_FFT_DATA = True
-VERBOSE = True
+VERBOSE = False
 SAVE_DATA_TRACES = True
+SAVE_NOISE = False
+
+
+FFT_FNAME = '_ffttraces'
+PEAKS_FNAME =  '_fftpeaks'
+DB_FNAME = '_resultdb'
+INDEX_FNAME = '_index'
+DATA_FNAME = "_rawdata"
+NOISE_FNAME = "_noise"
+OUTPUT_FNAME = "_outtones"
 
 class TonePlayer():
     def __init__(self, dbv=(100,0.1)):
@@ -113,7 +125,7 @@ class TonePlayer():
         return data
 
     def reset(self):
-
+        print('reset')
         self.tone_lock.acquire()
         #self.daq_lock.acquire()
 
@@ -201,13 +213,9 @@ class ToneCurve():
             for idb, db in enumerate(intensities):
                 for irep in range(nreps):
                     self.work_queue.put((f,db,irep))
-                    # also catalog where these values go in fft_max_vals
-                self.fft_vals_lookup[(f,db)] = (ifreq,idb)
-                    #print(ifreq,idb)
-                    #self.fft_vals_index[ifreq,idb] = (f,db)
-
-        self.freqs = freqs
-        self.intensities = intensities
+    
+        self.freqs = [x for x in freqs]
+        self.intensities = [x for x in intensities]
 
         self.player = TonePlayer(dbv)
 
@@ -223,11 +231,13 @@ class ToneCurve():
 
     def next(self):
 
+        print('reading')
         data = self.player.read()
+        print('read')
 
         # save data here
         played_f, played_db, r = self.current_fdb
-        self._savedata(data, self.current_fdb)
+        self._storedata(data, self.current_fdb)
         # t will not change in tuning curve
         played_tone, t = self.current_tone
 
@@ -255,7 +265,7 @@ class ToneCurve():
     def set_calibration(self, db_boost_array, frequencies):
         self.player.set_calibration(db_boost_array, frequencies)
 
-    def _savedata(self, data, fdb):
+    def _storedata(self, data, fdb):
         sr = self.player.get_samplerate()
         f, db, rep = fdb
 
@@ -287,28 +297,126 @@ class ToneCurve():
             print("%.5f AI V" % (vmax))
             print("%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq))
 
-        self.data_lock.acquire()
-        self.rep_temp.append(spec_peak_at_f)
-        self.vrep_temp.append(vmax)
-        if rep == self.nreps-1:
-            ifreq, idb = self.fft_vals_lookup[(f,db)]
-            self.fft_peaks[ifreq][idb] =  np.mean(self.rep_temp)
-            self.vin[ifreq][idb] = np.mean(self.vrep_temp)
-            if VERBOSE:
-                print('\n' + '*'*40)
-                print("Rep values: {}\nRep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
-                print("V rep values: {}\nV rep mean: {}".format(self.vrep_temp, np.mean(self.vrep_temp)))
-                print('*'*40 + '\n')
-            self.rep_temp = []
-            self.vrep_temp = []
+        try:
+            self.data_lock.acquire()
+            self.rep_temp.append(spec_peak_at_f)
+            self.vrep_temp.append(vmax)
+            if rep == self.nreps-1:
+                ifreq = self.freqs.index(f)
+                idb = self.intensities.index(db)
+                self.fft_peaks[ifreq][idb] =  np.mean(self.rep_temp)
+                self.vin[ifreq][idb] = np.mean(self.vrep_temp)
+                if VERBOSE:
+                    print('\n' + '*'*40)
+                    print("Rep values: {}\nRep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
+                    print("V rep values: {}\nV rep mean: {}".format(self.vrep_temp, np.mean(self.vrep_temp)))
+                    print('*'*40 + '\n')
+                self.rep_temp = []
+                self.vrep_temp = []
 
-        if SAVE_FFT_DATA: 
-            ifreq, idb = self.fft_vals_lookup[(f,db)]
-            self.full_fft_data[ifreq][idb][rep] = spectrum
-            
-            if SAVE_DATA_TRACES: 
-                self.data_traces[ifreq][idb][rep] = data
-        self.data_lock.release()
+            if SAVE_FFT_DATA:
+                ifreq = self.freqs.index(f)
+                idb = self.intensities.index(db)
+                #ifreq, idb = self.fft_vals_lookup[(f,db)]
+                self.full_fft_data[ifreq][idb][rep] = spectrum
+
+                if SAVE_DATA_TRACES: 
+                    self.data_traces[ifreq][idb][rep] = data
+            self.data_lock.release()
+        except Exception as e:
+            print("ERROR: unable to save recorded data")
+            print(e)
+            self.data_lock.release()
+
+    def save_to_file(self, calf, sfolder, sfilename, keepcal=False):
+        #After running curve do calculations and save data to file
+        
+        print("Saving...")
+        #print('fft peaks ', self.fft_peaks)
+        print('rejects : ', self.reject_list)
+        # go through FFT peaks and calculate playback resultant dB
+        #for freq in self.fft_peaks
+        vfunc = np.vectorize(calc_db)
+        caldb = self.player.caldb
+        calv = self.player.calv
+        #dB_from_v_vfunc = np.vectorize(calc_db_from_v)
+
+        try:
+            self.data_lock.acquire()
+            ifreq = self.freqs.index(calf)
+            idb = self.intensities.index(caldb)
+            cal_fft_peak = self.fft_peaks[ifreq][idb]
+            cal_vmax =  self.vin[ifreq][idb]
+            #self.data_lock.release()
+            print("Using FFT peak data from ", caldb, " dB, ", 
+                  calf, " Hz tone to calculate calibration curve")
+        except:
+            print("ERROR : could not retrieve data from specified calibration frequency, %d Hz, and intensity, %d dB" % (calf, caldb))
+            cal_fft_peak = 0
+            cal_vmax = 0
+
+        #resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
+        resultant_dB = vfunc(self.vin, caldb, cal_vmax)
+
+        fname = sfilename
+        while os.path.isfile(os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")):
+            # increment filename until we come across one that 
+            # doesn't exist
+            if not fname[-1].isdigit():
+                fname = fname + '0'
+            else:
+                currentno = re.search('(\d+)$', fname).group(0)
+                prefix = fname[:-(len(currentno))]
+                currentno = int(currentno) +1
+                fname = prefix + str(currentno)
+
+        if SAVE_FFT_DATA:
+            filename = os.path.join(sfolder, fname + FFT_FNAME)
+            np.save(filename, self.full_fft_data)
+
+            filename = os.path.join(sfolder, fname + PEAKS_FNAME)
+            np.save(filename, self.fft_peaks)
+
+            with open(os.path.join(sfolder, fname + INDEX_FNAME + ".pkl"), 'wb') as cfo:
+                # make a dictionary of the other paramters used to 
+                # generate this roll-off curve
+                params = {'calV': calv, 'caldB' : caldb, 
+                          'calf' : calf, 'rft' : self.rft, 
+                          'samplerate' : self.sr, 'duration' : self.dur}
+                pickle.dump([self.freqs, self.intensities, self.reject_list, params], cfo)
+
+            if SAVE_DATA_TRACES:
+                filename = os.path.join(sfolder, fname + DATA_FNAME)
+                np.save(filename, self.data_traces)
+
+            if SAVE_OUTPUT:
+                filename = os.path.join(sfolder, fname + OUTPUT_FNAME)
+                np.save(filename, self.tone_array)
+
+        filename = os.path.join(sfolder, fname + DB_FNAME)
+        np.save(filename, resultant_dB)
+        np.savetxt(filename + ".txt", resultant_dB)
+
+        if keepcal:
+            filename = "calibration_data"
+            calibration_vector = resultant_dB[:,0]
+            np.save(filename,calibration_vector)
+            with open("calibration_index.pkl",'wb') as pkf:
+                pickle.dump(self.freq_index, pkf)
+        
+
+        if SAVE_NOISE:
+            #noise_vfunc = np.vectorize(calc_noise)
+            #noise_array = noise_vfunc(self.full_fft_data,0,2000)
+            noise_array = np.zeros((len(self.freqs),len(self.intensities),self.nreps))
+            for ifreq in range(len(self.freqs)):
+                for idb in range(len(self.intensities)):
+                    for irep in range(self.nreps):
+                        noise_array[ifreq,idb,irep] = calc_noise(self.full_fft_data[ifreq,idb,irep], 0, 2000)
+
+            np.save(sfolder + fname + NOISE_FNAME, noise_array)
+
+        return resultant_dB
 
 class Tone():
     def __init__(self):

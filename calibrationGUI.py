@@ -27,21 +27,13 @@ NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
 
 XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
-SAVE_DATA_TRACES = True
-SAVE_FFT_DATA = True
+SAVE_DATA_TRACES = False
+SAVE_FFT_DATA = False
 USE_FINITE = True
 VERBOSE = False
-SAVE_NOISE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = True
 
-FFT_FNAME = '_ffttraces'
-PEAKS_FNAME =  '_fftpeaks'
-DB_FNAME = '_resultdb'
-INDEX_FNAME = '_index'
-DATA_FNAME = "_rawdata"
-NOISE_FNAME = "_noise"
-OUTPUT_FNAME = "_outtones"
 
 class CalibrationWindow(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -269,11 +261,13 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                     self.ui.running_label.setText("RUNNING")
                     self.ui.running_label.setPalette(self.green)
-                    self.daq_timer = self.startTimer(interval)
 
                     # save these lists for easier plotting later
                     self.freqs = freqs
                     self.intensities = intensities
+
+                    self.daq_timer = self.startTimer(interval)
+                    
                 except:
                     self.live_lock.unlock()
                     print("handle curve set-up exception")
@@ -281,7 +275,9 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.ui.start_button.setEnabled(True)
                     raise
             else:
-                print("Operation alread in progress")
+                print("Operation already in progress")
+        self.start_time = time.time()
+        self.last_tick = self.start_time
 
     def curve_worker(self):
         print("curve worker")
@@ -305,97 +301,11 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.signals.done.emit(f, db, data[:])
 
     def process_caldata(self):
-        #After running curve do calculations and save data to file
-        self.live_lock.lock()
-        print("job finished")
-        #print('fft peaks ', self.fft_peaks)
-        print('rejects ', self.reject_list)
-        # go through FFT peaks and calculate playback resultant dB
-        #for freq in self.fft_peaks
-        vfunc = np.vectorize(calc_db)
-        #dB_from_v_vfunc = np.vectorize(calc_db_from_v)
-
-        try:
-            self.response_data_lock.lock()
-            ifreq, idb = self.fft_vals_lookup[(self.calf,self.caldb)]
-            cal_fft_peak = self.fft_peaks[ifreq][idb]
-            cal_vmax =  self.vin[ifreq][idb]
-            self.response_data_lock.unlock()
-            print("Using FFT peak data from ", self.caldb, " dB, ", 
-                  self.calf, " Hz tone to calculate calibration curve")
-        except:
-            print("WARNING : using manual %.4f fft peak" % (CALHACK))
-            cal_fft_peak = CALHACK
-            cal_vmax = 0
-
-        #resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
-        resultant_dB = vfunc(self.vin, self.caldb, cal_vmax)
-
-        fname = self.savename
-        while os.path.isfile(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl")):
-            # increment filename until we come across one that 
-            # doesn't exist
-            if not fname[-1].isdigit():
-                fname = fname + '0'
-            else:
-                currentno = re.search('(\d+)$', fname).group(0)
-                prefix = fname[:-(len(currentno))]
-                currentno = int(currentno) +1
-                fname = prefix + str(currentno)
-
-        self.statusBar().showMessage("writing " + fname)
-        if SAVE_FFT_DATA:
-            self.response_data_lock.lock()
-            filename = os.path.join(self.savefolder, fname + FFT_FNAME)
-            np.save(filename, self.full_fft_data)
-
-            filename = os.path.join(self.savefolder, fname + PEAKS_FNAME)
-            np.save(filename, self.fft_peaks)
-
-            with open(os.path.join(self.savefolder, fname + INDEX_FNAME + ".pkl"), 'wb') as cfo:
-                # make a dictionary of the other paramters used to 
-                # generate this roll-off curve
-                params = {'calV': self.calv, 'caldB' : self.caldb, 
-                          'calf' : self.calf, 'rft' : self.rft, 
-                          'samplerate' : self.sr, 'duration' : self.dur}
-                pickle.dump([self.fft_vals_lookup, self.reject_list, params], cfo)
-
-            if SAVE_DATA_TRACES:
-                filename = os.path.join(self.savefolder, fname + DATA_FNAME)
-                np.save(filename, self.data_traces)
-
-            self.response_data_lock.unlock()
-
-            if SAVE_OUTPUT:
-                filename = os.path.join(self.savefolder, fname + OUTPUT_FNAME)
-                np.save(filename, self.tone_array)
-
-        filename = os.path.join(self.savefolder, fname + DB_FNAME)
-        np.save(filename, resultant_dB)
-        np.savetxt(filename+".txt", resultant_dB)
-
-        if self.save_as_calibration:
-            filename = "calibration_data"
-            calibration_vector = resultant_dB[:,0]
-            np.save(filename,calibration_vector)
-            with open("calibration_index.pkl",'wb') as pkf:
-                pickle.dump(self.freq_index, pkf)
-
+        resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, 
+                                                   self.savename, 
+                                                   keepcal=self.save_as_calibration)
         print("plotting calibration curve")
         plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
-
-        if SAVE_NOISE:
-            #noise_vfunc = np.vectorize(calc_noise)
-            #noise_array = noise_vfunc(self.full_fft_data,0,2000)
-            noise_array = np.zeros((len(self.freqs),len(self.intensities),self.nreps))
-            for ifreq in range(len(self.freqs)):
-                for idb in range(len(self.intensities)):
-                    for irep in range(self.nreps):
-                        noise_array[ifreq,idb,irep] = calc_noise(self.full_fft_data[ifreq,idb,irep], 0, 2000)
-
-            np.save(self.savefolder + fname + NOISE_FNAME, noise_array)
-
-        self.live_lock.unlock()
 
     def on_stop(self):
         if self.current_operation == 0 : 
@@ -578,6 +488,9 @@ class CalibrationWindow(QtGui.QMainWindow):
            
     def timerEvent(self, evt):
         #print("tick")
+        now = time.time()
+        print("interval %d, time from start %d \n" % ((now - self.last_tick)*1000, (now - self.start_time)*1000))
+        self.last_tick = now
         if self.current_operation == 0:
             self.ngenerated +=1
             t  = GenericThread(self.finite_worker)
