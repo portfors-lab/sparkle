@@ -1,6 +1,7 @@
 import sys, os
 import time
 import pickle
+import threading
 
 from PyQt4 import QtCore, QtGui
 
@@ -246,6 +247,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     # calculate ms interval from reprate
                     interval = (1/reprate)*1000
                     self.sr = sr
+                    self.interval = interval
 
                     # set up display
                     if self.display == None or not(self.display.active):
@@ -266,8 +268,12 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.freqs = freqs
                     self.intensities = intensities
 
-                    self.daq_timer = self.startTimer(interval)
-                    
+                    #self.daq_timer = self.startTimer(interval)
+                    self.start_time = time.time()
+                    self.last_tick = self.start_time-0.250
+                    acq_thread = threading.Thread(target=self.curve_worker)
+                    acq_thread.start()                    
+
                 except:
                     self.live_lock.unlock()
                     print("handle curve set-up exception")
@@ -276,29 +282,45 @@ class CalibrationWindow(QtGui.QMainWindow):
                     raise
             else:
                 print("Operation already in progress")
-        self.start_time = time.time()
-        self.last_tick = self.start_time
+        
 
     def curve_worker(self):
         print("curve worker")
 
-        tone, data, times, f, db = self.tonecurve.next()
+        while not self.halt:
+            now = time.time()
+            elapsed = (now - self.last_tick)*1000
+            print(self.last_tick, now)
+            print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+            self.last_tick = now
+            if elapsed < self.interval:
+                print('sleep ', (self.interval-elapsed))
+                time.sleep((self.interval-elapsed)/1000)
 
-        self.ui.flabel.setText("Frequency : %d" % (f))
-        self.ui.dblabel.setText("Intensity : %d" % (db))
+            if not self.tonecurve.haswork():
+                self.on_stop()
+                self.halt = True
+            else:
+                self.ngenerated +=1
 
-        self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
 
-        xfft, yfft = calc_spectrum(tone, self.tonecurve.player.get_samplerate())
+            tone, data, times, f, db = self.tonecurve.next()
 
-        try:
-            self.signals.update_stim_display.emit(times, tone, xfft, abs(yfft))
-        except:
-            print("WARNING : Problem drawing stim to Window")
+            self.ui.flabel.setText("Frequency : %d" % (f))
+            self.ui.dblabel.setText("Intensity : %d" % (db))
 
-        #self.current_line_data = data
-        #self.process_response(f,db)
-        self.signals.done.emit(f, db, data[:])
+            self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
+
+            xfft, yfft = calc_spectrum(tone, self.tonecurve.player.get_samplerate())
+
+            try:
+                self.signals.update_stim_display.emit(times, tone, xfft, abs(yfft))
+            except:
+                print("WARNING : Problem drawing stim to Window")
+
+            #self.current_line_data = data
+            #self.process_response(f,db)
+            self.signals.done.emit(f, db, data[:])
 
     def process_caldata(self):
         resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, 
@@ -324,7 +346,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.toneplayer.stop()
            
         elif self.current_operation == 1:
-            self.killTimer(self.daq_timer)
+            #self.killTimer(self.daq_timer)
             self.halt = True
             self.ui.tab_2.setEnabled(True)
             self.ui.start_button.setEnabled(True)

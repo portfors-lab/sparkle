@@ -4,6 +4,7 @@ import threading
 import queue
 import os
 import pickle
+from multiprocessing import Process
 
 from PyDAQmx import *
 
@@ -237,7 +238,14 @@ class ToneCurve():
 
         # save data here
         played_f, played_db, r = self.current_fdb
-        self._storedata(data, self.current_fdb)
+
+        # spin off thread for saving data
+        t = threading.Thread(target=self._storedata, args=(data, self.current_fdb))
+        #t = Process(target=self._storesimple, args=(data, self.current_fdb))
+        #t.daemon = True
+        t.start()
+        #self._storedata(data, self.current_fdb)
+
         # t will not change in tuning curve
         played_tone, t = self.current_tone
 
@@ -264,6 +272,10 @@ class ToneCurve():
 
     def set_calibration(self, db_boost_array, frequencies):
         self.player.set_calibration(db_boost_array, frequencies)
+
+    def _storesimple(self,data,fdb):
+        f, db, rep = fdb
+        print(f, db, rep)
 
     def _storedata(self, data, fdb):
         sr = self.player.get_samplerate()
@@ -298,7 +310,7 @@ class ToneCurve():
             print("%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq))
 
         try:
-            self.data_lock.acquire()
+            #self.data_lock.acquire()
             self.rep_temp.append(spec_peak_at_f)
             self.vrep_temp.append(vmax)
             if rep == self.nreps-1:
@@ -322,11 +334,11 @@ class ToneCurve():
 
                 if SAVE_DATA_TRACES: 
                     self.data_traces[ifreq][idb][rep] = data
-            self.data_lock.release()
+            #self.data_lock.release()
         except Exception as e:
             print("ERROR: unable to save recorded data")
             print(e)
-            self.data_lock.release()
+            #self.data_lock.release()
 
     def save_to_file(self, calf, sfolder, sfilename, keepcal=False):
         #After running curve do calculations and save data to file
