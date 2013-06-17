@@ -19,4 +19,5 @@ class WorkerSignals(QtCore.QObject):
     done = QtCore.pyqtSignal(int, int, numpy.ndarray)
     curve_finished = QtCore.pyqtSignal()
     update_stim_display = QtCore.pyqtSignal(numpy.ndarray,numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    ncollected = QtCore.pyqtSignal(list)
 

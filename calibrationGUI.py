@@ -35,7 +35,6 @@ VERBOSE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = True
 
-
 class CalibrationWindow(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
         #auto generated code intialization
@@ -151,18 +150,11 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         #datastore = DataTraces()
 
+
         if self.ui.tabs.currentIndex() == 0 :
             if self.live_lock.tryLock():
                 # on the fly
                 self.current_operation = 0
-                    
-                self.toneplayer = TonePlayer((self.caldb,self.calv))
-                if self.apply_calibration:
-                    self.toneplayer.set_calibration(calibration_vector, calibration_freqs)
-                # gets info from UI and creates tone
-                self.update_stim()
-
-                interval = self.ui.interval_spnbx.value()
 
                 self.ndata = 0
                 self.current_line_data = []
@@ -172,34 +164,45 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                 # do not change interval on the fly
                 self.ui.interval_spnbx.setEnabled(False)
+                interval = self.ui.interval_spnbx.value()
+                self.interval = interval
+
                 try:
                     if USE_FINITE:
                         # set a timer to repeatedly start ao and ai tasks
                         # set up first go before timer, so that the task starts as soon 
                         # as timer fires, to get most accurate rate
+    
+                        self.toneplayer = TonePlayer((self.caldb,self.calv))
+                        if self.apply_calibration:
+                            self.toneplayer.set_calibration(calibration_vector, calibration_freqs)
+
+                        # gets info from UI and creates tone
+                        self.update_stim()
+
                         self.toneplayer.start(aochan,aichan)
                             
                         self.ui.running_label.setPalette(self.green)
                         self.ui.running_label.setText("RUNNING")
-                        self.daq_timer = self.startTimer(interval)
+
+                        self.start_time = time.time()
+                        self.last_tick = self.start_time-(interval/self.tscale)
+                        self.acq_thread = threading.Thread(target=self.finite_worker)
+                        self.acq_thread.start()
+
+
                     else:
                         # use continuous acquisition task, using NIDAQ everyncallback
-                        self.aitask = AITask(aichan, aisr, self.ainpts)
-                        self.aotask = AOTask(aochan, sr, npts, 
-                                             trigsrc=b"ai/StartTrigger")
-                        self.aitask.register_callback(self.every_n_callback,
-                                                      self.ainpts)
-                        self.aotask.write(self.tone)
-                        
-                        if SAVE_OUTPUT:
-                            self.tone_array.append(self.tone[:])
-
-                        self.aotask.StartTask()
-                        self.aitask.StartTask()
+                        self.ui.sr_spnbx.setEnabled(False)
+                        sr = self.ui.sr_spnbx.value()*self.fscale
+                        self.toneplayer = ContinuousTone(aichan, aochan, sr, 
+                                                         sr*(interval/self.tscale), self.ainpts, 
+                                                         (self.caldb, self.calv))
                 except:
                     print('ERROR! TERMINATE!')
                     self.on_stop
                     raise
+                
             else:
                 print("start pressed when task already running, updating stimulus...")
                 if USE_FINITE:
@@ -270,9 +273,9 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                     #self.daq_timer = self.startTimer(interval)
                     self.start_time = time.time()
-                    self.last_tick = self.start_time-0.250
-                    acq_thread = threading.Thread(target=self.curve_worker)
-                    acq_thread.start()                    
+                    self.last_tick = self.start_time - (interval/1000)
+                    self.acq_thread = threading.Thread(target=self.curve_worker)
+                    self.acq_thread.start()                    
 
                 except:
                     self.live_lock.unlock()
@@ -303,7 +306,6 @@ class CalibrationWindow(QtGui.QMainWindow):
             else:
                 self.ngenerated +=1
 
-
             tone, data, times, f, db = self.tonecurve.next()
 
             self.ui.flabel.setText("Frequency : %d" % (f))
@@ -333,12 +335,12 @@ class CalibrationWindow(QtGui.QMainWindow):
         if self.current_operation == 0 : 
             if USE_FINITE:
                 self.ui.interval_spnbx.setEnabled(True)
-                if self.daq_timer is not None:
+                if not self.halt:
                     self.ui.running_label.setText("STOPPING")
-                    self.killTimer(self.daq_timer)
-                    self.daq_timer = None
+                   
                     self.halt = True
-                    self.pool.waitForDone()
+                    
+                    self.acq_thread.join()
                     self.ui.running_label.setText("BUSY")
                     self.ui.running_label.setPalette(self.red)
                     QtGui.QApplication.processEvents()
@@ -346,15 +348,17 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.toneplayer.stop()
            
         elif self.current_operation == 1:
-            #self.killTimer(self.daq_timer)
+
             self.halt = True
             self.ui.tab_2.setEnabled(True)
             self.ui.start_button.setEnabled(True)
-            # no need to kill tasks since they will finish in the thread
-            self.pool.waitForDone()
+            # let thread finish and stop task
+            self.acq_thread.join()
+            self.toneplayer.stop()
             
         else:
             print("No task currently running")
+
         self.live_lock.unlock()
         self.ui.running_label.setText("OFF")
         self.ui.running_label.setPalette(self.red)
@@ -376,8 +380,6 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.live_lock.unlock()
 
     def update_stim(self):
-        scale_factor = 1000
-        time_scale = 1000
         f = self.ui.freq_spnbx.value()*self.fscale
         sr = self.ui.sr_spnbx.value()*self.fscale
         dur = self.ui.dur_spnbx.value()*self.tscale
@@ -507,60 +509,34 @@ class CalibrationWindow(QtGui.QMainWindow):
                 # I don't think it matters in the main thread
                 self.process_caldata()
 
-           
-    def timerEvent(self, evt):
-        #print("tick")
-        now = time.time()
-        print("interval %d, time from start %d \n" % ((now - self.last_tick)*1000, (now - self.start_time)*1000))
-        self.last_tick = now
-        if self.current_operation == 0:
-            self.ngenerated +=1
-            t  = GenericThread(self.finite_worker)
-           
-        elif self.current_operation == 1:
-
-            # if timing is correct and feasible (i.e. interval >= duration), locking 
-            # shouldn't strictly be necessesary, but for posterity...
-            if not self.tonecurve.haswork():
-                # due to the nature of generation, we must collect the last dataset,
-                # then halt.
-                print("outta work")
-                self.on_stop()
-                self.halt = True
-            else:
-                self.ngenerated +=1
-            # spawn thread for next item in queue
-            t  = GenericThread(self.curve_worker)
-        
-        self.pool.start(t)
-
     def finite_worker(self):
         #print("finite worker")
+        while not self.halt:
+            now = time.time()
+            elapsed = (now - self.last_tick)*1000
+            print(self.last_tick, now)
+            print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+            self.last_tick = now
+            if elapsed < self.interval:
+                print('sleep ', (self.interval-elapsed))
+                time.sleep((self.interval-elapsed)/1000)
 
-        data = self.toneplayer.read()
-        self.toneplayer.reset()
+            self.ngenerated +=1
+            data = self.toneplayer.read()
+            self.toneplayer.reset()
 
-        f, db = self.fdb
-        self.signals.done.emit(f, db, data[:])
+            f, db = self.fdb
+            self.signals.done.emit(f, db, data[:])
+
         
-    def every_n_callback(self,task):
+    def ncollected(self, datachunk):
         
         # read in the data as it is acquired and append to data structure
         try:
-            read = c_int32()
-            inbuffer = np.zeros(task.n)
-            task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,
-                               inbuffer,task.n,byref(read),None)
-            if SAVE_DATA_CHART:
-                self.a.extend(inbuffer.tolist())
-                # for now use stimulus data size also for acquisition
-                #ainpts = len(self.tone)
-
-            #print(self.data[0])
-            self.ndata += read.value
+            #self.ndata += len(datachunk)
             #print(self.ndata)
             
-            n = read.value
+            n = len(datachunk)
             lims = self.display.axs[1].axis()
             #print("lims {}".format(lims))
             #print("ndata {}".format(self.ndata))
@@ -573,22 +549,13 @@ class CalibrationWindow(QtGui.QMainWindow):
             if ndata/aisr >= self.aitime:
                 if len(self.current_line_data) != self.aitime*self.aisr:
                     print("incorrect number of data points saved")
-                if SAVE_DATA_TRACES:
-                    self.a.append(self.current_line_data)
                 self.current_line_data = []
             
             self.current_line_data.extend(inbuffer.tolist())
-        except MemoryError:
-            print("data size: {}, elements: {}"
-                  .format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
-            self.aitask.stop()
-            self.aotask.stop()
-            raise
+        
         except: 
             print('ERROR! TERMINATE!')
             #print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
-            self.aitask.stop()
-            self.aotask.stop()
             raise
 
     def set_interval_min(self):

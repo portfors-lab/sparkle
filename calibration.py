@@ -24,7 +24,7 @@ DATA_FNAME = "_rawdata"
 NOISE_FNAME = "_noise"
 OUTPUT_FNAME = "_outtones"
 
-class TonePlayer():
+class PlayerBase():
     def __init__(self, dbv=(100,0.1)):
 
         self.tone = []
@@ -41,34 +41,11 @@ class TonePlayer():
         self.tone_lock = threading.Lock()
         self.daq_lock = threading.Lock()
 
-    def start(self, aochan, aichan):
+    def start(self):
+        raise NotImplementedError
 
-        # this shouldn't actually be possible still...
-        if self.aitask is not None:
-            self.on_stop()
-            print("FIX ME : NESTED START OPERATIONS ALLOWED")
-
-        self.ngenerated = 0
-        self.nacquired = 0
-       
-        response_npts = int(self.aitime*self.aisr)
-        npts = self.tone.size
-        try:
-            self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
-            self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
-            self.aotask.write(self.tone)
-
-            if SAVE_OUTPUT:
-                self.played_tones = [self.tone[:]]
-
-        except:
-            print('ERROR! TERMINATE!')
-            self.on_stop
-            raise
-
-        # save for later -- allow not to be changed?
-        self.aochan = aochan
-        self.aichan = aichan
+    def stop(self):
+        raise NotImplementedError
 
     def set_calibration(self, db_boost_array, frequencies):
         # use supplied array of intensity adjustment to adjust tone output
@@ -100,6 +77,52 @@ class TonePlayer():
         self.tone_lock.release()
 
         return tone, timevals
+
+    def get_samplerate(self):
+        return self.sr
+
+    def get_caldb(self):
+        return self.caldb
+
+    def set_caldb(self, caldb):
+        self.caldb = caldb
+
+    def set_calv(self, calv):
+        self.calv
+
+class TonePlayer(PlayerBase):
+    def __init__(self, dbv=(100,0.1)):
+        PlayerBase.__init__(self, dbv)
+
+    def start(self, aochan, aichan):
+
+        # this shouldn't actually be possible still...
+        if self.aitask is not None:
+            self.on_stop()
+            print("FIX ME : NESTED START OPERATIONS ALLOWED")
+
+        self.ngenerated = 0
+        self.nacquired = 0
+       
+        response_npts = int(self.aitime*self.aisr)
+        npts = self.tone.size
+        try:
+            self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
+            self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
+            self.aotask.write(self.tone)
+
+            if SAVE_OUTPUT:
+                self.played_tones = [self.tone[:]]
+
+        except:
+            print('ERROR! TERMINATE!')
+            self.on_stop
+            raise
+
+        # save for later -- allow not to be changed?
+        self.aochan = aochan
+        self.aichan = aichan
+
 
     def read(self):
         try:
@@ -162,18 +185,89 @@ class TonePlayer():
         self.aitask = None
         self.aotask = None
 
-    def get_samplerate(self):
-        return self.sr
+    
+class ContinuousTone(PlayerBase):
+    def __init__(self, aichan, aochan, sr, npts, ainpts, dbv):
+        PlayerBase.__init__(self, dbv)
+        # use continuous acquisition task, using NIDAQ everyncallback
+        self.aitask = AITask(aichan, sr, ainpts)
+        self.aotask = AOTask(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
+        self.aitask.register_callback(self.every_n_callback, ainpts)
+                        
+        if SAVE_OUTPUT:
+            self.tone_array.append(self.tone[:])
 
-    def get_caldb(self):
-        return self.caldb
+        self.sr = sr
+        self.signal=None
 
-    def set_caldb(self, caldb):
-        self.caldb = caldb
+    def start(self):
+        self.aotask.write(self.tone)
+        self.aotask.StartTask()
+        self.aitask.StartTask()
 
-    def set_calv(self, calv):
-        self.calv
+    def stop(self):
+        try:
+            self.aitask.stop()
+            self.aotask.stop()
+        except DAQError:
+            print("No task running")
+        except:
+            raise
+        self.aitask = None
+        self.aotask = None
 
+    def use_signal(self, signal):
+        self.signal = signal
+
+    def every_n_callback(self,task):
+        
+        # read in the data as it is acquired and append to data structure
+        try:
+            read = c_int32()
+            inbuffer = np.zeros(task.n)
+            task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,
+                               inbuffer,task.n,byref(read),None)
+            if SAVE_DATA_CHART:
+                self.a.extend(inbuffer.tolist())
+                # for now use stimulus data size also for acquisition
+                #ainpts = len(self.tone)
+
+            self.signal.ncollected.emit(inbuffer.tolist())
+            self.ndata += read.value
+            #print(self.ndata)
+            
+            n = read.value
+            lims = self.display.axs[1].axis()
+            #print("lims {}".format(lims))
+            #print("ndata {}".format(self.ndata))
+            
+            # for display purposes only
+            ndata = len(self.current_line_data)
+            aisr = self.aisr
+
+            #print(self.aisr, self.aitime, ndata/aisr)
+            if ndata/aisr >= self.aitime:
+                if len(self.current_line_data) != self.aitime*self.aisr:
+                    print("incorrect number of data points saved")
+                if SAVE_DATA_TRACES:
+                    self.a.append(self.current_line_data)
+                self.current_line_data = []
+            
+            self.current_line_data.extend(inbuffer.tolist())
+
+        except MemoryError:
+            print("data size: {}, elements: {}"
+                  .format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
+            self.aitask.stop()
+            self.aotask.stop()
+            raise
+
+        except: 
+            print('ERROR! TERMINATE!')
+            #print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
+            self.aitask.stop()
+            self.aotask.stop()
+            raise
 
 class ToneCurve():
     def __init__(self, duration, samplerate, risefall, nreps, freqs, intensities, dbv=(100,0.1)):
