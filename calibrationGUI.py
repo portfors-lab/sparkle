@@ -10,6 +10,7 @@ import numpy as np
 from daq_tasks import *
 from plotz import *
 from audiotools import *
+from defined_plots import *
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 from scale_dlg import ScaleDialog
@@ -63,6 +64,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         self.savefolder = NBPATH
         self.savename = "cal"
+        self.saveformat = 'npy'
 
         inlist = load_inputs()
         if len(inlist) > 0:
@@ -96,6 +98,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 self.calf = inlist[23]
                 self.savefolder = inlist[24]
                 self.savename = inlist[25]
+                self.saveformat = inlist[26]
             except:
                 print("failed to find all defaults")
                 #raise
@@ -117,9 +120,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         
         self.current_operation = None
 
-        self.thread_pool = []
-        self.pool = QtCore.QThreadPool()
-        self.pool.setMaxThreadCount(5)
+        self.acq_thread = None
 
         self.signals = WorkerSignals()
         self.signals.done.connect(self.process_response)
@@ -301,7 +302,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 time.sleep((self.interval-elapsed)/1000)
 
             if not self.tonecurve.haswork():
-                self.on_stop()
+                #self.on_stop()
                 self.halt = True
             else:
                 self.ngenerated +=1
@@ -353,8 +354,9 @@ class CalibrationWindow(QtGui.QMainWindow):
             self.ui.tab_2.setEnabled(True)
             self.ui.start_button.setEnabled(True)
             # let thread finish and stop task
-            self.acq_thread.join()
-            self.toneplayer.stop()
+            if self.acq_thread is not None:
+                self.acq_thread.join()
+                self.tonecurve.player.stop()
             
         else:
             print("No task currently running")
@@ -507,6 +509,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             if self.current_operation == 1:
                 # or should I emit a signal to execute this? 
                 # I don't think it matters in the main thread
+                self.on_stop()
                 self.process_caldata()
 
     def finite_worker(self):
@@ -601,13 +604,13 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.update_unit_labels()
 
     def launch_savedlg(self):
-        field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : 'npy'}
+        field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : self.saveformat}
         dlg = SavingDialog(default_vals = field_vals)
         if dlg.exec_():
             savefolder, savename, saveformat = dlg.get_values()
             self.savefolder = savefolder
             self.savename = savename
-            #self.saveformat = saveformat
+            self.saveformat = saveformat
 
     def update_unit_labels(self):
         if self.fscale == 1000:
@@ -684,6 +687,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         outlist.append(self.calf)
         outlist.append(self.savefolder)
         outlist.append(self.savename)
+        outlist.append(self.saveformat)
 
         save_inputs(outlist)
 
@@ -707,22 +711,6 @@ def save_inputs(savelist):
     with open(cfgfile, 'wb') as cfo:
         pickle.dump(savelist,cfo)
 
-def plot_cal_curve(results_array, freqs, intensities, p):
-    # plot calibration curve: frequency against resultant dB by
-    # target dB
-    curve_lines = []
-    for idb in range(results_array.shape[1]):
-        ydata = results_array[:,idb]
-        curve_lines.append((freqs,ydata))
-    calcurve_plot = BasicPlot(*curve_lines, parent=p)
-    calcurve_plot.setWindowTitle("Calibration Curve")
-    calcurve_plot.axs[0].set_xlabel("Frequency (Hz)")
-    calcurve_plot.axs[0].set_ylabel("Recorded dB")
-    # set the labels on the lines for the legend
-    for iline, line in enumerate(calcurve_plot.axs[0].lines):
-        line.set_label(intensities[iline])
-    calcurve_plot.axs[0].legend()
-    calcurve_plot.show()
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

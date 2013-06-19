@@ -10,7 +10,9 @@ class SavingDialog(QtGui.QDialog):
         if default_vals is not None:
             self.ui.savefolder_lnedt.setText(default_vals['savefolder'])
             self.ui.savename_lnedt.setText(default_vals['savename'])
-            self.ui.saveformat_cmbx.setCurrentIndex(0)
+            formats = [self.ui.saveformat_cmbx.itemText(i) for i in range(self.ui.saveformat_cmbx.count())]
+            formatidx = formats.index(default_vals['saveformat'])
+            self.ui.saveformat_cmbx.setCurrentIndex(formatidx)
 
     def browse_folders(self):
         folder = QtGui.QFileDialog.getExistingDirectory(self, "select folder",  self.ui.savefolder_lnedt.text())
@@ -22,6 +24,6 @@ class SavingDialog(QtGui.QDialog):
     def get_values(self):
         folder = self.ui.savefolder_lnedt.text()
         name = self.ui.savename_lnedt.text()
-        sformat = self.ui.saveformat_cmbx.currentIndex()
+        sformat = self.ui.saveformat_cmbx.currentText()
 
-        return folder, name, "npy"
+        return folder, name, sformat

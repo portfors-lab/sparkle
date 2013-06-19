@@ -5,8 +5,11 @@ import queue
 import os
 import pickle
 from multiprocessing import Process
+#from datatypes import CalibrationObject
 
 from PyDAQmx import *
+
+from fileio import mightysave
 
 SAVE_OUTPUT = False
 PRINT_WARNINGS = True
@@ -116,7 +119,7 @@ class TonePlayer(PlayerBase):
 
         except:
             print('ERROR! TERMINATE!')
-            self.on_stop
+            self.stop
             raise
 
         # save for later -- allow not to be changed?
@@ -178,13 +181,10 @@ class TonePlayer(PlayerBase):
         try:
             self.aitask.stop()
             self.aotask.stop()
-        except DAQError:
+        except:     
             print("No task running")
-        except:
-            raise
         self.aitask = None
         self.aotask = None
-
     
 class ContinuousTone(PlayerBase):
     def __init__(self, aichan, aochan, sr, npts, ainpts, dbv):
@@ -277,6 +277,8 @@ class ToneCurve():
         self.ngenerated = 0
         self.nacquired = 0
 
+        #self.caldata = CalibrationObject(freqs, intensities, samplerate, duration, risefall, nreps)
+
         self.dur = duration
         self.sr = samplerate
         self.rft = risefall
@@ -367,10 +369,6 @@ class ToneCurve():
     def set_calibration(self, db_boost_array, frequencies):
         self.player.set_calibration(db_boost_array, frequencies)
 
-    def _storesimple(self,data,fdb):
-        f, db, rep = fdb
-        print(f, db, rep)
-
     def _storedata(self, data, fdb):
         sr = self.player.get_samplerate()
         f, db, rep = fdb
@@ -395,8 +393,8 @@ class ToneCurve():
             if PRINT_WARNINGS:
                 print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
                 print("\tTarget : {}, Received : {}".format(f, max_freq))
-  
-                ifreq, idb = self.fft_vals_lookup[(f,db)]
+                ifreq = self.freqs.index(f)
+                idb = self.intensities.index(db)
                 self.reject_list.append((f, db, ifreq, idb))            
 
         if VERBOSE:
@@ -424,6 +422,7 @@ class ToneCurve():
                 ifreq = self.freqs.index(f)
                 idb = self.intensities.index(db)
                 #ifreq, idb = self.fft_vals_lookup[(f,db)]
+                #self.caldata.spectrums[ifreq][idb][rep] = spectrum
                 self.full_fft_data[ifreq][idb][rep] = spectrum
 
                 if SAVE_DATA_TRACES: 
@@ -434,7 +433,7 @@ class ToneCurve():
             print(e)
             #self.data_lock.release()
 
-    def save_to_file(self, calf, sfolder, sfilename, keepcal=False):
+    def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat='npy'):
         #After running curve do calculations and save data to file
         
         print("Saving...")
@@ -478,30 +477,27 @@ class ToneCurve():
 
         if SAVE_FFT_DATA:
             filename = os.path.join(sfolder, fname + FFT_FNAME)
-            np.save(filename, self.full_fft_data)
+            mightysave(filename, self.full_fft_data, filetype=saveformat)
 
             filename = os.path.join(sfolder, fname + PEAKS_FNAME)
-            np.save(filename, self.fft_peaks)
+            mightysave(filename, self.fft_peaks, filetype=saveformat)
 
-            with open(os.path.join(sfolder, fname + INDEX_FNAME + ".pkl"), 'wb') as cfo:
-                # make a dictionary of the other paramters used to 
-                # generate this roll-off curve
-                params = {'calV': calv, 'caldB' : caldb, 
-                          'calf' : calf, 'rft' : self.rft, 
-                          'samplerate' : self.sr, 'duration' : self.dur}
-                pickle.dump([self.freqs, self.intensities, self.reject_list, params], cfo)
+            params = {'calV': calv, 'caldB' : caldb, 
+                      'calf' : calf, 'rft' : self.rft, 
+                      'samplerate' : self.sr, 'duration' : self.dur}
+            filename = os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")
+            mightysave(filename, [self.freqs, self.intensities, self.reject_list, params])
 
             if SAVE_DATA_TRACES:
                 filename = os.path.join(sfolder, fname + DATA_FNAME)
-                np.save(filename, self.data_traces)
+                mightysave(filename, self.data_traces, filetype=saveformat)
 
             if SAVE_OUTPUT:
                 filename = os.path.join(sfolder, fname + OUTPUT_FNAME)
-                np.save(filename, self.tone_array)
+                mightysave(filename, self.tone_array)
 
         filename = os.path.join(sfolder, fname + DB_FNAME)
-        np.save(filename, resultant_dB)
-        np.savetxt(filename + ".txt", resultant_dB)
+        mightysave(filename, resultant_dB, filetype=saveformat)
 
         if keepcal:
             filename = "calibration_data"
