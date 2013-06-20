@@ -277,7 +277,6 @@ class ContinuousTone(PlayerBase):
 class ToneCurve():
     def __init__(self, duration, samplerate, risefall, nreps, freqs, intensities, dbv=(100,0.1)):
 
-        print('initializing tone curve')
         self.data_lock = threading.Lock()
 
         self.ngenerated = 0
@@ -298,25 +297,20 @@ class ToneCurve():
         self.fft_vals_lookup = {}
         self.fft_vals_index = np.zeros((len(freqs),len(intensities)))
 
-        print('here')
         if SAVE_FFT_DATA:
             # 4D array nfrequencies x nintensities x nreps x npoints
             self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration*samplerate)/2)))
-            
-        print(len(freqs),len(intensities),nreps,duration,samplerate)
+
         if SAVE_DATA_TRACES:
             self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration*samplerate)))
 
-        print('here3')
         # data structure to hold repetitions, for averaging
         self.rep_temp = []
         self.vrep_temp = []
         self.reject_list = []
-        
-        print('here4')
+
         self.freq_index = [x for x in freqs]
 
-        print('building queue')
         self.work_queue = queue.Queue()
         for ifreq, f in enumerate(freqs):
             for idb, db in enumerate(intensities):
