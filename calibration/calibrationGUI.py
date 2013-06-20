@@ -7,10 +7,12 @@ from PyQt4 import QtCore, QtGui
 
 import numpy as np
 
-from daq_tasks import *
-from plotz import *
-from audiotools import *
-from defined_plots import *
+from audiolab.io.daq_tasks import *
+from audiolab.tools.audiotools import *
+from audiolab.plotting.plotz import *
+from audiolab.plotting.defined_plots import *
+
+#this package
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 from scale_dlg import ScaleDialog
@@ -61,6 +63,10 @@ class CalibrationWindow(QtGui.QMainWindow):
         
         self.fscale = 1000
         self.tscale = 0.001
+
+        self.caldb = None
+        self.calv = 0.1
+        self.calf = None
 
         self.savefolder = NBPATH
         self.savename = "cal"
@@ -213,6 +219,16 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.on_start()
         else:
             if self.live_lock.tryLock():
+
+                # check that calf and caldb are defined
+                if (self.caldb is None) or (self.calf is None):
+                    # prompt the user to enter them, if invalid
+                    self.launch_display_dlg()
+
+                    # if still not good values, abort
+                    if (self.caldb is None) or (self.calf is None):
+                        return
+
                 # tuning curve style run-through
                 self.current_operation = 1
                 self.halt_curve = False
@@ -240,13 +256,13 @@ class CalibrationWindow(QtGui.QMainWindow):
                     nreps = self.ui.nreps_spnbx.value()
 
                     if f_start < f_stop:
-                        freqs = range(f_start, f_stop+1, f_step)
+                        freqs = list(range(f_start, f_stop+1, f_step))
                     else:
-                        freqs = range(f_start, f_stop-1, -f_step)
+                        freqs = list(range(f_start, f_stop-1, -f_step))
                     if db_start < db_stop:
-                        intensities = range(db_start, db_stop+1, db_step)
+                        intensities = list(range(db_start, db_stop+1, db_step))
                     else:
-                        intensities = range(db_start, db_stop-1, -db_step)
+                        intensities = list(range(db_start, db_stop-1, -db_step))
 
                     # calculate ms interval from reprate
                     interval = (1/reprate)*1000
@@ -258,6 +274,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                         self.spawn_display()
                     self.display.show()
 
+                    print('setting up tone curve')
                     self.tonecurve = ToneCurve(dur,sr,rft,nreps,freqs,intensities, (self.caldb, self.calv))
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
@@ -265,6 +282,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.tonecurve.arm(aochan,aichan)
                     self.ngenerated +=1
 
+                    print('ready')
                     self.ui.running_label.setText("RUNNING")
                     self.ui.running_label.setPalette(self.green)
 
@@ -453,6 +471,10 @@ class CalibrationWindow(QtGui.QMainWindow):
 
             spec_max, max_freq = get_fft_peak(spectrum,freq)
             spec_peak_at_f = spectrum[freq == f]
+            if len(spec_peak_at_f) == 0:
+                print("COULD NOT FIND TARGET FREQUENCY ",f)
+                spec_peak_at_f = -1
+                self.on_stop()
 
             vmax = np.amax(abs(data))
             
@@ -589,10 +611,11 @@ class CalibrationWindow(QtGui.QMainWindow):
         dlg = DisplayDialog(default_vals=field_vals)
         if dlg.exec_():
             ainpts, caldb, calv, calf = dlg.get_values()
-            self.ainpts = ainpts
-            self.caldb = caldb
-            self.calv = calv
-            self.calf = calf
+            if ainpts is not None:
+                self.ainpts = ainpts
+                self.caldb = caldb
+                self.calv = calv
+                self.calf = calf
 
     def launch_scaledlg(self):
         field_vals = {'fscale' : self.fscale, 'tscale' : self.tscale}

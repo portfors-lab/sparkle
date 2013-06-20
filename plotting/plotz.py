@@ -1,13 +1,14 @@
+import collections
+import sys
+import time
+
 from PyQt4 import QtCore, QtGui
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from abstract_figures import BasePlot
-import collections
 
-import sys
-import time
+from audiolab.plotting.abstract_figures import BasePlot
 
 class BasicPlot(BasePlot):
     def __init__(self,*args,parent=None):
@@ -432,6 +433,7 @@ if __name__ == '__main__':
 
     d = [(t0,y0), (t1,y1), ((t0,y2),(t0,y3)), (t1,y4)]
 
+    """
     fft_data = np.load("cal0_ffttraces.npy")
     with open("cal0_index.pkl", 'rb') as cfo:
         index = pickle.load(cfo)
@@ -445,9 +447,10 @@ if __name__ == '__main__':
     label_array = np.empty(fft_data.shape[:-2], dtype=np.dtype(('U',60)))
     for fdb, ifdb in fdb_dict.items():
         label_array[ifdb[0],ifdb[1]] = "Frequency: %d, Intensity: %d" % fdb
+    """
 
     app = QtGui.QApplication(sys.argv)
-    myapp = FlickPlot(fft_data,freq,titles=label_array)
-    #myapp = FlickPlot(*d, titles=np.array(['meow', 'spam', 'wow', 'ducks']))
+    #myapp = FlickPlot(fft_data,freq,titles=label_array)
+    myapp = FlickPlot(*d, titles=np.array(['meow', 'spam', 'wow', 'ducks']))
     myapp.show()
     sys.exit(app.exec_())

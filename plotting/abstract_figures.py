@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
-from custom_toolbar import CustomToolbar
+from audiolab.plotting.custom_toolbar import CustomToolbar
 
 class BasePlot(QtGui.QMainWindow):
     def __init__(self,dims,parent=None,flickable=False):

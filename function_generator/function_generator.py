@@ -124,7 +124,7 @@ class FGenerator(QtGui.QMainWindow):
 
     def set_stim(self):
         self.lock.acquire()
-        amp = int(self.ui.amp_edit.text())
+        amp = float(self.ui.amp_edit.text())
         freq = int(self.ui.freq_edit.text())
         sr = int(self.ui.sr_edit.text())
         npts = int(self.ui.npts_edit.text())

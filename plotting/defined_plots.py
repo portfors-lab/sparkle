@@ -1,4 +1,4 @@
-from plotz import BasicPlot
+from audiolab.plotting.plotz import BasicPlot
 
 def plot_cal_curve(results_array, freqs, intensities, p):
     # plot calibration curve: frequency against resultant dB by

@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from datacursor import DataCursor
+from audiolab.plotting.datacursor import DataCursor
 
 class CustomToolbar(NavigationToolbar):
     def __init__(self, canvas, parent=None, flickable=False):
