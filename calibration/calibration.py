@@ -4,7 +4,7 @@ import queue
 import os
 import pickle
 from multiprocessing import Process
-#from datatypes import CalibrationObject
+from datatypes import CalibrationObject
 
 #from PyDAQmx import *
 
@@ -14,12 +14,11 @@ from audiolab.tools.audiotools import *
 
 
 SAVE_OUTPUT = False
-PRINT_WARNINGS = True
+PRINT_WARNINGS = False
 SAVE_FFT_DATA = True
 VERBOSE = False
 SAVE_DATA_TRACES = False
 SAVE_NOISE = False
-
 
 FFT_FNAME = '_ffttraces'
 PEAKS_FNAME =  '_fftpeaks'
@@ -282,34 +281,43 @@ class ToneCurve():
         self.ngenerated = 0
         self.nacquired = 0
 
-        #self.caldata = CalibrationObject(freqs, intensities, samplerate, duration, risefall, nreps)
+        self.caldata = CalibrationObject(freqs, intensities, samplerate, duration, risefall, nreps)
 
         self.dur = duration
         self.sr = samplerate
         self.rft = risefall
         self.nreps = nreps
 
-
+        """
         # data structure to store the averages of the resultant FFT peaks
         self.fft_peaks = np.zeros((len(freqs),len(intensities)))
         self.playback_dB = np.zeros((len(freqs),len(intensities)))
         self.vin = np.zeros((len(freqs),len(intensities)))
         self.fft_vals_lookup = {}
         self.fft_vals_index = np.zeros((len(freqs),len(intensities)))
+        
+        """
+
+        self.caldata.init_data('peaks', 2)
+        self.caldata.init_data('vmax', 2)
 
         if SAVE_FFT_DATA:
             # 4D array nfrequencies x nintensities x nreps x npoints
-            self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration*samplerate)/2)))
+            #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration*samplerate)/2)))
+            self.caldata.init_data('spectrums',3)
 
         if SAVE_DATA_TRACES:
-            self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration*samplerate)))
-
+            #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration*samplerate)))
+            self.caldata.init_data('raw_traces',3)
+        
+        """
         # data structure to hold repetitions, for averaging
         self.rep_temp = []
         self.vrep_temp = []
         self.reject_list = []
 
         self.freq_index = [x for x in freqs]
+        """
 
         self.work_queue = queue.Queue()
         for ifreq, f in enumerate(freqs):
@@ -317,8 +325,8 @@ class ToneCurve():
                 for irep in range(nreps):
                     self.work_queue.put((f,db,irep))
     
-        self.freqs = [x for x in freqs]
-        self.intensities = [x for x in intensities]
+        #self.freqs = [x for x in freqs]
+        #self.intensities = [x for x in intensities]
 
         self.player = TonePlayer(dbv)
 
@@ -409,6 +417,10 @@ class ToneCurve():
 
         try:
             #self.data_lock.acquire()
+            self.caldata.put('peaks', (f, db, rep), spec_peak_at_f)
+            self.caldata.put('vmax', (f, db, rep), vmax)
+
+            """
             self.rep_temp.append(spec_peak_at_f)
             self.vrep_temp.append(vmax)
             if rep == self.nreps-1:
@@ -423,13 +435,18 @@ class ToneCurve():
                     print('*'*40 + '\n')
                 self.rep_temp = []
                 self.vrep_temp = []
+            """
 
             if SAVE_FFT_DATA:
+                """
                 ifreq = self.freqs.index(f)
                 idb = self.intensities.index(db)
                 #ifreq, idb = self.fft_vals_lookup[(f,db)]
                 #self.caldata.spectrums[ifreq][idb][rep] = spectrum
                 self.full_fft_data[ifreq][idb][rep] = spectrum
+                """
+
+                self.caldata.put('spectrums', (f, db, rep), spectrum)
 
                 if SAVE_DATA_TRACES: 
                     self.data_traces[ifreq][idb][rep] = data
