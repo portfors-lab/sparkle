@@ -3,6 +3,7 @@ import threading
 import queue
 import os
 import pickle
+import re
 from multiprocessing import Process
 from datatypes import CalibrationObject
 
@@ -304,17 +305,18 @@ class ToneCurve():
         if SAVE_FFT_DATA:
             # 4D array nfrequencies x nintensities x nreps x npoints
             #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration*samplerate)/2)))
-            self.caldata.init_data('spectrums',3)
+            self.caldata.init_data('spectrums',4)
 
         if SAVE_DATA_TRACES:
             #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration*samplerate)))
-            self.caldata.init_data('raw_traces',3)
+            self.caldata.init_data('raw_traces',4)
         
+        self.reject_list = []
+
         """
         # data structure to hold repetitions, for averaging
         self.rep_temp = []
         self.vrep_temp = []
-        self.reject_list = []
 
         self.freq_index = [x for x in freqs]
         """
@@ -454,6 +456,7 @@ class ToneCurve():
         except Exception as e:
             print("ERROR: unable to save recorded data")
             print(e)
+            raise
             #self.data_lock.release()
 
     def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat='npy'):
@@ -471,10 +474,14 @@ class ToneCurve():
 
         try:
             self.data_lock.acquire()
-            ifreq = self.freqs.index(calf)
-            idb = self.intensities.index(caldb)
-            cal_fft_peak = self.fft_peaks[ifreq][idb]
-            cal_vmax =  self.vin[ifreq][idb]
+            #ifreq = self.freqs.index(calf)
+            #idb = self.intensities.index(caldb)
+            #cal_fft_peak = self.fft_peaks[ifreq][idb]
+            #cal_vmax =  self.vin[ifreq][idb]
+
+            cal_fft_peak = self.caldata.get('peaks', (calf, caldb))
+            cal_vmax =  self.caldata.get('vmax', (calf, caldb))
+
             #self.data_lock.release()
             print("Using FFT peak data from ", caldb, " dB, ", 
                   calf, " Hz tone to calculate calibration curve")
@@ -484,7 +491,10 @@ class ToneCurve():
             cal_vmax = 0
 
         #resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
-        resultant_dB = vfunc(self.vin, caldb, cal_vmax)
+        vin = self.caldata.data['vmax']
+
+        resultant_dB = vfunc(vin, caldb, cal_vmax)
+
 
         fname = sfilename
         while os.path.isfile(os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")):
@@ -500,20 +510,20 @@ class ToneCurve():
 
         if SAVE_FFT_DATA:
             filename = os.path.join(sfolder, fname + FFT_FNAME)
-            mightysave(filename, self.full_fft_data, filetype=saveformat)
+            mightysave(filename, self.caldata.data['spectrums'], filetype=saveformat)
 
             filename = os.path.join(sfolder, fname + PEAKS_FNAME)
-            mightysave(filename, self.fft_peaks, filetype=saveformat)
+            mightysave(filename, self.caldata.data['peaks'], filetype=saveformat)
 
             params = {'calV': calv, 'caldB' : caldb, 
                       'calf' : calf, 'rft' : self.rft, 
                       'samplerate' : self.sr, 'duration' : self.dur}
             filename = os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")
-            mightysave(filename, [self.freqs, self.intensities, self.reject_list, params])
+            mightysave(filename, self.caldata.stim)
 
             if SAVE_DATA_TRACES:
                 filename = os.path.join(sfolder, fname + DATA_FNAME)
-                mightysave(filename, self.data_traces, filetype=saveformat)
+                mightysave(filename, self.caldata.data['raw_traces'], filetype=saveformat)
 
             if SAVE_OUTPUT:
                 filename = os.path.join(sfolder, fname + OUTPUT_FNAME)

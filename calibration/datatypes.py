@@ -13,19 +13,19 @@ class AcquisitionObject():
 
         # all data object should have calibration info... even if it is none
         # frequency used to calculate all other dbspl values
-        self.calf = f
+        self.stim['calHz'] = f
 
         # intensity used to calibrate
-        self.caldb = db
+        self.stim['caldB'] = db
 
         # max V output at calibration frequency and intensity
-        self.calv = v
+        self.stim['calV'] = v
 
 class CalibrationObject():
     def __init__(self, freqs, dbs, sr, dur, rft, nreps, f=None, db=None, v=None, method=None):
         #intialize all the required fields to None
 
-        AcquitisionObject.__init__(self, sr, sr, f=f, db=db, v=v, method=method)
+        AcquisitionObject.__init__(self, sr, sr, f=f, db=db, v=v, method=method)
 
         # list of frequencies played -- dim 0 in spectrum and dbspl
         self.stim['frequencies'] = freqs
@@ -68,25 +68,27 @@ class CalibrationObject():
     def init_data(self, key, dims, dim4=None):
         # dims will create a numpy array with the number of dimensions, whose size
         # is determined in the order: frequencies, intensities, reps
+        frequencies = self.stim['frequencies']
+        intensities = self.stim['intensities']
         if dims == 4:
             # then we are storing an array of data for each frequency, dimension 
             # and rep e.g. the actual trace
 
             # if the last dimension size is not provided, assume simulus length
             if dim4 == None:
-                dim4 = int((self.duration*self.samplerate)/2)
-            self.data[key] = np.zeros((len(self.frequencies),len(self.intensities),self.nreps,
+                dim4 = int((self.stim['duration']*self.stim['sr'])/2)
+            self.data[key] = np.zeros((len(frequencies),len(intensities),self.nreps,
                                        dim4))
-        if dims == 3:
-            self.data[key] = np.zeros((len(self.frequencies),len(self.intensities),self.nreps))
+        elif dims == 3:
+            self.data[key] = np.zeros((len(frequencies),len(intensities),self.nreps))
 
         elif dims == 2:
             # if we have 2 dimensions, then assume that we need to temporarily store a thrid
             # dimension, and average results
-            self.data[key] = np.zeros((len(self.frequencies),len(self.intensities)))
+            self.data[key] = np.zeros((len(frequencies),len(intensities)))
             self.rep_temps[key] = []
         else:
-            raise Exception("number of dimensions data currently not supported")
+            raise Exception("number of dimensions, " + str(dims)+ ", currently not supported")
         
     def put(self, key, ix, data):
         arr = self.data[key]
@@ -95,8 +97,8 @@ class CalibrationObject():
         # frequency and intensitiy must be first two elements, 
         f, db, rep = ix
 
-        ifreq = self.frequencies.index(f)
-        idb = self.intensities.index(db)
+        ifreq = self.stim['frequencies'].index(f)
+        idb = self.stim['intensities'].index(db)
 
         if len(dims) == 2:
             rep_temp = self.rep_temps[key]
@@ -112,3 +114,17 @@ class CalibrationObject():
         elif len(dims) == 3:
             arr[ifreq][idb][rep] = data
 
+    def get(self, key, ix):
+
+        data = self.data[key]
+
+        ifreq = self.stim['frequencies'].index(ix[0])
+        idb = self.stim['intensities'].index(ix[1])
+
+        if len(ix) == 2:
+            item = data[ifreq][idb]
+                        
+        elif len(ix) == 3:
+            item = data[ifreq][idb][ix[2]]
+
+        return item

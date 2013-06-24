@@ -5,11 +5,12 @@ VERBOSE = True
 DBFACTOR = 20
 
 def calc_db(peak, caldB, cal_peak):
-    pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldB
-    return pbdB
-
-def calc_db_from_v(v, caldB, calv):
-    pbdB = DBFACTOR * np.log10(v/calv) + caldB
+    try:
+        pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldB
+    except ZeroDivisionError:
+        print('attempted division by zero:')
+        print('peak {}, caldb {}, calpeak {}'.format(peak, caldB, cal_peak))
+        pbdB = None
     return pbdB
 
 def calc_noise(fft_vector, ix1,ix2):
