@@ -1,6 +1,8 @@
 import numpy as np
 import datetime
 
+from audiolab.io.fileio import mightysave
+
 class AcquisitionObject():
     # abstract class for holding data acquitision data and stimulus information
     def __init__(self, sr_out, sr_in, f=None, db=None, v=None, method=None):
@@ -21,8 +23,12 @@ class AcquisitionObject():
         # max V output at calibration frequency and intensity
         self.stim['calV'] = v
 
+        # date this calibration was conducted
+        self.stim['date'] =  datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        
+
 class CalibrationObject():
-    def __init__(self, freqs, dbs, sr, dur, rft, nreps, f=None, db=None, v=None, method=None):
+    def __init__(self, freqs, dbs, sr, dur, rft, nreps, f=np.nan, db=np.nan, v=np.nan, method=None):
         #intialize all the required fields to None
 
         AcquisitionObject.__init__(self, sr, sr, f=f, db=db, v=v, method=method)
@@ -50,9 +56,6 @@ class CalibrationObject():
         # note about what this data represents
         self.note = None
 
-        # date this calibration was conducted
-        self.date =  datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        
         # how to store data -- predefined, or dictionary of caller specified?
         self.data = {}
         self.rep_temps = {}
@@ -104,15 +107,16 @@ class CalibrationObject():
             rep_temp = self.rep_temps[key]
             rep_temp.append(data)
 
-            if rep == self.nreps:
+            if rep == (self.nreps-1):
                 arr[ifreq][idb] = np.mean(rep_temp)
                 self.data[key] = arr
                 rep_temp = []
 
             self.rep_temps[key] = rep_temp
 
-        elif len(dims) == 3:
+        elif len(dims) == 4:
             arr[ifreq][idb][rep] = data
+            self.data[key] = arr
 
     def get(self, key, ix):
 
@@ -128,3 +132,20 @@ class CalibrationObject():
             item = data[ifreq][idb][ix[2]]
 
         return item
+
+    def save_to_file(self, fname, filetype='auto'):
+        
+        if filetype == 'auto':
+            # use the filename extension to determine
+            # file format
+            root, filetype = splitext(filename)
+            
+        filetype = filetype.replace('.', '')
+
+        # convert everything to a dictionary to save in a single file
+        master = {}
+        master['stim'] = self.stim
+        master['response'] = self.response
+        master['data'] = self.data
+
+        mightysave(fname, master, filetype=filetype)

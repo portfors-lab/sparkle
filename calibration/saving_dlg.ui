@@ -32,6 +32,11 @@
        </item>
        <item>
         <property name="text">
+         <string>json</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>mat</string>
         </property>
        </item>

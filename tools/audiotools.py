@@ -10,7 +10,7 @@ def calc_db(peak, caldB, cal_peak):
     except ZeroDivisionError:
         print('attempted division by zero:')
         print('peak {}, caldb {}, calpeak {}'.format(peak, caldB, cal_peak))
-        pbdB = None
+        pbdB = np.nan
     return pbdB
 
 def calc_noise(fft_vector, ix1,ix2):

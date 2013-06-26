@@ -12,12 +12,13 @@ from datatypes import CalibrationObject
 from audiolab.io.fileio import mightysave
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
 from audiolab.tools.audiotools import *
+from audiolab.config.info import caldata_filename, calfreq_filename
 
 
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
 SAVE_FFT_DATA = True
-VERBOSE = False
+VERBOSE = True
 SAVE_DATA_TRACES = False
 SAVE_NOISE = False
 
@@ -282,7 +283,8 @@ class ToneCurve():
         self.ngenerated = 0
         self.nacquired = 0
 
-        self.caldata = CalibrationObject(freqs, intensities, samplerate, duration, risefall, nreps)
+        self.caldata = CalibrationObject(freqs, intensities, samplerate, duration, 
+                                         risefall, nreps,v=dbv[1])
 
         self.dur = duration
         self.sr = samplerate
@@ -495,7 +497,6 @@ class ToneCurve():
 
         resultant_dB = vfunc(vin, caldb, cal_vmax)
 
-
         fname = sfilename
         while os.path.isfile(os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")):
             # increment filename until we come across one that 
@@ -508,6 +509,10 @@ class ToneCurve():
                 currentno = int(currentno) +1
                 fname = prefix + str(currentno)
 
+        filename = os.path.join(sfolder, fname)
+        self.caldata.save_to_file(filename, filetype=saveformat)
+
+        """
         if SAVE_FFT_DATA:
             filename = os.path.join(sfolder, fname + FFT_FNAME)
             mightysave(filename, self.caldata.data['spectrums'], filetype=saveformat)
@@ -528,18 +533,18 @@ class ToneCurve():
             if SAVE_OUTPUT:
                 filename = os.path.join(sfolder, fname + OUTPUT_FNAME)
                 mightysave(filename, self.tone_array)
+        """
 
         filename = os.path.join(sfolder, fname + DB_FNAME)
         mightysave(filename, resultant_dB, filetype=saveformat)
 
         if keepcal:
-            filename = "calibration_data"
             calibration_vector = resultant_dB[:,0]
-            np.save(filename,calibration_vector)
-            with open("calibration_index.pkl",'wb') as pkf:
-                pickle.dump(self.freq_index, pkf)
-        
+            np.save(caldata_filename(),calibration_vector)
+            freqs = self.caldata.stim['frequencies']
+            np.save(calfreq_filename(), freqs)
 
+        
         if SAVE_NOISE:
             #noise_vfunc = np.vectorize(calc_noise)
             #noise_array = noise_vfunc(self.full_fft_data,0,2000)

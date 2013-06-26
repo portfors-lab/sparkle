@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\saving_dlg.ui'
 #
-# Created: Mon Jun 17 15:11:58 2013
+# Created: Mon Jun 24 16:33:41 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,6 +39,7 @@ class Ui_SaveOptDlg(object):
         self.saveformat_cmbx.addItem(_fromUtf8(""))
         self.saveformat_cmbx.addItem(_fromUtf8(""))
         self.saveformat_cmbx.addItem(_fromUtf8(""))
+        self.saveformat_cmbx.addItem(_fromUtf8(""))
         self.gridLayout.addWidget(self.saveformat_cmbx, 0, 1, 1, 1)
         self.label_3 = QtGui.QLabel(SaveOptDlg)
         self.label_3.setObjectName(_fromUtf8("label_3"))
@@ -72,8 +73,9 @@ class Ui_SaveOptDlg(object):
         SaveOptDlg.setWindowTitle(_translate("SaveOptDlg", "Dialog", None))
         self.label.setText(_translate("SaveOptDlg", "Save file format", None))
         self.saveformat_cmbx.setItemText(0, _translate("SaveOptDlg", "npy", None))
-        self.saveformat_cmbx.setItemText(1, _translate("SaveOptDlg", "mat", None))
-        self.saveformat_cmbx.setItemText(2, _translate("SaveOptDlg", "txt", None))
+        self.saveformat_cmbx.setItemText(1, _translate("SaveOptDlg", "json", None))
+        self.saveformat_cmbx.setItemText(2, _translate("SaveOptDlg", "mat", None))
+        self.saveformat_cmbx.setItemText(3, _translate("SaveOptDlg", "txt", None))
         self.label_3.setText(_translate("SaveOptDlg", "Save file location", None))
         self.browse_button.setText(_translate("SaveOptDlg", "browse...", None))
         self.label_2.setText(_translate("SaveOptDlg", "Save name template", None))

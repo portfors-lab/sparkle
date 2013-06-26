@@ -11,6 +11,7 @@ from audiolab.io.daq_tasks import *
 from audiolab.tools.audiotools import *
 from audiolab.plotting.plotz import *
 from audiolab.plotting.defined_plots import *
+from audiolab.config.info import caldata_filename, calfreq_filename
 
 #this package
 from calform import Ui_CalibrationWindow
@@ -36,7 +37,7 @@ SAVE_FFT_DATA = False
 USE_FINITE = True
 VERBOSE = False
 SAVE_OUTPUT = False
-PRINT_WARNINGS = True
+PRINT_WARNINGS = False
 
 class CalibrationWindow(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
@@ -133,6 +134,8 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.signals.curve_finished.connect(self.process_caldata)
         self.signals.update_stim_display.connect(self.stim_display)
 
+        print('save format ',self.saveformat)
+
     def on_start(self):
        
         aochan = self.ui.aochan_box.currentText().encode()
@@ -147,8 +150,8 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.save_as_calibration = self.ui.savecal_ckbx.isChecked()
 
         if self.apply_calibration:
-            calibration_vector = np.load("calibration_dbdata.npy")
-            calibration_freqs = np.load("calibration_frq.npy")
+            calibration_vector = np.load(os.path.join(caldata_filename()))
+            calibration_freqs = np.load(os.path.join(calfreq_filename()))
 
         self.halt = False
 
@@ -156,7 +159,6 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.nacquired = 0
 
         #datastore = DataTraces()
-
 
         if self.ui.tabs.currentIndex() == 0 :
             if self.live_lock.tryLock():
@@ -275,7 +277,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.display.show()
 
                     print('setting up tone curve')
-                    self.tonecurve = ToneCurve(dur,sr,rft,nreps,freqs,intensities, (self.caldb, self.calv))
+                    self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, intensities, (self.caldb, self.calv))
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
@@ -307,17 +309,17 @@ class CalibrationWindow(QtGui.QMainWindow):
         
 
     def curve_worker(self):
-        print("curve worker")
 
         while not self.halt:
             now = time.time()
             elapsed = (now - self.last_tick)*1000
-            print(self.last_tick, now)
-            print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+            #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
             self.last_tick = now
             if elapsed < self.interval:
-                print('sleep ', (self.interval-elapsed))
+                #print('sleep ', (self.interval-elapsed))
                 time.sleep((self.interval-elapsed)/1000)
+
+            print(" ") # print empty line
 
             if not self.tonecurve.haswork():
                 #self.on_stop()
@@ -346,7 +348,7 @@ class CalibrationWindow(QtGui.QMainWindow):
     def process_caldata(self):
         resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, 
                                                    self.savename, 
-                                                   keepcal=self.save_as_calibration)
+                                                   keepcal=self.save_as_calibration, saveformat=self.saveformat)
         print("plotting calibration curve")
         plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
 
@@ -496,11 +498,6 @@ class CalibrationWindow(QtGui.QMainWindow):
                 if PRINT_WARNINGS:
                     print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
                     print("\tTarget : {}, Received : {}".format(f, max_freq))
-          
-            if VERBOSE:
-                #print(maxidx)
-                print("%.5f AI V" % (vmax))
-                print("%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq))
             
             try:
                 times = np.arange(len(data))/sr

@@ -32,8 +32,12 @@ def mightysave(filename, data, filetype='auto'):
             with open(filename, 'wb') as pf:
                 pickle.dump(data, pf)
         elif filetype == 'json':
+            if 'json' not in filename:
+                filename = filename + '.json'
             if isinstance(data,np.ndarray):
                 data = data.tolist()
+            elif isinstance(data, dict):
+                data = np2list(data)
             with open(filename, 'w') as jf:
                 json.dump(data, jf)
         print('saved')
@@ -43,3 +47,16 @@ def mightysave(filename, data, filetype='auto'):
         return -2
 
     return 0
+
+def load(filename, filetype='auto'):
+    pass
+
+def np2list(d):
+    for key, item in d.items():
+        if isinstance(item, dict):
+            item = np2list(item)        
+        elif isinstance(item,np.ndarray):
+            item = item.tolist()
+        d[key] = item
+
+    return d
