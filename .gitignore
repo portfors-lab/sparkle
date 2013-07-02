@@ -1,9 +1,11 @@
 # autosave files
 *~
+#*#
+
 # user specification files
 inputs.cfg
-calibration_data.npy
-calibration_index.pkl
+calibration_dbdata.npy
+calibration_frq.npy
 
 # os autogen files?
 __*__

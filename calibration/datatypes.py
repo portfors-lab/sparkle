@@ -1,7 +1,8 @@
 import numpy as np
 import datetime
+from os.path import splitext
 
-from audiolab.io.fileio import mightysave
+from audiolab.io.fileio import mightysave, mightyload
 
 class AcquisitionObject():
     # abstract class for holding data acquitision data and stimulus information
@@ -28,7 +29,7 @@ class AcquisitionObject():
         
 
 class CalibrationObject():
-    def __init__(self, freqs, dbs, sr, dur, rft, nreps, f=np.nan, db=np.nan, v=np.nan, method=None):
+    def __init__(self, freqs=None, dbs=None, sr=None, dur=None, rft=None, nreps=None, f=np.nan, db=np.nan, v=np.nan, method=None):
         #intialize all the required fields to None
 
         AcquisitionObject.__init__(self, sr, sr, f=f, db=db, v=v, method=method)
@@ -48,7 +49,7 @@ class CalibrationObject():
         self.stim['risefalltime'] = rft
 
         # number of stimulus repetitions
-        self.nreps = nreps
+        self.stim['repetitions'] = nreps
 
         # metric used to calculate the dB SPL, e.g maxV, peakFFT
         self.dbmethod = None
@@ -73,6 +74,7 @@ class CalibrationObject():
         # is determined in the order: frequencies, intensities, reps
         frequencies = self.stim['frequencies']
         intensities = self.stim['intensities']
+        nreps = self.stim['repetitions']
         if dims == 4:
             # then we are storing an array of data for each frequency, dimension 
             # and rep e.g. the actual trace
@@ -80,10 +82,10 @@ class CalibrationObject():
             # if the last dimension size is not provided, assume simulus length
             if dim4 == None:
                 dim4 = int((self.stim['duration']*self.stim['sr'])/2)
-            self.data[key] = np.zeros((len(frequencies),len(intensities),self.nreps,
+            self.data[key] = np.zeros((len(frequencies),len(intensities),nreps,
                                        dim4))
         elif dims == 3:
-            self.data[key] = np.zeros((len(frequencies),len(intensities),self.nreps))
+            self.data[key] = np.zeros((len(frequencies),len(intensities),nreps))
 
         elif dims == 2:
             # if we have 2 dimensions, then assume that we need to temporarily store a thrid
@@ -107,7 +109,7 @@ class CalibrationObject():
             rep_temp = self.rep_temps[key]
             rep_temp.append(data)
 
-            if rep == (self.nreps-1):
+            if rep == (self.stim['repetitions']-1):
                 arr[ifreq][idb] = np.mean(rep_temp)
                 self.data[key] = arr
                 rep_temp = []
@@ -138,7 +140,7 @@ class CalibrationObject():
         if filetype == 'auto':
             # use the filename extension to determine
             # file format
-            root, filetype = splitext(filename)
+            root, filetype = splitext(fname)
             
         filetype = filetype.replace('.', '')
 
@@ -149,3 +151,25 @@ class CalibrationObject():
         master['data'] = self.data
 
         mightysave(fname, master, filetype=filetype)
+
+    @staticmethod
+    def load_from_file(fname, filetype='auto'):
+
+        caldict = mightyload(fname, filetype)
+
+        # now intialize into a calObject
+        calobj = CalibrationObject()
+        calobj.stim = caldict['stim']
+        calobj.reponse = caldict['response']
+        data = caldict['data']
+        calobj.data = data
+        
+        calobj.rep_temps = {}
+        for key, arr in data.items():
+            arr = np.array(arr)
+            data[key] = arr
+            if len(arr.shape) == 2:
+                calobj.rep_temps[key] = []
+
+        return calobj
+        
