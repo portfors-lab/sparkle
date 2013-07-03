@@ -165,11 +165,21 @@ class CalibrationObject():
         calobj.data = data
         
         calobj.rep_temps = {}
-        for key, arr in data.items():
-            arr = np.array(arr)
-            data[key] = arr
-            if len(arr.shape) == 2:
-                calobj.rep_temps[key] = []
 
+        if filetype == 'auto':
+            root, ext = splitext(fname)
+            # use the filename extension to determine
+            # file format
+            filetype = ext
+
+        if filetype in ['json, pkl']:
+            for key, arr in data.items():
+                arr = np.array(arr)
+                data[key] = arr
+                if len(arr.shape) == 2:
+                    calobj.rep_temps[key] = []
+        else:
+            calobj.stim['frequencies'] = list(calobj.stim['frequencies'])
+            calobj.stim['intensities'] = list(calobj.stim['intensities'])
+            
         return calobj
-        

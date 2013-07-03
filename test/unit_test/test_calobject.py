@@ -2,6 +2,7 @@ import numpy as np
 import os
 from audiolab.calibration.datatypes import CalibrationObject
 import glob
+from nose.tools import nottest
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), "tmp")
 
@@ -10,7 +11,7 @@ class TestCalObj():
         print('setting up ob')
         self.freqs = [x for x in range(5,51,5)]
         self.intensities = [x for x in range(0,101,10)]
-        self.samplerate = 400000
+        self.samplerate = 100000
         self.duration = 200
         self.risefall = 5
         self.nreps = 3
@@ -25,7 +26,7 @@ class TestCalObj():
             os.remove(filename)
 
     def testcreate(self):
-
+        print("inside test create")
         assert self.caldata.stim['sr'] == self.samplerate
         assert self.caldata.stim['calV'] == self.dbv[1]
         assert self.caldata.stim['frequencies'] == self.freqs
@@ -89,12 +90,13 @@ class TestCalObj():
         self.caldata.save_to_file(fname)
         assert os.path.isfile(fname)
 
-class TestCalObjFile():
+
+class TestCalObjFile(object):
     def setup(self):
         print("setting up file test")
         self.freqs = [x for x in range(5,51,5)]
         self.intensities = [x for x in range(0,101,10)]
-        self.samplerate = 400000
+        self.samplerate = 100000
         self.duration = 200
         self.risefall = 5
         self.nreps = 3
@@ -123,6 +125,7 @@ class TestCalObjFile():
             os.remove(filename)
 
     def test_loaded_calobj(self):
+        print("inside test_loaded_calobj")
         # load it back in
         for ext in self.filetypes:
             fname = os.path.join(tempfolder,'savetemp' + ext)
