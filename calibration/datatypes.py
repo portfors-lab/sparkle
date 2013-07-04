@@ -10,6 +10,7 @@ class AcquisitionObject():
 
         self.stim = {}
         self.response = {}
+        self.misc = {}
 
         self.stim['sr'] = sr_out
         self.response['sr'] = sr_in
@@ -52,22 +53,15 @@ class CalibrationObject():
         self.stim['repetitions'] = nreps
 
         # metric used to calculate the dB SPL, e.g maxV, peakFFT
-        self.dbmethod = None
+        self.misc['dbmethod'] = None
 
         # note about what this data represents
-        self.note = None
+        self.misc['note'] = None
 
         # how to store data -- predefined, or dictionary of caller specified?
         self.data = {}
         self.rep_temps = {}
 
-        """
-        # ffts of recorded tones
-        self.spectrums = np.zeros((len(freqs),len(dbs),nreps,int((dur*sr)/2)))
-
-        # calculated db from recorded tones
-        self.dbspl = np.zeros((len(freqs),len(dbs)))
-        """
 
     def init_data(self, key, dims, dim4=None):
         # dims will create a numpy array with the number of dimensions, whose size
@@ -88,18 +82,19 @@ class CalibrationObject():
             self.data[key] = np.zeros((len(frequencies),len(intensities),nreps))
 
         elif dims == 2:
-            # if we have 2 dimensions, then assume that we need to temporarily store a thrid
+            # if we have 2 dimensions, then assume that we need to temporarily store a third
             # dimension, and average results
             self.data[key] = np.zeros((len(frequencies),len(intensities)))
             self.rep_temps[key] = []
         else:
             raise Exception("number of dimensions, " + str(dims)+ ", currently not supported")
-        
+
+
     def put(self, key, ix, data):
         arr = self.data[key]
         dims = arr.shape
 
-        # frequency and intensitiy must be first two elements, 
+        # frequency and intensitiy must be first two elements
         f, db, rep = ix
 
         ifreq = self.stim['frequencies'].index(f)
@@ -149,6 +144,7 @@ class CalibrationObject():
         master['stim'] = self.stim
         master['response'] = self.response
         master['data'] = self.data
+        master['misc'] = self.misc
 
         mightysave(fname, master, filetype=filetype)
 

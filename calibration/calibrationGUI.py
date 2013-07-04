@@ -133,6 +133,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.signals.done.connect(self.process_response)
         self.signals.curve_finished.connect(self.process_caldata)
         self.signals.update_stim_display.connect(self.stim_display)
+        self.signals.read_collected.connect(self.calc_spectrum)
 
         print('save format ',self.saveformat)
 
@@ -207,6 +208,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                         self.toneplayer = ContinuousTone(aichan, aochan, sr, 
                                                          sr*(interval/self.tscale), self.ainpts, 
                                                          (self.caldb, self.calv))
+                        
                 except:
                     print('ERROR! TERMINATE!')
                     self.on_stop
@@ -281,6 +283,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
+                    self.tonecurve.assign_signal(self.signals.done)
                     self.tonecurve.arm(aochan,aichan)
                     self.ngenerated +=1
 
@@ -343,12 +346,12 @@ class CalibrationWindow(QtGui.QMainWindow):
 
             #self.current_line_data = data
             #self.process_response(f,db)
-            self.signals.done.emit(f, db, data[:])
+            #self.signals.done.emit(f, db, data[:])
 
     def process_caldata(self):
-        resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, 
-                                                   self.savename, 
-                                                   keepcal=self.save_as_calibration, saveformat=self.saveformat)
+        resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, self.savename, 
+                                                   keepcal=self.save_as_calibration, 
+                                                   saveformat=self.saveformat)
         print("plotting calibration curve")
         plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
 
@@ -457,21 +460,16 @@ class CalibrationWindow(QtGui.QMainWindow):
         except:
             print("WARNING : Problem drawing stim to Window")
 
-    def process_response(self, f, db, data):
+    def process_response(self, f, db, data, spectrum, freq):
         try:
-            #print("process response")
+            print("process response")
+        
             if self.current_operation == 0:
                 sr = self.toneplayer.get_samplerate()
             else:
                 sr = self.tonecurve.player.get_samplerate()
 
-            # extract information from acquired tone, and save
-            freq, spectrum = calc_spectrum(data, sr)
-
-            # take the abs (should I do this?), and get the highest peak
-            spectrum = abs(spectrum)
-
-            spec_max, max_freq = get_fft_peak(spectrum,freq)
+            spec_max, max_freq = get_fft_peak(spectrum, freq)
             spec_peak_at_f = spectrum[freq == f]
             if len(spec_peak_at_f) == 0:
                 print("COULD NOT FIND TARGET FREQUENCY ",f)
@@ -548,7 +546,25 @@ class CalibrationWindow(QtGui.QMainWindow):
             self.toneplayer.reset()
 
             f, db = self.fdb
-            self.signals.done.emit(f, db, data[:])
+            self.signals.read_collected.emit(f, db, data[:])
+
+    def calc_spectrum(self, f, db, data):
+        try:
+            #print("process response")
+            if self.current_operation == 0:
+                sr = self.toneplayer.get_samplerate()
+            else:
+                sr = self.tonecurve.player.get_samplerate()
+
+            # extract information from acquired tone, and save
+            freq, spectrum = calc_spectrum(data, sr)
+
+            # take the abs (should I do this?), and get the highest peak
+            spectrum = abs(spectrum)
+        except:
+            raise
+
+        self.signals.done.emit(f, db, data, spectrum, freq)
 
         
     def ncollected(self, datachunk):

@@ -16,8 +16,8 @@ class GenericThread(QtCore.QRunnable):
         return
 
 class WorkerSignals(QtCore.QObject):
-    done = QtCore.pyqtSignal(int, int, numpy.ndarray)
+    done = QtCore.pyqtSignal(int, int, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     curve_finished = QtCore.pyqtSignal()
-    update_stim_display = QtCore.pyqtSignal(numpy.ndarray,numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    update_stim_display = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     ncollected = QtCore.pyqtSignal(list)
-
+    read_collected = QtCore.pyqtSignal(int, int, numpy.ndarray)

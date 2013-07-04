@@ -26,9 +26,9 @@ FFT_FNAME = '_ffttraces'
 PEAKS_FNAME =  '_fftpeaks'
 DB_FNAME = '_resultdb'
 INDEX_FNAME = '_index'
-DATA_FNAME = "_rawdata"
-NOISE_FNAME = "_noise"
-OUTPUT_FNAME = "_outtones"
+DATA_FNAME = '_rawdata'
+NOISE_FNAME = '_noise'
+OUTPUT_FNAME = '_outtones'
 
 class PlayerBase():
     def __init__(self, dbv=(100,0.1)):
@@ -291,16 +291,6 @@ class ToneCurve():
         self.rft = risefall
         self.nreps = nreps
 
-        """
-        # data structure to store the averages of the resultant FFT peaks
-        self.fft_peaks = np.zeros((len(freqs),len(intensities)))
-        self.playback_dB = np.zeros((len(freqs),len(intensities)))
-        self.vin = np.zeros((len(freqs),len(intensities)))
-        self.fft_vals_lookup = {}
-        self.fft_vals_index = np.zeros((len(freqs),len(intensities)))
-        
-        """
-
         self.caldata.init_data('peaks', 2)
         self.caldata.init_data('vmax', 2)
 
@@ -315,13 +305,6 @@ class ToneCurve():
         
         self.reject_list = []
 
-        """
-        # data structure to hold repetitions, for averaging
-        self.rep_temp = []
-        self.vrep_temp = []
-
-        self.freq_index = [x for x in freqs]
-        """
 
         self.work_queue = queue.Queue()
         for ifreq, f in enumerate(freqs):
@@ -333,6 +316,11 @@ class ToneCurve():
         #self.intensities = [x for x in intensities]
 
         self.player = TonePlayer(dbv)
+        self.signal = None
+
+    def assign_signal(self, signal):
+        # allow this object to signal to GUI data to update
+        self.signal = signal
 
     def arm(self, aochan, aichan):
 
@@ -353,8 +341,8 @@ class ToneCurve():
         # save data here
         played_f, played_db, r = self.current_fdb
 
-        # spin off thread for saving data
-        t = threading.Thread(target=self._storedata, args=(data, self.current_fdb))
+        # spin off thread for saving data, and move on to reset tone
+        t = threading.Thread(target=self._storedata, args=(data[:], self.current_fdb))
         #t = Process(target=self._storesimple, args=(data, self.current_fdb))
         #t.daemon = True
         t.start()
@@ -397,10 +385,14 @@ class ToneCurve():
         # take the abs (should I do this?), and get the highest peak
         spectrum = abs(spectrum)
 
-        spec_max, max_freq = get_fft_peak(spectrum,freq)
+        spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
 
         vmax = np.amax(abs(data))
+
+        if self.signal is not None:
+            print("Emitting")
+            self.signal.emit(f, db, data, spectrum, freq)
 
         if vmax < 0.005:
             if PRINT_WARNINGS:
@@ -465,21 +457,16 @@ class ToneCurve():
         #After running curve do calculations and save data to file
         
         print("Saving...")
-        #print('fft peaks ', self.fft_peaks)
+        
         print('rejects : ', self.reject_list)
         # go through FFT peaks and calculate playback resultant dB
-        #for freq in self.fft_peaks
+        # for freq in self.fft_peaks
         vfunc = np.vectorize(calc_db)
         caldb = self.player.caldb
         calv = self.player.calv
-        #dB_from_v_vfunc = np.vectorize(calc_db_from_v)
 
         try:
             self.data_lock.acquire()
-            #ifreq = self.freqs.index(calf)
-            #idb = self.intensities.index(caldb)
-            #cal_fft_peak = self.fft_peaks[ifreq][idb]
-            #cal_vmax =  self.vin[ifreq][idb]
 
             cal_fft_peak = self.caldata.get('peaks', (calf, caldb))
             cal_vmax =  self.caldata.get('vmax', (calf, caldb))
@@ -497,8 +484,11 @@ class ToneCurve():
 
         resultant_dB = vfunc(vin, caldb, cal_vmax)
 
+        self.caldata.data['frequency_rolloff'] = resultant_dB
+        self.caldata.misc['dbmethod'] = calc_db.__doc__ + " peak: max V"
+
         fname = sfilename
-        while os.path.isfile(os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")):
+        while os.path.isfile(os.path.join(sfolder, fname + '.' + saveformat)):
             # increment filename until we come across one that 
             # doesn't exist
             if not fname[-1].isdigit():
@@ -506,37 +496,11 @@ class ToneCurve():
             else:
                 currentno = re.search('(\d+)$', fname).group(0)
                 prefix = fname[:-(len(currentno))]
-                currentno = int(currentno) +1
+                currentno = int(currentno) + 1
                 fname = prefix + str(currentno)
 
         filename = os.path.join(sfolder, fname)
         self.caldata.save_to_file(filename, filetype=saveformat)
-
-        """
-        if SAVE_FFT_DATA:
-            filename = os.path.join(sfolder, fname + FFT_FNAME)
-            mightysave(filename, self.caldata.data['spectrums'], filetype=saveformat)
-
-            filename = os.path.join(sfolder, fname + PEAKS_FNAME)
-            mightysave(filename, self.caldata.data['peaks'], filetype=saveformat)
-
-            params = {'calV': calv, 'caldB' : caldb, 
-                      'calf' : calf, 'rft' : self.rft, 
-                      'samplerate' : self.sr, 'duration' : self.dur}
-            filename = os.path.join(sfolder, fname + INDEX_FNAME + ".pkl")
-            mightysave(filename, self.caldata.stim)
-
-            if SAVE_DATA_TRACES:
-                filename = os.path.join(sfolder, fname + DATA_FNAME)
-                mightysave(filename, self.caldata.data['raw_traces'], filetype=saveformat)
-
-            if SAVE_OUTPUT:
-                filename = os.path.join(sfolder, fname + OUTPUT_FNAME)
-                mightysave(filename, self.tone_array)
-        """
-
-        filename = os.path.join(sfolder, fname + DB_FNAME)
-        mightysave(filename, resultant_dB, filetype=saveformat)
 
         if keepcal:
             calibration_vector = resultant_dB[:,0]
