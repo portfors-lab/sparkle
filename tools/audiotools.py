@@ -5,7 +5,7 @@ VERBOSE = True
 DBFACTOR = 20
 
 def calc_db(peak, caldB, cal_peak):
-    """ 20*log10(peak/cal_peak) + caldB """
+    """20*log10(peak/cal_peak) + caldB"""
     try:
         pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldB
     except ZeroDivisionError:

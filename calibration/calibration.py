@@ -7,8 +7,6 @@ import re
 from multiprocessing import Process
 from datatypes import CalibrationObject
 
-#from PyDAQmx import *
-
 from audiolab.io.fileio import mightysave
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
 from audiolab.tools.audiotools import *

@@ -34,7 +34,7 @@ XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
 SAVE_FFT_DATA = False
-USE_FINITE = True
+USE_FINITE = False
 VERBOSE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
@@ -159,8 +159,6 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.ngenerated = 0
         self.nacquired = 0
 
-        #datastore = DataTraces()
-
         if self.ui.tabs.currentIndex() == 0 :
             if self.live_lock.tryLock():
                 # on the fly
@@ -179,10 +177,9 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                 try:
                     if USE_FINITE:
-                        # set a timer to repeatedly start ao and ai tasks
-                        # set up first go before timer, so that the task starts as soon 
-                        # as timer fires, to get most accurate rate
-    
+                        
+                        # write to and start generation task, so it is ready to fire immediately
+                        # when the command is given.
                         self.toneplayer = TonePlayer((self.caldb,self.calv))
                         if self.apply_calibration:
                             self.toneplayer.set_calibration(calibration_vector, calibration_freqs)
@@ -195,11 +192,14 @@ class CalibrationWindow(QtGui.QMainWindow):
                         self.ui.running_label.setPalette(self.green)
                         self.ui.running_label.setText("RUNNING")
 
+                        # spin off a thread that runs a continuous loop, with
+                        # an appropriate, adjusted, sleep time between loops
+    
                         self.start_time = time.time()
-                        self.last_tick = self.start_time-(interval/self.tscale)
+                        # set last tick to expired time, so first loop iteration doesn't sleep
+                        self.last_tick = self.start_time - (interval/self.tscale) 
                         self.acq_thread = threading.Thread(target=self.finite_worker)
                         self.acq_thread.start()
-
 
                     else:
                         # use continuous acquisition task, using NIDAQ everyncallback
@@ -278,7 +278,6 @@ class CalibrationWindow(QtGui.QMainWindow):
                         self.spawn_display()
                     self.display.show()
 
-                    print('setting up tone curve')
                     self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, intensities, (self.caldb, self.calv))
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
@@ -287,7 +286,6 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.tonecurve.arm(aochan,aichan)
                     self.ngenerated +=1
 
-                    print('ready')
                     self.ui.running_label.setText("RUNNING")
                     self.ui.running_label.setPalette(self.green)
 
@@ -478,6 +476,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
             vmax = np.amax(abs(data))
             
+            # update GUI info display area
             self.ui.label1.setText("AI Vmax : %.5f" % (vmax))
             self.ui.label2.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), max_freq))
             self.ui.label3.setText("FFT peak at %d kHz : %.6f" % (f/1000, spec_peak_at_f))
@@ -491,7 +490,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             else:
                 self.statusBar().showMessage("")
 
-            #tolerance of 1 Hz for frequency matching
+            # tolerance of 1 Hz for frequency matching
             if max_freq < f-1 or max_freq > f+1:
                 if PRINT_WARNINGS:
                     print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
@@ -503,7 +502,6 @@ class CalibrationWindow(QtGui.QMainWindow):
                 self.display.draw_line(2,1, freq, spectrum)
             except:
                 print("WARNING : Problem drawing to Window")        
-
 
             if self.current_operation == 0:
                 if SAVE_FFT_DATA:
@@ -520,7 +518,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         print('generated ', self.ngenerated, ', acquired ', self.nacquired, ', halted ', self.halt)
         
         if self.halt and self.ngenerated == self.nacquired:
-            print("finished collecting, wrapping up...")
+            print("Finished collecting, wrapping up...")
             self.live_lock.unlock()
                 
             if self.current_operation == 1:
@@ -534,12 +532,15 @@ class CalibrationWindow(QtGui.QMainWindow):
         while not self.halt:
             now = time.time()
             elapsed = (now - self.last_tick)*1000
-            print(self.last_tick, now)
-            print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+            #print(self.last_tick, now)
+            #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
             self.last_tick = now
             if elapsed < self.interval:
-                print('sleep ', (self.interval-elapsed))
+                #print('sleep ', (self.interval-elapsed))
                 time.sleep((self.interval-elapsed)/1000)
+            elif elapsed > self.interval:
+                print("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
+
 
             self.ngenerated +=1
             data = self.toneplayer.read()
@@ -550,7 +551,6 @@ class CalibrationWindow(QtGui.QMainWindow):
 
     def calc_spectrum(self, f, db, data):
         try:
-            #print("process response")
             if self.current_operation == 0:
                 sr = self.toneplayer.get_samplerate()
             else:
