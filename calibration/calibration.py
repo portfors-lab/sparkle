@@ -1,11 +1,10 @@
-
 import threading
 import queue
 import os
 import pickle
 import re
 from multiprocessing import Process
-from datatypes import CalibrationObject
+from audiolab.calibration.datatypes import CalibrationObject
 
 from audiolab.io.fileio import mightysave
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
@@ -44,6 +43,9 @@ class PlayerBase():
 
         self.tone_lock = threading.Lock()
         self.daq_lock = threading.Lock()
+
+        self.aitask = None
+        self.aotask = None
 
     def start(self):
         raise NotImplementedError
@@ -133,6 +135,9 @@ class TonePlayer(PlayerBase):
 
     def read(self):
         try:
+            if self.aotask is None:
+                print("You must arm the calibration first")
+                return
             # acquire data and reset task to be read for next timer event
             self.daq_lock.acquire()
             self.aotask.StartTask()
@@ -274,19 +279,22 @@ class ContinuousTone(PlayerBase):
             raise
 
 class ToneCurve():
-    def __init__(self, duration, samplerate, risefall, nreps, freqs, intensities, dbv=(100,0.1)):
+    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1)):
+        """
+        Set up a tone curve which loops through frequencies (outer) and intensities (inner)
+        """
 
         self.data_lock = threading.Lock()
 
         self.ngenerated = 0
         self.nacquired = 0
 
-        self.caldata = CalibrationObject(freqs, intensities, samplerate, duration, 
-                                         risefall, nreps,v=dbv[1])
+        self.caldata = CalibrationObject(freqs, intensities, samplerate, duration_s, 
+                                         risefall_s, nreps,v=dbv[1])
 
-        self.dur = duration
+        self.dur = duration_s
         self.sr = samplerate
-        self.rft = risefall
+        self.rft = risefall_s
         self.nreps = nreps
 
         self.caldata.init_data('peaks', 2)
@@ -294,11 +302,11 @@ class ToneCurve():
 
         if SAVE_FFT_DATA:
             # 4D array nfrequencies x nintensities x nreps x npoints
-            #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration*samplerate)/2)))
+            #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration_s*samplerate)/2)))
             self.caldata.init_data('spectrums',4)
 
         if SAVE_DATA_TRACES:
-            #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration*samplerate)))
+            #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration_s*samplerate)))
             self.caldata.init_data('raw_traces',4)
         
         self.reject_list = []
@@ -317,10 +325,17 @@ class ToneCurve():
         self.signal = None
 
     def assign_signal(self, signal):
+        """
+        Accepts a PyQt signal, which it will emit the parameters 
+        (f, db, data, spectrum, freq) after each read operation
+        """
         # allow this object to signal to GUI data to update
         self.signal = signal
 
     def arm(self, aochan, aichan):
+        """
+        Prepare the tone curve to play. This must be done before the first read
+        """
 
         # load first item in queue
         f, db, rep = self.work_queue.get()
@@ -331,6 +346,11 @@ class ToneCurve():
         self.current_tone = (tone, t)
 
     def next(self):
+        """
+        simultaneously present and read the next prepped stimulus, and reload.
+        Internally stores acquired data. 
+        Returns played_tone, data, times, played_f, played_db
+        """
 
         print('reading')
         data = self.player.read()
@@ -414,31 +434,7 @@ class ToneCurve():
             self.caldata.put('peaks', (f, db, rep), spec_peak_at_f)
             self.caldata.put('vmax', (f, db, rep), vmax)
 
-            """
-            self.rep_temp.append(spec_peak_at_f)
-            self.vrep_temp.append(vmax)
-            if rep == self.nreps-1:
-                ifreq = self.freqs.index(f)
-                idb = self.intensities.index(db)
-                self.fft_peaks[ifreq][idb] =  np.mean(self.rep_temp)
-                self.vin[ifreq][idb] = np.mean(self.vrep_temp)
-                if VERBOSE:
-                    print('\n' + '*'*40)
-                    print("Rep values: {}\nRep mean: {}".format(self.rep_temp, np.mean(self.rep_temp)))
-                    print("V rep values: {}\nV rep mean: {}".format(self.vrep_temp, np.mean(self.vrep_temp)))
-                    print('*'*40 + '\n')
-                self.rep_temp = []
-                self.vrep_temp = []
-            """
-
             if SAVE_FFT_DATA:
-                """
-                ifreq = self.freqs.index(f)
-                idb = self.intensities.index(db)
-                #ifreq, idb = self.fft_vals_lookup[(f,db)]
-                #self.caldata.spectrums[ifreq][idb][rep] = spectrum
-                self.full_fft_data[ifreq][idb][rep] = spectrum
-                """
 
                 self.caldata.put('spectrums', (f, db, rep), spectrum)
 

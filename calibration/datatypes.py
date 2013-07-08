@@ -1,6 +1,7 @@
 import numpy as np
 import datetime
 from os.path import splitext
+from threading import Lock
 
 from audiolab.io.fileio import mightysave, mightyload
 
@@ -28,6 +29,10 @@ class AcquisitionObject():
         # date this calibration was conducted
         self.stim['date'] =  datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         
+        # how to store data -- predefined, or dictionary of caller specified?
+        self.data = {}
+        self.rep_temps = {}
+        self.datalock = Lock()
 
 class CalibrationObject():
     def __init__(self, freqs=None, dbs=None, sr=None, dur=None, rft=None, nreps=None, f=np.nan, db=np.nan, v=np.nan, method=None):
@@ -53,14 +58,10 @@ class CalibrationObject():
         self.stim['repetitions'] = nreps
 
         # metric used to calculate the dB SPL, e.g maxV, peakFFT
-        self.misc['dbmethod'] = None
+        self.misc['dbmethod'] = ''
 
         # note about what this data represents
-        self.misc['note'] = None
-
-        # how to store data -- predefined, or dictionary of caller specified?
-        self.data = {}
-        self.rep_temps = {}
+        self.misc['note'] = ''
 
 
     def init_data(self, key, dims, dim4=None):
@@ -100,6 +101,8 @@ class CalibrationObject():
         ifreq = self.stim['frequencies'].index(f)
         idb = self.stim['intensities'].index(db)
 
+        self.datalock.acquire()
+
         if len(dims) == 2:
             rep_temp = self.rep_temps[key]
             rep_temp.append(data)
@@ -115,6 +118,8 @@ class CalibrationObject():
             arr[ifreq][idb][rep] = data
             self.data[key] = arr
 
+        self.datalock.release()
+
     def get(self, key, ix):
 
         data = self.data[key]
@@ -122,11 +127,15 @@ class CalibrationObject():
         ifreq = self.stim['frequencies'].index(ix[0])
         idb = self.stim['intensities'].index(ix[1])
 
+        self.datalock.acquire()
+
         if len(ix) == 2:
             item = data[ifreq][idb]
                         
         elif len(ix) == 3:
             item = data[ifreq][idb][ix[2]]
+
+        self.datalock.release()
 
         return item
 
@@ -139,6 +148,8 @@ class CalibrationObject():
             
         filetype = filetype.replace('.', '')
 
+        self.datalock.acquire()
+
         # convert everything to a dictionary to save in a single file
         master = {}
         master['stim'] = self.stim
@@ -147,6 +158,8 @@ class CalibrationObject():
         master['misc'] = self.misc
 
         mightysave(fname, master, filetype=filetype)
+
+        self.datalock.release()
 
     @staticmethod
     def load_from_file(fname, filetype='auto'):

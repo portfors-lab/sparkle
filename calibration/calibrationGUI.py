@@ -278,7 +278,8 @@ class CalibrationWindow(QtGui.QMainWindow):
                         self.spawn_display()
                     self.display.show()
 
-                    self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, intensities, (self.caldb, self.calv))
+                    self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, 
+                                               intensities, (self.caldb, self.calv))
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
@@ -293,7 +294,8 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.freqs = freqs
                     self.intensities = intensities
 
-                    #self.daq_timer = self.startTimer(interval)
+                    # save the start time and set last tick to expired, so first
+                    # acquisition loop iteration executes immediately
                     self.start_time = time.time()
                     self.last_tick = self.start_time - (interval/1000)
                     self.acq_thread = threading.Thread(target=self.curve_worker)
@@ -312,6 +314,7 @@ class CalibrationWindow(QtGui.QMainWindow):
     def curve_worker(self):
 
         while not self.halt:
+            # calculate time since last interation and wait to acheive desired interval
             now = time.time()
             elapsed = (now - self.last_tick)*1000
             #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
@@ -319,11 +322,13 @@ class CalibrationWindow(QtGui.QMainWindow):
             if elapsed < self.interval:
                 #print('sleep ', (self.interval-elapsed))
                 time.sleep((self.interval-elapsed)/1000)
+            elif elapsed > self.interval:
+                print("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
 
             print(" ") # print empty line
 
             if not self.tonecurve.haswork():
-                #self.on_stop()
+                # no more work left in the queue, collect last stim written.
                 self.halt = True
             else:
                 self.ngenerated +=1
