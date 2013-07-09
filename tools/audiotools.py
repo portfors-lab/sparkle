@@ -3,6 +3,7 @@ from scipy.integrate import simps, trapz
 
 VERBOSE = True
 DBFACTOR = 20
+OUTPUT_MINIMUM = 0.01
 
 def calc_db(peak, caldB, cal_peak):
     """20*log10(peak/cal_peak) + caldB"""
@@ -59,6 +60,12 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
         # equation for db from voltage is db = 20 * log10(V2/V1))
         # 10^(db/20)
         db = db + adjustdb
+        if db < caldb:
+            atten = caldb - db
+            db = caldb
+        else:
+            atten = 0
+
         v_at_caldB = calv
         caldB = caldb
         amp = (10 ** ((db-caldB)/DBFACTOR)*v_at_caldB)
@@ -88,6 +95,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
         print("WARNING: Unable to produce tone")
         tone = np.zeros(npts)
         timevals = np.arange(npts)/samplerate
+        raise
 
-    return tone, timevals
+    return tone, timevals, atten
 

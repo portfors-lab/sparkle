@@ -14,10 +14,10 @@ def test_main_cal():
     risefall = 0.005
     nreps = 3 
     freqs = [x for x in range(5000,10001,1000)]
-    intensities = [x for x in range(0,101,25)]
+    intensities = [x for x in range(0,121,20)]
 
     tc = ToneCurve(duration, samplerate, risefall, nreps, freqs, intensities)
-    tc.arm('PCI-6259/ao0','PCI-6259/ai0')
+    tc.arm(b'PCI-6259/ao0',b'PCI-6259/ai0')
 
     # run it straight through to finish
     while tc.haswork():

@@ -1,7 +1,6 @@
-#from PyDAQmx import Task
-#from PyDAQmx.DAQmxConstants import *
-#from PyDAQmx.DAQmxTypes import *
-from PyDAQmx import *
+from PyDAQmx import Task
+from PyDAQmx.DAQmxConstants import *
+from PyDAQmx.DAQmxTypes import *
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -82,9 +81,9 @@ class AOTaskFinite(Task):
         Task.__init__(self)
         self.npoints = npoints
 
-        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts,None)
+        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts, None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
-                              DAQmx_Val_FiniteSamps,npoints)
+                              DAQmx_Val_FiniteSamps, npoints)
         if len(trigsrc) > 0:
             self.CfgDigEdgeStartTrig(trigsrc,DAQmx_Val_Rising)
         #starts the AO and AI at the same time
@@ -94,8 +93,8 @@ class AOTaskFinite(Task):
     def write(self,output):
         output, atten_level = scale_output(output)
         w = c_int32()
-        self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,output,
-            w,None);
+        self.WriteAnalogF64(self.npoints, 0, 10.0, DAQmx_Val_GroupByChannel,
+                            output, w, None);
     def stop(self):
         self.StopTask()
         self.ClearTask()

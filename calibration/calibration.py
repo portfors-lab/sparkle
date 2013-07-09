@@ -3,6 +3,7 @@ import queue
 import os
 import pickle
 import re
+import win32com.client
 from multiprocessing import Process
 from audiolab.calibration.datatypes import CalibrationObject
 
@@ -27,6 +28,7 @@ DATA_FNAME = '_rawdata'
 NOISE_FNAME = '_noise'
 OUTPUT_FNAME = '_outtones'
 
+
 class PlayerBase():
     def __init__(self, dbv=(100,0.1)):
 
@@ -46,6 +48,19 @@ class PlayerBase():
 
         self.aitask = None
         self.aotask = None
+
+        # establish connection to the attenuator
+        pa5 = win32com.client.Dispatch("PA5.x")
+        success  = pa5.ConnectPA5('GB',1)
+        if success == 1:
+            print('Connection to PA5 attenuator established')
+        else:
+            print('Connection to PA5 attenuator failed')
+            errmsg = pa5.GetError()
+            print("Error: ", errmsg)
+            raise("Attenuator connection failed")
+
+        self.attenuator = pa5
 
     def start(self):
         raise NotImplementedError
@@ -69,17 +84,19 @@ class PlayerBase():
         else:
             adjdb = 0
 
-        tone, timevals = make_tone(f,db,dur,rft,sr, self.caldb, self.calv, adjustdb=adjdb)
+        tone, timevals, atten = make_tone(f,db,dur,rft,sr, self.caldb, self.calv, adjustdb=adjdb)
 
         if PRINT_WARNINGS:
             if np.amax(abs(tone)) < 0.005:
                 print("WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM")
+
 
         self.tone_lock.acquire()
         self.tone = tone
         self.sr = sr
         self.aitime = dur
         self.aisr = sr
+        self.atten = atten
         self.tone_lock.release()
 
         return tone, timevals
@@ -172,6 +189,7 @@ class TonePlayer(PlayerBase):
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
             self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
             self.aotask.write(self.tone)
+            self.attenuator.SetAtten(self.atten)
             self.ngenerated +=1
 
             if SAVE_OUTPUT:
