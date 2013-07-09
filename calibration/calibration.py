@@ -348,6 +348,7 @@ class ToneCurve():
     def next(self):
         """
         simultaneously present and read the next prepped stimulus, and reload.
+
         Internally stores acquired data. 
         Returns played_tone, data, times, played_f, played_db
         """

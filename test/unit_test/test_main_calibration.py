@@ -17,7 +17,7 @@ def test_main_cal():
     intensities = [x for x in range(0,101,25)]
 
     tc = ToneCurve(duration, samplerate, risefall, nreps, freqs, intensities)
-    tc.arm(b'PCI-6259/ao0',b'PCI-6259/ai0')
+    tc.arm('PCI-6259/ao0','PCI-6259/ai0')
 
     # run it straight through to finish
     while tc.haswork():

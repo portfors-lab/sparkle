@@ -81,7 +81,7 @@ class AOTaskFinite(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=b"", trigsrc=b""):
         Task.__init__(self)
         self.npoints = npoints
-        #self.data = np.zeros(npoints)
+
         self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps,npoints)
@@ -92,12 +92,18 @@ class AOTaskFinite(Task):
     def start(self):
         self.StartTask()
     def write(self,output):
+        output, atten_level = scale_output(output)
         w = c_int32()
         self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,output,
             w,None);
     def stop(self):
         self.StopTask()
         self.ClearTask()
+
+def scale_output(output):
+    # scale the desired output to be above the device minimum,
+    # and also return necessary attenuation factor
+    return output, 0
 
 def get_ao_chans(dev):
     buf = create_string_buffer(256)
