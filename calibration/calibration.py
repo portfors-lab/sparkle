@@ -58,7 +58,7 @@ class PlayerBase():
             print('Connection to PA5 attenuator failed')
             errmsg = pa5.GetError()
             print("Error: ", errmsg)
-            raise("Attenuator connection failed")
+            raise Exception("Attenuator connection failed")
 
         self.attenuator = pa5
 
@@ -85,7 +85,6 @@ class PlayerBase():
             adjdb = self.caldb - self.calibration_vector[self.calibration_frequencies == f][0]
         else:
             adjdb = 0
-        print('adjdb :', adjdb)
 
         tone, timevals, atten = make_tone(f,db,dur,rft,sr, self.caldb, self.calv, adjustdb=adjdb)
 
@@ -158,7 +157,8 @@ class TonePlayer(PlayerBase):
             if self.aotask is None:
                 print("You must arm the calibration first")
                 return
-            # acquire data and reset task to be read for next timer event
+            # acquire data and stop task, lock must have been release by
+            # previous reset
             self.daq_lock.acquire()
             self.aotask.StartTask()
             self.aitask.StartTask()
@@ -431,7 +431,6 @@ class ToneCurve():
         vmax = np.amax(abs(data))
 
         if self.signal is not None:
-            print("Emitting")
             self.signal.emit(f, db, data, spectrum, freq)
 
         if vmax < 0.005:
@@ -495,9 +494,10 @@ class ToneCurve():
             cal_fft_peak = 0
             cal_vmax = 0
 
-        #resultant_dB = vfunc(self.fft_peaks, self.caldb, cal_fft_peak)
-        vin = self.caldata.data['vmax']
+        #fft_peaks = self.caldata.data['peaks']
+        #resultant_dB = vfunc(fft_peaks, caldb, cal_fft_peak)
 
+        vin = self.caldata.data['vmax']
         resultant_dB = vfunc(vin, caldb, cal_vmax)
 
         self.caldata.data['frequency_rolloff'] = resultant_dB

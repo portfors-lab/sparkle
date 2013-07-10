@@ -130,7 +130,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.acq_thread = None
 
         self.signals = WorkerSignals()
-        self.signals.done.connect(self.process_response)
+        self.signals.done.connect(self.display_response)
         self.signals.curve_finished.connect(self.process_caldata)
         self.signals.update_stim_display.connect(self.stim_display)
         self.signals.read_collected.connect(self.calc_spectrum)
@@ -138,6 +138,9 @@ class CalibrationWindow(QtGui.QMainWindow):
         print('save format ',self.saveformat)
 
     def on_start(self):
+
+        if not self.verify_inputs_valid():
+            return
        
         aochan = self.ui.aochan_box.currentText().encode()
         aichan = self.ui.aichan_box.currentText().encode()
@@ -170,11 +173,6 @@ class CalibrationWindow(QtGui.QMainWindow):
                 if SAVE_FFT_DATA:
                     self.full_fft_data = []
 
-                # do not change interval on the fly
-                self.ui.interval_spnbx.setEnabled(False)
-                interval = self.ui.interval_spnbx.value()
-                self.interval = interval
-
                 try:
                     if USE_FINITE:
                         
@@ -186,6 +184,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                         # gets info from UI and creates tone
                         self.update_stim()
+                        interval = self.interval
 
                         self.toneplayer.start(aochan,aichan)
                             
@@ -314,7 +313,10 @@ class CalibrationWindow(QtGui.QMainWindow):
     def curve_worker(self):
 
         while not self.halt:
-            print(" ") # print empty line
+
+            # this thread runs only for the turning curve
+            # I don't know what I am suppose to type right now
+
             # calculate time since last interation and wait to acheive desired interval
             now = time.time()
             elapsed = (now - self.last_tick)*1000
@@ -348,15 +350,23 @@ class CalibrationWindow(QtGui.QMainWindow):
                 print("WARNING : Problem drawing stim to Window")
 
             #self.current_line_data = data
-            #self.process_response(f,db)
+            #self.display_response(f,db)
             #self.signals.done.emit(f, db, data[:])
 
     def process_caldata(self):
+        # saving can take a long time if there is alot of data, display indeterminate
+        # progess bar so user doesn't think program froze
+        progressdlg = QtGui.QProgressDialog("Saving data...", "Abort", 0, 0, self)
+        progressdlg.show()
+        QtGui.QApplication.processEvents()
         resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, self.savename, 
                                                    keepcal=self.save_as_calibration, 
                                                    saveformat=self.saveformat)
-        print("plotting calibration curve")
+
+        progressdlg.setLabel(QtGui.QLabel("Plotting data..."))
+        QtGui.QApplication.processEvents()
         plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
+        progressdlg.close()
 
     def on_stop(self):
         if self.current_operation == 0 : 
@@ -419,6 +429,9 @@ class CalibrationWindow(QtGui.QMainWindow):
         
         npts = tone.size
 
+        interval = self.ui.interval_spnbx.value()
+        self.interval = interval
+
         #also plot stim FFT
         freq, spectrum = calc_spectrum(tone,sr)
 
@@ -463,7 +476,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         except:
             print("WARNING : Problem drawing stim to Window")
 
-    def process_response(self, f, db, data, spectrum, freq):
+    def display_response(self, f, db, data, spectrum, freq):
         try:
             print("process response")
         
@@ -653,6 +666,37 @@ class CalibrationWindow(QtGui.QMainWindow):
             self.savename = savename
             self.saveformat = saveformat
 
+    def verify_inputs_valid(self):
+        if self.ui.tabs.currentIndex() == 0 :
+            f = self.ui.freq_spnbx.value()*self.fscale
+            sr = self.ui.sr_spnbx.value()*self.fscale
+            if sr < f*2:
+                QtGui.QMessageBox.warning(self, "Invalid parameter", "Samplerate, %d Hz, must be at least 2x the maximum frequency, %d Hz" % (sr, f))
+                return 0
+            dur = self.ui.dur_spnbx.value()*self.tscale
+            interval = self.ui.interval_spnbx.value()*self.tscale
+            if dur > interval:
+                QtGui.QMessageBox.warning(self, "Invalid parameter", "Duration, %.3f s, exceeds interval, %.3f s" % (dur, interval))
+                return 0
+        else:
+            # verify that the calbration frequency and intensity are included in the curve
+            f_start = self.ui.freq_start_spnbx.value()*self.fscale
+            f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
+            f_step = self.ui.freq_step_spnbx.value()*self.fscale
+            if self.calf not in list(range(f_start, f_stop+1, f_step)):
+                QtGui.QMessageBox.warning(self, "Invalid parameter", "Frequency range must include the specified calibration frequency, %d Hz" % (self.calf))
+                return 0
+            sr = self.ui.sr_spnbx_2.value()*self.fscale
+            if sr < f_stop*2:
+                QtGui.QMessageBox.warning(self, "Invalid parameter", "Samplerate, %d Hz,  must be at least 2x the maximum frequency, %d Hz" % (sr, f_stop))
+                return 0
+            reprate = self.ui.reprate_spnbx.value()
+            dur = self.ui.dur_spnbx_2.value()*self.tscale
+            if dur*reprate > 1:
+                QtGui.QMessageBox.warning(self, "Invalid parameter", "Duration, %.3f s, exceeds interval allowed by reptition rate, %.2f reps/s" % (dur, reprate))
+                return 0
+        return 1
+
     def update_unit_labels(self):
         if self.fscale == 1000:
             self.ui.f_units.setText('kHz')
@@ -682,11 +726,13 @@ class CalibrationWindow(QtGui.QMainWindow):
         print("keypress from calibrator")
         #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
-            if USE_FINITE:
-                self.update_stim()
-            else:
-                self.on_stop()
-                self.on_start()
+            if self.current_operation == 0:
+                if USE_FINITE:
+                    if self.verify_inputs_valid():
+                        self.update_stim()
+                else:
+                    self.on_stop()
+                    self.on_start()
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
@@ -733,7 +779,6 @@ class CalibrationWindow(QtGui.QMainWindow):
         save_inputs(outlist)
 
         QtGui.QMainWindow.closeEvent(self,event)
-
 
 def load_inputs():
     cfgfile = "inputs.cfg"
