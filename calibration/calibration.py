@@ -76,13 +76,16 @@ class PlayerBase():
 
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
+        print(self.calibration_vector)
+        print(self.calibration_frequencies)
 
     def set_tone(self,f,db,dur,rft,sr):
 
         if self.calibration_vector is not None:
-            adjdb = self.calibration_vector[self.calibration_frequencies == f]
+            adjdb = self.caldb - self.calibration_vector[self.calibration_frequencies == f][0]
         else:
             adjdb = 0
+        print('adjdb :', adjdb)
 
         tone, timevals, atten = make_tone(f,db,dur,rft,sr, self.caldb, self.calv, adjustdb=adjdb)
 
@@ -516,7 +519,9 @@ class ToneCurve():
         self.caldata.save_to_file(filename, filetype=saveformat)
 
         if keepcal:
-            calibration_vector = resultant_dB[:,0]
+            # get vector of calibration intensity only
+            caldb_idx = self.caldata.stim['intensities'].index(self.player.caldb)
+            calibration_vector = resultant_dB[:,caldb_idx]
             np.save(caldata_filename(),calibration_vector)
             freqs = self.caldata.stim['frequencies']
             np.save(calfreq_filename(), freqs)

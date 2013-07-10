@@ -34,7 +34,7 @@ XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
 SAVE_FFT_DATA = False
-USE_FINITE = False
+USE_FINITE = True
 VERBOSE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
@@ -314,18 +314,18 @@ class CalibrationWindow(QtGui.QMainWindow):
     def curve_worker(self):
 
         while not self.halt:
+            print(" ") # print empty line
             # calculate time since last interation and wait to acheive desired interval
             now = time.time()
             elapsed = (now - self.last_tick)*1000
             #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
-            self.last_tick = now
             if elapsed < self.interval:
                 #print('sleep ', (self.interval-elapsed))
                 time.sleep((self.interval-elapsed)/1000)
+                now = time.time()
             elif elapsed > self.interval:
                 print("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
-
-            print(" ") # print empty line
+            self.last_tick = now
 
             if not self.tonecurve.haswork():
                 # no more work left in the queue, collect last stim written.
@@ -539,13 +539,13 @@ class CalibrationWindow(QtGui.QMainWindow):
             elapsed = (now - self.last_tick)*1000
             #print(self.last_tick, now)
             #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
-            self.last_tick = now
             if elapsed < self.interval:
                 #print('sleep ', (self.interval-elapsed))
                 time.sleep((self.interval-elapsed)/1000)
+                now = time.time()
             elif elapsed > self.interval:
                 print("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
-
+            self.last_tick = now
 
             self.ngenerated +=1
             data = self.toneplayer.read()

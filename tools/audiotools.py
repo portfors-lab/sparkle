@@ -69,6 +69,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
         v_at_caldB = calv
         caldB = caldb
         amp = (10 ** ((db-caldB)/DBFACTOR)*v_at_caldB)
+        print(amp)
 
         if VERBOSE:
             print("current dB: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, freq/1000, amp))

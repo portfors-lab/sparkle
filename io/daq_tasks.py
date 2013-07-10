@@ -1,6 +1,7 @@
-from PyDAQmx import Task
-from PyDAQmx.DAQmxConstants import *
-from PyDAQmx.DAQmxTypes import *
+#from PyDAQmx import Task
+#from PyDAQmx.DAQmxConstants import *
+#from PyDAQmx.DAQmxTypes import *
+from PyDAQmx import *
 import numpy as np
 import matplotlib.pyplot as plt
 
