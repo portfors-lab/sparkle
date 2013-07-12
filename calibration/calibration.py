@@ -123,7 +123,7 @@ class TonePlayer(PlayerBase):
 
         # this shouldn't actually be possible still...
         if self.aitask is not None:
-            self.on_stop()
+            self.stop()
             print("FIX ME : NESTED START OPERATIONS ALLOWED")
 
         self.daq_lock.acquire()
@@ -143,7 +143,7 @@ class TonePlayer(PlayerBase):
 
         except:
             print('ERROR! TERMINATE!')
-            self.stop
+            self.stop()
             raise
 
         # save for later -- allow not to be changed?
@@ -174,7 +174,7 @@ class TonePlayer(PlayerBase):
         except:
             print('ERROR! TERMINATE!')
             self.daq_lock.release()
-            self.stop
+            self.stop()
             raise
 
         #self.daq_lock.release()
@@ -300,7 +300,7 @@ class ContinuousTone(PlayerBase):
             raise
 
 class ToneCurve():
-    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1)):
+    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None):
         """
         Set up a tone curve which loops through frequencies (outer) and intensities (inner)
         """
@@ -317,6 +317,7 @@ class ToneCurve():
         self.sr = samplerate
         self.rft = risefall_s
         self.nreps = nreps
+        self.calf = calf
 
         self.caldata.init_data('peaks', 2)
         self.caldata.init_data('vmax', 2)
@@ -358,13 +359,28 @@ class ToneCurve():
         Prepare the tone curve to play. This must be done before the first read
         """
 
+        # first play the calibration frequency and intensity
+        caltemp = []
+        tone, t = self.player.set_tone(self.calf,self.player.caldb,self.dur, self.rft, self.sr)
+        self.player.start(aochan, aichan)
+        for irep in range(self.nreps):
+            data = self.player.read()
+            caltemp.append(np.amax(abs(data)))
+            self.player.reset()
+
+        self.calpeak = np.mean(caltemp)
+        self.player.stop()
+
         # load first item in queue
         f, db, rep = self.work_queue.get()
 
         tone, t = self.player.set_tone(f,db,self.dur, self.rft, self.sr)
+
         self.player.start(aochan, aichan)
         self.current_fdb = (f, db, rep)
         self.current_tone = (tone, t)
+
+        return self.calpeak
 
     def next(self):
         """
@@ -498,7 +514,7 @@ class ToneCurve():
         #resultant_dB = vfunc(fft_peaks, caldb, cal_fft_peak)
 
         vin = self.caldata.data['vmax']
-        resultant_dB = vfunc(vin, caldb, cal_vmax)
+        resultant_dB = vfunc(vin, caldb, self.calpeak)
 
         self.caldata.data['frequency_rolloff'] = resultant_dB
         self.caldata.misc['dbmethod'] = calc_db.__doc__ + " peak: max V"

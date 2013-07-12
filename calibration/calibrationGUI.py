@@ -278,12 +278,12 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.display.show()
 
                     self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, 
-                                               intensities, (self.caldb, self.calv))
+                                               intensities, (self.caldb, self.calv), calf=self.calf)
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
                     self.tonecurve.assign_signal(self.signals.done)
-                    self.tonecurve.arm(aochan,aichan)
+                    self.calval = self.tonecurve.arm(aochan,aichan)
                     self.ngenerated +=1
 
                     self.ui.running_label.setText("RUNNING")
@@ -292,6 +292,9 @@ class CalibrationWindow(QtGui.QMainWindow):
                     # save these lists for easier plotting later
                     self.freqs = freqs
                     self.intensities = intensities
+
+                    self.livecurve = LiveCalPlot(freqs, intensities)
+                    self.livecurve.show()
 
                     # save the start time and set last tick to expired, so first
                     # acquisition loop iteration executes immediately
@@ -365,7 +368,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         progressdlg.setLabel(QtGui.QLabel("Plotting data..."))
         QtGui.QApplication.processEvents()
-        plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
+        #plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
         progressdlg.close()
 
     def on_stop(self):
@@ -518,8 +521,12 @@ class CalibrationWindow(QtGui.QMainWindow):
                 times = np.arange(len(data))/sr
                 self.display.draw_line(1,0, times, data)
                 self.display.draw_line(2,1, freq, spectrum)
+                if self.current_operation == 1:
+                    resultdb = calc_db(vmax, self.caldb, self.calval)
+                    self.livecurve.set_point(f,db,resultdb)
             except:
-                print("WARNING : Problem drawing to Window")        
+                print("WARNING : Problem drawing to Window")   
+                raise     
 
             if self.current_operation == 0:
                 if SAVE_FFT_DATA:

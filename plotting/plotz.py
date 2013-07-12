@@ -24,7 +24,7 @@ class ResultsPlot(BasePlot):
     def __init__(self,data,parent=None):
         ncols = np.floor(np.sqrt(data.shape[1]))
         nrows = np.ceil(data.shape[1]/subplotcols)
-        BasePlot.__init__(self,(nrows,ncols),arent)
+        BasePlot.__init__(self,(nrows,ncols),parent)
         self.setWindowTitle('Results')
         self.data=data
         self.create_main_frame()
@@ -403,7 +403,32 @@ class AnimatedWindow(BasePlot):
         else:
             # pass keypress to parent classes
             super().keyPressEvent(event)
-    
+
+class LiveCalPlot(BasePlot):
+    def __init__(self, freqs, intensities, parent=None):
+        BasePlot.__init__(self, (1,1), parent)
+ 
+        for idb in intensities:
+            dummydata = np.empty((len(freqs),1))
+            dummydata[:] = np.NAN
+            self.axs[0].plot(freqs,dummydata)
+
+        self.setWindowTitle("Calibration Curve")
+        self.axs[0].set_xlabel("Frequency (Hz)")
+        self.axs[0].set_ylabel("Recorded dB")
+
+        self.frequencies = freqs
+        self.intensities = intensities
+        self.axs[0].set_ylim(50,100)
+
+    def set_point(self, f, db, value):
+        idb = self.intensities.index(db)
+        l = self.axs[0].lines[idb].get_ydata()
+        l[self.frequencies.index(f)] = value
+        self.axs[0].lines[idb].set_ydata(l)
+
+        self.canvas.draw()
+
 class ScrollingPlot(BasePlot):
     def __init__(self,*args,callback=None,parent=None):
         nsubplots = len(args)
