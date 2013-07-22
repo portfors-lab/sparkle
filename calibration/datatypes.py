@@ -1,5 +1,6 @@
 import numpy as np
 import datetime
+import h5py
 from os.path import splitext
 from threading import Lock
 
@@ -120,6 +121,7 @@ class CalibrationObject():
 
         self.datalock.release()
 
+
     def get(self, key, ix):
 
         data = self.data[key]
@@ -139,6 +141,7 @@ class CalibrationObject():
 
         return item
 
+
     def save_to_file(self, fname, filetype='auto'):
         
         if filetype == 'auto':
@@ -150,45 +153,90 @@ class CalibrationObject():
 
         self.datalock.acquire()
 
-        # convert everything to a dictionary to save in a single file
-        master = {}
-        master['stim'] = self.stim
-        master['response'] = self.response
-        master['data'] = self.data
-        master['misc'] = self.misc
+        if filetype == 'hdf5':
+            if not fname.endswith('hdf5'):
+                fname = fname + '.hdf5'
 
-        mightysave(fname, master, filetype=filetype)
+            f = h5py.File(fname, "w")
+            dgrp = f.create_group("data")
+            for dname, data in self.data.items():
+                
+                dset = dgrp.create_dataset(dname, data.shape)
+                dset[...] = data[:]
+                
+            for att, val in self.stim.items():
+                f.attrs[att] = val
 
+            f.close()
+
+        else:
+
+            # convert everything to a dictionary to save in a single file
+            master = {}
+            master['stim'] = self.stim
+            master['response'] = self.response
+            master['data'] = self.data
+            master['misc'] = self.misc
+            
+            mightysave(fname, master, filetype=filetype)
+        
         self.datalock.release()
+
 
     @staticmethod
     def load_from_file(fname, filetype='auto'):
 
-        caldict = mightyload(fname, filetype)
-
-        # now intialize into a calObject
-        calobj = CalibrationObject()
-        calobj.stim = caldict['stim']
-        calobj.reponse = caldict['response']
-        data = caldict['data']
-        calobj.data = data
-        
-        calobj.rep_temps = {}
-
+        root, ext = splitext(fname)
         if filetype == 'auto':
-            root, ext = splitext(fname)
-            # use the filename extension to determine
+            # use the filename extenspion to determine
             # file format
             filetype = ext
 
-        if filetype in ['json, pkl']:
-            for key, arr in data.items():
-                arr = np.array(arr)
-                data[key] = arr
-                if len(arr.shape) == 2:
-                    calobj.rep_temps[key] = []
+        print('FILETYPE ', filetype)
+        if filetype.endswith('hdf5'):
+           
+            with h5py.File(fname, 'r') as hf:
+                calobj = CalibrationObject()
+                for attr, val in hf.attrs.items():
+                    
+                    if isinstance(val, np.ndarray):
+                        calobj.stim[attr] = list(val)
+                    else:
+                        calobj.stim[attr] = val
+
+                for dname, dset in hf['data'].items():
+                    
+                    data = np.zeros(dset.shape)
+                    data[...] = dset[:]
+                    calobj.data[dname] = data
         else:
-            calobj.stim['frequencies'] = list(calobj.stim['frequencies'])
-            calobj.stim['intensities'] = list(calobj.stim['intensities'])
+
+            caldict = mightyload(fname, filetype)
+
+            # now intialize into a calObject
+            calobj = CalibrationObject()
+            calobj.stim = caldict['stim']
+            calobj.repo197nse = caldict['response']
+            data = caldict['data']
+            calobj.data = data
+
+            calobj.rep_temps = {}
+
+            if filetype == 'auto':
+                root, ext = splitext(fname)
+                # use the filename extension to determine
+                # file format
+                filetype = ext
+
+            if filetype in ['json, pkl']:
+                for key, arr in data.items():
+                    arr = np.array(arr)
+                    data[key] = arr
+                    if len(arr.shape) == 2:
+                        calobj.rep_temps[key] = []
+
+            else:
+                calobj.stim['frequencies'] = list(calobj.stim['frequencies'])
+                calobj.stim['intensities'] = list(calobj.stim['intensities'])
             
         return calobj

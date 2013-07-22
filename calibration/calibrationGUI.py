@@ -481,7 +481,6 @@ class CalibrationWindow(QtGui.QMainWindow):
 
     def display_response(self, f, db, data, spectrum, freq):
         try:
-            print("process response")
         
             if self.current_operation == 0:
                 sr = self.toneplayer.get_samplerate()
@@ -526,7 +525,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.livecurve.set_point(f,db,resultdb)
             except:
                 print("WARNING : Problem drawing to Window")   
-                raise     
+                     
 
             if self.current_operation == 0:
                 if SAVE_FFT_DATA:
@@ -540,7 +539,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             #self.on_stop()
             raise   
 
-        print('generated ', self.ngenerated, ', acquired ', self.nacquired, ', halted ', self.halt)
+        #print('generated ', self.ngenerated, ', acquired ', self.nacquired, ', halted ', self.halt)
         
         if self.halt and self.ngenerated == self.nacquired:
             print("Finished collecting, wrapping up...")

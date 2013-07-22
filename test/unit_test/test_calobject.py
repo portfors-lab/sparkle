@@ -41,14 +41,18 @@ class TestCalObj():
     def test_initdata(self):
 
         self.caldata.init_data('testdata', 2)
-        assert self.caldata.data['testdata'].shape == (len(self.freqs), len(self.intensities))
+        assert self.caldata.data['testdata'].shape == (len(self.freqs), 
+                                                       len(self.intensities))
 
         self.caldata.init_data('testdata', 3)
-        assert self.caldata.data['testdata'].shape == (len(self.freqs), len(self.intensities), self.nreps)
+        assert self.caldata.data['testdata'].shape == (len(self.freqs), 
+                                                       len(self.intensities), self.nreps)
 
         npts = (self.samplerate*(self.duration/1000))
         self.caldata.init_data('testdata', 4, dim4=npts)
-        assert self.caldata.data['testdata'].shape == (len(self.freqs), len(self.intensities), self.nreps, npts)
+        assert self.caldata.data['testdata'].shape == (len(self.freqs), 
+                                                       len(self.intensities), self.nreps, 
+                                                       npts)
 
     def test_put(self):
         npts = (self.samplerate*(self.duration/1000))
@@ -77,6 +81,7 @@ class TestCalObj():
         
         self.caldata.put('testdata', (self.freqs[1], self.intensities[3], 1), d)
 
+        """
         fname = os.path.join(tempfolder,'savetemp.json')
         self.caldata.save_to_file(fname)
         assert os.path.isfile(fname)
@@ -92,4 +97,8 @@ class TestCalObj():
         fname = os.path.join(tempfolder,'savetemp.pkl')
         self.caldata.save_to_file(fname)
         assert os.path.isfile(fname)
+        """
 
+        fname = os.path.join(tempfolder,'savetemp.hdf5')
+        self.caldata.save_to_file(fname)
+        assert os.path.isfile(fname)

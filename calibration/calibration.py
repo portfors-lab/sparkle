@@ -177,13 +177,11 @@ class TonePlayer(PlayerBase):
             self.stop()
             raise
 
-        #self.daq_lock.release()
         return data
 
     def reset(self):
-        print('reset')
+       
         self.tone_lock.acquire()
-        #self.daq_lock.acquire()
 
         npts =  self.tone.size
         response_npts = int(self.aitime*self.aisr)
@@ -532,6 +530,8 @@ class ToneCurve():
                 fname = prefix + str(currentno)
 
         filename = os.path.join(sfolder, fname)
+        print('SAVENAME ', filename)
+
         self.caldata.save_to_file(filename, filetype=saveformat)
 
         if keepcal:

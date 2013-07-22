@@ -4,6 +4,7 @@ import pickle
 import json
 
 from os.path import splitext
+from copy import deepcopy
 
 def mightysave(filename, data, filetype='auto'):
 
@@ -29,16 +30,16 @@ def mightysave(filename, data, filetype='auto'):
             np.save(filename, data)
         elif filetype == 'mat':
             if not isinstance(data, dict):
-                data = {'matdata':data}
+                data = {'matdata': deepcopy(data)}
             spio.savemat(filename, data)
         elif filetype == 'pkl':
             with open(filename, 'wb') as pf:
                 pickle.dump(data, pf)
         elif filetype == 'json':
             if isinstance(data,np.ndarray):
-                data = data.tolist()
+                data = deepcopy(data).tolist()
             elif isinstance(data, dict):
-                data = np2list(data)
+                data = np2list(deepcopy(data))
             with open(filename, 'w') as jf:
                 json.dump(data, jf)
     except:
@@ -57,7 +58,7 @@ def mightyload(filename, filetype='auto'):
 
     filetype = filetype.replace('.', '')
 
-    if filetype not in ['txt', 'npy', 'mat', 'pkl', 'json']:
+    if filetype not in ['txt', 'npy', 'mat', 'pkl', 'json', 'hdf5']:
         print('unsupported format ', filetype)
         return -1
 
@@ -76,6 +77,10 @@ def mightyload(filename, filetype='auto'):
         elif filetype == 'json':
             with open(filename, 'r') as jf:
                 data = json.load(jf)
+        else:
+            print('unsupported format ', filetype)
+            return -1
+        
     except:
         print('Loading failed')
         raise

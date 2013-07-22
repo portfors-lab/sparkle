@@ -29,8 +29,10 @@ def test_calobj_load():
     co.init_data('testdata', 4, dim4=NPTS)
     
     co.put('testdata', (FREQS[1], INTENSITIES[3], 1), D)
-        
-    filetypes = ['.json', '.mat', '.npy', '.pkl']
+    print('testdata type ', type(co.data['testdata']))        
+
+    filetypes = ['.json', '.mat', '.npy', '.pkl', '.hdf5']
+    #filetypes = ['.hdf5']
     for ext in filetypes:
         fname = os.path.join(tempfolder,'savetemp' + ext)
         co.save_to_file(fname)
