@@ -98,8 +98,8 @@ class BasePlot(QtGui.QMainWindow):
                     xind0 = (np.abs(xdata-x0)).argmin()
                     xind1 = (np.abs(xdata-x1)).argmin()
                         
-                    y0 = min(np.amin(ydata[xind0:xind1]),y0)
-                    y1 = max(np.amax(ydata[xind0:xind1]),y1)
+                    y0 = min(np.nanmin(ydata[xind0:xind1]),y0)
+                    y1 = max(np.nanmax(ydata[xind0:xind1]),y1)
                        
             buf = (y1-y0)*0.1
             ax.set_ylim(y0-buf,y1+buf)
