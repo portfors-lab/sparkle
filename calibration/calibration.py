@@ -298,7 +298,7 @@ class ContinuousTone(PlayerBase):
             raise
 
 class ToneCurve():
-    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None):
+    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename='temp.hdf5'):
         """
         Set up a tone curve which loops through frequencies (outer) and intensities (inner)
         """
@@ -308,9 +308,8 @@ class ToneCurve():
         self.ngenerated = 0
         self.nacquired = 0
 
-        self.caldata = CalibrationObject(freqs, intensities, samplerate, duration_s, 
+        self.caldata = CalibrationObject(filename, freqs, intensities, samplerate, duration_s, 
                                          risefall_s, nreps,v=dbv[1])
-
         self.dur = duration_s
         self.sr = samplerate
         self.rft = risefall_s
@@ -330,7 +329,6 @@ class ToneCurve():
             self.caldata.init_data('raw_traces',4)
         
         self.reject_list = []
-
 
         self.work_queue = queue.Queue()
         for ifreq, f in enumerate(freqs):
@@ -359,7 +357,9 @@ class ToneCurve():
 
         # first play the calibration frequency and intensity
         caltemp = []
+        #if self.player.calibration_vector is not None:
         tone, t = self.player.set_tone(self.calf,self.player.caldb,self.dur, self.rft, self.sr)
+
         self.player.start(aochan, aichan)
         for irep in range(self.nreps):
             data = self.player.read()
@@ -382,7 +382,7 @@ class ToneCurve():
 
     def next(self):
         """
-        simultaneously present and read the next prepped stimulus, and reload.
+        Simultaneously present and read the next prepped stimulus, and reload.
 
         Internally stores acquired data. 
         Returns played_tone, data, times, played_f, played_db
@@ -511,11 +511,12 @@ class ToneCurve():
         #fft_peaks = self.caldata.data['peaks']
         #resultant_dB = vfunc(fft_peaks, caldb, cal_fft_peak)
 
-        vin = self.caldata.data['vmax']
+        vin = self.caldata.data['vmax'].value
+        print(vin, caldb, self.calpeak)
         resultant_dB = vfunc(vin, caldb, self.calpeak)
 
         self.caldata.data['frequency_rolloff'] = resultant_dB
-        self.caldata.misc['dbmethod'] = calc_db.__doc__ + " peak: max V"
+        self.caldata.attrs['dbmethod'] = calc_db.__doc__ + " peak: max V"
 
         fname = sfilename
         while os.path.isfile(os.path.join(sfolder, fname + '.' + saveformat)):

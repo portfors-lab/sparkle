@@ -23,16 +23,16 @@ def test_calobj_load():
     """
     Test that you load back the same calibration data object that you save
     """
-    co =  CalibrationObject(FREQS, INTENSITIES, SAMPLERATE, DURATION, 
-                            RISEFALL, NREPS,v=DBV[1])
+    fname = os.path.join(tempfolder,'savetemp.hdf5')
+    co =  CalibrationObject(fname, FREQS, INTENSITIES, SAMPLERATE, DURATION, 
+                            RISEFALL, NREPS, v=DBV[1])
     
     co.init_data('testdata', 4, dim4=NPTS)
     
-    co.put('testdata', (FREQS[1], INTENSITIES[3], 1), D)
-    print('testdata type ', type(co.data['testdata']))        
+    co.put('testdata', (FREQS[1], INTENSITIES[3], 1), D)      
 
-    filetypes = ['.json', '.mat', '.npy', '.pkl', '.hdf5']
-    #filetypes = ['.hdf5']
+    #filetypes = ['.json', '.mat', '.npy', '.pkl', '.hdf5']
+    filetypes = ['.hdf5']
     for ext in filetypes:
         fname = os.path.join(tempfolder,'savetemp' + ext)
         co.save_to_file(fname)
@@ -45,18 +45,19 @@ def test_calobj_load():
         yield verify_get, caldata, ext
 
     # delete generated file
+    caldata.hdf5.close()
     for filename in glob.glob(os.path.join(tempfolder,'savetemp.*')):
         os.remove(filename)
 
 def verify_dictfields(data, ext):
 
-    assert data.stim['sr'] == SAMPLERATE
-    assert data.stim['calV'] == DBV[1]
-    assert data.stim['frequencies'] == FREQS
-    assert data.stim['intensities'] == INTENSITIES
-    assert data.stim['duration'] == DURATION
-    assert data.stim['risefalltime'] == RISEFALL
-    assert data.stim['repetitions'] == NREPS
+    assert data.attrs['sr'] == SAMPLERATE
+    assert data.attrs['calv'] == DBV[1]
+    assert np.array_equal(data.attrs['frequencies'], FREQS)
+    assert np.array_equal(data.attrs['intensities'], INTENSITIES)
+    assert data.attrs['duration'] == DURATION
+    assert data.attrs['risefalltime'] == RISEFALL
+    assert data.attrs['repetitions'] == NREPS
 
 def verify_get(data, ext):
         
