@@ -426,8 +426,15 @@ class ToneCurve():
     def haswork(self):
         return not self.work_queue.empty()
 
+
     def set_calibration(self, db_boost_array, frequencies):
         self.player.set_calibration(db_boost_array, frequencies)
+
+
+    def stop(self):
+        self.player.stop()
+        #self.caldata.close()
+
 
     def _storedata(self, data, fdb):
         sr = self.player.get_samplerate()
@@ -515,7 +522,8 @@ class ToneCurve():
         print(vin, caldb, self.calpeak)
         resultant_dB = vfunc(vin, caldb, self.calpeak)
 
-        self.caldata.data['frequency_rolloff'] = resultant_dB
+        self.caldata.data['frequency_rolloff'] = self.caldata.hdf5.create_dataset('frequency_rolloff', resultant_dB.shape)
+        self.caldata.data['frequency_rolloff'][...] = resultant_dB
         self.caldata.attrs['dbmethod'] = calc_db.__doc__ + " peak: max V"
 
         fname = sfilename
@@ -531,9 +539,10 @@ class ToneCurve():
                 fname = prefix + str(currentno)
 
         filename = os.path.join(sfolder, fname)
-        print('SAVENAME ', filename)
 
-        self.caldata.save_to_file(filename, filetype=saveformat)
+        if saveformat != 'hdf5':
+            print('SAVENAME ', filename)
+            self.caldata.export(filename, filetype=saveformat)
 
         if keepcal:
             # get vector of calibration intensity only

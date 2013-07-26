@@ -277,8 +277,10 @@ class CalibrationWindow(QtGui.QMainWindow):
                         self.spawn_display()
                     self.display.show()
 
-                    self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, 
-                                               intensities, (self.caldb, self.calv), calf=self.calf)
+                    self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, intensities, 
+                                               (self.caldb, self.calv), calf=self.calf,
+                                               filename=os.path.join(self.savefolder,self.savename+'.hdf5'))
+
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
@@ -368,8 +370,10 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         progressdlg.setLabel(QtGui.QLabel("Plotting data..."))
         QtGui.QApplication.processEvents()
+        self.tonecurve.caldata.close()
         #plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
         progressdlg.close()
+
 
     def on_stop(self):
         if self.current_operation == 0 : 
@@ -395,7 +399,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             # let thread finish and stop task
             if self.acq_thread is not None:
                 self.acq_thread.join()
-                self.tonecurve.player.stop()
+                self.tonecurve.stop()
             
         else:
             print("No task currently running")

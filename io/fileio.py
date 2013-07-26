@@ -39,7 +39,7 @@ def mightysave(filename, data, filetype='auto'):
             if isinstance(data,np.ndarray):
                 data = deepcopy(data).tolist()
             elif isinstance(data, dict):
-                data = np2list(deepcopy(data))
+                data = np2native(deepcopy(data))
             with open(filename, 'w') as jf:
                 json.dump(data, jf)
     except:
@@ -88,12 +88,14 @@ def mightyload(filename, filetype='auto'):
 
     return data
 
-def np2list(d):
+def np2native(d):
     for key, item in d.items():
         if isinstance(item, dict):
-            item = np2list(item)        
+            item = np2native(item)        
         elif isinstance(item,np.ndarray):
             item = item.tolist()
+        elif type(item).__module__ == np.__name__:
+            item = np.asscalar(item)
         d[key] = item
 
     return d

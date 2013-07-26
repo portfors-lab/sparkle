@@ -31,11 +31,12 @@ def test_calobj_load():
     
     co.put('testdata', (FREQS[1], INTENSITIES[3], 1), D)      
 
-    #filetypes = ['.json', '.mat', '.npy', '.pkl', '.hdf5']
-    filetypes = ['.hdf5']
+    filetypes = ['.json', '.mat', '.npy', '.pkl', '.hdf5']
     for ext in filetypes:
         fname = os.path.join(tempfolder,'savetemp' + ext)
-        co.save_to_file(fname)
+        co.export(fname)
+
+    co.close()
 
     # load it back in
     for ext in filetypes:
@@ -43,9 +44,9 @@ def test_calobj_load():
         caldata = CalibrationObject.load_from_file(fname)
         yield verify_dictfields, caldata, ext
         yield verify_get, caldata, ext
+        caldata.close()
 
     # delete generated file
-    caldata.hdf5.close()
     for filename in glob.glob(os.path.join(tempfolder,'savetemp.*')):
         os.remove(filename)
 
@@ -63,9 +64,3 @@ def verify_get(data, ext):
         
     dback = data.get('testdata', (FREQS[1], INTENSITIES[3], 1))
     assert np.array_equal(dback,D)
-
-
-        
-
-
-

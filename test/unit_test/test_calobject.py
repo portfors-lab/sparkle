@@ -11,7 +11,6 @@ class TestCalObj():
     Test creating, putting and getting to calibration data structure
     """
     def setUp(self):
-        print('setting up ob')
         self.freqs = [x for x in range(5,51,5)]
         self.intensities = [x for x in range(0,101,10)]
         self.samplerate = 100000
@@ -26,12 +25,11 @@ class TestCalObj():
 
     def tearDown(self):
         # delete generated file
-        self.caldata.hdf5.close()
+        self.caldata.close()
         for filename in glob.glob(os.path.join(tempfolder,'savetemp.*')):
             os.remove(filename)
 
     def testcreate(self):
-        print("inside test create")
         assert self.caldata.attrs['sr'] == self.samplerate
         assert self.caldata.attrs['calv'] == self.dbv[1]
         assert np.array_equal(self.caldata.attrs['frequencies'], self.freqs)
@@ -76,31 +74,26 @@ class TestCalObj():
         dback = self.caldata.get('testdata', (self.freqs[1], self.intensities[3], 1))
         assert np.array_equal(dback,d)
 
-    def xtest_save(self):
+    def test_export(self):
         npts = (self.samplerate*(self.duration/1000))
         self.caldata.init_data('testdata', 4, dim4=npts)
         d = np.ones(npts)
         
         self.caldata.put('testdata', (self.freqs[1], self.intensities[3], 1), d)
-
-        """
+        
         fname = os.path.join(tempfolder,'savetemp.json')
-        self.caldata.save_to_file(fname)
+        self.caldata.export(fname)
         assert os.path.isfile(fname)
 
         fname = os.path.join(tempfolder,'savetemp.mat')
-        self.caldata.save_to_file(fname)
+        self.caldata.export(fname)
         assert os.path.isfile(fname)
 
         fname = os.path.join(tempfolder,'savetemp.npy')
-        self.caldata.save_to_file(fname)
+        self.caldata.export(fname)
         assert os.path.isfile(fname)
 
         fname = os.path.join(tempfolder,'savetemp.pkl')
-        self.caldata.save_to_file(fname)
+        self.caldata.export(fname)
         assert os.path.isfile(fname)
-        """
-
-        fname = os.path.join(tempfolder,'savetemp.hdf5')
-        self.caldata.save_to_file(fname)
-        assert os.path.isfile(fname)
+        
