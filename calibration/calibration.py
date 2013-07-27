@@ -214,88 +214,6 @@ class TonePlayer(PlayerBase):
         self.aitask = None
         self.aotask = None
     
-class ContinuousTone(PlayerBase):
-    def __init__(self, aichan, aochan, sr, npts, ainpts, dbv):
-        PlayerBase.__init__(self, dbv)
-        # use continuous acquisition task, using NIDAQ everyncallback
-        self.aitask = AITask(aichan, sr, ainpts)
-        self.aotask = AOTask(aochan, sr, npts, trigsrc=b"ai/StartTrigger")
-        self.aitask.register_callback(self.every_n_callback, ainpts)
-                        
-        if SAVE_OUTPUT:
-            self.tone_array.append(self.tone[:])
-
-        self.sr = sr
-        self.signal=None
-
-    def start(self):
-        self.aotask.write(self.tone)
-        self.aotask.StartTask()
-        self.aitask.StartTask()
-
-    def stop(self):
-        try:
-            self.aitask.stop()
-            self.aotask.stop()
-        except DAQError:
-            print("No task running")
-        except:
-            raise
-        self.aitask = None
-        self.aotask = None
-
-    def use_signal(self, signal):
-        self.signal = signal
-
-    def every_n_callback(self,task):
-        
-        # read in the data as it is acquired and append to data structure
-        try:
-            read = c_int32()
-            inbuffer = np.zeros(task.n)
-            task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,
-                               inbuffer,task.n,byref(read),None)
-            if SAVE_DATA_CHART:
-                self.a.extend(inbuffer.tolist())
-                # for now use stimulus data size also for acquisition
-                #ainpts = len(self.tone)
-
-            self.signal.ncollected.emit(inbuffer.tolist())
-            self.ndata += read.value
-            #print(self.ndata)
-            
-            n = read.value
-            lims = self.display.axs[1].axis()
-            #print("lims {}".format(lims))
-            #print("ndata {}".format(self.ndata))
-            
-            # for display purposes only
-            ndata = len(self.current_line_data)
-            aisr = self.aisr
-
-            #print(self.aisr, self.aitime, ndata/aisr)
-            if ndata/aisr >= self.aitime:
-                if len(self.current_line_data) != self.aitime*self.aisr:
-                    print("incorrect number of data points saved")
-                if SAVE_DATA_TRACES:
-                    self.a.append(self.current_line_data)
-                self.current_line_data = []
-            
-            self.current_line_data.extend(inbuffer.tolist())
-
-        except MemoryError:
-            print("data size: {}, elements: {}"
-                  .format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
-            self.aitask.stop()
-            self.aotask.stop()
-            raise
-
-        except: 
-            print('ERROR! TERMINATE!')
-            #print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
-            self.aitask.stop()
-            self.aotask.stop()
-            raise
 
 class ToneCurve():
     def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename='temp.hdf5'):
@@ -522,7 +440,8 @@ class ToneCurve():
         print(vin, caldb, self.calpeak)
         resultant_dB = vfunc(vin, caldb, self.calpeak)
 
-        self.caldata.data['frequency_rolloff'] = self.caldata.hdf5.create_dataset('frequency_rolloff', resultant_dB.shape)
+        self.caldata.data['frequency_rolloff'] = self.caldata.hdf5.create_dataset('frequency_rolloff', 
+                                                                                  resultant_dB.shape)
         self.caldata.data['frequency_rolloff'][...] = resultant_dB
         self.caldata.attrs['dbmethod'] = calc_db.__doc__ + " peak: max V"
 

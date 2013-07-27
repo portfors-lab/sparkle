@@ -34,7 +34,6 @@ XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
 SAVE_DATA_TRACES = False
 SAVE_FFT_DATA = False
-USE_FINITE = True
 VERBOSE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
@@ -174,40 +173,31 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.full_fft_data = []
 
                 try:
-                    if USE_FINITE:
                         
-                        # write to and start generation task, so it is ready to fire immediately
-                        # when the command is given.
-                        self.toneplayer = TonePlayer((self.caldb,self.calv))
-                        if self.apply_calibration:
-                            self.toneplayer.set_calibration(calibration_vector, calibration_freqs)
+                    # write to and start generation task, so it is ready to fire immediately
+                    # when the command is given.
+                    self.toneplayer = TonePlayer((self.caldb,self.calv))
+                    if self.apply_calibration:
+                        self.toneplayer.set_calibration(calibration_vector, calibration_freqs)
 
-                        # gets info from UI and creates tone
-                        self.update_stim()
-                        interval = self.interval
+                    # gets info from UI and creates tone
+                    self.update_stim()
+                    interval = self.interval
 
-                        self.toneplayer.start(aochan,aichan)
-                            
-                        self.ui.running_label.setPalette(self.green)
-                        self.ui.running_label.setText("RUNNING")
+                    self.toneplayer.start(aochan,aichan)
 
-                        # spin off a thread that runs a continuous loop, with
-                        # an appropriate, adjusted, sleep time between loops
-    
-                        self.start_time = time.time()
-                        # set last tick to expired time, so first loop iteration doesn't sleep
-                        self.last_tick = self.start_time - (interval/self.tscale) 
-                        self.acq_thread = threading.Thread(target=self.finite_worker)
-                        self.acq_thread.start()
+                    self.ui.running_label.setPalette(self.green)
+                    self.ui.running_label.setText("RUNNING")
 
-                    else:
-                        # use continuous acquisition task, using NIDAQ everyncallback
-                        self.ui.sr_spnbx.setEnabled(False)
-                        sr = self.ui.sr_spnbx.value()*self.fscale
-                        self.toneplayer = ContinuousTone(aichan, aochan, sr, 
-                                                         sr*(interval/self.tscale), self.ainpts, 
-                                                         (self.caldb, self.calv))
-                        
+                    # spin off a thread that runs a continuous loop, with
+                    # an appropriate, adjusted, sleep time between loops
+
+                    self.start_time = time.time()
+                    # set last tick to expired time, so first loop iteration doesn't sleep
+                    self.last_tick = self.start_time - (interval/self.tscale) 
+                    self.acq_thread = threading.Thread(target=self.finite_worker)
+                    self.acq_thread.start()
+
                 except:
                     print('ERROR! TERMINATE!')
                     self.on_stop
@@ -215,11 +205,8 @@ class CalibrationWindow(QtGui.QMainWindow):
                 
             else:
                 print("start pressed when task already running, updating stimulus...")
-                if USE_FINITE:
-                    self.update_stim()
-                else:
-                    self.on_stop()
-                    self.on_start()
+                self.update_stim()
+ 
         else:
             if self.live_lock.tryLock():
 
@@ -376,21 +363,22 @@ class CalibrationWindow(QtGui.QMainWindow):
 
 
     def on_stop(self):
+        print('SENDER: ', self.sender())
         if self.current_operation == 0 : 
-            if USE_FINITE:
-                self.ui.interval_spnbx.setEnabled(True)
-                if not self.halt:
-                    self.ui.running_label.setText("STOPPING")
-                   
-                    self.halt = True
-                    
-                    self.acq_thread.join()
-                    self.ui.running_label.setText("BUSY")
-                    self.ui.running_label.setPalette(self.red)
-                    QtGui.QApplication.processEvents()
-                    self.save_speculative_data()
-                    self.toneplayer.stop()
-           
+                
+            self.ui.interval_spnbx.setEnabled(True)
+            if not self.halt:
+                self.ui.running_label.setText("STOPPING")
+
+                self.halt = True
+
+                self.acq_thread.join()
+                self.ui.running_label.setText("BUSY")
+                self.ui.running_label.setPalette(self.red)
+                QtGui.QApplication.processEvents()
+                self.save_speculative_data()
+                self.toneplayer.stop()
+
         elif self.current_operation == 1:
 
             self.halt = True
@@ -400,6 +388,11 @@ class CalibrationWindow(QtGui.QMainWindow):
             if self.acq_thread is not None:
                 self.acq_thread.join()
                 self.tonecurve.stop()
+
+            # if this funtion was called by user pushing button,
+            # go ahead and close data file
+            if isinstance(self.sender(), QtGui.QPushButton):
+                self.tonecurve.caldata.close()
             
         else:
             print("No task currently running")
@@ -594,35 +587,6 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         self.signals.done.emit(f, db, data, spectrum, freq)
 
-        
-    def ncollected(self, datachunk):
-        
-        # read in the data as it is acquired and append to data structure
-        try:
-            #self.ndata += len(datachunk)
-            #print(self.ndata)
-            
-            n = len(datachunk)
-            lims = self.display.axs[1].axis()
-            #print("lims {}".format(lims))
-            #print("ndata {}".format(self.ndata))
-            
-            # for display purposes only
-            ndata = len(self.current_line_data)
-            aisr = self.aisr
-
-            #print(self.aisr, self.aitime, ndata/aisr)
-            if ndata/aisr >= self.aitime:
-                if len(self.current_line_data) != self.aitime*self.aisr:
-                    print("incorrect number of data points saved")
-                self.current_line_data = []
-            
-            self.current_line_data.extend(inbuffer.tolist())
-        
-        except: 
-            print('ERROR! TERMINATE!')
-            #print("data size: {}, elements: {}".format(sys.getsizeof(self.a)/(1024*1024), len(self.a)))
-            raise
 
     def set_interval_min(self):
         dur = self.ui.dur_spnbx.value()
@@ -737,12 +701,8 @@ class CalibrationWindow(QtGui.QMainWindow):
         #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
             if self.current_operation == 0:
-                if USE_FINITE:
-                    if self.verify_inputs_valid():
-                        self.update_stim()
-                else:
-                    self.on_stop()
-                    self.on_start()
+                if self.verify_inputs_valid():
+                    self.update_stim()
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
