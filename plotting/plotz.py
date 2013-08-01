@@ -430,18 +430,26 @@ class LiveCalPlot(BasePlot):
         self.canvas.draw()
 
 class ScrollingPlot(BasePlot):
-    def __init__(self,*args,callback=None,parent=None):
-        nsubplots = len(args)
+    def __init__(self, nsubplots, deltax, callback=None,parent=None, window=1):
         BasePlot.__init__(self,(nsubplots,1),parent)
-        # TODO : write this class
- #if ndata/aisr > lims[1]:
-                #print("change x lim, {} to {}".format((ndata-n)/aisr,((ndata-n)/aisr)+XLEN))
-                #self.sp.figure.axes[1].set_xlim((ndata-n)/aisr,((ndata-n)/aisr)+XLEN)
-                # must use regular draw to update axes tick labels
-                #self.sp.draw()
-                # update saved background so scale stays accurate
-                #self.sp.axs_background = self.sp.copy_from_bbox(self.sp.figure.axes[1].bbox)
+        # deltax is the time increment between all plotted values
+        self.delta = deltax
+        self.window = window # displayed window in seconds
+        for ax in self.axs:
+            ax.plot([0],[0])
+            ax.set_xlim(0,self.window)
+            ax.set_ylim(-1,1)
 
+
+    def append(self, yvals, axnum=0):
+        times, existing_data = self.axs[axnum].lines[0].get_data()
+        data = np.append(existing_data, yvals)
+        times = np.append(times, (np.arange(len(yvals))*self.delta)+times[-1]+(2*self.delta))
+        self.axs[axnum].lines[0].set_data(times, data)
+        lims = self.axs[axnum].get_xlim()
+        if times[-1] > lims[1]:
+            self.axs[axnum].set_xlim(lims[0]+len(yvals)*self.delta,lims[1]+len(yvals)*self.delta)
+        self.canvas.draw()
 
 
 if __name__ == '__main__':
@@ -474,6 +482,7 @@ if __name__ == '__main__':
         label_array[ifdb[0],ifdb[1]] = "Frequency: %d, Intensity: %d" % fdb
     """
 
+    print(sys.argv)
     app = QtGui.QApplication(sys.argv)
     #myapp = FlickPlot(fft_data,freq,titles=label_array)
     myapp = FlickPlot(*d, titles=np.array(['meow', 'spam', 'wow', 'ducks']))

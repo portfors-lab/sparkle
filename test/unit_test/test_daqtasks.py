@@ -45,7 +45,7 @@ def test_syncfinite():
         print(amp)       
         assert np.allclose(stim,response,rtol=0,atol=tolerance)
 
-def test_continuous():
+def test_sync_continuous():
 
     npts = 10000
     frequency = 50000
