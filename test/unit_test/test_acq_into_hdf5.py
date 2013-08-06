@@ -9,7 +9,7 @@ from PyDAQmx.DAQmxTypes import *
 
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
 from audiolab.io.structures import BigStore
-from audiolab.plotting.plotz import AnimatedWindow
+from audiolab.plotting.plotz import AnimatedWindow, ScrollingPlot
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), "tmp")
 
@@ -24,13 +24,13 @@ class TestFileAcquire():
         self.testdata = BigStore(fname, chunksize=2**24)
 
         npts = 1000
-        frequency = 50000
+        frequency = 5000
         amp = 2
         x = np.linspace(0,np.pi, npts)
         self.stim = amp * np.sin(frequency*x*2*np.pi)
         self.t = x        
 
-        self.sr = 1000000
+        self.sr = 10000
         self.npts = npts
 
         self.aot = AOTask(b"PCI-6259/ao0", self.sr, self.npts, trigsrc=b"ai/StartTrigger")
@@ -86,6 +86,28 @@ class TestFileAcquire():
         
         self.fig.close()
 
+    def xtest_synch_with_scrollplot(self):
+        app = QtGui.QApplication(['sometext'])
+        self.fig = ScrollingPlot(1, 1/self.sr)
+        self.fig.show()
+
+        self.ait.register_callback(self.stashacq_plotscroll,self.npts)
+        
+        self.aot.start()
+        self.ait.start()
+        
+        acqtime = 6 #seconds 
+        time.sleep(acqtime)
+        
+        self.aot.stop()
+        self.ait.stop()
+        self.testdata.consolidate()
+        print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
+
+        assert self.testdata.shape() == (acqtime*self.sr,)
+        
+        self.fig.close()
+
     def stashacq(self,task):
         try:
             r = c_int32()
@@ -106,6 +128,21 @@ class TestFileAcquire():
                                task.n,byref(r),None)
             self.testdata.append(inbuffer.tolist())
             self.fig.draw_line(1,0, self.t, inbuffer)
+
+        except:
+            self.aot.stop()
+            self.ait.stop()
+            raise
+
+    def stashacq_plotscroll(self,task):
+        try:
+            r = c_int32()
+            inbuffer = np.zeros(task.n)
+            task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
+                               task.n,byref(r),None)
+            self.testdata.append(inbuffer.tolist())
+            self.fig.append(inbuffer)
+            QtGui.QApplication.processEvents()
 
         except:
             self.aot.stop()
