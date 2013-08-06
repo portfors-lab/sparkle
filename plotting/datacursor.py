@@ -83,3 +83,36 @@ class DataCursor(object):
             annotation.set_text(self.template % (x, y))
             annotation.set_visible(True)
             event.canvas.draw()
+
+if __name__ == '__main__':
+
+    import sys
+    from PyQt4 import QtCore, QtGui
+    from matplotlib.figure import Figure
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+
+    t0 = np.arange(0.0, 10.0, 0.1)
+    t1 = np.arange(0.0, 5.0, 0.02)
+
+    y0 = np.sin(2*np.pi*t0)
+    y1 = np.sin(2*np.pi*t1)
+
+    app = QtGui.QApplication(sys.argv)
+
+    window = QtGui.QMainWindow()
+    main_frame = QtGui.QWidget()
+    fig = Figure()
+    canvas = FigureCanvas(fig)
+    canvas.setParent(main_frame)
+    ax = fig.add_subplot(1,1,1)
+
+    vbox = QtGui.QVBoxLayout()
+    vbox.addWidget(canvas)
+    main_frame.resize(500,500)
+    main_frame.setLayout(vbox)
+    window.setCentralWidget(main_frame)
+    lines = ax.plot(t0,y0,t1,y1)
+    dc = DataCursor(lines)
+
+    window.show()
+    input("press any key when finished")
