@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from scipy.integrate import simps, trapz
 
@@ -6,12 +7,12 @@ DBFACTOR = 20
 OUTPUT_MINIMUM = 0.01
 
 def calc_db(peak, caldB, cal_peak):
-    """20*log10(peak/cal_peak) + caldB"""
+    u"""20*log10(peak/cal_peak) + caldB"""
     try:
         pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldB
     except ZeroDivisionError:
-        print('attempted division by zero:')
-        print('peak {}, caldb {}, calpeak {}'.format(peak, caldB, cal_peak))
+        print u'attempted division by zero:'
+        print u'peak {}, caldb {}, calpeak {}'.format(peak, caldB, cal_peak)
         pbdB = np.nan
     return pbdB
 

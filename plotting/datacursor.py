@@ -4,11 +4,11 @@ from matplotlib import cbook
 import numpy as np
 
 class DataCursor(object):
-    """A simple data cursor widget that displays the x,y location of a
+    u"""A simple data cursor widget that displays the x,y location of a
     matplotlib artist when it is selected."""
     def __init__(self, artists, tolerance=2, offsets=(-20, 20), 
-                 template='x: %0.2f\ny: %0.2f', display_all=False):
-        """Create the data cursor and connect it to the relevant figure.
+                 template=u'x: %0.2f\ny: %0.2f', display_all=False):
+        u"""Create the data cursor and connect it to the relevant figure.
         "artists" is the matplotlib artist or sequence of artists that will be 
             selected. 
         "tolerance" is the radius (in points) that the mouse click must be
@@ -39,22 +39,22 @@ class DataCursor(object):
         for artist in self.artists:
             artist.set_picker(tolerance)
         for fig in self.figures:
-            pe = fig.canvas.mpl_connect('pick_event', self)
+            pe = fig.canvas.mpl_connect(u'pick_event', self)
             self.pick_events.append(pe)
 
     def annotate(self, ax):
-        """Draws and hides the annotation box for the given axis "ax"."""
-        annotation = ax.annotate(self.template, xy=(0, 0), ha='right',
-                xytext=self.offsets, textcoords='offset points', va='bottom',
+        u"""Draws and hides the annotation box for the given axis "ax"."""
+        annotation = ax.annotate(self.template, xy=(0, 0), ha=u'right',
+                xytext=self.offsets, textcoords=u'offset points', va=u'bottom',
                 #bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0')
+                arrowprops=dict(arrowstyle=u'->', connectionstyle=u'arc3,rad=0')
                 )
         annotation.set_visible(False)
         DraggableAnnotation(annotation)
         return annotation
 
     def __call__(self, event):
-        """Intended to be called through "mpl_connect"."""
+        u"""Intended to be called through "mpl_connect"."""
         
         #print(event.mouseevent)
         

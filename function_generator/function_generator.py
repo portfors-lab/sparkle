@@ -1,3 +1,14 @@
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
 import sys, os
 import multiprocessing
 import threading
@@ -20,9 +31,9 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
         #manual costumization
-        cnames = get_ao_chans(b"PCI-6259")
+        cnames = get_ao_chans(u"PCI-6259")
         self.ui.aochan_box.addItems(cnames)
-        cnames = get_ai_chans(b"PCI-6259")
+        cnames = get_ai_chans(u"PCI-6259")
         self.ui.aichan_box.addItems(cnames)
         self.ui.start_button.clicked.connect(self.start_gen)
         self.ui.stop_button.clicked.connect(self.stop_gen)
@@ -34,14 +45,14 @@ class FGenerator(QtGui.QMainWindow):
         self.ui.wav_radio.toggled.connect(self.update_npts)
         self.ui.browse_button.clicked.connect(self.getdir)
         
-        axis_action = QtGui.QAction('adjust axis', self)
+        axis_action = QtGui.QAction(u'adjust axis', self)
         axis_action.triggered.connect(self.adjust_axis)
         self.popMenu = QtGui.QMenu( self )
         self.popMenu.addAction( axis_action )
 
         #self.ui.inplot.setContextMenuPolicy(QtCore.Qt.CustomContextMenu);
         #self.ui.inplot.customContextMenuRequested.connect(self.on_context_menu)
-        self.ui.inplot.figure.canvas.mpl_connect('button_press_event', 
+        self.ui.inplot.figure.canvas.mpl_connect(u'button_press_event', 
                                                  self.on_figure_press)
 
         #mainbox = QtGui.QHBoxLayout()
@@ -63,7 +74,7 @@ class FGenerator(QtGui.QMainWindow):
         self.popMenu.exec_(self.ui.inplot.mapToGlobal(point))
 
     def adjust_axis(self):
-        print("no one expects the spanish inquisition")
+        print u"no one expects the spanish inquisition"
 
     def update_time(self):
         #update the time display if one of the parameters changes
@@ -76,8 +87,8 @@ class FGenerator(QtGui.QMainWindow):
         ait = readnpts/airate
         self.aot = aot
 
-        self.ui.aotime.setText("AO time: " + str(aot))
-        self.ui.aitime.setText("AI time: " + str(ait))        
+        self.ui.aotime.setText(u"AO time: " + unicode(aot))
+        self.ui.aitime.setText(u"AI time: " + unicode(ait))        
 
     def update_npts(self):
         if self.ui.wav_radio.isChecked():
@@ -90,8 +101,8 @@ class FGenerator(QtGui.QMainWindow):
             self.ui.ainpts_edit.setEnabled(True)
 
     def getdir(self):
-        fname = QtGui.QFileDialog.getExistingDirectory(self, 'Open folder', 
-                                                  'C:\\Users')
+        fname = QtGui.QFileDialog.getExistingDirectory(self, u'Open folder', 
+                                                  u'C:\\Users')
         self.ui.folder_edit.setText(fname)
 
     def start_gen(self):
@@ -159,13 +170,13 @@ class FGenerator(QtGui.QMainWindow):
             self.ao.stop()
 
             self.lock.acquire()
-            self.ao = AOTask(aochan,aosr,aonpts,trigsrc=b"ai/StartTrigger")
+            self.ao = AOTask(aochan,aosr,aonpts,trigsrc=u"ai/StartTrigger")
             self.ao.write(self.stim)
             self.lock.release()
             
             self.ao.start()
         except:
-            print('ERROR! TERMINATE!')
+            print u'ERROR! TERMINATE!'
             self.ai.stop()
             self.ao.stop()
             raise
@@ -207,7 +218,7 @@ class FGenerator(QtGui.QMainWindow):
 
             #second way
             self.lock.acquire()
-            self.ao = AOTask(aochan,aosr,aonpts,trigsrc=b"ai/StartTrigger")
+            self.ao = AOTask(aochan,aosr,aonpts,trigsrc=u"ai/StartTrigger")
             
             #print("amax of outdata: " + str(np.amax(outdata)))
             
@@ -220,7 +231,7 @@ class FGenerator(QtGui.QMainWindow):
             self.ai.StartTask()
 
         except:
-            print('ERROR! TERMINATE!')
+            print u'ERROR! TERMINATE!'
             self.ai.stop()
             self.ao.stop()
             raise
@@ -274,7 +285,7 @@ class FGenerator(QtGui.QMainWindow):
         #stimFolder = "C:\\Users\\amy.boyle\\sampledata\\M1_FD024"
         stimFolder = self.ui.folder_edit.text()
         stimFileList = os.listdir(stimFolder)
-        print('Found '+str(len(stimFileList))+' stim files')
+        print u'Found '+unicode(len(stimFileList))+u' stim files'
     
         aisr, ainpts = self.set_ai()
 
@@ -289,9 +300,9 @@ class FGenerator(QtGui.QMainWindow):
         for istim in stimFileList[:6]:
                 
             try:
-                sr,outdata = wv.read(stimFolder+"\\"+istim)
+                sr,outdata = wv.read(stimFolder+u"\\"+istim)
             except:
-                print("Problem reading wav file")
+                print u"Problem reading wav file"
                 raise
             outdata = outdata.astype(float)
             mx = np.amax(outdata)
@@ -302,13 +313,13 @@ class FGenerator(QtGui.QMainWindow):
             aisr = sr
             ainpts = 30000
 
-            print("aisr: {}, ainpts: {}, y lim: {}".format(aisr, ainpts,  self.ui.inplot.axes.axis()))
+            print u"aisr: {}, ainpts: {}, y lim: {}".format(aisr, ainpts,  self.ui.inplot.axes.axis())
             self.ui.outplot.axes.set_xlim(0,len(outdata))
-            self.ui.outplot.axes.plot(range(len(outdata)),outdata)
+            self.ui.outplot.axes.plot(xrange(len(outdata)),outdata)
             
             #also set ai to same - FIXME!!!!!
             self.ui.inplot.axes.set_xlim(0,len(outdata))
-            self.ui.inplot.axes.plot(range(len(outdata)), np.zeros(len(outdata)))
+            self.ui.inplot.axes.plot(xrange(len(outdata)), np.zeros(len(outdata)))
 
             self.ui.outplot.draw()
 
@@ -317,7 +328,7 @@ class FGenerator(QtGui.QMainWindow):
 
                 # two ways to sync -- give the AOTask the ai sample clock 
                 # for its source, or have it trigger off the ai
-                self.ao = AOTaskFinite(aochan,sr,len(outdata),b"",b"ai/StartTrigger")
+                self.ao = AOTaskFinite(aochan,sr,len(outdata),u"",u"ai/StartTrigger")
 
                 self.ao.write(outdata)
                 self.ao.start()
@@ -325,14 +336,14 @@ class FGenerator(QtGui.QMainWindow):
                 
                 #blocking read
                 data = self.ai.read()
-                print("ai max: {}".format(np.amax(data)))
+                print u"ai max: {}".format(np.amax(data))
 
                 self.ncollected += ainpts
         
                 #store data in a numpy array where columns are trace sweeps
                 self.indata.append(data.tolist())
                 #there is only one line of data, reset it to current acquisition
-                self.ui.inplot.axes.lines[0].set_data(range(ainpts),data)
+                self.ui.inplot.axes.lines[0].set_data(xrange(ainpts),data)
                 #this shouldn't be neccessay -- why do I have to reset the axis when calling set_data?
                 self.ui.inplot.axes.set_ylim(-amp,amp)
                 self.ui.inplot.draw()
@@ -341,15 +352,15 @@ class FGenerator(QtGui.QMainWindow):
                 self.ai.stop()
                 self.ao.stop()
             except:
-                print('ERROR! TERMINATE!')
+                print u'ERROR! TERMINATE!'
                 self.ai.stop()
                 self.ao.stop()
                 raise
 
-        print('done')
-        print("indata len: " + str(len(self.indata[0])))
+        print u'done'
+        print u"indata len: " + unicode(len(self.indata[0]))
         aggdata = np.array(self.indata).transpose()
-        print(aggdata.shape)
+        print aggdata.shape
         rp = ResultsPlot(aggdata,self)
         rp.show()
 
@@ -365,7 +376,7 @@ class FGenerator(QtGui.QMainWindow):
             self.ao.stop()
             self.ai.stop()
         except:
-            print("Task already stopped, or does not exist")
+            print u"Task already stopped, or does not exist"
 
 def get_ao_chans(dev):
     buf = create_string_buffer(256)

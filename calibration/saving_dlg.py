@@ -8,22 +8,22 @@ class SavingDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         if default_vals is not None:
-            self.ui.savefolder_lnedt.setText(default_vals['savefolder'])
-            self.ui.savename_lnedt.setText(default_vals['savename'])
-            formats = [self.ui.saveformat_cmbx.itemText(i) for i in range(self.ui.saveformat_cmbx.count())]
-            formatidx = formats.index(default_vals['saveformat'])
+            self.ui.savefolder_lnedt.setText(default_vals[u'savefolder'])
+            self.ui.savename_lnedt.setText(default_vals[u'savename'])
+            formats = [self.ui.saveformat_cmbx.itemText(i) for i in xrange(self.ui.saveformat_cmbx.count())]
+            formatidx = formats.index(default_vals[u'saveformat'])
             self.ui.saveformat_cmbx.setCurrentIndex(formatidx)
 
     def browse_folders(self):
-        folder = QtGui.QFileDialog.getExistingDirectory(self, "select folder",  self.ui.savefolder_lnedt.text())
+        folder = QtGui.QFileDialog.getExistingDirectory(self, u"select folder",  self.ui.savefolder_lnedt.text())
         self.ui.savefolder_lnedt.setText(folder)
         #bdlg.setFileMode(QtGui.QFileDialog.Directory)
         #bdlg.setOption(QtGui.QFileDialog.ShowDirsOnly)
         #bdlg.exec_()
 
     def get_values(self):
-        folder = self.ui.savefolder_lnedt.text()
-        name = self.ui.savename_lnedt.text()
-        sformat = self.ui.saveformat_cmbx.currentText()
+        folder = str(self.ui.savefolder_lnedt.text())
+        name = str(self.ui.savename_lnedt.text())
+        sformat = str(self.ui.saveformat_cmbx.currentText())
 
         return folder, name, sformat

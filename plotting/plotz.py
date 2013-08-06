@@ -1,3 +1,4 @@
+from __future__ import division
 import collections
 import sys
 import time
@@ -11,7 +12,9 @@ import matplotlib.pyplot as plt
 from audiolab.plotting.abstract_figures import BasePlot
 
 class BasicPlot(BasePlot):
-    def __init__(self,*args,parent=None):
+    def __init__(self,*args, **_3to2kwargs):
+        if 'parent' in _3to2kwargs: parent = _3to2kwargs['parent']; del _3to2kwargs['parent']
+        else: parent = None
         BasePlot.__init__(self, (1,1), parent)
         # assumes input in the form of (xdata,ydata) tuples
 
@@ -25,7 +28,7 @@ class ResultsPlot(BasePlot):
         ncols = np.floor(np.sqrt(data.shape[1]))
         nrows = np.ceil(data.shape[1]/subplotcols)
         BasePlot.__init__(self,(nrows,ncols),parent)
-        self.setWindowTitle('Results')
+        self.setWindowTitle(u'Results')
         self.data=data
         self.create_main_frame()
         self.create_menu()
@@ -33,11 +36,11 @@ class ResultsPlot(BasePlot):
     def create_main_frame(self):
         
         #assume columns are traces
-        print("data size: "+str(self.data.shape))
-        print(self.data.shape[0])
-        print(self.data.shape[1])
+        print u"data size: "+unicode(self.data.shape)
+        print self.data.shape[0]
+        print self.data.shape[1]
         
-        print('rows: ' + str(subplotrows) + ' cols: ' + str(subplotcols))
+        print u'rows: ' + unicode(subplotrows) + u' cols: ' + unicode(subplotcols)
 
         #make a new window to display acquired data
         for itrace, ax in enumerate(self.axs):
@@ -45,31 +48,31 @@ class ResultsPlot(BasePlot):
             ax.plot(self.data[:,itrace], picker=5)
 
         #self.fig.canvas.mpl_connect('button_press_event', self.axes_click)
-        self.fig.canvas.mpl_connect('pick_event', self.line_click)
-        self.fig.canvas.mpl_connect('button_release_event', self.line_drop)
+        self.fig.canvas.mpl_connect(u'pick_event', self.line_click)
+        self.fig.canvas.mpl_connect(u'button_release_event', self.line_drop)
 
         self.from_axes = None
 
     def create_menu(self):
-        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self) 
+        exitAction = QtGui.QAction(QtGui.QIcon(u'exit.png'), u'&Exit', self) 
 
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
+        exitAction.setShortcut(u'Ctrl+Q')
+        exitAction.setStatusTip(u'Exit application')
         exitAction.triggered.connect(QtGui.qApp.quit)
 
-        resetAction = QtGui.QAction('Reset plots', self)
+        resetAction = QtGui.QAction(u'Reset plots', self)
         resetAction.triggered.connect(self.reset_plots)
 
         #self.statusBar()
 
         menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
+        fileMenu = menubar.addMenu(u'&File')
         fileMenu.addAction(resetAction)
         fileMenu.addAction(exitAction)
 
     def reset_plots(self):
-        print('Reset \'em')
-        for itrace in range(self.data.shape[1]):
+        print u'Reset \'em'
+        for itrace in xrange(self.data.shape[1]):
             #clear each axes and plot data anew
             ax = self.fig.axes[itrace]
             ax.cla()
@@ -82,20 +85,20 @@ class ResultsPlot(BasePlot):
         ax = event.inaxes
         contains, other = ax.lines[0].contains(event)
         if contains:
-            print('you clicked the line')
-            print(contains)
+            print u'you clicked the line'
+            print contains
 
     def line_click(self,event):
         self.from_axes = event.mouseevent.inaxes
-        print('line click, {}'.format(len(self.from_axes.lines)))
+        print u'line click, {}'.format(len(self.from_axes.lines))
 
     def line_drop(self,event):
         if self.from_axes != None and event.inaxes != None and self.from_axes != event.inaxes:
-            print('drag n drop')
+            print u'drag n drop'
             dropax = event.inaxes
-            print('lines to move {}'.format(len(self.from_axes.lines)))
+            print u'lines to move {}'.format(len(self.from_axes.lines))
             nmovelines = len(self.from_axes.lines)
-            for iline in range(nmovelines):
+            for iline in xrange(nmovelines):
                 #self.from_axes.lines.remove(iline)
                 iline = self.from_axes.lines[0]
                 del self.from_axes.lines[0]
@@ -104,14 +107,22 @@ class ResultsPlot(BasePlot):
                 #must transpose the data, otherwise is plots each points as it's own line
                 dropax.plot(xdata.transpose(),ydata.transpose(), picker=5)
             self.canvas.draw()
-            print('lines in drop axes: {}'.format(len(dropax.lines)))
-            print('-'*30)
+            print u'lines in drop axes: {}'.format(len(dropax.lines))
+            print u'-'*30
             self.from_axes = None
         else:
             self.from_axes = None
 
 class SubPlots(BasePlot):
-    def __init__(self,*args,callback=None,parent=None):
+    def __init__(self,*args,**kwargs): #callback=None,parent=None):
+        if 'callback' in kwargs:
+            callback = kwargs['callback']
+        else:
+            callback = None
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+        else:
+            parent = None
         nsubplots = len(args)
         BasePlot.__init__(self,(nsubplots,1),parent)
  
@@ -148,7 +159,20 @@ class SubPlots(BasePlot):
         self.canvas.draw()
 
 class FlickPlot(BasePlot):
-    def __init__(self,*args,callback=None,parent=None, titles=None):
+    def __init__(self,*args,**kwargs): #callback=None,parent=None, titles=None):
+        if 'callback' in kwargs:
+            callback = kwargs['callback']
+        else:
+            callback = None
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+        else:
+            parent = None
+        if 'titles' in kwargs:
+            titles = kwargs['titles']
+        else:
+            titles = None
+
         BasePlot.__init__(self,(1,1),parent,flickable=True)
 
         # accepts as args either a list of axes tuples... or a nd numpy array
@@ -259,8 +283,16 @@ class FlickPlot(BasePlot):
 
 
 class AnimatedWindow(BasePlot):
-    def __init__(self,*args,callback=None,parent=None):
+    def __init__(self,*args, **kwargs): #callback=None,parent=None):
         nsubplots = len(args)
+        if 'callback' in kwargs:
+            callback = kwargs['callback']
+        else:
+            callback = None
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+        else:
+            parent = None
         BasePlot.__init__(self,(nsubplots,1),parent)
 
         self.canvas.draw()
@@ -430,8 +462,16 @@ class LiveCalPlot(BasePlot):
         self.canvas.draw()
 
 class ScrollingPlot(BasePlot):
-    def __init__(self,*args,callback=None,parent=None):
+    def __init__(self,*args):  #,callback=None,parent=None):
         nsubplots = len(args)
+        if 'callback' in kwargs:
+            callback = kwargs['callback']
+        else:
+            callback = None
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+        else:
+            parent = None
         BasePlot.__init__(self,(nsubplots,1),parent)
         # TODO : write this class
  #if ndata/aisr > lims[1]:

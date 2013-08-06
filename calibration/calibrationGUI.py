@@ -1,3 +1,11 @@
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
+from __future__ import division
 import sys, os
 import time
 import pickle
@@ -28,7 +36,7 @@ CALV = 0.175
 CALF = int(15000)
 DBFACTOR = 20
 CALHACK = 0.136
-NBPATH = 'C:\\Users\\amy.boyle\\src\\notebooks\\'
+NBPATH = u'C:\\Users\\amy.boyle\\src\\notebooks\\'
 
 XLEN = 5 #seconds, also not used?
 SAVE_DATA_CHART = False
@@ -69,8 +77,8 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.calf = None
 
         self.savefolder = NBPATH
-        self.savename = "cal"
-        self.saveformat = 'npy'
+        self.savename = u"cal"
+        self.saveformat = u'npy'
 
         inlist = load_inputs()
         if len(inlist) > 0:
@@ -106,7 +114,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 self.savename = inlist[25]
                 self.saveformat = inlist[26]
             except:
-                print("failed to find all defaults")
+                print u"failed to find all defaults"
                 #raise
 
         self.set_interval_min()
@@ -134,15 +142,15 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.signals.update_stim_display.connect(self.stim_display)
         self.signals.read_collected.connect(self.calc_spectrum)
 
-        print('save format ',self.saveformat)
+        print u'save format ',self.saveformat
 
     def on_start(self):
 
         if not self.verify_inputs_valid():
             return
        
-        aochan = self.ui.aochan_box.currentText().encode()
-        aichan = self.ui.aichan_box.currentText().encode()
+        aochan = str(self.ui.aochan_box.currentText())
+        aichan = str(self.ui.aichan_box.currentText())
 
         # depending on currently displayed tab, present
         # tuning curve, or on-the-fly modifyable tone
@@ -187,7 +195,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.toneplayer.start(aochan,aichan)
 
                     self.ui.running_label.setPalette(self.green)
-                    self.ui.running_label.setText("RUNNING")
+                    self.ui.running_label.setText(u"RUNNING")
 
                     # spin off a thread that runs a continuous loop, with
                     # an appropriate, adjusted, sleep time between loops
@@ -199,12 +207,12 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.acq_thread.start()
 
                 except:
-                    print('ERROR! TERMINATE!')
+                    print u'ERROR! TERMINATE!'
                     self.on_stop
                     raise
                 
             else:
-                print("start pressed when task already running, updating stimulus...")
+                print u"start pressed when task already running, updating stimulus..."
                 self.update_stim()
  
         else:
@@ -226,7 +234,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 # grey out interface during curve
                 self.ui.tab_2.setEnabled(False)
                 self.ui.start_button.setEnabled(False)
-                self.ui.label4.setText("")
+                self.ui.label4.setText(u"")
 
                 self.ngenerated = 0
                 self.nacquired = 0
@@ -246,13 +254,13 @@ class CalibrationWindow(QtGui.QMainWindow):
                     nreps = self.ui.nreps_spnbx.value()
 
                     if f_start < f_stop:
-                        freqs = list(range(f_start, f_stop+1, f_step))
+                        freqs = range(f_start, f_stop+1, f_step)
                     else:
-                        freqs = list(range(f_start, f_stop-1, -f_step))
+                        freqs = range(f_start, f_stop-1, -f_step)
                     if db_start < db_stop:
-                        intensities = list(range(db_start, db_stop+1, db_step))
+                        intensities = range(db_start, db_stop+1, db_step)
                     else:
-                        intensities = list(range(db_start, db_stop-1, -db_step))
+                        intensities = range(db_start, db_stop-1, -db_step)
 
                     # calculate ms interval from reprate
                     interval = (1/reprate)*1000
@@ -275,7 +283,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.calval = self.tonecurve.arm(aochan,aichan)
                     self.ngenerated +=1
 
-                    self.ui.running_label.setText("RUNNING")
+                    self.ui.running_label.setText(u"RUNNING")
                     self.ui.running_label.setPalette(self.green)
 
                     # save these lists for easier plotting later
@@ -294,12 +302,12 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                 except:
                     self.live_lock.unlock()
-                    print("handle curve set-up exception")
+                    print u"handle curve set-up exception"
                     self.ui.tab_2.setEnabled(True)
                     self.ui.start_button.setEnabled(True)
                     raise
             else:
-                print("Operation already in progress")
+                print u"Operation already in progress"
         
 
     def curve_worker(self):
@@ -318,7 +326,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 time.sleep((self.interval-elapsed)/1000)
                 now = time.time()
             elif elapsed > self.interval:
-                print("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
+                print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
             self.last_tick = now
 
             if not self.tonecurve.haswork():
@@ -329,17 +337,17 @@ class CalibrationWindow(QtGui.QMainWindow):
 
             tone, data, times, f, db = self.tonecurve.next()
 
-            self.ui.flabel.setText("Frequency : %d" % (f))
-            self.ui.dblabel.setText("Intensity : %d" % (db))
+            self.ui.flabel.setText(u"Frequency : %d" % (f))
+            self.ui.dblabel.setText(u"Intensity : %d" % (db))
 
-            self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
+            self.ui.label0.setText(u"AO Vmax : %.5f" % (np.amax(abs(tone))))
 
             xfft, yfft = calc_spectrum(tone, self.tonecurve.player.get_samplerate())
 
             try:
                 self.signals.update_stim_display.emit(times, tone, xfft, abs(yfft))
             except:
-                print("WARNING : Problem drawing stim to Window")
+                print u"WARNING : Problem drawing stim to Window"
 
             #self.current_line_data = data
             #self.display_response(f,db)
@@ -348,14 +356,14 @@ class CalibrationWindow(QtGui.QMainWindow):
     def process_caldata(self):
         # saving can take a long time if there is alot of data, display indeterminate
         # progess bar so user doesn't think program froze
-        progressdlg = QtGui.QProgressDialog("Saving data...", "Abort", 0, 0, self)
+        progressdlg = QtGui.QProgressDialog(u"Saving data...", u"Abort", 0, 0, self)
         progressdlg.show()
         QtGui.QApplication.processEvents()
         resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, self.savename, 
                                                    keepcal=self.save_as_calibration, 
                                                    saveformat=self.saveformat)
 
-        progressdlg.setLabel(QtGui.QLabel("Plotting data..."))
+        progressdlg.setLabel(QtGui.QLabel(u"Plotting data..."))
         QtGui.QApplication.processEvents()
         self.tonecurve.caldata.close()
         #plot_cal_curve(resultant_dB, self.freqs, self.intensities, self)
@@ -363,17 +371,17 @@ class CalibrationWindow(QtGui.QMainWindow):
 
 
     def on_stop(self):
-        print('SENDER: ', self.sender())
+        print u'SENDER: ', self.sender()
         if self.current_operation == 0 : 
                 
             self.ui.interval_spnbx.setEnabled(True)
             if not self.halt:
-                self.ui.running_label.setText("STOPPING")
+                self.ui.running_label.setText(u"STOPPING")
 
                 self.halt = True
 
                 self.acq_thread.join()
-                self.ui.running_label.setText("BUSY")
+                self.ui.running_label.setText(u"BUSY")
                 self.ui.running_label.setPalette(self.red)
                 QtGui.QApplication.processEvents()
                 self.save_speculative_data()
@@ -395,10 +403,10 @@ class CalibrationWindow(QtGui.QMainWindow):
                 self.tonecurve.caldata.close()
             
         else:
-            print("No task currently running")
+            print u"No task currently running"
 
         self.live_lock.unlock()
-        self.ui.running_label.setText("OFF")
+        self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(self.red)
 
     def save_speculative_data(self):
@@ -408,11 +416,11 @@ class CalibrationWindow(QtGui.QMainWindow):
             # due to the method of loading the write, the last tone in
             # tone array was never generated, so delete it
             del self.tone_array[-1]
-            print("saving output tones, shape : ", len(self.tone_array), ', ', len(self.tone_array[0]))
+            print u"saving output tones, shape : ", len(self.tone_array), u', ', len(self.tone_array[0])
             filename = OUTPUT_FNAME
             np.save(filename, self.tone_array)
         if SAVE_FFT_DATA:
-            print("saving fft traces, shape : ", len(self.full_fft_data), ', ', len(self.full_fft_data[0]))
+            print u"saving fft traces, shape : ", len(self.full_fft_data), u', ', len(self.full_fft_data[0])
             filename = FFT_FNAME
             np.save(filename, self.full_fft_data)
         self.live_lock.unlock()
@@ -437,14 +445,14 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         self.fdb = (f,db)
 
-        self.statusBar().showMessage('npts: {}'.format(npts))
-        print('\n' + '*'*40 + '\n')
+        self.statusBar().showMessage(u'npts: {}'.format(npts))
+        print u'\n' + u'*'*40 + u'\n'
 
-        self.ui.flabel.setText("Frequency : %d" % (f))
-        self.ui.dblabel.setText("Intensity : %d" % (db))
-        self.ui.label0.setText("AO Vmax : %.5f" % (np.amax(abs(tone))))
+        self.ui.flabel.setText(u"Frequency : %d" % (f))
+        self.ui.dblabel.setText(u"Intensity : %d" % (db))
+        self.ui.label0.setText(u"AO Vmax : %.5f" % (np.amax(abs(tone))))
 
-        print("update_stim")
+        print u"update_stim"
         # now update the display of the stim
         if self.display == None or not(self.display.active):
             self.spawn_display()
@@ -457,15 +465,15 @@ class CalibrationWindow(QtGui.QMainWindow):
                                       ([[],[]],[[],[]]), parent=self)
         self.display.show()
         # set axes limits appropriately
-        self.display.axs[0].set_title("Stimulus")
+        self.display.axs[0].set_title(u"Stimulus")
         self.display.axs[0].set_xlim(0,2)
         self.display.axs[0].set_ylim(-10,10)
-        self.display.axs[1].set_title("Response")
+        self.display.axs[1].set_title(u"Response")
         self.display.axs[1].set_xlim(0,2)
         self.display.axs[1].set_ylim(-10,10)
-        self.display.axs[2].set_title("FFTs")
+        self.display.axs[2].set_title(u"FFTs")
         self.display.axs[2].set_xlim(0,200000)
-        self.display.axs[1].lines[0].set_color('g')
+        self.display.axs[1].lines[0].set_color(u'g')
         #self.display.canvas.draw()
 
     def stim_display(self, xdata, ydata, xfft, yfft):
@@ -474,7 +482,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             self.display.draw_line(0, 0, xdata, ydata)
             self.display.draw_line(2, 0, xfft, yfft)
         except:
-            print("WARNING : Problem drawing stim to Window")
+            print u"WARNING : Problem drawing stim to Window"
 
     def display_response(self, f, db, data, spectrum, freq):
         try:
@@ -487,31 +495,31 @@ class CalibrationWindow(QtGui.QMainWindow):
             spec_max, max_freq = get_fft_peak(spectrum, freq)
             spec_peak_at_f = spectrum[freq == f]
             if len(spec_peak_at_f) == 0:
-                print("COULD NOT FIND TARGET FREQUENCY ",f)
+                print u"COULD NOT FIND TARGET FREQUENCY ",f
                 spec_peak_at_f = -1
                 self.on_stop()
 
             vmax = np.amax(abs(data))
             
             # update GUI info display area
-            self.ui.label1.setText("AI Vmax : %.5f" % (vmax))
-            self.ui.label2.setText("FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), max_freq))
-            self.ui.label3.setText("FFT peak at %d kHz : %.6f" % (f/1000, spec_peak_at_f))
+            self.ui.label1.setText(u"AI Vmax : %.5f" % (vmax))
+            self.ui.label2.setText(u"FFT peak : %.6f, \t at %d Hz\n" % (np.amax(spectrum), max_freq))
+            self.ui.label3.setText(u"FFT peak at %d kHz : %.6f" % (f/1000, spec_peak_at_f))
             if self.current_operation == 0 and self.apply_calibration:
-                self.ui.label4.setText("Response dB : %.2f" % (calc_db(spec_peak_at_f, self.caldb, CALHACK)))
+                self.ui.label4.setText(u"Response dB : %.2f" % (calc_db(spec_peak_at_f, self.caldb, CALHACK)))
 
             if vmax < 0.005:
                 if PRINT_WARNINGS:
-                    print("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
-                self.statusBar().showMessage("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
+                    print u"WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR"
+                self.statusBar().showMessage(u"WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
             else:
-                self.statusBar().showMessage("")
+                self.statusBar().showMessage(u"")
 
             # tolerance of 1 Hz for frequency matching
             if max_freq < f-1 or max_freq > f+1:
                 if PRINT_WARNINGS:
-                    print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
-                    print("\tTarget : {}, Received : {}".format(f, max_freq))
+                    print u"WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS"
+                    print u"\tTarget : {}, Received : {}".format(f, max_freq)
             
             try:
                 times = np.arange(len(data))/sr
@@ -521,7 +529,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     resultdb = calc_db(vmax, self.caldb, self.calval)
                     self.livecurve.set_point(f,db,resultdb)
             except:
-                print("WARNING : Problem drawing to Window")   
+                print u"WARNING : Problem drawing to Window"   
                      
 
             if self.current_operation == 0:
@@ -532,14 +540,14 @@ class CalibrationWindow(QtGui.QMainWindow):
 
             self.nacquired +=1
         except:
-            print("Error processing response data")
+            print u"Error processing response data"
             #self.on_stop()
             raise   
 
         #print('generated ', self.ngenerated, ', acquired ', self.nacquired, ', halted ', self.halt)
         
         if self.halt and self.ngenerated == self.nacquired:
-            print("Finished collecting, wrapping up...")
+            print u"Finished collecting, wrapping up..."
             self.live_lock.unlock()
                 
             if self.current_operation == 1:
@@ -560,7 +568,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 time.sleep((self.interval-elapsed)/1000)
                 now = time.time()
             elif elapsed > self.interval:
-                print("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
+                print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
             self.last_tick = now
 
             self.ngenerated +=1
@@ -592,10 +600,10 @@ class CalibrationWindow(QtGui.QMainWindow):
         dur = self.ui.dur_spnbx.value()
         interval = self.ui.interval_spnbx.value()
         if interval < dur:
-            print("interval less than duration, increasing interval")
+            print u"interval less than duration, increasing interval"
             self.ui.interval_spnbx.setValue(dur)
         if interval == dur:
-            print("Warning: No interval down-time, consider using continuous acquisition to avoid failure.")
+            print u"Warning: No interval down-time, consider using continuous acquisition to avoid failure."
 
     def set_dur_max(self):
         dur = self.ui.dur_spnbx_2.value()
@@ -612,7 +620,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             self.ui.savecal_ckbx.setChecked(False)
 
     def launch_display_dlg(self):
-        field_vals = {'chunksz' : self.ainpts, 'caldb': self.caldb, 'calv': self.calv, 'calf' : self.calf}
+        field_vals = {u'chunksz' : self.ainpts, u'caldb': self.caldb, u'calv': self.calv, u'calf' : self.calf}
         dlg = DisplayDialog(default_vals=field_vals)
         if dlg.exec_():
             ainpts, caldb, calv, calf = dlg.get_values()
@@ -623,7 +631,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                 self.calf = calf
 
     def launch_scaledlg(self):
-        field_vals = {'fscale' : self.fscale, 'tscale' : self.tscale}
+        field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}
         dlg = ScaleDialog(default_vals=field_vals)
         if dlg.exec_():
             fscale, tscale = dlg.get_values()
@@ -632,7 +640,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.update_unit_labels()
 
     def launch_savedlg(self):
-        field_vals = {'savefolder' : self.savefolder, 'savename' : self.savename, 'saveformat' : self.saveformat}
+        field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}
         dlg = SavingDialog(default_vals = field_vals)
         if dlg.exec_():
             savefolder, savename, saveformat = dlg.get_values()
@@ -645,59 +653,59 @@ class CalibrationWindow(QtGui.QMainWindow):
             f = self.ui.freq_spnbx.value()*self.fscale
             sr = self.ui.sr_spnbx.value()*self.fscale
             if sr < f*2:
-                QtGui.QMessageBox.warning(self, "Invalid parameter", "Samplerate, %d Hz, must be at least 2x the maximum frequency, %d Hz" % (sr, f))
+                QtGui.QMessageBox.warning(self, u"Invalid parameter", u"Samplerate, %d Hz, must be at least 2x the maximum frequency, %d Hz" % (sr, f))
                 return 0
             dur = self.ui.dur_spnbx.value()*self.tscale
             interval = self.ui.interval_spnbx.value()*self.tscale
             if dur > interval:
-                QtGui.QMessageBox.warning(self, "Invalid parameter", "Duration, %.3f s, exceeds interval, %.3f s" % (dur, interval))
+                QtGui.QMessageBox.warning(self, u"Invalid parameter", u"Duration, %.3f s, exceeds interval, %.3f s" % (dur, interval))
                 return 0
         else:
             # verify that the calbration frequency and intensity are included in the curve
             f_start = self.ui.freq_start_spnbx.value()*self.fscale
             f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
             f_step = self.ui.freq_step_spnbx.value()*self.fscale
-            if self.calf not in list(range(f_start, f_stop+1, f_step)):
-                QtGui.QMessageBox.warning(self, "Invalid parameter", "Frequency range must include the specified calibration frequency, %d Hz" % (self.calf))
+            if self.calf not in range(f_start, f_stop+1, f_step):
+                QtGui.QMessageBox.warning(self, u"Invalid parameter", u"Frequency range must include the specified calibration frequency, %d Hz" % (self.calf))
                 return 0
             sr = self.ui.sr_spnbx_2.value()*self.fscale
             if sr < f_stop*2:
-                QtGui.QMessageBox.warning(self, "Invalid parameter", "Samplerate, %d Hz,  must be at least 2x the maximum frequency, %d Hz" % (sr, f_stop))
+                QtGui.QMessageBox.warning(self, u"Invalid parameter", u"Samplerate, %d Hz,  must be at least 2x the maximum frequency, %d Hz" % (sr, f_stop))
                 return 0
             reprate = self.ui.reprate_spnbx.value()
             dur = self.ui.dur_spnbx_2.value()*self.tscale
             if dur*reprate > 1:
-                QtGui.QMessageBox.warning(self, "Invalid parameter", "Duration, %.3f s, exceeds interval allowed by reptition rate, %.2f reps/s" % (dur, reprate))
+                QtGui.QMessageBox.warning(self, u"Invalid parameter", u"Duration, %.3f s, exceeds interval allowed by reptition rate, %.2f reps/s" % (dur, reprate))
                 return 0
         return 1
 
     def update_unit_labels(self):
         if self.fscale == 1000:
-            self.ui.f_units.setText('kHz')
-            self.ui.sr_units.setText('kHz')
-            self.ui.aisr_units.setText('kHz')
+            self.ui.f_units.setText(u'kHz')
+            self.ui.sr_units.setText(u'kHz')
+            self.ui.aisr_units.setText(u'kHz')
         elif self.fscale == 1:
-            self.ui.f_units.setText('Hz')
-            self.ui.sr_units.setText('Hz')
-            self.ui.aisr_units.setText('Hz')
+            self.ui.f_units.setText(u'Hz')
+            self.ui.sr_units.setText(u'Hz')
+            self.ui.aisr_units.setText(u'Hz')
         else:
-            print(self.fscale)
-            raise Exception("Invalid frequency scale")
+            print self.fscale
+            raise Exception(u"Invalid frequency scale")
             
         if self.tscale == 0.001:
-            self.ui.dur_units.setText('ms')
-            self.ui.interval_units.setText('ms')
-            self.ui.risefall_units.setText('ms')
+            self.ui.dur_units.setText(u'ms')
+            self.ui.interval_units.setText(u'ms')
+            self.ui.risefall_units.setText(u'ms')
         elif self.tscale == 1:
-            self.ui.dur_units.setText('s')
-            self.ui.interval_units.setText('s')
-            self.ui.risefall_units.setText('s')
+            self.ui.dur_units.setText(u's')
+            self.ui.interval_units.setText(u's')
+            self.ui.risefall_units.setText(u's')
         else:
-            print(self.tscale)
-            raise Exception("Invalid time scale")
+            print self.tscale
+            raise Exception(u"Invalid time scale")
             
     def keyPressEvent(self,event):
-        print("keypress from calibrator")
+        print u"keypress from calibrator"
         #print(event.text())
         if event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
             if self.current_operation == 0:
@@ -706,8 +714,8 @@ class CalibrationWindow(QtGui.QMainWindow):
             self.setFocus()
         elif event.key () == QtCore.Qt.Key_Escape:
             self.setFocus()
-        elif event.text() == 'r':
-            print("redraw")
+        elif event.text() == u'r':
+            print u"redraw"
             self.display.redraw()
         
     def closeEvent(self,event):

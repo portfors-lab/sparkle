@@ -9,3 +9,8 @@ calibration_frq.npy
 
 # os autogen files?
 __*__
+*.bak
+*.pyc
+
+#temp folder for testing
+test/unit_test/tmp/

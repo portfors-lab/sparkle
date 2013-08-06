@@ -69,7 +69,7 @@ class BasePlot(QtGui.QMainWindow):
                 self.last_event = event
                 figheight = self.canvas.height()
                 point = QtCore.QPoint(event.x, figheight - event.y)
-                self.popMenu.exec(self.canvas.mapToGlobal(point))
+                self.popMenu.exec_(self.canvas.mapToGlobal(point))
 
     def add_context_item(self, item):
         act, funct = item
@@ -154,7 +154,11 @@ class BasePlot(QtGui.QMainWindow):
         QtGui.QMainWindow.closeEvent(self,event)
 
 class SimplePlot(BasePlot):
-    def __init__(self,*args,parent=None):
+    def __init__(self,*args, **kwargs): #,parent=None):
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+        else:
+            parent = None
         BasePlot.__init__(self,(1,1),parent)
 
         if len(args) == 1:

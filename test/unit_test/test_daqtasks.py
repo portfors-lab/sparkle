@@ -2,7 +2,7 @@ import numpy as np
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
 
 def test_syncfinite():
-    """
+    u"""
     Test basic operation of DAQ and drivers
     """
 
@@ -11,8 +11,8 @@ def test_syncfinite():
     frequency = 50000
     npts = 10000
     for amp in amps:
-        aot = AOTaskFinite(b"PCI-6259/ao0", 1000000, npts, trigsrc=b"ai/StartTrigger")
-        ait = AITaskFinite(b"PCI-6259/ai0", 1000000, npts)
+        aot = AOTaskFinite(u"PCI-6259/ao0", 1000000, npts, trigsrc=u"ai/StartTrigger")
+        ait = AITaskFinite(u"PCI-6259/ai0", 1000000, npts)
 
         x = np.linspace(0,np.pi, npts)
         stim = amp * np.sin(frequency*x*2*np.pi)

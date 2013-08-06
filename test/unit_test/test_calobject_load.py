@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 import os
 from audiolab.calibration.datatypes import CalibrationObject
@@ -7,8 +8,8 @@ import glob
 # I had originally tried to do this in a class, but the setup function
 # wasn't properly working when a generator was also used. So I have
 # used a bunch of globals instead
-FREQS = [x for x in range(5,51,5)]
-INTENSITIES = [x for x in range(0,101,10)]
+FREQS = [x for x in xrange(5,51,5)]
+INTENSITIES = [x for x in xrange(0,101,10)]
 SAMPLERATE = 100000
 DURATION = 200
 RISEFALL = 5

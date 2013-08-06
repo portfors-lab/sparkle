@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class AITask(Task):
-    def __init__(self, chan, samplerate, bufsize, clksrc=b""):
+    def __init__(self, chan, samplerate, bufsize, clksrc=u""):
         Task.__init__(self)
-        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,
+        self.CreateAIVoltageChan(chan,u"",DAQmx_Val_Cfg_Default,
             -10.0,10.0,DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,bufsize)
@@ -20,21 +20,21 @@ class AITask(Task):
         self.callback_fun = fun
         self.n = npts
         self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,
-                                            npts,0,name="run_callback")
+                                            npts,0,name=u"run_callback")
     def run_callback(self):
         self.callback_fun(self)
     def DoneCallback(self,status):
-        print("Status"+str(status))
+        print u"Status"+unicode(status)
         return 0
     def stop(self):
         self.StopTask()
         self.ClearTask()
         
 class AOTask(Task):
-    def __init__(self, chan, samplerate, npoints, clksrc=b"", trigsrc=b""):
+    def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=u""):
         Task.__init__(self)
         self.npoints = npoints
-        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, 
+        self.CreateAOVoltageChan(chan,"",-10.0,10.0, 
             DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,npoints)
@@ -52,13 +52,13 @@ class AOTask(Task):
         self.StopTask()
         self.ClearTask()
     def DoneCallback(self,status):
-        print("Status"+str(status))
+        print u"Status"+unicode(status)
         return 0
 
 class AITaskFinite(Task):
-    def __init__(self, chan, samplerate, npts, clksrc=b""):
+    def __init__(self, chan, samplerate, npts, clksrc=""):
         Task.__init__(self)
-        self.CreateAIVoltageChan(chan,b"",DAQmx_Val_Cfg_Default,
+        self.CreateAIVoltageChan(chan,"",DAQmx_Val_Cfg_Default,
                                  -10.0,10.0,DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps,npts)
@@ -78,11 +78,11 @@ class AITaskFinite(Task):
         self.ClearTask()
 
 class AOTaskFinite(Task):
-    def __init__(self, chan, samplerate, npoints, clksrc=b"", trigsrc=b""):
+    def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=u""):
         Task.__init__(self)
         self.npoints = npoints
 
-        self.CreateAOVoltageChan(chan,b"",-10.0,10.0, DAQmx_Val_Volts, None)
+        self.CreateAOVoltageChan(chan,u"",-10.0,10.0, DAQmx_Val_Volts, None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps, npoints)
         if len(trigsrc) > 0:
@@ -110,7 +110,7 @@ def get_ao_chans(dev):
     buflen = c_uint32(sizeof(buf))
     DAQmxGetDevAOPhysicalChans(dev, buf, buflen)
     pybuf = buf.value
-    chans = pybuf.decode('utf-8').split(",")
+    chans = pybuf.decode(u'utf-8').split(u",")
     return chans  
 
 def get_ai_chans(dev):
@@ -118,5 +118,5 @@ def get_ai_chans(dev):
     buflen = c_uint32(sizeof(buf))
     DAQmxGetDevAIPhysicalChans(dev, buf, buflen)
     pybuf = buf.value
-    chans = pybuf.decode('utf-8').split(",")
+    chans = pybuf.decode(u'utf-8').split(u",")
     return chans

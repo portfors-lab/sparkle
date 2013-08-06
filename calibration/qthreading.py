@@ -7,7 +7,7 @@ class GenericThread(QtCore.QRunnable):
         self.function = function
         self.args = args
         self.kwargs = kwargs
-    """
+    u"""
     def __del__(self):
         self.wait()
     """

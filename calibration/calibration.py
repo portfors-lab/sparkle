@@ -1,5 +1,5 @@
 import threading
-import queue
+import Queue
 import os
 import pickle
 import re
@@ -20,13 +20,13 @@ VERBOSE = True
 SAVE_DATA_TRACES = False
 SAVE_NOISE = False
 
-FFT_FNAME = '_ffttraces'
-PEAKS_FNAME =  '_fftpeaks'
-DB_FNAME = '_resultdb'
-INDEX_FNAME = '_index'
-DATA_FNAME = '_rawdata'
-NOISE_FNAME = '_noise'
-OUTPUT_FNAME = '_outtones'
+FFT_FNAME = u'_ffttraces'
+PEAKS_FNAME =  u'_fftpeaks'
+DB_FNAME = u'_resultdb'
+INDEX_FNAME = u'_index'
+DATA_FNAME = u'_rawdata'
+NOISE_FNAME = u'_noise'
+OUTPUT_FNAME = u'_outtones'
 
 
 class PlayerBase():
@@ -50,15 +50,19 @@ class PlayerBase():
         self.aotask = None
 
         # establish connection to the attenuator
-        pa5 = win32com.client.Dispatch("PA5.x")
-        success  = pa5.ConnectPA5('GB',1)
-        if success == 1:
-            print('Connection to PA5 attenuator established')
-        else:
-            print('Connection to PA5 attenuator failed')
-            errmsg = pa5.GetError()
-            print("Error: ", errmsg)
-            raise Exception("Attenuator connection failed")
+        try:
+            pa5 = win32com.client.Dispatch("PA5.x")
+            success  = pa5.ConnectPA5('GB',1)
+            if success == 1:
+                print u'Connection to PA5 attenuator established'
+            else:
+                print u'Connection to PA5 attenuator failed'
+                errmsg = pa5.GetError()
+                print u"Error: ", errmsg
+                raise Exception(u"Attenuator connection failed")
+        except:
+            print "Error connecting to attenuator"
+            pa5 = None
 
         self.attenuator = pa5
 
@@ -71,13 +75,13 @@ class PlayerBase():
     def set_calibration(self, db_boost_array, frequencies):
         # use supplied array of intensity adjustment to adjust tone output
         if db_boost_array.shape != frequencies.shape:
-            print("ERROR: calibration array and frequency array must have same dimensions")
+            print u"ERROR: calibration array and frequency array must have same dimensions"
             return
 
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
-        print(self.calibration_vector)
-        print(self.calibration_frequencies)
+        print self.calibration_vector
+        print self.calibration_frequencies
 
     def set_tone(self,f,db,dur,rft,sr):
 
@@ -90,8 +94,7 @@ class PlayerBase():
 
         if PRINT_WARNINGS:
             if np.amax(abs(tone)) < 0.005:
-                print("WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM")
-
+                print u"WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM"
 
         self.tone_lock.acquire()
         self.tone = tone
@@ -124,7 +127,7 @@ class TonePlayer(PlayerBase):
         # this shouldn't actually be possible still...
         if self.aitask is not None:
             self.stop()
-            print("FIX ME : NESTED START OPERATIONS ALLOWED")
+            print u"FIX ME : NESTED START OPERATIONS ALLOWED"
 
         self.daq_lock.acquire()
 
@@ -135,14 +138,14 @@ class TonePlayer(PlayerBase):
         npts = self.tone.size
         try:
             self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
-            self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
+            self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")
             self.aotask.write(self.tone)
 
             if SAVE_OUTPUT:
                 self.played_tones = [self.tone[:]]
 
         except:
-            print('ERROR! TERMINATE!')
+            print u'ERROR! TERMINATE!'
             self.stop()
             raise
 
@@ -155,7 +158,7 @@ class TonePlayer(PlayerBase):
     def read(self):
         try:
             if self.aotask is None:
-                print("You must arm the calibration first")
+                print u"You must arm the calibration first"
                 return
             # acquire data and stop task, lock must have been release by
             # previous reset
@@ -172,7 +175,7 @@ class TonePlayer(PlayerBase):
             self.aotask.stop()
             
         except:
-            print('ERROR! TERMINATE!')
+            print u'ERROR! TERMINATE!'
             self.daq_lock.release()
             self.stop()
             raise
@@ -188,15 +191,19 @@ class TonePlayer(PlayerBase):
 
         try:
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
-            self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=b"ai/StartTrigger")
+            self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")
             self.aotask.write(self.tone)
-            self.attenuator.SetAtten(self.atten)
+            try:
+                self.attenuator.SetAtten(self.atten)
+            except:
+                print "ERROR: attenuation not set!"
+
             self.ngenerated +=1
 
             if SAVE_OUTPUT:
                 self.played_tones.append(self.tone[:])
         except:
-            print('ERROR! TERMINATE!')
+            print u'ERROR! TERMINATE!'
             self.daq_lock.release()
             self.tone_lock.release()
             self.stop
@@ -210,14 +217,14 @@ class TonePlayer(PlayerBase):
             self.aitask.stop()
             self.aotask.stop()
         except:     
-            print("No task running")
+            print u"No task running"
         self.aitask = None
         self.aotask = None
     
 
 class ToneCurve():
-    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename='temp.hdf5'):
-        """
+    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename=u'temp.hdf5'):
+        u"""
         Set up a tone curve which loops through frequencies (outer) and intensities (inner)
         """
 
@@ -234,24 +241,24 @@ class ToneCurve():
         self.nreps = nreps
         self.calf = calf
 
-        self.caldata.init_data('peaks', 2)
-        self.caldata.init_data('vmax', 2)
+        self.caldata.init_data(u'peaks', 2)
+        self.caldata.init_data(u'vmax', 2)
 
         if SAVE_FFT_DATA:
             # 4D array nfrequencies x nintensities x nreps x npoints
             #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration_s*samplerate)/2)))
-            self.caldata.init_data('spectrums',4)
+            self.caldata.init_data(u'spectrums',4)
 
         if SAVE_DATA_TRACES:
             #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration_s*samplerate)))
-            self.caldata.init_data('raw_traces',4)
+            self.caldata.init_data(u'raw_traces',4)
         
         self.reject_list = []
 
-        self.work_queue = queue.Queue()
+        self.work_queue = Queue.Queue()
         for ifreq, f in enumerate(freqs):
             for idb, db in enumerate(intensities):
-                for irep in range(nreps):
+                for irep in xrange(nreps):
                     self.work_queue.put((f,db,irep))
     
         #self.freqs = [x for x in freqs]
@@ -261,7 +268,7 @@ class ToneCurve():
         self.signal = None
 
     def assign_signal(self, signal):
-        """
+        u"""
         Accepts a PyQt signal, which it will emit the parameters 
         (f, db, data, spectrum, freq) after each read operation
         """
@@ -269,7 +276,7 @@ class ToneCurve():
         self.signal = signal
 
     def arm(self, aochan, aichan):
-        """
+        u"""
         Prepare the tone curve to play. This must be done before the first read
         """
 
@@ -279,7 +286,7 @@ class ToneCurve():
         tone, t = self.player.set_tone(self.calf,self.player.caldb,self.dur, self.rft, self.sr)
 
         self.player.start(aochan, aichan)
-        for irep in range(self.nreps):
+        for irep in xrange(self.nreps):
             data = self.player.read()
             caltemp.append(np.amax(abs(data)))
             self.player.reset()
@@ -299,16 +306,16 @@ class ToneCurve():
         return self.calpeak
 
     def next(self):
-        """
+        u"""
         Simultaneously present and read the next prepped stimulus, and reload.
 
         Internally stores acquired data. 
         Returns played_tone, data, times, played_f, played_db
         """
 
-        print('reading')
+        print u'reading'
         data = self.player.read()
-        print('read')
+        print u'read'
 
         # save data here
         played_f, played_db, r = self.current_fdb
@@ -374,45 +381,45 @@ class ToneCurve():
 
         if vmax < 0.005:
             if PRINT_WARNINGS:
-                print("WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR")
+                print u"WARNING : RESPONSE VOLTAGE BELOW DEVICE FLOOR"
 
         #tolerance of 1 Hz for frequency matching
         if max_freq < f-1 or max_freq > f+1:
             if PRINT_WARNINGS:
-                print("WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS")
-                print("\tTarget : {}, Received : {}".format(f, max_freq))
+                print u"WARNING : MAX SPECTRAL FREQUENCY DOES NOT MATCH STIMULUS"
+                print u"\tTarget : {}, Received : {}".format(f, max_freq)
                 ifreq = self.freqs.index(f)
                 idb = self.intensities.index(db)
                 self.reject_list.append((f, db, ifreq, idb))            
 
         if VERBOSE:
-            print("%.5f AI V" % (vmax))
-            print("%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq))
+            print u"%.5f AI V" % (vmax)
+            print u"%.6f FFT peak, at %d Hz\n" % (spec_max, max_freq)
 
         try:
             #self.data_lock.acquire()
-            self.caldata.put('peaks', (f, db, rep), spec_peak_at_f)
-            self.caldata.put('vmax', (f, db, rep), vmax)
+            self.caldata.put(u'peaks', (f, db, rep), spec_peak_at_f)
+            self.caldata.put(u'vmax', (f, db, rep), vmax)
 
             if SAVE_FFT_DATA:
 
-                self.caldata.put('spectrums', (f, db, rep), spectrum)
+                self.caldata.put(u'spectrums', (f, db, rep), spectrum)
 
                 if SAVE_DATA_TRACES: 
                     self.data_traces[ifreq][idb][rep] = data
             #self.data_lock.release()
-        except Exception as e:
-            print("ERROR: unable to save recorded data")
-            print(e)
+        except Exception, e:
+            print u"ERROR: unable to save recorded data"
+            print e
             raise
             #self.data_lock.release()
 
-    def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat='npy'):
+    def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat=u'npy'):
         #After running curve do calculations and save data to file
         
-        print("Saving...")
+        print u"Saving..."
         
-        print('rejects : ', self.reject_list)
+        print u'rejects : ', self.reject_list
         # go through FFT peaks and calculate playback resultant dB
         # for freq in self.fft_peaks
         vfunc = np.vectorize(calc_db)
@@ -422,53 +429,52 @@ class ToneCurve():
         try:
             self.data_lock.acquire()
 
-            cal_fft_peak = self.caldata.get('peaks', (calf, caldb))
-            cal_vmax =  self.caldata.get('vmax', (calf, caldb))
+            cal_fft_peak = self.caldata.get(u'peaks', (calf, caldb))
+            cal_vmax =  self.caldata.get(u'vmax', (calf, caldb))
 
             #self.data_lock.release()
-            print("Using FFT peak data from ", caldb, " dB, ", 
-                  calf, " Hz tone to calculate calibration curve")
+            print u"Using FFT peak data from ", caldb, u" dB, ", calf, u" Hz tone to calculate calibration curve"
         except:
-            print("ERROR : could not retrieve data from specified calibration frequency, %d Hz, and intensity, %d dB" % (calf, caldb))
+            print u"ERROR : could not retrieve data from specified calibration frequency, %d Hz, and intensity, %d dB" % (calf, caldb)
             cal_fft_peak = 0
             cal_vmax = 0
 
         #fft_peaks = self.caldata.data['peaks']
         #resultant_dB = vfunc(fft_peaks, caldb, cal_fft_peak)
 
-        vin = self.caldata.data['vmax'].value
-        print(vin, caldb, self.calpeak)
+        vin = self.caldata.data[u'vmax'].value
+        print vin, caldb, self.calpeak
         resultant_dB = vfunc(vin, caldb, self.calpeak)
 
-        self.caldata.data['frequency_rolloff'] = self.caldata.hdf5.create_dataset('frequency_rolloff', 
+        self.caldata.data[u'frequency_rolloff'] = self.caldata.hdf5.create_dataset(u'frequency_rolloff', 
                                                                                   resultant_dB.shape)
-        self.caldata.data['frequency_rolloff'][...] = resultant_dB
-        self.caldata.attrs['dbmethod'] = calc_db.__doc__ + " peak: max V"
+        self.caldata.data[u'frequency_rolloff'][...] = resultant_dB
+        self.caldata.attrs[u'dbmethod'] = calc_db.__doc__ + u" peak: max V"
 
         fname = sfilename
-        while os.path.isfile(os.path.join(sfolder, fname + '.' + saveformat)):
+        while os.path.isfile(os.path.join(sfolder, fname + u'.' + saveformat)):
             # increment filename until we come across one that 
             # doesn't exist
             if not fname[-1].isdigit():
-                fname = fname + '0'
+                fname = fname + u'0'
             else:
-                currentno = re.search('(\d+)$', fname).group(0)
+                currentno = re.search(u'(\d+)$', fname).group(0)
                 prefix = fname[:-(len(currentno))]
                 currentno = int(currentno) + 1
-                fname = prefix + str(currentno)
+                fname = prefix + unicode(currentno)
 
         filename = os.path.join(sfolder, fname)
 
-        if saveformat != 'hdf5':
-            print('SAVENAME ', filename)
+        if saveformat != u'hdf5':
+            print u'SAVENAME ', filename
             self.caldata.export(filename, filetype=saveformat)
 
         if keepcal:
             # get vector of calibration intensity only
-            caldb_idx = self.caldata.stim['intensities'].index(self.player.caldb)
+            caldb_idx = self.caldata.stim[u'intensities'].index(self.player.caldb)
             calibration_vector = resultant_dB[:,caldb_idx]
             np.save(caldata_filename(),calibration_vector)
-            freqs = self.caldata.stim['frequencies']
+            freqs = self.caldata.stim[u'frequencies']
             np.save(calfreq_filename(), freqs)
 
         
@@ -476,9 +482,9 @@ class ToneCurve():
             #noise_vfunc = np.vectorize(calc_noise)
             #noise_array = noise_vfunc(self.full_fft_data,0,2000)
             noise_array = np.zeros((len(self.freqs),len(self.intensities),self.nreps))
-            for ifreq in range(len(self.freqs)):
-                for idb in range(len(self.intensities)):
-                    for irep in range(self.nreps):
+            for ifreq in xrange(len(self.freqs)):
+                for idb in xrange(len(self.intensities)):
+                    for irep in xrange(self.nreps):
                         noise_array[ifreq,idb,irep] = calc_noise(self.full_fft_data[ifreq,idb,irep], 0, 2000)
 
             np.save(sfolder + fname + NOISE_FNAME, noise_array)

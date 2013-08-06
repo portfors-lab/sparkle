@@ -7,11 +7,11 @@ def getdir():
 
 def caldata_filename():
     # return the filename of the calibration dbspl vector
-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "calibration_dbdata.npy")
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)), u"calibration_dbdata.npy")
 
 def calfreq_filename():
-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "calibration_frq.npy")
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)), u"calibration_frq.npy")
 
-if __name__ == "__main__":
+if __name__ == u"__main__":
 
-    print("the directory of this file is ", getdir())
+    print u"the directory of this file is ", getdir()

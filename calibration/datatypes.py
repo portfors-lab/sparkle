@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 import datetime
 import h5py
@@ -9,19 +10,19 @@ from audiolab.io.fileio import mightysave, mightyload
 class AcquisitionObject():
     # abstract class for holding data acquitision data and stimulus information
     def __init__(self, filename, f=None, db=None, v=None, method=None, mode='w'):
-        print(filename, mode)
+        print filename, mode
         self.hdf5 = h5py.File(filename, mode)   
 
         self.attrs = self.hdf5.attrs
         
         if mode == 'w':
-            self.attrs['calhz'] = f
-            self.attrs['caldb'] = db
-            self.attrs['calv'] = v
-            self.attrs['date'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            self.attrs[u'calhz'] = f
+            self.attrs[u'caldb'] = db
+            self.attrs[u'calv'] = v
+            self.attrs[u'date'] = datetime.datetime.now().strftime(u"%Y-%m-%d %H:%M")
             self.data = {}
         else:
-            for x in self.hdf5.keys(): print(x)
+            for x in self.hdf5.keys(): print x
             self.data = dict(self.hdf5)
         
         self.rep_temps = {}
@@ -32,34 +33,34 @@ class AcquisitionObject():
 
 class CalibrationObject(AcquisitionObject):
     def __init__(self, filename, freqs=[], dbs=[], sr=np.nan, dur=np.nan, rft=np.nan, 
-                 nreps=1, f=np.nan, db=np.nan, v=np.nan, method=None, mode='w'):
+                 nreps=1, f=np.nan, db=np.nan, v=np.nan, method=None, mode=u'w'):
 
         AcquisitionObject.__init__(self, filename, f=f, db=db, v=v, method=method, mode=mode)
         
-        if mode == 'w':
-            self.attrs['sr'] = sr
+        if mode == u'w':
+            self.attrs[u'sr'] = sr
 
             # duration of tone (ms)
-            self.attrs['duration'] = dur
+            self.attrs[u'duration'] = dur
 
             # list of frequencies played -- dim 0 in spectrum and dbspl
-            self.attrs['frequencies'] = freqs
+            self.attrs[u'frequencies'] = freqs
 
             # intensity played -- dim1 in spectrum and dbspl
-            self.attrs['intensities'] = dbs
+            self.attrs[u'intensities'] = dbs
             
             # rise fall time of tone (ms)
-            self.attrs['risefalltime'] = rft
+            self.attrs[u'risefalltime'] = rft
 
             # number of stimulus repetitions
-            self.attrs['repetitions'] = nreps
+            self.attrs[u'repetitions'] = nreps
 
 
     def init_data(self, key, dims, dim4=None):
 
-        frequencies = self.attrs['frequencies']
-        intensities = self.attrs['intensities']
-        nreps = self.attrs['repetitions']
+        frequencies = self.attrs[u'frequencies']
+        intensities = self.attrs[u'intensities']
+        nreps = self.attrs[u'repetitions']
 
         if dims == 4:
             # then we are storing an array of data for each frequency, dimension 
@@ -67,7 +68,7 @@ class CalibrationObject(AcquisitionObject):
 
             # if the last dimension size is not provided, assume simulus length
             if dim4 == None:
-                dim4 = int((self.attrs['duration']*self.attrs['sr'])/2)
+                dim4 = int((self.attrs[u'duration']*self.attrs[u'sr'])/2)
             self.data[key] = self.hdf5.create_dataset(key, (len(frequencies),len(intensities),nreps,
                                        dim4))
 
@@ -80,7 +81,7 @@ class CalibrationObject(AcquisitionObject):
             self.data[key] = self.hdf5.create_dataset(key, (len(frequencies),len(intensities)))
             self.rep_temps[key] = []
         else:
-            raise Exception("number of dimensions, " + str(dims)+ ", currently not supported")
+            raise Exception(u"number of dimensions, " + unicode(dims)+ u", currently not supported")
 
     def put(self, key, ix, data):
         dims = self.data[key].shape
@@ -88,8 +89,8 @@ class CalibrationObject(AcquisitionObject):
         # frequency and intensitiy must be first two elements
         f, db, rep = ix
 
-        ifreq = np.where(self.attrs['frequencies'] == f)[0][0]
-        idb = np.where(self.attrs['intensities'] == db)[0][0]
+        ifreq = np.where(self.attrs[u'frequencies'] == f)[0][0]
+        idb = np.where(self.attrs[u'intensities'] == db)[0][0]
 
         self.datalock.acquire()
 
@@ -97,7 +98,7 @@ class CalibrationObject(AcquisitionObject):
             rep_temp = self.rep_temps[key]
             rep_temp.append(data)
 
-            if rep == (self.attrs['repetitions']-1):
+            if rep == (self.attrs[u'repetitions']-1):
                 self.data[key][ifreq,idb] = np.mean(rep_temp)
                 rep_temp = []
 
@@ -113,8 +114,8 @@ class CalibrationObject(AcquisitionObject):
 
         data = self.data[key]
 
-        ifreq = np.where(self.attrs['frequencies'] == ix[0])[0][0]
-        idb = np.where(self.attrs['intensities'] == ix[1])[0][0]
+        ifreq = np.where(self.attrs[u'frequencies'] == ix[0])[0][0]
+        idb = np.where(self.attrs[u'intensities'] == ix[1])[0][0]
         
         self.datalock.acquire()
 
@@ -129,16 +130,16 @@ class CalibrationObject(AcquisitionObject):
         return item
 
 
-    def export(self, fname, filetype='auto'):
+    def export(self, fname, filetype=u'auto'):
 
         self.datalock.acquire()
 
         # convert everything to a dictionary to save in a single file
         master = {}
-        master['data'] = {}
-        master['attrs'] = dict(self.attrs)
+        master[u'data'] = {}
+        master[u'attrs'] = dict(self.attrs)
         for name, dset in self.data.items():
-            master['data'][name] = dset.value
+            master[u'data'][name] = dset.value
 
         mightysave(fname, master, filetype=filetype)
         
@@ -146,21 +147,21 @@ class CalibrationObject(AcquisitionObject):
 
 
     @staticmethod
-    def load_from_file(fname, filetype='auto'):
+    def load_from_file(fname, filetype=u'auto'):
 
         root, ext = splitext(fname)
-        if filetype == 'auto':
+        if filetype == u'auto':
             # use the filename extenspion to determine
             # file format
             filetype = ext
 
-        print('FILETYPE ', filetype)
-        if filetype.endswith('hdf5'):
+        print u'FILETYPE ', filetype
+        if filetype.endswith(u'hdf5'):
 
-            calobj = CalibrationObject(fname, mode='r+')
+            calobj = CalibrationObject(fname, mode=u'r+')
 
         else:
-            hdf5_filename = root + '.hdf5'
+            hdf5_filename = root + u'.hdf5'
 
             caldict = mightyload(fname, filetype)
 
@@ -168,14 +169,14 @@ class CalibrationObject(AcquisitionObject):
             calobj = CalibrationObject(hdf5_filename)
             #convert any list objects to numpy arrays, so
             #indexing will work properly
-            for att, val in caldict['attrs'].items():
+            for att, val in caldict[u'attrs'].items():
                 if isinstance(val, list):
                     calobj.attrs[att] = np.array(val)
                 else:
                     calobj.attrs[att] = val
             
             calobj.data = {}
-            data = caldict['data']
+            data = caldict[u'data']
             for dname, array in data.items():
                 dset = calobj.hdf5.create_dataset(dname, shape(array))
                 dset[...] = array[:]

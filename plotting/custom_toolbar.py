@@ -11,7 +11,7 @@ class CustomToolbar(NavigationToolbar):
         #remove unwanted buttons
         layout = self.layout()
         builtin_buttons = []
-        for ichild in range(layout.count()):
+        for ichild in xrange(layout.count()):
             child = layout.itemAt(ichild)
             #print(child.widget().__class__.__name__)
             builtin_buttons.append(child.widget())
@@ -38,7 +38,7 @@ class CustomToolbar(NavigationToolbar):
 
         # datacursor toggle button
         self.datacursor_tb = QtGui.QToolButton(self)
-        self.datacursor_tb.setIcon(QtGui.QIcon("dc_icon.png"))
+        self.datacursor_tb.setIcon(QtGui.QIcon(u"dc_icon.png"))
         self.datacursor_tb.setCheckable(True)
         self.datacursor_tb.clicked[bool].connect(self.use_cursors)
 
@@ -48,10 +48,10 @@ class CustomToolbar(NavigationToolbar):
 
         if flickable:
             # add forward and back buttons to flick between plots
-            flick_next_btn = QtGui.QPushButton(">")
+            flick_next_btn = QtGui.QPushButton(u">")
             flick_next_btn.clicked.connect(self.flick_next)
 
-            flick_prev_btn = QtGui.QPushButton("<")
+            flick_prev_btn = QtGui.QPushButton(u"<")
             flick_prev_btn.clicked.connect(self.flick_prev)
 
             self.addWidget(flick_prev_btn)
@@ -65,7 +65,7 @@ class CustomToolbar(NavigationToolbar):
     def zoom_mod(self, checked):
         if checked:
             # add a draw command after every button up event
-            self.cid = self.canvas.mpl_connect('button_release_event', self.draw_update)
+            self.cid = self.canvas.mpl_connect(u'button_release_event', self.draw_update)
         else:
             # clear draw command update
             self.canvas.mpl_disconnect(self.cid)
@@ -85,7 +85,7 @@ class CustomToolbar(NavigationToolbar):
                     # not sure that adding abunch of empty annotations to
                     # all lines is the best way, but works for now
                     lines.append(line)
-            self.dc = DataCursor(lines, template='x: %d\ny: %0.5f')
+            self.dc = DataCursor(lines, template=u'x: %d\ny: %0.5f')
         else:
             while len(self.dc.pick_events) > 0:
                 pe = self.dc.pick_events.pop()
@@ -99,5 +99,5 @@ class CustomToolbar(NavigationToolbar):
         self.parent.previous_plot()
 
     def keyPressEvent(self,event):
-        print("key press event from toolbar")
-        super().keyPressEvent(event)
+        print u"key press event from toolbar"
+        super(self.__class__, self).keyPressEvent(event)

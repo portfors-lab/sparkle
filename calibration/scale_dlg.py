@@ -8,19 +8,19 @@ class ScaleDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         if default_vals is not None:
-            if default_vals['fscale'] == 1:
+            if default_vals[u'fscale'] == 1:
                 self.ui.hz_btn.setChecked(True)
-            elif default_vals['fscale'] == 1000:
+            elif default_vals[u'fscale'] == 1000:
                 self.ui.khz_btn.setChecked(True)
             else:
-                raise Exception("Invalid frequency scale")
+                raise Exception(u"Invalid frequency scale")
 
-            if default_vals['tscale'] == 1:
+            if default_vals[u'tscale'] == 1:
                 self.ui.sec_btn.setChecked(True)
-            elif default_vals['tscale'] == 0.001:
+            elif default_vals[u'tscale'] == 0.001:
                 self.ui.ms_btn.setChecked(True)
             else:
-                raise Exception("Invalid time scale")
+                raise Exception(u"Invalid time scale")
 
     def get_values(self):
 

@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import scipy.io as spio
 import numpy as np
 import pickle
@@ -5,84 +6,85 @@ import json
 
 from os.path import splitext
 from copy import deepcopy
+from io import open
 
-def mightysave(filename, data, filetype='auto'):
+def mightysave(filename, data, filetype=u'auto'):
 
     root, ext = splitext(filename)
-    if filetype == 'auto':
+    if filetype == u'auto':
         # use the filename extension to determine
         # file format
         filetype = ext
 
-    filetype = filetype.replace('.', '')
+    filetype = filetype.replace(u'.', u'')
 
-    if filetype not in ['txt', 'npy', 'mat', 'pkl', 'json']:
-        print('unsupported format ', filetype)
+    if filetype not in [u'txt', u'npy', u'mat', u'pkl', u'json']:
+        print u'unsupported format ', filetype
         return -1
 
     try:
-        if ext == '':
-            filename = filename + '.' + filetype
-        print('saving ', filename)
-        if filetype == 'txt':
+        if ext == u'':
+            filename = filename + u'.' + filetype
+        print u'saving ', filename
+        if filetype == u'txt':
             np.savetxt(filename, data)
-        elif filetype == 'npy':
+        elif filetype == u'npy':
             np.save(filename, data)
-        elif filetype == 'mat':
+        elif filetype == u'mat':
             if not isinstance(data, dict):
-                data = {'matdata': deepcopy(data)}
+                data = {u'matdata': deepcopy(data)}
             spio.savemat(filename, data)
-        elif filetype == 'pkl':
-            with open(filename, 'wb') as pf:
+        elif filetype == u'pkl':
+            with open(filename, u'wb') as pf:
                 pickle.dump(data, pf)
-        elif filetype == 'json':
+        elif filetype == u'json':
             if isinstance(data,np.ndarray):
                 data = deepcopy(data).tolist()
             elif isinstance(data, dict):
                 data = np2native(deepcopy(data))
-            with open(filename, 'w') as jf:
+            with open(filename, u'w') as jf:
                 json.dump(data, jf)
     except:
-        print('saving failed')
+        print u'saving failed'
         raise
         return -2
 
     return 0
 
-def mightyload(filename, filetype='auto'):
+def mightyload(filename, filetype=u'auto'):
     root, ext = splitext(filename)
-    if filetype == 'auto':
+    if filetype == u'auto':
         # use the filename extenspion to determine
         # file format
         filetype = ext
 
-    filetype = filetype.replace('.', '')
+    filetype = filetype.replace(u'.', u'')
 
-    if filetype not in ['txt', 'npy', 'mat', 'pkl', 'json', 'hdf5']:
-        print('unsupported format ', filetype)
+    if filetype not in [u'txt', u'npy', u'mat', u'pkl', u'json', u'hdf5']:
+        print u'unsupported format ', filetype
         return -1
 
     try:
-        print('loading ', filename)
-        if filetype == 'txt':
+        print u'loading ', filename
+        if filetype == u'txt':
             data = np.loadtxt(filename)
-        elif filetype == 'npy':
+        elif filetype == u'npy':
             data = np.load(filename)
             data = data.item()
-        elif filetype == 'mat':
+        elif filetype == u'mat':
             data = loadmat(filename)
-        elif filetype == 'pkl':
-            with open(filename, 'rb') as pf:
+        elif filetype == u'pkl':
+            with open(filename, u'rb') as pf:
                 data = pickle.load(pf)
-        elif filetype == 'json':
-            with open(filename, 'r') as jf:
+        elif filetype == u'json':
+            with open(filename, u'r') as jf:
                 data = json.load(jf)
         else:
-            print('unsupported format ', filetype)
+            print u'unsupported format ', filetype
             return -1
         
     except:
-        print('Loading failed')
+        print u'Loading failed'
         raise
         return None
 
@@ -101,7 +103,7 @@ def np2native(d):
     return d
 
 def loadmat(filename):
-    '''
+    u'''
     this function should be called instead of direct spio.loadmat
     as it cures the problem of not properly recovering python dictionaries
     from mat files. It calls the function check keys to cure all entries
@@ -111,7 +113,7 @@ def loadmat(filename):
     return _check_keys(data)
 
 def _check_keys(dict):
-    '''
+    u'''
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
     '''
@@ -121,7 +123,7 @@ def _check_keys(dict):
     return dict        
 
 def _todict(matobj):
-    '''
+    u'''
     A recursive function which constructs from matobjects nested dictionaries
     '''
     dict = {}

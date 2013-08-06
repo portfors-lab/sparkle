@@ -1,3 +1,4 @@
+from __future__ import division
 from PyQt4 import QtGui
 from dispform import Ui_DisplayDlg
 
@@ -8,14 +9,14 @@ class DisplayDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         if default_vals is not None:
-            self.ui.chunksz_lnedt.setText(str(default_vals['chunksz']))
-            self.ui.caldb_lnedt.setText(str(default_vals['caldb']))
-            self.ui.calV_lnedt.setText(str(default_vals['calv']))
+            self.ui.chunksz_lnedt.setText(unicode(default_vals[u'chunksz']))
+            self.ui.caldb_lnedt.setText(unicode(default_vals[u'caldb']))
+            self.ui.calV_lnedt.setText(unicode(default_vals[u'calv']))
             try:
-                calf = int(default_vals['calf']/1000)
+                calf = int(default_vals[u'calf']/1000)
             except:
                 calf = None
-            self.ui.calkhz_lnedt.setText(str(calf))
+            self.ui.calkhz_lnedt.setText(unicode(calf))
 
     def get_values(self):
         try:
@@ -23,9 +24,9 @@ class DisplayDialog(QtGui.QDialog):
             caldb = int(self.ui.caldb_lnedt.text())
             calv = float(self.ui.calV_lnedt.text())
             calf = int(self.ui.calkhz_lnedt.text())*1000
-        except ValueError as ve:
-            val = str(ve).split(':')
-            QtGui.QMessageBox.warning(self, 'Invalid input', 'Invalid entry '+val[1])
+        except ValueError, ve:
+            val = unicode(ve).split(u':')
+            QtGui.QMessageBox.warning(self, u'Invalid input', u'Invalid entry '+val[1])
 
             return None,None,None,None
 
