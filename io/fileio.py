@@ -1,15 +1,16 @@
-from __future__ import with_statement
+#from __future__ import with_statement
 import scipy.io as spio
 import numpy as np
 import pickle
 import json
+import collections
 
 from os.path import splitext
 from copy import deepcopy
-from io import open
+#from io import open
 
 def mightysave(filename, data, filetype=u'auto'):
-
+    print 'MIGHTY SAVE'
     root, ext = splitext(filename)
     if filetype == u'auto':
         # use the filename extension to determine
@@ -18,6 +19,9 @@ def mightysave(filename, data, filetype=u'auto'):
 
     filetype = filetype.replace(u'.', u'')
 
+    if filetype == '':
+        print 'No save format given, using text'
+        filetype = 'txt'
     if filetype not in [u'txt', u'npy', u'mat', u'pkl', u'json']:
         print u'unsupported format ', filetype
         return -1
@@ -30,9 +34,13 @@ def mightysave(filename, data, filetype=u'auto'):
             np.savetxt(filename, data)
         elif filetype == u'npy':
             np.save(filename, data)
-        elif filetype == u'mat':
+        elif filetype == 'mat':
             if not isinstance(data, dict):
-                data = {u'matdata': deepcopy(data)}
+                data = {'matdata': deepcopy(data)}
+                # savemat does not like having unicode dictionary keys
+                # so go through and convert
+            data = filter_keys(data)
+            print data
             spio.savemat(filename, data)
         elif filetype == u'pkl':
             with open(filename, u'wb') as pf:
@@ -42,7 +50,7 @@ def mightysave(filename, data, filetype=u'auto'):
                 data = deepcopy(data).tolist()
             elif isinstance(data, dict):
                 data = np2native(deepcopy(data))
-            with open(filename, u'w') as jf:
+            with open(filename, 'w') as jf:
                 json.dump(data, jf)
     except:
         print u'saving failed'
@@ -102,8 +110,30 @@ def np2native(d):
 
     return d
 
+def filter_keys(d):
+    """
+    convert dictionary keys to str
+    """
+    for key, item in d.items():
+        if isinstance(item, dict):
+            item = filter_keys(item)
+        del d[key]
+        d[str(key)] = item
+    return d
+
+
+def convert(data):
+    if isinstance(data, basestring):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(convert, data.iteritems()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(convert, data))
+    else:
+        return data
+
 def loadmat(filename):
-    u'''
+    '''
     this function should be called instead of direct spio.loadmat
     as it cures the problem of not properly recovering python dictionaries
     from mat files. It calls the function check keys to cure all entries
@@ -113,7 +143,7 @@ def loadmat(filename):
     return _check_keys(data)
 
 def _check_keys(dict):
-    u'''
+    '''
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
     '''
@@ -123,7 +153,7 @@ def _check_keys(dict):
     return dict        
 
 def _todict(matobj):
-    u'''
+    '''
     A recursive function which constructs from matobjects nested dictionaries
     '''
     dict = {}

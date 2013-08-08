@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 import h5py
 import datetime
@@ -18,19 +19,22 @@ class BigStore():
         """
 
         if self.chunk_location + len(d) <= self.chunk_size:
+            #simply add and update marker
             self.hdf5['set'+str(self.counter)][self.chunk_location:self.chunk_location+len(d)] = d[:]
             self.chunk_location += len(d)
         else:
             nleft = self.chunk_size - self.chunk_location
             #print('nleft: ', nleft)
             if nleft > 0:
+                # fill the rest of this data set
                 self.hdf5['set'+str(self.counter)][self.chunk_location:] = d[:nleft]
             dtemp = d[nleft:]
             self.chunk_location = 0
-            
-            print('new data set')
+
+            end = min(len(dtemp), self.chunk_size)
             nslices = int(np.ceil(len(dtemp)/self.chunk_size))
             for islice in range(0,nslices):
+                #print('new data set')
                 self.counter +=1
                 self.hdf5.create_dataset('set'+str(self.counter), (self.chunk_size,))
                 end = min(len(dtemp), self.chunk_size)
@@ -59,6 +63,7 @@ class BigStore():
         """
         Tuple of data size
         """
+        print self.counter, self.chunk_size, self.chunk_location
         if 'alldata' in self.hdf5:
             return self.hdf5['alldata'].shape
         else:

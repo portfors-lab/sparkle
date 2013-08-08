@@ -14,9 +14,11 @@ def test_continuous_data():
     total_samples = (2**16) +4
     for igrab in range(0,total_samples,acq_grab_size):
         grab = np.random.randint(-10,10,acq_grab_size)
-        mydata.put(grab)
+        mydata.append(grab)
 
+    
     mydata.consolidate()
+    print 'result data shape ', mydata.shape(), ' expected ', total_samples
     assert mydata.shape() == (total_samples,)
 
     mydata.close()
