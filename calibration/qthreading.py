@@ -21,3 +21,6 @@ class WorkerSignals(QtCore.QObject):
     update_stim_display = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     ncollected = QtCore.pyqtSignal(list)
     read_collected = QtCore.pyqtSignal(int, int, numpy.ndarray)
+
+class TestSignals(QtCore.QObject):
+    update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
