@@ -1,3 +1,4 @@
+#from __future__ import division
 from audiolab.plotting.chacoplots import LiveWindow
 
 import h5py
@@ -26,23 +27,26 @@ class TestFileAcquire():
         self.testdata = BigStore(fname, chunksize=2**24)
 
         npts = 10000
-        frequency = 5000
+        frequency = 5
         amp = 2
-        x = np.linspace(0,np.pi, npts)
+        x = np.linspace(0, np.pi, npts)
         self.stim = amp * np.sin(frequency*x*2*np.pi)
+
         self.t = x        
 
-        self.sr = 500000
+        self.sr = 200000
         self.npts = npts
 
         #keep the generation and acq same duration
-        sr_out = 1000000
-        npts_out = npts/(sr_out/self.sr) 
+        sr_out = 200000
+        npts_out = npts*(sr_out/self.sr) 
+        print(npts_out)
+        #print "durations", float(npts)/self.sr, float(npts_out)/sr_out
 
         self.aot = AOTask(b"PCI-6259/ao0", sr_out, npts_out, 
                             trigsrc=b"ai/StartTrigger")
         self.ait = AITask(b"PCI-6259/ai0", self.sr, self.npts)
-        
+        print "stim max", max(abs(self.stim))
         self.aot.write(self.stim)
 
         self.app = QApplication(['sometext'])
@@ -53,7 +57,7 @@ class TestFileAcquire():
         self.testdata.close()
         os.remove(fname)
 
-    def test_synchronous(self):
+    def xtest_synchronous(self):
         """
         Test acquitision, storing data, without plot display
         """
@@ -73,7 +77,7 @@ class TestFileAcquire():
 
         assert self.testdata.shape() == (acqtime*self.sr,)
 
-    def test_synch_with_mpl(self):
+    def xtest_synch_with_mpl(self):
         """
         Test acquisition, storing data, with matplotlib display
         """
@@ -182,7 +186,7 @@ class TestFileAcquire():
                                task.n,byref(r),None)
             self.testdata.append(inbuffer.tolist())
             self.fig.append(inbuffer)
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
 
         except:
             self.aot.stop()

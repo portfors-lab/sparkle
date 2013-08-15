@@ -14,9 +14,8 @@ class LiveWindow(QtGui.QMainWindow):
         self.plotview = Plotter(self, nsubplots)
 
         layout = QtGui.QVBoxLayout(self.mainWidget)
-        layout.setObjectName("superlayout")
+        layout.setObjectName("masterlayout")
         layout.addWidget(self.plotview.widget)
-        #self.setLayout(layout)
 
         self.resize(600,400)
 
@@ -25,6 +24,22 @@ class LiveWindow(QtGui.QMainWindow):
     def draw_line(self, axnum, linenum, x, y):
         self.plotview.update_data(axnum, linenum, x, y)
 
+class ScrollingWindow(QtGui.QMainWindow):
+    def __init__(self, nsubplots, deltax, windowsize=1):
+        QtGui.QMainWindow.__init__(self)
+        self.mainWidget = QtGui.QWidget(self) # dummy widget to contain layout manager
+        self.plotview = ScrollingPlotter(self, nsubplots, deltax, windowsize)
+
+        layout = QtGui.QVBoxLayout(self.mainWidget)
+        layout.setObjectName("masterlayout")
+        layout.addWidget(self.plotview.widget)
+
+        self.resize(600,400)
+
+        self.setCentralWidget(self.mainWidget)
+
+    def append(self, axnum, y):
+        self.plotview.update_data(axnum, y)
 
 
 class Plotter():
@@ -55,6 +70,41 @@ class Plotter():
         container.spacing = 0
 
         return Window(parent, -1, component=container)
+
+class ScrollingPlotter(Plotter):
+    def __init__(self, parent, nsubplots, deltax, windowsize):
+        Plotter.__init__(self, parent, nsubplots)
+        self.plots = self.window.component.components
+        # time steps between data points
+        self.deltax = deltax
+        # time window of display (seconds)
+        self.windowsize = windowsize
+        for plot in self.plots:
+            plot.range2d.x_range.low = 0
+            plot.range2d.x_range.high = windowsize
+
+        self.plotdata[0].set_data('x', [-1])
+        self.plotdata[0].set_data('y', [0])
+
+    def update_data(self, axnum, y):
+        # append the y data and append appropriate number of 
+        # x points
+        points_to_add = len(y)
+        xdata = self.plotdata[axnum].get_data('x')
+        x_to_append = np.arange(xdata[-1]+self.deltax, 
+                            xdata[-1]+self.deltax+(self.deltax*points_to_add),
+                            self.deltax)
+        xdata = np.append(xdata, x_to_append)
+        self.plotdata[axnum].set_data("x", xdata)
+        ydata = self.plotdata[axnum].get_data('y')
+        ydata = np.append(ydata,y)
+        self.plotdata[axnum].set_data("y", ydata)
+        
+        # now scroll axis limits
+        if self.plots[axnum].range2d.x_range.high <= xdata[-1]:
+            self.plots[axnum].range2d.x_range.high += self.deltax*points_to_add
+            self.plots[axnum].range2d.x_range.low += self.deltax*points_to_add
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
