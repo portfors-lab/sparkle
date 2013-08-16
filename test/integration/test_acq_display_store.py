@@ -5,6 +5,7 @@ import h5py
 import os
 import time
 import numpy as np
+import threading, Queue
 
 from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
 from PyDAQmx.DAQmxTypes import *
@@ -12,9 +13,10 @@ from PyDAQmx.DAQmxTypes import *
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
 from audiolab.io.structures import BigStore
 from audiolab.plotting.plotz import AnimatedWindow, ScrollingPlot
-from audiolab.calibration.qthreading import TestSignals
+from audiolab.calibration.qthreading import TestSignals, GenericThread
 
 from PyQt4.QtGui import QApplication
+from PyQt4 import QtCore
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), "tmp")
 
@@ -40,13 +42,13 @@ class TestFileAcquire():
         #keep the generation and acq same duration
         sr_out = 200000
         npts_out = npts*(sr_out/self.sr) 
-        print(npts_out)
+        #print(npts_out)
         #print "durations", float(npts)/self.sr, float(npts_out)/sr_out
 
         self.aot = AOTask(b"PCI-6259/ao0", sr_out, npts_out, 
                             trigsrc=b"ai/StartTrigger")
         self.ait = AITask(b"PCI-6259/ai0", self.sr, self.npts)
-        print "stim max", max(abs(self.stim))
+        #print "stim max", max(abs(self.stim))
         self.aot.write(self.stim)
 
         self.app = QApplication(['sometext'])
@@ -57,27 +59,17 @@ class TestFileAcquire():
         self.testdata.close()
         os.remove(fname)
 
-    def xtest_synchronous(self):
+    def test_synchronous(self):
         """
         Test acquitision, storing data, without plot display
         """
 
         self.ait.register_callback(self.stashacq,self.npts)
+        self.fig = None
 
-        self.aot.start()
-        self.ait.start()
-        
-        acqtime = 6 #seconds 
-        time.sleep(acqtime)
-        
-        self.aot.stop()
-        self.ait.stop()
-        self.testdata.consolidate()
-        print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
+        self.doacquitision()
 
-        assert self.testdata.shape() == (acqtime*self.sr,)
-
-    def xtest_synch_with_mpl(self):
+    def test_synch_with_mpl(self):
         """
         Test acquisition, storing data, with matplotlib display
         """
@@ -89,20 +81,7 @@ class TestFileAcquire():
 
         self.ait.register_callback(self.stashacq_mpl, self.npts)
         
-        self.aot.start()
-        self.ait.start()
-        
-        acqtime = 6 #seconds 
-        time.sleep(acqtime)
-        
-        self.aot.stop()
-        self.ait.stop()
-        self.testdata.consolidate()
-        print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
-
-        assert self.testdata.shape() == (acqtime*self.sr,)
-        
-        self.fig.close()
+        self.doacquitision()
 
     def xtest_synch_with_scrollplot(self):
         self.fig = ScrollingPlot(1, 1/self.sr)
@@ -110,10 +89,48 @@ class TestFileAcquire():
 
         self.ait.register_callback(self.stashacq_plotscroll,self.npts)
         
+        self.doacquitision()
+
+    def xtest_synch_with_chaco(self):
+
+        self.fig = LiveWindow(2)
+        self.fig.show()
+        self.fig.draw_line(0, 0, self.t, self.stim)
+        QApplication.processEvents()
+
+        self.ait.register_callback(self.stashacq_chaco,self.npts)
+
+        self.signals = TestSignals()
+        #self.signals.update_data.connect(self.update_display)
+        
+
+        self.administert()
+
+    def administert(self):
+        q = Queue.Queue()
+        #t = threading.Thread(target=self.doacquitision, args=(q,))
+        self.t = GenericThread(self.doacquitision, (q,))
+        self.app.connect(self.t, QtCore.SIGNAL("update_data"), self.update_display)
+        self.t.start()
+
+        result = q.get()
+
+        if self.fig is not None:
+            self.fig.close()
+
+        print "fig closed"
+
+        self.testdata.consolidate()
+        print "consolidated"
+
+        #print 'no. data points acquired: ', self.testdata.shape(), ' desired ', result
+        assert self.testdata.shape() == result
+
+    def doacquitision(self,q=None):
         self.aot.start()
         self.ait.start()
         
-        acqtime = 6 #seconds 
+        acqtime = 3 #seconds 
         time.sleep(acqtime)
         
         self.aot.stop()
@@ -123,34 +140,13 @@ class TestFileAcquire():
 
         assert self.testdata.shape() == (acqtime*self.sr,)
         
-        self.fig.close()
-
-    def test_synch_with_chaco(self):
-
-        self.fig = LiveWindow(2)
-        self.fig.show()
-        self.fig.draw_line(0, 0, self.t, self.stim)
-        QApplication.processEvents()
-
-        self.signals = TestSignals()
-        self.signals.update_data.connect(self.update_display)
-
-        self.ait.register_callback(self.stashacq_chaco,self.npts)
+        #print "done collecting"
         
-        self.aot.start()
-        self.ait.start()
+        #q.put((acqtime*self.sr,))
         
-        acqtime = 6 #seconds 
-        #time.sleep(acqtime)
-        raw_input("Press enter to stop")
-
-        self.aot.stop()
-        self.ait.stop()
-        self.testdata.consolidate()
-        self.fig.close()
-        print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
-
-        assert self.testdata.shape() == (acqtime*self.sr,)
+        #print "put into queue"
+        if self.fig is not None:
+            self.fig.close()
 
     def stashacq(self,task):
         try:
@@ -199,9 +195,9 @@ class TestFileAcquire():
             inbuffer = np.zeros(task.n)
             task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
                                task.n,byref(r),None)
-            self.testdata.append(inbuffer.tolist())
-            
-            self.signals.update_data.emit(self.t, inbuffer)
+            print("emitting")
+            #self.signals.update_data.emit(self.t, inbuffer)
+            self.t.emit(QtCore.SIGNAL("update_data"),(self.t, inbuffer))
             return
 
         except:
@@ -209,6 +205,9 @@ class TestFileAcquire():
             self.ait.stop()
             raise
 
-    def update_display(self, xdata, ydata):
+
+    def update_display(self, xdata=[0], ydata=[0]):
+        print "update display!"
+        self.testdata.append(ydata.tolist())
         self.fig.draw_line(1, 0, xdata, ydata)
         QApplication.processEvents()
