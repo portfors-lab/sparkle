@@ -52,11 +52,11 @@ class PlayerBase():
         # establish connection to the attenuator
         try:
             pa5 = win32com.client.Dispatch("PA5.x")
-            success  = pa5.ConnectPA5('GB',1)
+            success = pa5.ConnectPA5('GB', 1)
             if success == 1:
-                print u'Connection to PA5 attenuator established'
+                print 'Connection to PA5 attenuator established'
             else:
-                print u'Connection to PA5 attenuator failed'
+                print 'Connection to PA5 attenuator failed'
                 errmsg = pa5.GetError()
                 print u"Error: ", errmsg
                 raise Exception(u"Attenuator connection failed")
@@ -100,7 +100,6 @@ class PlayerBase():
         self.tone = tone
         self.sr = sr
         self.aitime = dur
-        self.aisr = sr
         self.atten = atten
         self.tone_lock.release()
 
@@ -111,6 +110,9 @@ class PlayerBase():
 
     def get_caldb(self):
         return self.caldb
+
+    def set_aisr(self, aisr):
+        self.aisr = aisr
 
     def set_caldb(self, caldb):
         self.caldb = caldb
@@ -223,7 +225,7 @@ class TonePlayer(PlayerBase):
     
 
 class ToneCurve():
-    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename=u'temp.hdf5'):
+    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename=u'temp.hdf5',samplerate_acq=None):
         u"""
         Set up a tone curve which loops through frequencies (outer) and intensities (inner)
         """
@@ -240,6 +242,10 @@ class ToneCurve():
         self.rft = risefall_s
         self.nreps = nreps
         self.calf = calf
+        if samplerate_acq == None:
+            self.aisr = samplerate
+        else:
+            self.aisr = samplerate_acq
 
         self.caldata.init_data(u'peaks', 2)
         self.caldata.init_data(u'vmax', 2)
@@ -265,6 +271,7 @@ class ToneCurve():
         #self.intensities = [x for x in intensities]
 
         self.player = TonePlayer(dbv)
+        self.player.set_aisr(self.aisr)
         self.signal = None
 
     def assign_signal(self, signal):
