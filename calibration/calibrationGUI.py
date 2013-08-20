@@ -13,14 +13,15 @@ from audiolab.tools.audiotools import *
 from audiolab.plotting.plotz import *
 from audiolab.plotting.defined_plots import *
 from audiolab.config.info import caldata_filename, calfreq_filename
+from audiolab.tools.qthreading import GenericThread, WorkerSignals
 
 #this package
 from calform import Ui_CalibrationWindow
 from disp_dlg import DisplayDialog
 from scale_dlg import ScaleDialog
-from saving_dlg import SavingDialog
+from audiolab.dialogs.saving_dlg import SavingDialog
 from calibration import TonePlayer, ToneCurve
-from qthreading import GenericThread, WorkerSignals
+
 
 #defauts used only if user data not saved
 AIPOINTS = 100
@@ -132,7 +133,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.acq_thread = None
 
         self.signals = WorkerSignals()
-        self.signals.done.connect(self.display_response)
+        self.signals.spectrum_analyzed.connect(self.display_response)
         self.signals.curve_finished.connect(self.process_caldata)
         self.signals.update_stim_display.connect(self.stim_display)
         self.signals.read_collected.connect(self.calc_spectrum)
@@ -273,8 +274,25 @@ class CalibrationWindow(QtGui.QMainWindow):
                     if self.apply_calibration:
                         self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
 
-                    self.tonecurve.assign_signal(self.signals.done)
-                    self.calval = self.tonecurve.arm(aochan,aichan)
+                    self.tonecurve.assign_signal(self.signals.spectrum_analyzed)
+
+                    # first play the calibration frequency and intensity,
+                    # so that we may get a running plot of roll-off
+                    caltemp = []
+                    #if self.player.calibration_vector is not None:
+                    tone, t = self.tonecurve.player.set_tone(self.calf, self.caldb, dur, rft, sr)
+
+                    self.tonecurve.player.start(aochan, aichan)
+                    for irep in xrange(nreps):
+                        data = self.tonecurve.player.read()
+                        caltemp.append(np.amax(abs(data)))
+                        self.tonecurve.player.reset()
+
+                    self.calval = np.mean(caltemp)
+                    self.tonecurve.player.stop()
+
+                    # now go ahead with the calibration curve
+                    self.tonecurve.arm(aochan,aichan)
                     self.ngenerated +=1
 
                     self.ui.running_label.setText(u"RUNNING")
@@ -345,7 +363,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
             #self.current_line_data = data
             #self.display_response(f,db)
-            #self.signals.done.emit(f, db, data[:])
+            #self.signals.spectrum_analyzed.emit(f, db, data[:])
 
     def process_caldata(self):
         # saving can take a long time if there is alot of data, display indeterminate
@@ -355,7 +373,8 @@ class CalibrationWindow(QtGui.QMainWindow):
         QtGui.QApplication.processEvents()
         resultant_dB = self.tonecurve.save_to_file(self.calf, self.savefolder, self.savename, 
                                                    keepcal=self.save_as_calibration, 
-                                                   saveformat=self.saveformat)
+                                                   saveformat=self.saveformat,
+                                                   calpeak=self.calval)
 
         progressdlg.setLabel(QtGui.QLabel(u"Plotting data..."))
         QtGui.QApplication.processEvents()
@@ -428,6 +447,8 @@ class CalibrationWindow(QtGui.QMainWindow):
         aisr =  self.ui.aisr_spnbx.value()*self.fscale
 
         tone, timevals = self.toneplayer.set_tone(f,db,dur,rft,sr)
+        self.toneplayer.set_aisr(sr)
+
         
         npts = tone.size
 
@@ -587,7 +608,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         except:
             raise
 
-        self.signals.done.emit(f, db, data, spectrum, freq)
+        self.signals.spectrum_analyzed.emit(f, db, data, spectrum, freq)
 
 
     def set_interval_min(self):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Mon Aug 19 11:33:48 2013
+# Created: Tue Aug 20 09:28:13 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,9 +26,20 @@ except AttributeError:
 class Ui_TuningCurve(object):
     def setupUi(self, TuningCurve):
         TuningCurve.setObjectName(_fromUtf8("TuningCurve"))
-        TuningCurve.resize(418, 242)
+        TuningCurve.resize(464, 305)
         self.verticalLayout = QtGui.QVBoxLayout(TuningCurve)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.running_label = QtGui.QLabel(TuningCurve)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.running_label.setFont(font)
+        self.running_label.setObjectName(_fromUtf8("running_label"))
+        self.horizontalLayout.addWidget(self.running_label)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.gridLayout_2 = QtGui.QGridLayout()
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.db_stop_spnbx = QtGui.QSpinBox(TuningCurve)
@@ -123,8 +134,8 @@ class Ui_TuningCurve(object):
         self.label_28 = QtGui.QLabel(TuningCurve)
         self.label_28.setObjectName(_fromUtf8("label_28"))
         self.gridLayout_2.addWidget(self.label_28, 0, 3, 1, 1)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.gridLayout_2.addItem(spacerItem, 3, 0, 1, 1)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout_2.addItem(spacerItem1, 3, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_2)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
@@ -282,6 +293,7 @@ class Ui_TuningCurve(object):
 
     def retranslateUi(self, TuningCurve):
         TuningCurve.setWindowTitle(_translate("TuningCurve", "Form", None))
+        self.running_label.setText(_translate("TuningCurve", "OFF", None))
         self.label_21.setText(_translate("TuningCurve", "dB SPL", None))
         self.label_19.setText(_translate("TuningCurve", "kHz", None))
         self.label_25.setText(_translate("TuningCurve", "Frequency", None))

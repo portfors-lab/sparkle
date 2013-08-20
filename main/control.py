@@ -1,43 +1,75 @@
-import os, time
-import threading
+import sys, os
 
+from audiolab.plotting.chacoplots import Plotter, LiveWindow
 from PyQt4 import QtCore, QtGui
 
-from tcform import Ui_TuningCurve
-from audiolab.calibration.calibration import ToneCurve
+from audiolab.io.daq_tasks import *
+
+from audiolab.config.info import caldata_filename, calfreq_filename
+from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.tools.qthreading import GenericThread, WorkerSignals
+
+
+from maincontrol_form import Ui_ControlWindow
+from tuning_curve_gui import TuningCurve
 
 RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
 GREEN = QtGui.QPalette()
 GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
 
-
-class TuningCurve(QtGui.QWidget):
-    def __init__(self, outchans, inchans, live_lock, saveinfo, parent=None):
+class ControlWindow(QtGui.QMainWindow):
+    def __init__(self, dev_name, parent=None):
         # auto generated code intialization
-        QtGui.QWidget.__init__(self, parent)
-        self.ui = Ui_TuningCurve()
+        QtGui.QMainWindow.__init__(self, parent)
+        self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
-        # assume one channel each for now
-        self.aochan = outchans
-        self.aichan = inchans
-        self.live_lock = live_lock
+        # add a chaco plot to the docked widget
 
-        self.ui.start_btn.clicked.connect(self.run_curve)
-        self.ui.stop_btn.clicked.connect(self.abort_curve)
+        # plot = Plotter(self,2)
+        # self.ui.plot_dock.setWidget(plot.widget)
+
+        plot = LiveWindow(2)
+        self.ui.plot_dock.setWidget(plot)
+
+        self.ui.start_btn.clicked.connect(self.on_start)
+        self.ui.stop_btn.clicked.connect(self.on_stop)
+
+        cnames = get_ao_chans(dev_name.encode())
+        self.ui.aochan_box.addItems(cnames)
+        cnames = get_ai_chans(dev_name.encode())
+        self.ui.aichan_box.addItems(cnames)
 
         self.ui.running_label.setPalette(RED)
         self.apply_calibration = False
         self.display = None
 
-        self.savefolder = saveinfo[0]
-        self.savename = saveinfo[1]
-        self.saveformat = saveinfo[2]
+        # set default values
+        homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
+        self.savefolder = homefolder
+        self.savename = u"untitled"
+        self.saveformat = u'hdf5'
+
+        self.live_lock = QtCore.QMutex()
 
         self.signals = WorkerSignals()
         self.signals.spectrum_analyzed.connect(self.display_response)
+
+    def on_start(self):
+        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
+            pass
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
+            pass
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
+            pass
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
+            pass
+        else: 
+            error("unrecognized tab selection")
+
+    def on_stop(self):
+        pass
 
     def run_curve(self):
         print "run curve"
@@ -127,16 +159,27 @@ class TuningCurve(QtGui.QWidget):
         else:
             print u"Operation already in progress"
 
-
     def curve_worker(self):
-        print('do work')
-        pass
-        
-    def abort_curve(self):
-        print "abort!"
-
-    def spawn_display(self):
-        print "display"
+        print "worker"
 
     def display_response(self):
+        print "display reponse"
+
+    def launch_save_dlg(self):
+        field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}
+        dlg = SavingDialog(default_vals = field_vals)
+        if dlg.exec_():
+            savefolder, savename, saveformat = dlg.get_values()
+            self.savefolder = savefolder
+            self.savename = savename
+            self.saveformat = saveformat
+
+    def launch_calibration_dlg(self):
         pass
+
+if __name__ == "__main__":
+    app = QtGui.QApplication(sys.argv)
+    devName = "PCI-6259"
+    myapp = ControlWindow(devName)
+    myapp.show()
+    sys.exit(app.exec_())

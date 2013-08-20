@@ -31,7 +31,7 @@ class AITask(Task):
         self.ClearTask()
         
 class AOTask(Task):
-    def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=u""):
+    def __init__(self, chan, samplerate, npoints, clksrc="", trigsrc=""):
         Task.__init__(self)
         self.npoints = npoints
         self.CreateAOVoltageChan(chan,"",-10.0,10.0, 
@@ -46,6 +46,7 @@ class AOTask(Task):
         self.StartTask()
     def write(self,output):
         w = c_int32()
+        print "output max", max(abs(output))
         self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,
                             output,w,None);
     def stop(self):

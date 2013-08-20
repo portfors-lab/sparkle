@@ -5,7 +5,7 @@ import pickle
 import re
 import win32com.client
 from multiprocessing import Process
-from audiolab.calibration.datatypes import CurveObject
+from audiolab.data.datatypes import CurveObject
 
 from audiolab.io.fileio import mightysave
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
@@ -286,31 +286,19 @@ class ToneCurve():
         u"""
         Prepare the tone curve to play. This must be done before the first read
         """
+        try:
+            # load first item in queue
+            f, db, rep = self.work_queue.get()
 
-        # first play the calibration frequency and intensity
-        caltemp = []
-        #if self.player.calibration_vector is not None:
-        tone, t = self.player.set_tone(self.calf,self.player.caldb,self.dur, self.rft, self.sr)
+            tone, t = self.player.set_tone(f, db, self.dur, self.rft, self.sr)
 
-        self.player.start(aochan, aichan)
-        for irep in xrange(self.nreps):
-            data = self.player.read()
-            caltemp.append(np.amax(abs(data)))
-            self.player.reset()
-
-        self.calpeak = np.mean(caltemp)
-        self.player.stop()
-
-        # load first item in queue
-        f, db, rep = self.work_queue.get()
-
-        tone, t = self.player.set_tone(f,db,self.dur, self.rft, self.sr)
-
-        self.player.start(aochan, aichan)
-        self.current_fdb = (f, db, rep)
-        self.current_tone = (tone, t)
-
-        return self.calpeak
+            self.player.start(aochan, aichan)
+            self.current_fdb = (f, db, rep)
+            self.current_tone = (tone, t)
+            success = 1
+        except:
+            success = 0
+        return success
 
     def next(self):
         u"""
@@ -421,7 +409,7 @@ class ToneCurve():
             raise
             #self.data_lock.release()
 
-    def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat=u'npy'):
+    def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat=u'npy', calpeak=None):
         #After running curve do calculations and save data to file
         
         print u"Saving..."
@@ -450,8 +438,8 @@ class ToneCurve():
         #resultant_dB = vfunc(fft_peaks, caldb, cal_fft_peak)
 
         vin = self.caldata.data[u'vmax'].value
-        print vin, caldb, self.calpeak
-        resultant_dB = vfunc(vin, caldb, self.calpeak)
+        print vin, caldb, calpeak
+        resultant_dB = vfunc(vin, caldb, calpeak)
 
         self.caldata.data[u'frequency_rolloff'] = self.caldata.hdf5.create_dataset(u'frequency_rolloff', 
                                                                                   resultant_dB.shape)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_choices.ui'
 #
-# Created: Mon Aug 19 17:15:27 2013
+# Created: Tue Aug 20 11:23:25 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -83,11 +83,15 @@ class Ui_ChoicesWindow(object):
         ChoicesWindow.setStatusBar(self.statusbar)
         self.actionSet_Calibration = QtGui.QAction(ChoicesWindow)
         self.actionSet_Calibration.setObjectName(_fromUtf8("actionSet_Calibration"))
+        self.actionSave_Options = QtGui.QAction(ChoicesWindow)
+        self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.menuOptions.addAction(self.actionSet_Calibration)
+        self.menuOptions.addAction(self.actionSave_Options)
         self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(ChoicesWindow)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ChoicesWindow.launch_calibration_dlg)
+        QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ChoicesWindow.launch_save_dlg)
         QtCore.QMetaObject.connectSlotsByName(ChoicesWindow)
 
     def retranslateUi(self, ChoicesWindow):
@@ -101,6 +105,7 @@ class Ui_ChoicesWindow(object):
         self.info_label.setText(_translate("ChoicesWindow", "Now Playing:", None))
         self.menuOptions.setTitle(_translate("ChoicesWindow", "Options", None))
         self.actionSet_Calibration.setText(_translate("ChoicesWindow", "Set Calibration...", None))
+        self.actionSave_Options.setText(_translate("ChoicesWindow", "Save Options", None))
 
 
 if __name__ == "__main__":

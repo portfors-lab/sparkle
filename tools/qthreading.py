@@ -1,9 +1,9 @@
 from PyQt4 import QtCore
 import numpy
 
-class GenericThread(QtCore.QRunnable):
+class GenericThread(QtCore.QThread):
     def __init__(self, function, *args, **kwargs):
-        QtCore.QRunnable.__init__(self)
+        QtCore.QThread.__init__(self)
         self.function = function
         self.args = args
         self.kwargs = kwargs
@@ -16,7 +16,7 @@ class GenericThread(QtCore.QRunnable):
         return
 
 class WorkerSignals(QtCore.QObject):
-    done = QtCore.pyqtSignal(int, int, numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    spectrum_analyzed = QtCore.pyqtSignal(int, int, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     curve_finished = QtCore.pyqtSignal()
     update_stim_display = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     ncollected = QtCore.pyqtSignal(list)

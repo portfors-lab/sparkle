@@ -53,7 +53,8 @@ class BigStore():
             master_set[iset*self.chunk_size:(iset+1)*self.chunk_size] = self.hdf5['set'+str(iset)][:]
 
         # also add in the last set, which may not be a complete chunk
-        master_set[self.counter*self.chunk_size:(self.counter*self.chunk_size)+self.chunk_location] = self.hdf5['set'+str(self.counter)][:self.chunk_location]
+        if self.chunk_location != 0:
+            master_set[self.counter*self.chunk_size:(self.counter*self.chunk_size)+self.chunk_location] = self.hdf5['set'+str(self.counter)][:self.chunk_location]
 
         # now go ahead and delete fractional sets.
         for iset in range(self.counter+1):
@@ -63,7 +64,7 @@ class BigStore():
         """
         Tuple of data size
         """
-        print self.counter, self.chunk_size, self.chunk_location
+        print "shape info", self.counter, self.chunk_size, self.chunk_location
         if 'alldata' in self.hdf5:
             return self.hdf5['alldata'].shape
         else:
