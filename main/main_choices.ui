@@ -113,7 +113,24 @@
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionSet_Calibration</sender>
+   <signal>triggered()</signal>
+   <receiver>ChoicesWindow</receiver>
+   <slot>launch_calibration_dlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>153</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>launch_calibration_dlg()</slot>
  </slots>

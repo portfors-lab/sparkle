@@ -1,11 +1,4 @@
 from __future__ import division
-from __future__ import division
-from __future__ import division
-from __future__ import division
-from __future__ import division
-from __future__ import division
-from __future__ import division
-from __future__ import division
 import sys, os
 import time
 import pickle
@@ -46,6 +39,11 @@ VERBOSE = False
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
 
+RED = QtGui.QPalette()
+RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
+GREEN = QtGui.QPalette()
+GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
+
 class CalibrationWindow(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
         #auto generated code intialization
@@ -60,11 +58,8 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         self.ui.start_button.clicked.connect(self.on_start)
         self.ui.stop_button.clicked.connect(self.on_stop)
-        self.red = QtGui.QPalette()
-        self.red.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
-        self.green = QtGui.QPalette()
-        self.green.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
-        self.ui.running_label.setPalette(self.red)
+        
+        self.ui.running_label.setPalette(RED)
 
         self.display = None
         self.ainpts = AIPOINTS # gets overriden (hopefully)
@@ -194,7 +189,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                     self.toneplayer.start(aochan,aichan)
 
-                    self.ui.running_label.setPalette(self.green)
+                    self.ui.running_label.setPalette(GREEN)
                     self.ui.running_label.setText(u"RUNNING")
 
                     # spin off a thread that runs a continuous loop, with
@@ -229,7 +224,6 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                 # tuning curve style run-through
                 self.current_operation = 1
-                self.halt_curve = False
 
                 # grey out interface during curve
                 self.ui.tab_2.setEnabled(False)
@@ -284,7 +278,7 @@ class CalibrationWindow(QtGui.QMainWindow):
                     self.ngenerated +=1
 
                     self.ui.running_label.setText(u"RUNNING")
-                    self.ui.running_label.setPalette(self.green)
+                    self.ui.running_label.setPalette(GREEN)
 
                     # save these lists for easier plotting later
                     self.freqs = freqs
@@ -382,7 +376,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
                 self.acq_thread.join()
                 self.ui.running_label.setText(u"BUSY")
-                self.ui.running_label.setPalette(self.red)
+                self.ui.running_label.setPalette(RED)
                 QtGui.QApplication.processEvents()
                 self.save_speculative_data()
                 self.toneplayer.stop()
@@ -407,7 +401,7 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         self.live_lock.unlock()
         self.ui.running_label.setText(u"OFF")
-        self.ui.running_label.setPalette(self.red)
+        self.ui.running_label.setPalette(RED)
 
     def save_speculative_data(self):
         #print("locking")

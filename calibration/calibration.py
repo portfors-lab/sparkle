@@ -5,7 +5,7 @@ import pickle
 import re
 import win32com.client
 from multiprocessing import Process
-from audiolab.calibration.datatypes import CalibrationObject
+from audiolab.calibration.datatypes import CurveObject
 
 from audiolab.io.fileio import mightysave
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
@@ -235,7 +235,7 @@ class ToneCurve():
         self.ngenerated = 0
         self.nacquired = 0
 
-        self.caldata = CalibrationObject(filename, freqs, intensities, samplerate, duration_s, 
+        self.caldata = CurveObject(filename, freqs, intensities, samplerate, duration_s, 
                                          risefall_s, nreps,v=dbv[1])
         self.dur = duration_s
         self.sr = samplerate

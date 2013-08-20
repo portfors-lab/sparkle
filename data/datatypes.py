@@ -31,7 +31,65 @@ class AcquisitionObject():
     def close(self):
         self.hdf5.close()
 
-class CalibrationObject(AcquisitionObject):
+    def export(self, fname, filetype=u'auto'):
+        print 'export called on ', fname
+
+        self.datalock.acquire()
+
+        # convert everything to a dictionary to save in a single file
+        master = {}
+        master['data'] = {}
+        master['attrs'] = dict(self.attrs)
+        print('SPAM!!!!!!!!!')
+        for name, dset in self.data.items():
+            master['data'][name] = dset.value
+            print name, master['data'][name].shape, type(master['data'][name])
+
+        mightysave(fname, master, filetype=filetype)
+        
+        self.datalock.release()
+        print 'EXPORTED!'
+
+    @staticmethod
+    def load_from_file(fname, filetype=u'auto'):
+
+        root, ext = splitext(fname)
+        if filetype == u'auto':
+            # use the filename extenspion to determine
+            # file format
+            filetype = ext
+
+        print u'FILETYPE ', filetype
+        if filetype.endswith(u'hdf5'):
+
+            acqobj = AcquisitionObject(fname, mode=u'r+')
+
+        else:
+            hdf5_filename = root + u'.hdf5'
+
+            acqdict = mightyload(fname, filetype)
+
+            # now intialize into a acqobject
+            acqobj = AcqusitionObject(hdf5_filename)
+            #convert any list objects to numpy arrays, so
+            #indexing will work properly
+            for att, val in acqdict['attrs'].items():
+                if isinstance(val, list):
+                    acqobj.attrs[att] = np.array(val)
+                else:
+                    acqobj.attrs[att] = val
+            
+            acqobj.data = {}
+            data = acqdict['data']
+            for dname, array in data.items():
+                dset = acqobj.hdf5.create_dataset(dname, shape(array))
+                dset[...] = array[:]
+
+                acqobj.data[dname] = dset
+            
+        return acqobj
+
+class CurveObject(AcquisitionObject):
     def __init__(self, filename, freqs=[], dbs=[], sr=np.nan, dur=np.nan, rft=np.nan, 
                  nreps=1, f=np.nan, db=np.nan, v=np.nan, method=None, mode=u'w'):
 
@@ -129,65 +187,6 @@ class CalibrationObject(AcquisitionObject):
 
         return item
 
-
-    def export(self, fname, filetype=u'auto'):
-        print 'export called on ', fname
-
-        self.datalock.acquire()
-
-        # convert everything to a dictionary to save in a single file
-        master = {}
-        master['data'] = {}
-        master['attrs'] = dict(self.attrs)
-        print('SPAM!!!!!!!!!')
-        for name, dset in self.data.items():
-            master['data'][name] = dset.value
-            print name, master['data'][name].shape, type(master['data'][name])
-
-        mightysave(fname, master, filetype=filetype)
-        
-        self.datalock.release()
-        print 'EXPORTED!'
-
-
-    @staticmethod
-    def load_from_file(fname, filetype=u'auto'):
-
-        root, ext = splitext(fname)
-        if filetype == u'auto':
-            # use the filename extenspion to determine
-            # file format
-            filetype = ext
-
-        print u'FILETYPE ', filetype
-        if filetype.endswith(u'hdf5'):
-
-            calobj = CalibrationObject(fname, mode=u'r+')
-
-        else:
-            hdf5_filename = root + u'.hdf5'
-
-            caldict = mightyload(fname, filetype)
-
-            # now intialize into a calObject
-            calobj = CalibrationObject(hdf5_filename)
-            #convert any list objects to numpy arrays, so
-            #indexing will work properly
-            for att, val in caldict['attrs'].items():
-                if isinstance(val, list):
-                    calobj.attrs[att] = np.array(val)
-                else:
-                    calobj.attrs[att] = val
-            
-            calobj.data = {}
-            data = caldict['data']
-            for dname, array in data.items():
-                dset = calobj.hdf5.create_dataset(dname, shape(array))
-                dset[...] = array[:]
-
-                calobj.data[dname] = dset
-            
-        return calobj
 
 def shape(arraylist, s = ()):
     if isinstance(arraylist, np.ndarray):

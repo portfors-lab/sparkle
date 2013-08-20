@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_choices.ui'
 #
-# Created: Mon Aug 19 12:33:49 2013
+# Created: Mon Aug 19 17:15:27 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,6 +87,7 @@ class Ui_ChoicesWindow(object):
         self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(ChoicesWindow)
+        QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ChoicesWindow.launch_calibration_dlg)
         QtCore.QMetaObject.connectSlotsByName(ChoicesWindow)
 
     def retranslateUi(self, ChoicesWindow):
