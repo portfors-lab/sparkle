@@ -24,3 +24,4 @@ class WorkerSignals(QtCore.QObject):
 
 class TestSignals(QtCore.QObject):
     update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
+    done = QtCore.pyqtSignal()

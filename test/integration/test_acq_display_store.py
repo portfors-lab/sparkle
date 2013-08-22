@@ -20,8 +20,7 @@ from audiolab.plotting.chacoplots import LiveWindow
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
 from audiolab.io.structures import BigStore
 from audiolab.plotting.plotz import AnimatedWindow, ScrollingPlot
-from audiolab.calibration.qthreading import TestSignals, GenericThread
-
+from audiolab.tools.qthreading import TestSignals, GenericThread
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), "tmp")
 
@@ -58,6 +57,9 @@ class TestFileAcquire():
 
         self.app = QApplication(['sometext'])
 
+        self.signals = TestSignals()
+        self.signals.done.connect(self.app.quit)
+
     def tearDown(self):
         # delete generated file
         fname = self.testdata.hdf5.filename
@@ -72,7 +74,6 @@ class TestFileAcquire():
         self.ait.register_callback(self.stashacq,self.npts)
         self.fig = None
 
-        # self.doacquitision()
         self.administert()
 
     def test_synch_with_mpl(self):
@@ -85,9 +86,10 @@ class TestFileAcquire():
         self.fig.draw_line(0, 0, self.t, self.stim)
         #self.fig.axs[1].set_xlim(0,1)
 
-        self.ait.register_callback(self.stashacq_mpl, self.npts)
-        
-        # self.doacquitision()
+        self.ait.register_callback(self.stashacq_plot, self.npts)
+
+        self.signals.update_data.connect(self.update_display)
+
         self.administert()
 
     def xtest_synch_with_scrollplot(self):
@@ -96,7 +98,6 @@ class TestFileAcquire():
 
         self.ait.register_callback(self.stashacq_plotscroll,self.npts)
         
-        # self.doacquitision()
         self.administert()
 
     def test_synch_with_chaco(self):
@@ -106,9 +107,8 @@ class TestFileAcquire():
         self.fig.draw_line(0, 0, self.t, self.stim)
         QApplication.processEvents()
 
-        self.ait.register_callback(self.stashacq_chaco,self.npts)
+        self.ait.register_callback(self.stashacq_plot,self.npts)
 
-        self.signals = TestSignals()
         self.signals.update_data.connect(self.update_display)
         
         self.administert()
@@ -120,17 +120,17 @@ class TestFileAcquire():
         # self.app.connect(self.task, QtCore.SIGNAL("update_data"), self.update_display)
         task.start()
 
+        # non-blocking wait for acq to finish, and signal quit
+        self.app.exec_()
+
         result = q.get()
 
         if self.fig is not None:
             self.fig.close()
 
-        print "fig closed"
-
         self.testdata.consolidate()
-        print "consolidated"
 
-        #print 'no. data points acquired: ', self.testdata.shape(), ' desired ', result
+        print 'no. data points acquired: ', self.testdata.shape(), ' desired ', result
         assert self.testdata.shape() == result
 
     def doacquitision(self,q=None):
@@ -142,18 +142,13 @@ class TestFileAcquire():
         
         self.aot.stop()
         self.ait.stop()
-        # self.testdata.consolidate()
-        print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
 
-        #assert self.testdata.shape() == (acqtime*self.sr,)
-        
-        print "done collecting"
-        
+        # print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
+
         q.put((acqtime*self.sr,))
         
-        #print "put into queue"
-        # if self.fig is not None:
-        #     self.fig.close()
+        self.signals .done.emit()
+
 
     def stashacq(self,task):
         try:
@@ -167,14 +162,13 @@ class TestFileAcquire():
             self.ait.stop()
             raise
 
-    def stashacq_mpl(self,task):
+    def stashacq_plot(self,task):
         try:
             r = c_int32()
             inbuffer = np.zeros(task.n)
             task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
                                task.n,byref(r),None)
-            self.testdata.append(inbuffer.tolist())
-            self.fig.draw_line(1,0, self.t, inbuffer)
+            self.signals.update_data.emit(self.t, inbuffer)
 
         except:
             self.aot.stop()
@@ -196,25 +190,9 @@ class TestFileAcquire():
             self.ait.stop()
             raise
 
-    def stashacq_chaco(self,task):
-        try:
-            r = c_int32()
-            inbuffer = np.zeros(task.n)
-            task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
-                               task.n,byref(r),None)
-            print("emitting")
-            self.signals.update_data.emit(self.t, inbuffer)
-            # self.task.emit(QtCore.SIGNAL("update_data"),(self.t, inbuffer))
-            return
-
-        except:
-            self.aot.stop()
-            self.ait.stop()
-            raise
-
 
     def update_display(self, xdata=[0], ydata=[0]):
-        print "update display!"
+        # print "update display!"
         self.testdata.append(ydata.tolist())
         self.fig.draw_line(1, 0, xdata, ydata)
         QApplication.processEvents()
