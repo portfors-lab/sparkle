@@ -1,7 +1,9 @@
-from traits.etsconfig.etsconfig import ETSConfig
+# from traits.etsconfig.etsconfig import ETSConfig
+from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.enable.api import Window
 from enthought.chaco.api import VPlotContainer, ArrayPlotData, Plot
+from chaco.tools.api import PanTool, ZoomTool, DragZoom
 
 import sys, random
 import numpy as np
@@ -38,7 +40,7 @@ class ScrollingWindow(QtGui.QMainWindow):
 
         self.setCentralWidget(self.mainWidget)
 
-    def append(self, axnum, y):
+    def append(self, y, axnum=0):
         self.plotview.update_data(axnum, y)
 
 
@@ -77,6 +79,7 @@ class ScrollingPlotter(Plotter):
         self.plots = self.window.component.components
         # time steps between data points
         self.deltax = deltax
+        print "delta x", deltax
         # time window of display (seconds)
         self.windowsize = windowsize
         for plot in self.plots:

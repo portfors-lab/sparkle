@@ -16,7 +16,7 @@ from PyQt4 import QtCore
 from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
 from PyDAQmx.DAQmxTypes import *
 
-from audiolab.plotting.chacoplots import LiveWindow
+from audiolab.plotting.chacoplots import LiveWindow, ScrollingWindow
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
 from audiolab.io.structures import BigStore
 from audiolab.plotting.plotz import AnimatedWindow, ScrollingPlot
@@ -32,22 +32,25 @@ class TestFileAcquire():
         fname = os.path.join(tempfolder,'savetemp.hdf5')
         self.testdata = BigStore(fname, chunksize=2**24)
 
+        
         npts = 10000
-        frequency = 5
-        amp = 2
-        x = np.linspace(0, np.pi, npts)
-        self.stim = amp * np.sin(frequency*x*2*np.pi)
-
-        self.t = x        
-
-        self.sr = 200000
+        self.sr = 500000
         self.npts = npts
 
         #keep the generation and acq same duration
-        sr_out = 200000
-        npts_out = npts*(sr_out/self.sr) 
+        sr_out = 500000
+        npts_out = int(npts*(float(sr_out)/self.sr)) 
+        
+        dur = np.pi*2
+        frequency = 3
+        amp = 2
+        x = np.linspace(0, dur, npts_out)
+        self.stim = amp * np.sin(frequency*x)
+
+        self.t = np.linspace(0, dur, npts)
+
         #print(npts_out)
-        #print "durations", float(npts)/self.sr, float(npts_out)/sr_out
+        print "durations", float(npts)/self.sr, float(npts_out)/sr_out
 
         self.aot = AOTask(b"PCI-6259/ao0", sr_out, npts_out, 
                             trigsrc=b"ai/StartTrigger")
@@ -92,11 +95,21 @@ class TestFileAcquire():
 
         self.administert()
 
-    def xtest_synch_with_scrollplot(self):
-        self.fig = ScrollingPlot(1, 1/self.sr)
+    def test_synch_with_scrollmpl(self):
+        self.fig = ScrollingPlot(1, 1/float(self.sr))
         self.fig.show()
 
-        self.ait.register_callback(self.stashacq_plotscroll,self.npts)
+        self.ait.register_callback(self.stashacq_plot,self.npts)
+        self.signals.update_data.connect(self.update_display_scroll)
+        
+        self.administert()
+
+    def test_synch_with_scrollchaco(self):
+        self.fig = ScrollingWindow(1, 1/float(self.sr), 1)
+        self.fig.show()
+
+        self.ait.register_callback(self.stashacq_plot,self.npts)
+        self.signals.update_data.connect(self.update_display_scroll)
         
         self.administert()
 
@@ -175,7 +188,7 @@ class TestFileAcquire():
             self.ait.stop()
             raise
 
-    def stashacq_plotscroll(self,task):
+    def stashacq_mplscroll(self,task):
         try:
             r = c_int32()
             inbuffer = np.zeros(task.n)
@@ -195,4 +208,10 @@ class TestFileAcquire():
         # print "update display!"
         self.testdata.append(ydata.tolist())
         self.fig.draw_line(1, 0, xdata, ydata)
+        QApplication.processEvents()
+
+    def update_display_scroll(self, xdata=[0], ydata=[0]):
+        # print "update display!"
+        self.testdata.append(ydata.tolist())
+        self.fig.append(ydata)
         QApplication.processEvents()
