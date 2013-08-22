@@ -1,5 +1,4 @@
 #from __future__ import division
-from audiolab.plotting.chacoplots import LiveWindow
 
 import h5py
 import os
@@ -7,16 +6,22 @@ import time
 import numpy as np
 import threading, Queue
 
+import sip
+sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
+
+from PyQt4.QtGui import QApplication
+from PyQt4 import QtCore
+
 from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
 from PyDAQmx.DAQmxTypes import *
 
+from audiolab.plotting.chacoplots import LiveWindow
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
 from audiolab.io.structures import BigStore
 from audiolab.plotting.plotz import AnimatedWindow, ScrollingPlot
 from audiolab.calibration.qthreading import TestSignals, GenericThread
 
-from PyQt4.QtGui import QApplication
-from PyQt4 import QtCore
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), "tmp")
 
@@ -67,7 +72,8 @@ class TestFileAcquire():
         self.ait.register_callback(self.stashacq,self.npts)
         self.fig = None
 
-        self.doacquitision()
+        # self.doacquitision()
+        self.administert()
 
     def test_synch_with_mpl(self):
         """
@@ -81,7 +87,8 @@ class TestFileAcquire():
 
         self.ait.register_callback(self.stashacq_mpl, self.npts)
         
-        self.doacquitision()
+        # self.doacquitision()
+        self.administert()
 
     def xtest_synch_with_scrollplot(self):
         self.fig = ScrollingPlot(1, 1/self.sr)
@@ -89,9 +96,10 @@ class TestFileAcquire():
 
         self.ait.register_callback(self.stashacq_plotscroll,self.npts)
         
-        self.doacquitision()
+        # self.doacquitision()
+        self.administert()
 
-    def xtest_synch_with_chaco(self):
+    def test_synch_with_chaco(self):
 
         self.fig = LiveWindow(2)
         self.fig.show()
@@ -101,17 +109,16 @@ class TestFileAcquire():
         self.ait.register_callback(self.stashacq_chaco,self.npts)
 
         self.signals = TestSignals()
-        #self.signals.update_data.connect(self.update_display)
+        self.signals.update_data.connect(self.update_display)
         
-
         self.administert()
 
     def administert(self):
         q = Queue.Queue()
-        #t = threading.Thread(target=self.doacquitision, args=(q,))
-        self.t = GenericThread(self.doacquitision, (q,))
-        self.app.connect(self.t, QtCore.SIGNAL("update_data"), self.update_display)
-        self.t.start()
+        task = threading.Thread(target=self.doacquitision, args=(q,))
+        # self.task = GenericThread(self.doacquitision, (q,))
+        # self.app.connect(self.task, QtCore.SIGNAL("update_data"), self.update_display)
+        task.start()
 
         result = q.get()
 
@@ -135,18 +142,18 @@ class TestFileAcquire():
         
         self.aot.stop()
         self.ait.stop()
-        self.testdata.consolidate()
+        # self.testdata.consolidate()
         print('no. data points acquired: ', self.testdata.shape(), ' desired ', self.sr*acqtime)
 
-        assert self.testdata.shape() == (acqtime*self.sr,)
+        #assert self.testdata.shape() == (acqtime*self.sr,)
         
-        #print "done collecting"
+        print "done collecting"
         
-        #q.put((acqtime*self.sr,))
+        q.put((acqtime*self.sr,))
         
         #print "put into queue"
-        if self.fig is not None:
-            self.fig.close()
+        # if self.fig is not None:
+        #     self.fig.close()
 
     def stashacq(self,task):
         try:
@@ -196,8 +203,8 @@ class TestFileAcquire():
             task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
                                task.n,byref(r),None)
             print("emitting")
-            #self.signals.update_data.emit(self.t, inbuffer)
-            self.t.emit(QtCore.SIGNAL("update_data"),(self.t, inbuffer))
+            self.signals.update_data.emit(self.t, inbuffer)
+            # self.task.emit(QtCore.SIGNAL("update_data"),(self.t, inbuffer))
             return
 
         except:
