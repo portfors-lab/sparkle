@@ -707,7 +707,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="aisr_spnbx_2">
+           <widget class="QSpinBox" name="aisr_spnbx">
             <property name="font">
              <font>
               <pointsize>10</pointsize>

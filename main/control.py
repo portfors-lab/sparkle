@@ -1,7 +1,10 @@
 import sys, os
 
-from audiolab.plotting.chacoplots import Plotter, LiveWindow
+from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter
 from PyQt4 import QtCore, QtGui
+
+from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
+from PyDAQmx.DAQmxTypes import *
 
 from audiolab.io.daq_tasks import *
 
@@ -44,6 +47,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.running_label.setPalette(RED)
         self.apply_calibration = False
         self.display = None
+        self.fscale = 1000
 
         # set default values
         homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
@@ -55,6 +59,7 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.signals = WorkerSignals()
         self.signals.spectrum_analyzed.connect(self.display_response)
+        self.signals.ncollected.connect(self.update_chart)
 
     def on_start(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
@@ -62,14 +67,36 @@ class ControlWindow(QtGui.QMainWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
             pass
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
-            pass
+            # change plot to scrolling plot
+            acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+            aichan = str(self.ui.aichan_box.currentText())
+            self.scrollplot = ScrollingPlotter(self, 1, 1/float(acq_rate))
+            self.ui.plot_dock.setWidget(self.scrollplot.widget)
+            self.start_chart(aichan, acq_rate)
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
             pass
         else: 
             error("unrecognized tab selection")
 
     def on_stop(self):
-        pass
+        if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
+            self.ait.stop()
+
+    def start_chart(self, aichan, samplerate):
+        npts = samplerate/10
+        self.ait = AITask(aichan, samplerate, npts*5)
+        self.ait.register_callback(self.read_continuous, npts)
+        self.ait.start()
+
+    def read_continuous(self,task):
+        r = c_int32()
+        inbuffer = np.zeros(task.n)
+        task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
+                           task.n,byref(r),None)
+        self.signals.ncollected.emit(inbuffer)
+
+    def update_chart(self, data):
+        self.scrollplot.update_data(data)
 
     def run_curve(self):
         print "run curve"

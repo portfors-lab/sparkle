@@ -61,10 +61,13 @@ class Plotter():
     def create_plot(self, parent):
         plots = []
         for idata in self.plotdata:
-            plots.append(Plot(idata, padding=50, border_visible=True))
-            plots[-1].plot(("x", "y"), name="data plot", color="green")
-            plots[-1].padding_top = 10
-            plots[-1].padding_bottom = 10
+            plot = Plot(idata, padding=50, border_visible=True)
+            plot.plot(("x", "y"), name="data plot", color="green")
+            plot.padding_top = 10
+            plot.padding_bottom = 10
+            plot.tools.append(PanTool(plot))
+            plot.tools.append(ZoomTool(plot))
+            plots.append(plot)
 
         plots[0].padding_bottom = 30
         plots[-1].padding_top = 30
@@ -74,7 +77,7 @@ class Plotter():
         return Window(parent, -1, component=container)
 
 class ScrollingPlotter(Plotter):
-    def __init__(self, parent, nsubplots, deltax, windowsize):
+    def __init__(self, parent, nsubplots, deltax, windowsize=1):
         Plotter.__init__(self, parent, nsubplots)
         self.plots = self.window.component.components
         # time steps between data points
@@ -86,10 +89,11 @@ class ScrollingPlotter(Plotter):
             plot.range2d.x_range.low = 0
             plot.range2d.x_range.high = windowsize
 
+
         self.plotdata[0].set_data('x', [-1])
         self.plotdata[0].set_data('y', [0])
 
-    def update_data(self, axnum, y):
+    def update_data(self, y, axnum=0):
         # append the y data and append appropriate number of 
         # x points
         points_to_add = len(y)

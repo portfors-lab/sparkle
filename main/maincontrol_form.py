@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Aug 20 16:09:34 2013
+# Created: Thu Aug 22 16:08:33 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -378,16 +378,16 @@ class Ui_ControlWindow(object):
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_3.addWidget(self.label)
-        self.aisr_spnbx_2 = QtGui.QSpinBox(self.centralwidget)
+        self.aisr_spnbx = QtGui.QSpinBox(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(10)
-        self.aisr_spnbx_2.setFont(font)
-        self.aisr_spnbx_2.setMinimum(1)
-        self.aisr_spnbx_2.setMaximum(200)
-        self.aisr_spnbx_2.setSingleStep(10)
-        self.aisr_spnbx_2.setProperty("value", 10)
-        self.aisr_spnbx_2.setObjectName(_fromUtf8("aisr_spnbx_2"))
-        self.horizontalLayout_3.addWidget(self.aisr_spnbx_2)
+        self.aisr_spnbx.setFont(font)
+        self.aisr_spnbx.setMinimum(1)
+        self.aisr_spnbx.setMaximum(200)
+        self.aisr_spnbx.setSingleStep(10)
+        self.aisr_spnbx.setProperty("value", 10)
+        self.aisr_spnbx.setObjectName(_fromUtf8("aisr_spnbx"))
+        self.horizontalLayout_3.addWidget(self.aisr_spnbx)
         self.label_7 = QtGui.QLabel(self.centralwidget)
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.horizontalLayout_3.addWidget(self.label_7)
