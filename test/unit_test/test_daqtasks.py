@@ -74,10 +74,7 @@ def test_sync_continuous():
     assert len(glblist) == acqtime*sr
 
 def stashacq(task):
-    r = c_int32()
-    inbuffer = np.zeros(task.n)
-    task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
-                       task.n,byref(r),None)
+    inbuffer = task.read()
     glblist.extend(inbuffer.tolist())
 
 

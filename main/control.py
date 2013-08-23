@@ -3,9 +3,6 @@ import sys, os
 from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter
 from PyQt4 import QtCore, QtGui
 
-from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
-from PyDAQmx.DAQmxTypes import *
-
 from audiolab.io.daq_tasks import *
 
 from audiolab.config.info import caldata_filename, calfreq_filename
@@ -45,6 +42,18 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aichan_box.addItems(cnames)
 
         self.ui.running_label.setPalette(RED)
+
+        self.wavrootdir = os.path.expanduser('~')
+        self.dirmodel = QtGui.QFileSystemModel(self)
+        self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
+        self.dirmodel.setRootPath(self.wavrootdir)
+        self.ui.filetree_view.setModel(self.dirmodel)
+
+        self.filemodel = QtGui.QFileSystemModel(self)
+        self.filemodel.setFilter(QtCore.QDir.Files)
+        self.filemodel.setRootPath(self.wavrootdir)
+        self.ui.filelist_view.setModel(self.filemodel)
+
         self.apply_calibration = False
         self.display = None
         self.fscale = 1000
@@ -83,16 +92,13 @@ class ControlWindow(QtGui.QMainWindow):
             self.ait.stop()
 
     def start_chart(self, aichan, samplerate):
-        npts = samplerate/10
+        npts = samplerate/10 #update display at 10Hz rate
         self.ait = AITask(aichan, samplerate, npts*5)
         self.ait.register_callback(self.read_continuous, npts)
         self.ait.start()
 
     def read_continuous(self,task):
-        r = c_int32()
-        inbuffer = np.zeros(task.n)
-        task.ReadAnalogF64(task.n,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
-                           task.n,byref(r),None)
+        inbuffer = task.read()
         self.signals.ncollected.emit(inbuffer)
 
     def update_chart(self, data):
@@ -203,6 +209,17 @@ class ControlWindow(QtGui.QMainWindow):
 
     def launch_calibration_dlg(self):
         pass
+
+    def browse_wavdirs(self):
+        wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir)
+        self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(wavdir))
+        self.ui.wavrootdir_lnedt.setText(wavdir)
+        self.wavrootdir = wavdir
+
+    def wavdir_selected(self, model_index):
+        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
+        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(spath))
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

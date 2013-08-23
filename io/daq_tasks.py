@@ -23,6 +23,12 @@ class AITask(Task):
                                             npts,0,name=u"run_callback")
     def run_callback(self):
         self.callback_fun(self)
+    def read(self):
+        r = c_int32()
+        inbuffer = np.zeros(self.n)
+        self.ReadAnalogF64(self.n,10.0,DAQmx_Val_GroupByScanNumber,
+                            inbuffer, self.n,byref(r),None)
+        return inbuffer
     def DoneCallback(self,status):
         print u"Status"+unicode(status)
         return 0
@@ -46,7 +52,7 @@ class AOTask(Task):
         self.StartTask()
     def write(self,output):
         w = c_int32()
-        print "output max", max(abs(output))
+        # print "output max", max(abs(output))
         self.WriteAnalogF64(self.npoints,0,10.0,DAQmx_Val_GroupByChannel,
                             output,w,None);
     def stop(self):
