@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Aug 23 14:16:07 2013
+# Created: Tue Aug 27 10:33:43 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -785,8 +785,8 @@ class Ui_ControlWindow(object):
         self.statusbar = QtGui.QStatusBar(ControlWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         ControlWindow.setStatusBar(self.statusbar)
-        self.plot_dock = QtGui.QDockWidget(ControlWindow)
-        self.plot_dock.setObjectName(_fromUtf8("plot_dock"))
+        self.stim_dock = QtGui.QDockWidget(ControlWindow)
+        self.stim_dock.setObjectName(_fromUtf8("stim_dock"))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -794,8 +794,14 @@ class Ui_ControlWindow(object):
         self.parrot_label = QtGui.QLabel(self.dockWidgetContents)
         self.parrot_label.setObjectName(_fromUtf8("parrot_label"))
         self.verticalLayout_4.addWidget(self.parrot_label)
-        self.plot_dock.setWidget(self.dockWidgetContents)
-        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.plot_dock)
+        self.stim_dock.setWidget(self.dockWidgetContents)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.stim_dock)
+        self.response_dock = QtGui.QDockWidget(ControlWindow)
+        self.response_dock.setObjectName(_fromUtf8("response_dock"))
+        self.dockWidgetContents_2 = QtGui.QWidget()
+        self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
+        self.response_dock.setWidget(self.dockWidgetContents_2)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.response_dock)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -812,6 +818,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.stackedWidget.setCurrentIndex)
         QtCore.QObject.connect(self.filetree_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavdir_selected)
         QtCore.QObject.connect(self.wavrootdir_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.browse_wavdirs)
+        QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavfile_selected)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):

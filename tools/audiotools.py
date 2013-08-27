@@ -1,6 +1,9 @@
 from __future__ import division
 import numpy as np
 from scipy.integrate import simps, trapz
+import scipy.io.wavfile as wv
+from matplotlib.mlab import specgram
+
 
 VERBOSE = True
 DBFACTOR = 20
@@ -100,3 +103,17 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
 
     return tone, timevals, atten
 
+def spectrogram(filename, nfft=512):
+    try:
+        sr, wavdata = wv.read(filename)
+    except:
+        print u"Problem reading wav file"
+        raise
+    wavdata = wavdata.astype(float)
+    # mx = np.amax(wavdata)
+    # wavdata = wavdata/mx
+
+    Pxx, freqs, bins = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9),
+                              pad_to=nfft*2)
+
+    return Pxx, freqs, bins, sr

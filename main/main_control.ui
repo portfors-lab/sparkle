@@ -1460,7 +1460,7 @@
    <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="plot_dock">
+  <widget class="QDockWidget" name="stim_dock">
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
@@ -1475,6 +1475,12 @@
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QDockWidget" name="response_dock">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2"/>
   </widget>
   <action name="actionSave_Options">
    <property name="text">
@@ -1569,6 +1575,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>filelist_view</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>wavfile_selected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>415</x>
+     <y>319</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>848</x>
+     <y>471</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1576,5 +1598,6 @@
   <slot>change_exp_input()</slot>
   <slot>wavdir_selected()</slot>
   <slot>browse_wavdirs()</slot>
+  <slot>wavfile_selected()</slot>
  </slots>
 </ui>

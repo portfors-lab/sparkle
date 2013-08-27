@@ -1,6 +1,6 @@
 import sys, os
 
-from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter
+from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter, ImagePlotter
 from PyQt4 import QtCore, QtGui
 
 from audiolab.io.daq_tasks import *
@@ -8,7 +8,7 @@ from audiolab.io.daq_tasks import *
 from audiolab.config.info import caldata_filename, calfreq_filename
 from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.tools.qthreading import GenericThread, WorkerSignals
-
+from audiolab.tools.audiotools import spectrogram
 
 from maincontrol_form import Ui_ControlWindow
 from tuning_curve_gui import TuningCurve
@@ -28,10 +28,12 @@ class ControlWindow(QtGui.QMainWindow):
         # add a chaco plot to the docked widget
 
         # plot = Plotter(self,2)
-        # self.ui.plot_dock.setWidget(plot.widget)
+        # self.ui.stim_dock.setWidget(plot.widget)
 
-        plot = LiveWindow(2)
-        self.ui.plot_dock.setWidget(plot)
+        self.response_plot = LiveWindow(2)
+        self.spec_plot = ImagePlotter(self,1)
+        self.ui.stim_dock.setWidget(self.spec_plot.widget)
+        self.ui.response_dock.setWidget(self.response_plot)
 
         self.ui.start_btn.clicked.connect(self.on_start)
         self.ui.stop_btn.clicked.connect(self.on_stop)
@@ -80,7 +82,7 @@ class ControlWindow(QtGui.QMainWindow):
             acq_rate = self.ui.aisr_spnbx.value()*self.fscale
             aichan = str(self.ui.aichan_box.currentText())
             self.scrollplot = ScrollingPlotter(self, 1, 1/float(acq_rate))
-            self.ui.plot_dock.setWidget(self.scrollplot.widget)
+            self.ui.stim_dock.setWidget(self.scrollplot.widget)
             self.start_chart(aichan, acq_rate)
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
             pass
@@ -213,6 +215,7 @@ class ControlWindow(QtGui.QMainWindow):
     def browse_wavdirs(self):
         wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir)
         self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(wavdir))
+        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(wavdir))
         self.ui.wavrootdir_lnedt.setText(wavdir)
         self.wavrootdir = wavdir
 
@@ -220,6 +223,11 @@ class ControlWindow(QtGui.QMainWindow):
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(spath))
 
+    def wavfile_selected(self, model_index):
+        # display spectrogram of file
+        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
+        spec, f, bins, fs = spectrogram(spath)
+        self.spec_plot.update_data(spec, xaxis=bins, yaxis=f)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
