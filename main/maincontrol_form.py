@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Aug 28 09:45:03 2013
+# Created: Wed Aug 28 10:03:05 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -795,15 +795,20 @@ class Ui_ControlWindow(object):
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.parrot_label = QtGui.QLabel(self.dockWidgetContents)
-        self.parrot_label.setObjectName(_fromUtf8("parrot_label"))
-        self.verticalLayout_4.addWidget(self.parrot_label)
+        self.spec_plot = ImageWidget(self.dockWidgetContents)
+        self.spec_plot.setObjectName(_fromUtf8("spec_plot"))
+        self.verticalLayout_4.addWidget(self.spec_plot)
         self.stim_dock.setWidget(self.dockWidgetContents)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.stim_dock)
         self.response_dock = QtGui.QDockWidget(ControlWindow)
         self.response_dock.setObjectName(_fromUtf8("response_dock"))
         self.dockWidgetContents_2 = QtGui.QWidget()
         self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
+        self.verticalLayout_8 = QtGui.QVBoxLayout(self.dockWidgetContents_2)
+        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
+        self.response_plot = DataPlotWidget(self.dockWidgetContents_2)
+        self.response_plot.setObjectName(_fromUtf8("response_plot"))
+        self.verticalLayout_8.addWidget(self.response_plot)
         self.response_dock.setWidget(self.dockWidgetContents_2)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.response_dock)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
@@ -917,11 +922,10 @@ class Ui_ControlWindow(object):
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
         self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))
-        self.parrot_label.setText(_translate("ControlWindow", "This is a late parrot", None))
         self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
 
-from audiolab.plotting.chacoplots import ImageWidget
+from audiolab.plotting.chacoplots import DataPlotWidget, ImageWidget
 
 if __name__ == "__main__":
     import sys

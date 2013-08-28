@@ -1,4 +1,5 @@
 import sys, os
+import json
 
 from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter, ImagePlotter
 from PyQt4 import QtCore, QtGui
@@ -9,6 +10,7 @@ from audiolab.config.info import caldata_filename, calfreq_filename
 from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.tools.qthreading import GenericThread, WorkerSignals
 from audiolab.tools.audiotools import spectrogram
+import audiolab.tools.systools as systools
 
 from maincontrol_form import Ui_ControlWindow
 from tuning_curve_gui import TuningCurve
@@ -18,22 +20,14 @@ RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
 GREEN = QtGui.QPalette()
 GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
 
+INPUTSFNAME = "controlinputs.json"
+
 class ControlWindow(QtGui.QMainWindow):
     def __init__(self, dev_name, parent=None):
         # auto generated code intialization
         QtGui.QMainWindow.__init__(self, parent)
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
-
-        # add a chaco plot to the docked widget
-
-        # plot = Plotter(self,2)
-        # self.ui.stim_dock.setWidget(plot.widget)
-
-        self.response_plot = LiveWindow(2)
-        self.spec_plot = ImagePlotter(self,1)
-        self.ui.stim_dock.setWidget(self.spec_plot.widget)
-        self.ui.response_dock.setWidget(self.response_plot)
 
         self.ui.start_btn.clicked.connect(self.on_start)
         self.ui.stop_btn.clicked.connect(self.on_stop)
@@ -45,16 +39,27 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.ui.running_label.setPalette(RED)
 
-        self.wavrootdir = os.path.expanduser('~')
+        # load saved user inputs
+        inputsfname = os.path.join(systools.get_appdir(), INPUTSFNAME)
+        try:
+            with open(inputsfname, 'r') as jf:
+                inputsdict = json.load(jf)
+        except:
+            print "problem loading app data"
+            inputsdict = {}
+
+        self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
+
+        # set up wav file directory finder paths
         self.dirmodel = QtGui.QFileSystemModel(self)
         self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
-        self.dirmodel.setRootPath(self.wavrootdir)
         self.ui.filetree_view.setModel(self.dirmodel)
+        self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(self.wavrootdir))
 
         self.filemodel = QtGui.QFileSystemModel(self)
         self.filemodel.setFilter(QtCore.QDir.Files)
-        self.filemodel.setRootPath(self.wavrootdir)
         self.ui.filelist_view.setModel(self.filemodel)
+        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.wavrootdir))
 
         self.apply_calibration = False
         self.display = None
@@ -227,13 +232,26 @@ class ControlWindow(QtGui.QMainWindow):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         spec, f, bins, fs = spectrogram(spath)
-        self.spec_plot.update_data(spec, xaxis=bins, yaxis=f)
+        self.ui.spec_plot.update_data(spec, xaxis=bins, yaxis=f)
 
     def wavfile_clicked(self, model_index):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         spec, f, bins, fs = spectrogram(spath)
         self.ui.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
+
+    def closeEvent(self,event):
+        # save current inputs to file for loading next time
+        appdir = systools.get_appdir()
+        if not os.path.isdir(appdir):
+            os.makedirs(appdir)
+        fname = os.path.join(appdir, INPUTSFNAME)
+
+        savedict = {}
+        savedict['wavrootdir'] = self.wavrootdir
+        with open(fname, 'w') as jf:
+            json.dump(savedict, jf)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

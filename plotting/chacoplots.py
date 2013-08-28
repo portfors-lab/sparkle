@@ -43,24 +43,17 @@ class ScrollingWindow(QtGui.QMainWindow):
     def append(self, y, axnum=0):
         self.plotview.update_data(axnum, y)
 
+class DataPlotWidget(QtGui.QWidget):
+    def __init__(self, parent=None, nsubplots=1):
+        QtGui.QWidget.__init__(self, parent)
+        self.plotview = Plotter(self, nsubplots)
 
-class ImageWindow(QtGui.QMainWindow):
-    def __init__(self, nsubplots):
-        QtGui.QMainWindow.__init__(self)
-        self.mainWidget = QtGui.QWidget(self) # dummy widget to contain layout manager
-        self.plotview = ImagePlotter(self, nsubplots)
-
-        layout = QtGui.QVBoxLayout(self.mainWidget)
-        layout.setObjectName("masterlayout")
+        layout = QtGui.QVBoxLayout()
         layout.addWidget(self.plotview.widget)
+        self.setLayout(layout)
 
-        self.resize(600,400)
-
-        self.setCentralWidget(self.mainWidget)
-
-    def change_image(self, imgdata, axnum=0):
-        self.plotview.update_data(imgdata, axnum=axnum)
-
+    def update_data(self, axnum, linenum, x, y):
+        self.plotview.update_data(axnum, linenum, x, y)
 
 class ImageWidget(QtGui.QWidget):
     def __init__(self, parent=None, nsubplots=1):
@@ -68,7 +61,6 @@ class ImageWidget(QtGui.QWidget):
         self.plotview = ImagePlotter(self, nsubplots)
 
         layout = QtGui.QVBoxLayout()
-        layout.setObjectName("masterlayout")
         layout.addWidget(self.plotview.widget)
         self.setLayout(layout)
 

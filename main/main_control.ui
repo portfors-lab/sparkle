@@ -176,7 +176,7 @@
            </rect>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page">
            <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -798,6 +798,11 @@
           </widget>
          </widget>
         </widget>
+        <widget class="QWidget" name="tab_chart">
+         <attribute name="title">
+          <string>Chart</string>
+         </attribute>
+        </widget>
         <widget class="QWidget" name="tab_tc">
          <attribute name="title">
           <string>Tuning Curve</string>
@@ -1219,11 +1224,6 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_chart">
-         <attribute name="title">
-          <string>Chart</string>
-         </attribute>
-        </widget>
         <widget class="QWidget" name="tab_protocol">
          <attribute name="title">
           <string>Experiment</string>
@@ -1472,11 +1472,7 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QLabel" name="parrot_label">
-       <property name="text">
-        <string>This is a late parrot</string>
-       </property>
-      </widget>
+      <widget class="ImageWidget" name="spec_plot" native="true"/>
      </item>
     </layout>
    </widget>
@@ -1485,7 +1481,13 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2"/>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_8">
+     <item>
+      <widget class="DataPlotWidget" name="response_plot" native="true"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionSave_Options">
    <property name="text">
@@ -1501,6 +1503,12 @@
  <customwidgets>
   <customwidget>
    <class>ImageWidget</class>
+   <extends>QWidget</extends>
+   <header>audiolab.plotting.chacoplots</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DataPlotWidget</class>
    <extends>QWidget</extends>
    <header>audiolab.plotting.chacoplots</header>
    <container>1</container>

@@ -27,10 +27,9 @@ def test_chaco_plot():
 
 def test_chaco_image():
     app = QApplication(sys.argv)
-    # fig = ImageWindow(1)
     # fig = ImageWidget()
     fig = ImagePlotter(None, 1)
-    fname = os.path.join(os.path.abspath(os.path.dirname(__file__)), "ducklings.jpg")
+    # fname = os.path.join(os.path.abspath(os.path.dirname(__file__)), "ducklings.jpg")
     # print fname
     # img = Image.open(fname)
     # print img.size
@@ -42,7 +41,6 @@ def test_chaco_image():
     spec, f, bins, fs = adt.spectrogram(sylpath)
 
     fig.update_data(spec)
-    # fig.change_image(img)
     fig.widget.resize(600, 400)
     # fig.resize(600,400)
     fig.widget.show()
