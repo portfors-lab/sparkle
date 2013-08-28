@@ -1,10 +1,13 @@
-from audiolab.plotting.chacoplots import LiveWindow
+from audiolab.plotting.chacoplots import LiveWindow, ImageWindow, ImageWidget, ImagePlotter
 
-import sys
+import sys, os
 import time, random
 import numpy as np
+import Image
 
 from PyQt4.QtGui import QApplication
+
+import audiolab.tools.audiotools as adt
 
 def test_chaco_plot():
     app = QApplication(sys.argv)
@@ -21,3 +24,28 @@ def test_chaco_plot():
         time.sleep(0.5)
 
     fig.close()
+
+def test_chaco_image():
+    app = QApplication(sys.argv)
+    # fig = ImageWindow(1)
+    # fig = ImageWidget()
+    fig = ImagePlotter(None, 1)
+    fname = os.path.join(os.path.abspath(os.path.dirname(__file__)), "ducklings.jpg")
+    # print fname
+    # img = Image.open(fname)
+    # print img.size
+    # img = np.array(img.getdata(), np.uint8).reshape(img.size[1], img.size[0], 3)
+    # # img = np.array(img)
+    # print img.shape
+    # print type(img)
+    sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
+    spec, f, bins, fs = adt.spectrogram(sylpath)
+
+    fig.update_data(spec)
+    # fig.change_image(img)
+    fig.widget.resize(600, 400)
+    # fig.resize(600,400)
+    fig.widget.show()
+
+    QApplication.processEvents()
+    time.sleep(3)

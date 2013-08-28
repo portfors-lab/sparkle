@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Aug 27 10:33:43 2013
+# Created: Wed Aug 28 09:45:03 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,22 +73,22 @@ class Ui_ControlWindow(object):
         self.label_4.setGeometry(QtCore.QRect(530, 20, 46, 13))
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.label_39 = QtGui.QLabel(self.tab_explore)
-        self.label_39.setGeometry(QtCore.QRect(20, 330, 41, 22))
+        self.label_39.setGeometry(QtCore.QRect(20, 450, 41, 22))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.label_39.setFont(font)
         self.label_39.setObjectName(_fromUtf8("label_39"))
         self.nreps_spnbx_2 = QtGui.QSpinBox(self.tab_explore)
-        self.nreps_spnbx_2.setGeometry(QtCore.QRect(70, 330, 61, 22))
+        self.nreps_spnbx_2.setGeometry(QtCore.QRect(80, 470, 61, 22))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.nreps_spnbx_2.setFont(font)
-        self.nreps_spnbx_2.setMinimum(1)
+        self.nreps_spnbx_2.setMinimum(0)
         self.nreps_spnbx_2.setMaximum(100)
         self.nreps_spnbx_2.setProperty("value", 5)
         self.nreps_spnbx_2.setObjectName(_fromUtf8("nreps_spnbx_2"))
         self.stackedWidget = QtGui.QStackedWidget(self.tab_explore)
-        self.stackedWidget.setGeometry(QtCore.QRect(20, 50, 481, 261))
+        self.stackedWidget.setGeometry(QtCore.QRect(20, 50, 471, 331))
         self.stackedWidget.setObjectName(_fromUtf8("stackedWidget"))
         self.page = QtGui.QWidget()
         self.page.setObjectName(_fromUtf8("page"))
@@ -432,15 +432,19 @@ class Ui_ControlWindow(object):
         self.wavrootdir_btn.setObjectName(_fromUtf8("wavrootdir_btn"))
         self.horizontalLayout_6.addWidget(self.wavrootdir_btn)
         self.verticalLayout_7.addLayout(self.horizontalLayout_6)
-        self.horizontalLayout_7 = QtGui.QHBoxLayout()
-        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
-        self.filetree_view = QtGui.QTreeView(self.page_3)
+        self.splitter_2 = QtGui.QSplitter(self.page_3)
+        self.splitter_2.setOrientation(QtCore.Qt.Vertical)
+        self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
+        self.splitter = QtGui.QSplitter(self.splitter_2)
+        self.splitter.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter.setObjectName(_fromUtf8("splitter"))
+        self.filetree_view = QtGui.QTreeView(self.splitter)
         self.filetree_view.setObjectName(_fromUtf8("filetree_view"))
-        self.horizontalLayout_7.addWidget(self.filetree_view)
-        self.filelist_view = QtGui.QListView(self.page_3)
+        self.filelist_view = QtGui.QListView(self.splitter)
         self.filelist_view.setObjectName(_fromUtf8("filelist_view"))
-        self.horizontalLayout_7.addWidget(self.filelist_view)
-        self.verticalLayout_7.addLayout(self.horizontalLayout_7)
+        self.spec_preview = ImageWidget(self.splitter_2)
+        self.spec_preview.setObjectName(_fromUtf8("spec_preview"))
+        self.verticalLayout_7.addWidget(self.splitter_2)
         self.stackedWidget.addWidget(self.page_3)
         self.tab_group.addTab(self.tab_explore, _fromUtf8(""))
         self.tab_tc = QtGui.QWidget()
@@ -819,6 +823,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.filetree_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavdir_selected)
         QtCore.QObject.connect(self.wavrootdir_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.browse_wavdirs)
         QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavfile_selected)
+        QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("clicked(QModelIndex)")), ControlWindow.wavfile_clicked)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -916,6 +921,7 @@ class Ui_ControlWindow(object):
         self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
 
+from audiolab.plotting.chacoplots import ImageWidget
 
 if __name__ == "__main__":
     import sys

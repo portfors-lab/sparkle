@@ -229,6 +229,12 @@ class ControlWindow(QtGui.QMainWindow):
         spec, f, bins, fs = spectrogram(spath)
         self.spec_plot.update_data(spec, xaxis=bins, yaxis=f)
 
+    def wavfile_clicked(self, model_index):
+        # display spectrogram of file
+        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
+        spec, f, bins, fs = spectrogram(spath)
+        self.ui.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     devName = "PCI-6259"

@@ -128,7 +128,7 @@
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>330</y>
+            <y>450</y>
             <width>41</width>
             <height>22</height>
            </rect>
@@ -145,8 +145,8 @@
          <widget class="QSpinBox" name="nreps_spnbx_2">
           <property name="geometry">
            <rect>
-            <x>70</x>
-            <y>330</y>
+            <x>80</x>
+            <y>470</y>
             <width>61</width>
             <height>22</height>
            </rect>
@@ -157,7 +157,7 @@
            </font>
           </property>
           <property name="minimum">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="maximum">
            <number>100</number>
@@ -171,8 +171,8 @@
            <rect>
             <x>20</x>
             <y>50</y>
-            <width>481</width>
-            <height>261</height>
+            <width>471</width>
+            <height>331</height>
            </rect>
           </property>
           <property name="currentIndex">
@@ -780,14 +780,19 @@
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
-              <item>
+             <widget class="QSplitter" name="splitter_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <widget class="QSplitter" name="splitter">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
                <widget class="QTreeView" name="filetree_view"/>
-              </item>
-              <item>
                <widget class="QListView" name="filelist_view"/>
-              </item>
-             </layout>
+              </widget>
+              <widget class="ImageWidget" name="spec_preview" native="true"/>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -1493,6 +1498,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ImageWidget</class>
+   <extends>QWidget</extends>
+   <header>audiolab.plotting.chacoplots</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -1591,6 +1604,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>filelist_view</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>wavfile_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>361</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>851</x>
+     <y>550</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1599,5 +1628,6 @@
   <slot>wavdir_selected()</slot>
   <slot>browse_wavdirs()</slot>
   <slot>wavfile_selected()</slot>
+  <slot>wavfile_clicked()</slot>
  </slots>
 </ui>
