@@ -4,7 +4,7 @@ from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.chaco.api import GridPlotContainer
 
-from audiolab.plotting.chacoplots import ImagePlotter, Plotter
+from audiolab.plotting.chacoplots import ImagePlotter, Plotter, DataPlotWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -13,7 +13,8 @@ class ProtocolDisplay(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
 
         self.spec_plot = ImagePlotter(self)
-        self.fft_plot = Plotter(self, 1, rotation = -90)
+        # self.fft_plot = Plotter(self, 1, rotation = -90)
+        self.fft_plot = DataPlotWidget()
         self.spiketrace_plot = Plotter(self,1)
         self.signal_plot = Plotter(self,1)
 
@@ -24,8 +25,8 @@ class ProtocolDisplay(QtGui.QWidget):
         # container.insert(5, self.fft_plot)
 
         self.spiketrace_plot.widget.setMinimumWidth(500)
-        self.fft_plot.widget.setMinimumWidth(100)
-        self.fft_plot.widget.setMinimumHeight(400)
+        self.fft_plot.setMinimumWidth(100)
+        self.fft_plot.setMinimumHeight(400)
 
         # layout = QtGui.QGridLayout()
         # # layout.setSpacing(10)
@@ -43,7 +44,7 @@ class ProtocolDisplay(QtGui.QWidget):
         splittersw.addWidget(splitternw)
         splitternw.addWidget(self.spiketrace_plot.widget)
         splitterse.addWidget(splitternw)
-        splitterse.addWidget(self.fft_plot.widget)
+        splitterse.addWidget(RotatableView(self.fft_plot))
 
         layout = QtGui.QHBoxLayout()
         layout.addWidget(splitterse)
@@ -62,6 +63,22 @@ class ProtocolDisplay(QtGui.QWidget):
     def update_signal(self, *args, **kwargs):
         self.signal_plot.update_data(*args, **kwargs)
 
+class RotatableView(QtGui.QGraphicsView):
+    def __init__(self, item, rotation=0):
+        QtGui.QGraphicsView.__init__(self)
+        scene = QtGui.QGraphicsScene(self)
+        self.setScene(scene)
+        graphics_item = scene.addWidget(item)
+        graphics_item.rotate(rotation)
+        self.item = graphics_item
+        # make the QGraphicsView invisible
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setStyleSheet("border: 0px")
+
+    def resizeEvent(self,event):
+        sz = event.size()
+        self.item.setGeometry(QtCore.QRectF(0,0,sz.width(), sz.height()))
 
 if __name__ == "__main__":
     import random

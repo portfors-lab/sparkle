@@ -53,8 +53,8 @@ class DataPlotWidget(QtGui.QWidget):
         layout.addWidget(self.plotview.widget)
         self.setLayout(layout)
 
-    def update_data(self, axnum, linenum, x, y):
-        self.plotview.update_data(axnum, linenum, x, y)
+    def update_data(self, *args, **kwargs):
+        self.plotview.update_data(*args, **kwargs)
 
 class ImageWidget(QtGui.QWidget):
     def __init__(self, parent=None, nsubplots=1):
@@ -75,6 +75,8 @@ class Plotter():
             self.plotdata.append(ArrayPlotData(x=np.array([]),  y=np.array([])))
         self.window, self.plots = self.create_plot(parent, rotation)
         self.widget = self.window.control
+        # self.widget = RotatableView(self.window.control)
+
         
     def update_data(self, x, y, axnum=0, linenum=0):
         self.plotdata[axnum].set_data("x", x)
@@ -94,10 +96,10 @@ class Plotter():
         plots[0].padding_bottom = 30
         plots[-1].padding_top = 30
         container = VPlotContainer(*plots)
-        outer_container = RotatablePlotContainer(container, rotation=rotation)
+        # outer_container = RotatablePlotContainer(container, rotation=rotation)
         container.spacing = 0
 
-        return Window(parent, -1, component=outer_container), plots
+        return Window(parent, -1, component=container), plots
 
 class ScrollingPlotter(Plotter):
     def __init__(self, parent, nsubplots, deltax, windowsize=1):
