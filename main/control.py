@@ -1,5 +1,6 @@
 import sys, os
 import json
+import scipy.io.wavfile as wv
 
 from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter, ImagePlotter
 from PyQt4 import QtCore, QtGui
@@ -9,7 +10,7 @@ from audiolab.io.daq_tasks import *
 from audiolab.config.info import caldata_filename, calfreq_filename
 from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.tools.qthreading import GenericThread, WorkerSignals
-from audiolab.tools.audiotools import spectrogram
+from audiolab.tools.audiotools import spectrogram, calc_spectrum
 import audiolab.tools.systools as systools
 
 from maincontrol_form import Ui_ControlWindow
@@ -232,13 +233,19 @@ class ControlWindow(QtGui.QMainWindow):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         spec, f, bins, fs = spectrogram(spath)
-        self.ui.spec_plot.update_data(spec, xaxis=bins, yaxis=f)
+        self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
+
+        sr, wavdata = wv.read(spath)
+        freq, spectrum = calc_spectrum(wavdata,sr)
+
+        self.ui.display.update_fft(freq, spectrum)
 
     def wavfile_clicked(self, model_index):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         spec, f, bins, fs = spectrogram(spath)
-        self.ui.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
+        self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
+
 
     def closeEvent(self,event):
         # save current inputs to file for loading next time

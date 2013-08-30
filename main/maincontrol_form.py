@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Aug 28 10:03:05 2013
+# Created: Fri Aug 30 12:38:23 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(967, 790)
+        ControlWindow.resize(967, 802)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -447,6 +447,9 @@ class Ui_ControlWindow(object):
         self.verticalLayout_7.addWidget(self.splitter_2)
         self.stackedWidget.addWidget(self.page_3)
         self.tab_group.addTab(self.tab_explore, _fromUtf8(""))
+        self.tab_chart = QtGui.QWidget()
+        self.tab_chart.setObjectName(_fromUtf8("tab_chart"))
+        self.tab_group.addTab(self.tab_chart, _fromUtf8(""))
         self.tab_tc = QtGui.QWidget()
         self.tab_tc.setObjectName(_fromUtf8("tab_tc"))
         self.verticalLayout = QtGui.QVBoxLayout(self.tab_tc)
@@ -674,9 +677,6 @@ class Ui_ControlWindow(object):
         self.gridLayout_3.addWidget(self.label_14, 0, 3, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.tab_group.addTab(self.tab_tc, _fromUtf8(""))
-        self.tab_chart = QtGui.QWidget()
-        self.tab_chart.setObjectName(_fromUtf8("tab_chart"))
-        self.tab_group.addTab(self.tab_chart, _fromUtf8(""))
         self.tab_protocol = QtGui.QWidget()
         self.tab_protocol.setObjectName(_fromUtf8("tab_protocol"))
         self.label_2 = QtGui.QLabel(self.tab_protocol)
@@ -715,6 +715,12 @@ class Ui_ControlWindow(object):
         self.tableWidget.setItem(2, 0, item)
         item = QtGui.QTableWidgetItem()
         self.tableWidget.setItem(2, 1, item)
+        self.listWidget = QtGui.QListWidget(self.tab_protocol)
+        self.listWidget.setGeometry(QtCore.QRect(420, 60, 256, 192))
+        self.listWidget.setObjectName(_fromUtf8("listWidget"))
+        self.label_8 = QtGui.QLabel(self.tab_protocol)
+        self.label_8.setGeometry(QtCore.QRect(420, 40, 46, 13))
+        self.label_8.setObjectName(_fromUtf8("label_8"))
         self.tab_group.addTab(self.tab_protocol, _fromUtf8(""))
         self.horizontalLayout_5.addWidget(self.tab_group)
         self.verticalLayout_2 = QtGui.QVBoxLayout()
@@ -789,28 +795,17 @@ class Ui_ControlWindow(object):
         self.statusbar = QtGui.QStatusBar(ControlWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         ControlWindow.setStatusBar(self.statusbar)
-        self.stim_dock = QtGui.QDockWidget(ControlWindow)
-        self.stim_dock.setObjectName(_fromUtf8("stim_dock"))
+        self.plot_dock = QtGui.QDockWidget(ControlWindow)
+        self.plot_dock.setObjectName(_fromUtf8("plot_dock"))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.spec_plot = ImageWidget(self.dockWidgetContents)
-        self.spec_plot.setObjectName(_fromUtf8("spec_plot"))
-        self.verticalLayout_4.addWidget(self.spec_plot)
-        self.stim_dock.setWidget(self.dockWidgetContents)
-        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.stim_dock)
-        self.response_dock = QtGui.QDockWidget(ControlWindow)
-        self.response_dock.setObjectName(_fromUtf8("response_dock"))
-        self.dockWidgetContents_2 = QtGui.QWidget()
-        self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
-        self.verticalLayout_8 = QtGui.QVBoxLayout(self.dockWidgetContents_2)
-        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
-        self.response_plot = DataPlotWidget(self.dockWidgetContents_2)
-        self.response_plot.setObjectName(_fromUtf8("response_plot"))
-        self.verticalLayout_8.addWidget(self.response_plot)
-        self.response_dock.setWidget(self.dockWidgetContents_2)
-        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.response_dock)
+        self.display = ProtocolDisplay(self.dockWidgetContents)
+        self.display.setObjectName(_fromUtf8("display"))
+        self.verticalLayout_4.addWidget(self.display)
+        self.plot_dock.setWidget(self.dockWidgetContents)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.plot_dock)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -821,7 +816,7 @@ class Ui_ControlWindow(object):
 
         self.retranslateUi(ControlWindow)
         self.tab_group.setCurrentIndex(0)
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
         QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.stackedWidget.setCurrentIndex)
@@ -869,6 +864,7 @@ class Ui_ControlWindow(object):
         self.label_52.setText(_translate("ControlWindow", "Intensity", None))
         self.wavrootdir_btn.setText(_translate("ControlWindow", "change", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_explore), _translate("ControlWindow", "Explore", None))
+        self.tab_group.setTabText(self.tab_group.indexOf(self.tab_chart), _translate("ControlWindow", "Chart", None))
         self.label_21.setText(_translate("ControlWindow", "dB SPL", None))
         self.label_19.setText(_translate("ControlWindow", "kHz", None))
         self.label_25.setText(_translate("ControlWindow", "Frequency", None))
@@ -886,7 +882,6 @@ class Ui_ControlWindow(object):
         self.label_31.setText(_translate("ControlWindow", "Reps", None))
         self.label_14.setText(_translate("ControlWindow", "Rise fall time", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_tc), _translate("ControlWindow", "Tuning Curve", None))
-        self.tab_group.setTabText(self.tab_group.indexOf(self.tab_chart), _translate("ControlWindow", "Chart", None))
         self.label_2.setText(_translate("ControlWindow", "Experiment Protocol:", None))
         self.pushButton.setText(_translate("ControlWindow", "Edit...", None))
         item = self.tableWidget.verticalHeaderItem(0)
@@ -914,6 +909,7 @@ class Ui_ControlWindow(object):
         item = self.tableWidget.item(2, 1)
         item.setText(_translate("ControlWindow", "5", None))
         self.tableWidget.setSortingEnabled(__sortingEnabled)
+        self.label_8.setText(_translate("ControlWindow", "HIstory", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_protocol), _translate("ControlWindow", "Experiment", None))
         self.label_30.setText(_translate("ControlWindow", "AI channel", None))
         self.label_29.setText(_translate("ControlWindow", "Stim channel", None))
@@ -925,7 +921,8 @@ class Ui_ControlWindow(object):
         self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
 
-from audiolab.plotting.chacoplots import DataPlotWidget, ImageWidget
+from audiolab.plotting.chacoplots import ImageWidget
+from audiolab.plotting.protocoldisplay import ProtocolDisplay
 
 if __name__ == "__main__":
     import sys

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>967</width>
-    <height>790</height>
+    <height>802</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1324,6 +1324,29 @@
            </property>
           </item>
          </widget>
+         <widget class="QListWidget" name="listWidget">
+          <property name="geometry">
+           <rect>
+            <x>420</x>
+            <y>60</y>
+            <width>256</width>
+            <height>192</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_8">
+          <property name="geometry">
+           <rect>
+            <x>420</x>
+            <y>40</y>
+            <width>46</width>
+            <height>13</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>HIstory</string>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -1465,26 +1488,14 @@
    <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="stim_dock">
+  <widget class="QDockWidget" name="plot_dock">
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="ImageWidget" name="spec_plot" native="true"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="response_dock">
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QVBoxLayout" name="verticalLayout_8">
-     <item>
-      <widget class="DataPlotWidget" name="response_plot" native="true"/>
+      <widget class="ProtocolDisplay" name="display" native="true"/>
      </item>
     </layout>
    </widget>
@@ -1508,9 +1519,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>DataPlotWidget</class>
+   <class>ProtocolDisplay</class>
    <extends>QWidget</extends>
-   <header>audiolab.plotting.chacoplots</header>
+   <header>audiolab.plotting.protocoldisplay</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

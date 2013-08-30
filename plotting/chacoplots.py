@@ -2,10 +2,11 @@
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.enable.api import Window
-from enthought.chaco.api import VPlotContainer, ArrayPlotData, Plot
+from enthought.chaco.api import VPlotContainer, ArrayPlotData, Plot, OverlayPlotContainer
 from chaco.tools.api import PanTool, ZoomTool, DragZoom
 
 import sys, random
+import math
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -44,9 +45,9 @@ class ScrollingWindow(QtGui.QMainWindow):
         self.plotview.update_data(axnum, y)
 
 class DataPlotWidget(QtGui.QWidget):
-    def __init__(self, parent=None, nsubplots=1):
+    def __init__(self, parent=None, nsubplots=1, rotation=0):
         QtGui.QWidget.__init__(self, parent)
-        self.plotview = Plotter(self, nsubplots)
+        self.plotview = Plotter(self, nsubplots, rotation=rotation)
 
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.plotview.widget)
@@ -65,22 +66,21 @@ class ImageWidget(QtGui.QWidget):
         self.setLayout(layout)
 
     def update_data(self, imgdata, axnum=0,  xaxis=None, yaxis=None):
-        self.plotview.update_data(imgdata, axnum=0, xaxis=None, yaxis=None)
+        self.plotview.update_data(imgdata, axnum=axnum, xaxis=xaxis, yaxis=yaxis)
 
 class Plotter():
-    def __init__(self, parent, nsubplots):
+    def __init__(self, parent, nsubplots=1, rotation=0):
         self.plotdata = []
         for isubplot in range(nsubplots):
             self.plotdata.append(ArrayPlotData(x=np.array([]),  y=np.array([])))
-        self.window = self.create_plot(parent)
+        self.window, self.plots = self.create_plot(parent, rotation)
         self.widget = self.window.control
         
-    def update_data(self, axnum, linenum, x, y):
+    def update_data(self, x, y, axnum=0, linenum=0):
         self.plotdata[axnum].set_data("x", x)
         self.plotdata[axnum].set_data("y", y)
-        self.window.component.components[axnum].request_redraw()
 
-    def create_plot(self, parent):
+    def create_plot(self, parent, rotation):
         plots = []
         for idata in self.plotdata:
             plot = Plot(idata, padding=50, border_visible=True)
@@ -94,9 +94,10 @@ class Plotter():
         plots[0].padding_bottom = 30
         plots[-1].padding_top = 30
         container = VPlotContainer(*plots)
+        outer_container = RotatablePlotContainer(container, rotation=rotation)
         container.spacing = 0
 
-        return Window(parent, -1, component=container)
+        return Window(parent, -1, component=outer_container), plots
 
 class ScrollingPlotter(Plotter):
     def __init__(self, parent, nsubplots, deltax, windowsize=1):
@@ -135,7 +136,7 @@ class ScrollingPlotter(Plotter):
             self.plots[axnum].range2d.x_range.low += self.deltax*points_to_add
 
 class ImagePlotter():
-    def __init__(self, parent, nsubplots):
+    def __init__(self, parent=None, nsubplots=1):
         self.plotdata = []
         for isubplot in range(nsubplots):
             pd = ArrayPlotData()
@@ -169,6 +170,26 @@ class ImagePlotter():
         container.spacing = 0
 
         return Window(parent, -1, component=container)
+
+class RotatablePlotContainer(OverlayPlotContainer):
+    use_backbuffer=True
+    # hack to get only one rotation
+    first_draw = True
+    def __init__(self, *args, **kw):
+        rotation = kw.pop('rotation',0)
+        super(RotatablePlotContainer, self).__init__(*args, **kw)
+        self.rotation = float(rotation)  # rotation in degrees
+
+    def _draw(self, gc, *args, **kw):
+        if self.first_draw:
+            w2 = self.width / 2
+            h2 = self.height / 2
+            gc.translate_ctm(w2, h2)
+            gc.rotate_ctm(math.radians(self.rotation))
+            gc.translate_ctm(-w2, -h2)
+            self.first_draw = False
+        super(RotatablePlotContainer, self)._draw(gc, *args, **kw)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
