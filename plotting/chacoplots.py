@@ -56,6 +56,9 @@ class DataPlotWidget(QtGui.QWidget):
     def update_data(self, *args, **kwargs):
         self.plotview.update_data(*args, **kwargs)
 
+    def resizeEvent(self, event):
+        self.plotview.window.component.first_draw = True
+
 class ImageWidget(QtGui.QWidget):
     def __init__(self, parent=None, nsubplots=1):
         QtGui.QWidget.__init__(self, parent)
@@ -89,17 +92,21 @@ class Plotter():
             plot.plot(("x", "y"), name="data plot", color="green")
             plot.padding_top = 10
             plot.padding_bottom = 10
-            plot.tools.append(PanTool(plot))
-            plot.tools.append(ZoomTool(plot))
+            if rotation == 0:
+                plot.tools.append(PanTool(plot))
+                plot.tools.append(ZoomTool(plot))
+            else:
+                plot.tools.append(TransposedPanTool(plot))
+                plot.tools.append(ZoomTool(plot))
             plots.append(plot)
 
         plots[0].padding_bottom = 30
         plots[-1].padding_top = 30
         container = VPlotContainer(*plots)
-        # outer_container = RotatablePlotContainer(container, rotation=rotation)
+        outer_container = RotatablePlotContainer(container, rotation=rotation)
         container.spacing = 0
 
-        return Window(parent, -1, component=container), plots
+        return Window(parent, -1, component=outer_container), plots
 
 class ScrollingPlotter(Plotter):
     def __init__(self, parent, nsubplots, deltax, windowsize=1):
@@ -186,12 +193,31 @@ class RotatablePlotContainer(OverlayPlotContainer):
         if self.first_draw:
             w2 = self.width / 2
             h2 = self.height / 2
+            # translate to get rotation correct
             gc.translate_ctm(w2, h2)
             gc.rotate_ctm(math.radians(self.rotation))
-            gc.translate_ctm(-w2, -h2)
+            # translate to correct position
+            gc.translate_ctm(-h2, -w2)
+            h, w = self.outer_bounds
+            self.outer_bounds = (w,h)
             self.first_draw = False
         super(RotatablePlotContainer, self)._draw(gc, *args, **kw)
 
+class TransposedPanTool(PanTool):
+    startx = None
+
+    def normal_left_down(self, event):
+        print event
+        self.startx = event.y
+        super(TransposedPanTool,self).normal_left_down(event)
+
+    def panning_mouse_move(self, event):
+        # print event
+        xtmp = event.x
+        event.x = self.startx + (self.startx - event.y)
+        event.y = xtmp
+        # print event.x, event.y
+        super(TransposedPanTool,self).panning_mouse_move(event)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

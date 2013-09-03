@@ -14,7 +14,7 @@ class ProtocolDisplay(QtGui.QWidget):
 
         self.spec_plot = ImagePlotter(self)
         # self.fft_plot = Plotter(self, 1, rotation = -90)
-        self.fft_plot = DataPlotWidget()
+        self.fft_plot = DataPlotWidget(rotation=-90)
         self.spiketrace_plot = Plotter(self,1)
         self.signal_plot = Plotter(self,1)
 
@@ -25,8 +25,8 @@ class ProtocolDisplay(QtGui.QWidget):
         # container.insert(5, self.fft_plot)
 
         self.spiketrace_plot.widget.setMinimumWidth(500)
-        self.fft_plot.setMinimumWidth(100)
-        self.fft_plot.setMinimumHeight(400)
+        self.fft_plot.setMinimumWidth(200)
+        self.fft_plot.setMinimumHeight(100)
 
         # layout = QtGui.QGridLayout()
         # # layout.setSpacing(10)
@@ -44,7 +44,8 @@ class ProtocolDisplay(QtGui.QWidget):
         splittersw.addWidget(splitternw)
         splitternw.addWidget(self.spiketrace_plot.widget)
         splitterse.addWidget(splitternw)
-        splitterse.addWidget(RotatableView(self.fft_plot))
+        # splitterse.addWidget(RotatableView(self.fft_plot))
+        splitterse.addWidget(self.fft_plot)
 
         layout = QtGui.QHBoxLayout()
         layout.addWidget(splitterse)
@@ -81,7 +82,7 @@ class RotatableView(QtGui.QGraphicsView):
         self.item.setGeometry(QtCore.QRectF(0,0,sz.width(), sz.height()))
 
 if __name__ == "__main__":
-    import random
+    import random, time
     import numpy as np
     app = QtGui.QApplication(sys.argv)
     plot = ProtocolDisplay()
@@ -89,7 +90,11 @@ if __name__ == "__main__":
     plot.show()
 
     x = np.arange(200)
-    y = random.randint(0,10) * np.sin(x)
-    plot.update_spiketrace(x,y)
+    for i in range(10):
+        y = random.randint(0,10) * np.sin(x)
+        plot.update_fft(x,y)
+        time.sleep(0.2)
+        QtGui.QApplication.processEvents()
+
 
     sys.exit(app.exec_())
