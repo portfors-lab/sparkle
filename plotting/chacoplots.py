@@ -59,6 +59,9 @@ class DataPlotWidget(QtGui.QWidget):
     def resizeEvent(self, event):
         self.plotview.window.component.first_draw = True
 
+    def set_xlim(self, *args, **kwargs):
+        self.plotview.set_xlim(*args, **kwargs)
+
 class ImageWidget(QtGui.QWidget):
     def __init__(self, parent=None, nsubplots=1):
         QtGui.QWidget.__init__(self, parent)
@@ -68,8 +71,11 @@ class ImageWidget(QtGui.QWidget):
         layout.addWidget(self.plotview.widget)
         self.setLayout(layout)
 
-    def update_data(self, imgdata, axnum=0,  xaxis=None, yaxis=None):
-        self.plotview.update_data(imgdata, axnum=axnum, xaxis=xaxis, yaxis=yaxis)
+    def update_data(self, *args, **kwargs):
+        self.plotview.update_data(*args, **kwargs)
+
+    def set_xlim(self, *args, **kwargs):
+        self.plotview.set_xlim(*args, **kwargs)
 
 class Plotter():
     def __init__(self, parent, nsubplots=1, rotation=0):
@@ -84,6 +90,10 @@ class Plotter():
     def update_data(self, x, y, axnum=0, linenum=0):
         self.plotdata[axnum].set_data("x", x)
         self.plotdata[axnum].set_data("y", y)
+
+    def set_xlim(self, lim, axnum=0):
+        self.plots[axnum].range2d.x_range.low = lim[0]
+        self.plots[axnum].range2d.x_range.high = lim[1]
 
     def create_plot(self, parent, rotation):
         plots = []
@@ -162,6 +172,10 @@ class ImagePlotter():
             self.plots[axnum].components[0].index.set_data(xaxis, yaxis)
         self.window.component.components[axnum].request_redraw()
 
+    def set_xlim(self, lim, axnum=0):
+        self.plots[axnum].range2d.x_range.low = lim[0]
+        self.plots[axnum].range2d.x_range.high = lim[1]
+        
     def create_plot(self, parent):
         plots = []
         for data in self.plotdata:
@@ -190,7 +204,7 @@ class RotatablePlotContainer(OverlayPlotContainer):
         self.rotation = float(rotation)  # rotation in degrees
 
     def _draw(self, gc, *args, **kw):
-        if self.first_draw:
+        if self.first_draw and self.rotation != 0:
             w2 = self.width / 2
             h2 = self.height / 2
             # translate to get rotation correct
@@ -207,12 +221,11 @@ class TransposedPanTool(PanTool):
     startx = None
 
     def normal_left_down(self, event):
-        print event
         self.startx = event.y
         super(TransposedPanTool,self).normal_left_down(event)
 
     def panning_mouse_move(self, event):
-        # print event
+        print event
         xtmp = event.x
         event.x = self.startx + (self.startx - event.y)
         event.y = xtmp

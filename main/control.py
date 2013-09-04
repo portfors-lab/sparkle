@@ -79,6 +79,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.signals.ncollected.connect(self.update_chart)
 
     def on_start(self):
+        # set plot axis to appropriate limits
+        winsz = float(self.ui.windowsz_spnbx.value())
+        self.ui.display.set_xlimits((0,winsz/1000))
+
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             pass
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
@@ -239,6 +243,8 @@ class ControlWindow(QtGui.QMainWindow):
         freq, spectrum = calc_spectrum(wavdata,sr)
 
         self.ui.display.update_fft(freq, spectrum)
+        t = np.linspace(0,(float(len(wavdata))/sr), len(wavdata))
+        self.ui.display.update_signal(t, wavdata)
 
     def wavfile_clicked(self, model_index):
         # display spectrogram of file

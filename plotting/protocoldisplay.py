@@ -4,7 +4,7 @@ from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.chaco.api import GridPlotContainer
 
-from audiolab.plotting.chacoplots import ImagePlotter, Plotter, DataPlotWidget
+from audiolab.plotting.chacoplots import ImagePlotter, Plotter, DataPlotWidget, ImageWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -12,11 +12,11 @@ class ProtocolDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.spec_plot = ImagePlotter(self)
+        self.spec_plot = ImageWidget(self)
         # self.fft_plot = Plotter(self, 1, rotation = -90)
         self.fft_plot = DataPlotWidget(rotation=-90)
-        self.spiketrace_plot = Plotter(self,1)
-        self.signal_plot = Plotter(self,1)
+        self.spiketrace_plot = DataPlotWidget(self)
+        self.signal_plot = DataPlotWidget(self)
 
         # container = GridPlotContainer(shape=(3,2))
         # container.insert(0, self.spec_plot)
@@ -24,8 +24,12 @@ class ProtocolDisplay(QtGui.QWidget):
         # container.insert(4, self.spiketrace_plot)
         # container.insert(5, self.fft_plot)
 
-        self.spiketrace_plot.widget.setMinimumWidth(500)
-        self.fft_plot.setMinimumWidth(200)
+
+        self.signal_plot.setMinimumHeight(100)
+        self.spec_plot.setMinimumHeight(100)
+        self.spiketrace_plot.setMinimumWidth(500)
+        self.spiketrace_plot.setMinimumHeight(500)
+        self.fft_plot.setMinimumWidth(100)
         self.fft_plot.setMinimumHeight(100)
 
         # layout = QtGui.QGridLayout()
@@ -39,10 +43,10 @@ class ProtocolDisplay(QtGui.QWidget):
         splitternw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
-        splitternw.addWidget(self.spec_plot.widget)
-        splitternw.addWidget(self.signal_plot.widget)
+        splitternw.addWidget(self.spec_plot)
+        splitternw.addWidget(self.signal_plot)
         splittersw.addWidget(splitternw)
-        splitternw.addWidget(self.spiketrace_plot.widget)
+        splitternw.addWidget(self.spiketrace_plot)
         splitterse.addWidget(splitternw)
         # splitterse.addWidget(RotatableView(self.fft_plot))
         splitterse.addWidget(self.fft_plot)
@@ -63,6 +67,11 @@ class ProtocolDisplay(QtGui.QWidget):
 
     def update_signal(self, *args, **kwargs):
         self.signal_plot.update_data(*args, **kwargs)
+
+    def set_xlimits(self, lims):
+        self.spec_plot.set_xlim(lims)
+        self.signal_plot.set_xlim(lims)
+        self.spiketrace_plot.set_xlim(lims)
 
 class RotatableView(QtGui.QGraphicsView):
     def __init__(self, item, rotation=0):
@@ -90,6 +99,9 @@ if __name__ == "__main__":
     plot.show()
 
     x = np.arange(200)
+    y = random.randint(0,10) * np.sin(x)
+    plot.update_signal(x,y)
+    plot.update_spiketrace(x,y)
     for i in range(10):
         y = random.randint(0,10) * np.sin(x)
         plot.update_fft(x,y)
