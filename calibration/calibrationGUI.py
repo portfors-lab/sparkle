@@ -135,7 +135,7 @@ class CalibrationWindow(QtGui.QMainWindow):
         self.signals = WorkerSignals()
         self.signals.spectrum_analyzed.connect(self.display_response)
         self.signals.curve_finished.connect(self.process_caldata)
-        self.signals.update_stim_display.connect(self.stim_display)
+        self.signals.stim_update.connect(self.stim_display)
         self.signals.read_collected.connect(self.calc_spectrum)
 
         print u'save format ',self.saveformat
@@ -347,7 +347,9 @@ class CalibrationWindow(QtGui.QMainWindow):
             else:
                 self.ngenerated +=1
 
-            tone, data, times, f, db = self.tonecurve.next()
+            tone, data, f, db = self.tonecurve.next()
+            tone, times = tone
+            data = data[0]
 
             self.ui.flabel.setText(u"Frequency : %d" % (f))
             self.ui.dblabel.setText(u"Intensity : %d" % (db))
@@ -357,7 +359,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             xfft, yfft = calc_spectrum(tone, self.tonecurve.player.get_samplerate())
 
             try:
-                self.signals.update_stim_display.emit(times, tone, xfft, abs(yfft))
+                self.signals.stim_update.emit(times, tone, xfft, abs(yfft))
             except:
                 print u"WARNING : Problem drawing stim to Window"
 

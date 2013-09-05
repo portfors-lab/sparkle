@@ -24,11 +24,10 @@ class ProtocolDisplay(QtGui.QWidget):
         # container.insert(4, self.spiketrace_plot)
         # container.insert(5, self.fft_plot)
 
-
         self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
-        self.spiketrace_plot.setMinimumWidth(500)
-        self.spiketrace_plot.setMinimumHeight(500)
+        self.spiketrace_plot.setMinimumWidth(400)
+        self.spiketrace_plot.setMinimumHeight(400)
         self.fft_plot.setMinimumWidth(100)
         self.fft_plot.setMinimumHeight(100)
 
@@ -91,12 +90,18 @@ class RotatableView(QtGui.QGraphicsView):
         self.item.setGeometry(QtCore.QRectF(0,0,sz.width(), sz.height()))
 
 if __name__ == "__main__":
-    import random, time
+    import random, time, os
     import numpy as np
+    import audiolab.tools.audiotools as audiotools
+
     app = QtGui.QApplication(sys.argv)
     plot = ProtocolDisplay()
     plot.resize(800, 400)
     plot.show()
+
+    sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
+    spec, f, bins, fs = audiotools.spectrogram(sylpath)
+    plot.update_spec(spec, xaxis=bins, yaxis=f)
 
     x = np.arange(200)
     y = random.randint(0,10) * np.sin(x)

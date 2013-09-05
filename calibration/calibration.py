@@ -225,7 +225,9 @@ class TonePlayer(PlayerBase):
     
 
 class ToneCurve():
-    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, intensities, dbv=(100,0.1), calf=None, filename=u'temp.hdf5',samplerate_acq=None):
+    def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, 
+                 intensities, dbv=(100,0.1), calf=None, filename=u'temp.hdf5',
+                 samplerate_acq=None, duration_acq_s=None):
         u"""
         Set up a tone curve which loops through frequencies (outer) and intensities (inner)
         """
@@ -246,6 +248,12 @@ class ToneCurve():
             self.aisr = samplerate
         else:
             self.aisr = samplerate_acq
+        if duration_acq_s == None:
+            self.aidur = duration_s
+        else:
+            self.aidur = duration_acq_s
+
+        self.aitimes = np.linspace(0, self.aidur, self.aidur*self.aisr)
 
         self.caldata.init_data(u'peaks', 2)
         self.caldata.init_data(u'vmax', 2)
@@ -316,14 +324,18 @@ class ToneCurve():
         played_f, played_db, r = self.current_fdb
 
         # spin off thread for saving data, and move on to reset tone
-        t = threading.Thread(target=self._storedata, args=(data[:], self.current_fdb))
+        t = threading.Thread(target=self._storedata, 
+                             args=(data[:], self.current_fdb))
         #t = Process(target=self._storesimple, args=(data, self.current_fdb))
         #t.daemon = True
         t.start()
         #self._storedata(data, self.current_fdb)
 
         # t will not change in tuning curve
-        played_tone, t = self.current_tone
+        played_tone = self.current_tone
+
+        # also includes times in response data
+        data = (data, self.aitimes)
 
         # reset so ready to go for next time
         if self.haswork():
@@ -341,7 +353,7 @@ class ToneCurve():
             self.current_fdb = (f, db, rep)
             self.current_tone = (new_tone, t)
         
-        return played_tone, data, t, played_f, played_db
+        return played_tone, data, played_f, played_db
 
     def haswork(self):
         return not self.work_queue.empty()

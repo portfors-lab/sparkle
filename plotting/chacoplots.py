@@ -225,7 +225,6 @@ class TransposedPanTool(PanTool):
         super(TransposedPanTool,self).normal_left_down(event)
 
     def panning_mouse_move(self, event):
-        print event
         xtmp = event.x
         event.x = self.startx + (self.startx - event.y)
         event.y = xtmp

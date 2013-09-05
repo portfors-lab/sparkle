@@ -9,7 +9,7 @@ from audiolab.io.daq_tasks import *
 
 from audiolab.config.info import caldata_filename, calfreq_filename
 from audiolab.dialogs.saving_dlg import SavingDialog
-from audiolab.tools.qthreading import GenericThread, WorkerSignals
+from audiolab.tools.qthreading import ProtocolSignals
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
 import audiolab.tools.systools as systools
 
@@ -74,8 +74,9 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.live_lock = QtCore.QMutex()
 
-        self.signals = WorkerSignals()
-        self.signals.spectrum_analyzed.connect(self.display_response)
+        self.signals = ProtocolSignals()
+        self.signals.response_collected.connect(self.display_response)
+        self.signals.stim_generated.connect(self.display_stim)
         self.signals.ncollected.connect(self.update_chart)
 
     def on_start(self):
@@ -122,18 +123,16 @@ class ControlWindow(QtGui.QMainWindow):
         if self.live_lock.tryLock():
             # will need to replace this with user defined filepath
             if self.apply_calibration:
-                calibration_vector = np.load(os.path.join(caldata_filename()))
-                calibration_freqs = np.load(os.path.join(calfreq_filename()))
+                self.acqmodel.set_calibration(self.calfname)
+            else
+                self.acqmodel.set_calibration(None)
 
             self.ui.start_btn.setEnabled(False)
 
-            self.fscale = 1000
+            # will get from GUI in future
+            self.fscale = 1000 
             self.tscale = 0.001
-
-            self.ngenerated = 0
-            self.nacquired = 0
-            self.halt = False
-
+            
             try:
                 #scale_factor = 1000
                 f_start = self.ui.freq_start_spnbx.value()*self.fscale
@@ -170,31 +169,20 @@ class ControlWindow(QtGui.QMainWindow):
                 if not os.path.isdir(self.savefolder):
                     os.makedirs(self.savefolder)
 
-                fname = os.path.join(self.savefolder,self.savename+'.hdf5')
-                self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, 
-                                            intensities, 
-                                           filename=fname)
 
-                if self.apply_calibration:
-                    self.tonecurve.set_calibration(calibration_vector, calibration_freqs)
+                self.acqmodel.setup_curve(dur=dur, sr=sr, rft=rft, 
+                                          nreps=nreps, freqs=freqs,
+                                          intensities=intensities)
 
-                self.tonecurve.assign_signal(self.signals.spectrum_analyzed)
-                self.calval = self.tonecurve.arm(self.aochan, self.aichan)
-                self.ngenerated +=1
-
+                self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
+                self.acqmodel.register_signal(self.signals.stim_generated, 'stim_generated')
+                
                 self.ui.running_label.setText(u"RUNNING")
                 self.ui.running_label.setPalette(GREEN)
 
                 # save these lists for easier plotting later
                 self.freqs = freqs
                 self.intensities = intensities
-
-                # save the start time and set last tick to expired, so first
-                # acquisition loop iteration executes immediately
-                self.start_time = time.time()
-                self.last_tick = self.start_time - (interval/1000)
-                self.acq_thread = threading.Thread(target=self.curve_worker)
-                self.acq_thread.start()                    
 
             except:
                 self.live_lock.unlock()
@@ -204,10 +192,10 @@ class ControlWindow(QtGui.QMainWindow):
         else:
             print u"Operation already in progress"
 
-    def curve_worker(self):
-        print "worker"
+    def display_stim(self, stimdeets, times, signal, xfft, yfft):
+        print "display stim"
 
-    def display_response(self):
+    def display_response(self, times, response):
         print "display reponse"
 
     def launch_save_dlg(self):
