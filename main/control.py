@@ -10,11 +10,11 @@ from audiolab.io.daq_tasks import *
 from audiolab.config.info import caldata_filename, calfreq_filename
 from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.tools.qthreading import ProtocolSignals
-from audiolab.tools.audiotools import spectrogram, calc_spectrum
+from audiolab.main.acqmodel import AcquisitionModel
 import audiolab.tools.systools as systools
+from audiolab.tools.audiotools import spectrogram
 
 from maincontrol_form import Ui_ControlWindow
-from tuning_curve_gui import TuningCurve
 
 RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
@@ -79,6 +79,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.signals.stim_generated.connect(self.display_stim)
         self.signals.ncollected.connect(self.update_chart)
 
+        self.acqmodel = AcquisitionModel()
+
     def on_start(self):
         # set plot axis to appropriate limits
         winsz = float(self.ui.windowsz_spnbx.value())
@@ -87,7 +89,7 @@ class ControlWindow(QtGui.QMainWindow):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             pass
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
-            pass
+            self.tuning_curve()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             # change plot to scrolling plot
             acq_rate = self.ui.aisr_spnbx.value()*self.fscale
@@ -103,6 +105,15 @@ class ControlWindow(QtGui.QMainWindow):
     def on_stop(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             self.ait.stop()
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
+            self.acqmodel.halt_curve()
+            if isinstance(self.sender(), QtGui.QPushButton):
+                self.acqmodel.closedata()
+
+        self.ui.start_btn.setEnabled(True)
+        self.live_lock.unlock()
+        self.ui.running_label.setText(u"OFF")
+        self.ui.running_label.setPalette(RED)
 
     def start_chart(self, aichan, samplerate):
         npts = samplerate/10 #update display at 10Hz rate
@@ -117,14 +128,14 @@ class ControlWindow(QtGui.QMainWindow):
     def update_chart(self, data):
         self.scrollplot.update_data(data)
 
-    def run_curve(self):
+    def tuning_curve(self):
         print "run curve"
 
         if self.live_lock.tryLock():
             # will need to replace this with user defined filepath
             if self.apply_calibration:
                 self.acqmodel.set_calibration(self.calfname)
-            else
+            else:
                 self.acqmodel.set_calibration(None)
 
             self.ui.start_btn.setEnabled(False)
@@ -135,6 +146,8 @@ class ControlWindow(QtGui.QMainWindow):
             
             try:
                 #scale_factor = 1000
+                aochan = self.ui.aochan_box.currentText()
+                aichan = self.ui.aichan_box.currentText()
                 f_start = self.ui.freq_start_spnbx.value()*self.fscale
                 f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
                 f_step = self.ui.freq_step_spnbx.value()*self.fscale
@@ -144,7 +157,8 @@ class ControlWindow(QtGui.QMainWindow):
                 dur = self.ui.dur_spnbx_2.value()*self.tscale
                 rft = self.ui.risefall_spnbx_2.value()*self.tscale
                 reprate = self.ui.reprate_spnbx.value()
-                sr = self.ui.sr_spnbx_2.value()*self.fscale
+                sr = self.ui.aosr_spnbx.value()*self.fscale
+                aisr = self.ui.aisr_spnbx.value()*self.fscale
                 nreps = self.ui.nreps_spnbx.value()
 
                 if f_start < f_stop:
@@ -163,16 +177,19 @@ class ControlWindow(QtGui.QMainWindow):
 
                 # set up display
                 if self.display == None or not(self.display.active):
-                    self.spawn_display()
+                    pass
+                    # self.spawn_display()
                     #self.display.show()
 
                 if not os.path.isdir(self.savefolder):
                     os.makedirs(self.savefolder)
 
-
+                self.acqmodel.set_save_params(self.savefolder, self.savename)
                 self.acqmodel.setup_curve(dur=dur, sr=sr, rft=rft, 
                                           nreps=nreps, freqs=freqs,
-                                          intensities=intensities)
+                                          intensities=intensities,
+                                          aisr=aisr, aochan=aochan, 
+                                          aichan=aichan, interval=interval)
 
                 self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
                 self.acqmodel.register_signal(self.signals.stim_generated, 'stim_generated')
@@ -184,6 +201,8 @@ class ControlWindow(QtGui.QMainWindow):
                 self.freqs = freqs
                 self.intensities = intensities
 
+                self.acqmodel.run_curve()
+
             except:
                 self.live_lock.unlock()
                 print u"handle curve set-up exception"
@@ -194,9 +213,12 @@ class ControlWindow(QtGui.QMainWindow):
 
     def display_stim(self, stimdeets, times, signal, xfft, yfft):
         print "display stim"
+        self.ui.display.update_signal(times, signal)
+        self.ui.display.update_fft(xfft, yfft)
 
     def display_response(self, times, response):
         print "display reponse"
+        self.ui.display.update_spiketrace(times, response)
 
     def launch_save_dlg(self):
         field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}

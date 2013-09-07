@@ -13,7 +13,7 @@ from audiolab.tools.audiotools import *
 from audiolab.plotting.plotz import *
 from audiolab.plotting.defined_plots import *
 from audiolab.config.info import caldata_filename, calfreq_filename
-from audiolab.tools.qthreading import GenericThread, WorkerSignals
+from audiolab.tools.qthreading import GenericThread, CalibrationSignals
 
 #this package
 from calform import Ui_CalibrationWindow
@@ -132,10 +132,10 @@ class CalibrationWindow(QtGui.QMainWindow):
 
         self.acq_thread = None
 
-        self.signals = WorkerSignals()
+        self.signals = CalibrationSignals()
         self.signals.spectrum_analyzed.connect(self.display_response)
         self.signals.curve_finished.connect(self.process_caldata)
-        self.signals.stim_update.connect(self.stim_display)
+        self.signals.stim_generated.connect(self.stim_display)
         self.signals.read_collected.connect(self.calc_spectrum)
 
         print u'save format ',self.saveformat
@@ -359,7 +359,7 @@ class CalibrationWindow(QtGui.QMainWindow):
             xfft, yfft = calc_spectrum(tone, self.tonecurve.player.get_samplerate())
 
             try:
-                self.signals.stim_update.emit(times, tone, xfft, abs(yfft))
+                self.signals.stim_generated.emit(times, tone, xfft, abs(yfft))
             except:
                 print u"WARNING : Problem drawing stim to Window"
 

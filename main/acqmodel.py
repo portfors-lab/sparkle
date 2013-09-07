@@ -1,8 +1,11 @@
+import os, time
+import threading
 import numpy as np
-
+from audiolab.calibration.calibration import TonePlayer, ToneCurve
+from audiolab.tools.audiotools import spectrogram, calc_spectrum
 
 class AcquisitionModel():
-    def __init__():
+    def __init__(self):
         self.signals = {}
         pass
 
@@ -21,7 +24,7 @@ class AcquisitionModel():
         # communication. Allowed names are 
         self.signals[name] = signal
 
-    def setup_curve(self, dur, sr, rft, nreps, freqs, intensities, aisr):
+    def setup_curve(self, dur, sr, rft, nreps, freqs, intensities, aisr, aichan, aochan, interval):
 
         self.ngenerated = 0
         self.nacquired = 0
@@ -35,13 +38,14 @@ class AcquisitionModel():
                                            samplerate_acq=aisr)
 
         # self.tonecurve.assign_signal(self.signals.spectrum_analyzed)
-        self.calval = self.tonecurve.arm(self.aochan, self.aichan)
+        self.calval = self.tonecurve.arm(aochan, aichan)
         self.ngenerated +=1
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
         self.start_time = time.time()
         self.last_tick = self.start_time - (interval/1000)
+        self.interval = interval
         self.acq_thread = threading.Thread(target=self.curve_worker)
 
     def run_curve(self):
@@ -51,7 +55,7 @@ class AcquisitionModel():
         print "worker"
         while not self.halt:
 
-            # this thread runs only for the turning curve
+            # this thread runs only for the tuning curve
 
             # calculate time since last interation and wait to acheive desired interval
             now = time.time()
@@ -84,3 +88,9 @@ class AcquisitionModel():
             else:
                 print "Frequency : %d, Intensity : %d" % (f, db)
                 print "AO Vmax : %.5f" % (np.amax(abs(tone)))
+
+    def halt_curve(self):
+        self.halt = True
+
+    def closedata(self):
+        pass

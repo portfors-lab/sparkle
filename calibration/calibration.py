@@ -227,7 +227,7 @@ class TonePlayer(PlayerBase):
 class ToneCurve():
     def __init__(self, duration_s, samplerate, risefall_s, nreps, freqs, 
                  intensities, dbv=(100,0.1), calf=None, filename=u'temp.hdf5',
-                 samplerate_acq=None, duration_acq_s=None):
+                 samplerate_acq=None, duration_acq_s=None, mode='calibration'):
         u"""
         Set up a tone curve which loops through frequencies (outer) and intensities (inner)
         """
@@ -237,8 +237,12 @@ class ToneCurve():
         self.ngenerated = 0
         self.nacquired = 0
 
-        self.caldata = CurveObject(filename, freqs, intensities, samplerate, duration_s, 
-                                         risefall_s, nreps,v=dbv[1])
+        if mode == 'calibration':
+            self.response_data = CurveObject(filename, freqs, intensities, 
+                                   samplerate, duration_s, 
+                                   risefall_s, nreps,v=dbv[1])
+        else:
+            self.reponse_data = AquisitionDataObject(filename)
         self.dur = duration_s
         self.sr = samplerate
         self.rft = risefall_s
@@ -255,17 +259,17 @@ class ToneCurve():
 
         self.aitimes = np.linspace(0, self.aidur, self.aidur*self.aisr)
 
-        self.caldata.init_data(u'peaks', 2)
-        self.caldata.init_data(u'vmax', 2)
+        self.response_data.init_data(u'peaks', 2)
+        self.response_data.init_data(u'vmax', 2)
 
         if SAVE_FFT_DATA:
             # 4D array nfrequencies x nintensities x nreps x npoints
             #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration_s*samplerate)/2)))
-            self.caldata.init_data(u'spectrums',4)
+            self.response_data.init_data(u'spectrums',4)
 
         if SAVE_DATA_TRACES:
             #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration_s*samplerate)))
-            self.caldata.init_data(u'raw_traces',4)
+            self.response_data.init_data(u'raw_traces',4)
         
         self.reject_list = []
 
@@ -365,7 +369,7 @@ class ToneCurve():
 
     def stop(self):
         self.player.stop()
-        #self.caldata.close()
+        #self.response_data.close()
 
 
     def _storedata(self, data, fdb):
@@ -405,12 +409,12 @@ class ToneCurve():
 
         try:
             #self.data_lock.acquire()
-            self.caldata.put(u'peaks', (f, db, rep), spec_peak_at_f)
-            self.caldata.put(u'vmax', (f, db, rep), vmax)
+            self.response_data.put(u'peaks', (f, db, rep), spec_peak_at_f)
+            self.response_data.put(u'vmax', (f, db, rep), vmax)
 
             if SAVE_FFT_DATA:
 
-                self.caldata.put(u'spectrums', (f, db, rep), spectrum)
+                self.response_data.put(u'spectrums', (f, db, rep), spectrum)
 
                 if SAVE_DATA_TRACES: 
                     self.data_traces[ifreq][idb][rep] = data
@@ -436,8 +440,8 @@ class ToneCurve():
         try:
             self.data_lock.acquire()
 
-            cal_fft_peak = self.caldata.get(u'peaks', (calf, caldb))
-            cal_vmax =  self.caldata.get(u'vmax', (calf, caldb))
+            cal_fft_peak = self.response_data.get(u'peaks', (calf, caldb))
+            cal_vmax =  self.response_data.get(u'vmax', (calf, caldb))
 
             #self.data_lock.release()
             print u"Using FFT peak data from ", caldb, u" dB, ", calf, u" Hz tone to calculate calibration curve"
@@ -446,17 +450,17 @@ class ToneCurve():
             cal_fft_peak = 0
             cal_vmax = 0
 
-        #fft_peaks = self.caldata.data['peaks']
+        #fft_peaks = self.response_data.data['peaks']
         #resultant_dB = vfunc(fft_peaks, caldb, cal_fft_peak)
 
-        vin = self.caldata.data[u'vmax'].value
+        vin = self.response_data.data[u'vmax'].value
         print vin, caldb, calpeak
         resultant_dB = vfunc(vin, caldb, calpeak)
 
-        self.caldata.data[u'frequency_rolloff'] = self.caldata.hdf5.create_dataset(u'frequency_rolloff', 
+        self.response_data.data[u'frequency_rolloff'] = self.response_data.hdf5.create_dataset(u'frequency_rolloff', 
                                                                                   resultant_dB.shape)
-        self.caldata.data[u'frequency_rolloff'][...] = resultant_dB
-        self.caldata.attrs[u'dbmethod'] = calc_db.__doc__ + u" peak: max V"
+        self.response_data.data[u'frequency_rolloff'][...] = resultant_dB
+        self.response_data.attrs[u'dbmethod'] = calc_db.__doc__ + u" peak: max V"
 
         fname = sfilename
         while os.path.isfile(os.path.join(sfolder, fname + u'.' + saveformat)):
@@ -474,14 +478,14 @@ class ToneCurve():
 
         if saveformat != u'hdf5':
             print u'SAVENAME ', filename
-            self.caldata.export(filename, filetype=saveformat)
+            self.response_data.export(filename, filetype=saveformat)
 
         if keepcal:
             # get vector of calibration intensity only
-            caldb_idx = self.caldata.stim[u'intensities'].index(self.player.caldb)
+            caldb_idx = self.response_data.stim[u'intensities'].index(self.player.caldb)
             calibration_vector = resultant_dB[:,caldb_idx]
             np.save(caldata_filename(),calibration_vector)
-            freqs = self.caldata.stim[u'frequencies']
+            freqs = self.response_data.stim[u'frequencies']
             np.save(calfreq_filename(), freqs)
 
         
