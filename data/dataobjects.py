@@ -5,7 +5,7 @@ import datetime
 
 class AcquisitionDataObject():
     def __init__(self, filename):
-        self.hdf5 = hdpy.File(filename)
+        self.hdf5 = h5py.File(filename, 'w')
         self.datasets = {}
 
     def close(self):
@@ -33,3 +33,5 @@ class AcquisitionDataObject():
         else:
             raise Exception("invalid number of keys for AcquisitionDataObject metadata")
             
+    def get_meta(self, key):
+        pass

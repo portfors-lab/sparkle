@@ -3,9 +3,11 @@ import Queue
 import os
 import pickle
 import re
+import datetime
 import win32com.client
 from multiprocessing import Process
 from audiolab.data.datatypes import CurveObject
+from audiolab.data.dataobjects import AcquisitionDataObject
 
 from audiolab.io.fileio import mightysave
 from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
@@ -15,9 +17,7 @@ from audiolab.config.info import caldata_filename, calfreq_filename
 
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
-SAVE_FFT_DATA = True
 VERBOSE = True
-SAVE_DATA_TRACES = False
 SAVE_NOISE = False
 
 FFT_FNAME = u'_ffttraces'
@@ -32,7 +32,7 @@ OUTPUT_FNAME = u'_outtones'
 class PlayerBase():
     def __init__(self, dbv=(100,0.1)):
 
-        self.tone = []
+        self.stim = []
         self.caldb = dbv[0]
         self.calv = dbv[1]
         self.calf = None
@@ -97,13 +97,24 @@ class PlayerBase():
                 print u"WARNING : ENTIRE OUTPUT TONE VOLTAGE LESS THAN DEVICE MINIMUM"
 
         self.tone_lock.acquire()
-        self.tone = tone
+        self.stim = tone
         self.sr = sr
         self.aitime = dur
         self.atten = atten
         self.tone_lock.release()
 
         return tone, timevals
+
+    def set_stim(self, signal, sr):
+        self.tone_lock.acquire()
+        self.stim = stim
+        self.sr = sr
+        dur = float(len(stim))/sr
+        self.aitime = dur
+        timevals = np.arange(npts).astype(float)/samplerate
+        self.tone_lock.release()
+
+        return timevals
 
     def get_samplerate(self):
         return self.sr
@@ -137,14 +148,14 @@ class TonePlayer(PlayerBase):
         self.nacquired = 0
        
         response_npts = int(self.aitime*self.aisr)
-        npts = self.tone.size
+        npts = self.stim.size
         try:
             self.aitask = AITaskFinite(aichan, self.aisr, response_npts)
             self.aotask = AOTaskFinite(aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")
-            self.aotask.write(self.tone)
+            self.aotask.write(self.stim)
 
             if SAVE_OUTPUT:
-                self.played_tones = [self.tone[:]]
+                self.played_tones = [self.stim[:]]
 
         except:
             print u'ERROR! TERMINATE!'
@@ -188,13 +199,13 @@ class TonePlayer(PlayerBase):
        
         self.tone_lock.acquire()
 
-        npts =  self.tone.size
+        npts =  self.stim.size
         response_npts = int(self.aitime*self.aisr)
 
         try:
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
             self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")
-            self.aotask.write(self.tone)
+            self.aotask.write(self.stim)
             try:
                 self.attenuator.SetAtten(self.atten)
             except:
@@ -203,7 +214,7 @@ class TonePlayer(PlayerBase):
             self.ngenerated +=1
 
             if SAVE_OUTPUT:
-                self.played_tones.append(self.tone[:])
+                self.played_tones.append(self.stim[:])
         except:
             print u'ERROR! TERMINATE!'
             self.daq_lock.release()
@@ -242,12 +253,15 @@ class ToneCurve():
                                    samplerate, duration_s, 
                                    risefall_s, nreps,v=dbv[1])
         else:
-            self.reponse_data = AquisitionDataObject(filename)
+            self.response_data = AcquisitionDataObject(filename)
+            
         self.dur = duration_s
         self.sr = samplerate
         self.rft = risefall_s
         self.nreps = nreps
         self.calf = calf
+        self.freqs = freqs
+        self.intensities = intensities
         if samplerate_acq == None:
             self.aisr = samplerate
         else:
@@ -256,21 +270,33 @@ class ToneCurve():
             self.aidur = duration_s
         else:
             self.aidur = duration_acq_s
+        if mode == 'calibration':
+            save_fft_data = True
+            save_data_traces = False
+        elif mode == 'tuning':
+            save_fft_data = False
+            save_data_traces = True
+        else:
+            save_fft_data = False
+            save_data_traces = False
+        self.mode = mode
 
         self.aitimes = np.linspace(0, self.aidur, self.aidur*self.aisr)
 
-        self.response_data.init_data(u'peaks', 2)
-        self.response_data.init_data(u'vmax', 2)
 
-        if SAVE_FFT_DATA:
+        if save_fft_data:
             # 4D array nfrequencies x nintensities x nreps x npoints
             #self.full_fft_data = np.zeros((len(freqs),len(intensities),nreps,int((duration_s*samplerate)/2)))
             self.response_data.init_data(u'spectrums',4)
+            self.response_data.init_data(u'peaks', 2)
+            self.response_data.init_data(u'vmax', 2)
 
-        if SAVE_DATA_TRACES:
+        if save_data_traces:
             #self.data_traces = np.zeros((len(freqs),len(intensities),nreps,int(duration_s*samplerate)))
-            self.response_data.init_data(u'raw_traces',4)
-        
+            self.response_data.init_data(u'raw_traces',(len(freqs),len(intensities),nreps,self.aidur*self.aisr))
+            self.response_data.set_meta(('frequencies',), freqs)
+            self.response_data.set_meta(('intensities',), intensities)
+
         self.reject_list = []
 
         self.work_queue = Queue.Queue()
@@ -328,8 +354,12 @@ class ToneCurve():
         played_f, played_db, r = self.current_fdb
 
         # spin off thread for saving data, and move on to reset tone
-        t = threading.Thread(target=self._storedata, 
-                             args=(data[:], self.current_fdb))
+        if self.mode == 'calibration':
+            t = threading.Thread(target=self._storedata_calibration, 
+                                 args=(data[:], self.current_fdb))
+        else:
+            t = threading.Thread(target=self._storedata_tuning, 
+                                 args=(data[:], self.current_fdb))
         #t = Process(target=self._storesimple, args=(data, self.current_fdb))
         #t.daemon = True
         t.start()
@@ -371,8 +401,10 @@ class ToneCurve():
         self.player.stop()
         #self.response_data.close()
 
+    def closedata(self):
+        self.response_data.close()
 
-    def _storedata(self, data, fdb):
+    def _storedata_calibration(self, data, fdb):
         sr = self.player.get_samplerate()
         f, db, rep = fdb
 
@@ -412,11 +444,11 @@ class ToneCurve():
             self.response_data.put(u'peaks', (f, db, rep), spec_peak_at_f)
             self.response_data.put(u'vmax', (f, db, rep), vmax)
 
-            if SAVE_FFT_DATA:
+            if save_fft_data:
 
                 self.response_data.put(u'spectrums', (f, db, rep), spectrum)
 
-                if SAVE_DATA_TRACES: 
+                if save_data_traces: 
                     self.data_traces[ifreq][idb][rep] = data
             #self.data_lock.release()
         except Exception, e:
@@ -424,6 +456,13 @@ class ToneCurve():
             print e
             raise
             #self.data_lock.release()
+
+    def _storedata_tuning(self, data, fdb):
+        f, db, rep = fdb
+        ifreq = self.freqs.index(f)
+        idb = self.intensities.index(db)
+
+        self.response_data.put('raw_traces', (ifreq, idb, rep), data)
 
     def save_to_file(self, calf, sfolder, sfilename, keepcal=False, saveformat=u'npy', calpeak=None):
         #After running curve do calculations and save data to file
@@ -484,9 +523,15 @@ class ToneCurve():
             # get vector of calibration intensity only
             caldb_idx = self.response_data.stim[u'intensities'].index(self.player.caldb)
             calibration_vector = resultant_dB[:,caldb_idx]
-            np.save(caldata_filename(),calibration_vector)
+            # np.save(caldata_filename(),calibration_vector)
             freqs = self.response_data.stim[u'frequencies']
-            np.save(calfreq_filename(), freqs)
+            # np.save(calfreq_filename(), freqs)
+            # save the caldata as a json file?
+            caldict = {'calhz': self.player.calf, 'caldb': self.player.caldb, 'calv': self.player.calv, 'frequencies': freqs, 'intensities': calibration_vector}
+            calfname, ext = os.path.splitext(filename)
+            today = datetime.date.today().strftime("%Y%m%d")
+            calfname = calfname + '_cal' + today + '.json'
+            mightysave(calfname, caldict)
 
         
         if SAVE_NOISE:

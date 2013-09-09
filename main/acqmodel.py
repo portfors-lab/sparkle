@@ -11,9 +11,14 @@ class AcquisitionModel():
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
-        return
-        calibration_vector = np.load(os.path.join(caldata_filename()))
-        calibration_freqs = np.load(os.path.join(calfreq_filename()))
+        try:
+            caldata = mightyload(cal_fname)
+            calibration_vector = caldata['intensities']
+            calibration_freqs = caldata['frequencies']
+        except:
+            print "Error: unable to load calibration data from file: ", cal_fname
+        # calibration_vector = np.load(os.path.join(caldata_filename()))
+        # calibration_freqs = np.load(os.path.join(calfreq_filename()))
 
     def set_save_params(self, savefolder, savename):
         self.savefolder = savefolder
@@ -35,7 +40,7 @@ class AcquisitionModel():
         self.tonecurve = ToneCurve(dur, sr, rft, nreps, freqs, 
                                             intensities, 
                                            filename=fname,
-                                           samplerate_acq=aisr)
+                                           samplerate_acq=aisr, mode='tuning')
 
         # self.tonecurve.assign_signal(self.signals.spectrum_analyzed)
         self.calval = self.tonecurve.arm(aochan, aichan)
@@ -54,43 +59,46 @@ class AcquisitionModel():
     def curve_worker(self):
         print "worker"
         while not self.halt:
+            try:
+                # this thread runs only for the tuning curve
 
-            # this thread runs only for the tuning curve
-
-            # calculate time since last interation and wait to acheive desired interval
-            now = time.time()
-            elapsed = (now - self.last_tick)*1000
-            #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
-            if elapsed < self.interval:
-                #print('sleep ', (self.interval-elapsed))
-                time.sleep((self.interval-elapsed)/1000)
+                # calculate time since last interation and wait to acheive desired interval
                 now = time.time()
-            elif elapsed > self.interval:
-                print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
-            self.last_tick = now
+                elapsed = (now - self.last_tick)*1000
+                #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+                if elapsed < self.interval:
+                    #print('sleep ', (self.interval-elapsed))
+                    time.sleep((self.interval-elapsed)/1000)
+                    now = time.time()
+                elif elapsed > self.interval:
+                    print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
+                self.last_tick = now
 
-            if not self.tonecurve.haswork():
-                # no more work left in the queue, collect last stim written.
-                self.halt = True
-            else:
-                self.ngenerated +=1
+                if not self.tonecurve.haswork():
+                    # no more work left in the queue, collect last stim written.
+                    self.halt = True
+                else:
+                    self.ngenerated +=1
 
-            tone, response, f, db = self.tonecurve.next()
+                tone, response, f, db = self.tonecurve.next()
 
-            # self.ui.flabel.setText(u"Frequency : %d" % (f))
-            # self.ui.dblabel.setText(u"Intensity : %d" % (db))
+                # self.ui.flabel.setText(u"Frequency : %d" % (f))
+                # self.ui.dblabel.setText(u"Intensity : %d" % (db))
 
-            xfft, yfft = calc_spectrum(tone[0], self.tonecurve.player.get_samplerate())
-            if self.signals["stim_generated"]:
-                self.signals["stim_generated"].emit((f,db),tone[1], tone[0], 
-                                                    xfft, abs(yfft))
-                self.signals['response_collected'].emit(response[1], response[0])
-            else:
-                print "Frequency : %d, Intensity : %d" % (f, db)
-                print "AO Vmax : %.5f" % (np.amax(abs(tone)))
+                xfft, yfft = calc_spectrum(tone[0], self.tonecurve.player.get_samplerate())
+                if self.signals["stim_generated"]:
+                    self.signals["stim_generated"].emit((f,db),tone[1], tone[0], 
+                                                        xfft, abs(yfft))
+                    self.signals['response_collected'].emit(response[1], response[0])
+                else:
+                    print "Frequency : %d, Intensity : %d" % (f, db)
+                    print "AO Vmax : %.5f" % (np.amax(abs(tone)))
+            except:
+                self.tonecurve.closedata()
+                raise
 
     def halt_curve(self):
         self.halt = True
 
     def closedata(self):
-        pass
+        self.tonecurve.closedata()
