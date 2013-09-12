@@ -26,8 +26,8 @@ class ProtocolDisplay(QtGui.QWidget):
 
         self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
-        self.spiketrace_plot.setMinimumWidth(400)
-        self.spiketrace_plot.setMinimumHeight(400)
+        self.spiketrace_plot.setMinimumWidth(100)
+        self.spiketrace_plot.setMinimumHeight(100)
         self.fft_plot.setMinimumWidth(100)
         self.fft_plot.setMinimumHeight(100)
 
@@ -53,7 +53,7 @@ class ProtocolDisplay(QtGui.QWidget):
         layout = QtGui.QHBoxLayout()
         layout.addWidget(splitterse)
         self.setLayout(layout)
-
+        self.setGeometry(0,0,500,500)
 
     def update_spec(self, *args, **kwargs):
         self.spec_plot.update_data(*args, **kwargs)
@@ -72,18 +72,8 @@ class ProtocolDisplay(QtGui.QWidget):
         self.signal_plot.set_xlim(lims)
         self.spiketrace_plot.set_xlim(lims)
 
-class RotatableView(QtGui.QGraphicsView):
-    def __init__(self, item, rotation=0):
-        QtGui.QGraphicsView.__init__(self)
-        scene = QtGui.QGraphicsScene(self)
-        self.setScene(scene)
-        graphics_item = scene.addWidget(item)
-        graphics_item.rotate(rotation)
-        self.item = graphics_item
-        # make the QGraphicsView invisible
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setStyleSheet("border: 0px")
+    def sizeHint(self):
+        return QtCore.QSize(500,300)
 
     def resizeEvent(self,event):
         sz = event.size()
@@ -112,6 +102,5 @@ if __name__ == "__main__":
         plot.update_fft(x,y)
         time.sleep(0.2)
         QtGui.QApplication.processEvents()
-
 
     sys.exit(app.exec_())

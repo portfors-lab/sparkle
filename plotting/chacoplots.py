@@ -2,8 +2,12 @@
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.enable.api import Window
-from enthought.chaco.api import VPlotContainer, ArrayPlotData, Plot, OverlayPlotContainer
-from chaco.tools.api import PanTool, ZoomTool, DragZoom
+from enthought.chaco.api import create_line_plot, VPlotContainer, ArrayPlotData, Plot, OverlayPlotContainer, ScatterPlot
+from chaco.tools.api import PanTool, ZoomTool, DragZoom, SelectTool, SimpleInspectorTool, ScatterInspector
+from enthought.enable.base_tool import BaseTool
+from chaco.tools.cursor_tool import CursorTool
+from traits.api import Instance
+from enthought.chaco.abstract_mapper import AbstractMapper
 
 import sys, random
 import math
@@ -45,9 +49,9 @@ class ScrollingWindow(QtGui.QMainWindow):
         self.plotview.update_data(axnum, y)
 
 class DataPlotWidget(QtGui.QWidget):
-    def __init__(self, parent=None, nsubplots=1, rotation=0):
+    def __init__(self, parent=None, nsubplots=1, orientation='h'):
         QtGui.QWidget.__init__(self, parent)
-        self.plotview = Plotter(self, nsubplots, rotation=rotation)
+        self.plotview = Plotter(self, nsubplots, orientation=orientation)
 
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.plotview.widget)
@@ -78,14 +82,13 @@ class ImageWidget(QtGui.QWidget):
         self.plotview.set_xlim(*args, **kwargs)
 
 class Plotter():
-    def __init__(self, parent, nsubplots=1, rotation=0):
+    def __init__(self, parent, nsubplots=1, orientation='h'):
         self.plotdata = []
         for isubplot in range(nsubplots):
             self.plotdata.append(ArrayPlotData(x=np.array([]),  y=np.array([])))
-        self.window, self.plots = self.create_plot(parent, rotation)
+        self.window, self.plots = self.create_plot(parent, orientation)
         self.widget = self.window.control
-        # self.widget = RotatableView(self.window.control)
-
+        self.index_mapper = Instance(AbstractMapper)
         
     def update_data(self, x, y, axnum=0, linenum=0):
         self.plotdata[axnum].set_data("x", x)
@@ -95,28 +98,35 @@ class Plotter():
         self.plots[axnum].range2d.x_range.low = lim[0]
         self.plots[axnum].range2d.x_range.high = lim[1]
 
-    def create_plot(self, parent, rotation):
+    def create_plot(self, parent, orientation):
         plots = []
         for idata in self.plotdata:
+            print idata.get_data('x')
+            # plot = create_line_plot([idata.get_data('x'), idata.get_data('y')], 
+            #                         index_sort='ascending', add_axis=True,)
             plot = Plot(idata, padding=50, border_visible=True)
             plot.plot(("x", "y"), name="data plot", color="green")
+            plot.orientation = orientation
             plot.padding_top = 10
             plot.padding_bottom = 10
-            if rotation == 0:
-                plot.tools.append(PanTool(plot))
-                plot.tools.append(ZoomTool(plot))
-            else:
-                plot.tools.append(TransposedPanTool(plot))
-                plot.tools.append(ZoomTool(plot))
+            plot.tools.append(PanTool(plot))
+            plot.tools.append(ZoomTool(plot))
+            # plot.overlays.append(CursorTool(plot,
+            #             drag_button="left",
+            #             color='blue'))
+            # plot.tools.append(SimpleInspectorTool(plot))
+            # plot.tools.append(MyPointMarker(plot))
+            # plot.tools.append(MyTool(plot, selection_mode="single"))
+            # plot.tools.append(MyScatterInspector(plot))
+
             plots.append(plot)
 
         plots[0].padding_bottom = 30
         plots[-1].padding_top = 30
         container = VPlotContainer(*plots)
-        outer_container = RotatablePlotContainer(container, rotation=rotation)
         container.spacing = 0
 
-        return Window(parent, -1, component=outer_container), plots
+        return Window(parent, -1, component=container), plots
 
 class ScrollingPlotter(Plotter):
     def __init__(self, parent, nsubplots, deltax, windowsize=1):
@@ -194,51 +204,45 @@ class ImagePlotter():
 
         return Window(parent, -1, component=container)
 
-class RotatablePlotContainer(OverlayPlotContainer):
-    use_backbuffer=True
-    # hack to get only one rotation
-    first_draw = True
-    def __init__(self, *args, **kw):
-        rotation = kw.pop('rotation',0)
-        super(RotatablePlotContainer, self).__init__(*args, **kw)
-        self.rotation = float(rotation)  # rotation in degrees
 
-    def _draw(self, gc, *args, **kw):
-        if self.first_draw and self.rotation != 0:
-            w2 = self.width / 2
-            h2 = self.height / 2
-            # translate to get rotation correct
-            gc.translate_ctm(w2, h2)
-            gc.rotate_ctm(math.radians(self.rotation))
-            # translate to correct position
-            gc.translate_ctm(-h2, -w2)
-            h, w = self.outer_bounds
-            self.outer_bounds = (w,h)
-            self.first_draw = False
-        super(RotatablePlotContainer, self)._draw(gc, *args, **kw)
+class MyTool(SelectTool):
 
-class TransposedPanTool(PanTool):
-    startx = None
+    # def dispatch(self,event, suffix):
+    #     print event, suffix
 
     def normal_left_down(self, event):
-        self.startx = event.y
-        super(TransposedPanTool,self).normal_left_down(event)
+        print 'nld', event
+        super(MyTool,self).normal_left_down(event)        
 
-    def panning_mouse_move(self, event):
-        xtmp = event.x
-        event.x = self.startx + (self.startx - event.y)
-        event.y = xtmp
-        # print event.x, event.y
-        super(TransposedPanTool,self).panning_mouse_move(event)
+    def _select(self, event, append):
+        print 'limburger', event, append
+        indxs = self.component.index_mapper(event.x)
+        # hit = self.component.hittest((event.x, event.y))
+        # print 'hit', hit
+        #super(MyTool, self)._select(*args)
+
+    def _get_selection_state(self, event):
+        print 'gss', event
+        return (False, True)
+
+class MyScatterInspector(ScatterInspector):
+    def normal_left_down(self, event):
+        print 'nld', event
+        super(MyScatterInspector,self).normal_left_down(event)
+
+    def _select(self, *args, **kwargs):
+        print 'limburger', args
+        super(MyScatterInspector, self)._select(*args, **kwargs)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    plot = LiveWindow(2)
+    plot = DataPlotWidget()
     plot.resize(600, 400)
     plot.show()
 
     x = np.arange(200)
     y = random.randint(0,10) * np.sin(x)
-    plot.draw_line(0,0,x,y)
+    plot.update_data(x,y)
 
     sys.exit(app.exec_())
