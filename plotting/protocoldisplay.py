@@ -3,8 +3,10 @@ import sys
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.chaco.api import GridPlotContainer
+# from enthought.chaco.tools.rect_zoom import RectZoomTool
 
-from audiolab.plotting.chacoplots import ImagePlotter, Plotter, DataPlotWidget, ImageWidget, TraceWidget
+# from audiolab.plotting.chacoplots import ImagePlotter, Plotter, DataPlotWidget, ImageWidget, TraceWidget
+from audiolab.plotting.custom_plots import TraceWidget, FFTWidget, SpecWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -12,12 +14,15 @@ class ProtocolDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.spec_plot = ImageWidget(self)
         # self.fft_plot = Plotter(self, 1, rotation = -90)
-        self.fft_plot = DataPlotWidget(orientation='v')
+        # self.fft_plot = DataPlotWidget(orientation='v')
+        self.fft_plot = FFTWidget(self)
+        # add a rubber band zoom to the fft plot
+        # self.fft_plot.plotview.plots[0].tools.append(RectZoomTool(self.fft_plot.plotview.plots[0], drag_button="right"))
         self.spiketrace_plot = TraceWidget(self)
         # self.spiketrace_plot = DataPlotWidget(self)
         # self.signal_plot = DataPlotWidget(self)
+        self.spec_plot = SpecWidget(self)
 
         # container = GridPlotContainer(shape=(3,2))
         # container.insert(0, self.spec_plot)
@@ -129,8 +134,9 @@ if __name__ == "__main__":
     # plot.update_signal(x,y)
     # plot.update_spiketrace(x,y)
     plot.update_signal(stim_times, wavdata)
-    plot.update_spiketrace(resp_times, datakey='times', axeskey='response')
-    plot.update_spiketrace(resp, datakey='response', axeskey='response')
+    plot.update_spiketrace(resp_times,resp)
+    # plot.update_spiketrace(resp_times, datakey='times', axeskey='response')
+    # plot.update_spiketrace(resp, datakey='response', axeskey='response')
     for i in range(10):
         y = random.randint(0,10) * np.sin(x)
         plot.update_fft(x,y)

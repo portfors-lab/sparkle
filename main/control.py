@@ -80,6 +80,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.signals.ncollected.connect(self.update_chart)
 
         self.acqmodel = AcquisitionModel()
+        self.current_operation = None
+        
 
     def on_start(self):
         # set plot axis to appropriate limits
@@ -113,6 +115,7 @@ class ControlWindow(QtGui.QMainWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.halt_explore()
 
+        self.current_operation = None
         self.ui.start_btn.setEnabled(True)
         self.live_lock.unlock()
         self.ui.running_label.setText(u"OFF")
@@ -135,6 +138,8 @@ class ControlWindow(QtGui.QMainWindow):
 
     def run_explore(self):
         self.ui.start_btn.setText('Update')
+        # make this an enum!!!!
+        self.current_operation = 'explore'
         aochan = self.ui.aochan_box.currentText()
         aichan = self.ui.aichan_box.currentText()
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
@@ -284,6 +289,14 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.display.update_signal(t, wavdata)
 
         self.current_wav_file = spath
+
+        if self.current_operation == 'explore':
+            aochan = self.ui.aochan_box.currentText()
+            aichan = self.ui.aichan_box.currentText()
+            acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+            winsz = float(self.ui.windowsz_spnbx.value())*0.001
+            self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
+                                             acqtime=winsz, aisr=acq_rate)
         # self.current_gen_rate = sr
         # self.current_wav_signal = wavdata
 
@@ -291,8 +304,8 @@ class ControlWindow(QtGui.QMainWindow):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         spec, f, bins, fs = spectrogram(spath)
-        self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
-
+        # self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
+        self.ui.spec_preview.update_data(spec,xaxis=bins,yaxis=f)
 
     def closeEvent(self,event):
         # save current inputs to file for loading next time
