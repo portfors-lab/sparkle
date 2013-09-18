@@ -83,13 +83,16 @@ class ImageWidget(QtGui.QWidget):
 
 class TraceWidget(QtGui.QWidget):
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self)
+        QtGui.QWidget.__init__(self, parent)
         trait_object = SpecialPlotter()
         self.window = Window(self, -1, component=trait_object.plot)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.window.control)
         self.setLayout(layout)
         self.traits = trait_object
+
+    def update_data(self, *args, **kwargs):
+        self.traits.update_data(*args, **kwargs)
 
     def resizeEvent(self, event):
         tp_bounds = self.traits.trace_plot.bounds
@@ -170,12 +173,12 @@ class SpecialPlotter(HasTraits):
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
         trace_plot.plot(('times', 'spikes'), type='scatter', name='detected spikes')
 
-        self.stim_plot_height = 100
+        self.stim_plot_height = 50
         stim_plot = Plot(self.stim_data)
         stim_plot.plot(('times', 'signal'), type='line', 
                         name='stim signal', color='blue')
         stim_plot.set(resizable='h',
-                      bounds=[600,150], 
+                      bounds=[600,100], 
                       position=[50,250], 
                       border_visible=False,
                       overlay_border=False)
@@ -197,6 +200,12 @@ class SpecialPlotter(HasTraits):
         self.trace_plot = trace_plot
         self.stim_plot = stim_plot
         return container
+
+    def update_data(self, data, axeskey, datakey):
+        if axeskey == 'stim':
+            self.stim_data.set_data(datakey, data)
+        if axeskey == 'response':
+            self.trace_data.set_data(datakey, data)
 
     def noticks(self,num):
         return ''
