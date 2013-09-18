@@ -12,7 +12,7 @@ from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.tools.qthreading import ProtocolSignals
 from audiolab.main.acqmodel import AcquisitionModel
 import audiolab.tools.systools as systools
-from audiolab.tools.audiotools import spectrogram
+from audiolab.tools.audiotools import spectrogram, calc_spectrum
 
 from maincontrol_form import Ui_ControlWindow
 
@@ -83,17 +83,18 @@ class ControlWindow(QtGui.QMainWindow):
 
     def on_start(self):
         # set plot axis to appropriate limits
-        winsz = float(self.ui.windowsz_spnbx.value())
-        self.ui.display.set_xlimits((0,winsz/1000))
+        
 
+        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+        aichan = str(self.ui.aichan_box.currentText())
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            pass
+            self.run_explore()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
             self.tuning_curve()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             # change plot to scrolling plot
-            acq_rate = self.ui.aisr_spnbx.value()*self.fscale
-            aichan = str(self.ui.aichan_box.currentText())
+            winsz = float(self.ui.windowsz_spnbx.value())
+            self.ui.display.set_xlimits((0,winsz/1000))
             self.scrollplot = ScrollingPlotter(self, 1, 1/float(acq_rate))
             self.ui.stim_dock.setWidget(self.scrollplot.widget)
             self.start_chart(aichan, acq_rate)
@@ -109,11 +110,15 @@ class ControlWindow(QtGui.QMainWindow):
             self.acqmodel.halt_curve()
             if isinstance(self.sender(), QtGui.QPushButton):
                 self.acqmodel.closedata()
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
+            self.acqmodel.halt_explore()
 
         self.ui.start_btn.setEnabled(True)
         self.live_lock.unlock()
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
+        self.ui.start_btn.setText('Start')
+
 
     def start_chart(self, aichan, samplerate):
         npts = samplerate/10 #update display at 10Hz rate
@@ -128,88 +133,110 @@ class ControlWindow(QtGui.QMainWindow):
     def update_chart(self, data):
         self.scrollplot.update_data(data)
 
+    def run_explore(self):
+        self.ui.start_btn.setText('Update')
+        aochan = self.ui.aochan_box.currentText()
+        aichan = self.ui.aichan_box.currentText()
+        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+        winsz = float(self.ui.windowsz_spnbx.value())*0.001
+        reprate = self.ui.reprate_spnbx.value()
+        interval = (1/reprate)*1000
+
+        print 'interval', interval
+        # set up first stimulus, lets start with vocalizations for now
+        if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
+            # assume user has already clicked on wav file
+            self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
+            
+            self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
+                                             acqtime=winsz, aisr=acq_rate)
+            self.acqmodel.run_explore(interval)
+
+
     def tuning_curve(self):
         print "run curve"
-
         if self.live_lock.tryLock():
-            # will need to replace this with user defined filepath
-            if self.apply_calibration:
-                self.acqmodel.set_calibration(self.calfname)
-            else:
-                self.acqmodel.set_calibration(None)
-
-            self.ui.start_btn.setEnabled(False)
-
-            # will get from GUI in future
-            self.fscale = 1000 
-            self.tscale = 0.001
-            
-            try:
-                #scale_factor = 1000
-                aochan = self.ui.aochan_box.currentText()
-                aichan = self.ui.aichan_box.currentText()
-                f_start = self.ui.freq_start_spnbx.value()*self.fscale
-                f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
-                f_step = self.ui.freq_step_spnbx.value()*self.fscale
-                db_start = self.ui.db_start_spnbx.value()
-                db_stop = self.ui.db_stop_spnbx.value()
-                db_step = self.ui.db_step_spnbx.value()
-                dur = self.ui.dur_spnbx_2.value()*self.tscale
-                rft = self.ui.risefall_spnbx_2.value()*self.tscale
-                reprate = self.ui.reprate_spnbx.value()
-                sr = self.ui.aosr_spnbx.value()*self.fscale
-                aisr = self.ui.aisr_spnbx.value()*self.fscale
-                nreps = self.ui.nreps_spnbx.value()
-
-                if f_start < f_stop:
-                    freqs = range(f_start, f_stop+1, f_step)
-                else:
-                    freqs = range(f_start, f_stop-1, -f_step)
-                if db_start < db_stop:
-                    intensities = range(db_start, db_stop+1, db_step)
-                else:
-                    intensities = range(db_start, db_stop-1, -db_step)
-
-                # calculate ms interval from reprate
-                interval = (1/reprate)*1000
-                self.sr = sr
-                self.interval = interval
-
-                # set up display
-                if self.display == None or not(self.display.active):
-                    pass
-                    # self.spawn_display()
-                    #self.display.show()
-
-                if not os.path.isdir(self.savefolder):
-                    os.makedirs(self.savefolder)
-
-                self.acqmodel.set_save_params(self.savefolder, self.savename)
-                self.acqmodel.setup_curve(dur=dur, sr=sr, rft=rft, 
-                                          nreps=nreps, freqs=freqs,
-                                          intensities=intensities,
-                                          aisr=aisr, aochan=aochan, 
-                                          aichan=aichan, interval=interval)
-
-                self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
-                self.acqmodel.register_signal(self.signals.stim_generated, 'stim_generated')
-                
-                self.ui.running_label.setText(u"RUNNING")
-                self.ui.running_label.setPalette(GREEN)
-
-                # save these lists for easier plotting later
-                self.freqs = freqs
-                self.intensities = intensities
-
-                self.acqmodel.run_curve()
-
-            except:
-                self.live_lock.unlock()
-                print u"handle curve set-up exception"
-                self.ui.start_btn.setEnabled(True)
-                raise
+            pass
         else:
             print u"Operation already in progress"
+            return
+
+        # will need to replace this with user defined filepath
+        if self.apply_calibration:
+            self.acqmodel.set_calibration(self.calfname)
+        else:
+            self.acqmodel.set_calibration(None)
+
+        self.ui.start_btn.setEnabled(False)
+
+        # will get from GUI in future
+        self.fscale = 1000 
+        self.tscale = 0.001
+        
+        try:
+            #scale_factor = 1000
+            aochan = self.ui.aochan_box.currentText()
+            aichan = self.ui.aichan_box.currentText()
+            f_start = self.ui.freq_start_spnbx.value()*self.fscale
+            f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
+            f_step = self.ui.freq_step_spnbx.value()*self.fscale
+            db_start = self.ui.db_start_spnbx.value()
+            db_stop = self.ui.db_stop_spnbx.value()
+            db_step = self.ui.db_step_spnbx.value()
+            dur = self.ui.dur_spnbx_2.value()*self.tscale
+            rft = self.ui.risefall_spnbx_2.value()*self.tscale
+            reprate = self.ui.reprate_spnbx.value()
+            sr = self.ui.aosr_spnbx.value()*self.fscale
+            aisr = self.ui.aisr_spnbx.value()*self.fscale
+            nreps = self.ui.nreps_spnbx.value()
+
+            if f_start < f_stop:
+                freqs = range(f_start, f_stop+1, f_step)
+            else:
+                freqs = range(f_start, f_stop-1, -f_step)
+            if db_start < db_stop:
+                intensities = range(db_start, db_stop+1, db_step)
+            else:
+                intensities = range(db_start, db_stop-1, -db_step)
+
+            # calculate ms interval from reprate
+            interval = (1/reprate)*1000
+            self.sr = sr
+            self.interval = interval
+
+            # set up display
+            if self.display == None or not(self.display.active):
+                pass
+                # self.spawn_display()
+                #self.display.show()
+
+            if not os.path.isdir(self.savefolder):
+                os.makedirs(self.savefolder)
+
+            self.acqmodel.set_save_params(self.savefolder, self.savename)
+            self.acqmodel.setup_curve(dur=dur, sr=sr, rft=rft, 
+                                      nreps=nreps, freqs=freqs,
+                                      intensities=intensities,
+                                      aisr=aisr, aochan=aochan, 
+                                      aichan=aichan, interval=interval)
+
+            self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
+            self.acqmodel.register_signal(self.signals.stim_generated, 'stim_generated')
+            
+            self.ui.running_label.setText(u"RUNNING")
+            self.ui.running_label.setPalette(GREEN)
+
+            # save these lists for easier plotting later
+            self.freqs = freqs
+            self.intensities = intensities
+
+            self.acqmodel.run_curve()
+
+        except:
+            self.live_lock.unlock()
+            print u"handle curve set-up exception"
+            self.ui.start_btn.setEnabled(True)
+            raise
 
     def display_stim(self, stimdeets, times, signal, xfft, yfft):
         print "display stim"
@@ -255,6 +282,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.display.update_fft(freq, spectrum)
         t = np.linspace(0,(float(len(wavdata))/sr), len(wavdata))
         self.ui.display.update_signal(t, wavdata)
+
+        self.current_wav_file = spath
+        # self.current_gen_rate = sr
+        # self.current_wav_signal = wavdata
 
     def wavfile_clicked(self, model_index):
         # display spectrogram of file

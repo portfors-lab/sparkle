@@ -76,7 +76,7 @@
          <attribute name="title">
           <string>Explore</string>
          </attribute>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="explore_stim_type_cmbbx">
           <property name="geometry">
            <rect>
             <x>10</x>
@@ -1600,7 +1600,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>comboBox</sender>
+   <sender>explore_stim_type_cmbbx</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>stackedWidget</receiver>
    <slot>setCurrentIndex(int)</slot>

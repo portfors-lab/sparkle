@@ -43,13 +43,22 @@ class ProtocolDisplay(QtGui.QWidget):
         splitternw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
-        splitternw.addWidget(self.spec_plot)
+        # splitternw.addWidget(self.spec_plot)
         # splitternw.addWidget(self.signal_plot)
-        splittersw.addWidget(splitternw)
-        splitternw.addWidget(self.spiketrace_plot)
-        splitterse.addWidget(splitternw)
-        # splitterse.addWidget(RotatableView(self.fft_plot))
+        # splittersw.addWidget(splitternw)
+        splittersw.addWidget(self.spec_plot)
+        splittersw.addWidget(self.spiketrace_plot)
+        splitterse.addWidget(splittersw)
         splitterse.addWidget(self.fft_plot)
+
+        # set inital sizes
+        # splitternw.setSizes([100])
+        splittersw.setSizes([100,500])
+        splitterse.setSizes([500,100])
+
+        # link spectrogram x axis with response x axis
+        # self.spec_plot.plotview.plots[0].range2d = self.spiketrace_plot.traits.trace_plot.range2d
+        # print self.spec_plot.plotview.plots[0].index_range
 
         layout = QtGui.QHBoxLayout()
         layout.addWidget(splitterse)
@@ -62,31 +71,34 @@ class ProtocolDisplay(QtGui.QWidget):
     def update_fft(self, *args, **kwargs):
         self.fft_plot.update_data(*args, **kwargs)
 
-    def update_spiketrace(self, *args, **kwargs):
-        self.spiketrace_plot.update_data(*args, **kwargs)
+    def update_spiketrace(self, xdata, ydata):
+        # self.spiketrace_plot.update_data(*args, **kwargs)
+        self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='response')
+        self.spiketrace_plot.update_data(ydata, datakey='response', axeskey='response')
 
-    def update_signal(self, *args, **kwargs):
+    def update_signal(self, xdata, ydata):
         # self.signal_plot.update_data(*args, **kwargs)
-        self.spiketrace_plot.update_data(*args, **kwargs)
+        self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='stim')
+        self.spiketrace_plot.update_data(ydata, datakey='signal', axeskey='stim')
 
     def set_xlimits(self, lims):
         self.spec_plot.set_xlim(lims)
-        self.signal_plot.set_xlim(lims)
+        # self.signal_plot.set_xlim(lims)
         self.spiketrace_plot.set_xlim(lims)
 
     def sizeHint(self):
         return QtCore.QSize(500,300)
 
-    def resizeEvent(self,event):
-        sz = event.size()
-        self.item.setGeometry(QtCore.QRectF(0,0,sz.width(), sz.height()))
+    # def resizeEvent(self,event):
+    #     sz = event.size()
+    #     self.item.setGeometry(QtCore.QRectF(0,0,sz.width(), sz.height()))
 
 if __name__ == "__main__":
     import random, time, os
     import numpy as np
     import audiolab.tools.audiotools as audiotools
     import scipy.io.wavfile as wv
-
+    from scipy.io import loadmat
 
     app = QtGui.QApplication(sys.argv)
     plot = ProtocolDisplay()
@@ -101,23 +113,32 @@ if __name__ == "__main__":
     sr, wavdata = wv.read(sylpath)
     freqs, fft = audiotools.calc_spectrum(wavdata,sr)
 
-    print len(wavdata)
     # stim_times = np.arange(0,len(wavdata),1/float(len(wavdata)))
-    stim_times = np.linspace(0,len(wavdata)*sr, len(wavdata))
+    stim_times = np.linspace(0,float(len(wavdata))/sr, len(wavdata))
 
+
+    marr = loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"singlesweep.mat"), squeeze_me=True)
+    resp = abs(marr['sweep'])
+    acq_rate = 50000
+
+    resp_times = np.linspace(0,float(len(resp))/acq_rate, len(resp))
+
+    print 'stim time', stim_times[-1], 'resp time', resp_times[-1]
     x = np.arange(len(wavdata))
     y = random.randint(0,10) * np.sin(x)
     # plot.update_signal(x,y)
     # plot.update_spiketrace(x,y)
-    plot.update_signal(stim_times, datakey='times', axeskey='stim')
-    plot.update_signal(wavdata, datakey='signal', axeskey='stim')
-    plot.update_spiketrace(stim_times, datakey='times', axeskey='response')
-    plot.update_spiketrace(y, datakey='response', axeskey='response')
+    plot.update_signal(stim_times, wavdata)
+    plot.update_spiketrace(resp_times, datakey='times', axeskey='response')
+    plot.update_spiketrace(resp, datakey='response', axeskey='response')
     for i in range(10):
         y = random.randint(0,10) * np.sin(x)
         plot.update_fft(x,y)
         time.sleep(0.2)
         QtGui.QApplication.processEvents()
-    plot.update_fft(freqs,fft) 
+    plot.update_fft(freqs,fft)
+
+    # coerce x ranges to match
+    plot.set_xlimits([0, resp_times[-1]])
 
     sys.exit(app.exec_())

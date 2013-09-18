@@ -90,15 +90,26 @@ class TraceWidget(QtGui.QWidget):
         layout.addWidget(self.window.control)
         self.setLayout(layout)
         self.traits = trait_object
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.contextMenuRequested)
 
     def update_data(self, *args, **kwargs):
         self.traits.update_data(*args, **kwargs)
 
+    def set_xlim(self, *args, **kwargs):
+        self.traits.set_xlim(*args, **kwargs)
+
     def resizeEvent(self, event):
         tp_bounds = self.traits.trace_plot.bounds
-        # print 'trace plot', self.traits.trace_plot.position
+        # print 'trace plot', self.traits.trace_plot.position, tp_bounds
         # print 'stim plot', self.traits.stim_plot.position
-        self.traits.stim_plot.set(position=[50,tp_bounds[1]-self.traits.stim_plot_height])        
+        self.traits.stim_plot.set(position=[50,tp_bounds[1]-self.traits.stim_plot_height]) 
+
+    def contextMenuRequested(self, point):
+        menu = QtGui.QMenu()
+        traits_action = menu.addAction("reset axis limits")
+        traits_action.triggered.connect(self.traits.reset_lims)
+        menu.exec_(self.mapToGlobal(point))
 
 class Plotter():
     def __init__(self, parent, nsubplots=1, orientation='h'):
@@ -160,9 +171,9 @@ class SpecialPlotter(HasTraits):
         #make some data
         index = np.linspace(-10,10,512)
         value = np.sin(index)
-        self.trace_data = ArrayPlotData(times=index, response=value, spikes=value*2)
+        self.trace_data = ArrayPlotData(times=[], response=[], spikes=[])
         value = np.sin(3*index)
-        self.stim_data = ArrayPlotData(times=index, signal=value)
+        self.stim_data = ArrayPlotData(times=[], signal=[])
 
         #create a LinePlot instance and add it to the subcontainer
         # trace_plot = create_line_plot([index, value], add_grid=True,
@@ -172,14 +183,15 @@ class SpecialPlotter(HasTraits):
         trace_plot = Plot(self.trace_data)
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
         trace_plot.plot(('times', 'spikes'), type='scatter', name='detected spikes')
+        trace_plot.set(bounds=[600,500], position=[50,50])
 
-        self.stim_plot_height = 50
+        self.stim_plot_height = 20
         stim_plot = Plot(self.stim_data)
         stim_plot.plot(('times', 'signal'), type='line', 
                         name='stim signal', color='blue')
         stim_plot.set(resizable='h',
-                      bounds=[600,100], 
-                      position=[50,250], 
+                      bounds=[600,self.stim_plot_height+30], 
+                      position=[50,350], 
                       border_visible=False,
                       overlay_border=False)
         stim_plot.y_axis.orientation = "right"
@@ -188,10 +200,12 @@ class SpecialPlotter(HasTraits):
         stim_plot.x_axis.tick_label_formatter = self.noticks
         stim_plot.y_grid.visible = False
 
-        trace_plot.tools.append(PanTool(trace_plot, drag_button="right"))
+        trace_plot.tools.append(PanTool(trace_plot))
         trace_plot.overlays.append(ZoomTool(trace_plot))
 
+        # link x-axis ranges
         trace_plot.index_range = stim_plot.index_range
+
         container = OverlayPlotContainer()
         # self.plot = container
         container.add(trace_plot)
@@ -206,6 +220,20 @@ class SpecialPlotter(HasTraits):
             self.stim_data.set_data(datakey, data)
         if axeskey == 'response':
             self.trace_data.set_data(datakey, data)
+
+    def set_xlim(self, lim):
+        self.trace_plot.index_range.low = lim[0]
+        self.trace_plot.index_range.high = lim[1]
+
+    def set_ylim(self, lim):
+        self.trace_plot.value_range.low = lim[0]
+        self.trace_plot.value_range.high = lim[1]
+
+    def reset_lims(self):
+        xdata = self.trace_data.get_data('times')
+        self.set_xlim((xdata[0],xdata[-1]))
+        ydata = self.trace_data.get_data('response')
+        self.set_ylim((ydata.min(), ydata.max()))
 
     def noticks(self,num):
         return ''

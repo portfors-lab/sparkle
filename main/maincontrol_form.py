@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Sep 03 17:07:03 2013
+# Created: Wed Sep 18 02:59:00 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -60,12 +60,12 @@ class Ui_ControlWindow(object):
         self.tab_group.setObjectName(_fromUtf8("tab_group"))
         self.tab_explore = QtGui.QWidget()
         self.tab_explore.setObjectName(_fromUtf8("tab_explore"))
-        self.comboBox = QtGui.QComboBox(self.tab_explore)
-        self.comboBox.setGeometry(QtCore.QRect(10, 20, 141, 21))
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
+        self.explore_stim_type_cmbbx = QtGui.QComboBox(self.tab_explore)
+        self.explore_stim_type_cmbbx.setGeometry(QtCore.QRect(10, 20, 141, 21))
+        self.explore_stim_type_cmbbx.setObjectName(_fromUtf8("explore_stim_type_cmbbx"))
+        self.explore_stim_type_cmbbx.addItem(_fromUtf8(""))
+        self.explore_stim_type_cmbbx.addItem(_fromUtf8(""))
+        self.explore_stim_type_cmbbx.addItem(_fromUtf8(""))
         self.listWidget_2 = QtGui.QListWidget(self.tab_explore)
         self.listWidget_2.setGeometry(QtCore.QRect(530, 40, 201, 191))
         self.listWidget_2.setObjectName(_fromUtf8("listWidget_2"))
@@ -838,7 +838,7 @@ class Ui_ControlWindow(object):
         self.stackedWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
-        QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.stackedWidget.setCurrentIndex)
+        QtCore.QObject.connect(self.explore_stim_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.stackedWidget.setCurrentIndex)
         QtCore.QObject.connect(self.filetree_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavdir_selected)
         QtCore.QObject.connect(self.wavrootdir_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.browse_wavdirs)
         QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavfile_selected)
@@ -849,9 +849,9 @@ class Ui_ControlWindow(object):
         ControlWindow.setWindowTitle(_translate("ControlWindow", "MainWindow", None))
         self.label_3.setText(_translate("ControlWindow", "Neruone Control", None))
         self.running_label.setText(_translate("ControlWindow", "OFF", None))
-        self.comboBox.setItemText(0, _translate("ControlWindow", "Tone", None))
-        self.comboBox.setItemText(1, _translate("ControlWindow", "FM Sweep", None))
-        self.comboBox.setItemText(2, _translate("ControlWindow", "Vocalization", None))
+        self.explore_stim_type_cmbbx.setItemText(0, _translate("ControlWindow", "Tone", None))
+        self.explore_stim_type_cmbbx.setItemText(1, _translate("ControlWindow", "FM Sweep", None))
+        self.explore_stim_type_cmbbx.setItemText(2, _translate("ControlWindow", "Vocalization", None))
         self.label_4.setText(_translate("ControlWindow", "History:", None))
         self.label_39.setText(_translate("ControlWindow", "Reps", None))
         self.label_5.setText(_translate("ControlWindow", "kHz", None))

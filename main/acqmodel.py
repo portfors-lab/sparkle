@@ -1,13 +1,15 @@
 import os, time
 import threading
 import numpy as np
+import scipy.io.wavfile as wv
+
 from audiolab.calibration.calibration import TonePlayer, ToneCurve
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
 
 class AcquisitionModel():
     def __init__(self):
         self.signals = {}
-        pass
+        self.toneplayer = None
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -28,6 +30,79 @@ class AcquisitionModel():
         # saves a reference to specific types of pyqt signals for GUI
         # communication. Allowed names are 
         self.signals[name] = signal
+
+    def set_explore_params(self, **kwargs):
+        if self.toneplayer is None:
+            self.toneplayer = TonePlayer()
+
+        if kwargs['wavfile']:
+            sr, wavdata = wv.read(kwargs['wavfile'])
+            wavdata = wavdata.astype('float')
+            #normalize
+            mx = np.amax(wavdata)
+            wavdata = wavdata/mx
+
+            # self.current_gen_rate = sr
+            # self.current_signal = wavdata
+            self.toneplayer.set_stim(wavdata,sr)
+        if kwargs['acqtime']:
+            self.toneplayer.set_aidur(kwargs['acqtime'])
+        if kwargs['aisr']:
+            self.toneplayer.set_aisr(kwargs['aisr'])
+        if kwargs['aochan']:
+            self.aochan = kwargs['aochan']
+        if kwargs['aichan']:
+            self.aichan = kwargs['aichan']
+        if kwargs['aisr'] and kwargs['acqtime']:
+            self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
+
+    def run_explore(self, interval):
+        self.halt = False
+        
+        # TODO: some error checking to make sure valid paramenters are set
+
+        # save the start time and set last tick to expired, so first
+        # acquisition loop iteration executes immediately
+        self.start_time = time.time()
+        self.last_tick = self.start_time - (interval/1000)
+        self.interval = interval
+        self.acq_thread = threading.Thread(target=self._explore_worker)
+
+        # arm the first read
+        self.toneplayer.start(self.aochan, self.aichan)
+
+        # and go!
+        self.acq_thread.start()
+
+    def _explore_worker(self):
+        while not self.halt:
+            print 'explore worker'
+            try:
+                # calculate time since last interation and wait to acheive desired interval
+                now = time.time()
+                elapsed = (now - self.last_tick)*1000
+                #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+                if elapsed < self.interval:
+                    #print('sleep ', (self.interval-elapsed))
+                    time.sleep((self.interval-elapsed)/1000)
+                    now = time.time()
+                elif elapsed > self.interval:
+                    print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
+                self.last_tick = now
+
+                response = self.toneplayer.read()
+                # do something to display response - signal?
+
+                self.signals['response_collected'].emit(self.aitimes, response)
+
+                self.toneplayer.reset()
+            except:
+                raise
+        self.toneplayer.stop()
+
+    def halt_explore(self):
+        self.halt = True
+
 
     def setup_curve(self, dur, sr, rft, nreps, freqs, intensities, aisr, aichan, aochan, interval):
 
@@ -51,12 +126,12 @@ class AcquisitionModel():
         self.start_time = time.time()
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
-        self.acq_thread = threading.Thread(target=self.curve_worker)
+        self.acq_thread = threading.Thread(target=self._curve_worker)
 
     def run_curve(self):
         self.acq_thread.start()
 
-    def curve_worker(self):
+    def _curve_worker(self):
         print "worker"
         while not self.halt:
             try:

@@ -107,14 +107,14 @@ class PlayerBase():
 
     def set_stim(self, signal, sr):
         self.tone_lock.acquire()
-        self.stim = stim
+        self.stim = signal
         self.sr = sr
-        dur = float(len(stim))/sr
-        self.aitime = dur
-        timevals = np.arange(npts).astype(float)/samplerate
+        dur = float(len(signal))/sr
+        # self.aitime = dur
+        # timevals = np.arange(npts).astype(float)/samplerate
         self.tone_lock.release()
 
-        return timevals
+        # return timevals
 
     def get_samplerate(self):
         return self.sr
@@ -124,6 +124,9 @@ class PlayerBase():
 
     def set_aisr(self, aisr):
         self.aisr = aisr
+
+    def set_aidur(self,dur):
+        self.aitime = dur
 
     def set_caldb(self, caldb):
         self.caldb = caldb
