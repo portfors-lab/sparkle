@@ -6,7 +6,7 @@ from enthought.chaco.api import create_line_plot, VPlotContainer, ArrayPlotData,
 from chaco.tools.api import PanTool, ZoomTool, DragZoom, SelectTool, SimpleInspectorTool, ScatterInspector
 from enthought.enable.base_tool import BaseTool
 from chaco.tools.cursor_tool import CursorTool
-from traits.api import Instance
+from traits.api import HasTraits, Instance
 from enthought.chaco.abstract_mapper import AbstractMapper
 
 import sys, random
@@ -81,6 +81,22 @@ class ImageWidget(QtGui.QWidget):
     def set_xlim(self, *args, **kwargs):
         self.plotview.set_xlim(*args, **kwargs)
 
+class TraceWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self)
+        trait_object = SpecialPlotter()
+        self.window = Window(self, -1, component=trait_object.plot)
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.window.control)
+        self.setLayout(layout)
+        self.traits = trait_object
+
+    def resizeEvent(self, event):
+        tp_bounds = self.traits.trace_plot.bounds
+        # print 'trace plot', self.traits.trace_plot.position
+        # print 'stim plot', self.traits.stim_plot.position
+        self.traits.stim_plot.set(position=[50,tp_bounds[1]-self.traits.stim_plot_height])        
+
 class Plotter():
     def __init__(self, parent, nsubplots=1, orientation='h'):
         self.plotdata = []
@@ -127,6 +143,63 @@ class Plotter():
         container.spacing = 0
 
         return Window(parent, -1, component=container), plots
+
+class SpecialPlotter(HasTraits):
+    plot = Instance(OverlayPlotContainer)
+    # trace_data = ArrayPlotData
+    # times_index = Array
+    # response_data = Array
+    # spike_data = Array
+
+    # def __init__(self):
+    
+    def _plot_default(self):
+        #make some data
+        index = np.linspace(-10,10,512)
+        value = np.sin(index)
+        self.trace_data = ArrayPlotData(times=index, response=value, spikes=value*2)
+        value = np.sin(3*index)
+        self.stim_data = ArrayPlotData(times=index, signal=value)
+
+        #create a LinePlot instance and add it to the subcontainer
+        # trace_plot = create_line_plot([index, value], add_grid=True,
+        #                         add_axis=True, index_sort='ascending')
+        # raster_plot = create_scatter_plot([index, value])
+
+        trace_plot = Plot(self.trace_data)
+        trace_plot.plot(('times', 'response'), type='line', name='response potential')
+        trace_plot.plot(('times', 'spikes'), type='scatter', name='detected spikes')
+
+        self.stim_plot_height = 100
+        stim_plot = Plot(self.stim_data)
+        stim_plot.plot(('times', 'signal'), type='line', 
+                        name='stim signal', color='blue')
+        stim_plot.set(resizable='h',
+                      bounds=[600,150], 
+                      position=[50,250], 
+                      border_visible=False,
+                      overlay_border=False)
+        stim_plot.y_axis.orientation = "right"
+        stim_plot.x_axis.axis_line_visible = False
+        stim_plot.x_axis.tick_visible = False
+        stim_plot.x_axis.tick_label_formatter = self.noticks
+        stim_plot.y_grid.visible = False
+
+        trace_plot.tools.append(PanTool(trace_plot, drag_button="right"))
+        trace_plot.overlays.append(ZoomTool(trace_plot))
+
+        trace_plot.index_range = stim_plot.index_range
+        container = OverlayPlotContainer()
+        # self.plot = container
+        container.add(trace_plot)
+        container.add(stim_plot)
+
+        self.trace_plot = trace_plot
+        self.stim_plot = stim_plot
+        return container
+
+    def noticks(self,num):
+        return ''
 
 class ScrollingPlotter(Plotter):
     def __init__(self, parent, nsubplots, deltax, windowsize=1):
@@ -237,12 +310,13 @@ class MyScatterInspector(ScatterInspector):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    plot = DataPlotWidget()
+    # plot = DataPlotWidget()
+    plot = TraceWidget()
     plot.resize(600, 400)
     plot.show()
 
-    x = np.arange(200)
-    y = random.randint(0,10) * np.sin(x)
-    plot.update_data(x,y)
+    # x = np.arange(200)
+    # y = random.randint(0,10) * np.sin(x)
+    # plot.update_data(x,y)
 
     sys.exit(app.exec_())
