@@ -15,6 +15,10 @@ from scipy.special import jn
 
 from PyQt4 import QtCore, QtGui
 
+LEFT_MARGIN = 50
+RIGHT_MARGIN = 10
+FREQ_UNIT = 1000
+
 class BaseWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -91,14 +95,14 @@ class SpikePlotter(HasTraits):
         trace_plot = Plot(self.trace_data)
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
         trace_plot.plot(('times', 'spikes'), type='scatter', name='detected spikes')
-        trace_plot.set(bounds=[600,500], position=[50,50])
+        trace_plot.set(bounds=[600,500], position=[0,0])
 
         self.stim_plot_height = 20
         stim_plot = Plot(self.stim_data)
         stim_plot.plot(('times', 'signal'), type='line', 
                         name='stim signal', color='blue')
         stim_plot.set(resizable='h',
-                      bounds=[600,self.stim_plot_height+30], 
+                      bounds=[600,self.stim_plot_height], 
                       position=[50,350], 
                       border_visible=False,
                       overlay_border=False)
@@ -108,17 +112,28 @@ class SpikePlotter(HasTraits):
         stim_plot.x_axis.tick_label_formatter = self._noticks
         stim_plot.y_grid.visible = False
 
+        trace_plot.x_axis.title = 'Time (s)'
+        trace_plot.y_axis.title = 'voltage (mV)'
+
         trace_plot.tools.append(PanTool(trace_plot))
-        trace_plot.overlays.append(ZoomTool(trace_plot))
+        trace_plot.tools.append(ZoomTool(trace_plot))
 
         # link x-axis ranges
         trace_plot.index_range = stim_plot.index_range
+
+        trace_plot.padding_bottom = 40
+        trace_plot.padding_top = 0
+
+        # make sure side padding matches, or else time will be off
+        trace_plot.padding_right = RIGHT_MARGIN
+        stim_plot.padding_right = trace_plot.padding_right
 
         container = OverlayPlotContainer()
         # self.plot = container
         container.add(trace_plot)
         container.add(stim_plot)
 
+        container.bgcolor = "transparent"
         self.trace_plot = trace_plot
         self.stim_plot = stim_plot
         return container
@@ -154,21 +169,30 @@ class FFTPlotter(HasTraits):
         plot.plot(('freq', 'fft'), type='line', name='Stimulus spectrum')
         plot.orientation = 'v'
 
+        plot.x_axis.title = 'Intensity'
+        plot.y_axis.title = 'Frequency (kHz)'
+
+        plot.padding_left = 50
+        plot.padding_right = 10
+        plot.padding_bottom = 40
+        plot.padding_top = 0
+
         plot.overlays.append(RectZoomTool(plot))
 
         return plot
 
-    def update_data(self,freq, fft):
+    def update_data(self, freq, fft):
+        freq = freq/FREQ_UNIT
         self.fft_data.set_data('freq', freq)
         self.fft_data.set_data('fft', fft)
 
     def reset_lims(self):
         index = self.fft_data.get_data('freq')
-        self.plot.index_range.low(index[0])
-        self.plot.index_range.high(index[-1])
+        self.plot.index_range.low = index[0]
+        self.plot.index_range.high = index[-1]
         value = self.fft_data.get_data('fft')
-        self.plot.value_range.low(value.min())
-        self.plot.value_range.high(value.max())
+        self.plot.value_range.low = value.min()
+        self.plot.value_range.high = value.max()
 
 class ImagePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
@@ -177,11 +201,19 @@ class ImagePlotter(HasTraits):
         self.img_data.set_data('imagedata', np.zeros((5,5)))
         plot = Plot(self.img_data)
         plot.img_plot('imagedata', name="spectrogram")
+
+        plot.padding_top = 0
+        plot.padding_bottom = 20
+        plot.padding_right = RIGHT_MARGIN
+
+        plot.overlays.append(ZoomTool(plot))
+
         return plot
 
     def update_data(self, imgdata, xaxis=None, yaxis=None):
         self.img_data.set_data('imagedata',imgdata)
         if xaxis is not None and yaxis is not None:
+            yaxis = yaxis/FREQ_UNIT
             self.plot.components[0].index.set_data(xaxis, yaxis)
         self.plot.components[0].request_redraw()
 

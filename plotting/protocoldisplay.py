@@ -3,9 +3,7 @@ import sys
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 from enthought.chaco.api import GridPlotContainer
-# from enthought.chaco.tools.rect_zoom import RectZoomTool
 
-# from audiolab.plotting.chacoplots import ImagePlotter, Plotter, DataPlotWidget, ImageWidget, TraceWidget
 from audiolab.plotting.custom_plots import TraceWidget, FFTWidget, SpecWidget
 
 from PyQt4 import QtGui, QtCore
@@ -14,21 +12,13 @@ class ProtocolDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        # self.fft_plot = Plotter(self, 1, rotation = -90)
-        # self.fft_plot = DataPlotWidget(orientation='v')
         self.fft_plot = FFTWidget(self)
-        # add a rubber band zoom to the fft plot
-        # self.fft_plot.plotview.plots[0].tools.append(RectZoomTool(self.fft_plot.plotview.plots[0], drag_button="right"))
         self.spiketrace_plot = TraceWidget(self)
-        # self.spiketrace_plot = DataPlotWidget(self)
-        # self.signal_plot = DataPlotWidget(self)
         self.spec_plot = SpecWidget(self)
 
-        # container = GridPlotContainer(shape=(3,2))
-        # container.insert(0, self.spec_plot)
-        # container.insert(2, self.signal_plot)
-        # container.insert(4, self.spiketrace_plot)
-        # container.insert(5, self.fft_plot)
+        print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
+        self.spec_plot.traits.plot.range2d.x_range = self.spiketrace_plot.traits.trace_plot.range2d.x_range
+
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
@@ -37,12 +27,6 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot.setMinimumWidth(100)
         self.fft_plot.setMinimumHeight(100)
 
-        # layout = QtGui.QGridLayout()
-        # # layout.setSpacing(10)
-        # layout.addWidget(self.spec_plot.widget, 0, 0)
-        # layout.addWidget(self.signal_plot.widget, 1, 0)
-        # layout.addWidget(self.spiketrace_plot.widget, 2, 0)
-        # layout.addWidget(self.fft_plot.widget, 2, 1)
 
         splittersw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitternw = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -60,10 +44,6 @@ class ProtocolDisplay(QtGui.QWidget):
         # splitternw.setSizes([100])
         splittersw.setSizes([100,500])
         splitterse.setSizes([500,100])
-
-        # link spectrogram x axis with response x axis
-        # self.spec_plot.plotview.plots[0].range2d = self.spiketrace_plot.traits.trace_plot.range2d
-        # print self.spec_plot.plotview.plots[0].index_range
 
         layout = QtGui.QHBoxLayout()
         layout.addWidget(splitterse)
@@ -87,7 +67,9 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.update_data(ydata, datakey='signal', axeskey='stim')
 
     def set_xlimits(self, lims):
-        self.spec_plot.set_xlim(lims)
+        print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
+
+        # self.spec_plot.set_xlim(lims)
         # self.signal_plot.set_xlim(lims)
         self.spiketrace_plot.set_xlim(lims)
 
@@ -129,19 +111,16 @@ if __name__ == "__main__":
     resp_times = np.linspace(0,float(len(resp))/acq_rate, len(resp))
 
     print 'stim time', stim_times[-1], 'resp time', resp_times[-1]
-    x = np.arange(len(wavdata))
-    y = random.randint(0,10) * np.sin(x)
-    # plot.update_signal(x,y)
-    # plot.update_spiketrace(x,y)
+    # x = np.arange(len(wavdata))
+    # y = random.randint(0,10) * np.sin(x)
+
     plot.update_signal(stim_times, wavdata)
     plot.update_spiketrace(resp_times,resp)
-    # plot.update_spiketrace(resp_times, datakey='times', axeskey='response')
-    # plot.update_spiketrace(resp, datakey='response', axeskey='response')
-    for i in range(10):
-        y = random.randint(0,10) * np.sin(x)
-        plot.update_fft(x,y)
-        time.sleep(0.2)
-        QtGui.QApplication.processEvents()
+    # for i in range(10):
+    #     y = random.randint(0,10) * np.sin(x)
+    #     plot.update_fft(x,y)
+    #     time.sleep(0.2)
+    #     QtGui.QApplication.processEvents()
     plot.update_fft(freqs,fft)
 
     # coerce x ranges to match
