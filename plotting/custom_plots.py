@@ -84,7 +84,7 @@ class SpikePlotter(HasTraits):
     # def __init__(self):
     
     def _plot_default(self):
-        self.trace_data = ArrayPlotData(times=[], response=[], spikes=[])
+        self.trace_data = ArrayPlotData(times=[], response=[], bins=[], spikes=[])
         self.stim_data = ArrayPlotData(times=[], signal=[])
 
         #create a LinePlot instance and add it to the subcontainer
@@ -94,7 +94,7 @@ class SpikePlotter(HasTraits):
 
         trace_plot = Plot(self.trace_data)
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
-        trace_plot.plot(('times', 'spikes'), type='scatter', name='detected spikes')
+        trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes')
         trace_plot.set(bounds=[600,500], position=[0,0])
 
         self.stim_plot_height = 20
@@ -142,6 +142,16 @@ class SpikePlotter(HasTraits):
         if axeskey == 'stim':
             self.stim_data.set_data(datakey, data)
         if axeskey == 'response':
+            self.trace_data.set_data(datakey, data)
+
+    def clear_data(self, axeskey, datakey):
+        if axeskey == 'response':
+            self.trace_data.set_data(datakey, []])
+
+    def append_data(self, data, axeskey, datakey):
+        if axeskey == 'response':
+            d = self.trace_data.get_data(datakey)
+            d.append(data)
             self.trace_data.set_data(datakey, data)
 
     def set_xlim(self, lim):

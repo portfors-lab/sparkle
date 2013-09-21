@@ -61,6 +61,14 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='response')
         self.spiketrace_plot.update_data(ydata, datakey='response', axeskey='response')
 
+    def clear_raster(self):
+        self.spiketrace_plot.clear_data("response", "spikes")
+        self.spiketrace_plot.clear_data("response", "bins")
+
+    def add_raster_points(self, xdata, ydata):
+        self.spiketrace_plot.append_data(xdata, "response", 'bins')
+        self.spiketrace_plot.append_data(ydata, "response", 'spikes')
+
     def update_signal(self, xdata, ydata):
         # self.signal_plot.update_data(*args, **kwargs)
         self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='stim')

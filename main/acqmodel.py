@@ -55,6 +55,9 @@ class AcquisitionModel():
             self.aichan = kwargs['aichan']
         if kwargs['aisr'] and kwargs['acqtime']:
             self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
+        if kwargs['nreps']:
+            self.nreps = kwargs['nreps']
+
 
     def run_explore(self, interval):
         self.halt = False
@@ -63,6 +66,7 @@ class AcquisitionModel():
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
+        self.irep = 0
         self.start_time = time.time()
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
@@ -91,11 +95,18 @@ class AcquisitionModel():
                 self.last_tick = now
 
                 response = self.toneplayer.read()
-                # do something to display response - signal?
-
+                # process response; calculate spike times
+                spike_times = calc_spike_times(response, threshold)
+                response_bins = bin_spikes(spike_times, binsz)
+                raster_vals = np.ones((len(response_bins),), dtype=int)*self.irep
+                display.add_raster_points(response_bins, raster_vals)
                 self.signals['response_collected'].emit(self.aitimes, response)
 
                 self.toneplayer.reset()
+
+                self.irep +=1
+                if self.irep == self.nreps:
+                    self.display.clear_raster()
             except:
                 raise
         self.toneplayer.stop()

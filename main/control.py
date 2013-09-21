@@ -144,6 +144,7 @@ class ControlWindow(QtGui.QMainWindow):
         aichan = self.ui.aichan_box.currentText()
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         winsz = float(self.ui.windowsz_spnbx.value())*0.001
+        nreps = self.ui.nreps_spnbx.value()
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
 
