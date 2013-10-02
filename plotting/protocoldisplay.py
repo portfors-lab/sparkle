@@ -27,7 +27,6 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot.setMinimumWidth(100)
         self.fft_plot.setMinimumHeight(100)
 
-
         splittersw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitternw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
@@ -66,6 +65,10 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.clear_data("response", "bins")
 
     def add_raster_points(self, xdata, ydata):
+        """Add a list (or numpy array) of points to raster plot, 
+           in any order.
+           xdata: bin centers
+           ydata: rep number """
         self.spiketrace_plot.append_data(xdata, "response", 'bins')
         self.spiketrace_plot.append_data(ydata, "response", 'spikes')
 
@@ -130,6 +133,18 @@ if __name__ == "__main__":
     #     time.sleep(0.2)
     #     QtGui.QApplication.processEvents()
     plot.update_fft(freqs,fft)
+
+    nbins=20
+    bin_centers = np.linspace(0,float(len(resp))/acq_rate, nbins)
+    dummy_data = np.ones((nbins/2,))
+    dummy_bins = bin_centers[0:-1:2]
+    plot.add_raster_points(dummy_bins, dummy_data)
+    dummy_data = np.ones(((nbins/2)-1,))*2
+    dummy_bins = bin_centers[1:-2:2]
+    plot.add_raster_points(dummy_bins, dummy_data)
+    dummy_data = np.ones(((nbins/2)-1,))*3
+    dummy_bins = bin_centers[1:-2:2]
+    plot.add_raster_points(dummy_bins, dummy_data)
 
     # coerce x ranges to match
     plot.set_xlimits([0, resp_times[-1]])

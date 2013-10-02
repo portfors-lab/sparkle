@@ -19,6 +19,17 @@ LEFT_MARGIN = 50
 RIGHT_MARGIN = 10
 FREQ_UNIT = 1000
 
+DEFAULT_NREPS = 20
+RASTER_YMAX = 1
+RASTER_YMIN = 0.5
+
+def append(arr, data):
+    if isinstance(arr, list):
+        arr.extend(list(data))
+    elif isinstance(arr, np.ndarray):
+        arr = np.append(arr, data)
+    return arr
+
 class BaseWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -39,6 +50,9 @@ class BaseWidget(QtGui.QWidget):
 
     def update_data(self, *args, **kwargs):
         self.traits.update_data(*args, **kwargs)
+
+    def append_data(self, *args, **kwargs):
+        self.traits.append_data(*args, **kwargs)
 
     def set_xlim(self, *args, **kwargs):
         self.traits.set_xlim(*args, **kwargs)
@@ -76,6 +90,11 @@ class SpecWidget(BaseWidget):
 
 class SpikePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
+    nreps = DEFAULT_NREPS
+    raster_ymax = RASTER_YMAX
+    raster_ymin = RASTER_YMIN
+    raster_yslots = np.linspace(RASTER_YMIN, RASTER_YMAX, DEFAULT_NREPS)
+    print 'slots', raster_yslots
     # trace_data = ArrayPlotData
     # times_index = Array
     # response_data = Array
@@ -146,13 +165,25 @@ class SpikePlotter(HasTraits):
 
     def clear_data(self, axeskey, datakey):
         if axeskey == 'response':
-            self.trace_data.set_data(datakey, []])
+            self.trace_data.set_data(datakey, [])
 
     def append_data(self, data, axeskey, datakey):
         if axeskey == 'response':
+            if datakey == 'spikes':
+                # adjust repetition number to y scale
+                data = np.ones_like(data)*self.raster_yslots[data[0]]
             d = self.trace_data.get_data(datakey)
-            d.append(data)
-            self.trace_data.set_data(datakey, data)
+            d = append(d, data)
+            self.trace_data.set_data(datakey, d)
+
+    def set_nreps(self, nreps):
+        self.nreps = nreps
+        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
+
+    def set_raster_ylims(self, ymin, ymax):
+        self.raster_ymin = ymin
+        self.raster_ymax = ymax
+        self.raster_yslots = np.linspace(ymin, ymax, self.nreps)
 
     def set_xlim(self, lim):
         self.trace_plot.index_range.low = lim[0]
