@@ -5,6 +5,7 @@ import scipy.io.wavfile as wv
 
 from audiolab.calibration.calibration import TonePlayer, ToneCurve
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
+from audiolab.tools.spiketools import calc_spike_times
 
 class AcquisitionModel():
     def __init__(self):
@@ -45,17 +46,17 @@ class AcquisitionModel():
             # self.current_gen_rate = sr
             # self.current_signal = wavdata
             self.toneplayer.set_stim(wavdata,sr)
-        if kwargs['acqtime']:
+        if 'acqtime' in kwargs:
             self.toneplayer.set_aidur(kwargs['acqtime'])
-        if kwargs['aisr']:
+        if 'aisr' in kwargs:
             self.toneplayer.set_aisr(kwargs['aisr'])
-        if kwargs['aochan']:
+        if 'aochan' in kwargs:
             self.aochan = kwargs['aochan']
-        if kwargs['aichan']:
+        if 'aichan' in kwargs:
             self.aichan = kwargs['aichan']
-        if kwargs['aisr'] and kwargs['acqtime']:
+        if 'aisr' in kwargs and 'acqtime' in kwargs:
             self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
-        if kwargs['nreps']:
+        if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
 
 

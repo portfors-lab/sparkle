@@ -2,18 +2,22 @@ import sys
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from traits.api import HasTraits, Instance, List
+from traits.api import HasTraits, Instance, List, Int
 from traitsui.api import View, Item
 from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer
 from enable.component_editor import ComponentEditor
-from enthought.enable.api import Window
-from chaco.tools.api import PanTool, ZoomTool
+from enthought.enable.api import Window, Component
+from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool
 from enthought.chaco.tools.rect_zoom import RectZoomTool
 
 import numpy as np
 from scipy.special import jn
 
+from audiolab.plotting.plottools import SpikeTraceBroadcasterTool, LineDraggingTool
+
 from PyQt4 import QtCore, QtGui
+
+
 
 LEFT_MARGIN = 50
 RIGHT_MARGIN = 10
@@ -84,6 +88,9 @@ class TraceWidget(BaseWidget):
         traits_action.triggered.connect(self.traits.reset_lims)
         menu.exec_(self.mapToGlobal(point))
 
+    def get_threshold(self):
+        return self.traits.trace_plot.datasources['threshold'].get_data()
+
 class SpecWidget(BaseWidget):
     def _create_plotter(self):
         return ImagePlotter()
@@ -94,7 +101,7 @@ class SpikePlotter(HasTraits):
     raster_ymax = RASTER_YMAX
     raster_ymin = RASTER_YMIN
     raster_yslots = np.linspace(RASTER_YMIN, RASTER_YMAX, DEFAULT_NREPS)
-    print 'slots', raster_yslots
+    threshold_val = 0
     # trace_data = ArrayPlotData
     # times_index = Array
     # response_data = Array
@@ -103,18 +110,18 @@ class SpikePlotter(HasTraits):
     # def __init__(self):
     
     def _plot_default(self):
-        self.trace_data = ArrayPlotData(times=[], response=[], bins=[], spikes=[])
+        self.trace_data = ArrayPlotData(times=[], response=[], bins=[], spikes=[], 
+                                        threshold=[self.threshold_val,self.threshold_val], 
+                                        thresh_anchor=[])
         self.stim_data = ArrayPlotData(times=[], signal=[])
-
-        #create a LinePlot instance and add it to the subcontainer
-        # trace_plot = create_line_plot([index, value], add_grid=True,
-        #                         add_axis=True, index_sort='ascending')
-        # raster_plot = create_scatter_plot([index, value])
 
         trace_plot = Plot(self.trace_data)
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
         trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes')
+        thresh_line, = trace_plot.plot(('thresh_anchor', 'threshold'), type='line', color='red')
         trace_plot.set(bounds=[600,500], position=[0,0])
+        # must manually set sort order on array for map_index to work
+        trace_plot.datasources['thresh_anchor'].sort_order = "ascending"
 
         self.stim_plot_height = 20
         stim_plot = Plot(self.stim_data)
@@ -134,14 +141,21 @@ class SpikePlotter(HasTraits):
         trace_plot.x_axis.title = 'Time (s)'
         trace_plot.y_axis.title = 'voltage (mV)'
 
-        trace_plot.tools.append(PanTool(trace_plot))
-        trace_plot.tools.append(ZoomTool(trace_plot))
+        trace_plot.padding_bottom = 40
+        trace_plot.padding_top = 0
+
+        # Attach some tools to the plot
+        broadcaster = SpikeTraceBroadcasterTool(thresh_line)
+        broadcaster.tools.append(PanTool(trace_plot))
+        broadcaster.tools.append(ZoomTool(trace_plot))
+        broadcaster.tools.append(LineDraggingTool(thresh_line))
+        trace_plot.tools.append(broadcaster)
+        # setting the offsets after adding tools, sets it for all child tools
+        broadcaster.set_offsets(trace_plot.padding_left, trace_plot.padding_bottom)
 
         # link x-axis ranges
         trace_plot.index_range = stim_plot.index_range
 
-        trace_plot.padding_bottom = 40
-        trace_plot.padding_top = 0
 
         # make sure side padding matches, or else time will be off
         trace_plot.padding_right = RIGHT_MARGIN
@@ -188,6 +202,7 @@ class SpikePlotter(HasTraits):
     def set_xlim(self, lim):
         self.trace_plot.index_range.low = lim[0]
         self.trace_plot.index_range.high = lim[1]
+        self.trace_data.set_data('thresh_anchor', lim)
 
     def set_ylim(self, lim):
         self.trace_plot.value_range.low = lim[0]
@@ -261,6 +276,8 @@ class ImagePlotter(HasTraits):
     def set_xlim(self, lim):
         self.plot.range2d.x_range.low = lim[0]
         self.plot.range2d.x_range.high = lim[1]
+
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
