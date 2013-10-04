@@ -2,7 +2,7 @@ import sys
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from traits.api import HasTraits, Instance, List, Int
+from traits.api import HasTraits, Instance, List, Int, Tuple
 from traitsui.api import View, Item
 from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer
 from enable.component_editor import ComponentEditor
@@ -17,7 +17,7 @@ from audiolab.plotting.plottools import SpikeTraceBroadcasterTool, LineDraggingT
 
 from PyQt4 import QtCore, QtGui
 
-
+from audiolab.tools.qthreading import ProtocolSignals
 
 LEFT_MARGIN = 50
 RIGHT_MARGIN = 10
@@ -89,7 +89,10 @@ class TraceWidget(BaseWidget):
         menu.exec_(self.mapToGlobal(point))
 
     def get_threshold(self):
-        return self.traits.trace_plot.datasources['threshold'].get_data()
+        return self.traits.trace_data.get_data('threshold')
+
+    def set_threshold(self, threshold):
+        self.traits.trace_data.set_data('threshold', [threshold, threshold])
 
 class SpecWidget(BaseWidget):
     def _create_plotter(self):
@@ -101,7 +104,8 @@ class SpikePlotter(HasTraits):
     raster_ymax = RASTER_YMAX
     raster_ymin = RASTER_YMIN
     raster_yslots = np.linspace(RASTER_YMIN, RASTER_YMAX, DEFAULT_NREPS)
-    threshold_val = 0
+    threshold_val = 0.25
+    signals = ProtocolSignals()
     # trace_data = ArrayPlotData
     # times_index = Array
     # response_data = Array
@@ -129,7 +133,7 @@ class SpikePlotter(HasTraits):
                         name='stim signal', color='blue')
         stim_plot.set(resizable='h',
                       bounds=[600,self.stim_plot_height], 
-                      position=[50,350], 
+                      position=[50,550],
                       border_visible=False,
                       overlay_border=False)
         stim_plot.y_axis.orientation = "right"
@@ -148,14 +152,16 @@ class SpikePlotter(HasTraits):
         broadcaster = SpikeTraceBroadcasterTool(thresh_line)
         broadcaster.tools.append(PanTool(trace_plot))
         broadcaster.tools.append(ZoomTool(trace_plot))
-        broadcaster.tools.append(LineDraggingTool(thresh_line))
+        linetool = LineDraggingTool(thresh_line)
+        broadcaster.tools.append(linetool)
         trace_plot.tools.append(broadcaster)
         # setting the offsets after adding tools, sets it for all child tools
         broadcaster.set_offsets(trace_plot.padding_left, trace_plot.padding_bottom)
+        linetool.register_signal(self.signals.threshold_updated)
+        self.signals.threshold_updated.connect(self._update_thresh_data)
 
         # link x-axis ranges
         trace_plot.index_range = stim_plot.index_range
-
 
         # make sure side padding matches, or else time will be off
         trace_plot.padding_right = RIGHT_MARGIN
@@ -169,6 +175,7 @@ class SpikePlotter(HasTraits):
         container.bgcolor = "transparent"
         self.trace_plot = trace_plot
         self.stim_plot = stim_plot
+
         return container
 
     def update_data(self, data, axeskey, datakey):
@@ -214,6 +221,10 @@ class SpikePlotter(HasTraits):
         ydata = self.trace_data.get_data('response')
         self.set_ylim((ydata.min(), ydata.max()))
 
+    def _update_thresh_data(self, threshold):
+        # manual drag does not update datasource, so do so here
+        self.trace_data.set_data('threshold', [threshold, threshold])
+
     def _noticks(self,num):
         return ''
 
@@ -258,8 +269,8 @@ class ImagePlotter(HasTraits):
         plot = Plot(self.img_data)
         plot.img_plot('imagedata', name="spectrogram")
 
-        plot.padding_top = 0
-        plot.padding_bottom = 20
+        plot.padding_top = 20
+        plot.padding_bottom = 0
         plot.padding_right = RIGHT_MARGIN
 
         plot.overlays.append(ZoomTool(plot))
@@ -278,10 +289,17 @@ class ImagePlotter(HasTraits):
         self.plot.range2d.x_range.high = lim[1]
 
 
-
 if __name__ == '__main__':
+    import os
+    import audiolab.tools.audiotools as audiotools
+
     app = QtGui.QApplication(sys.argv)
-    qt_container = QtContainer()
-    qt_container.show()
-    qt_container.resize(1000,600)
+
+    sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
+    spec, f, bins, fs = audiotools.spectrogram(sylpath)
+
+    spec_plot = SpecWidget()
+    spec_plot.update_data(spec, xaxis=bins, yaxis=f)
+    spec_plot.show()
+
     sys.exit(app.exec_())

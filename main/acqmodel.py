@@ -11,6 +11,7 @@ class AcquisitionModel():
     def __init__(self):
         self.signals = {}
         self.toneplayer = None
+        self.threshold = 0.5
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -97,7 +98,7 @@ class AcquisitionModel():
 
                 response = self.toneplayer.read()
                 # process response; calculate spike times
-                spike_times = calc_spike_times(response, threshold)
+                spike_times = calc_spike_times(response, self.threshold)
                 response_bins = bin_spikes(spike_times, binsz)
                 raster_vals = np.ones((len(response_bins),), dtype=int)*self.irep
                 display.add_raster_points(response_bins, raster_vals)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Sep 18 02:59:00 2013
+# Created: Thu Oct 03 14:55:10 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(967, 802)
+        ControlWindow.resize(1121, 820)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -790,6 +790,23 @@ class Ui_ControlWindow(object):
         self.label_11 = QtGui.QLabel(self.centralwidget)
         self.label_11.setObjectName(_fromUtf8("label_11"))
         self.gridLayout.addWidget(self.label_11, 1, 2, 1, 1)
+        self.label_12 = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label_12.setFont(font)
+        self.label_12.setObjectName(_fromUtf8("label_12"))
+        self.gridLayout.addWidget(self.label_12, 2, 0, 1, 1)
+        self.label_13 = QtGui.QLabel(self.centralwidget)
+        self.label_13.setObjectName(_fromUtf8("label_13"))
+        self.gridLayout.addWidget(self.label_13, 2, 2, 1, 1)
+        self.thresh_lnedt = QtGui.QLineEdit(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.thresh_lnedt.sizePolicy().hasHeightForWidth())
+        self.thresh_lnedt.setSizePolicy(sizePolicy)
+        self.thresh_lnedt.setObjectName(_fromUtf8("thresh_lnedt"))
+        self.gridLayout.addWidget(self.thresh_lnedt, 2, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem3)
@@ -806,7 +823,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 967, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1121, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -936,6 +953,8 @@ class Ui_ControlWindow(object):
         self.label_7.setText(_translate("ControlWindow", "kHz", None))
         self.label_10.setText(_translate("ControlWindow", "Window size", None))
         self.label_11.setText(_translate("ControlWindow", "ms", None))
+        self.label_12.setText(_translate("ControlWindow", "Threshold", None))
+        self.label_13.setText(_translate("ControlWindow", "mV", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
         self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))

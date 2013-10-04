@@ -16,9 +16,9 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot = TraceWidget(self)
         self.spec_plot = SpecWidget(self)
 
-        print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
-        self.spec_plot.traits.plot.range2d.x_range = self.spiketrace_plot.traits.trace_plot.range2d.x_range
-
+        # print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
+        # self.spec_plot.traits.plot.range2d.x_range = self.spiketrace_plot.traits.trace_plot.range2d.x_range
+        self.spiketrace_plot.traits.trace_plot.components[0].index_mapper.range = self.spec_plot.traits.plot.components[0].index_mapper.range.x_range
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
@@ -78,11 +78,10 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.update_data(ydata, datakey='signal', axeskey='stim')
 
     def set_xlimits(self, lims):
-        print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
+        # print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
 
-        # self.spec_plot.set_xlim(lims)
-        # self.signal_plot.set_xlim(lims)
         self.spiketrace_plot.set_xlim(lims)
+        self.spec_plot.set_xlim(lims)
 
     def sizeHint(self):
         return QtCore.QSize(500,300)
@@ -105,8 +104,8 @@ if __name__ == "__main__":
 
     sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
     spec, f, bins, fs = audiotools.spectrogram(sylpath)
-    plot.update_spec(spec, xaxis=bins, yaxis=f)
 
+    plot.update_spec(spec, xaxis=bins, yaxis=f)
 
     sr, wavdata = wv.read(sylpath)
     freqs, fft = audiotools.calc_spectrum(wavdata,sr)
@@ -121,7 +120,6 @@ if __name__ == "__main__":
 
     resp_times = np.linspace(0,float(len(resp))/acq_rate, len(resp))
 
-    print 'stim time', stim_times[-1], 'resp time', resp_times[-1]
     # x = np.arange(len(wavdata))
     # y = random.randint(0,10) * np.sin(x)
 
@@ -145,6 +143,9 @@ if __name__ == "__main__":
     dummy_data = np.ones(((nbins/2)-1,))*3
     dummy_bins = bin_centers[1:-2:2]
     plot.add_raster_points(dummy_bins, dummy_data)
+
+    print 'spec range', plot.spec_plot.traits.plot.range2d.x_range
+    print 'spiketrace range', plot.spiketrace_plot.traits.trace_plot.range2d.x_range
 
     # coerce x ranges to match
     plot.set_xlimits([0, resp_times[-1]])

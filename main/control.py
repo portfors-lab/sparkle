@@ -78,10 +78,13 @@ class ControlWindow(QtGui.QMainWindow):
         self.signals.response_collected.connect(self.display_response)
         self.signals.stim_generated.connect(self.display_stim)
         self.signals.ncollected.connect(self.update_chart)
+        self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
 
         self.acqmodel = AcquisitionModel()
         self.current_operation = None
-        
+
+        self.ui.thresh_lnedt.setText(str(self.ui.display.spiketrace_plot.get_threshold()[0]))
+        self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
 
     def on_start(self):
         # set plot axis to appropriate limits
@@ -277,6 +280,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(spath))
 
     def wavfile_selected(self, model_index):
+        """ On double click of wav file, load into display """
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         spec, f, bins, fs = spectrogram(spath)
@@ -287,17 +291,20 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.ui.display.update_fft(freq, spectrum)
         t = np.linspace(0,(float(len(wavdata))/sr), len(wavdata))
+        print 'stim time lims', t[0], t[-1]
         self.ui.display.update_signal(t, wavdata)
 
         self.current_wav_file = spath
 
-        if self.current_operation == 'explore':
+        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             aochan = self.ui.aochan_box.currentText()
             aichan = self.ui.aichan_box.currentText()
             acq_rate = self.ui.aisr_spnbx.value()*self.fscale
             winsz = float(self.ui.windowsz_spnbx.value())*0.001
             self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
                                              acqtime=winsz, aisr=acq_rate)
+            print 'win size', winsz
+            self.ui.display.set_xlimits((0,winsz))
         # self.current_gen_rate = sr
         # self.current_wav_signal = wavdata
 
@@ -307,6 +314,13 @@ class ControlWindow(QtGui.QMainWindow):
         spec, f, bins, fs = spectrogram(spath)
         # self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
         self.ui.spec_preview.update_data(spec,xaxis=bins,yaxis=f)
+
+    def update_thresh(self, thresh):
+        self.ui.thresh_lnedt.setText(str(thresh))
+
+    def set_plot_thresh(self):
+        thresh = float(self.ui.thresh_lnedt.text())
+        self.ui.display.spiketrace_plot.set_threshold(thresh)
 
     def closeEvent(self,event):
         # save current inputs to file for loading next time

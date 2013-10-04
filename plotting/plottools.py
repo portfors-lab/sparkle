@@ -6,17 +6,17 @@ from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool, DragTool
 from enthought.enable.api import Component
 
 
-
 class LineDraggingTool(DragTool):
 
     component = Instance(Component)
-
     # The pixel distance from a point that the cursor is still considered
     # to be 'on' the point
     tolerance = Int(5)
 
     # value of line at beginning of drag
     _orig_value = Float
+
+    signal = None
 
     def is_draggable(self, x, y):
         # Check to see if (x,y) are over one of the points in self.component
@@ -33,7 +33,6 @@ class LineDraggingTool(DragTool):
         if ndx is None:
             return
         plot_point = plot.map_data((event.x-self.xoffset, event.y-self.yoffset), all_values=True)
-        self._drag_index = ndx
         self._orig_value = plot_point[1]
 
     def dragging(self, event):
@@ -47,19 +46,16 @@ class LineDraggingTool(DragTool):
         plot.request_redraw()
 
     def drag_cancel(self, event):
+        print 'drag cancel'
         plot = self.component
-        plot.value._data[:] = [self._orig_value]*len(plot.value._data)
+        plot.value._data = [self._orig_value]*len(plot.value._data)
         plot.value.data_changed = True
         plot.request_redraw()
 
     def drag_end(self, event):
-        return
-        plot = self.component
-        if plot.index.metadata.has_key('selections'):
-            del plot.index.metadata['selections']
-        plot.invalidate_draw()
-        plot.request_redraw()
-
+        if self.signal is not None:
+            self.signal.emit(self.component.value._data[0])
+        
     def _lookup_point(self, x, y):
         """ Finds the point closest to a screen point if it is within self.threshold
 
@@ -86,10 +82,14 @@ class LineDraggingTool(DragTool):
         self.xoffset = x
         self.yoffset = y
 
+    def register_signal(self, signal):
+        """ saves signal for emitting value after drag end """
+        self.signal = signal
+
 class SpikeTraceBroadcasterTool(BroadcasterTool):
 
     component = Instance(Component)
-    tolerance = Int(20)
+    tolerance = Int(5)
     xoffset = 0
     yoffset = 0
     pan_enabled = True # flag saves us from looping through tools
