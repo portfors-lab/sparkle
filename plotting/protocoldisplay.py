@@ -18,7 +18,7 @@ class ProtocolDisplay(QtGui.QWidget):
 
         # print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
         # self.spec_plot.traits.plot.range2d.x_range = self.spiketrace_plot.traits.trace_plot.range2d.x_range
-        self.spiketrace_plot.traits.trace_plot.components[0].index_mapper.range = self.spec_plot.traits.plot.components[0].index_mapper.range.x_range
+        # self.spiketrace_plot.traits.trace_plot.components[0].index_mapper.range = self.spec_plot.traits.plot.components[0].index_mapper.range.x_range
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)

@@ -109,6 +109,7 @@ class PlayerBase():
         self.tone_lock.acquire()
         self.stim = signal
         self.sr = sr
+        self.atten = 0
         dur = float(len(signal))/sr
         # self.aitime = dur
         # timevals = np.arange(npts).astype(float)/samplerate
@@ -213,6 +214,7 @@ class TonePlayer(PlayerBase):
                 self.attenuator.SetAtten(self.atten)
             except:
                 print "ERROR: attenuation not set!"
+                raise
 
             self.ngenerated +=1
 

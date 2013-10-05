@@ -61,6 +61,8 @@ class BaseWidget(QtGui.QWidget):
     def set_xlim(self, *args, **kwargs):
         self.traits.set_xlim(*args, **kwargs)
 
+    def clear_data(self, *args, **kwargs):
+        self.traits.clear_data(*args, **kwargs)
 
 class FFTWidget(BaseWidget):
     def _create_plotter(self):
@@ -121,7 +123,7 @@ class SpikePlotter(HasTraits):
 
         trace_plot = Plot(self.trace_data)
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
-        trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes')
+        trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes', color='red')
         thresh_line, = trace_plot.plot(('thresh_anchor', 'threshold'), type='line', color='red')
         trace_plot.set(bounds=[600,500], position=[0,0])
         # must manually set sort order on array for map_index to work

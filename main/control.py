@@ -78,9 +78,15 @@ class ControlWindow(QtGui.QMainWindow):
         self.signals.response_collected.connect(self.display_response)
         self.signals.stim_generated.connect(self.display_stim)
         self.signals.ncollected.connect(self.update_chart)
+        self.signals.spikes_found.connect(self.display_raster)
+        self.signals.trace_finished.connect(self.trace_done)
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
 
         self.acqmodel = AcquisitionModel()
+        self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
+        self.acqmodel.register_signal(self.signals.spikes_found, 'spikes_found')
+        self.acqmodel.register_signal(self.signals.trace_finished, 'trace_finished')
+
         self.current_operation = None
 
         self.ui.thresh_lnedt.setText(str(self.ui.display.spiketrace_plot.get_threshold()[0]))
@@ -155,10 +161,9 @@ class ControlWindow(QtGui.QMainWindow):
         # set up first stimulus, lets start with vocalizations for now
         if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
             # assume user has already clicked on wav file
-            self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
             
             self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate)
+                                             acqtime=winsz, aisr=acq_rate, nreps=nreps)
             self.acqmodel.run_explore(interval)
 
 
@@ -256,6 +261,13 @@ class ControlWindow(QtGui.QMainWindow):
         print "display reponse"
         self.ui.display.update_spiketrace(times, response)
 
+    def display_raster(self, bins, spike_counts):
+        self.ui.display.add_raster_points(bins, spike_counts)
+
+    def trace_done(self):
+        self.ui.display.clear_raster()
+
+
     def launch_save_dlg(self):
         field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}
         dlg = SavingDialog(default_vals = field_vals)
@@ -317,10 +329,15 @@ class ControlWindow(QtGui.QMainWindow):
 
     def update_thresh(self, thresh):
         self.ui.thresh_lnedt.setText(str(thresh))
+        # self.acqmodel.theshold = thresh
+        self.acqmodel.set_threshold(thresh)
+
 
     def set_plot_thresh(self):
         thresh = float(self.ui.thresh_lnedt.text())
         self.ui.display.spiketrace_plot.set_threshold(thresh)
+        # self.acqmodel.theshold = thresh
+        self.acqmodel.set_threshold(thresh)
 
     def closeEvent(self,event):
         # save current inputs to file for loading next time

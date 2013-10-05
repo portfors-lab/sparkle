@@ -5,13 +5,13 @@ import scipy.io.wavfile as wv
 
 from audiolab.calibration.calibration import TonePlayer, ToneCurve
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
-from audiolab.tools.spiketools import calc_spike_times
+from audiolab.tools.spiketools import calc_spike_times, bin_spikes
 
 class AcquisitionModel():
     def __init__(self):
         self.signals = {}
         self.toneplayer = None
-        self.threshold = 0.5
+        self.threshold = 0.75
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -23,6 +23,10 @@ class AcquisitionModel():
             print "Error: unable to load calibration data from file: ", cal_fname
         # calibration_vector = np.load(os.path.join(caldata_filename()))
         # calibration_freqs = np.load(os.path.join(calfreq_filename()))
+
+    def set_threshold(self, threshold):
+        print threshold
+        self.threshold = threshold
 
     def set_save_params(self, savefolder, savename):
         self.savefolder = savefolder
@@ -97,18 +101,24 @@ class AcquisitionModel():
                 self.last_tick = now
 
                 response = self.toneplayer.read()
-                # process response; calculate spike times
-                spike_times = calc_spike_times(response, self.threshold)
-                response_bins = bin_spikes(spike_times, binsz)
-                raster_vals = np.ones((len(response_bins),), dtype=int)*self.irep
-                display.add_raster_points(response_bins, raster_vals)
                 self.signals['response_collected'].emit(self.aitimes, response)
+
+                # process response; calculate spike times
+                spike_times = calc_spike_times(response, self.threshold, self.toneplayer.aisr)
+                
+                binsz = 0.001
+                response_bins = bin_spikes(spike_times, binsz)
+                raster_vals = [self.irep]*len(response_bins)
+                # raster_vals = np.ones((len(response_bins),), dtype=int)*self.irep
+                if len(raster_vals) > 0:
+                    self.signals['spikes_found'].emit(response_bins, raster_vals)
 
                 self.toneplayer.reset()
 
                 self.irep +=1
                 if self.irep == self.nreps:
-                    self.display.clear_raster()
+                    self.irep = 0
+                    self.signals['trace_finished'].emit()
             except:
                 raise
         self.toneplayer.stop()
