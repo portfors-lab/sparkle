@@ -83,6 +83,9 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.set_xlim(lims)
         self.spec_plot.set_xlim(lims)
 
+    def set_nreps(self, nreps):
+        self.spiketrace_plot.set_nreps(nreps)
+
     def sizeHint(self):
         return QtCore.QSize(500,300)
 

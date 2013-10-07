@@ -2,7 +2,7 @@ import sys
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from traits.api import HasTraits, Instance, List, Int, Tuple
+from traits.api import HasTraits, Instance, List, Int, Tuple, Float
 from traitsui.api import View, Item
 from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer
 from enable.component_editor import ComponentEditor
@@ -18,6 +18,7 @@ from audiolab.plotting.plottools import SpikeTraceBroadcasterTool, LineDraggingT
 from PyQt4 import QtCore, QtGui
 
 from audiolab.tools.qthreading import ProtocolSignals
+from audiolab.dialogs.raster_bounds_dlg import RasterBoundsDialog
 
 LEFT_MARGIN = 50
 RIGHT_MARGIN = 10
@@ -70,8 +71,8 @@ class FFTWidget(BaseWidget):
 
     def contextMenuRequested(self, point):
         menu = QtGui.QMenu()
-        traits_action = menu.addAction("reset axis limits")
-        traits_action.triggered.connect(self.traits.reset_lims)
+        axis_action = menu.addAction("reset axis limits")
+        axis_action.triggered.connect(self.traits.reset_lims)
         menu.exec_(self.mapToGlobal(point))
 
 class TraceWidget(BaseWidget):
@@ -82,12 +83,14 @@ class TraceWidget(BaseWidget):
         tp_bounds = self.traits.trace_plot.bounds
         # print 'trace plot', self.traits.trace_plot.position, tp_bounds
         # print 'stim plot', self.traits.stim_plot.position
-        self.traits.stim_plot.set(position=[50,tp_bounds[1]-self.traits.stim_plot_height]) 
+        self.traits.stim_plot.set(position=[50,tp_bounds[1]]) 
 
     def contextMenuRequested(self, point):
         menu = QtGui.QMenu()
-        traits_action = menu.addAction("reset axis limits")
-        traits_action.triggered.connect(self.traits.reset_lims)
+        axis_action = menu.addAction("reset axis limits")
+        axis_action.triggered.connect(self.traits.reset_lims)
+        raster_bounds_action = menu.addAction("edit raster bounds")
+        raster_bounds_action.triggered.connect(self.ask_raster_bounds)
         menu.exec_(self.mapToGlobal(point))
 
     def get_threshold(self):
@@ -96,15 +99,28 @@ class TraceWidget(BaseWidget):
     def set_threshold(self, threshold):
         self.traits.trace_data.set_data('threshold', [threshold, threshold])
 
+    def set_nreps(self, nreps):
+        self.traits.nreps = nreps
+
+    def set_raster_lims(self,lims):
+        self.traits.raster_ymin = lims[0]
+        self.traits.raster_ymax = lims[1]
+
+    def ask_raster_bounds(self):
+        dlg = RasterBoundsDialog(bounds= (self.traits.raster_ymin, self.traits.raster_ymax))
+        if dlg.exec_():
+            bounds = dlg.get_values()
+            self.set_raster_lims(bounds)
+
 class SpecWidget(BaseWidget):
     def _create_plotter(self):
         return ImagePlotter()
 
 class SpikePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
-    nreps = DEFAULT_NREPS
-    raster_ymax = RASTER_YMAX
-    raster_ymin = RASTER_YMIN
+    nreps = Int(DEFAULT_NREPS)
+    raster_ymax = Float(RASTER_YMAX)
+    raster_ymin = Float(RASTER_YMIN)
     raster_yslots = np.linspace(RASTER_YMIN, RASTER_YMAX, DEFAULT_NREPS)
     threshold_val = 0.25
     signals = ProtocolSignals()
@@ -135,7 +151,7 @@ class SpikePlotter(HasTraits):
                         name='stim signal', color='blue')
         stim_plot.set(resizable='h',
                       bounds=[600,self.stim_plot_height], 
-                      position=[50,550],
+                      position=[50,350],
                       border_visible=False,
                       overlay_border=False)
         stim_plot.y_axis.orientation = "right"
@@ -149,6 +165,8 @@ class SpikePlotter(HasTraits):
 
         trace_plot.padding_bottom = 40
         trace_plot.padding_top = 0
+        stim_plot.padding_top = 0
+        stim_plot.padding_bottom = 0
 
         # Attach some tools to the plot
         broadcaster = SpikeTraceBroadcasterTool(thresh_line)
@@ -199,15 +217,6 @@ class SpikePlotter(HasTraits):
             d = append(d, data)
             self.trace_data.set_data(datakey, d)
 
-    def set_nreps(self, nreps):
-        self.nreps = nreps
-        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
-
-    def set_raster_ylims(self, ymin, ymax):
-        self.raster_ymin = ymin
-        self.raster_ymax = ymax
-        self.raster_yslots = np.linspace(ymin, ymax, self.nreps)
-
     def set_xlim(self, lim):
         self.trace_plot.index_range.low = lim[0]
         self.trace_plot.index_range.high = lim[1]
@@ -229,6 +238,15 @@ class SpikePlotter(HasTraits):
 
     def _noticks(self,num):
         return ''
+
+    def _nreps_changed(self):
+        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
+
+    def _raster_ymax_changed(self):
+        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
+
+    def _raster_ymin_changed(self):
+        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
 
 class FFTPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)

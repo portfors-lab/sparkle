@@ -795,7 +795,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QSpinBox" name="nreps_spnbx_2">
+               <widget class="QSpinBox" name="ex_nreps_spnbx">
                 <property name="font">
                  <font>
                   <pointsize>10</pointsize>

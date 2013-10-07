@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Oct 07 13:14:06 2013
+# Created: Mon Oct 07 15:38:11 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -467,15 +467,15 @@ class Ui_ControlWindow(object):
         self.label_39.setFont(font)
         self.label_39.setObjectName(_fromUtf8("label_39"))
         self.gridLayout_7.addWidget(self.label_39, 0, 0, 1, 1)
-        self.nreps_spnbx_2 = QtGui.QSpinBox(self.tab_explore)
+        self.ex_nreps_spnbx = QtGui.QSpinBox(self.tab_explore)
         font = QtGui.QFont()
         font.setPointSize(10)
-        self.nreps_spnbx_2.setFont(font)
-        self.nreps_spnbx_2.setMinimum(0)
-        self.nreps_spnbx_2.setMaximum(100)
-        self.nreps_spnbx_2.setProperty("value", 5)
-        self.nreps_spnbx_2.setObjectName(_fromUtf8("nreps_spnbx_2"))
-        self.gridLayout_7.addWidget(self.nreps_spnbx_2, 0, 1, 1, 1)
+        self.ex_nreps_spnbx.setFont(font)
+        self.ex_nreps_spnbx.setMinimum(0)
+        self.ex_nreps_spnbx.setMaximum(100)
+        self.ex_nreps_spnbx.setProperty("value", 5)
+        self.ex_nreps_spnbx.setObjectName(_fromUtf8("ex_nreps_spnbx"))
+        self.gridLayout_7.addWidget(self.ex_nreps_spnbx, 0, 1, 1, 1)
         self.verticalLayout_8.addLayout(self.gridLayout_7)
         self.horizontalLayout_7.addLayout(self.verticalLayout_8)
         self.tab_group.addTab(self.tab_explore, _fromUtf8(""))

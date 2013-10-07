@@ -176,12 +176,13 @@ class ControlWindow(QtGui.QMainWindow):
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
         binsz = float(self.ui.binsz_lnedt.text())*self.tscale
-        nreps = self.ui.nreps_spnbx.value()
+        nreps = self.ui.ex_nreps_spnbx.value()
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
 
         print 'interval', interval
         # set up first stimulus, lets start with vocalizations for now
+        self.ui.display.set_nreps(nreps)
         if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
             # assume user has already clicked on wav file
             
