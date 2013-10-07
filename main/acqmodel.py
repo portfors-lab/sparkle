@@ -41,7 +41,7 @@ class AcquisitionModel():
         if self.toneplayer is None:
             self.toneplayer = TonePlayer()
 
-        if kwargs['wavfile']:
+        if 'wavfile' in kwargs:
             sr, wavdata = wv.read(kwargs['wavfile'])
             wavdata = wavdata.astype('float')
             #normalize
@@ -64,6 +64,8 @@ class AcquisitionModel():
         if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
 
+    def set_tone(self, f,db,dur,rft,sr):
+        self.toneplayer.set_tone(f,db,dur,rft,sr)
 
     def run_explore(self, interval):
         self.halt = False
@@ -86,7 +88,7 @@ class AcquisitionModel():
 
     def _explore_worker(self):
         while not self.halt:
-            print 'explore worker'
+            # print 'explore worker'
             try:
                 # calculate time since last interation and wait to acheive desired interval
                 now = time.time()

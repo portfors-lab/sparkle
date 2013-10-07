@@ -102,7 +102,7 @@ class ControlWindow(QtGui.QMainWindow):
 
     def on_start(self):
         # set plot axis to appropriate limits
-
+        print 'on start'
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         aichan = str(self.ui.aichan_box.currentText())
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
@@ -121,6 +121,17 @@ class ControlWindow(QtGui.QMainWindow):
         else: 
             error("unrecognized tab selection")
 
+    def on_update(self):
+        print 'on_update'
+        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
+            if self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
+                f = self.ui.extone_freq_spnbx.value()*self.fscale
+                gen_rate = self.ui.extone_aosr_spnbx.value()*self.fscale
+                dur = self.ui.extone_dur_spnbx.value()*self.tscale
+                db = self.ui.extone_db_spnbx.value()
+                rft = self.ui.extone_risefall_spnbx.value()*self.tscale
+                self.acqmodel.set_tone(f,db,dur,rft,gen_rate)
+
     def on_stop(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             self.ait.stop()
@@ -137,6 +148,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
         self.ui.start_btn.setText('Start')
+        self.ui.start_btn.clicked.disconnect()
+        self.ui.start_btn.clicked.connect(self.on_start)
 
 
     def start_chart(self, aichan, samplerate):
@@ -154,6 +167,8 @@ class ControlWindow(QtGui.QMainWindow):
 
     def run_explore(self):
         self.ui.start_btn.setText('Update')
+        self.ui.start_btn.clicked.disconnect()
+        self.ui.start_btn.clicked.connect(self.on_update)
         # make this an enum!!!!
         self.current_operation = 'explore'
         aochan = self.ui.aochan_box.currentText()
@@ -172,6 +187,12 @@ class ControlWindow(QtGui.QMainWindow):
             
             self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
                                              acqtime=winsz, aisr=acq_rate, nreps=nreps)
+            self.acqmodel.run_explore(interval)
+
+        elif self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
+            self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
+                                             acqtime=winsz, aisr=acq_rate, nreps=nreps)
+            self.on_update()            
             self.acqmodel.run_explore(interval)
 
 
@@ -262,7 +283,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.display.update_fft(xfft, yfft)
 
     def display_response(self, times, response):
-        print "display reponse"
+        # print "display reponse"
         self.ui.display.update_spiketrace(times, response)
 
     def display_raster(self, bins, spike_counts):

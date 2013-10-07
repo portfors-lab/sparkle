@@ -124,7 +124,7 @@
             <item>
              <widget class="QStackedWidget" name="stackedWidget">
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="page">
                <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -138,7 +138,7 @@
                    </widget>
                   </item>
                   <item row="3" column="1">
-                   <widget class="QDoubleSpinBox" name="reprate_spnbx_2">
+                   <widget class="QDoubleSpinBox" name="extone_reprate_spnbx">
                     <property name="font">
                      <font>
                       <pointsize>10</pointsize>
@@ -156,7 +156,7 @@
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QSpinBox" name="spinBox"/>
+                   <widget class="QSpinBox" name="extone_freq_spnbx"/>
                   </item>
                   <item row="0" column="0">
                    <widget class="QLabel" name="label_41">
@@ -202,7 +202,7 @@
                    </widget>
                   </item>
                   <item row="5" column="1">
-                   <widget class="QSpinBox" name="aosr_spnbx_2">
+                   <widget class="QSpinBox" name="extone_aosr_spnbx">
                     <property name="font">
                      <font>
                       <pointsize>10</pointsize>
@@ -254,7 +254,7 @@
                    </widget>
                   </item>
                   <item row="4" column="1">
-                   <widget class="QSpinBox" name="risefall_spnbx_3">
+                   <widget class="QSpinBox" name="extone_risefall_spnbx">
                     <property name="font">
                      <font>
                       <pointsize>10</pointsize>
@@ -302,7 +302,7 @@
                    </widget>
                   </item>
                   <item row="2" column="1">
-                   <widget class="QSpinBox" name="dur_spnbx_3">
+                   <widget class="QSpinBox" name="extone_dur_spnbx">
                     <property name="font">
                      <font>
                       <pointsize>10</pointsize>
@@ -361,7 +361,7 @@
                    </widget>
                   </item>
                   <item row="1" column="1">
-                   <widget class="QSpinBox" name="spinBox_2"/>
+                   <widget class="QSpinBox" name="extone_db_spnbx"/>
                   </item>
                   <item row="1" column="2">
                    <widget class="QLabel" name="label_6">
