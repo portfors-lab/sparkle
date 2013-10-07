@@ -8,7 +8,8 @@ from PyQt4 import QtCore, QtGui
 from audiolab.io.daq_tasks import *
 
 from audiolab.config.info import caldata_filename, calfreq_filename
-from audiolab.dialogs.saving_dlg import SavingDialog
+from audiolab.dialogs.saving_dlg import SavingDialog 
+from audiolab.dialogs.scale_dlg import ScaleDialog
 from audiolab.tools.qthreading import ProtocolSignals
 from audiolab.main.acqmodel import AcquisitionModel
 import audiolab.tools.systools as systools
@@ -50,6 +51,11 @@ class ControlWindow(QtGui.QMainWindow):
             inputsdict = {}
 
         self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
+        self.threshold = inputsdict.get('threshold', 0.5)
+        self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
+        self.ui.binsz_lnedt.setText(inputsdict.get('binsz', '5'))        
+        self.tscale = inputsdict.get('tscale', 0.001)
+        self.fscale = inputsdict.get('fscale', 1000)
 
         # set up wav file directory finder paths
         self.dirmodel = QtGui.QFileSystemModel(self)
@@ -64,7 +70,6 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.apply_calibration = False
         self.display = None
-        self.fscale = 1000
 
         # set default values
         homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
@@ -91,6 +96,8 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.ui.thresh_lnedt.setText(str(self.ui.display.spiketrace_plot.get_threshold()[0]))
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
+
+        self.update_unit_labels()
 
     def on_start(self):
         # set plot axis to appropriate limits
@@ -152,7 +159,8 @@ class ControlWindow(QtGui.QMainWindow):
         aochan = self.ui.aochan_box.currentText()
         aichan = self.ui.aichan_box.currentText()
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
-        winsz = float(self.ui.windowsz_spnbx.value())*0.001
+        winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
+        binsz = float(self.ui.binsz_lnedt.text())*self.tscale
         nreps = self.ui.nreps_spnbx.value()
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
@@ -183,10 +191,6 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.ui.start_btn.setEnabled(False)
 
-        # will get from GUI in future
-        self.fscale = 1000 
-        self.tscale = 0.001
-        
         try:
             #scale_factor = 1000
             aochan = self.ui.aochan_box.currentText()
@@ -280,6 +284,55 @@ class ControlWindow(QtGui.QMainWindow):
     def launch_calibration_dlg(self):
         pass
 
+    def launch_scale_dlg(self):
+        field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}
+        dlg = ScaleDialog(default_vals=field_vals)
+        if dlg.exec_():
+            fscale, tscale = dlg.get_values()
+            self.fscale = fscale
+            self.tscale = tscale
+        self.update_unit_labels()
+
+    def update_unit_labels(self):
+        nf_lbls = 7
+        nt_lbls = 8
+        if self.fscale == 1000:
+            # better way to do this than eval?
+            for i in range(nf_lbls):
+                lbl_str = "self.ui.funit_lbl" + str(i) + ".setText(u'kHz')"
+                try:
+                    eval(lbl_str)
+                except:
+                    print "trouble with command: ", lbl_str
+        elif self.fscale == 1:
+            for i in range(nf_lbls):
+                lbl_str = "self.ui.funit_lbl" + str(i) + ".setText(u'Hz')"
+                try:
+                    eval(lbl_str)
+                except:
+                    print "trouble with command: ", lbl_str
+        else:
+            print self.fscale
+            raise Exception(u"Invalid frequency scale")
+            
+        if self.tscale == 0.001:
+            for i in range(nt_lbls):
+                lbl_str = "self.ui.tunit_lbl" + str(i) + ".setText(u'ms')"
+                try:
+                    eval(lbl_str)
+                except:
+                    print "trouble with command: ", lbl_str
+        elif self.tscale == 1:
+            for i in range(nt_lbls):
+                lbl_str = "self.ui.tunit_lbl" + str(i) + ".setText(u's')"
+                try:
+                    eval(lbl_str)
+                except:
+                    print "trouble with command: ", lbl_str
+        else:
+            print self.tscale
+            raise Exception(u"Invalid time scale")
+    
     def browse_wavdirs(self):
         wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir)
         self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(wavdir))
@@ -348,6 +401,11 @@ class ControlWindow(QtGui.QMainWindow):
 
         savedict = {}
         savedict['wavrootdir'] = self.wavrootdir
+        savedict['threshold'] = self.threshold
+        savedict['binsz'] = self.ui.binsz_lnedt.text()
+        savedict['aisr'] = self.ui.aisr_spnbx.value()
+        savedict['tscale'] = self.tscale
+        savedict['fscale'] = self.fscale
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 

@@ -214,7 +214,7 @@ class TonePlayer(PlayerBase):
                 self.attenuator.SetAtten(self.atten)
             except:
                 print "ERROR: attenuation not set!"
-                raise
+                # raise
 
             self.ngenerated +=1
 
