@@ -41,41 +41,8 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.ui.running_label.setPalette(RED)
 
-        # load saved user inputs
-        inputsfname = os.path.join(systools.get_appdir(), INPUTSFNAME)
-        try:
-            with open(inputsfname, 'r') as jf:
-                inputsdict = json.load(jf)
-        except:
-            print "problem loading app data"
-            inputsdict = {}
-
-        self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
-        self.threshold = inputsdict.get('threshold', 0.5)
-        self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
-        self.ui.binsz_lnedt.setText(inputsdict.get('binsz', '5'))        
-        self.tscale = inputsdict.get('tscale', 0.001)
-        self.fscale = inputsdict.get('fscale', 1000)
-
-        # set up wav file directory finder paths
-        self.dirmodel = QtGui.QFileSystemModel(self)
-        self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
-        self.ui.filetree_view.setModel(self.dirmodel)
-        self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(self.wavrootdir))
-
-        self.filemodel = QtGui.QFileSystemModel(self)
-        self.filemodel.setFilter(QtCore.QDir.Files)
-        self.ui.filelist_view.setModel(self.filemodel)
-        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.wavrootdir))
-
         self.apply_calibration = False
         self.display = None
-
-        # set default values
-        homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
-        self.savefolder = homefolder
-        self.savename = u"untitled"
-        self.saveformat = u'hdf5'
 
         self.live_lock = QtCore.QMutex()
 
@@ -92,16 +59,49 @@ class ControlWindow(QtGui.QMainWindow):
         self.acqmodel.register_signal(self.signals.spikes_found, 'spikes_found')
         self.acqmodel.register_signal(self.signals.trace_finished, 'trace_finished')
 
+        self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
+        
         self.current_operation = None
 
-        self.ui.thresh_lnedt.setText(str(self.ui.display.spiketrace_plot.get_threshold()[0]))
-        self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
+        # set default values
+        homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
+        
+        # load saved user inputs
+        inputsfname = os.path.join(systools.get_appdir(), INPUTSFNAME)
+        try:
+            with open(inputsfname, 'r') as jf:
+                inputsdict = json.load(jf)
+        except:
+            print "problem loading app data"
+            inputsdict = {}
 
+        self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
+        self.ui.thresh_lnedt.setText(inputsdict.get('threshold', '0.5'))
+        self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
+        self.ui.binsz_lnedt.setText(inputsdict.get('binsz', '5'))        
+        self.tscale = inputsdict.get('tscale', 0.001)
+        self.fscale = inputsdict.get('fscale', 1000)
+        self.savefolder = inputsdict.get('savefolder', homefolder)
+        self.savename = inputsdict.get('savename', "untitled")
+        self.saveformat = inputsdict.get('saveformat', 'hdf5')
+
+        # update GUI to reflect loaded values
         self.update_unit_labels()
+        self.set_plot_thresh()
+
+        # set up wav file directory finder paths
+        self.dirmodel = QtGui.QFileSystemModel(self)
+        self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
+        self.ui.filetree_view.setModel(self.dirmodel)
+        self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(self.wavrootdir))
+
+        self.filemodel = QtGui.QFileSystemModel(self)
+        self.filemodel.setFilter(QtCore.QDir.Files)
+        self.ui.filelist_view.setModel(self.filemodel)
+        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.wavrootdir))
 
     def on_start(self):
         # set plot axis to appropriate limits
-        
 
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         aichan = str(self.ui.aichan_box.currentText())
@@ -382,14 +382,11 @@ class ControlWindow(QtGui.QMainWindow):
 
     def update_thresh(self, thresh):
         self.ui.thresh_lnedt.setText(str(thresh))
-        # self.acqmodel.theshold = thresh
         self.acqmodel.set_threshold(thresh)
-
 
     def set_plot_thresh(self):
         thresh = float(self.ui.thresh_lnedt.text())
         self.ui.display.spiketrace_plot.set_threshold(thresh)
-        # self.acqmodel.theshold = thresh
         self.acqmodel.set_threshold(thresh)
 
     def closeEvent(self,event):
@@ -401,11 +398,14 @@ class ControlWindow(QtGui.QMainWindow):
 
         savedict = {}
         savedict['wavrootdir'] = self.wavrootdir
-        savedict['threshold'] = self.threshold
+        savedict['threshold'] = self.ui.thresh_lnedt.text()
         savedict['binsz'] = self.ui.binsz_lnedt.text()
         savedict['aisr'] = self.ui.aisr_spnbx.value()
         savedict['tscale'] = self.tscale
         savedict['fscale'] = self.fscale
+        savedict['savefolder'] = self.savefolder
+        savedict['savename'] = self.savename
+        savedict['saveformat'] = self.saveformat
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 

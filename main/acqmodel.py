@@ -8,10 +8,10 @@ from audiolab.tools.audiotools import spectrogram, calc_spectrum
 from audiolab.tools.spiketools import calc_spike_times, bin_spikes
 
 class AcquisitionModel():
-    def __init__(self):
+    def __init__(self, threshold=None):
         self.signals = {}
         self.toneplayer = None
-        self.threshold = 0.75
+        self.threshold = threshold
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
