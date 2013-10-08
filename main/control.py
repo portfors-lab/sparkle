@@ -57,9 +57,6 @@ class MainWindow(ControlWindow):
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
         
         self.current_operation = None
-
-        # load saved user inputs
-        self.load_inputs()
         
         # update GUI to reflect loaded values
         self.update_unit_labels()
@@ -108,7 +105,13 @@ class MainWindow(ControlWindow):
                 dur = self.ui.extone_dur_spnbx.value()*self.tscale
                 db = self.ui.extone_db_spnbx.value()
                 rft = self.ui.extone_risefall_spnbx.value()*self.tscale
-                self.acqmodel.set_tone(f,db,dur,rft,gen_rate)
+                tone, timevals = self.acqmodel.set_tone(f,db,dur,rft,gen_rate)
+
+                freq, spectrum = calc_spectrum(tone, gen_rate)
+
+                self.ui.display.update_fft(freq, spectrum)
+                self.ui.display.update_signal(timevals, tone)
+
 
     def on_stop(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
@@ -155,12 +158,13 @@ class MainWindow(ControlWindow):
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
         binsz = float(self.ui.binsz_lnedt.text())*self.tscale
         nreps = self.ui.ex_nreps_spnbx.value()
-        reprate = self.ui.reprate_spnbx.value()
+        reprate = self.ui.ex_reprate_spnbx.value()
         interval = (1/reprate)*1000
 
         print 'interval', interval
         # set up first stimulus, lets start with vocalizations for now
         self.ui.display.set_nreps(nreps)
+        self.ui.display.set_xlimits((0,winsz))
         if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
             # assume user has already clicked on wav file
             
@@ -389,8 +393,6 @@ class MainWindow(ControlWindow):
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
 
-    def closeEvent(self,event):
-        self.save_inputs()
 
 
 if __name__ == "__main__":

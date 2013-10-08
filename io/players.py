@@ -103,8 +103,6 @@ class PlayerBase():
         self.atten = atten
         self.tone_lock.release()
 
-        print 'tone len', len(tone)
-        print 'timevals', timevals
         return tone, timevals
 
     def set_stim(self, signal, sr):
@@ -210,7 +208,6 @@ class TonePlayer(PlayerBase):
 
         npts =  self.stim.size
         response_npts = int(self.aitime*self.aisr)
-        print 'aitime', self.aitime, 'aisr', self.aisr, 'response npts', response_npts
         try:
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
             self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")

@@ -14,6 +14,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
+        self.load_inputs()
+
     def verify_inputs(self):
         allgood = True
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
@@ -31,7 +33,7 @@ class ControlWindow(QtGui.QMainWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
             pass
         return allgood
-        
+
     def save_inputs(self):
         # save current inputs to file for loading next time
         appdir = systools.get_appdir()
@@ -51,7 +53,9 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['saveformat'] = self.saveformat
         savedict['extone_freq'] = self.ui.extone_freq_spnbx.value()
         savedict['extone_db'] = self.ui.extone_db_spnbx.value()
+        savedict['extone_dur'] = self.ui.extone_dur_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
+        savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 
@@ -79,5 +83,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.extone_freq_spnbx.setValue(inputsdict.get('extone_freq', 5))
         self.ui.extone_db_spnbx.setValue(inputsdict.get('extone_db', 60))
+        self.ui.extone_dur_spnbx.setValue(inputsdict.get('extone_dur', 200))
+        self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
 
         self.ui.wavrootdir_lnedt.setText(self.wavrootdir)
+
+    def closeEvent(self,event):
+        self.save_inputs()

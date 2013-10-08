@@ -65,7 +65,7 @@ class AcquisitionModel():
             self.nreps = kwargs['nreps']
 
     def set_tone(self, f,db,dur,rft,sr):
-        self.toneplayer.set_tone(f,db,dur,rft,sr)
+        return self.toneplayer.set_tone(f,db,dur,rft,sr)
 
     def run_explore(self, interval):
         self.halt = False
@@ -106,7 +106,6 @@ class AcquisitionModel():
                 self.signals['response_collected'].emit(self.aitimes, response)
 
                 # process response; calculate spike times
-                print 'resp len', len(response)
                 spike_times = calc_spike_times(response, self.threshold, self.toneplayer.aisr)
                 
                 binsz = 0.001

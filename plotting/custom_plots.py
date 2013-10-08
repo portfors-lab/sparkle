@@ -2,9 +2,9 @@ import sys
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from traits.api import HasTraits, Instance, List, Int, Tuple, Float
+from traits.api import HasTraits, Instance, List, Int, Tuple, Float, Trait, Class, Property
 from traitsui.api import View, Item
-from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer
+from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer, DataRange1D
 from enable.component_editor import ComponentEditor
 from enthought.enable.api import Window, Component
 from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool
@@ -76,7 +76,10 @@ class FFTWidget(BaseWidget):
         menu.exec_(self.mapToGlobal(point))
 
 class TraceWidget(BaseWidget):
+    autoscale_action = QtGui.QAction('auto-scale axes',None)
+    autoscale_action.setCheckable(False)
     def _create_plotter(self):
+        self.autoscale_action.triggered.connect(self.toggle_autoscale)
         return SpikePlotter()
     
     def resizeEvent(self, event):
@@ -91,6 +94,8 @@ class TraceWidget(BaseWidget):
         axis_action.triggered.connect(self.traits.reset_lims)
         raster_bounds_action = menu.addAction("edit raster bounds")
         raster_bounds_action.triggered.connect(self.ask_raster_bounds)
+        menu.addAction(self.autoscale_action)
+        
         menu.exec_(self.mapToGlobal(point))
 
     def get_threshold(self):
@@ -98,11 +103,12 @@ class TraceWidget(BaseWidget):
 
     def set_threshold(self, threshold):
         self.traits.trace_data.set_data('threshold', [threshold, threshold])
+        print 'thresh anchor', self.traits.trace_data.get_data('thresh_anchor')
 
     def set_nreps(self, nreps):
         self.traits.nreps = nreps
 
-    def set_raster_lims(self,lims):
+    def set_raster_bounds(self,lims):
         self.traits.raster_ymin = lims[0]
         self.traits.raster_ymax = lims[1]
 
@@ -110,7 +116,14 @@ class TraceWidget(BaseWidget):
         dlg = RasterBoundsDialog(bounds= (self.traits.raster_ymin, self.traits.raster_ymax))
         if dlg.exec_():
             bounds = dlg.get_values()
-            self.set_raster_lims(bounds)
+            self.set_raster_bounds(bounds)
+
+    def get_raster_bounds(self):
+        return (self.traits.raster_ymin, self.traits.raster_ymax)
+
+    def toggle_autoscale(self, checked):
+            self.traits.trace_plot.range2d.x_range.reset()
+            self.traits.trace_plot.range2d.y_range.reset()
 
 class SpecWidget(BaseWidget):
     def _create_plotter(self):
@@ -175,6 +188,7 @@ class SpikePlotter(HasTraits):
         linetool = LineDraggingTool(thresh_line)
         broadcaster.tools.append(linetool)
         trace_plot.tools.append(broadcaster)
+
         # setting the offsets after adding tools, sets it for all child tools
         broadcaster.set_offsets(trace_plot.padding_left, trace_plot.padding_bottom)
         linetool.register_signal(self.signals.threshold_updated)
@@ -247,6 +261,7 @@ class SpikePlotter(HasTraits):
 
     def _raster_ymin_changed(self):
         self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
+
 
 class FFTPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)

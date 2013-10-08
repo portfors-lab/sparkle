@@ -16,7 +16,7 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot = TraceWidget(self)
         self.spec_plot = SpecWidget(self)
 
-        # print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
+        print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
         # self.spec_plot.traits.plot.range2d.x_range = self.spiketrace_plot.traits.trace_plot.range2d.x_range
         # self.spiketrace_plot.traits.trace_plot.components[0].index_mapper.range = self.spec_plot.traits.plot.components[0].index_mapper.range.x_range
 
