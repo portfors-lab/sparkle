@@ -7,18 +7,20 @@ def calc_spike_times(signal, threshold, sr, mint=None):
     times = []
     over, = np.where(signal>threshold)
     segments, = np.where(np.diff(over) > 1)
-
-    if len(segments) > 0:
-        # add end points to sections for looping
-        if segments[0] != 0:
-            segments = np.insert(segments, [0], [0])
+    if len(over) > 1:
+        if len(segments) == 0:
+            segments = [0, len(over)-1]
         else:
-            #first point in singleton
-            times.append(float(over[0])/sr)
-        if segments[-1] != len(over)-1:
-            segments = np.insert(segments, [len(segments)], [len(over)-1])
-        else:
-            times.append(float(over[-1])/sr)
+            # add end points to sections for looping
+            if segments[0] != 0:
+                segments = np.insert(segments, [0], [0])
+            else:
+                #first point in singleton
+                times.append(float(over[0])/sr)
+            if segments[-1] != len(over)-1:
+                segments = np.insert(segments, [len(segments)], [len(over)-1])
+            else:
+                times.append(float(over[-1])/sr)
 
         for iseg in range(1,len(segments)):
             if segments[iseg] - segments[iseg-1] == 1:
@@ -29,7 +31,9 @@ def calc_spike_times(signal, threshold, sr, mint=None):
                 # find maximum of continuous set over max
                 idx = over[segments[iseg-1]+1] + np.argmax(signal[over[segments[iseg-1]+1]:over[segments[iseg]]])
             times.append(float(idx)/sr)
-
+    elif len(over) == 1:
+        times.append(float(over[0])/sr)
+        
     return times
 
 def bin_spikes(spike_times, binsz):

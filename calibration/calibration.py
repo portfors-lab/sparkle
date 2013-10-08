@@ -99,10 +99,12 @@ class PlayerBase():
         self.tone_lock.acquire()
         self.stim = tone
         self.sr = sr
-        self.aitime = dur
+        # self.aitime = dur
         self.atten = atten
         self.tone_lock.release()
 
+        print 'tone len', len(tone)
+        print 'timevals', timevals
         return tone, timevals
 
     def set_stim(self, signal, sr):
@@ -186,6 +188,9 @@ class TonePlayer(PlayerBase):
             # blocking read
             data = self.aitask.read()
 
+            # write task should always be shorter than read
+            # self.aotask.WaitUntilTaskDone(10)
+
             self.nacquired += 1
             
             self.aitask.stop()
@@ -205,7 +210,7 @@ class TonePlayer(PlayerBase):
 
         npts =  self.stim.size
         response_npts = int(self.aitime*self.aisr)
-
+        print 'aitime', self.aitime, 'aisr', self.aisr, 'response npts', response_npts
         try:
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
             self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")
