@@ -3,7 +3,7 @@ import threading
 import numpy as np
 import scipy.io.wavfile as wv
 
-from audiolab.calibration.calibration import TonePlayer, ToneCurve
+from audiolab.io.players import TonePlayer, ToneCurve
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
 from audiolab.tools.spiketools import calc_spike_times, bin_spikes
 

@@ -1,5 +1,4 @@
 import sys, os
-import json
 import scipy.io.wavfile as wv
 
 from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter, ImagePlotter
@@ -12,25 +11,21 @@ from audiolab.dialogs.saving_dlg import SavingDialog
 from audiolab.dialogs.scale_dlg import ScaleDialog
 from audiolab.tools.qthreading import ProtocolSignals
 from audiolab.main.acqmodel import AcquisitionModel
-import audiolab.tools.systools as systools
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
 
-from maincontrol_form import Ui_ControlWindow
+from controlwindow import ControlWindow
 
 RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
 GREEN = QtGui.QPalette()
 GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
 
-INPUTSFNAME = "controlinputs.json"
 
-class ControlWindow(QtGui.QMainWindow):
-    def __init__(self, dev_name, parent=None):
+class MainWindow(ControlWindow):
+    def __init__(self, dev_name):
         # auto generated code intialization
-        QtGui.QMainWindow.__init__(self, parent)
-        self.ui = Ui_ControlWindow()
-        self.ui.setupUi(self)
-
+        ControlWindow.__init__(self)
+        
         self.ui.start_btn.clicked.connect(self.on_start)
         self.ui.stop_btn.clicked.connect(self.on_stop)
 
@@ -70,7 +65,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.update_unit_labels()
         self.set_plot_thresh()
 
-        self.ui.wavrootdir_lnedt.setText(self.wavrootdir)
         # set up wav file directory finder paths
         self.dirmodel = QtGui.QFileSystemModel(self)
         self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
@@ -395,73 +389,13 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
 
-    def verify_inputs(self):
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
-                pass
-            elif self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
-                if self.ui.extone_dur_spnbx.value() > self.ui.windowsz_spnbx.value():
-                    QtGui.QMessageBox.warning(self, "Invalid Input",
-                        "Window size must equal or exceed stimulus length")
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
-            pass
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
-            pass
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
-            pass
-
-    def load_inputs(self):
-        inputsfname = os.path.join(systools.get_appdir(), INPUTSFNAME)
-        try:
-            with open(inputsfname, 'r') as jf:
-                inputsdict = json.load(jf)
-        except:
-            print "problem loading app data"
-            inputsdict = {}
-        
-        # set default values
-        homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
-
-        self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
-        self.ui.thresh_lnedt.setText(inputsdict.get('threshold', '0.5'))
-        self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
-        self.ui.windowsz_spnbx.setValue(inputsdict.get('windowsz', 100))
-        self.ui.binsz_lnedt.setText(inputsdict.get('binsz', '5'))        
-        self.tscale = inputsdict.get('tscale', 0.001)
-        self.fscale = inputsdict.get('fscale', 1000)
-        self.savefolder = inputsdict.get('savefolder', homefolder)
-        self.savename = inputsdict.get('savename', "untitled")
-        self.saveformat = inputsdict.get('saveformat', 'hdf5')
-        self.ui.extone_freq_spnbx.setValue(inputsdict.get('extone_freq', 5))
-        self.ui.extone_db_spnbx.setValue(inputsdict.get('extone_db', 60))
-
     def closeEvent(self,event):
-        # save current inputs to file for loading next time
-        appdir = systools.get_appdir()
-        if not os.path.isdir(appdir):
-            os.makedirs(appdir)
-        fname = os.path.join(appdir, INPUTSFNAME)
-
-        savedict = {}
-        savedict['wavrootdir'] = self.wavrootdir
-        savedict['threshold'] = self.ui.thresh_lnedt.text()
-        savedict['binsz'] = self.ui.binsz_lnedt.text()
-        savedict['aisr'] = self.ui.aisr_spnbx.value()
-        savedict['tscale'] = self.tscale
-        savedict['fscale'] = self.fscale
-        savedict['savefolder'] = self.savefolder
-        savedict['savename'] = self.savename
-        savedict['saveformat'] = self.saveformat
-        savedict['extone_freq'] = self.ui.extone_freq_spnbx.value()
-        savedict['extone_db'] = self.ui.extone_db_spnbx.value()
-        savedict['windowsz'] = self.ui.windowsz_spnbx.value()
-        with open(fname, 'w') as jf:
-            json.dump(savedict, jf)
+        self.save_inputs()
 
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     devName = "PCI-6259"
-    myapp = ControlWindow(devName)
+    myapp = MainWindow(devName)
     myapp.show()
     sys.exit(app.exec_())
