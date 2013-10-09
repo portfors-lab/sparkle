@@ -2,6 +2,7 @@ import os
 import json
 from PyQt4 import QtCore, QtGui
 
+from audiolab.main.window_accessories import MaximizableTitleBar
 import audiolab.tools.systools as systools
 from maincontrol_form import Ui_ControlWindow
 
@@ -14,6 +15,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
+        self.ui.plot_dock.setTitleBarWidget(MaximizableTitleBar(self.ui.plot_dock))
         self.load_inputs()
 
     def verify_inputs(self):
@@ -26,6 +28,10 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input",
                         "Window size must equal or exceed stimulus length")
                     allgood = False
+                if self.ui.extone_freq_spnbx.value() > (self.ui.extone_aosr_spnbx.value()/2):
+                    QtGui.QMessageBox.warning(self, "Invalid Input",
+                        "Generation sample rate must be at least twice the stimulus frequency")
+                    allgood=False
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
             pass
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
@@ -51,9 +57,13 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['savefolder'] = self.savefolder
         savedict['savename'] = self.savename
         savedict['saveformat'] = self.saveformat
+        savedict['ex_nreps'] = self.ui.ex_nreps_spnbx.value()
+        savedict['ex_reprate'] = self.ui.ex_reprate_spnbx.value()
         savedict['extone_freq'] = self.ui.extone_freq_spnbx.value()
         savedict['extone_db'] = self.ui.extone_db_spnbx.value()
         savedict['extone_dur'] = self.ui.extone_dur_spnbx.value()
+        savedict['extone_risefall'] = self.ui.extone_risefall_spnbx.value()
+        savedict['extone_aosr'] = self.ui.extone_aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
         with open(fname, 'w') as jf:
@@ -81,9 +91,13 @@ class ControlWindow(QtGui.QMainWindow):
         self.savefolder = inputsdict.get('savefolder', homefolder)
         self.savename = inputsdict.get('savename', "untitled")
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
+        self.ui.ex_nreps_spnbx.setValue(inputsdict.get('ex_nreps', 5))
+        self.ui.ex_reprate_spnbx.setValue(inputsdict.get('ex_reprate', 1))
         self.ui.extone_freq_spnbx.setValue(inputsdict.get('extone_freq', 5))
         self.ui.extone_db_spnbx.setValue(inputsdict.get('extone_db', 60))
         self.ui.extone_dur_spnbx.setValue(inputsdict.get('extone_dur', 200))
+        self.ui.extone_risefall_spnbx.setValue(inputsdict.get('extone_risefall', 0))
+        self.ui.extone_aosr_spnbx.setValue(inputsdict.get('extone_aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
 
         self.ui.wavrootdir_lnedt.setText(self.wavrootdir)

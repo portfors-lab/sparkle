@@ -393,6 +393,10 @@ class MainWindow(ControlWindow):
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
 
+    def closeEvent(self,event):
+        # stop any tasks that may be running
+        self.on_stop()
+        super(MainWindow, self).closeEvent(event)
 
 
 if __name__ == "__main__":

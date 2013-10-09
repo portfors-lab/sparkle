@@ -1574,6 +1574,9 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <property name="margin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="ProtocolDisplay" name="display" native="true"/>
      </item>

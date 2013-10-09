@@ -45,6 +45,7 @@ class ProtocolDisplay(QtGui.QWidget):
         splitterse.setSizes([500,100])
 
         layout = QtGui.QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
         layout.addWidget(splitterse)
         self.setLayout(layout)
         # self.setGeometry(0,0,500,500)

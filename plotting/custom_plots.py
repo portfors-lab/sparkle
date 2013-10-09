@@ -176,7 +176,7 @@ class SpikePlotter(HasTraits):
         trace_plot.x_axis.title = 'Time (s)'
         trace_plot.y_axis.title = 'voltage (mV)'
 
-        trace_plot.padding_bottom = 40
+        trace_plot.padding_bottom = 35
         trace_plot.padding_top = 0
         stim_plot.padding_top = 0
         stim_plot.padding_bottom = 0
@@ -276,8 +276,8 @@ class FFTPlotter(HasTraits):
 
         plot.padding_left = 50
         plot.padding_right = 10
-        plot.padding_bottom = 40
-        plot.padding_top = 0
+        plot.padding_bottom = 35
+        plot.padding_top = 5
 
         plot.overlays.append(RectZoomTool(plot))
 
@@ -304,8 +304,8 @@ class ImagePlotter(HasTraits):
         plot = Plot(self.img_data)
         plot.img_plot('imagedata', name="spectrogram")
 
-        plot.padding_top = 20
-        plot.padding_bottom = 0
+        plot.padding_top = 5
+        plot.padding_bottom = 5
         plot.padding_right = RIGHT_MARGIN
 
         plot.overlays.append(ZoomTool(plot))

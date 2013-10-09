@@ -81,8 +81,12 @@ class AITaskFinite(Task):
         self.WaitUntilTaskDone(10.0)
         return inbuffer
     def stop(self):
-        self.StopTask()
-        self.ClearTask()
+        # attempts to stop task after already clear throw error
+        try:
+            self.StopTask()
+            self.ClearTask()
+        except:
+            raise
 
 class AOTaskFinite(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=u""):
@@ -104,8 +108,12 @@ class AOTaskFinite(Task):
         self.WriteAnalogF64(self.npoints, 0, 10.0, DAQmx_Val_GroupByChannel,
                             output, w, None);
     def stop(self):
-        self.StopTask()
-        self.ClearTask()
+        # attempts to stop task after already clear throw error
+        try:
+            self.StopTask()
+            self.ClearTask()
+        except:
+            raise
 
 def scale_output(output):
     # scale the desired output to be above the device minimum,

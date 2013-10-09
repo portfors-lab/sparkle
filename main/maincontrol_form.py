@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Oct 08 16:02:30 2013
+# Created: Wed Oct 09 16:30:41 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -863,6 +863,7 @@ class Ui_ControlWindow(object):
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.dockWidgetContents)
+        self.verticalLayout_4.setMargin(0)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
         self.display = ProtocolDisplay(self.dockWidgetContents)
         self.display.setObjectName(_fromUtf8("display"))
@@ -995,3 +996,13 @@ class Ui_ControlWindow(object):
 
 from audiolab.plotting.chacoplots import ImageWidget
 from audiolab.plotting.protocoldisplay import ProtocolDisplay
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    ControlWindow = QtGui.QMainWindow()
+    ui = Ui_ControlWindow()
+    ui.setupUi(ControlWindow)
+    ControlWindow.show()
+    sys.exit(app.exec_())
+
