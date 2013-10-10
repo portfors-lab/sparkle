@@ -37,9 +37,9 @@ def calc_spike_times(signal, threshold, sr, mint=None):
     return times
 
 def bin_spikes(spike_times, binsz):
-    """ returns a list of bin centers, one for each time"""
+    """ returns a list of bin centers indicies, one for each time"""
     bins=[]
     for stime in spike_times:
-        bins.append((np.floor(stime/binsz)*binsz)+(binsz/2))
-
+        # bins.append((np.floor(stime/binsz)*binsz)+(binsz/2))
+        bins.append(int(np.floor(stime/binsz)))
     return bins

@@ -1,8 +1,8 @@
 import sys
+import numpy as np
 
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
-from enthought.chaco.api import GridPlotContainer
 
 from audiolab.plotting.custom_plots import TraceWidget, FFTWidget, SpecWidget
 
@@ -65,11 +65,12 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.clear_data("response", "spikes")
         self.spiketrace_plot.clear_data("response", "bins")
 
-    def add_raster_points(self, xdata, ydata):
+    def add_raster_points(self, xdata, repnum):
         """Add a list (or numpy array) of points to raster plot, 
            in any order.
            xdata: bin centers
            ydata: rep number """
+        ydata = np.ones_like(xdata)*repnum
         self.spiketrace_plot.append_data(xdata, "response", 'bins')
         self.spiketrace_plot.append_data(ydata, "response", 'spikes')
 

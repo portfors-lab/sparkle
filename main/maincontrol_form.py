@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Oct 09 16:30:41 2013
+# Created: Thu Oct 10 16:14:27 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -870,6 +870,19 @@ class Ui_ControlWindow(object):
         self.verticalLayout_4.addWidget(self.display)
         self.plot_dock.setWidget(self.dockWidgetContents)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.plot_dock)
+        self.psth_dock = QtGui.QDockWidget(ControlWindow)
+        self.psth_dock.setObjectName(_fromUtf8("psth_dock"))
+        self.dockWidgetContents_2 = QtGui.QWidget()
+        self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
+        self.verticalLayout_10 = QtGui.QVBoxLayout(self.dockWidgetContents_2)
+        self.verticalLayout_10.setSpacing(6)
+        self.verticalLayout_10.setMargin(0)
+        self.verticalLayout_10.setObjectName(_fromUtf8("verticalLayout_10"))
+        self.psth = PSTWidget(self.dockWidgetContents_2)
+        self.psth.setObjectName(_fromUtf8("psth"))
+        self.verticalLayout_10.addWidget(self.psth)
+        self.psth_dock.setWidget(self.dockWidgetContents_2)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.psth_dock)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -995,6 +1008,7 @@ class Ui_ControlWindow(object):
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
 
 from audiolab.plotting.chacoplots import ImageWidget
+from audiolab.plotting.custom_plots import PSTWidget
 from audiolab.plotting.protocoldisplay import ProtocolDisplay
 
 if __name__ == "__main__":

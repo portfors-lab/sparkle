@@ -4,10 +4,10 @@ from PyQt4 import QtGui, QtCore
 class MaximizableTitleBar(QtGui.QWidget):
     """ Title bar widget to be used with QDockWidget. Adds maximize
         functionality for floating widget """
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self,parent)
+    def __init__(self, dock):
+        QtGui.QWidget.__init__(self, dock)
         thisfolder = os.path.dirname(os.path.realpath(__file__))
-        self.parent = parent
+        self.dock = dock
         self.float_icon = QtGui.QIcon.fromTheme('view-fullscreen', QtGui.QIcon(os.path.join(thisfolder,'float_window.png')))
         self.close_icon = QtGui.QIcon.fromTheme('window-close', QtGui.QIcon(os.path.join(thisfolder,'close_window.png')))
         self.restore_icon = QtGui.QIcon(os.path.join(thisfolder,'restore_window.png'))
@@ -24,7 +24,7 @@ class MaximizableTitleBar(QtGui.QWidget):
         close_button.setIconSize(QtCore.QSize(12,12))
         close_button.clicked.connect(self.on_close)
 
-        self.parent.topLevelChanged.connect(self.topLevelChange)
+        self.dock.topLevelChanged.connect(self.topLevelChange)
 
         layout = QtGui.QHBoxLayout()
 
@@ -39,21 +39,21 @@ class MaximizableTitleBar(QtGui.QWidget):
 
 
     def on_adjust(self):
-        if self.parent.isFloating():
+        if self.dock.isFloating():
             if self.maximized:
-                self.parent.showNormal()
+                self.dock.showNormal()
                 self.adjust_button.setIcon(self.maximize_icon)
                 self.maximized = False
             else:
-                self.parent.showMaximized()
+                self.dock.showMaximized()
                 self.adjust_button.setIcon(self.restore_icon)
                 self.maximized = True
         else:
-            self.parent.setFloating(True)
+            self.dock.setFloating(True)
             # QtGui.QApplication.processEvents()
 
     def on_close(self):
-        self.parent.close()
+        self.dock.close()
 
     def topLevelChange(self, isfloating):
         if isfloating:

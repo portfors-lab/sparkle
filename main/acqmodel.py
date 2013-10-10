@@ -63,6 +63,8 @@ class AcquisitionModel():
             self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
         if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
+        if 'binsz' in kwargs:
+            self.binsz = kwargs['binsz']
 
     def set_tone(self, f,db,dur,rft,sr):
         return self.toneplayer.set_tone(f,db,dur,rft,sr)
@@ -108,12 +110,9 @@ class AcquisitionModel():
                 # process response; calculate spike times
                 spike_times = calc_spike_times(response, self.threshold, self.toneplayer.aisr)
                 
-                binsz = 0.001
-                response_bins = bin_spikes(spike_times, binsz)
-                raster_vals = [self.irep]*len(response_bins)
-                # raster_vals = np.ones((len(response_bins),), dtype=int)*self.irep
-                if len(raster_vals) > 0:
-                    self.signals['spikes_found'].emit(response_bins, raster_vals)
+                response_bins = bin_spikes(spike_times, self.binsz)
+                if len(response_bins) > 0:
+                    self.signals['spikes_found'].emit(response_bins, self.irep)
 
                 self.toneplayer.reset()
 

@@ -48,7 +48,7 @@ class MainWindow(ControlWindow):
         self.signals.spikes_found.connect(self.display_raster)
         self.signals.trace_finished.connect(self.trace_done)
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
-
+        
         self.acqmodel = AcquisitionModel()
         self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
         self.acqmodel.register_signal(self.signals.spikes_found, 'spikes_found')
@@ -161,20 +161,28 @@ class MainWindow(ControlWindow):
         reprate = self.ui.ex_reprate_spnbx.value()
         interval = (1/reprate)*1000
 
+        nbins = np.ceil(winsz/binsz)
+        bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
+        print 'bin_centers', bin_centers
+
         print 'interval', interval
         # set up first stimulus, lets start with vocalizations for now
         self.ui.display.set_nreps(nreps)
         self.ui.display.set_xlimits((0,winsz))
+        self.ui.psth.set_bins(bin_centers)
         if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
             # assume user has already clicked on wav file
             
-            self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate, nreps=nreps)
+            self.acqmodel.set_explore_params(wavfile=self.current_wav_file, 
+                                             aochan=aochan, aichan=aichan,
+                                             acqtime=winsz, aisr=acq_rate, 
+                                             nreps=nreps, binsz=binsz)
             self.acqmodel.run_explore(interval)
 
         elif self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
             self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate, nreps=nreps)
+                                             acqtime=winsz, aisr=acq_rate, 
+                                             nreps=nreps, binsz=binsz)
             self.on_update()            
             self.acqmodel.run_explore(interval)
 
@@ -269,11 +277,16 @@ class MainWindow(ControlWindow):
         # print "display reponse"
         self.ui.display.update_spiketrace(times, response)
 
-    def display_raster(self, bins, spike_counts):
-        self.ui.display.add_raster_points(bins, spike_counts)
+    def display_raster(self, bins, repnum):
+        # convert to times for raster
+        binsz = float(self.ui.binsz_lnedt.text())*self.tscale
+        bin_times = (np.array(bins)*binsz)+(binsz/2)
+        self.ui.display.add_raster_points(bin_times, repnum)
+        self.ui.psth.append_data(bins, repnum)
 
     def trace_done(self):
         self.ui.display.clear_raster()
+        self.ui.psth.clear_data()
 
 
     def launch_save_dlg(self):

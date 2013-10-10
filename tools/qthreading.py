@@ -27,7 +27,7 @@ class CalibrationSignals(BaseSignals):
 
 class ProtocolSignals(BaseSignals):
     response_collected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
-    spikes_found = QtCore.pyqtSignal(list, list)
+    spikes_found = QtCore.pyqtSignal(list, int)
     stim_generated = QtCore.pyqtSignal(tuple, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     threshold_updated = QtCore.pyqtSignal(float)
     trace_finished = QtCore.pyqtSignal()

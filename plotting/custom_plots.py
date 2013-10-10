@@ -129,6 +129,53 @@ class SpecWidget(BaseWidget):
     def _create_plotter(self):
         return ImagePlotter()
 
+class PSTWidget(BaseWidget):
+    def _create_plotter(self):
+        return PSTPlotter()
+
+    def set_bins(self, bins):
+        self.traits.set_bins(bins)
+
+class PSTPlotter(HasTraits):
+    plot = Instance(OverlayPlotContainer)
+    nreps = Int(DEFAULT_NREPS)
+
+    def _plot_default(self):
+        self.pst_data = ArrayPlotData(bins=[], spikecounts=[])
+        plot = Plot(self.pst_data)
+        plot.plot(('bins', 'spikecounts'), type='bar', name='PSTH', bar_width=0.001)
+
+        plot.value_range.low = -1
+        plot.value_range.high = 30
+
+        return plot
+
+    def clear_data(self):
+        """Clear histogram counts"""
+        c = self.pst_data.get_data('spikecounts')
+        c = np.zeros_like(c)
+        self.pst_data.set_data('spikecounts', c)
+
+    def set_bins(self, bins):
+        counts = np.zeros_like(bins)
+        self.pst_data.set_data('bins', bins)
+        self.pst_data.set_data('spikecounts', counts)
+
+    def append_data(self, bins, repnum):
+        """Adds one to each bin index in list"""
+        d = self.pst_data.get_data('spikecounts')
+        for b in bins:
+            d[b] += 1
+        self.pst_data.set_data('spikecounts', d)
+
+    def set_xlim(self, lim):
+        self.plot.index_range.low = lim[0]
+        self.plot.index_range.high = lim[1]
+
+    def set_ylim(self, lim):
+        self.plot.value_range.low = lim[0]
+        self.plot.value_range.high = lim[1]
+
 class SpikePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     nreps = Int(DEFAULT_NREPS)
