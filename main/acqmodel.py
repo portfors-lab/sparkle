@@ -5,13 +5,15 @@ import scipy.io.wavfile as wv
 
 from audiolab.io.players import TonePlayer, ToneCurve
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
-from audiolab.tools.spiketools import calc_spike_times, bin_spikes
+from audiolab.tools import spikestats
+from audiolab.tools.qthreading import ProtocolSignals
 
 class AcquisitionModel():
     def __init__(self, threshold=None):
         self.signals = {}
         self.toneplayer = None
         self.threshold = threshold
+        self.signals = ProtocolSignals()
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -25,17 +27,11 @@ class AcquisitionModel():
         # calibration_freqs = np.load(os.path.join(calfreq_filename()))
 
     def set_threshold(self, threshold):
-        print threshold
         self.threshold = threshold
 
     def set_save_params(self, savefolder, savename):
         self.savefolder = savefolder
         self.savename = savename
-
-    def register_signal(self, signal, name):
-        # saves a reference to specific types of pyqt signals for GUI
-        # communication. Allowed names are 
-        self.signals[name] = signal
 
     def set_explore_params(self, **kwargs):
         if self.toneplayer is None:
@@ -76,7 +72,6 @@ class AcquisitionModel():
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
-        self.irep = 0
         self.start_time = time.time()
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
@@ -89,6 +84,10 @@ class AcquisitionModel():
         self.acq_thread.start()
 
     def _explore_worker(self):
+        spike_counts = []
+        spike_latencies = []
+        spike_rates = []
+        irep = 0
         while not self.halt:
             # print 'explore worker'
             try:
@@ -101,25 +100,37 @@ class AcquisitionModel():
                     time.sleep((self.interval-elapsed)/1000)
                     now = time.time()
                 elif elapsed > self.interval:
-                    print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
+                    self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
                 self.last_tick = now
 
                 response = self.toneplayer.read()
-                self.signals['response_collected'].emit(self.aitimes, response)
+                self.signals.response_collected.emit(self.aitimes, response)
 
                 # process response; calculate spike times
-                spike_times = calc_spike_times(response, self.threshold, self.toneplayer.aisr)
-                
-                response_bins = bin_spikes(spike_times, self.binsz)
+                spike_times = spikestats.spike_times(response, self.threshold, self.toneplayer.aisr)
+                spike_counts.append(len(spike_times))
+                if len(spike_times) > 0:
+                    spike_latencies.append(spike_times[0])
+                spike_rates.append(spikestats.firing_rate(spike_times))
+
+                response_bins = spikestats.bin_spikes(spike_times, self.binsz)
                 if len(response_bins) > 0:
-                    self.signals['spikes_found'].emit(response_bins, self.irep)
+                    self.signals.spikes_found.emit(response_bins, irep)
 
                 self.toneplayer.reset()
 
-                self.irep +=1
-                if self.irep == self.nreps:
-                    self.irep = 0
-                    self.signals['trace_finished'].emit()
+                irep +=1
+                if irep == self.nreps:
+                    total_spikes = float(sum(spike_counts))
+                    avg_count = total_spikes/len(spike_counts)
+                    avg_latency = sum(spike_latencies)/len(spike_latencies)
+                    avg_rate = sum(spike_rates)/len(spike_rates)
+                    irep = 0
+                    self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
+                    spike_counts = []
+                    spike_latencies = []
+                    spike_rates = []
+
             except:
                 raise
         self.toneplayer.stop()
@@ -170,7 +181,7 @@ class AcquisitionModel():
                     time.sleep((self.interval-elapsed)/1000)
                     now = time.time()
                 elif elapsed > self.interval:
-                    print u"WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed)
+                    self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
                 self.last_tick = now
 
                 if not self.tonecurve.haswork():
@@ -185,13 +196,11 @@ class AcquisitionModel():
                 # self.ui.dblabel.setText(u"Intensity : %d" % (db))
 
                 xfft, yfft = calc_spectrum(tone[0], self.tonecurve.player.get_samplerate())
-                if self.signals["stim_generated"]:
-                    self.signals["stim_generated"].emit((f,db),tone[1], tone[0], 
+                self.signals.stim_generated.emit((f,db),tone[1], tone[0], 
                                                         xfft, abs(yfft))
-                    self.signals['response_collected'].emit(response[1], response[0])
-                else:
-                    print "Frequency : %d, Intensity : %d" % (f, db)
-                    print "AO Vmax : %.5f" % (np.amax(abs(tone)))
+                self.signals.response_collected.emit(response[1], response[0])
+                    # print "Frequency : %d, Intensity : %d" % (f, db)
+                    # print "AO Vmax : %.5f" % (np.amax(abs(tone)))
             except:
                 self.tonecurve.closedata()
                 raise

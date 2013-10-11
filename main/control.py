@@ -42,18 +42,17 @@ class MainWindow(ControlWindow):
         self.live_lock = QtCore.QMutex()
 
         self.signals = ProtocolSignals()
-        self.signals.response_collected.connect(self.display_response)
-        self.signals.stim_generated.connect(self.display_stim)
         self.signals.ncollected.connect(self.update_chart)
-        self.signals.spikes_found.connect(self.display_raster)
-        self.signals.trace_finished.connect(self.trace_done)
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         
         self.acqmodel = AcquisitionModel()
-        self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
-        self.acqmodel.register_signal(self.signals.spikes_found, 'spikes_found')
-        self.acqmodel.register_signal(self.signals.trace_finished, 'trace_finished')
+        self.acqmodel.signals.response_collected.connect(self.display_response)
+        self.acqmodel.signals.spikes_found.connect(self.display_raster)
+        self.acqmodel.signals.trace_finished.connect(self.trace_done)
+        self.acqmodel.signals.stim_generated.connect(self.display_stim)
+        self.acqmodel.signals.warning.connect(self.set_status_msg)
 
+        
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
         
         self.current_operation = None
@@ -163,7 +162,6 @@ class MainWindow(ControlWindow):
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
-        print 'bin_centers', bin_centers
 
         print 'interval', interval
         # set up first stimulus, lets start with vocalizations for now
@@ -249,9 +247,6 @@ class MainWindow(ControlWindow):
                                       intensities=intensities,
                                       aisr=aisr, aochan=aochan, 
                                       aichan=aichan, interval=interval)
-
-            self.acqmodel.register_signal(self.signals.response_collected, 'response_collected')
-            self.acqmodel.register_signal(self.signals.stim_generated, 'stim_generated')
             
             self.ui.running_label.setText(u"RUNNING")
             self.ui.running_label.setPalette(GREEN)
@@ -284,10 +279,13 @@ class MainWindow(ControlWindow):
         self.ui.display.add_raster_points(bin_times, repnum)
         self.ui.psth.append_data(bins, repnum)
 
-    def trace_done(self):
+    def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
         self.ui.display.clear_raster()
         self.ui.psth.clear_data()
-
+        self.ui.spike_total_lbl.setText(str(total_spikes))
+        self.ui.spike_avg_lbl.setText(str(avg_count))
+        self.ui.spike_latency_lbl.setText(str(avg_latency))
+        self.ui.spike_rate_lbl.setText(str(avg_rate))
 
     def launch_save_dlg(self):
         field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}
@@ -405,6 +403,9 @@ class MainWindow(ControlWindow):
         thresh = float(self.ui.thresh_lnedt.text())
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
+
+    def set_status_msg(self, status):
+        self.statusBar().showMessage(status)
 
     def closeEvent(self,event):
         # stop any tasks that may be running

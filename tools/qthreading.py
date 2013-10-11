@@ -18,6 +18,7 @@ class GenericThread(QtCore.QThread):
 class BaseSignals(QtCore.QObject):
     curve_finished = QtCore.pyqtSignal()
     ncollected = QtCore.pyqtSignal(numpy.ndarray)
+    warning = QtCore.pyqtSignal(str)
 
 class CalibrationSignals(BaseSignals):
     stim_generated = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
@@ -30,7 +31,7 @@ class ProtocolSignals(BaseSignals):
     spikes_found = QtCore.pyqtSignal(list, int)
     stim_generated = QtCore.pyqtSignal(tuple, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
     threshold_updated = QtCore.pyqtSignal(float)
-    trace_finished = QtCore.pyqtSignal()
+    trace_finished = QtCore.pyqtSignal(int, float, float, float)
 
 class TestSignals(QtCore.QObject):
     update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
