@@ -17,6 +17,16 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.ui.plot_dock.setTitleBarWidget(MaximizableTitleBar(self.ui.plot_dock))
         self.load_inputs()
+        
+        try:
+            settings = QtCore.QSettings("audiolab")
+            self.restoreGeometry(settings.value("geometry"))
+            self.restoreState(settings.value("windowState"))
+            # self.ui.psth.restoreGeometry(settings.value("psth_dock/geometry"))
+
+        except Exception as e:
+            print e
+
 
     def verify_inputs(self):
         allgood = True
@@ -104,3 +114,9 @@ class ControlWindow(QtGui.QMainWindow):
 
     def closeEvent(self,event):
         self.save_inputs()
+
+        # save GUI size
+        settings = QtCore.QSettings("audiolab")
+        settings.setValue("geometry", self.saveGeometry())
+        settings.setValue("windowState", self.saveState())
+        # settings.setValue("psth_dock/state", self.ui.psth.saveGeometry())
