@@ -101,6 +101,12 @@ def firing_rate(spike_times, window_size=None):
     :type window_size: float
     """
     if window_size is None:
-        window_size = spike_times[-1] - spike_times[0]
+        if len(spike_times) > 1:
+            window_size = spike_times[-1] - spike_times[0]
+        elif len(spike_times) > 0:
+            # Only one spike, and no window - what to do?
+            window_size = 1
+        else:
+            return 0
     rate = window_size/len(spike_times)
     return rate
