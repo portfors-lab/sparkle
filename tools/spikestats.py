@@ -100,6 +100,9 @@ def firing_rate(spike_times, window_size=None):
     If none, uses time from first to last spike in spike_times
     :type window_size: float
     """
+    if len(spike_times) == 0:
+        return 0
+
     if window_size is None:
         if len(spike_times) > 1:
             window_size = spike_times[-1] - spike_times[0]
@@ -107,6 +110,7 @@ def firing_rate(spike_times, window_size=None):
             # Only one spike, and no window - what to do?
             window_size = 1
         else:
-            return 0
+            window_size = 0
+
     rate = window_size/len(spike_times)
     return rate

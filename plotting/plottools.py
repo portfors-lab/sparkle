@@ -2,9 +2,70 @@ from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
 from traits.api import Instance, Int, Float
-from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool, DragTool
+from chaco.tools.api import PanTool, BroadcasterTool, DragTool, BetterZoom
 from enthought.enable.api import Component
+from chaco.tools.tool_states import ZoomState, PanState, GroupedToolState, ToolState
 
+class AxisZoomTool(BetterZoom):
+    """ Tool to zoom single axis at a time, using mouse location to determine axis"""
+    # def __init__(self, *args, **kwargs):
+    #     BetterZoom.__init(self, *args, **kwargs)
+    #     y_mapper = self._get_y_mapper()
+    #     y_mapper.domain_limits = (-1, None)
+
+    def _do_zoom(self, new_index_factor, new_value_factor):
+        location = self.position
+        if (location[0] < self.component.padding_left) and not (location[1] < self.component.padding_bottom):
+            # mouse is beside y axis
+            self.axis = 'value'
+
+        elif (location[1] < self.component.padding_bottom) and not (location[0] < self.component.padding_left):
+            # mouse is beside x axis
+            self.axis = 'index'
+        else:
+            # don't zoom in middle of plot
+            return
+
+        if self.zoom_to_mouse:
+            x_map = self._get_x_mapper()
+            y_map = self._get_y_mapper()
+
+            print 'dom limits', x_map.domain_limits
+
+            cx = (x_map.range.high + x_map.range.low)/2
+            if self._index_factor == new_index_factor:
+                nextx = cx
+            else:
+                x = x_map.map_data(location[0])
+                nextx = x + (cx - x)*(self._index_factor/new_index_factor)
+
+            cy = (y_map.range.high + y_map.range.low)/2
+            if self._value_factor == new_value_factor:
+                nexty = cy
+            else:
+                y = y_map.map_data(location[1])
+                nexty = y + (cy - y)*(self._value_factor/new_value_factor)
+
+            print 'stuff!', cx, cy, nextx, nexty, new_value_factor, new_index_factor
+            pan_state = PanState((cx,cy), (nextx, nexty))
+            zoom_state = ZoomState((self._index_factor, self._value_factor),
+                                   (new_index_factor, new_value_factor))
+
+            states = GroupedToolState([pan_state, zoom_state])
+            states.apply(self)
+            self._append_state(states)
+
+        else:
+
+            zoom_state = ZoomState((self._index_factor, self._value_factor),
+                                   (new_index_factor, new_value_factor))
+
+            zoom_state.apply(self)
+            self._append_state(zoom_state)
+
+    def set_xdomain(self, limits):
+        x_mapper = self._get_x_mapper()
+        x_mapper.domain_limits = limits
 
 class LineDraggingTool(DragTool):
 
@@ -85,6 +146,7 @@ class LineDraggingTool(DragTool):
     def register_signal(self, signal):
         """ saves signal for emitting value after drag end """
         self.signal = signal
+
 
 class SpikeTraceBroadcasterTool(BroadcasterTool):
 

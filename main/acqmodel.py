@@ -111,6 +111,8 @@ class AcquisitionModel():
                 spike_counts.append(len(spike_times))
                 if len(spike_times) > 0:
                     spike_latencies.append(spike_times[0])
+                else:
+                    spike_latencies.append(np.nan)
                 spike_rates.append(spikestats.firing_rate(spike_times, self.toneplayer.aitime))
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)

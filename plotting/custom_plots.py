@@ -7,13 +7,13 @@ from traitsui.api import View, Item
 from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer, DataRange1D
 from enable.component_editor import ComponentEditor
 from enthought.enable.api import Window, Component
-from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool
+from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool, DragZoom
 from enthought.chaco.tools.rect_zoom import RectZoomTool
 
 import numpy as np
 from scipy.special import jn
 
-from audiolab.plotting.plottools import SpikeTraceBroadcasterTool, LineDraggingTool
+from audiolab.plotting.plottools import SpikeTraceBroadcasterTool, LineDraggingTool, AxisZoomTool
 
 from PyQt4 import QtCore, QtGui
 
@@ -136,6 +136,14 @@ class PSTWidget(BaseWidget):
     def set_bins(self, bins):
         self.traits.set_bins(bins)
 
+    def contextMenuRequested(self, point):
+        menu = QtGui.QMenu()
+        axis_action = menu.addAction("reset axis limits")
+        axis_action.triggered.connect(self.traits.reset_lims)
+        # menu.addAction(self.autoscale_action)
+        
+        menu.exec_(self.mapToGlobal(point))
+
 class PSTPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     nreps = Int(DEFAULT_NREPS)
@@ -143,12 +151,26 @@ class PSTPlotter(HasTraits):
     def _plot_default(self):
         self.pst_data = ArrayPlotData(bins=[], spikecounts=[])
         plot = Plot(self.pst_data)
-        plot.plot(('bins', 'spikecounts'), type='bar', name='PSTH', bar_width=0.001)
+        plot.plot(('bins', 'spikecounts'), type='bar', name='PSTH', 
+                    bar_width=0.001)
 
         plot.value_range.low = -1
         plot.value_range.high = 30
 
+        # Attach some tools to the plot
+        # broadcaster = PSTHBroadcasterTool(thresh_line)
+        # broadcaster.tools.append(PanTool(trace_plot))
+        # broadcaster.tools.append(ZoomTool(trace_plot))
+        # linetool = LineDraggingTool(thresh_line)
+        # broadcaster.tools.append(linetool)
+        # trace_plot.tools.append(broadcaster)
+        self.ax_zoom_tool = AxisZoomTool(plot, speed=0.1, single_axis=True,
+                                   axis='index', maintain_aspect_ratio=False)
+        plot.tools.append(self.ax_zoom_tool)
+        plot.tools.append(PanTool(plot, constrain_direction='x', restrict_to_data=True))
+
         return plot
+
 
     def clear_data(self):
         """Clear histogram counts"""
@@ -160,6 +182,7 @@ class PSTPlotter(HasTraits):
         counts = np.zeros_like(bins)
         self.pst_data.set_data('bins', bins)
         self.pst_data.set_data('spikecounts', counts)
+        self.ax_zoom_tool.set_xdomain((0, bins[-1]))
 
     def append_data(self, bins, repnum):
         """Adds one to each bin index in list"""
@@ -167,6 +190,12 @@ class PSTPlotter(HasTraits):
         for b in bins:
             d[b] += 1
         self.pst_data.set_data('spikecounts', d)
+
+    def reset_lims(self):
+        xdata = self.pst_data.get_data('bins')
+        self.set_xlim((xdata[0],xdata[-1]))
+        ydata = self.pst_data.get_data('spikecounts')
+        self.set_ylim((ydata.min(), ydata.max()))
 
     def set_xlim(self, lim):
         self.plot.index_range.low = lim[0]
@@ -380,8 +409,14 @@ if __name__ == '__main__':
     sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
     spec, f, bins, fs = audiotools.spectrogram(sylpath)
 
-    spec_plot = SpecWidget()
-    spec_plot.update_data(spec, xaxis=bins, yaxis=f)
-    spec_plot.show()
+    # spec_plot = SpecWidget()
+    # spec_plot.update_data(spec, xaxis=bins, yaxis=f)
+    # spec_plot.show()
+
+    psth = PSTWidget()
+    psth.set_bins(range(10))
+    psth.append_data([0, 1, 1, 1, 3, 4, 4,9,9,9,9,9, 7], 0)
+    psth.resize(800, 400)
+    psth.show()
 
     sys.exit(app.exec_())
