@@ -8,32 +8,24 @@ from chaco.tools.tool_states import ZoomState, PanState, GroupedToolState, ToolS
 
 class AxisZoomTool(BetterZoom):
     """ Tool to zoom single axis at a time, using mouse location to determine axis"""
-    # def __init__(self, *args, **kwargs):
-    #     BetterZoom.__init(self, *args, **kwargs)
-    #     y_mapper = self._get_y_mapper()
-    #     y_mapper.domain_limits = (-1, None)
-
-    def _do_zoom(self, new_index_factor, new_value_factor):
-        location = self.position
-
-        if (location[0] < self.component.padding_left+10) and not (location[1] < self.component.padding_bottom+10):
+    def dispatch(self, event, suffix):
+        if (event.x < self.component.padding_left+10) and not (event.y < self.component.padding_bottom+10):
             # mouse is beside y axis
             self.axis = 'value'
-
-        elif (location[1] < self.component.padding_bottom+10) and not (location[0] < self.component.padding_left+10):
+        elif (event.y < self.component.padding_bottom+10) and not (event.x < self.component.padding_left+10):
             # mouse is beside x axis
             self.axis = 'index'
         else:
             # don't zoom in middle of plot
             return
+        super(AxisZoomTool, self).dispatch(event,suffix)
+
+    def _do_zoom(self, new_index_factor, new_value_factor):
 
         if self.zoom_to_mouse:
             x_map = self._get_x_mapper()
             y_map = self._get_y_mapper()
-            # force y zoom to center point at 0
-            # location = (location[0], 0)
-
-            print 'dom limits', y_map.domain_limits
+            location = self.position
 
             cx = (x_map.range.high + x_map.range.low)/2
             if self._index_factor == new_index_factor:
@@ -46,11 +38,10 @@ class AxisZoomTool(BetterZoom):
             if self._value_factor == new_value_factor:
                 nexty = cy
             else:
-                y = y_map.map_data(location[1])
+                # force y zoom to center point at 0
                 y = 0
                 nexty = y + (cy - y)*(self._value_factor/new_value_factor)
 
-            print 'stuff!', cx, cy, nextx, nexty, new_value_factor, new_index_factor
             pan_state = PanState((cx,cy), (nextx, nexty))
             zoom_state = ZoomState((self._index_factor, self._value_factor),
                                    (new_index_factor, new_value_factor))
