@@ -1565,7 +1565,15 @@
     <addaction name="actionSet_Calibration"/>
     <addaction name="actionSet_Scale"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShow_Data_display"/>
+    <addaction name="actionShow_PSTH"/>
+   </widget>
    <addaction name="menuOptions"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="plot_dock">
@@ -1720,6 +1728,16 @@
     <string>Set Scale...</string>
    </property>
   </action>
+  <action name="actionShow_Data_display">
+   <property name="text">
+    <string>Show Data Display</string>
+   </property>
+  </action>
+  <action name="actionShow_PSTH">
+   <property name="text">
+    <string>Show PSTH</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1798,8 +1816,8 @@
    <slot>wavdir_selected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>316</y>
+     <x>121</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>844</x>
@@ -1814,8 +1832,8 @@
    <slot>browse_wavdirs()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>541</x>
-     <y>156</y>
+     <x>121</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>880</x>
@@ -1830,8 +1848,8 @@
    <slot>wavfile_selected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>415</x>
-     <y>319</y>
+     <x>121</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>848</x>
@@ -1846,8 +1864,8 @@
    <slot>wavfile_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>361</x>
-     <y>318</y>
+     <x>121</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>851</x>
@@ -1871,6 +1889,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShow_Data_display</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>show_display()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_PSTH</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>show_psth()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1881,5 +1931,7 @@
   <slot>wavfile_selected()</slot>
   <slot>wavfile_clicked()</slot>
   <slot>launch_scale_dlg()</slot>
+  <slot>show_display()</slot>
+  <slot>show_psth()</slot>
  </slots>
 </ui>

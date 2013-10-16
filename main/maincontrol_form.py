@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Oct 11 12:39:52 2013
+# Created: Wed Oct 16 15:54:58 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -854,6 +854,8 @@ class Ui_ControlWindow(object):
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
+        self.menuView = QtGui.QMenu(self.menubar)
+        self.menuView.setObjectName(_fromUtf8("menuView"))
         ControlWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(ControlWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -941,10 +943,17 @@ class Ui_ControlWindow(object):
         self.actionSet_Calibration.setObjectName(_fromUtf8("actionSet_Calibration"))
         self.actionSet_Scale = QtGui.QAction(ControlWindow)
         self.actionSet_Scale.setObjectName(_fromUtf8("actionSet_Scale"))
+        self.actionShow_Data_display = QtGui.QAction(ControlWindow)
+        self.actionShow_Data_display.setObjectName(_fromUtf8("actionShow_Data_display"))
+        self.actionShow_PSTH = QtGui.QAction(ControlWindow)
+        self.actionShow_PSTH.setObjectName(_fromUtf8("actionShow_PSTH"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
+        self.menuView.addAction(self.actionShow_Data_display)
+        self.menuView.addAction(self.actionShow_PSTH)
         self.menubar.addAction(self.menuOptions.menuAction())
+        self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
         self.tab_group.setCurrentIndex(0)
@@ -957,6 +966,8 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavfile_selected)
         QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("clicked(QModelIndex)")), ControlWindow.wavfile_clicked)
         QtCore.QObject.connect(self.actionSet_Scale, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_scale_dlg)
+        QtCore.QObject.connect(self.actionShow_Data_display, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_display)
+        QtCore.QObject.connect(self.actionShow_PSTH, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_psth)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -1055,6 +1066,7 @@ class Ui_ControlWindow(object):
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
         self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))
+        self.menuView.setTitle(_translate("ControlWindow", "View", None))
         self.label_16.setText(_translate("ControlWindow", "Average :", None))
         self.label_5.setText(_translate("ControlWindow", "Latency (ms) :", None))
         self.spike_latency_lbl.setText(_translate("ControlWindow", "0", None))
@@ -1066,6 +1078,8 @@ class Ui_ControlWindow(object):
         self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
+        self.actionShow_Data_display.setText(_translate("ControlWindow", "Show Data Display", None))
+        self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
 
 from audiolab.plotting.chacoplots import ImageWidget
 from audiolab.plotting.custom_plots import PSTWidget

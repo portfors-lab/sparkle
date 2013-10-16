@@ -72,6 +72,10 @@ class MainWindow(ControlWindow):
         self.ui.filelist_view.setModel(self.filemodel)
         self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.wavrootdir))
 
+        # always show plots on load
+        self.ui.plot_dock.setVisible(True)
+        self.ui.psth_dock.setVisible(True)
+
     def on_start(self):
         # set plot axis to appropriate limits
         print 'on start'
@@ -88,7 +92,7 @@ class MainWindow(ControlWindow):
             winsz = float(self.ui.windowsz_spnbx.value())
             self.ui.display.set_xlimits((0,winsz/1000))
             self.scrollplot = ScrollingPlotter(self, 1, 1/float(acq_rate))
-            self.ui.stim_dock.setWidget(self.scrollplot.widget)
+            self.ui.plot_dock.setWidget(self.scrollplot.widget)
             self.start_chart(aichan, acq_rate)
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
             pass
@@ -403,6 +407,12 @@ class MainWindow(ControlWindow):
         thresh = float(self.ui.thresh_lnedt.text())
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
+
+    def show_display(self):
+        self.ui.plot_dock.setVisible(True)
+
+    def show_psth(self):
+        self.ui.psth_dock.setVisible(True)
 
     def set_status_msg(self, status):
         self.statusBar().showMessage(status)
