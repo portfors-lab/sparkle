@@ -195,7 +195,7 @@ class PSTPlotter(HasTraits):
         xdata = self.pst_data.get_data('bins')
         self.set_xlim((xdata[0],xdata[-1]))
         ydata = self.pst_data.get_data('spikecounts')
-        self.set_ylim((ydata.min(), ydata.max()))
+        self.set_ylim((-0.15, ydata.max()))
 
     def set_xlim(self, lim):
         self.plot.index_range.low = lim[0]

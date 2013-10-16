@@ -15,11 +15,12 @@ class AxisZoomTool(BetterZoom):
 
     def _do_zoom(self, new_index_factor, new_value_factor):
         location = self.position
-        if (location[0] < self.component.padding_left) and not (location[1] < self.component.padding_bottom):
+
+        if (location[0] < self.component.padding_left+10) and not (location[1] < self.component.padding_bottom+10):
             # mouse is beside y axis
             self.axis = 'value'
 
-        elif (location[1] < self.component.padding_bottom) and not (location[0] < self.component.padding_left):
+        elif (location[1] < self.component.padding_bottom+10) and not (location[0] < self.component.padding_left+10):
             # mouse is beside x axis
             self.axis = 'index'
         else:
@@ -29,8 +30,10 @@ class AxisZoomTool(BetterZoom):
         if self.zoom_to_mouse:
             x_map = self._get_x_mapper()
             y_map = self._get_y_mapper()
+            # force y zoom to center point at 0
+            # location = (location[0], 0)
 
-            print 'dom limits', x_map.domain_limits
+            print 'dom limits', y_map.domain_limits
 
             cx = (x_map.range.high + x_map.range.low)/2
             if self._index_factor == new_index_factor:
@@ -44,6 +47,7 @@ class AxisZoomTool(BetterZoom):
                 nexty = cy
             else:
                 y = y_map.map_data(location[1])
+                y = 0
                 nexty = y + (cy - y)*(self._value_factor/new_value_factor)
 
             print 'stuff!', cx, cy, nextx, nexty, new_value_factor, new_index_factor
