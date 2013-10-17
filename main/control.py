@@ -1,7 +1,7 @@
 import sys, os
 import scipy.io.wavfile as wv
 
-from audiolab.plotting.chacoplots import Plotter, LiveWindow, ScrollingPlotter, ImagePlotter
+from audiolab.plotting.custom_plots import ChartWidget
 from PyQt4 import QtCore, QtGui
 
 from audiolab.io.daq_tasks import *
@@ -35,6 +35,8 @@ class MainWindow(ControlWindow):
         self.ui.aichan_box.addItems(cnames)
 
         self.ui.running_label.setPalette(RED)
+
+        self.scrollplot = ChartWidget()
 
         self.apply_calibration = False
         self.display = None
@@ -90,8 +92,9 @@ class MainWindow(ControlWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             # change plot to scrolling plot
             winsz = float(self.ui.windowsz_spnbx.value())
-            self.ui.display.set_xlimits((0,winsz/1000))
-            self.scrollplot = ScrollingPlotter(self, 1, 1/float(acq_rate))
+            self.scrollplot.set_windowsize(winsz)
+            self.scrollplot.set_sr(acq_rate)
+            
             self.ui.plot_dock.setWidget(self.scrollplot.widget)
             self.start_chart(aichan, acq_rate)
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
@@ -147,7 +150,7 @@ class MainWindow(ControlWindow):
         self.signals.ncollected.emit(inbuffer)
 
     def update_chart(self, data):
-        self.scrollplot.update_data(data)
+        self.scrollplot.append_data(data)
 
     def run_explore(self):
         self.ui.start_btn.setText('Update')

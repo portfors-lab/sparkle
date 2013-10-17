@@ -129,6 +129,16 @@ class SpecWidget(BaseWidget):
     def _create_plotter(self):
         return ImagePlotter()
 
+class ChartWidget(BaseWidget):
+    def _create_plotter(self):
+        return ScrollingPlotter
+
+    def set_sr(self, sr):
+        self.traits.set_time_delta(float(1/sr))
+
+    def set_windowsize(self, winsz):
+        self.traits.set_windowsize(winsz)
+
 class PSTWidget(BaseWidget):
     def _create_plotter(self):
         return PSTPlotter()
@@ -157,13 +167,6 @@ class PSTPlotter(HasTraits):
         plot.value_range.low = -1
         plot.value_range.high = 30
 
-        # Attach some tools to the plot
-        # broadcaster = PSTHBroadcasterTool(thresh_line)
-        # broadcaster.tools.append(PanTool(trace_plot))
-        # broadcaster.tools.append(ZoomTool(trace_plot))
-        # linetool = LineDraggingTool(thresh_line)
-        # broadcaster.tools.append(linetool)
-        # trace_plot.tools.append(broadcaster)
         self.ax_zoom_tool = AxisZoomTool(plot, speed=0.1, single_axis=True,
                                    axis='index', maintain_aspect_ratio=False)
         plot.tools.append(self.ax_zoom_tool)
@@ -398,6 +401,56 @@ class ImagePlotter(HasTraits):
     def set_xlim(self, lim):
         self.plot.range2d.x_range.low = lim[0]
         self.plot.range2d.x_range.high = lim[1]
+
+class ScrollingPlotter(HasTraits):
+    plot = Instance(OverlayPlotContainer)
+    deltax = Float(1.0)
+    windowsize = Float(10.0)
+    def _plot_default(self):
+        self.chart_data = ArrayPlotData(x=[], y=[])
+        plot = Plot(self.chart_data)
+        plot.plot(('x', 'y'), type='line', name='chart')
+
+        plot.x_axis.title = 'Time (s)'
+        plot.y_axis.title = 'voltage (mV)'
+
+
+        plot.tools.append(PanTool(plot))
+        plot.tools.append(ZoomTool(plot))
+
+        # self.plot = plot
+        return plot
+
+    def set_time_delta(self, delta):
+        self.deltax = delta
+
+    def set_windowsize(self, winsz):
+        self.windowsize = winsz
+        self.plot.range2d.x_range.high = self.plot.range2d.x_range.low + winsz
+
+    def append_data(self, data):
+        npoints_to_add = len(data)
+        xdata = self.chart_data.get_data('x')
+        if len(xdata) == 0:
+            last_time = 0
+        else:
+            last_time = xdata[-1]
+
+        x_to_append = np.arange(last_time+self.deltax, 
+                                last_time+self.deltax+(self.deltax*npoints_to_add),
+                                self.deltax)
+
+        xdata = np.append(xdata, x_to_append)
+        self.chart_data.set_data('x', xdata)
+
+        ydata = self.chart_data.get_data('y')
+        ydata = np.append(ydata, data)
+        self.chart_data.set_data("y", ydata)
+
+        # now scroll axis limits
+        if self.plot.range2d.x_range.high <= xdata[-1]:
+            self.plot.range2d.x_range.high += self.deltax*npoints_to_add
+            self.plot.range2d.x_range.low += self.deltax*npoints_to_add
 
 
 if __name__ == '__main__':

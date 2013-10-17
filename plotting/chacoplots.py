@@ -143,7 +143,6 @@ class ScrollingPlotter(Plotter):
             plot.range2d.x_range.low = 0
             plot.range2d.x_range.high = windowsize
 
-
         self.plotdata[0].set_data('x', [-1])
         self.plotdata[0].set_data('y', [0])
 
