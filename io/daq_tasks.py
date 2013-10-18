@@ -33,9 +33,12 @@ class AITask(Task):
         print u"Status"+unicode(status)
         return 0
     def stop(self):
-        self.StopTask()
-        self.ClearTask()
-        
+        try:
+            self.StopTask()
+            self.ClearTask()
+        except DAQError:
+            pass
+
 class AOTask(Task):
     def __init__(self, chan, samplerate, npoints, clksrc="", trigsrc=""):
         Task.__init__(self)
@@ -85,8 +88,8 @@ class AITaskFinite(Task):
         try:
             self.StopTask()
             self.ClearTask()
-        except:
-            raise
+        except DAQError:
+            pass
 
 class AOTaskFinite(Task):
     def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=u""):
@@ -112,8 +115,8 @@ class AOTaskFinite(Task):
         try:
             self.StopTask()
             self.ClearTask()
-        except:
-            raise
+        except DAQError:
+            pass
 
 def scale_output(output):
     # scale the desired output to be above the device minimum,

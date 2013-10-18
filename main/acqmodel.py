@@ -3,7 +3,7 @@ import threading
 import numpy as np
 import scipy.io.wavfile as wv
 
-from audiolab.io.players import TonePlayer, ToneCurve
+from audiolab.io.players import FinitePlayer, ToneCurve, ContinuousPlayer
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
 from audiolab.tools import spikestats
 from audiolab.tools.qthreading import ProtocolSignals
@@ -11,7 +11,7 @@ from audiolab.tools.qthreading import ProtocolSignals
 class AcquisitionModel():
     def __init__(self, threshold=None):
         self.signals = {}
-        self.toneplayer = None
+        self.finite_player = None
         self.threshold = threshold
         self.signals = ProtocolSignals()
 
@@ -34,8 +34,8 @@ class AcquisitionModel():
         self.savename = savename
 
     def set_explore_params(self, **kwargs):
-        if self.toneplayer is None:
-            self.toneplayer = TonePlayer()
+        if self.finite_player is None:
+            self.finite_player = FinitePlayer()
 
         if 'wavfile' in kwargs:
             sr, wavdata = wv.read(kwargs['wavfile'])
@@ -46,11 +46,11 @@ class AcquisitionModel():
 
             # self.current_gen_rate = sr
             # self.current_signal = wavdata
-            self.toneplayer.set_stim(wavdata,sr)
+            self.finite_player.set_stim(wavdata,sr)
         if 'acqtime' in kwargs:
-            self.toneplayer.set_aidur(kwargs['acqtime'])
+            self.finite_player.set_aidur(kwargs['acqtime'])
         if 'aisr' in kwargs:
-            self.toneplayer.set_aisr(kwargs['aisr'])
+            self.finite_player.set_aisr(kwargs['aisr'])
         if 'aochan' in kwargs:
             self.aochan = kwargs['aochan']
         if 'aichan' in kwargs:
@@ -63,7 +63,7 @@ class AcquisitionModel():
             self.binsz = kwargs['binsz']
 
     def set_tone(self, f,db,dur,rft,sr):
-        return self.toneplayer.set_tone(f,db,dur,rft,sr)
+        return self.finite_player.set_tone(f,db,dur,rft,sr)
 
     def run_explore(self, interval):
         self.halt = False
@@ -78,7 +78,7 @@ class AcquisitionModel():
         self.acq_thread = threading.Thread(target=self._explore_worker)
 
         # arm the first read
-        self.toneplayer.start(self.aochan, self.aichan)
+        self.finite_player.start(self.aochan, self.aichan)
 
         # and go!
         self.acq_thread.start()
@@ -103,23 +103,23 @@ class AcquisitionModel():
                     self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
                 self.last_tick = now
 
-                response = self.toneplayer.read()
+                response = self.finite_player.read()
                 self.signals.response_collected.emit(self.aitimes, response)
 
                 # process response; calculate spike times
-                spike_times = spikestats.spike_times(response, self.threshold, self.toneplayer.aisr)
+                spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)
                 spike_counts.append(len(spike_times))
                 if len(spike_times) > 0:
                     spike_latencies.append(spike_times[0])
                 else:
                     spike_latencies.append(np.nan)
-                spike_rates.append(spikestats.firing_rate(spike_times, self.toneplayer.aitime))
+                spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
                 if len(response_bins) > 0:
                     self.signals.spikes_found.emit(response_bins, irep)
 
-                self.toneplayer.reset()
+                self.finite_player.reset()
 
                 irep +=1
                 if irep == self.nreps:
@@ -135,7 +135,7 @@ class AcquisitionModel():
 
             except:
                 raise
-        self.toneplayer.stop()
+        self.finite_player.stop()
 
     def halt_explore(self):
         self.halt = True
@@ -212,3 +212,15 @@ class AcquisitionModel():
 
     def closedata(self):
         self.tonecurve.closedata()
+
+    def start_chart(self, aichan, samplerate):
+        self.chart_player = ContinuousPlayer()
+        self.chart_player.signals.ncollected.connect(self.emit_ncollected)
+        self.chart_player.start(aichan,samplerate)
+
+    def stop_chart(self):
+        self.chart_player.stop()
+
+    def emit_ncollected(self, data):
+        # relay emit signal
+        self.signals.ncollected.emit(data)

@@ -92,7 +92,7 @@ class ControlWindow(QtGui.QMainWindow):
         homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
 
         self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
-        self.ui.thresh_lnedt.setText(inputsdict.get('threshold', '0.5'))
+        self.ui.thresh_lnedt.setText(str(inputsdict.get('threshold', '0.5')))
         self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
         self.ui.windowsz_spnbx.setValue(inputsdict.get('windowsz', 100))
         self.ui.binsz_lnedt.setText(inputsdict.get('binsz', '5'))        

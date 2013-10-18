@@ -10,10 +10,11 @@ from audiolab.data.datatypes import CurveObject
 from audiolab.data.dataobjects import AcquisitionDataObject
 
 from audiolab.io.fileio import mightysave
-from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite
+from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
 from audiolab.tools.audiotools import *
 from audiolab.config.info import caldata_filename, calfreq_filename
 
+from audiolab.tools.qthreading import ProtocolSignals
 
 SAVE_OUTPUT = False
 PRINT_WARNINGS = False
@@ -135,7 +136,7 @@ class PlayerBase():
     def set_calv(self, calv):
         self.calv
 
-class TonePlayer(PlayerBase):
+class FinitePlayer(PlayerBase):
     def __init__(self, dbv=(100,0.1)):
         PlayerBase.__init__(self, dbv)
 
@@ -554,7 +555,22 @@ class ToneCurve():
 
         return resultant_dB
 
-class Tone():
-    def __init__(self):
-        self.played = None
-        self.recorded = None
+class ContinuousPlayer(PlayerBase):
+    def __init__(self, dbv=(100,0.1)):
+        PlayerBase.__init__(self, dbv)
+        self.signals = ProtocolSignals()
+
+    def start(self, aichan, samplerate, update_hz=10):
+        """Begins a continuous analog generation, emitting an ncollected 
+        signal at a rate of 10Hz"""
+        npts = samplerate/update_hz #update display at 10Hz rate
+        self.ait = AITask(aichan, samplerate, npts*5)
+        self.ait.register_callback(self._read_continuous, npts)
+        self.ait.start()
+
+    def _read_continuous(self, task):
+        inbuffer = task.read()
+        self.signals.ncollected.emit(inbuffer)
+
+    def stop(self):
+        self.ait.stop()

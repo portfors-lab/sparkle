@@ -131,10 +131,10 @@ class SpecWidget(BaseWidget):
 
 class ChartWidget(BaseWidget):
     def _create_plotter(self):
-        return ScrollingPlotter
+        return ScrollingPlotter()
 
     def set_sr(self, sr):
-        self.traits.set_time_delta(float(1/sr))
+        self.traits.set_time_delta(1/float(sr))
 
     def set_windowsize(self, winsz):
         self.traits.set_windowsize(winsz)
@@ -411,9 +411,11 @@ class ScrollingPlotter(HasTraits):
         plot = Plot(self.chart_data)
         plot.plot(('x', 'y'), type='line', name='chart')
 
+        plot.range2d.x_range.low = 0
+        plot.range2d.x_range.high = 1
+
         plot.x_axis.title = 'Time (s)'
         plot.y_axis.title = 'voltage (mV)'
-
 
         plot.tools.append(PanTool(plot))
         plot.tools.append(ZoomTool(plot))
@@ -436,19 +438,27 @@ class ScrollingPlotter(HasTraits):
         else:
             last_time = xdata[-1]
 
+        # print 'last_time', last_time, 'deltax', self.deltax, 'npoints_to_add', npoints_to_add
         x_to_append = np.arange(last_time+self.deltax, 
                                 last_time+self.deltax+(self.deltax*npoints_to_add),
                                 self.deltax)
-
         xdata = np.append(xdata, x_to_append)
-        self.chart_data.set_data('x', xdata)
 
         ydata = self.chart_data.get_data('y')
         ydata = np.append(ydata, data)
+
+        # remove data that has gone off screen
+        xlow = self.plot.range2d.x_range.low
+        removex, = np.where(xdata < xlow)
+
+        xdata = np.delete(xdata, removex)
+        ydata = np.delete(ydata, removex)
+
+        self.chart_data.set_data('x', xdata)
         self.chart_data.set_data("y", ydata)
 
         # now scroll axis limits
-        if self.plot.range2d.x_range.high <= xdata[-1]:
+        if self.plot.range2d.x_range.high < xdata[-1]:
             self.plot.range2d.x_range.high += self.deltax*npoints_to_add
             self.plot.range2d.x_range.low += self.deltax*npoints_to_add
 

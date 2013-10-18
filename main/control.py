@@ -9,7 +9,6 @@ from audiolab.io.daq_tasks import *
 from audiolab.config.info import caldata_filename, calfreq_filename
 from audiolab.dialogs.saving_dlg import SavingDialog 
 from audiolab.dialogs.scale_dlg import ScaleDialog
-from audiolab.tools.qthreading import ProtocolSignals
 from audiolab.main.acqmodel import AcquisitionModel
 from audiolab.tools.audiotools import spectrogram, calc_spectrum
 
@@ -43,8 +42,6 @@ class MainWindow(ControlWindow):
 
         self.live_lock = QtCore.QMutex()
 
-        self.signals = ProtocolSignals()
-        self.signals.ncollected.connect(self.update_chart)
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         
         self.acqmodel = AcquisitionModel()
@@ -53,6 +50,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.trace_finished.connect(self.trace_done)
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
         self.acqmodel.signals.warning.connect(self.set_status_msg)
+        self.acqmodel.signals.ncollected.connect(self.update_chart)
 
         
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
@@ -81,6 +79,7 @@ class MainWindow(ControlWindow):
     def on_start(self):
         # set plot axis to appropriate limits
         print 'on start'
+        self.ui.plot_dock.setWidget(self.ui.display)
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         if not self.verify_inputs():
             return
@@ -91,11 +90,11 @@ class MainWindow(ControlWindow):
             self.tuning_curve()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             # change plot to scrolling plot
-            winsz = float(self.ui.windowsz_spnbx.value())
+            winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
             self.scrollplot.set_windowsize(winsz)
             self.scrollplot.set_sr(acq_rate)
-            
-            self.ui.plot_dock.setWidget(self.scrollplot.widget)
+            self.ui.plot_dock.setWidget(self.scrollplot)
+
             self.start_chart(aichan, acq_rate)
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
             pass
@@ -121,7 +120,7 @@ class MainWindow(ControlWindow):
 
     def on_stop(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
-            self.ait.stop()
+            self.acqmodel.stop_chart()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
             self.acqmodel.halt_curve()
             if isinstance(self.sender(), QtGui.QPushButton):
@@ -140,14 +139,7 @@ class MainWindow(ControlWindow):
 
 
     def start_chart(self, aichan, samplerate):
-        npts = samplerate/10 #update display at 10Hz rate
-        self.ait = AITask(aichan, samplerate, npts*5)
-        self.ait.register_callback(self.read_continuous, npts)
-        self.ait.start()
-
-    def read_continuous(self,task):
-        inbuffer = task.read()
-        self.signals.ncollected.emit(inbuffer)
+        self.acqmodel.start_chart(aichan, samplerate)
 
     def update_chart(self, data):
         self.scrollplot.append_data(data)
