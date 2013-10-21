@@ -1609,6 +1609,9 @@
            <pointsize>12</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string extracomment="Mean no. of spikes per unique stimulus"/>
+         </property>
          <property name="text">
           <string>Average :</string>
          </property>
@@ -1620,6 +1623,9 @@
           <font>
            <pointsize>12</pointsize>
           </font>
+         </property>
+         <property name="toolTip">
+          <string extracomment="Mean time of first spike"/>
          </property>
          <property name="text">
           <string>Latency (ms) :</string>
@@ -1651,6 +1657,9 @@
            <pointsize>12</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string extracomment="Total no. of spikes over repetitions"/>
+         </property>
          <property name="text">
           <string>Total :</string>
          </property>
@@ -1668,6 +1677,9 @@
           <font>
            <pointsize>12</pointsize>
           </font>
+         </property>
+         <property name="toolTip">
+          <string extracomment="Mean no. spikes per window"/>
          </property>
          <property name="text">
           <string>Rate :</string>
