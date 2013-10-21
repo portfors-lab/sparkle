@@ -70,7 +70,7 @@ class MainWindow(ControlWindow):
         self.filemodel = QtGui.QFileSystemModel(self)
         self.filemodel.setFilter(QtCore.QDir.Files)
         self.ui.filelist_view.setModel(self.filemodel)
-        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.wavrootdir))
+        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.filelistdir))
 
         # always show plots on load
         self.ui.plot_dock.setVisible(True)
@@ -104,12 +104,28 @@ class MainWindow(ControlWindow):
     def on_update(self):
         print 'on_update'
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
+            aochan = self.ui.aochan_box.currentText()
+            aichan = self.ui.aichan_box.currentText()
+            acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+            nreps = self.ui.ex_nreps_spnbx.value()
+
+            winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
+            binsz = float(self.ui.binsz_lnedt.text())*self.tscale
+
+            nbins = np.ceil(winsz/binsz)
+            bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
+            self.ui.psth.set_bins(bin_centers)
+            self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
+                                             acqtime=winsz, aisr=acq_rate,
+                                             nreps=nreps, binsz=binsz)
+
             if self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
                 f = self.ui.extone_freq_spnbx.value()*self.fscale
                 gen_rate = self.ui.extone_aosr_spnbx.value()*self.fscale
                 dur = self.ui.extone_dur_spnbx.value()*self.tscale
                 db = self.ui.extone_db_spnbx.value()
                 rft = self.ui.extone_risefall_spnbx.value()*self.tscale
+                
                 tone, timevals = self.acqmodel.set_tone(f,db,dur,rft,gen_rate)
 
                 freq, spectrum = calc_spectrum(tone, gen_rate)

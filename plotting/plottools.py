@@ -42,6 +42,8 @@ class AxisZoomTool(BetterZoom):
                 y = 0
                 nexty = y + (cy - y)*(self._value_factor/new_value_factor)
 
+            # print 'cx', cx, 'cy', cy, 'next x', nextx, 'nexty'
+            # print 'index factor', self._index_factor, 'value factor', self._value_factor, 'new index factor', new_index_factor, 'new value factor', new_value_factor
             pan_state = PanState((cx,cy), (nextx, nexty))
             zoom_state = ZoomState((self._index_factor, self._value_factor),
                                    (new_index_factor, new_value_factor))
@@ -57,10 +59,18 @@ class AxisZoomTool(BetterZoom):
 
             zoom_state.apply(self)
             self._append_state(zoom_state)
+        self.check_extents()
 
     def set_xdomain(self, limits):
         x_mapper = self._get_x_mapper()
         x_mapper.domain_limits = limits
+
+    def check_extents(self):
+        lims = self._get_x_mapper().domain_limits
+        if self.component.index_range.low < lims[0]:
+            self.component.index_range.low = lims[0]
+        if self.component.index_range.high > lims[1]:
+            self.component.index_range.high = lims[1]
 
 class LineDraggingTool(DragTool):
 

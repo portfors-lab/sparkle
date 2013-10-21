@@ -157,20 +157,21 @@ class PSTWidget(BaseWidget):
 class PSTPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     nreps = Int(DEFAULT_NREPS)
+    bar_width = Float(0.005)
 
     def _plot_default(self):
         self.pst_data = ArrayPlotData(bins=[], spikecounts=[])
         plot = Plot(self.pst_data)
         plot.plot(('bins', 'spikecounts'), type='bar', name='PSTH', 
-                    bar_width=0.001)
+                    bar_width=self.bar_width)
 
-        plot.value_range.low = -1
+        plot.value_range.low = 0
         plot.value_range.high = 30
 
         self.ax_zoom_tool = AxisZoomTool(plot, speed=0.1, single_axis=True,
                                    axis='index', maintain_aspect_ratio=False)
         plot.tools.append(self.ax_zoom_tool)
-        plot.tools.append(PanTool(plot, constrain_direction='x', restrict_to_data=True))
+        plot.tools.append(PanTool(plot, constrain=True, constrain_direction='x', restrict_to_data=True))
 
         return plot
 
@@ -185,6 +186,8 @@ class PSTPlotter(HasTraits):
         counts = np.zeros_like(bins)
         self.pst_data.set_data('bins', bins)
         self.pst_data.set_data('spikecounts', counts)
+        # set appropriate width of bars
+        self.bar_width = bins[0]*1.5
         self.ax_zoom_tool.set_xdomain((0, bins[-1]))
 
     def append_data(self, bins, repnum):
@@ -198,7 +201,7 @@ class PSTPlotter(HasTraits):
         xdata = self.pst_data.get_data('bins')
         self.set_xlim((xdata[0],xdata[-1]))
         ydata = self.pst_data.get_data('spikecounts')
-        self.set_ylim((-0.15, ydata.max()))
+        self.set_ylim((0, ydata.max()))
 
     def set_xlim(self, lim):
         self.plot.index_range.low = lim[0]
@@ -207,6 +210,9 @@ class PSTPlotter(HasTraits):
     def set_ylim(self, lim):
         self.plot.value_range.low = lim[0]
         self.plot.value_range.high = lim[1]
+
+    def _bar_width_changed(self):
+        self.plot.components[0].bar_width = self.bar_width
 
 class SpikePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)

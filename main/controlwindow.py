@@ -59,6 +59,7 @@ class ControlWindow(QtGui.QMainWindow):
 
         savedict = {}
         savedict['wavrootdir'] = self.ui.wavrootdir_lnedt.text()
+        savedict['filelistdir'] = self.filemodel.rootPath()
         savedict['threshold'] = self.ui.thresh_lnedt.text()
         savedict['binsz'] = self.ui.binsz_lnedt.text()
         savedict['aisr'] = self.ui.aisr_spnbx.value()
@@ -92,6 +93,7 @@ class ControlWindow(QtGui.QMainWindow):
         homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
 
         self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
+        self.filelistdir = inputsdict.get('filelistdir', self.wavrootdir)
         self.ui.thresh_lnedt.setText(str(inputsdict.get('threshold', '0.5')))
         self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
         self.ui.windowsz_spnbx.setValue(inputsdict.get('windowsz', 100))
