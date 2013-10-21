@@ -268,8 +268,8 @@ class SpikePlotter(HasTraits):
 
         # Attach some tools to the plot
         broadcaster = SpikeTraceBroadcasterTool(thresh_line)
-        broadcaster.tools.append(PanTool(trace_plot))
-        broadcaster.tools.append(ZoomTool(trace_plot))
+        broadcaster.tools.append(PanTool(trace_plot, constrain=True, constrain_direction='y'))
+        broadcaster.tools.append(ZoomTool(trace_plot, axis='value'))
         linetool = LineDraggingTool(thresh_line)
         broadcaster.tools.append(linetool)
         trace_plot.tools.append(broadcaster)

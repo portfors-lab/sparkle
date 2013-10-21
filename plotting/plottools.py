@@ -59,13 +59,15 @@ class AxisZoomTool(BetterZoom):
 
             zoom_state.apply(self)
             self._append_state(zoom_state)
-        self.check_extents()
+        self._check_extents()
 
     def set_xdomain(self, limits):
         x_mapper = self._get_x_mapper()
         x_mapper.domain_limits = limits
 
-    def check_extents(self):
+    def _check_extents(self):
+        """Check that zoom did not overshoot"""
+        # This is neccessary because domain_limits are not enforced correctly?
         lims = self._get_x_mapper().domain_limits
         if self.component.index_range.low < lims[0]:
             self.component.index_range.low = lims[0]
