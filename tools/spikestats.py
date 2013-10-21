@@ -1,3 +1,4 @@
+""" Here is a doc string for spikestats :)"""
 import numpy as np
 from scipy.signal import firwin, lfilter
 

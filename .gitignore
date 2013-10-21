@@ -12,5 +12,8 @@ __*__
 *.bak
 *.pyc
 
-#temp folder for testing
+# temp folder for testing
 test/unit_test/tmp/
+
+# build files
+/doc/_build/

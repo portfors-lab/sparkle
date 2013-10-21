@@ -556,6 +556,7 @@ class ToneCurve():
         return resultant_dB
 
 class ContinuousPlayer(PlayerBase):
+    """This is a continuous player for a chart acquitision operation"""
     def __init__(self, dbv=(100,0.1)):
         PlayerBase.__init__(self, dbv)
         self.signals = ProtocolSignals()
