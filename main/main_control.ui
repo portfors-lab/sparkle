@@ -1610,7 +1610,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string extracomment="Mean no. of spikes per unique stimulus"/>
+          <string>Mean no. of spikes per unique stimulus</string>
          </property>
          <property name="text">
           <string>Average :</string>
@@ -1625,7 +1625,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string extracomment="Mean time of first spike"/>
+          <string>Mean time of first spike</string>
          </property>
          <property name="text">
           <string>Latency (ms) :</string>
@@ -1658,7 +1658,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string extracomment="Total no. of spikes over repetitions"/>
+          <string>Total no. of spikes over repetitions</string>
          </property>
          <property name="text">
           <string>Total :</string>
@@ -1679,7 +1679,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string extracomment="Mean no. spikes per window"/>
+          <string>Mean no. spikes per window</string>
          </property>
          <property name="text">
           <string>Rate :</string>

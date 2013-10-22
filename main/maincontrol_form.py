@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Oct 16 15:54:58 2013
+# Created: Mon Oct 21 17:09:00 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -1067,10 +1067,14 @@ class Ui_ControlWindow(object):
         self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))
         self.menuView.setTitle(_translate("ControlWindow", "View", None))
+        self.label_16.setToolTip(_translate("ControlWindow", "Mean no. of spikes per unique stimulus", None))
         self.label_16.setText(_translate("ControlWindow", "Average :", None))
+        self.label_5.setToolTip(_translate("ControlWindow", "Mean time of first spike", None))
         self.label_5.setText(_translate("ControlWindow", "Latency (ms) :", None))
         self.spike_latency_lbl.setText(_translate("ControlWindow", "0", None))
+        self.label_11.setToolTip(_translate("ControlWindow", "Total no. of spikes over repetitions", None))
         self.label_11.setText(_translate("ControlWindow", "Total :", None))
+        self.label_7.setToolTip(_translate("ControlWindow", "Mean no. spikes per window", None))
         self.label_7.setText(_translate("ControlWindow", "Rate :", None))
         self.spike_rate_lbl.setText(_translate("ControlWindow", "0", None))
         self.spike_avg_lbl.setText(_translate("ControlWindow", "0", None))

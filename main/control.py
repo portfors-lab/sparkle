@@ -299,7 +299,7 @@ class MainWindow(ControlWindow):
         self.ui.psth.clear_data()
         self.ui.spike_total_lbl.setText(str(total_spikes))
         self.ui.spike_avg_lbl.setText(str(avg_count))
-        self.ui.spike_latency_lbl.setText(str(avg_latency))
+        self.ui.spike_latency_lbl.setText(str(avg_latency*1000))
         self.ui.spike_rate_lbl.setText(str(avg_rate))
 
     def launch_save_dlg(self):
