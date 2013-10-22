@@ -269,10 +269,11 @@ class SpikePlotter(HasTraits):
         # Attach some tools to the plot
         broadcaster = SpikeTraceBroadcasterTool(thresh_line)
         broadcaster.tools.append(PanTool(trace_plot, constrain=True, constrain_direction='y'))
-        broadcaster.tools.append(ZoomTool(trace_plot, axis='value'))
+        broadcaster.tools.append(ZoomTool(trace_plot, axis='value', zoom_factor=1.1))
         linetool = LineDraggingTool(thresh_line)
         broadcaster.tools.append(linetool)
         trace_plot.tools.append(broadcaster)
+
 
         # setting the offsets after adding tools, sets it for all child tools
         broadcaster.set_offsets(trace_plot.padding_left, trace_plot.padding_bottom)
@@ -364,7 +365,8 @@ class FFTPlotter(HasTraits):
         plot.padding_bottom = 35
         plot.padding_top = 5
 
-        plot.overlays.append(RectZoomTool(plot))
+        plot.tools.append(PanTool(plot))
+        plot.overlays.append(RectZoomTool(plot, always_on=False, always_on_modifier='control'))
 
         return plot
 

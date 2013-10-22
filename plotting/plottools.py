@@ -74,6 +74,7 @@ class AxisZoomTool(BetterZoom):
         if self.component.index_range.high > lims[1]:
             self.component.index_range.high = lims[1]
 
+
 class LineDraggingTool(DragTool):
 
     component = Instance(Component)
@@ -174,9 +175,10 @@ class SpikeTraceBroadcasterTool(BroadcasterTool):
                     if t.__class__.__name__ == "PanTool":
                         self.tools.remove(t)
                         self.pan_enabled = False
+                        self.pt = t
             elif not self.pan_enabled:
                 # if user clicks on anything apart from threshold line
-                self.tools.append(PanTool(self.component))
+                self.tools.append(self.pt)
 
         BroadcasterTool.dispatch(self, event, suffix)
 
