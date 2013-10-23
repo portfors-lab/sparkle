@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Oct 21 17:09:00 2013
+# Created: Tue Oct 22 13:46:00 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -91,9 +91,6 @@ class Ui_ControlWindow(object):
         self.funit_lbl1 = QtGui.QLabel(self.page)
         self.funit_lbl1.setObjectName(_fromUtf8("funit_lbl1"))
         self.gridLayout_5.addWidget(self.funit_lbl1, 0, 2, 1, 1)
-        self.extone_freq_spnbx = QtGui.QSpinBox(self.page)
-        self.extone_freq_spnbx.setObjectName(_fromUtf8("extone_freq_spnbx"))
-        self.gridLayout_5.addWidget(self.extone_freq_spnbx, 0, 1, 1, 1)
         self.label_41 = QtGui.QLabel(self.page)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -121,7 +118,7 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.addWidget(self.funit_lbl2, 5, 2, 1, 1)
         self.extone_aosr_spnbx = QtGui.QSpinBox(self.page)
         font = QtGui.QFont()
-        font.setPointSize(10)
+        font.setPointSize(14)
         self.extone_aosr_spnbx.setFont(font)
         self.extone_aosr_spnbx.setMinimum(10)
         self.extone_aosr_spnbx.setMaximum(1000)
@@ -150,7 +147,7 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.addWidget(self.tunit_lbl3, 4, 2, 1, 1)
         self.extone_risefall_spnbx = QtGui.QSpinBox(self.page)
         font = QtGui.QFont()
-        font.setPointSize(10)
+        font.setPointSize(14)
         self.extone_risefall_spnbx.setFont(font)
         self.extone_risefall_spnbx.setMaximum(100)
         self.extone_risefall_spnbx.setObjectName(_fromUtf8("extone_risefall_spnbx"))
@@ -168,7 +165,7 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.addWidget(self.label_32, 2, 0, 1, 1)
         self.extone_dur_spnbx = QtGui.QSpinBox(self.page)
         font = QtGui.QFont()
-        font.setPointSize(10)
+        font.setPointSize(14)
         self.extone_dur_spnbx.setFont(font)
         self.extone_dur_spnbx.setMinimum(100)
         self.extone_dur_spnbx.setMaximum(50000)
@@ -191,11 +188,23 @@ class Ui_ControlWindow(object):
         self.label_42.setObjectName(_fromUtf8("label_42"))
         self.gridLayout_5.addWidget(self.label_42, 1, 0, 1, 1)
         self.extone_db_spnbx = QtGui.QSpinBox(self.page)
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.extone_db_spnbx.setFont(font)
         self.extone_db_spnbx.setObjectName(_fromUtf8("extone_db_spnbx"))
         self.gridLayout_5.addWidget(self.extone_db_spnbx, 1, 1, 1, 1)
         self.label_6 = QtGui.QLabel(self.page)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout_5.addWidget(self.label_6, 1, 2, 1, 1)
+        self.extone_freq_spnbx = IncrementInput(self.page)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.extone_freq_spnbx.sizePolicy().hasHeightForWidth())
+        self.extone_freq_spnbx.setSizePolicy(sizePolicy)
+        self.extone_freq_spnbx.setMinimumSize(QtCore.QSize(0, 25))
+        self.extone_freq_spnbx.setObjectName(_fromUtf8("extone_freq_spnbx"))
+        self.gridLayout_5.addWidget(self.extone_freq_spnbx, 0, 1, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_5)
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QtGui.QWidget()
@@ -1086,6 +1095,7 @@ class Ui_ControlWindow(object):
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
 
 from audiolab.plotting.chacoplots import ImageWidget
+from audiolab.main.incrementer import IncrementInput
 from audiolab.plotting.custom_plots import PSTWidget
 from audiolab.plotting.protocoldisplay import ProtocolDisplay
 

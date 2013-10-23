@@ -8,6 +8,7 @@ from chaco.tools.tool_states import ZoomState, PanState, GroupedToolState, ToolS
 
 class AxisZoomTool(BetterZoom):
     """ Tool to zoom single axis at a time, using mouse location to determine axis"""
+    zoom_factor = 1.5
     def dispatch(self, event, suffix):
         if (event.x < self.component.padding_left+10) and not (event.y < self.component.padding_bottom+10):
             # mouse is beside y axis
@@ -94,6 +95,21 @@ class LineDraggingTool(DragTool):
             return True
         else:
             return False
+
+    def normal_mouse_move(self, event):
+        plot = self.component
+
+        # ndx = plot.map_index((event.x, event.y), self.threshold)
+        ndx = plot.get_closest_line((event.x-self.xoffset, event.y-self.yoffset), self.tolerance)
+        if ndx is None:
+            plot.line_width = 1.0
+            plot.color = 'red'
+        else:
+            plot.line_width = 1.5
+            plot.color = 'crimson'
+
+        plot.invalidate_draw()
+        plot.request_redraw()
 
     def drag_start(self, event):
         plot = self.component

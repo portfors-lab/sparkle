@@ -137,9 +137,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QSpinBox" name="extone_freq_spnbx"/>
-                  </item>
                   <item row="0" column="0">
                    <widget class="QLabel" name="label_41">
                     <property name="sizePolicy">
@@ -187,7 +184,7 @@
                    <widget class="QSpinBox" name="extone_aosr_spnbx">
                     <property name="font">
                      <font>
-                      <pointsize>10</pointsize>
+                      <pointsize>14</pointsize>
                      </font>
                     </property>
                     <property name="minimum">
@@ -239,7 +236,7 @@
                    <widget class="QSpinBox" name="extone_risefall_spnbx">
                     <property name="font">
                      <font>
-                      <pointsize>10</pointsize>
+                      <pointsize>14</pointsize>
                      </font>
                     </property>
                     <property name="maximum">
@@ -269,7 +266,7 @@
                    <widget class="QSpinBox" name="extone_dur_spnbx">
                     <property name="font">
                      <font>
-                      <pointsize>10</pointsize>
+                      <pointsize>14</pointsize>
                      </font>
                     </property>
                     <property name="minimum">
@@ -312,12 +309,34 @@
                    </widget>
                   </item>
                   <item row="1" column="1">
-                   <widget class="QSpinBox" name="extone_db_spnbx"/>
+                   <widget class="QSpinBox" name="extone_db_spnbx">
+                    <property name="font">
+                     <font>
+                      <pointsize>14</pointsize>
+                     </font>
+                    </property>
+                   </widget>
                   </item>
                   <item row="1" column="2">
                    <widget class="QLabel" name="label_6">
                     <property name="text">
                      <string>dB SPL</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="IncrementInput" name="extone_freq_spnbx" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>25</height>
+                     </size>
                     </property>
                    </widget>
                   </item>
@@ -1770,6 +1789,12 @@
    <header>audiolab.plotting.custom_plots</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>IncrementInput</class>
+   <extends>QWidget</extends>
+   <header>audiolab.main.incrementer</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>
@@ -1828,8 +1853,8 @@
    <slot>wavdir_selected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>153</y>
+     <x>143</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>844</x>
@@ -1844,8 +1869,8 @@
    <slot>browse_wavdirs()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>153</y>
+     <x>351</x>
+     <y>156</y>
     </hint>
     <hint type="destinationlabel">
      <x>880</x>
@@ -1860,8 +1885,8 @@
    <slot>wavfile_selected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>153</y>
+     <x>307</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>848</x>
@@ -1876,8 +1901,8 @@
    <slot>wavfile_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>153</y>
+     <x>307</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>851</x>
