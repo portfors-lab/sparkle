@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1084</width>
-    <height>694</height>
+    <width>1144</width>
+    <height>696</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,7 +70,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -1234,8 +1234,8 @@
          <widget class="QPushButton" name="pushButton">
           <property name="geometry">
            <rect>
-            <x>100</x>
-            <y>260</y>
+            <x>20</x>
+            <y>440</y>
             <width>75</width>
             <height>23</height>
            </rect>
@@ -1247,16 +1247,40 @@
          <widget class="QTableWidget" name="tableWidget">
           <property name="geometry">
            <rect>
-            <x>70</x>
-            <y>40</y>
-            <width>251</width>
-            <height>191</height>
+            <x>10</x>
+            <y>30</y>
+            <width>221</width>
+            <height>401</height>
            </rect>
           </property>
           <property name="font">
            <font>
             <pointsize>8</pointsize>
            </font>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropOverwriteMode">
+           <bool>false</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::InternalMove</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::MoveAction</enum>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>false</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ContiguousSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
           </property>
           <row>
            <property name="text">
@@ -1313,29 +1337,6 @@
             <string>5</string>
            </property>
           </item>
-         </widget>
-         <widget class="QListWidget" name="listWidget">
-          <property name="geometry">
-           <rect>
-            <x>420</x>
-            <y>60</y>
-            <width>256</width>
-            <height>192</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_8">
-          <property name="geometry">
-           <rect>
-            <x>420</x>
-            <y>40</y>
-            <width>46</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>HIstory</string>
-          </property>
          </widget>
         </widget>
        </widget>
@@ -1572,7 +1573,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1084</width>
+     <width>1144</width>
      <height>21</height>
     </rect>
    </property>

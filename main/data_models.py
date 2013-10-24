@@ -71,6 +71,7 @@ class ProtocolView(QtGui.QTableView):
         self.setAcceptDrops(True)
         # self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.dragline = None
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/x-person"):
@@ -81,17 +82,38 @@ class ProtocolView(QtGui.QTableView):
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("application/x-person"):
+            #find the nearest row break to cursor
+            # assume all rows same height
+            row_height = self.rowHeight(0)
+            y = row_height*self.rowAt(event.pos().y())
+            x = self.width()
+            self.dragline = QtCore.QLine(0,y,x,y)          
+            # self.repaint(0,0,self.width(), self.height())
+            # self.repaint(self.rect())
+            self.viewport().update()
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()
         else:
             event.ignore()
 
+    def paintEvent(self, event):
+        super(ProtocolView, self).paintEvent(event)
+
+        if self.dragline is not None:
+            pen = QtGui.QPen(QtCore.Qt.blue)
+            painter = QtGui.QPainter(self.viewport())
+            painter.setPen(pen)
+            painter.drawLine(self.dragline)
+
+
     def dropEvent(self, event):
+        self.dragline = None
         data = event.mimeData()
         bstream = data.retrieveData("application/x-person",
             QtCore.QVariant.ByteArray)
         selected = pickle.loads(bstream.toByteArray())
-        self.model().insertTest(selected, 0)
+        location = self.rowAt(event.pos().y())
+        self.model().insertTest(selected, location)
         event.accept()
 
     def mousePressEvent(self, event):
@@ -108,14 +130,22 @@ class ProtocolView(QtGui.QTableView):
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)
 
-        # example 1 - the object itself
+        # grab an image of the cell we are moving
+        # assume all rows same height
+        row_height = self.rowHeight(0)
+        # -5 becuase it a a little off
+        y = (row_height*self.rowAt(event.pos().y())) + row_height - 5
+        x = self.width()
+        rect = QtCore.QRect(5,y,x,row_height)
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, rect)
 
-        # pixmap = QtGui.QPixmap()
-        # pixmap = pixmap.grabWidget(self, self.rectForIndex(index))
-
-        # example 2 -  a plain pixmap
-        pixmap = QtGui.QPixmap(100, self.height()/2)
-        pixmap.fill(QtGui.QColor("orange"))
+        # below makes the pixmap half transparent
+        painter = QtGui.QPainter(pixmap)
+        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+        painter.end()
+        
         drag.setPixmap(pixmap)
 
         drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
@@ -149,6 +179,7 @@ if __name__ == '__main__':
 
     tableView = ProtocolView()
     tableView.show()
+    tableView.resize(400,400)
 
     model = ProtocolTabelModel(protocol)
 
