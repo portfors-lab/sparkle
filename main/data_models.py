@@ -69,7 +69,6 @@ class ProtocolView(QtGui.QTableView):
         QtGui.QTableView.__init__(self,parent)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
-        # self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.dragline = None
 
@@ -88,8 +87,6 @@ class ProtocolView(QtGui.QTableView):
             y = row_height*self.rowAt(event.pos().y())
             x = self.width()
             self.dragline = QtCore.QLine(0,y,x,y)          
-            # self.repaint(0,0,self.width(), self.height())
-            # self.repaint(self.rect())
             self.viewport().update()
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()
@@ -121,7 +118,6 @@ class ProtocolView(QtGui.QTableView):
         index = self.indexAt(event.pos())
         selected = self.model().data(index,QtCore.Qt.UserRole)
 
-        # print self.model().tests
         ## convert to  a bytestream
         bstream = cPickle.dumps(selected)
         mimeData = QtCore.QMimeData()
