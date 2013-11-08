@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>StimulusEditor</class>
+ <widget class="QWidget" name="StimulusEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -42,7 +42,7 @@
         <item>
          <layout class="QVBoxLayout" name="track_layout">
           <item>
-           <widget class="QFrame" name="frame">
+           <widget class="QFrame" name="track0">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
               <horstretch>0</horstretch>

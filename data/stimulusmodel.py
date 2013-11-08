@@ -1,33 +1,111 @@
+import pickle
+
+from PyQt4 import QtGui, QtCore
+
 from audiolab.tools.langtools import enum
 
-class StimulusModel():
-"""Model to represent a unique stimulus, holds all relevant parameters"""
-    def __init__(self):
-        ntracks = 0
-        nreps = 0
+PIXELS_PER_MS = 5
+
+
+class StimulusModel(QtCore.QAbstractTableModel):
+    """Model to represent a unique stimulus, holds all relevant parameters"""
+    def __init__(self, segments=[[]], parent=None):
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self.nreps = 0
         # 2D array of simulus components track number x component number
-        segments = [[]]
+        self.segments = segments
         auto_params = []
 
-    def print_stimulus(self):
-        """This is for purposes of documenting what was presented"""
+    def headerData(self, section, orientation, role):
+        return ''
 
-class TrackModel(QtCore.QAbstractListModel):
+    def rowCount(self, parent=QtCore.QModelIndex()):
+        return len(self.segments)
 
-    def __init__(self, segments=[], parent = None):
-        QtCore.QAbstractListModel.__init__(self, parent)
-        self._segments = segments
+    def columnCount(self, parent=QtCore.QModelIndex()):
+        column_lengths = [len(x) for x in self.segments]
+        return max(column_lengths)
+
+    def columnCountForRow(self, row):
+        return len(self.segments[row])
 
     def data(self, index, role):
+        print 'calling data!', role
+        if role == QtCore.Qt.DisplayRole:
+            component = self.segments[index.row()][index.column()]
+            # do I need anything here?
+            return component.__class__.__name__
+        elif role == QtCore.Qt.UserRole:  #return the whole python object
+            print '!!userrole!!'
+            if len(self.segments[index.row()]) > index.column():
+                component = self.segments[index.row()][index.column()]
+                component = QtCore.QVariant(pickle.dumps(component))
+            else:
+                component = None
+            return component
+        elif role == QtCore.Qt.SizeHintRole:
+            component = self.segments[index.row()][index.column()]
+            return component.duration() * PIXELS_PER_MS * 1000
 
-class AbstractStimulusComponent()
-"""Represents a single component of a complete summed stimulus"""
-    start_time = None
-    duration = None
-    fs = None
-    intensity = None
-    risefall = None
+    def printStimulus(self):
+        """This is for purposes of documenting what was presented"""
+
+    def addComponent(self, comp, index=(0,0)):
+        if index[0] > len(self.segments)-1:
+            self.segments.append([comp])
+        else:
+            self.segments[index[0]].insert(index[1], comp)
+
+    def removeComponent(self, index):
+        self.segments[index[0]].pop(index[1])
+
+    def setData(self, index, value, role):
+        print 'SET DATA MAN!'
+
+    def flags(self, index):
+        return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+
+# class TrackModel(QtCore.QAbstractListModel):
+
+#     def __init__(self, segments=[], parent = None):
+#         QtCore.QAbstractListModel.__init__(self, parent)
+#         self._segments = segments
+
+#     def data(self, index, role):
+
+class AbstractStimulusComponent(object):
+    """Represents a single component of a complete summed stimulus"""
+    _start_time = None
+    _duration0 = None
+    _fs = None
+    _intensity = None
+    _risefall = None
+
     # def __init__(self):
+    def duration(self):
+        return self._duration
+
+    def setDuration(self, dur):
+        self._duration = dur
+
+    def paint(self, painter, rect, palette, editMode):
+        painter.save()
+
+        image = QtGui.QImage("./ducklings.jpg)")
+        painter.drawImage(0,0,image)
+
+        painter.drawRect(rect)
+
+        # set text color
+        painter.setPen(QPen(Qt.black))
+        text = 'cute ducks!'
+        painter.drawText(5, 5, text)
+
+        painter.restore()
+
+    def sizeHint(self):
+        width = self._duration * PIXELS_PER_MS*1000
+        return QtCore.QSize(width, 50)
 
 class AutoParameter():
     """Hold information for parameter modification loop"""
@@ -37,8 +115,8 @@ class AutoParameter():
     stop_type = 0 # 0 : stop time, 1 : N times
     stop_value = None
 
-class Tone(StimulusComponent):
-    pass
+class Tone(AbstractStimulusComponent):
+    foo = None
 
 class PureTone(Tone):
     name = "puretone"
@@ -49,28 +127,28 @@ class FMSweep(Tone):
     start_frequency = None
     stop_frequency = None
 
-class Vocalization(StimulusComponent):
+class Vocalization(AbstractStimulusComponent):
     name = "vocalization"
     filename = None
 
-class Noise(StimulusComponent):
+class Noise(AbstractStimulusComponent):
     name = "noise"
 
-class Silence(StimulusComponent):
+class Silence(AbstractStimulusComponent):
     name = "silence"
 
-class Modulation(StimulusComponent):
+class Modulation(AbstractStimulusComponent):
     modulation_frequency = None
 
 class SAM(Modulation):
-"""Sinusodal Amplitude Modulation"""
+    """Sinusodal Amplitude Modulation"""
     name = "sam"
 
 class SquareWaveModulation(Modulation):
     name = "squaremod"
 
-class SFM(StimulusComponent):
+class SFM(AbstractStimulusComponent):
     name = "sfm"
 
-class Ripples(StimulusComponent):
+class Ripples(AbstractStimulusComponent):
     name = "ripples"
