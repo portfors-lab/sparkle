@@ -1,4 +1,4 @@
-import pickle
+import cPickle
 
 from PyQt4 import QtGui, QtCore
 
@@ -30,16 +30,16 @@ class StimulusModel(QtCore.QAbstractTableModel):
         return len(self.segments[row])
 
     def data(self, index, role):
-        print 'calling data!', role
+        # print 'calling data!', role
         if role == QtCore.Qt.DisplayRole:
             component = self.segments[index.row()][index.column()]
             # do I need anything here?
             return component.__class__.__name__
         elif role == QtCore.Qt.UserRole:  #return the whole python object
-            print '!!userrole!!'
+            # print '!!userrole!!'
             if len(self.segments[index.row()]) > index.column():
                 component = self.segments[index.row()][index.column()]
-                component = QtCore.QVariant(pickle.dumps(component))
+                component = QtCore.QVariant(cPickle.dumps(component))
             else:
                 component = None
             return component
@@ -50,7 +50,9 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
 
-    def addComponent(self, comp, index=(0,0)):
+    def insertComponent(self, comp, index=(0,0)):
+        # sizes = [len(x) for x in self.segments]
+        # print 'add at', index, sizes
         if index[0] > len(self.segments)-1:
             self.segments.append([comp])
         else:
@@ -59,7 +61,7 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def removeComponent(self, index):
         self.segments[index[0]].pop(index[1])
 
-    def setData(self, index, value, role):
+    def setData(self, index, value):
         print 'SET DATA MAN!'
 
     def flags(self, index):
@@ -73,10 +75,18 @@ class StimulusModel(QtCore.QAbstractTableModel):
 
 #     def data(self, index, role):
 
+class AutoParameter():
+    """Hold information for parameter modification loop"""
+    components = []
+    parameter = ""
+    delta = None
+    stop_type = 0 # 0 : stop time, 1 : N times
+    stop_value = None
+
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     _start_time = None
-    _duration0 = None
+    _duration = None
     _fs = None
     _intensity = None
     _risefall = None
@@ -107,13 +117,12 @@ class AbstractStimulusComponent(object):
         width = self._duration * PIXELS_PER_MS*1000
         return QtCore.QSize(width, 50)
 
-class AutoParameter():
-    """Hold information for parameter modification loop"""
-    components = []
-    parameter = ""
-    delta = None
-    stop_type = 0 # 0 : stop time, 1 : N times
-    stop_value = None
+    def intensity(self):
+        return self._intensity
+
+    def setIntensity(self, intensity):
+        self._intensity = intensity
+
 
 class Tone(AbstractStimulusComponent):
     foo = None

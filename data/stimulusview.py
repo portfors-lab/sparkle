@@ -1,19 +1,22 @@
-import pickle
+import cPickle, pickle
 from PyQt4 import QtGui, QtCore
 
 from audiolab.data.stimulusmodel import *
 
 
 ROW_HEIGHT = 100
-COLUMN_SPACE = 25
+ROW_SPACE = 25
 
 class StimulusView(QtGui.QAbstractItemView):
     hashIsDirty = False
     _rects = [[]]
-    # def __init__(self, parent=None):
-    #     super(StimulusView, self).__init__(parent)
-        # self.horizontalScrollBar().setRange(0, 0)
-        # self.verticalScrollBar().setRange(0, 0)
+    def __init__(self, parent=None):
+        super(StimulusView, self).__init__(parent)
+        self.horizontalScrollBar().setRange(0, 0)
+        self.verticalScrollBar().setRange(0, 0)
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.dragline = None
 
     def setModel(self, model):
         super(StimulusView, self).setModel(model)
@@ -40,9 +43,10 @@ class StimulusView(QtGui.QAbstractItemView):
         if not self.hashIsDirty:
             return
 
+        self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
         x, y = 0, 0
         for row in range(self.model().rowCount(self.rootIndex())):
-            y += row*ROW_HEIGHT + COLUMN_SPACE
+            y += row*ROW_HEIGHT + ROW_SPACE
             x = 0
             for col in range(self.model().columnCountForRow(row)):
                 index = self.model().index(row, col, self.rootIndex())
@@ -50,6 +54,19 @@ class StimulusView(QtGui.QAbstractItemView):
                 if width is not None:
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
+
+
+    def splitAt(self, point):
+        wx = point.x() + self.horizontalScrollBar().value()
+        wy = point.y() + self.verticalScrollBar().value()
+
+        row = wy/(ROW_HEIGHT + ROW_SPACE)
+        if row > self.model().rowCount(self.rootIndex()) - 1:
+            row = self.model().rowCount(self.rootIndex()) - 1
+        for col in range(self.model().columnCountForRow(row)):
+            if self._rects[row][col].contains(wx, wy):
+                return (row, col)
+        return row, self.model().columnCountForRow(row)
 
     def isIndexHidden(self, index):
         return False
@@ -60,9 +77,9 @@ class StimulusView(QtGui.QAbstractItemView):
         return self.visualRectRC(index.row(),index.column())
 
     def visualRectRC(self, row, column):
-        if len(self._rects)-1 < row or len(self._rects[row])-1 < column:
-            print 'index out of boundsssss!!!'
-            return QtCore.QRect()
+        # if len(self._rects)-1 < row or len(self._rects[row])-1 < column:
+        #     print 'index out of boundsssss!!! desired ', row, column, 'actual size', len(self._rects), len(self._rects[row])
+        #     return QtCore.QRect()
         rect = self._rects[row][column]
         if rect.isValid():
             return QtCore.QRect(rect.x() - self.horizontalScrollBar().value(),
@@ -140,6 +157,8 @@ class StimulusView(QtGui.QAbstractItemView):
         painter = QtGui.QPainter(self.viewport())
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
 
+        self.calculateRects()
+
         painter.fillRect(event.rect(), background)
         painter.setPen(foreground)  
         painter.drawText(5,5, "Testing yo!")
@@ -154,9 +173,107 @@ class StimulusView(QtGui.QAbstractItemView):
                     option.rect = self.visualRectRC(row, col)
                     self.itemDelegate().paint(painter, option, index)
 
+        if self.dragline is not None:
+            pen = QtGui.QPen(QtCore.Qt.red)
+            painter.setPen(pen)
+            painter.drawLine(self.dragline)
+
+
     def moveCursor(self, cursorAction, modifiers):
         print "I done care about cursors!"
         return QtCore.QModelIndex()
+
+    def mousePressEvent(self, event):
+
+        index = self.indexAt(event.pos())
+        selected = self.model().data(index,QtCore.Qt.UserRole)
+        selected = cPickle.loads(str(selected.toString()))
+
+        ## convert to  a bytestream
+        bstream = cPickle.dumps(selected)
+        mimeData = QtCore.QMimeData()
+        mimeData.setData("application/x-component", bstream)
+
+        drag = QtGui.QDrag(self)
+        drag.setMimeData(mimeData)
+
+        # grab an image of the cell we are moving
+        
+        rect = self._rects[index.row()][index.column()]
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, rect)
+
+        # below makes the pixmap half transparent
+        painter = QtGui.QPainter(pixmap)
+        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+        painter.end()
+        
+        drag.setPixmap(pixmap)
+
+        drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+        drag.setPixmap(pixmap)
+
+        # if result: # == QtCore.Qt.MoveAction:
+            # self.model().removeRow(index.row())
+        self.model().removeComponent((index.row(), index.column()))
+        self.hashIsDirty = True
+        result = drag.start(QtCore.Qt.MoveAction)
+
+        # super(ProtocolView, self).mousePressEvent(event)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat("application/x-component"):
+            event.setDropAction(QtCore.Qt.MoveAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat("application/x-component"):
+            #find the nearest row break to cursor
+            # assume all rows same height
+
+            index = self.splitAt(event.pos())
+            if len(self._rects[index[0]])-1 < index[1]:
+                if index[1] == 0:
+                    # empty row
+                    x = 0
+                else:
+                    rect = self._rects[index[0]][index[1]-1]
+                    x = rect.x() + rect.width()
+            else:
+                rect = self._rects[index[0]][index[1]]
+                x = rect.x()
+                
+            y0 = index[0]*(ROW_HEIGHT + ROW_SPACE) + ROW_SPACE
+            y1 = y0 + ROW_HEIGHT
+
+            self.dragline = QtCore.QLine(x,y0,x,y1)          
+            self.viewport().update()
+
+            event.setDropAction(QtCore.Qt.MoveAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        self.dragline = None
+        data = event.mimeData()
+        bstream = data.retrieveData("application/x-component",
+            QtCore.QVariant.ByteArray)
+        selected = pickle.loads(bstream.toByteArray())
+
+        # row = self.rowAt(event.pos().y())
+        # col = self.columnAt(row, event.pos().x())
+        location = self.splitAt(event.pos())
+
+        self.model().insertComponent(selected, location)
+        self.hashIsDirty = True
+        self.viewport().update()
+
+        event.accept()
+
 
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
@@ -186,7 +303,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         # bring up separate window for component parameters
         component = index.data(QtCore.Qt.UserRole)
-        component = pickle.loads(str(component.toString()))
+        component = cPickle.loads(str(component.toString()))
         print parent, option, index, component
 
         if component is not None:
@@ -224,11 +341,13 @@ class ComponentEditor(QtGui.QDialog):
         super(ComponentEditor, self).__init__(parent)
 
         self._component = component
-        inputfield = QtGui.QLineEdit(component.__class__.__name__, self)
+        inputfield = QtGui.QLineEdit(str(component.intensity()), self)
         layout = QtGui.QHBoxLayout()
         layout.addWidget(inputfield)
         self.setLayout(layout)
         # self.show()
+
+        self.mapper = QtGui.QDataWidgetMapper(self)
 
     def sizeHint(self):
         return QtCore.QSize(300,400)
@@ -258,13 +377,13 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     stim = StimulusModel()
-    stim.addComponent(tone2)
-    stim.addComponent(tone1)
-    stim.addComponent(tone0)
+    stim.insertComponent(tone2)
+    stim.insertComponent(tone1)
+    stim.insertComponent(tone0)
 
-    stim.addComponent(tone4, (1,0))
-    stim.addComponent(tone5, (1,0))
-    stim.addComponent(tone3, (1,0))
+    stim.insertComponent(tone4, (1,0))
+    stim.insertComponent(tone5, (1,0))
+    stim.insertComponent(tone3, (1,0))
 
     viewer = StimulusView()
     viewer.setItemDelegate(ComponentDelegate())
