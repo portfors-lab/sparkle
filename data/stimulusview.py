@@ -55,7 +55,6 @@ class StimulusView(QtGui.QAbstractItemView):
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
 
-
     def splitAt(self, point):
         wx = point.x() + self.horizontalScrollBar().value()
         wy = point.y() + self.verticalScrollBar().value()
@@ -178,49 +177,51 @@ class StimulusView(QtGui.QAbstractItemView):
             painter.setPen(pen)
             painter.drawLine(self.dragline)
 
-
     def moveCursor(self, cursorAction, modifiers):
         print "I done care about cursors!"
         return QtCore.QModelIndex()
 
     def mousePressEvent(self, event):
+        if event.button() == 1:
+            index = self.indexAt(event.pos())
+            selected = self.model().data(index,QtCore.Qt.UserRole)
+            selected = cPickle.loads(str(selected.toString()))
 
-        index = self.indexAt(event.pos())
-        selected = self.model().data(index,QtCore.Qt.UserRole)
-        selected = cPickle.loads(str(selected.toString()))
+            ## convert to  a bytestream
+            bstream = cPickle.dumps(selected)
+            mimeData = QtCore.QMimeData()
+            mimeData.setData("application/x-component", bstream)
 
-        ## convert to  a bytestream
-        bstream = cPickle.dumps(selected)
-        mimeData = QtCore.QMimeData()
-        mimeData.setData("application/x-component", bstream)
+            drag = QtGui.QDrag(self)
+            drag.setMimeData(mimeData)
 
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
+            # grab an image of the cell we are moving
+            
+            rect = self._rects[index.row()][index.column()]
+            pixmap = QtGui.QPixmap()
+            pixmap = pixmap.grabWidget(self, rect)
 
-        # grab an image of the cell we are moving
-        
-        rect = self._rects[index.row()][index.column()]
-        pixmap = QtGui.QPixmap()
-        pixmap = pixmap.grabWidget(self, rect)
+            # below makes the pixmap half transparent
+            painter = QtGui.QPainter(pixmap)
+            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+            painter.end()
+            
+            drag.setPixmap(pixmap)
 
-        # below makes the pixmap half transparent
-        painter = QtGui.QPainter(pixmap)
-        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-        painter.end()
-        
-        drag.setPixmap(pixmap)
+            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+            drag.setPixmap(pixmap)
 
-        drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-        drag.setPixmap(pixmap)
+            # if result: # == QtCore.Qt.MoveAction:
+                # self.model().removeRow(index.row())
+            self.model().removeComponent((index.row(), index.column()))
+            self.hashIsDirty = True
+            result = drag.start(QtCore.Qt.MoveAction)
 
-        # if result: # == QtCore.Qt.MoveAction:
-            # self.model().removeRow(index.row())
-        self.model().removeComponent((index.row(), index.column()))
-        self.hashIsDirty = True
-        result = drag.start(QtCore.Qt.MoveAction)
-
-        # super(ProtocolView, self).mousePressEvent(event)
+        elif event.button() == 2:
+            index = self.indexAt(event.pos())
+            self.edit(index)
+            # super(StimulusView, self).mousePressEvent(event)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/x-component"):
@@ -245,7 +246,7 @@ class StimulusView(QtGui.QAbstractItemView):
             else:
                 rect = self._rects[index[0]][index[1]]
                 x = rect.x()
-                
+
             y0 = index[0]*(ROW_HEIGHT + ROW_SPACE) + ROW_SPACE
             y1 = y0 + ROW_HEIGHT
 
@@ -320,12 +321,13 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def setEditorData(self, editor, index):
         print 'Er, set editor data?'
-        component = index.data(QtCore.Qt.UserRole)
-        editor.setComponent(component)
+        # component = index.data(QtCore.Qt.UserRole)
+        # editor.setComponent(component)
 
     def setModelData(self, editor, model, index):
         print 'Set model Data!'
-        component = index.data()
+        # component = index.data()
+        editor.saveToObject()
         model.setData(index, editor.component())
 
     def commitAndCloseEditor(self):
@@ -334,16 +336,16 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         self.commitData.emit(editor)
         self.closeEditor.emit(editor)
 
-class ComponentEditor(QtGui.QDialog):
+class ComponentEditor(QtGui.QWidget):
     editingFinished = QtCore.pyqtSignal()
 
     def __init__(self, component, parent = None):
         super(ComponentEditor, self).__init__(parent)
 
         self._component = component
-        inputfield = QtGui.QLineEdit(str(component.intensity()), self)
+        self.inputfield = QtGui.QLineEdit(str(component.intensity()), self)
         layout = QtGui.QHBoxLayout()
-        layout.addWidget(inputfield)
+        layout.addWidget(self.inputfield)
         self.setLayout(layout)
         # self.show()
 
@@ -357,6 +359,9 @@ class ComponentEditor(QtGui.QDialog):
  
     def component(self):
         return self._component
+
+    def saveToObject(self):
+        self._component.setIntensity(int(self.inputfield.text()))
 
 if __name__ == "__main__":
     import sys

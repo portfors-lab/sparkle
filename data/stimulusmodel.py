@@ -46,6 +46,9 @@ class StimulusModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.SizeHintRole:
             component = self.segments[index.row()][index.column()]
             return component.duration() * PIXELS_PER_MS * 1000
+        elif role == 33:
+            component = self.segments[index.row()][index.column()]
+            return component
 
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
@@ -62,7 +65,8 @@ class StimulusModel(QtCore.QAbstractTableModel):
         self.segments[index[0]].pop(index[1])
 
     def setData(self, index, value):
-        print 'SET DATA MAN!'
+        print 'SET DATA MAN!', value.intensity()
+        self.segments[index.row()][index.column()] = value
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
