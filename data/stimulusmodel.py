@@ -111,7 +111,7 @@ class AbstractStimulusComponent(object):
         painter.drawRect(rect)
 
         # set text color
-        painter.setPen(QPen(Qt.black))
+        painter.setPen(QPen(Qt.black)) 
         text = 'cute ducks!'
         painter.drawText(5, 5, text)
 
@@ -127,6 +127,8 @@ class AbstractStimulusComponent(object):
     def setIntensity(self, intensity):
         self._intensity = intensity
 
+    def showEditor(self):
+        raise NotImplementedError
 
 class Tone(AbstractStimulusComponent):
     foo = None
