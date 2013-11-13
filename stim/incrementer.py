@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 from incrementer_form import Ui_IncrementInput
 
 class IncrementInput(QtGui.QWidget,Ui_IncrementInput):

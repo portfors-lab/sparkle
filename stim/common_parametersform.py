@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
-# Created: Tue Nov 12 14:20:43 2013
+# Created: Wed Nov 13 14:25:43 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -100,7 +100,7 @@ class Ui_ParameterWidget(object):
         font = QtGui.QFont()
         font.setPointSize(14)
         self.dur_spnbx.setFont(font)
-        self.dur_spnbx.setMinimum(100)
+        self.dur_spnbx.setMinimum(5)
         self.dur_spnbx.setMaximum(50000)
         self.dur_spnbx.setSingleStep(100)
         self.dur_spnbx.setProperty("value", 1000)

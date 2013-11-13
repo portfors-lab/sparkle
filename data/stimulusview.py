@@ -160,7 +160,7 @@ class StimulusView(QtGui.QAbstractItemView):
 
         painter.fillRect(event.rect(), background)
         painter.setPen(foreground)  
-        painter.drawText(5,5, "Testing yo!")
+        # painter.drawText(5,5, "Testing yo!")
 
         # actual painting of widget?
         for row in range(self.model().rowCount(self.rootIndex())):
@@ -178,7 +178,7 @@ class StimulusView(QtGui.QAbstractItemView):
             painter.drawLine(self.dragline)
 
     def moveCursor(self, cursorAction, modifiers):
-        print "I done care about cursors!"
+        # print "I done care about cursors!"
         return QtCore.QModelIndex()
 
     def mousePressEvent(self, event):
@@ -279,21 +279,12 @@ class StimulusView(QtGui.QAbstractItemView):
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
-        component = index.data()
-        # component.paint(painter, option.rect, option.palette, ComponentDelegate.ReadOnly)
-
-        image = QtGui.QImage("./ducklings.jpg)")
-        painter.drawImage(0,0,image)
+        component = index.data(QtCore.Qt.UserRole)
+        component = cPickle.loads(str(component.toString()))
 
         painter.drawRect(option.rect)
 
-        # set text color
-        painter.setPen(QtGui.QPen(QtCore.Qt.black))
-        value = index.data(QtCore.Qt.DisplayRole)
-        if value.isValid():
-            text = value.toString()
-            # print 'location', option.rect.x(), option.rect.y(), option.rect.width(), option.rect.height()
-            painter.drawText(option.rect, QtCore.Qt.AlignLeft, text)
+        component.paint(painter, option.rect, option.palette)
 
     def sizeHint(self, option, index):
         # calculate size by data component
@@ -305,63 +296,23 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         # bring up separate window for component parameters
         component = index.data(QtCore.Qt.UserRole)
         component = cPickle.loads(str(component.toString()))
-        print parent, option, index, component
+        # print parent, option, index, component
 
         if component is not None:
+            editor = component.showEditor()
 
-            editor = ComponentEditor(component)
-            # editor.exec_()
         else:
             print 'delegate data type', type(component)
-            editor = ComponentEditor(component)
+            raise Exception('UnknownDelegateType')
 
-        # editor = StarEditor(parent)
-        # editor.editingFinished.connect(self.commitAndCloseEditor)
         return editor
 
-    def setEditorData(self, editor, index):
-        print 'Er, set editor data?'
-        # component = index.data(QtCore.Qt.UserRole)
-        # editor.setComponent(component)
 
     def setModelData(self, editor, model, index):
-        print 'Set model Data!'
-        # component = index.data()
         editor.saveToObject()
+        # need to save over component object in stimulus model
         model.setData(index, editor.component())
 
-    def commitAndCloseEditor(self):
-        print 'comit and close editor'
-        editor = self.sender()
-        self.commitData.emit(editor)
-        self.closeEditor.emit(editor)
-
-class ComponentEditor(QtGui.QWidget):
-    editingFinished = QtCore.pyqtSignal()
-
-    def __init__(self, component, parent = None):
-        super(ComponentEditor, self).__init__(parent)
-
-        self._component = component
-        self.inputfield = QtGui.QLineEdit(str(component.intensity()), self)
-        layout = QtGui.QHBoxLayout()
-        layout.addWidget(self.inputfield)
-        self.setLayout(layout)
-        # self.show()
-
-        self.mapper = QtGui.QDataWidgetMapper(self)
-
-    def sizeHint(self):
-        return QtCore.QSize(300,400)
-
-    def setComponent(self, component):
-        print 'Editor recieved', component
- 
-    def component(self):
-        return self._component
-
-    def saveToObject(self):
-        self._component.setIntensity(int(self.inputfield.text()))
 
 if __name__ == "__main__":
     import sys

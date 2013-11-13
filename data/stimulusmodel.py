@@ -4,6 +4,8 @@ from PyQt4 import QtGui, QtCore
 
 from audiolab.tools.langtools import enum
 
+from audiolab.stim.tone_parameters import ToneParameterWidget
+
 PIXELS_PER_MS = 5
 
 
@@ -65,7 +67,6 @@ class StimulusModel(QtCore.QAbstractTableModel):
         self.segments[index[0]].pop(index[1])
 
     def setData(self, index, value):
-        print 'SET DATA MAN!', value.intensity()
         self.segments[index.row()][index.column()] = value
 
     def flags(self, index):
@@ -91,9 +92,9 @@ class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     _start_time = None
     _duration = None
-    _fs = None
-    _intensity = None
-    _risefall = None
+    _fs = 400000
+    _intensity = 20
+    _risefall = 0
 
     # def __init__(self):
     def duration(self):
@@ -102,30 +103,39 @@ class AbstractStimulusComponent(object):
     def setDuration(self, dur):
         self._duration = dur
 
-    def paint(self, painter, rect, palette, editMode):
+    def intensity(self):
+        return self._intensity
+
+    def setIntensity(self, intensity):
+        self._intensity = intensity
+
+    def samplerate(self):
+        return self._fs
+
+    def setSamplerate(self, fs):
+        self._fs = fs
+        
+    def risefall(self):
+        return self._risefall
+
+    def setRisefall(self, risefall):
+        self._risefall = risefall    
+
+    def paint(self, painter, rect, palette):
         painter.save()
 
-        image = QtGui.QImage("./ducklings.jpg)")
-        painter.drawImage(0,0,image)
-
-        painter.drawRect(rect)
+        image = QtGui.QImage("./ducklings.jpg")
+        painter.drawImage(rect,image)
 
         # set text color
-        painter.setPen(QPen(Qt.black)) 
-        text = 'cute ducks!'
-        painter.drawText(5, 5, text)
+        painter.setPen(QtGui.QPen(QtCore.Qt.black)) 
+        painter.drawText(rect, QtCore.Qt.AlignLeft, self.__class__.__name__)
 
         painter.restore()
 
     def sizeHint(self):
         width = self._duration * PIXELS_PER_MS*1000
         return QtCore.QSize(width, 50)
-
-    def intensity(self):
-        return self._intensity
-
-    def setIntensity(self, intensity):
-        self._intensity = intensity
 
     def showEditor(self):
         raise NotImplementedError
@@ -135,7 +145,17 @@ class Tone(AbstractStimulusComponent):
 
 class PureTone(Tone):
     name = "puretone"
-    frequency = None
+    _frequency = 5000
+
+    def frequency(self):
+        return self._frequency
+
+    def setFrequency(self, freq):
+        self._frequency = freq
+
+    def showEditor(self):
+        editor = ToneParameterWidget(self)
+        return editor
 
 class FMSweep(Tone):
     name = "fmsweep"
