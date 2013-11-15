@@ -5,7 +5,7 @@ import scipy.misc
 
 from audiolab.tools.langtools import enum
 
-from audiolab.stim.tone_parameters import ToneParameterWidget
+from audiolab.stim.tone_parameters import ToneParameterWidget, SilenceParameterWidget
 from audiolab.stim.vocal_parameters import VocalParameterWidget
 from audiolab.tools.audiotools import spectrogram
 
@@ -241,6 +241,15 @@ class Noise(AbstractStimulusComponent):
 
 class Silence(AbstractStimulusComponent):
     name = "silence"
+
+    def paint(self, painter, rect, palette):
+        mid = rect.y() + (rect.height()/2)
+        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
+
+    def showEditor(self):
+        editor = SilenceParameterWidget()
+        editor.setComponent(self)
+        return editor
 
 class Modulation(AbstractStimulusComponent):
     modulation_frequency = None

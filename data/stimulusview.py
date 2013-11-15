@@ -1,7 +1,5 @@
 import cPickle, pickle
 
-from audiolab.data.stimulusmodel import *
-
 from PyQt4 import QtGui, QtCore
 
 ROW_HEIGHT = 100
@@ -46,7 +44,7 @@ class StimulusView(QtGui.QAbstractItemView):
         self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
         x, y = 0, 0
         for row in range(self.model().rowCount(self.rootIndex())):
-            y += row*ROW_HEIGHT + ROW_SPACE
+            y = row*ROW_HEIGHT + row*ROW_SPACE
             x = 0
             for col in range(self.model().columnCountForRow(row)):
                 index = self.model().index(row, col, self.rootIndex())
@@ -248,7 +246,7 @@ class StimulusView(QtGui.QAbstractItemView):
                 rect = self._rects[index[0]][index[1]]
                 x = rect.x()
 
-            y0 = index[0]*(ROW_HEIGHT + ROW_SPACE) + ROW_SPACE
+            y0 = index[0]*(ROW_HEIGHT + ROW_SPACE)
             y1 = y0 + ROW_HEIGHT
 
             self.dragline = QtCore.QLine(x,y0,x,y1)          
@@ -317,6 +315,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
 if __name__ == "__main__":
     import sys
+    from audiolab.data.stimulusmodel import *
     app  = QtGui.QApplication(sys.argv)
 
     tone0 = PureTone()
@@ -336,6 +335,9 @@ if __name__ == "__main__":
     vocal0 = Vocalization()
     vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
 
+    silence0 = Silence()
+    silence0.setDuration(0.025)
+
     stim = StimulusModel()
     stim.insertComponent(tone2)
     stim.insertComponent(tone1)
@@ -343,8 +345,10 @@ if __name__ == "__main__":
 
     stim.insertComponent(tone4, (1,0))
     stim.insertComponent(tone5, (1,0))
-    stim.insertComponent(tone3, (1,0))
     stim.insertComponent(vocal0, (1,0))
+
+    stim.insertComponent(tone3, (2,0))
+    stim.insertComponent(silence0, (2,0))
 
     viewer = StimulusView()
     viewer.setItemDelegate(ComponentDelegate())

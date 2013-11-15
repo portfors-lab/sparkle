@@ -50,7 +50,7 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
 
     def saveToObject(self):
         self._component.setIntensity(self.common.intensityValue())
-        self._component.setFile(self.current_wav_file)
+        self._component.setFile(str(self.current_wav_file))
         # self._component.setDuration(self.common.durationValue())
         # self._component.setSamplerate(self.common.samplerateValue())
 
