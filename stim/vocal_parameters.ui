@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VocalParameterWidget</class>
+ <widget class="QWidget" name="VocalParameterWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>520</width>
+    <height>435</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="QLineEdit" name="wavrootdir_lnedt"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="wavrootdir_btn">
+       <property name="text">
+        <string>change</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QTreeView" name="filetree_view"/>
+      <widget class="QListView" name="filelist_view">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </widget>
+     <widget class="SpecWidget" name="spec_preview" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>150</height>
+       </size>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="ParameterWidget" name="common"/>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>parameterwidget</header>
+  </customwidget>
+  <customwidget>
+   <class>SpecWidget</class>
+   <extends>QWidget</extends>
+   <header>audiolab.plotting.mpl_spec_widget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>filelist_view</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>VocalParameterWidget</receiver>
+   <slot>wavfile_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>490</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>505</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filelist_view</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>VocalParameterWidget</receiver>
+   <slot>wavfile_selected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>288</x>
+     <y>79</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filetree_view</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>VocalParameterWidget</receiver>
+   <slot>wavdir_selected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>189</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-3</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wavrootdir_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>VocalParameterWidget</receiver>
+   <slot>browse_wavdirs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>430</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>526</x>
+     <y>138</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>wavfile_selected()</slot>
+  <slot>wavdir_selected()</slot>
+  <slot>browse_wavdirs()</slot>
+  <slot>wavfile_clicked()</slot>
+  <slot>folder_expanded()</slot>
+ </slots>
+</ui>

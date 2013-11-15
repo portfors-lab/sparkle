@@ -1,8 +1,8 @@
 import cPickle, pickle
-from PyQt4 import QtGui, QtCore
 
 from audiolab.data.stimulusmodel import *
 
+from PyQt4 import QtGui, QtCore
 
 ROW_HEIGHT = 100
 ROW_SPACE = 25
@@ -186,6 +186,7 @@ class StimulusView(QtGui.QAbstractItemView):
             index = self.indexAt(event.pos())
             selected = self.model().data(index,QtCore.Qt.UserRole)
             selected = cPickle.loads(str(selected.toString()))
+            # dataStream >> selected
 
             ## convert to  a bytestream
             bstream = cPickle.dumps(selected)
@@ -332,6 +333,9 @@ if __name__ == "__main__":
     tone5 = PureTone()
     tone5.setDuration(0.030)
 
+    vocal0 = Vocalization()
+    vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+
     stim = StimulusModel()
     stim.insertComponent(tone2)
     stim.insertComponent(tone1)
@@ -340,6 +344,7 @@ if __name__ == "__main__":
     stim.insertComponent(tone4, (1,0))
     stim.insertComponent(tone5, (1,0))
     stim.insertComponent(tone3, (1,0))
+    stim.insertComponent(vocal0, (1,0))
 
     viewer = StimulusView()
     viewer.setItemDelegate(ComponentDelegate())
@@ -347,5 +352,6 @@ if __name__ == "__main__":
     viewer.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
     viewer.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
     viewer.setModel(stim)
+    viewer.resize(500,400)
     viewer.show()
     app.exec_()

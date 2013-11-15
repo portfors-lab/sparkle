@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1158</width>
-    <height>653</height>
+    <width>1089</width>
+    <height>501</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,7 +70,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -124,12 +124,12 @@
             <item>
              <widget class="QStackedWidget" name="stackedWidget">
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="page">
                <layout class="QVBoxLayout" name="verticalLayout_6">
                 <item>
-                 <widget class="QWidget" name="widget" native="true"/>
+                 <widget class="ToneParameterWidget" name="widget" native="true"/>
                 </item>
                </layout>
               </widget>
@@ -1362,7 +1362,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1158</width>
+     <width>1089</width>
      <height>21</height>
     </rect>
    </property>
@@ -1577,6 +1577,12 @@
    <class>PSTWidget</class>
    <extends>QWidget</extends>
    <header>audiolab.plotting.custom_plots</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ToneParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>audiolab.stim.tone_parameters</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

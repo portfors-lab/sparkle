@@ -29,3 +29,6 @@ class ParameterWidget(QtGui.QWidget,Ui_ParameterWidget):
         self.dur_spnbx.setValue(component.duration()/self.tscale)
         self.risefall_spnbx.setValue(component.risefall()/self.tscale)
         self.aosr_spnbx.setValue(component.samplerate()/self.fscale)
+
+    def setDuration(self, duration):
+        self.dur_spnbx.setValue(duration/self.tscale)

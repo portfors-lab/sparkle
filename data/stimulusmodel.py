@@ -1,13 +1,22 @@
 import cPickle
+import os
 
-from PyQt4 import QtGui, QtCore
+import scipy.misc
 
 from audiolab.tools.langtools import enum
 
 from audiolab.stim.tone_parameters import ToneParameterWidget
+from audiolab.stim.vocal_parameters import VocalParameterWidget
+from audiolab.tools.audiotools import spectrogram
 
 PIXELS_PER_MS = 5
 
+from matplotlib import cm
+from PyQt4 import QtGui, QtCore
+
+# COLORTABLE=cm.get_cmap('jet')
+COLORTABLE = []
+for i in range(16): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
 
 class StimulusModel(QtCore.QAbstractTableModel):
     """Model to represent a unique stimulus, holds all relevant parameters"""
@@ -41,6 +50,12 @@ class StimulusModel(QtCore.QAbstractTableModel):
             # print '!!userrole!!'
             if len(self.segments[index.row()]) > index.column():
                 component = self.segments[index.row()][index.column()]
+                itemData = QtCore.QByteArray()
+                # dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+                # dataStream << component
+                # return dataStream
+                # if component.name == 'vocalization':
+                #     imagepickle = cPickle.dumps(component._image)
                 component = QtCore.QVariant(cPickle.dumps(component))
             else:
                 component = None
@@ -91,9 +106,9 @@ class AutoParameter():
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     _start_time = None
-    _duration = None
-    _fs = 400000
-    _intensity = 20
+    _duration = None # in seconds
+    _fs = 400000 # in Hz
+    _intensity = 20 # in dB SPL
     _risefall = 0
 
     # def __init__(self):
@@ -134,11 +149,12 @@ class AbstractStimulusComponent(object):
         painter.restore()
 
     def sizeHint(self):
-        width = self._duration * PIXELS_PER_MS*1000
+        width = self._duration * PIXELS_PER_MS * 1000
         return QtCore.QSize(width, 50)
 
     def showEditor(self):
         raise NotImplementedError
+
 
 class Tone(AbstractStimulusComponent):
     foo = None
@@ -154,8 +170,15 @@ class PureTone(Tone):
         self._frequency = freq
 
     def showEditor(self):
-        editor = ToneParameterWidget(self)
+        editor = ToneParameterWidget()
+        editor.setComponent(self)
         return editor
+
+    def paint(self, painter, rect, palette):
+
+        painter.drawText(rect.x()+5, rect.y()+12, rect.width()-5, rect.height()-12, QtCore.Qt.AlignLeft, "Pure Tone")
+        painter.fillRect(rect.x()+5, rect.y()+35, rect.width()-10, 20, QtCore.Qt.black)
+        painter.drawText(rect.x()+5, rect.y()+80, str(self._frequency/1000) + " kHz")
 
 class FMSweep(Tone):
     name = "fmsweep"
@@ -164,7 +187,55 @@ class FMSweep(Tone):
 
 class Vocalization(AbstractStimulusComponent):
     name = "vocalization"
-    filename = None
+    _filename = None
+    _browsedirs = [os.path.expanduser('~'), os.path.expanduser('~')]
+
+    def browsedir(self, index):
+        return self._browsedirs[index]
+
+    def setBrowseDir(self, browsedir, index):
+        self._browsedirs[index] = browsedir
+
+    def file(self):
+        return self._filename
+
+    def setFile(self, fname):
+        self._filename = fname
+        spec, f, bins, fs = spectrogram(fname)
+        print 'vocal dur ~ ', bins[-1]
+        import numpy as np
+        print np.amin(spec), np.amax(spec)
+        self._duration = bins[-1]
+
+        # width = self._duration * PIXELS_PER_MS * 1000
+        # self._image = QtGui.QImage(spec, width, 100, 7)
+
+        # self._spec = spec
+        # h,w = self._spec.shape
+        # image = QtGui.QImage(self._spec, w, h, QtGui.QImage.Format_Indexed8)
+
+        # self._image = QtGui.QImage(scipy.misc.toimage(spec))
+
+        # saving the spectrogram array makes ui VERY slow
+        # self._image = spec
+
+    def paint(self, painter, rect, palette):
+        super(Vocalization,self).paint(painter, rect, palette)
+        # print 'painting vocal'
+        # import numpy as np
+
+        # h,w = self._image.shape
+        # # image = QtGui.QImage(self._image.astype(np.uint8), w, h, QtGui.QImage.Format_Indexed8)
+        # image = QtGui.QImage(scipy.misc.toimage(self._image.astype(np.uint8), high= 15, low=0))
+
+        # image.setColorTable(COLORTABLE)
+        # # painter.drawImage(rect, image)
+        # painter.drawPixmap(rect, QtGui.QPixmap.fromImage(image))
+
+    def showEditor(self):
+        editor = VocalParameterWidget()
+        editor.setComponent(self)
+        return editor
 
 class Noise(AbstractStimulusComponent):
     name = "noise"
