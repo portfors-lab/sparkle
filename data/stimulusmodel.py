@@ -188,13 +188,12 @@ class FMSweep(Tone):
 class Vocalization(AbstractStimulusComponent):
     name = "vocalization"
     _filename = None
-    _browsedirs = [os.path.expanduser('~'), os.path.expanduser('~')]
+    _browsedir = os.path.expanduser('~')
+    def browsedir(self):
+        return self._browsedir
 
-    def browsedir(self, index):
-        return self._browsedirs[index]
-
-    def setBrowseDir(self, browsedir, index):
-        self._browsedirs[index] = browsedir
+    def setBrowseDir(self, browsedir):
+        self._browsedir = browsedir
 
     def file(self):
         return self._filename

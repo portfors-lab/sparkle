@@ -9,7 +9,6 @@ class ParameterWidget(QtGui.QWidget,Ui_ParameterWidget):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         self.tscale = 0.001 # display in ms
-        self.fscale = 1000 # display in kHz
 
     def intensityValue(self):
         return self.db_spnbx.value()
@@ -20,15 +19,12 @@ class ParameterWidget(QtGui.QWidget,Ui_ParameterWidget):
     def risefallValue(self):
         return self.risefall_spnbx.value()*self.tscale
 
-    def samplerateValue(self):
-        return self.aosr_spnbx.value()*self.fscale
 
     def setFields(self, component):
         """Set all the input fields to the values in the provided component"""
         self.db_spnbx.setValue(component.intensity())
         self.dur_spnbx.setValue(component.duration()/self.tscale)
         self.risefall_spnbx.setValue(component.risefall()/self.tscale)
-        self.aosr_spnbx.setValue(component.samplerate()/self.fscale)
 
     def setDuration(self, duration):
         self.dur_spnbx.setValue(duration/self.tscale)

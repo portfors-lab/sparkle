@@ -33,6 +33,7 @@ class SpecWidget(QtGui.QWidget):
             print u"Problem reading wav file"
             raise
         wavdata = wavdata.astype(float)
+        self.ax.clear()
         data = self.ax.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9),
                               pad_to=nfft*2)
         self.ax.axis('tight')

@@ -1,3 +1,5 @@
+from os.path import dirname
+
 from vocal_parameters_form import Ui_VocalParameterWidget
 
 from audiolab.tools.audiotools import spectrogram
@@ -18,11 +20,15 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
     def setComponent(self, component):
         self.common.setFields(component)
 
+        self.current_wav_file = component.file()
+        wav_parent_dir = dirname(self.current_wav_file)
+
         # set up wav file directory finder paths
         self.dirmodel = QtGui.QFileSystemModel(self)
         self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
         self.filetree_view.setModel(self.dirmodel)
-        self.filetree_view.setRootIndex(self.dirmodel.setRootPath(component.browsedir(0)))
+        self.filetree_view.setRootIndex(self.dirmodel.setRootPath(component.browsedir()))
+        self.filetree_view.setCurrentIndex(self.dirmodel.index(wav_parent_dir))
         self.filetree_view.hideColumn(1)
         self.filetree_view.hideColumn(2)
         self.filetree_view.header().setStretchLastSection(False)
@@ -31,14 +37,14 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         self.filemodel = QtGui.QFileSystemModel(self)
         self.filemodel.setFilter(QtCore.QDir.Files)
         self.filelist_view.setModel(self.filemodel)
-        self.filelist_view.setRootIndex(self.filemodel.setRootPath(component.browsedir(1)))
+        self.filelist_view.setRootIndex(self.filemodel.setRootPath(wav_parent_dir))
+        self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
 
-        self.current_wav_file = component.file()
         # spec, f, bins, fs = spectrogram(self.current_wav_file)
         # self.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
         self.spec_preview.update_file(self.current_wav_file)
 
-        self.wavrootdir_lnedt.setText(component.browsedir(0))
+        self.wavrootdir_lnedt.setText(component.browsedir())
 
         self._component = component
 
@@ -48,8 +54,7 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         # self._component.setDuration(self.common.durationValue())
         # self._component.setSamplerate(self.common.samplerateValue())
 
-        self._component.setBrowseDir(self.dirmodel.rootPath(),0)
-        self._component.setBrowseDir(self.filemodel.rootPath(),1)
+        self._component.setBrowseDir(self.dirmodel.rootPath())
 
     def component(self):
         return self._component

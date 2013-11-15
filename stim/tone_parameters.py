@@ -19,7 +19,6 @@ class ToneParameterWidget(QtGui.QWidget, Ui_ToneParameterWidget):
         self._component.setIntensity(self.common.intensityValue())
         self._component.setDuration(self.common.durationValue())
         self._component.setRisefall(self.common.risefallValue())
-        self._component.setSamplerate(self.common.samplerateValue())
 
     def component(self):
         return self._component
