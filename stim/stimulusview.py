@@ -8,6 +8,7 @@ ROW_SPACE = 25
 class StimulusView(QtGui.QAbstractItemView):
     hashIsDirty = False
     _rects = [[]]
+    _height = ROW_HEIGHT
     def __init__(self, parent=None):
         super(StimulusView, self).__init__(parent)
         self.horizontalScrollBar().setRange(0, 0)
@@ -15,6 +16,11 @@ class StimulusView(QtGui.QAbstractItemView):
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.dragline = None
+
+        self.setItemDelegate(ComponentDelegate())
+        self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked)
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
+        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
     def setModel(self, model):
         super(StimulusView, self).setModel(model)
@@ -52,6 +58,8 @@ class StimulusView(QtGui.QAbstractItemView):
                 if width is not None:
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
+
+        self._height = y+ROW_HEIGHT
 
     def splitAt(self, point):
         wx = point.x() + self.horizontalScrollBar().value()
@@ -274,6 +282,9 @@ class StimulusView(QtGui.QAbstractItemView):
 
         event.accept()
 
+    def sizeHint(self):
+        return QtCore.QSize(self.width(), self._height)
+
 
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
@@ -299,7 +310,6 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
         if component is not None:
             editor = component.showEditor()
-
         else:
             print 'delegate data type', type(component)
             raise Exception('UnknownDelegateType')
@@ -351,10 +361,7 @@ if __name__ == "__main__":
     stim.insertComponent(silence0, (2,0))
 
     viewer = StimulusView()
-    viewer.setItemDelegate(ComponentDelegate())
-    viewer.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked)
-    viewer.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
-    viewer.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+    
     viewer.setModel(stim)
     viewer.resize(500,400)
     viewer.show()
