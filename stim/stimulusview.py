@@ -325,7 +325,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
 if __name__ == "__main__":
     import sys
-    from audiolab.data.stimulusmodel import *
+    from audiolab.stim.stimulusmodel import *
     app  = QtGui.QApplication(sys.argv)
 
     tone0 = PureTone()

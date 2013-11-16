@@ -9,6 +9,10 @@ from audiolab.stim.tone_parameters import ToneParameterWidget, SilenceParameterW
 from audiolab.stim.vocal_parameters import VocalParameterWidget
 from audiolab.tools.audiotools import spectrogram
 
+import scipy.io.wavfile as wv
+# from matplotlib.mlab import specgram
+from pylab import specgram
+
 PIXELS_PER_MS = 5
 
 from matplotlib import cm
@@ -87,13 +91,6 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-# class TrackModel(QtCore.QAbstractListModel):
-
-#     def __init__(self, segments=[], parent = None):
-#         QtCore.QAbstractListModel.__init__(self, parent)
-#         self._segments = segments
-
-#     def data(self, index, role):
 
 class AutoParameter():
     """Hold information for parameter modification loop"""
@@ -200,36 +197,36 @@ class Vocalization(AbstractStimulusComponent):
 
     def setFile(self, fname):
         self._filename = fname
-        spec, f, bins, fs = spectrogram(fname)
-        print 'vocal dur ~ ', bins[-1]
-        import numpy as np
-        print np.amin(spec), np.amax(spec)
-        self._duration = bins[-1]
 
-        # width = self._duration * PIXELS_PER_MS * 1000
-        # self._image = QtGui.QImage(spec, width, 100, 7)
+        nfft=512
+        try:
+            sr, wavdata = wv.read(fname)
+        except:
+            print u"Problem reading wav file"
+            raise
+        wavdata = wavdata.astype(float)
+        Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
 
-        # self._spec = spec
-        # h,w = self._spec.shape
-        # image = QtGui.QImage(self._spec, w, h, QtGui.QImage.Format_Indexed8)
+        self._duration = float(len(wavdata))/sr
 
-        # self._image = QtGui.QImage(scipy.misc.toimage(spec))
-
-        # saving the spectrogram array makes ui VERY slow
-        # self._image = spec
 
     def paint(self, painter, rect, palette):
-        super(Vocalization,self).paint(painter, rect, palette)
-        # print 'painting vocal'
-        # import numpy as np
 
-        # h,w = self._image.shape
-        # # image = QtGui.QImage(self._image.astype(np.uint8), w, h, QtGui.QImage.Format_Indexed8)
-        # image = QtGui.QImage(scipy.misc.toimage(self._image.astype(np.uint8), high= 15, low=0))
+        nfft=512
+        try:
+            sr, wavdata = wv.read(self._filename)
+        except:
+            print u"Problem reading wav file"
+            raise
+        wavdata = wavdata.astype(float)
+        Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
 
-        # image.setColorTable(COLORTABLE)
-        # # painter.drawImage(rect, image)
-        # painter.drawPixmap(rect, QtGui.QPixmap.fromImage(image))
+        self._duration = float(len(wavdata))/sr
+
+        rows, cols, rgb = im.make_image().as_rgba_str()
+        image = QtGui.QImage(rgb, cols, rows, QtGui.QImage.Format_ARGB32)
+        pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(image))
+        painter.drawPixmap(rect, pixmap)
 
     def showEditor(self):
         editor = VocalParameterWidget()
