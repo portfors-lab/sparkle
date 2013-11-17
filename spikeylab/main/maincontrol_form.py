@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Nov 13 16:17:49 2013
+# Created: Sun Nov 17 00:56:13 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -251,38 +251,11 @@ class Ui_ControlWindow(object):
         self.page_3.setObjectName(_fromUtf8("page_3"))
         self.verticalLayout_7 = QtGui.QVBoxLayout(self.page_3)
         self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
-        self.horizontalLayout_6 = QtGui.QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
-        self.wavrootdir_lnedt = QtGui.QLineEdit(self.page_3)
-        self.wavrootdir_lnedt.setObjectName(_fromUtf8("wavrootdir_lnedt"))
-        self.horizontalLayout_6.addWidget(self.wavrootdir_lnedt)
-        self.wavrootdir_btn = QtGui.QPushButton(self.page_3)
-        self.wavrootdir_btn.setObjectName(_fromUtf8("wavrootdir_btn"))
-        self.horizontalLayout_6.addWidget(self.wavrootdir_btn)
-        self.verticalLayout_7.addLayout(self.horizontalLayout_6)
         self.splitter_2 = QtGui.QSplitter(self.page_3)
         self.splitter_2.setOrientation(QtCore.Qt.Vertical)
         self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
-        self.splitter = QtGui.QSplitter(self.splitter_2)
-        self.splitter.setOrientation(QtCore.Qt.Horizontal)
-        self.splitter.setObjectName(_fromUtf8("splitter"))
-        self.filetree_view = QtGui.QTreeView(self.splitter)
-        self.filetree_view.setObjectName(_fromUtf8("filetree_view"))
-        self.filelist_view = QtGui.QListView(self.splitter)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.filelist_view.sizePolicy().hasHeightForWidth())
-        self.filelist_view.setSizePolicy(sizePolicy)
-        self.filelist_view.setObjectName(_fromUtf8("filelist_view"))
-        self.spec_preview = ImageWidget(self.splitter_2)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.spec_preview.sizePolicy().hasHeightForWidth())
-        self.spec_preview.setSizePolicy(sizePolicy)
-        self.spec_preview.setMinimumSize(QtCore.QSize(0, 150))
-        self.spec_preview.setObjectName(_fromUtf8("spec_preview"))
+        self.exvocal = VocalParameterWidget(self.splitter_2)
+        self.exvocal.setObjectName(_fromUtf8("exvocal"))
         self.verticalLayout_7.addWidget(self.splitter_2)
         self.stackedWidget.addWidget(self.page_3)
         self.verticalLayout_9.addWidget(self.stackedWidget)
@@ -851,17 +824,13 @@ class Ui_ControlWindow(object):
 
         self.retranslateUi(ControlWindow)
         self.tab_group.setCurrentIndex(0)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
         QtCore.QObject.connect(self.actionSet_Scale, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_scale_dlg)
         QtCore.QObject.connect(self.actionShow_Data_display, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_display)
         QtCore.QObject.connect(self.actionShow_PSTH, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_psth)
         QtCore.QObject.connect(self.explore_stim_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.stackedWidget.setCurrentIndex)
-        QtCore.QObject.connect(self.filetree_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavdir_selected)
-        QtCore.QObject.connect(self.wavrootdir_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.browse_wavdirs)
-        QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), ControlWindow.wavfile_selected)
-        QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("clicked(QModelIndex)")), ControlWindow.wavfile_clicked)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -884,7 +853,6 @@ class Ui_ControlWindow(object):
         self.tunit_lbl7.setText(_translate("ControlWindow", "ms", None))
         self.label_9.setText(_translate("ControlWindow", "dB SPL", None))
         self.label_52.setText(_translate("ControlWindow", "Intensity", None))
-        self.wavrootdir_btn.setText(_translate("ControlWindow", "change", None))
         self.label_4.setText(_translate("ControlWindow", "History:", None))
         self.label_35.setText(_translate("ControlWindow", "Rep rate", None))
         self.label_39.setText(_translate("ControlWindow", "Reps", None))
@@ -968,7 +936,7 @@ class Ui_ControlWindow(object):
         self.actionShow_Data_display.setText(_translate("ControlWindow", "Show Data Display", None))
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
 
-from spikeylab.plotting.chacoplots import ImageWidget
-from spikeylab.stim.tone_parameters import ToneParameterWidget
+from spikeylab.stim.vocal_parameters import VocalParameterWidget
 from spikeylab.plotting.custom_plots import PSTWidget
+from spikeylab.stim.tone_parameters import ToneParameterWidget
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay

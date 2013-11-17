@@ -124,7 +124,7 @@
             <item>
              <widget class="QStackedWidget" name="stackedWidget">
               <property name="currentIndex">
-               <number>0</number>
+               <number>2</number>
               </property>
               <widget class="QWidget" name="page">
                <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -424,52 +424,11 @@
               <widget class="QWidget" name="page_3">
                <layout class="QVBoxLayout" name="verticalLayout_7">
                 <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_6">
-                  <item>
-                   <widget class="QLineEdit" name="wavrootdir_lnedt"/>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="wavrootdir_btn">
-                    <property name="text">
-                     <string>change</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
                  <widget class="QSplitter" name="splitter_2">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
                   </property>
-                  <widget class="QSplitter" name="splitter">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <widget class="QTreeView" name="filetree_view"/>
-                   <widget class="QListView" name="filelist_view">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                   </widget>
-                  </widget>
-                  <widget class="ImageWidget" name="spec_preview" native="true">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>150</height>
-                    </size>
-                   </property>
-                  </widget>
+                  <widget class="VocalParameterWidget" name="exvocal" native="true"/>
                  </widget>
                 </item>
                </layout>
@@ -1562,12 +1521,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ImageWidget</class>
-   <extends>QWidget</extends>
-   <header>spikeylab.plotting.chacoplots</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ProtocolDisplay</class>
    <extends>QWidget</extends>
    <header>spikeylab.plotting.protocoldisplay</header>
@@ -1583,6 +1536,12 @@
    <class>ToneParameterWidget</class>
    <extends>QWidget</extends>
    <header>spikeylab.stim.tone_parameters</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VocalParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>spikeylab.stim.vocal_parameters</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -1681,70 +1640,6 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>167</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>filetree_view</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>wavdir_selected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>143</x>
-     <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>844</x>
-     <y>352</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>wavrootdir_btn</sender>
-   <signal>clicked()</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>browse_wavdirs()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>351</x>
-     <y>156</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>880</x>
-     <y>259</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>filelist_view</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>wavfile_selected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>307</x>
-     <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>848</x>
-     <y>471</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>filelist_view</sender>
-   <signal>clicked(QModelIndex)</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>wavfile_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>307</x>
-     <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>851</x>
-     <y>550</y>
     </hint>
    </hints>
   </connection>

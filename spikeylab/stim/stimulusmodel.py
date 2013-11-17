@@ -224,7 +224,8 @@ class Vocalization(AbstractStimulusComponent):
         rows, cols, rgb = im.make_image().as_rgba_str()
         image = QtGui.QImage(rgb, cols, rows, QtGui.QImage.Format_ARGB32)
         pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(image))
-        painter.drawPixmap(rect, pixmap)
+        # Why is the rect not equal to the draw rect seen in GUI?????
+        painter.drawPixmap(rect.x(), rect.y(), rect.width()+25, rect.height()+6, pixmap)
 
     def showEditor(self):
         editor = VocalParameterWidget()

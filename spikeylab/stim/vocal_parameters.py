@@ -23,12 +23,23 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         self.current_wav_file = component.file()
         wav_parent_dir = dirname(self.current_wav_file)
 
+        self.setRootDirs(component.browsedir(), wav_parent_dir)
+
+        self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
+
+        # spec, f, bins, fs = spectrogram(self.current_wav_file)
+        # self.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
+        self.spec_preview.update_file(self.current_wav_file)
+
+        self._component = component
+
+    def setRootDirs(self, treeroot, listroot):
         # set up wav file directory finder paths
         self.dirmodel = QtGui.QFileSystemModel(self)
         self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
         self.filetree_view.setModel(self.dirmodel)
-        self.filetree_view.setRootIndex(self.dirmodel.setRootPath(component.browsedir()))
-        self.filetree_view.setCurrentIndex(self.dirmodel.index(wav_parent_dir))
+        self.filetree_view.setRootIndex(self.dirmodel.setRootPath(treeroot))
+        self.filetree_view.setCurrentIndex(self.dirmodel.index(listroot))
         self.filetree_view.hideColumn(1)
         self.filetree_view.hideColumn(2)
         self.filetree_view.header().setStretchLastSection(False)
@@ -37,16 +48,15 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         self.filemodel = QtGui.QFileSystemModel(self)
         self.filemodel.setFilter(QtCore.QDir.Files)
         self.filelist_view.setModel(self.filemodel)
-        self.filelist_view.setRootIndex(self.filemodel.setRootPath(wav_parent_dir))
-        self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
+        self.filelist_view.setRootIndex(self.filemodel.setRootPath(listroot))
 
-        # spec, f, bins, fs = spectrogram(self.current_wav_file)
-        # self.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
-        self.spec_preview.update_file(self.current_wav_file)
+        self.wavrootdir_lnedt.setText(treeroot)
 
-        self.wavrootdir_lnedt.setText(component.browsedir())
+    def getTreeRoot(self):
+        return self.dirmodel.rootPath()
 
-        self._component = component
+    def getListRoot(self):
+        return self.filemodel.rootPath()
 
     def saveToObject(self):
         self._component.setIntensity(self.common.intensityValue())
@@ -60,7 +70,7 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         return self._component
 
     def browse_wavdirs(self):
-        wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir)
+        wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir_lnedt.text())
         self.filetree_view.setRootIndex(self.dirmodel.setRootPath(wavdir))
         self.filelist_view.setRootIndex(self.filemodel.setRootPath(wavdir))
         self.wavrootdir_lnedt.setText(wavdir)

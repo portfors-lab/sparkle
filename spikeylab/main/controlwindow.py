@@ -58,8 +58,8 @@ class ControlWindow(QtGui.QMainWindow):
         fname = os.path.join(appdir, INPUTSFNAME)
 
         savedict = {}
-        savedict['wavrootdir'] = self.ui.wavrootdir_lnedt.text()
-        savedict['filelistdir'] = self.filemodel.rootPath()
+        savedict['wavrootdir'] = self.ui.exvocal.getTreeRoot()
+        savedict['filelistdir'] = self.ui.exvocal.getListRoot()
         savedict['threshold'] = self.ui.thresh_lnedt.text()
         savedict['binsz'] = self.ui.binsz_lnedt.text()
         savedict['aisr'] = self.ui.aisr_spnbx.value()
@@ -111,8 +111,6 @@ class ControlWindow(QtGui.QMainWindow):
         # self.ui.extone_risefall_spnbx.setValue(inputsdict.get('extone_risefall', 0))
         # self.ui.extone_aosr_spnbx.setValue(inputsdict.get('extone_aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
-
-        self.ui.wavrootdir_lnedt.setText(self.wavrootdir)
 
     def closeEvent(self,event):
         self.save_inputs()

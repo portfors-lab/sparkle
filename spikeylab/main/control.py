@@ -62,15 +62,7 @@ class MainWindow(ControlWindow):
         self.set_plot_thresh()
 
         # set up wav file directory finder paths
-        self.dirmodel = QtGui.QFileSystemModel(self)
-        self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
-        self.ui.filetree_view.setModel(self.dirmodel)
-        self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(self.wavrootdir))
-
-        self.filemodel = QtGui.QFileSystemModel(self)
-        self.filemodel.setFilter(QtCore.QDir.Files)
-        self.ui.filelist_view.setModel(self.filemodel)
-        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(self.filelistdir))
+        self.ui.exvocal.setRootDirs(self.wavrootdir, self.filelistdir)
 
         # always show plots on load
         self.ui.plot_dock.setVisible(True)
