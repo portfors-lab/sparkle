@@ -6,12 +6,14 @@
 Welcome to spikeylab's documentation!
 =====================================
 
-
-
-Statistical Tools
+User Guide
 =================
+:doc:`Instructions for use <guide>`
 
-:doc:`Spike Stats <tools>`
+Programming Reference
+=====================
+:doc:`Interface API <ref/api>`
+
 
 Indices and tables
 ==================
