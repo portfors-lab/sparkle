@@ -27,6 +27,7 @@ class StimulusModel(QtCore.QAbstractTableModel):
         self.nreps = 0
         # 2D array of simulus components track number x component number
         self.segments = segments
+        # add an empty place to place components into new track
         auto_params = []
 
     def headerData(self, section, orientation, role):
@@ -80,8 +81,19 @@ class StimulusModel(QtCore.QAbstractTableModel):
         else:
             self.segments[index[0]].insert(index[1], comp)
 
+        if len(self.segments[-1]) > 0:
+            self.segments.append([])
+
     def removeComponent(self, index):
         self.segments[index[0]].pop(index[1])
+        # remove if track is now empty - except always have one empty track to add to
+        if len(self.segments[index[0]]) == 0:
+            self.segments.pop(index[0])
+
+            # now add an empty row back onto end to allow 
+            # placing widgets in new track
+            if len(self.segments[-1]) > 0:
+                self.segments.append([])
 
     def setData(self, index, value):
         self.segments[index.row()][index.column()] = value

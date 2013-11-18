@@ -13,7 +13,7 @@ class StimulusEditor(QtGui.QWidget):
 
 if __name__ == "__main__":
     import sys
-    from spikeylab.data.stimulusmodel import *
+    from spikeylab.stim.stimulusmodel import *
     app  = QtGui.QApplication(sys.argv)
 
     tone0 = PureTone()
@@ -31,7 +31,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    # vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
 
     silence0 = Silence()
     silence0.setDuration(0.025)

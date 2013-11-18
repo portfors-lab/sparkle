@@ -191,6 +191,8 @@ class StimulusView(QtGui.QAbstractItemView):
     def mousePressEvent(self, event):
         if event.button() == 1:
             index = self.indexAt(event.pos())
+            if not index.isValid():
+                return
             selected = self.model().data(index,QtCore.Qt.UserRole)
             selected = cPickle.loads(str(selected.toString()))
             # dataStream >> selected
