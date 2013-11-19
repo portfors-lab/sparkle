@@ -124,12 +124,12 @@
             <item>
              <widget class="QStackedWidget" name="stackedWidget">
               <property name="currentIndex">
-               <number>2</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="page">
                <layout class="QVBoxLayout" name="verticalLayout_6">
                 <item>
-                 <widget class="ToneParameterWidget" name="widget" native="true"/>
+                 <widget class="ToneParameterWidget" name="extone" native="true"/>
                 </item>
                </layout>
               </widget>
@@ -607,7 +607,7 @@
              </widget>
             </item>
             <item row="1" column="4">
-             <widget class="QLabel" name="funit_lbl3">
+             <widget class="QLabel" name="funit_lbl_3">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -778,7 +778,7 @@
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="tunit_lbl4">
+             <widget class="QLabel" name="tunit_lbl_4">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -791,7 +791,7 @@
              </widget>
             </item>
             <item row="0" column="5">
-             <widget class="QLabel" name="tunit_lbl5">
+             <widget class="QLabel" name="tunit_lbl_3">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -831,58 +831,6 @@
               </property>
               <property name="text">
                <string>reps/s</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_17">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Gen. Sample rate</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="4">
-             <widget class="QSpinBox" name="aosr_spnbx">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="minimum">
-               <number>10</number>
-              </property>
-              <property name="maximum">
-               <number>1000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
-              </property>
-              <property name="value">
-               <number>100</number>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="5">
-             <widget class="QLabel" name="funit_lbl4">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>kHz</string>
               </property>
              </widget>
             </item>
@@ -1163,13 +1111,13 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="funit_lbl0">
+           <widget class="QLabel" name="funit_lbl_2">
             <property name="text">
              <string>kHz</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_10">
             <property name="font">
              <font>
@@ -1181,7 +1129,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QSpinBox" name="windowsz_spnbx">
             <property name="font">
              <font>
@@ -1202,14 +1150,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="tunit_lbl1">
+          <item row="2" column="2">
+           <widget class="QLabel" name="tunit_lbl">
             <property name="text">
              <string>ms</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_12">
             <property name="font">
              <font>
@@ -1221,14 +1169,14 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
+          <item row="3" column="2">
            <widget class="QLabel" name="label_13">
             <property name="text">
              <string>mV</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QLineEdit" name="thresh_lnedt">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1243,7 +1191,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_43">
             <property name="font">
              <font>
@@ -1255,7 +1203,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="4" column="1">
            <widget class="QLineEdit" name="binsz_lnedt">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1270,10 +1218,44 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="tunit_lbl0">
+          <item row="4" column="2">
+           <widget class="QLabel" name="tunit_lbl_2">
             <property name="text">
              <string>ms</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="aosr_spnbx">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="maximum">
+             <number>500</number>
+            </property>
+            <property name="value">
+             <number>400</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Gen. Sample rate</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="funit_lbl">
+            <property name="text">
+             <string>kHz</string>
             </property>
            </widget>
           </item>

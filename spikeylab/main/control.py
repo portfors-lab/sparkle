@@ -112,11 +112,11 @@ class MainWindow(ControlWindow):
                                              nreps=nreps, binsz=binsz)
 
             if self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
-                f = self.ui.extone_freq_spnbx.value()*self.fscale
-                gen_rate = self.ui.extone_aosr_spnbx.value()*self.fscale
-                dur = self.ui.extone_dur_spnbx.value()*self.tscale
-                db = self.ui.extone_db_spnbx.value()
-                rft = self.ui.extone_risefall_spnbx.value()*self.tscale
+                f = self.ui.extone.freq_spnbx.value()*self.fscale
+                gen_rate = self.ui.aosr_spnbx.value()*self.fscale
+                dur = self.ui.extone.durationValue()
+                db = self.ui.extone.intensityValue()
+                rft = self.ui.extone.risefallValue()
                 
                 tone, timevals = self.acqmodel.set_tone(f,db,dur,rft,gen_rate)
 
@@ -321,14 +321,14 @@ class MainWindow(ControlWindow):
         if self.fscale == 1000:
             # better way to do this than eval?
             for i in range(nf_lbls):
-                lbl_str = "self.ui.funit_lbl" + str(i) + ".setText(u'kHz')"
+                lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'kHz')"
                 try:
                     eval(lbl_str)
                 except:
                     print "trouble with command: ", lbl_str
         elif self.fscale == 1:
             for i in range(nf_lbls):
-                lbl_str = "self.ui.funit_lbl" + str(i) + ".setText(u'Hz')"
+                lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'Hz')"
                 try:
                     eval(lbl_str)
                 except:
@@ -339,14 +339,14 @@ class MainWindow(ControlWindow):
             
         if self.tscale == 0.001:
             for i in range(nt_lbls):
-                lbl_str = "self.ui.tunit_lbl" + str(i) + ".setText(u'ms')"
+                lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u'ms')"
                 try:
                     eval(lbl_str)
                 except:
                     print "trouble with command: ", lbl_str
         elif self.tscale == 1:
             for i in range(nt_lbls):
-                lbl_str = "self.ui.tunit_lbl" + str(i) + ".setText(u's')"
+                lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u's')"
                 try:
                     eval(lbl_str)
                 except:

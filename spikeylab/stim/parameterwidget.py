@@ -10,6 +10,10 @@ class ParameterWidget(QtGui.QWidget,Ui_ParameterWidget):
         self.setupUi(self)
         self.tscale = 0.001 # display in ms
 
+    def setScale(self, scale):
+        self.tscale = scale
+        # should also set labels!!!
+
     def intensityValue(self):
         return self.db_spnbx.value()
 
@@ -19,6 +23,13 @@ class ParameterWidget(QtGui.QWidget,Ui_ParameterWidget):
     def risefallValue(self):
         return self.risefall_spnbx.value()*self.tscale
 
+    def setField(self, **field):
+        if 'intensity' in field:
+            self.db_spnbx.setValue(field['intensity'])
+        if 'duration' in field:
+            self.dur_spnbx.setValue(field['duration']/self.tscale)
+        if 'risefall' in field:
+            self.risefall_spnbx.setValue(field['risefall']/self.tscale)
 
     def setFields(self, component):
         """Set all the input fields to the values in the provided component"""

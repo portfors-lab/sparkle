@@ -20,8 +20,26 @@ class ToneParameterWidget(QtGui.QWidget, Ui_ToneParameterWidget):
         self._component.setDuration(self.common.durationValue())
         self._component.setRisefall(self.common.risefallValue())
 
+    def intensityValue(self):
+        return self.common.intensityValue()
+
+    def durationValue(self):
+        return self.common.durationValue()
+
+    def risefallValue(self):
+        return self.common.risefallValue()
+
     def component(self):
         return self._component
+
+    def setIntensity(self, db):
+        self.common.setField(intensity=db)
+
+    def setRisefall(self, rf):
+        self.common.setField(risefall=rf)
+
+    def setDuration(self, dur):
+        self.common.setField(duration=dur)
 
 
 class SilenceParameterWidget(QtGui.QWidget):

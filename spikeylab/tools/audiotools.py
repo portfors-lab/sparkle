@@ -75,7 +75,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
         print(amp)
 
         if VERBOSE:
-            print("current dB: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, freq/1000, amp))
+            print("current dB: {}, attenuation: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, atten, freq/1000, amp))
             print("cal dB: {}, V at cal dB: {}".format(caldB, v_at_caldB))
 
         rf_npts = risefall * samplerate
