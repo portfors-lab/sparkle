@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Sun Nov 17 00:56:13 2013
+# Created: Tue Nov 19 13:48:42 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -745,7 +745,7 @@ class Ui_ControlWindow(object):
         self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
         self.verticalLayout_10 = QtGui.QVBoxLayout(self.dockWidgetContents_2)
         self.verticalLayout_10.setObjectName(_fromUtf8("verticalLayout_10"))
-        self.psth = PSTWidget(self.dockWidgetContents_2)
+        self.psth = PSTHWidget(self.dockWidgetContents_2)
         self.psth.setObjectName(_fromUtf8("psth"))
         self.verticalLayout_10.addWidget(self.psth)
         self.gridLayout_9 = QtGui.QGridLayout()
@@ -937,6 +937,6 @@ class Ui_ControlWindow(object):
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
 
 from spikeylab.stim.vocal_parameters import VocalParameterWidget
-from spikeylab.plotting.custom_plots import PSTWidget
+from spikeylab.plotting.custom_plots import PSTHWidget
 from spikeylab.stim.tone_parameters import ToneParameterWidget
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay

@@ -156,10 +156,6 @@ class AbstractStimulusComponent(object):
 
         painter.restore()
 
-    # def sizeHint(self):
-    #     width = self._duration * PIXELS_PER_MS * 1000
-    #     return QtCore.QSize(width, 50)
-
     def showEditor(self):
         raise NotImplementedError
 

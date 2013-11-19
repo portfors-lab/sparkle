@@ -65,6 +65,9 @@ class BaseWidget(QtGui.QWidget):
     def clear_data(self, *args, **kwargs):
         self.traits.clear_data(*args, **kwargs)
 
+    def sizeHint(self):
+        return QtCore.QSize(500, 300)
+
 class FFTWidget(BaseWidget):
     def _create_plotter(self):
         return FFTPlotter()
@@ -139,7 +142,7 @@ class ChartWidget(BaseWidget):
     def set_windowsize(self, winsz):
         self.traits.set_windowsize(winsz)
 
-class PSTWidget(BaseWidget):
+class PSTHWidget(BaseWidget):
     def _create_plotter(self):
         return PSTPlotter()
 
@@ -190,7 +193,7 @@ class PSTPlotter(HasTraits):
         self.bar_width = bins[0]*1.5
         self.ax_zoom_tool.set_xdomain((0, bins[-1]))
 
-    def append_data(self, bins, repnum):
+    def append_data(self, bins, repnum=None):
         """Adds one to each bin index in list"""
         d = self.pst_data.get_data('spikecounts')
         for b in bins:
@@ -484,7 +487,7 @@ if __name__ == '__main__':
     # spec_plot.update_data(spec, xaxis=bins, yaxis=f)
     # spec_plot.show()
 
-    psth = PSTWidget()
+    psth = PSTHWidget()
     psth.set_bins(range(10))
     psth.append_data([0, 1, 1, 1, 3, 4, 4,9,9,9,9,9, 7], 0)
     psth.resize(800, 400)

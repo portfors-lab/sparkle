@@ -1366,7 +1366,7 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_10">
      <item>
-      <widget class="PSTWidget" name="psth" native="true"/>
+      <widget class="PSTHWidget" name="psth" native="true"/>
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout_9">
@@ -1527,7 +1527,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PSTWidget</class>
+   <class>PSTHWidget</class>
    <extends>QWidget</extends>
    <header>spikeylab.plotting.custom_plots</header>
    <container>1</container>

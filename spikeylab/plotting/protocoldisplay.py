@@ -100,6 +100,7 @@ if __name__ == "__main__":
     import numpy as np
     import spikeylab.tools.audiotools as audiotools
     import scipy.io.wavfile as wv
+    import test.sample as sample
     from scipy.io import loadmat
 
     app = QtGui.QApplication(sys.argv)
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     plot.resize(800, 400)
     plot.show()
 
-    sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
+    sylpath = sample.samplewav()
     spec, f, bins, fs = audiotools.spectrogram(sylpath)
 
     plot.update_spec(spec, xaxis=bins, yaxis=f)
