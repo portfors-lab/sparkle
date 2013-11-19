@@ -21,15 +21,20 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         self.common.setFields(component)
 
         self.current_wav_file = component.file()
-        wav_parent_dir = dirname(self.current_wav_file)
+        if self.current_wav_file is not None:
+            wav_parent_dir = dirname(self.current_wav_file)
+        else:
+            wav_parent_dir = component.browsedir()
 
         self.setRootDirs(component.browsedir(), wav_parent_dir)
 
-        self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
+        if self.current_wav_file is not None:
 
-        # spec, f, bins, fs = spectrogram(self.current_wav_file)
-        # self.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
-        self.spec_preview.update_file(self.current_wav_file)
+            self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
+
+            # spec, f, bins, fs = spectrogram(self.current_wav_file)
+            # self.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
+            self.spec_preview.update_file(self.current_wav_file)
 
         self._component = component
 

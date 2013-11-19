@@ -13,7 +13,7 @@ __*__
 *.pyc
 
 # temp folder for testing
-test/unit_test/tmp/
+tmp/
 
 # build files
 /doc/_build/

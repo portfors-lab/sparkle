@@ -2,8 +2,12 @@ import cPickle, pickle
 
 from PyQt4 import QtGui, QtCore
 
+from spikeylab.stim.component_label import ComponentTemplateLabel
 ROW_HEIGHT = 100
 ROW_SPACE = 25
+
+PIXELS_PER_MS = 5
+GRID_MS = 25
 
 class StimulusView(QtGui.QAbstractItemView):
     """View for editing stimulus components"""
@@ -55,7 +59,8 @@ class StimulusView(QtGui.QAbstractItemView):
             x = 0
             for col in range(self.model().columnCountForRow(row)):
                 index = self.model().index(row, col, self.rootIndex())
-                width = self.model().data(index, QtCore.Qt.SizeHintRole)
+                duration = self.model().data(index, QtCore.Qt.SizeHintRole)
+                width = duration * PIXELS_PER_MS * 1000
                 if width is not None:
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
@@ -78,14 +83,13 @@ class StimulusView(QtGui.QAbstractItemView):
         return False
 
     def visualRect(self, index):
-    #     if len(self._rects[index.row()]) -1 < index.column():
-    #         return QtCore.QRect()
+        if len(self._rects[index.row()]) -1 < index.column() or index.row() == -1:
+            #Er, so I don't know why this was getting called with index -1
+            return QtCore.QRect()
+    
         return self.visualRectRC(index.row(),index.column())
 
     def visualRectRC(self, row, column):
-        # if len(self._rects)-1 < row or len(self._rects[row])-1 < column:
-        #     print 'index out of boundsssss!!! desired ', row, column, 'actual size', len(self._rects), len(self._rects[row])
-        #     return QtCore.QRect()
         rect = self._rects[row][column]
         if rect.isValid():
             return QtCore.QRect(rect.x() - self.horizontalScrollBar().value(),
@@ -155,7 +159,11 @@ class StimulusView(QtGui.QAbstractItemView):
         option = self.viewOptions()
         state = option.state
 
-        background = option.palette.base()
+        if self.parentWidget() is not None:
+            background = self.parentWidget().palette().color(1)
+        else:
+            background = option.palette.base()
+
         foreground = QtGui.QPen(option.palette.color(QtGui.QPalette.WindowText))
         textPen = QtGui.QPen(option.palette.color(QtGui.QPalette.Text))
         highlightedPen = QtGui.QPen(option.palette.color(QtGui.QPalette.HighlightedText))
@@ -165,9 +173,17 @@ class StimulusView(QtGui.QAbstractItemView):
 
         self.calculateRects()
 
-        painter.fillRect(event.rect(), background)
+        viewrect = event.rect()
+        painter.fillRect(viewrect, background)
         painter.setPen(foreground)  
-        # painter.drawText(5,5, "Testing yo!")
+
+        # draw grid lines
+        nlines = (viewrect.width()/PIXELS_PER_MS)/GRID_MS
+        y0 = viewrect.y()
+        y1 = viewrect.y()+viewrect.height()
+        for iline in range(nlines):
+            x = iline * GRID_MS * PIXELS_PER_MS
+            painter.drawLine(x, y0, x, y1)
 
         # actual painting of widget?
         for row in range(self.model().rowCount(self.rootIndex())):
@@ -189,23 +205,19 @@ class StimulusView(QtGui.QAbstractItemView):
         return QtCore.QModelIndex()
 
     def mousePressEvent(self, event):
-        if event.button() == 1:
+        if event.button() == QtCore.Qt.LeftButton:
             index = self.indexAt(event.pos())
             if not index.isValid():
                 return
             selected = self.model().data(index,QtCore.Qt.UserRole)
-            selected = cPickle.loads(str(selected.toString()))
-            # dataStream >> selected
 
-            ## convert to  a bytestream
-            bstream = cPickle.dumps(selected)
             mimeData = QtCore.QMimeData()
-            mimeData.setData("application/x-component", bstream)
+            mimeData.setData("application/x-component", selected)
 
             drag = QtGui.QDrag(self)
             drag.setMimeData(mimeData)
 
-            # grab an image of the cell we are moving
+            # grab an image of the cell  we are moving
             
             rect = self._rects[index.row()][index.column()]
             pixmap = QtGui.QPixmap()
@@ -228,7 +240,7 @@ class StimulusView(QtGui.QAbstractItemView):
             self.hashIsDirty = True
             result = drag.start(QtCore.Qt.MoveAction)
 
-        elif event.button() == 2:
+        elif event.button() == QtCore.Qt.RightButton:
             index = self.indexAt(event.pos())
             self.edit(index)
             # super(StimulusView, self).mousePressEvent(event)
@@ -269,17 +281,21 @@ class StimulusView(QtGui.QAbstractItemView):
             event.ignore()
 
     def dropEvent(self, event):
+
         self.dragline = None
         data = event.mimeData()
-        bstream = data.retrieveData("application/x-component",
-            QtCore.QVariant.ByteArray)
-        selected = pickle.loads(bstream.toByteArray())
+        stream = data.retrieveData("application/x-component",
+            QtCore.QVariant.String)
+        component = cPickle.loads(str(stream.toString()))
 
-        # row = self.rowAt(event.pos().y())
-        # col = self.columnAt(row, event.pos().x())
         location = self.splitAt(event.pos())
 
-        self.model().insertComponent(selected, location)
+        self.model().insertComponent(component, location)
+
+        if isinstance(event.source(), ComponentTemplateLabel):
+            index = self.model().index(location[0], location[1])
+            self.edit(index)
+
         self.hashIsDirty = True
         self.viewport().update()
 
@@ -346,8 +362,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    # vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
-    vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    # vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
 
     silence0 = Silence()
     silence0.setDuration(0.025)
