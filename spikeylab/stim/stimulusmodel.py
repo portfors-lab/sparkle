@@ -147,7 +147,7 @@ class AbstractStimulusComponent(object):
     def paint(self, painter, rect, palette):
         painter.save()
 
-        image = QtGui.QImage("./ducklings.jpg")
+        image = QtGui.QImage("./default.jpg")
         painter.drawImage(rect,image)
 
         # set text color

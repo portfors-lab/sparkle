@@ -31,16 +31,12 @@ class ProtocolDisplay(QtGui.QWidget):
         splitternw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
-        # splitternw.addWidget(self.spec_plot)
-        # splitternw.addWidget(self.signal_plot)
-        # splittersw.addWidget(splitternw)
         splittersw.addWidget(self.spec_plot)
         splittersw.addWidget(self.spiketrace_plot)
         splitterse.addWidget(splittersw)
         splitterse.addWidget(self.fft_plot)
 
         # set inital sizes
-        # splitternw.setSizes([100])
         splittersw.setSizes([100,500])
         splitterse.setSizes([500,100])
 
@@ -48,7 +44,6 @@ class ProtocolDisplay(QtGui.QWidget):
         layout.setContentsMargins(0,0,0,0)
         layout.addWidget(splitterse)
         self.setLayout(layout)
-        # self.setGeometry(0,0,500,500)
 
     def update_spec(self, *args, **kwargs):
         self.spec_plot.update_data(*args, **kwargs)
@@ -57,7 +52,6 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot.update_data(*args, **kwargs)
 
     def update_spiketrace(self, xdata, ydata):
-        # self.spiketrace_plot.update_data(*args, **kwargs)
         self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='response')
         self.spiketrace_plot.update_data(ydata, datakey='response', axeskey='response')
 
@@ -90,10 +84,6 @@ class ProtocolDisplay(QtGui.QWidget):
 
     def sizeHint(self):
         return QtCore.QSize(500,300)
-
-    # def resizeEvent(self,event):
-    #     sz = event.size()
-    #     self.item.setGeometry(QtCore.QRectF(0,0,sz.width(), sz.height()))
 
 if __name__ == "__main__":
     import random, time, os

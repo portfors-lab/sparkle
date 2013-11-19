@@ -14,6 +14,7 @@ import test.sample as sample
 PAUSE = 0.5
 
 class TestChacoPlots():
+    """ Run through plotting data, and make sure no errors occur"""
 
     def setUp(self):
         self.app = QApplication(sys.argv)
