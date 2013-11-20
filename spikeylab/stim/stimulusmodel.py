@@ -102,6 +102,7 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
+    # def isSelected(self, index):
 
 class AutoParameter():
     """Hold information for parameter modification loop"""

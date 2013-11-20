@@ -9,6 +9,10 @@ ROW_SPACE = 25
 PIXELS_PER_MS = 5
 GRID_MS = 25
 
+#Enums
+BUILDMODE = 0
+AUTOPARAMMODE = 1
+
 class StimulusView(QtGui.QAbstractItemView):
     """View for editing stimulus components"""
     hashIsDirty = False
@@ -26,6 +30,8 @@ class StimulusView(QtGui.QAbstractItemView):
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+
+        self.mode = BUILDMODE
 
     def setModel(self, model):
         super(StimulusView, self).setModel(model)
@@ -195,6 +201,16 @@ class StimulusView(QtGui.QAbstractItemView):
                     option.rect = self.visualRectRC(row, col)
                     self.itemDelegate().paint(painter, option, index)
 
+        # highlight selected components
+        region = self.visualRegionForSelection(self.selectionModel().selection())
+        
+        painter.save()
+        painter.setClipRegion(region)
+        painter.setOpacity(0.25)
+        painter.fillRect(viewrect, option.palette.highlight())
+        painter.restore()
+
+
         if self.dragline is not None:
             pen = QtGui.QPen(QtCore.Qt.red)
             painter.setPen(pen)
@@ -205,45 +221,53 @@ class StimulusView(QtGui.QAbstractItemView):
         return QtCore.QModelIndex()
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
+        if self.mode == BUILDMODE:
+            if event.button() == QtCore.Qt.LeftButton:
+                index = self.indexAt(event.pos())
+                if not index.isValid():
+                    return
+                selected = self.model().data(index,QtCore.Qt.UserRole)
+
+                mimeData = QtCore.QMimeData()
+                mimeData.setData("application/x-component", selected)
+
+                drag = QtGui.QDrag(self)
+                drag.setMimeData(mimeData)
+
+                # grab an image of the cell  we are moving
+                
+                rect = self._rects[index.row()][index.column()]
+                pixmap = QtGui.QPixmap()
+                pixmap = pixmap.grabWidget(self, rect)
+
+                # below makes the pixmap half transparent
+                painter = QtGui.QPainter(pixmap)
+                painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+                painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+                painter.end()
+                
+                drag.setPixmap(pixmap)
+
+                drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+                drag.setPixmap(pixmap)
+
+                # if result: # == QtCore.Qt.MoveAction:
+                    # self.model().removeRow(index.row())
+                self.model().removeComponent((index.row(), index.column()))
+                self.hashIsDirty = True
+                result = drag.start(QtCore.Qt.MoveAction)
+
+            elif event.button() == QtCore.Qt.RightButton:
+                index = self.indexAt(event.pos())
+                self.edit(index)
+                # super(StimulusView, self).mousePressEvent(event)
+        else:
+            # select and de-select components
+            # super(StimulusView, self).mousePressEvent(event)
             index = self.indexAt(event.pos())
             if not index.isValid():
                 return
-            selected = self.model().data(index,QtCore.Qt.UserRole)
-
-            mimeData = QtCore.QMimeData()
-            mimeData.setData("application/x-component", selected)
-
-            drag = QtGui.QDrag(self)
-            drag.setMimeData(mimeData)
-
-            # grab an image of the cell  we are moving
-            
-            rect = self._rects[index.row()][index.column()]
-            pixmap = QtGui.QPixmap()
-            pixmap = pixmap.grabWidget(self, rect)
-
-            # below makes the pixmap half transparent
-            painter = QtGui.QPainter(pixmap)
-            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-            painter.end()
-            
-            drag.setPixmap(pixmap)
-
-            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-            drag.setPixmap(pixmap)
-
-            # if result: # == QtCore.Qt.MoveAction:
-                # self.model().removeRow(index.row())
-            self.model().removeComponent((index.row(), index.column()))
-            self.hashIsDirty = True
-            result = drag.start(QtCore.Qt.MoveAction)
-
-        elif event.button() == QtCore.Qt.RightButton:
-            index = self.indexAt(event.pos())
-            self.edit(index)
-            # super(StimulusView, self).mousePressEvent(event)
+            self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/x-component"):
@@ -304,6 +328,23 @@ class StimulusView(QtGui.QAbstractItemView):
     def sizeHint(self):
         return QtCore.QSize(self.width(), self._height)
 
+    def setMode(self, mode):
+        self.mode = mode
+        if mode == BUILDMODE:
+            self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        else:
+            self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
+
+    def selectionChanged(self, selected, deselected):
+        # print 'selection changed', selected, deselected
+        super(StimulusView, self).selectionChanged(selected, deselected)
+
+    def visualRegionForSelection(self, selection):
+        region = QtGui.QRegion()
+        for index in selection.indexes():
+            region = region.united(self._rects[index.row()][index.column()])
+
+        return region
 
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Mon Nov 18 12:49:19 2013
+# Created: Wed Nov 20 12:51:43 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -89,9 +89,9 @@ class Ui_StimulusEditor(object):
         self.listView.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.listView.setObjectName(_fromUtf8("listView"))
         self.verticalLayout.addWidget(self.listView)
-        self.pushButton_8 = QtGui.QPushButton(self.frame)
-        self.pushButton_8.setObjectName(_fromUtf8("pushButton_8"))
-        self.verticalLayout.addWidget(self.pushButton_8)
+        self.autoparam_btn = QtGui.QPushButton(self.frame)
+        self.autoparam_btn.setObjectName(_fromUtf8("autoparam_btn"))
+        self.verticalLayout.addWidget(self.autoparam_btn)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.label_2 = QtGui.QLabel(self.frame)
@@ -121,12 +121,13 @@ class Ui_StimulusEditor(object):
         self.verticalLayout_2.addWidget(self.splitter)
 
         self.retranslateUi(StimulusEditor)
+        QtCore.QObject.connect(self.autoparam_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.doAutoparameters)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):
         StimulusEditor.setWindowTitle(_translate("StimulusEditor", "Form", None))
         self.label.setText(_translate("StimulusEditor", "Info:", None))
-        self.pushButton_8.setText(_translate("StimulusEditor", "Automatic parameter manipulation", None))
+        self.autoparam_btn.setText(_translate("StimulusEditor", "Automatic parameter manipulation", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
 
 from spikeylab.stim.stimulusview import StimulusView

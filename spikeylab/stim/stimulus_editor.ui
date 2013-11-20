@@ -122,7 +122,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_8">
+        <widget class="QPushButton" name="autoparam_btn">
          <property name="text">
           <string>Automatic parameter manipulation</string>
          </property>
@@ -191,5 +191,25 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>autoparam_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>doAutoparameters()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1031</x>
+     <y>547</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1047</x>
+     <y>557</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>doAutoparameters()</slot>
+ </slots>
 </ui>

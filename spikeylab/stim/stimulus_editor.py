@@ -11,6 +11,9 @@ class StimulusEditor(QtGui.QWidget):
     def setStimulus(self, stimulus):
         pass
 
+    def doAutoparameters(self):
+        self.ui.trackview.setMode(1)
+
 if __name__ == "__main__":
     import sys
     from spikeylab.stim.stimulusmodel import *
