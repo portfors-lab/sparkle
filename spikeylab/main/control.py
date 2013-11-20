@@ -63,6 +63,7 @@ class MainWindow(ControlWindow):
 
         # set up wav file directory finder paths
         self.ui.exvocal.setRootDirs(self.wavrootdir, self.filelistdir)
+        self.ui.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
 
         # always show plots on load
         self.ui.plot_dock.setVisible(True)
@@ -178,7 +179,7 @@ class MainWindow(ControlWindow):
         if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
             # assume user has already clicked on wav file
             
-            self.acqmodel.set_explore_params(wavfile=self.current_wav_file, 
+            self.acqmodel.set_explore_params(wavfile=self.ui.exvocal.current_wav_file, 
                                              aochan=aochan, aichan=aichan,
                                              acqtime=winsz, aisr=acq_rate, 
                                              nreps=nreps, binsz=binsz)
@@ -354,22 +355,11 @@ class MainWindow(ControlWindow):
         else:
             print self.tscale
             raise Exception(u"Invalid time scale")
-    
-    def browse_wavdirs(self):
-        wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir)
-        self.ui.filetree_view.setRootIndex(self.dirmodel.setRootPath(wavdir))
-        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(wavdir))
-        self.ui.wavrootdir_lnedt.setText(wavdir)
-        self.wavrootdir = wavdir
-
-    def wavdir_selected(self, model_index):
-        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
-        self.ui.filelist_view.setRootIndex(self.filemodel.setRootPath(spath))
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """
         # display spectrogram of file
-        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
+        spath = self.ui.exvocal.current_wav_file
         spec, f, bins, fs = spectrogram(spath)
         self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
 
@@ -381,26 +371,17 @@ class MainWindow(ControlWindow):
         print 'stim time lims', t[0], t[-1]
         self.ui.display.update_signal(t, wavdata)
 
-        self.current_wav_file = spath
-
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             aochan = self.ui.aochan_box.currentText()
             aichan = self.ui.aichan_box.currentText()
             acq_rate = self.ui.aisr_spnbx.value()*self.fscale
             winsz = float(self.ui.windowsz_spnbx.value())*0.001
-            self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
+            self.acqmodel.set_explore_params(wavfile=spath, aochan=aochan, aichan=aichan,
                                              acqtime=winsz, aisr=acq_rate)
             print 'win size', winsz
             self.ui.display.set_xlimits((0,winsz))
         # self.current_gen_rate = sr
         # self.current_wav_signal = wavdata
-
-    def wavfile_clicked(self, model_index):
-        # display spectrogram of file
-        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
-        spec, f, bins, fs = spectrogram(spath)
-        # self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
-        self.ui.spec_preview.update_data(spec,xaxis=bins,yaxis=f)
 
     def update_thresh(self, thresh):
         self.ui.thresh_lnedt.setText(str(thresh))
