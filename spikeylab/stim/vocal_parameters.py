@@ -84,36 +84,6 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
         self.filelist_view.setRootIndex(self.filemodel.setRootPath(spath))
 
-    def wavfile_selected(self, model_index):
-        pass
-    #     """ On double click of wav file, load into display """
-    #     # display spectrogram of file
-    #     spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
-    #     spec, f, bins, fs = spectrogram(spath)
-    #     self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
-
-    #     sr, wavdata = wv.read(spath)
-    #     freq, spectrum = calc_spectrum(wavdata,sr)
-
-    #     self.ui.display.update_fft(freq, spectrum)
-    #     t = np.linspace(0,(float(len(wavdata))/sr), len(wavdata))
-    #     print 'stim time lims', t[0], t[-1]
-    #     self.ui.display.update_signal(t, wavdata)
-
-    #     self.current_wav_file = spath
-
-    #     if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-    #         aochan = self.ui.aochan_box.currentText()
-    #         aichan = self.ui.aichan_box.currentText()
-    #         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
-    #         winsz = float(self.ui.windowsz_spnbx.value())*0.001
-    #         self.acqmodel.set_explore_params(wavfile=self.current_wav_file, aochan=aochan, aichan=aichan,
-    #                                          acqtime=winsz, aisr=acq_rate)
-    #         print 'win size', winsz
-    #         self.ui.display.set_xlimits((0,winsz))
-    #     # self.current_gen_rate = sr
-    #     # self.current_wav_signal = wavdata
-
     def wavfile_clicked(self, model_index):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
@@ -122,3 +92,6 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         dur = self.spec_preview.update_file(spath)
         self.common.setDuration(dur)
         self.current_wav_file = spath
+
+    def setContentFocus(self):
+        pass

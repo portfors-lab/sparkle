@@ -329,6 +329,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
         if component is not None:
             editor = component.showEditor()
+
         else:
             print 'delegate data type', type(component)
             raise Exception('UnknownDelegateType')
@@ -341,6 +342,21 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         # need to save over component object in stimulus model
         model.setData(index, editor.component())
 
+
+    def updateEditorGeometry(self, editor, option, index):
+        # center the widget
+        qr = editor.frameGeometry()
+        cp = QtGui.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+
+        editor.move(qr.topLeft())
+
+    def eventFilter(self, editor, event):
+        if event.type() == QtCore.QEvent.FocusIn:
+            editor.setContentFocus()
+            return True
+
+        return super(ComponentDelegate, self).eventFilter(editor, event)
 
 if __name__ == "__main__":
     import sys

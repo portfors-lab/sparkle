@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
-# Created: Fri Nov 15 12:02:06 2013
+# Created: Wed Nov 20 09:58:02 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_VocalParameterWidget(object):
     def setupUi(self, VocalParameterWidget):
         VocalParameterWidget.setObjectName(_fromUtf8("VocalParameterWidget"))
-        VocalParameterWidget.resize(501, 435)
+        VocalParameterWidget.resize(555, 444)
         self.verticalLayout = QtGui.QVBoxLayout(VocalParameterWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
@@ -68,7 +68,6 @@ class Ui_VocalParameterWidget(object):
 
         self.retranslateUi(VocalParameterWidget)
         QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("clicked(QModelIndex)")), VocalParameterWidget.wavfile_clicked)
-        QtCore.QObject.connect(self.filelist_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), VocalParameterWidget.wavfile_selected)
         QtCore.QObject.connect(self.filetree_view, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), VocalParameterWidget.wavdir_selected)
         QtCore.QObject.connect(self.wavrootdir_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), VocalParameterWidget.browse_wavdirs)
         QtCore.QMetaObject.connectSlotsByName(VocalParameterWidget)
@@ -77,5 +76,5 @@ class Ui_VocalParameterWidget(object):
         VocalParameterWidget.setWindowTitle(_translate("VocalParameterWidget", "Form", None))
         self.wavrootdir_btn.setText(_translate("VocalParameterWidget", "change", None))
 
-from parameterwidget import ParameterWidget
+from spikeylab.stim.parameterwidget import ParameterWidget
 from spikeylab.plotting.mpl_spec_widget import SpecWidget

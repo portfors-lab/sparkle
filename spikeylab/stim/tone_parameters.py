@@ -41,6 +41,10 @@ class ToneParameterWidget(QtGui.QWidget, Ui_ToneParameterWidget):
     def setDuration(self, dur):
         self.common.setField(duration=dur)
 
+    def setContentFocus(self):
+        self.freq_spnbx.setFocus()
+        # self.freq_spnbx.selectAll()
+
 
 class SilenceParameterWidget(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -55,6 +59,7 @@ class SilenceParameterWidget(QtGui.QWidget):
 
         self.setLayout(layout)
 
+
     def setComponent(self, component):
         self.dur_spnbx.setValue(component.duration()/self.tscale)
         self._component = component
@@ -64,3 +69,7 @@ class SilenceParameterWidget(QtGui.QWidget):
 
     def component(self):
         return self._component
+
+    def setContentFocus(self):
+        self.dur_spnbx.setFocus()
+        self.dur_spnbx.selectAll()

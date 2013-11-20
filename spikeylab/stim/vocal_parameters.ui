@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>435</height>
+    <width>555</width>
+    <height>444</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,7 +64,7 @@
     </widget>
    </item>
    <item>
-    <widget class="ParameterWidget" name="common"/>
+    <widget class="ParameterWidget" name="common" native="true"/>
    </item>
   </layout>
  </widget>
@@ -72,12 +72,12 @@
   <customwidget>
    <class>ParameterWidget</class>
    <extends>QWidget</extends>
-   <header>parameterwidget</header>
+   <header>spikeylab.stim.parameterwidget</header>
   </customwidget>
   <customwidget>
    <class>SpecWidget</class>
    <extends>QWidget</extends>
-   <header>audiolab.plotting.mpl_spec_widget</header>
+   <header>spikeylab.plotting.mpl_spec_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -96,22 +96,6 @@
     <hint type="destinationlabel">
      <x>505</x>
      <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>filelist_view</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>VocalParameterWidget</receiver>
-   <slot>wavfile_selected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>288</x>
-     <y>79</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>499</x>
-     <y>189</y>
     </hint>
    </hints>
   </connection>
