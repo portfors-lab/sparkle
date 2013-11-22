@@ -102,7 +102,6 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-    # def isSelected(self, index):
 
 class AutoParameter():
     """Hold information for parameter modification loop"""
@@ -120,7 +119,6 @@ class AbstractStimulusComponent(object):
     _intensity = 20 # in dB SPL
     _risefall = 0
 
-    # def __init__(self):
     def duration(self):
         return self._duration
 
