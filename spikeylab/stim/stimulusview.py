@@ -1,3 +1,5 @@
+
+
 import cPickle, pickle
 
 from PyQt4 import QtGui, QtCore
@@ -229,7 +231,7 @@ class StimulusView(QtGui.QAbstractItemView):
                 selected = self.model().data(index,QtCore.Qt.UserRole)
 
                 mimeData = QtCore.QMimeData()
-                mimeData.setData("application/x-component", selected)
+                mimeData.setData("application/x-component", selected.serialize())
 
                 drag = QtGui.QDrag(self)
                 drag.setMimeData(mimeData)
@@ -309,8 +311,8 @@ class StimulusView(QtGui.QAbstractItemView):
         self.dragline = None
         data = event.mimeData()
         stream = data.retrieveData("application/x-component",
-            QtCore.QVariant.String)
-        component = cPickle.loads(str(stream.toString()))
+            QtCore.QVariant.ByteArray)
+        component = cPickle.loads(str(stream))
 
         location = self.splitAt(event.pos())
 
@@ -350,7 +352,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         component = index.data(QtCore.Qt.UserRole)
-        component = cPickle.loads(str(component.toString()))
+        # component = cPickle.loads(str(component.toString()))
 
         painter.drawRect(option.rect)
 
@@ -365,7 +367,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         # bring up separate window for component parameters
         component = index.data(QtCore.Qt.UserRole)
-        component = cPickle.loads(str(component.toString()))
+        # component = cPickle.loads(str(component.toString()))
         # print parent, option, index, component
 
         if component is not None:

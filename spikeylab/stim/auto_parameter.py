@@ -1,3 +1,7 @@
+import sip
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
+
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.stim.auto_parameter_modelview import AutoParameterDelegate, AutoParameterModel, AutoParamWidget
@@ -43,6 +47,13 @@ class Parametizer(QtGui.QWidget):
 
     def addParameter(self):
         self.param_model.insertRows(-1,1)
+        # defaultparam = { 'start': 0,
+        #                  'delta': 1,
+        #                  'stop': 0,
+        #                  'parameter': 'duration',
+        #                  # 'components' : QtGui.QItemSelectionModel(self._stimmodel)
+        #                 }
+        # self.param_model.insertParameter(defaultparam, -1)
 
     def saveParameters(self):
         print 'save to stim model'

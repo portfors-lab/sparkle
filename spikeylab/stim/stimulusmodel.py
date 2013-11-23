@@ -60,7 +60,8 @@ class StimulusModel(QtCore.QAbstractTableModel):
                 # if component.name == 'vocalization':
                 #     imagepickle = cPickle.dumps(component._image)
                 # component = QtCore.QVariant(cPickle.dumps(component))
-                component = component.serialize()
+                # component = component.serialize()
+                return component
             else:
                 component = None
             return component
