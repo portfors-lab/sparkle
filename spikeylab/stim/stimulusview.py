@@ -209,7 +209,8 @@ class StimulusView(QtGui.QAbstractItemView):
         painter.save()
         painter.setClipRegion(region)
         painter.setOpacity(0.5)
-        painter.fillRect(viewrect, option.palette.highlight())
+        # painter.fillRect(viewrect, option.palette.highlight())
+        painter.fillRect(viewrect, QtCore.Qt.blue)
         painter.restore()
 
 

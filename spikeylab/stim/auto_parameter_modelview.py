@@ -1,5 +1,3 @@
-import cPickle
-
 from PyQt4 import QtGui, QtCore
 
 from auto_parameter_form import Ui_AutoParamWidget
@@ -7,31 +5,30 @@ from auto_parameter_form import Ui_AutoParamWidget
 PARAMETER_TYPES = ['duration', 'intensity', 'frequency']
 
 class AutoParameterListView(QtGui.QListView):
-    _selfieList = []
+    def __init__(self):
+        QtGui.QListView.__init__(self)
+
+        self.setItemDelegate(AutoParameterDelegate())
+        self.setEditTriggers(QtGui.QAbstractItemView.CurrentChanged | QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
+        self.setAcceptDrops(True)
+        self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+
+    def edit(self, index, trigger, event):
+        self.model().updateSelectionModel(index)
+        return super(AutoParameterListView, self).edit(index, trigger, event)
 
 class AutoParameterModel(QtCore.QAbstractListModel):
     _parameters = []
-    _stimmodel = None
+    _stimview = None
+    _selectionmap = {}
+    _paramid = 0
     def rowCount(self, parent=QtCore.QModelIndex()):
         return len(self._parameters)
 
     def data(self, index, role):
         # print 'data role', role
         return self._parameters[index.row()]
-        # return cPickle.dumps(self._parameters[index.row()])
-        # return QtCore.QVariant(cPickle.dumps(self._parameters[index.row()]))
-        if role == QtCore.Qt.UserRole:
-            param = self._parameters[index.row()]
-            if not isinstance(param, dict):
-                print 'waaaah', self._parameters
-                param = cPickle.loads(str(param))
-            param.pop('components', None)
-            # return QtCore.QVariant(cPickle.dumps(param))
-            return cPickle.dumps(self._parameters[index.row()])
-        if role == QtCore.Qt.DisplayRole:
-            # return 'Test display'
-            return cPickle.dumps(self._parameters[index.row()])
-
+        
     def setData(self, index, value, role):
         self._parameters[index.row()] = value
         return True
@@ -40,29 +37,27 @@ class AutoParameterModel(QtCore.QAbstractListModel):
         self._parameters = paramlist
 
     def insertParameter(self, param, position):
-        print '!!!!!!!!!!!!!!!!!inserting', position, param
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
         self._parameters.insert(position, param)
         self.endInsertRows()
 
-
     def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
-        print '!!!!!!!!!!!!!!!!!inserting', position, rows, parent
         self.beginInsertRows(parent, position, position + rows - 1)
         for i in range(rows):
             defaultparam = { 'start': 0,
                              'delta': 1,
                              'stop': 0,
                              'parameter': 'duration',
-                             # 'components' : QtGui.QItemSelectionModel(self._stimmodel)
+                             'paramid' : self._paramid,
                             }
             self._parameters.insert(position, defaultparam)
-        print 'param list', self._parameters
+            self._selectionmap[self._paramid] = QtGui.QItemSelectionModel(self._stimview.model())
+            self._paramid +=1
+
         self.endInsertRows()
         return True
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
-        print '!!!!!!!!!!!removing'
         self.beginRemoveRows(parent, position, position + rows - 1)
         for i in range(rows):
             self._parameters.pop(position)
@@ -71,48 +66,48 @@ class AutoParameterModel(QtCore.QAbstractListModel):
 
     def flags(self, index):
         if index.isValid():
-            return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+            return QtCore.Qt.ItemIsDragEnabled | \
+                   QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
+                   QtCore.Qt.ItemIsEditable
         else:
-            return QtCore.Qt.ItemIsDropEnabled
+            return QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | \
+                   QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
+                   QtCore.Qt.ItemIsEditable
 
-    def setStimModel(self, stimmodel):
-        self._stimmodel = stimmodel
-
-    def edit(self, index):
-        print 'edit triggered'
-        param = self._parameters[index.row()]
-        self._stimmodel.setSelectionModel(param['components'])
-        super(AutoParameterModel, self).edit(index)
+    def setStimView(self, stimview):
+        self._stimview = stimview
 
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction
+
+    def updateSelectionModel(self, index):
+        if index.isValid:
+            param = self._parameters[index.row()]
+            paramid = param['paramid']
+            self._stimview.setSelectionModel(self._selectionmap[paramid])
+            self._stimview.viewport().update()
+        else:
+            print 'invalid index'
+            # self._stimview.setSelectionModel(
+
 
 class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         # paint a fake editor widget
         painter.drawRect(option.rect)
+
         param = index.model().data(index, QtCore.Qt.UserRole)
-        # param = cPickle.loads(param)
-        # param = cPickle.loads(str(param.toString()))
-        # print 'param type', param
-        # param = filterdict(param)
-        if isinstance(param, dict):
-            if option.state & QtGui.QStyle.State_Selected:
-                painter.fillRect(option.rect, option.palette.highlight())
-            else:
-                try:
-                    tmpedit = AutoParamWidget()
-                    tmpedit.setParamValues(param)
-                    tmpedit.setGeometry(option.rect)
-                    selfie = QtGui.QPixmap.grabWidget(tmpedit, QtCore.QRect(0,0, tmpedit.width(), tmpedit.height()))
-                    painter.drawPixmap(option.rect, selfie)
-                    tmpedit.close()
-                except:
-                    print '!!!!!!!!!!!problem wit dict'
-                    print 'param', param
+        if option.state & QtGui.QStyle.State_Selected:
+            painter.fillRect(option.rect, option.palette.highlight())
         else:
-            painter.drawText(option.rect, QtCore.Qt.AlignLeft, "Lost the parameter")
+            tmpedit = AutoParamWidget()
+            tmpedit.setParamValues(param)
+            tmpedit.setGeometry(option.rect)
+            selfie = QtGui.QPixmap.grabWidget(tmpedit, QtCore.QRect(0,0, tmpedit.width(), tmpedit.height()))
+            painter.drawPixmap(option.rect, selfie)
+            tmpedit.close()
+        
 
     def sizeHint(self, option, index):
         #this will always be the same?
@@ -124,24 +119,18 @@ class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 
     def setEditorData(self, editor, index):
         param = index.data(QtCore.Qt.UserRole)
-        # param = cPickle.loads(str(param))
-
-        # also need to set the selection model on the stim view
         editor.setParamValues(param)
 
     def setModelData(self, editor, model, index):
         param = editor.paramValues()
-        # FIXME! save selection model
-        # param['selfie'] = QtGui.QPixmap.grabWidget(editor, editor.geometry())
-
         model.setData(index, param, QtCore.Qt.EditRole)
+
 
 class AutoParamWidget(QtGui.QWidget, Ui_AutoParamWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
-        for pt in PARAMETER_TYPES:
-            self.type_cmbx.addItem(pt)
+        self.type_cmbx.addItems(PARAMETER_TYPES)
 
     def setParamValues(self, paramdict):
         self.step_lnedt.setText(str(paramdict['delta']))
@@ -149,29 +138,15 @@ class AutoParamWidget(QtGui.QWidget, Ui_AutoParamWidget):
         self.start_lnedt.setText(str(paramdict['start']))
         typeidx = PARAMETER_TYPES.index(paramdict['parameter'])
         self.type_cmbx.setCurrentIndex(typeidx)
-
-        # self.membersview.setModel(paramdict['components'])
+        self._paramdict = paramdict
 
     def paramValues(self):
-        paramdict = {}
+        paramdict = self._paramdict
         paramdict['start'] = float(self.start_lnedt.text())
         paramdict['delta'] = float(self.step_lnedt.text())
         paramdict['stop'] = float(self.stop_lnedt.text())
         paramdict['parameter'] = self.type_cmbx.currentText()
-        # paramdict['components'] = self.membersview.model()
         return paramdict
 
-def filterdict(d):
-    newd ={}
-    try:
-        for k,v in d.iteritems():
-            k = str(k)
-            if isinstance(v, QtCore.QString):
-                v = str(v)
-            newd[k] = v
-    except:
-        print '!!!!!!!!!!!problem with dict'
-        print d   
-        raise     
-
-    return newd
+    def paramId(self):
+        return self._paramdict['paramid']

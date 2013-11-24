@@ -5,6 +5,7 @@ sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore
 
 from stimeditor_form import Ui_StimulusEditor
+from auto_parameter import Parametizer
 
 class StimulusEditor(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -17,6 +18,10 @@ class StimulusEditor(QtGui.QWidget):
 
     def doAutoparameters(self):
         self.ui.trackview.setMode(1)
+        parametizer = Parametizer(self.ui.trackview)
+        parametizer.show()
+        self.parametizer = parametizer
+
 
 if __name__ == "__main__":
     import sys
@@ -38,8 +43,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
-    # vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    # vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
 
     silence0 = Silence()
     silence0.setDuration(0.025)
