@@ -34,14 +34,13 @@ class Parametizer(QtGui.QWidget):
 
         self.param_list = AutoParameterListView()
 
-        self.param_model = AutoParameterModel()
+        self.param_model = stimulusview.model().autoParams()
         self.param_model.setStimView(stimulusview)
         self.param_list.setModel(self.param_model)
 
         layout.addWidget(self.param_list)
         layout.addLayout(btn_layout)
         self.setLayout(layout)
-
 
     def setParameterList(self, paramlist):
         self.param_model.setParameterList(paramlist)
@@ -53,8 +52,14 @@ class Parametizer(QtGui.QWidget):
         current = self.param_list.currentIndex()
         self.param_model.removeRows(current.row(), 1)
 
-    def saveParameters(self):
+    def saveParameters(self): 
         print 'save to stim model'
+        # this is the same model from stimulusview.model() we set in contructor
+        # do I need to do this?
+        # self.param_model.parentModel().setAutoParams(self)
+
+        self.param_model.stimView().setMode(0)
+        self.close()
 
     def sizeHint(self):
         return QtCore.QSize(500,500)

@@ -27,6 +27,7 @@ class StimulusView(QtGui.QAbstractItemView):
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.dragline = None
+        self._drag_from = None
 
         self.setItemDelegate(ComponentDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked)
@@ -231,6 +232,9 @@ class StimulusView(QtGui.QAbstractItemView):
                     return
                 selected = self.model().data(index,QtCore.Qt.UserRole)
 
+
+                self._drag_from = index
+
                 mimeData = QtCore.QMimeData()
                 mimeData.setData("application/x-component", selected.serialize())
 
@@ -238,7 +242,6 @@ class StimulusView(QtGui.QAbstractItemView):
                 drag.setMimeData(mimeData)
 
                 # grab an image of the cell  we are moving
-                
                 rect = self._rects[index.row()][index.column()]
                 pixmap = QtGui.QPixmap()
                 pixmap = pixmap.grabWidget(self, rect)
@@ -319,8 +322,11 @@ class StimulusView(QtGui.QAbstractItemView):
 
         self.model().insertComponent(component, location)
 
+        # reconcile the selection models in auto parameters
+        index = self.model().index(location[0], location[1])
+        self.model().reconcileSelections(self._drag_from, index)
+
         if isinstance(event.source(), ComponentTemplateLabel):
-            index = self.model().index(location[0], location[1])
             self.edit(index)
 
         self.hashIsDirty = True
@@ -335,6 +341,7 @@ class StimulusView(QtGui.QAbstractItemView):
         self.mode = mode
         if mode == BUILDMODE:
             self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+            self.setSelectionModel(QtGui.QItemSelectionModel(self.model()))
         else:
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 

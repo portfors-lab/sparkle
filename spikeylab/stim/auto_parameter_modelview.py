@@ -77,6 +77,9 @@ class AutoParameterModel(QtCore.QAbstractListModel):
     def setStimView(self, stimview):
         self._stimview = stimview
 
+    def stimView(self):
+        return self._stimview
+
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction
 
@@ -88,9 +91,20 @@ class AutoParameterModel(QtCore.QAbstractListModel):
             self._stimview.viewport().update()
         else:
             print 'invalid index'
+            # set model selection to no selection allow
             # self._stimview.setSelectionModel(
+    
+    def parentModel(self):
+        return self._stimview.model()
 
+    def reorderSelectionModels(self, from_index, to_index):
+        for selection_model in self._selectionmap.values():
+            if selection_model.isSelected(from_index):
+                print 'sorting'
+                selection_model.select(from_index, QtGui.QItemSelectionModel.Deselect)
+                selection_model.select(to_index, QtGui.QItemSelectionModel.Select)
 
+                
 class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):

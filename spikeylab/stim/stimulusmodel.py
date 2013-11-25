@@ -6,6 +6,7 @@ import scipy.misc
 from spikeylab.stim.tone_parameters import ToneParameterWidget, SilenceParameterWidget
 from spikeylab.stim.vocal_parameters import VocalParameterWidget
 from spikeylab.tools.audiotools import spectrogram
+from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
 
 import numpy as np
 import scipy.io.wavfile as wv
@@ -22,13 +23,19 @@ for i in range(16): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
 
 class StimulusModel(QtCore.QAbstractTableModel):
     """Model to represent a unique stimulus, holds all relevant parameters"""
-    def __init__(self, segments=[[]], parent=None):
+    def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.nreps = 0
         # 2D array of simulus components track number x component number
-        self.segments = segments
+        self.segments = [[]]
         # add an empty place to place components into new track
-        auto_params = []
+        self.auto_params = AutoParameterModel()
+
+    def setAutoParams(self, params):
+        self.auto_params = params
+
+    def autoParams(self):
+        return self.auto_params
 
     def headerData(self, section, orientation, role):
         return ''
@@ -103,14 +110,9 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
+    def reconcileSelections(self, from_index, to_index):
+        self.auto_params.reorderSelectionModels(from_index, to_index)
 
-class AutoParameter():
-    """Hold information for parameter modification loop"""
-    components = []
-    parameter = ""
-    delta = None
-    stop_type = 0 # 0 : stop time, 1 : N times
-    stop_value = None
 
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
