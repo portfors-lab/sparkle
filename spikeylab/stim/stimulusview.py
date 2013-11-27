@@ -113,11 +113,11 @@ class StimulusView(QtGui.QAbstractItemView):
 
     def rowsInserted(self, parent, start, end):
         self.hashIsDirty = True
-        super(PieView, self).rowsInserted(parent, start, end)
+        super(StimulusView, self).rowsInserted(parent, start, end)
 
     def rowsAboutToBeRemoved(self, parent, start, end):
         self.hashIsDirty = True
-        super(PieView, self).rowsAboutToBeRemoved(parent, start, end)
+        super(StimulusView, self).rowsAboutToBeRemoved(parent, start, end)
 
     def verticalOffset(self):
         return self.verticalScrollBar().value()
@@ -322,11 +322,8 @@ class StimulusView(QtGui.QAbstractItemView):
 
         self.model().insertComponent(component, location)
 
-        # reconcile the selection models in auto parameters
-        index = self.model().index(location[0], location[1])
-        self.model().reconcileSelections(self._drag_from, index)
-
         if isinstance(event.source(), ComponentTemplateLabel):
+            index = self.model().index(location[0], location[1])
             self.edit(index)
 
         self.hashIsDirty = True

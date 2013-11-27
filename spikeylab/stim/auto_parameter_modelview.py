@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 
 from auto_parameter_form import Ui_AutoParamWidget
+from spikeylab.stim.selectionmodel import ComponentSelectionModel
 
 PARAMETER_TYPES = ['duration', 'intensity', 'frequency']
 
@@ -26,7 +27,6 @@ class AutoParameterModel(QtCore.QAbstractListModel):
         return len(self._parameters)
 
     def data(self, index, role):
-        # print 'data role', role
         return self._parameters[index.row()]
         
     def setData(self, index, value, role):
@@ -51,7 +51,7 @@ class AutoParameterModel(QtCore.QAbstractListModel):
                              'paramid' : self._paramid,
                             }
             self._parameters.insert(position, defaultparam)
-            self._selectionmap[self._paramid] = QtGui.QItemSelectionModel(self._stimview.model())
+            self._selectionmap[self._paramid] = ComponentSelectionModel(self._stimview.model())
             self._paramid +=1
 
         self.endInsertRows()
@@ -97,14 +97,7 @@ class AutoParameterModel(QtCore.QAbstractListModel):
     def parentModel(self):
         return self._stimview.model()
 
-    def reorderSelectionModels(self, from_index, to_index):
-        for selection_model in self._selectionmap.values():
-            if selection_model.isSelected(from_index):
-                print 'sorting'
-                selection_model.select(from_index, QtGui.QItemSelectionModel.Deselect)
-                selection_model.select(to_index, QtGui.QItemSelectionModel.Select)
 
-                
 class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):

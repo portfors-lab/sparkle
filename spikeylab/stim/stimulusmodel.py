@@ -1,5 +1,6 @@
 import cPickle
 import os
+import uuid
 
 import scipy.misc
 
@@ -21,10 +22,10 @@ from PyQt4 import QtGui, QtCore
 COLORTABLE = []
 for i in range(16): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
 
-class StimulusModel(QtCore.QAbstractTableModel):
+class StimulusModel(QtCore.QAbstractItemModel):
     """Model to represent a unique stimulus, holds all relevant parameters"""
     def __init__(self, parent=None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
+        QtCore.QAbstractItemModel.__init__(self, parent)
         self.nreps = 0
         # 2D array of simulus components track number x component number
         self.segments = [[]]
@@ -44,13 +45,20 @@ class StimulusModel(QtCore.QAbstractTableModel):
         return len(self.segments)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
-        column_lengths = [len(x) for x in self.segments]
-        return max(column_lengths)
+        if parent.isValid():
+            print 'querying column count by parent'
+            wholerow = parent.internalPointer()
+            return len(wholerow)
+        else:
+            column_lengths = [len(x) for x in self.segments]
+            return max(column_lengths)
 
     def columnCountForRow(self, row):
         return len(self.segments[row])
 
     def data(self, index, role):
+        if not index.isValid():
+            return None
         # print 'calling data!', role
         if role == QtCore.Qt.DisplayRole:
             component = self.segments[index.row()][index.column()]
@@ -82,36 +90,62 @@ class StimulusModel(QtCore.QAbstractTableModel):
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
 
-    def insertComponent(self, comp, index=(0,0)):
-        # sizes = [len(x) for x in self.segments]
-        # print 'add at', index, sizes
-        if index[0] > len(self.segments)-1:
-            self.segments.append([comp])
+
+    def index(self, row, col, parent=QtCore.QModelIndex()):
+        # need to convert row, col to correct element, however still have heirarchy?
+        if parent.isValid():
+            print 'valid parent', parent.row(), parent.col()
+            prow = self.segments.index(parent.internalPointer())
+            return self.createIndex(prow, row, self.segments[prow][row])
         else:
-            self.segments[index[0]].insert(index[1], comp)
+            return self.createIndex(row, col, self.segments[row][col])
+
+    def parentForRow(self, row):
+        # get the whole row
+        return self.createIndex(row, -1, self.segments[row])
+
+    def parent(self, index):
+        if index.column() == -1:
+            return QtCore.QModelIndex()
+        else:
+            return self.createIndex(index.row(), -1, self.segments[index.row()])
+
+    def insertComponent(self, comp, rowcol=(0,0)):
+        parent = self.parentForRow(rowcol[0])
+        # convert to index or done already?
+        self.beginInsertRows(parent, rowcol[1], rowcol[1])
+        parent.internalPointer().insert(rowcol[1], comp)
+        self.endInsertRows()
 
         if len(self.segments[-1]) > 0:
+            self.beginInsertRows(QtCore.QModelIndex(), len(self.segments), len(self.segments))
             self.segments.append([])
+            self.endInsertRows()
 
-    def removeComponent(self, index):
-        self.segments[index[0]].pop(index[1])
-        # remove if track is now empty - except always have one empty track to add to
-        if len(self.segments[index[0]]) == 0:
-            self.segments.pop(index[0])
+    def removeComponent(self, rowcol):
+        parent = self.parentForRow(rowcol[0])
 
-            # now add an empty row back onto end to allow 
-            # placing widgets in new track
-            if len(self.segments[-1]) > 0:
-                self.segments.append([])
+        self.beginRemoveRows(parent, rowcol[1], rowcol[1])
+        parent.internalPointer().pop(rowcol[1])
+        self.endRemoveRows()
+
+        if len(self.segments[-2]) == 0:
+            self.beginRemoveRows(QtCore.QModelIndex(), len(self.segments)-1, len(self.segments)-1)
+            self.segments.pop(len(self.segments)-1)
+            self.endRemoveRows()
+
+    def indexByComponent(self, component):
+        for row, rowcontents in enumerate(self.segments):
+            if component in rowcontents:
+                column = rowcontents.index(component)
+                return self.index(row, column)
 
     def setData(self, index, value):
         self.segments[index.row()][index.column()] = value
+        self.dataChanged(index, index)
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-
-    def reconcileSelections(self, from_index, to_index):
-        self.auto_params.reorderSelectionModels(from_index, to_index)
 
 
 class AbstractStimulusComponent(object):
@@ -121,6 +155,8 @@ class AbstractStimulusComponent(object):
     _fs = 400000 # in Hz
     _intensity = 20 # in dB SPL
     _risefall = 0
+    def __init__(self):
+        self.idnum = uuid.uuid1()
 
     def duration(self):
         return self._duration
@@ -168,6 +204,21 @@ class AbstractStimulusComponent(object):
     def deserialize(stream):
         return cPickle.loads(stream)
 
+    def __repr__(self):
+        return "StimComponent:"  + str(self.idnum)
+
+    def __eq__(self, other):
+        if self.idnum == other.idnum:
+            return True
+        else:
+            return False
+
+    def __ne__(self, other):
+        if self.idnum != other.idnum:
+            return True
+        else:
+            return False
+
 class Tone(AbstractStimulusComponent):
     foo = None
 
@@ -202,6 +253,7 @@ class Vocalization(AbstractStimulusComponent):
     name = "vocalization"
     _filename = None
     _browsedir = os.path.expanduser('~')
+
     def browsedir(self):
         return self._browsedir
 
