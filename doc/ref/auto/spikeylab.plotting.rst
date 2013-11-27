@@ -9,14 +9,6 @@ plotting Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`chacoplots` Module
-------------------------
-
-.. automodule:: spikeylab.plotting.chacoplots
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`custom_plots` Module
 --------------------------
 

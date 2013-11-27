@@ -1,5 +1,5 @@
 Hardware IO stuff
 
-.. autoclass:: audiolab.io.players.ContinuousPlayer
+.. autoclass:: spikelylab.io.players.ContinuousPlayer
 
-.. automodule:: audiolab.io.players
+.. automodule:: spikelylab.io.players

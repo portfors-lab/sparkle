@@ -1,10 +1,42 @@
 stim Package
 ============
 
+:mod:`auto_parameter` Module
+----------------------------
+
+.. automodule:: spikeylab.stim.auto_parameter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`auto_parameter_form` Module
+---------------------------------
+
+.. automodule:: spikeylab.stim.auto_parameter_form
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`auto_parameter_modelview` Module
+--------------------------------------
+
+.. automodule:: spikeylab.stim.auto_parameter_modelview
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`common_parametersform` Module
 -----------------------------------
 
 .. automodule:: spikeylab.stim.common_parametersform
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`component_label` Module
+-----------------------------
+
+.. automodule:: spikeylab.stim.component_label
     :members:
     :undoc-members:
     :show-inheritance:
@@ -29,6 +61,14 @@ stim Package
 -----------------------------
 
 .. automodule:: spikeylab.stim.parameterwidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`selectionmodel` Module
+----------------------------
+
+.. automodule:: spikeylab.stim.selectionmodel
     :members:
     :undoc-members:
     :show-inheritance:

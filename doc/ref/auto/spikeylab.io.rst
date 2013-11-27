@@ -9,14 +9,6 @@ io Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`charter` Module
----------------------
-
-.. automodule:: spikeylab.io.charter
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`daq_tasks` Module
 -----------------------
 

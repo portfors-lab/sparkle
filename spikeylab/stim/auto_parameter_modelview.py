@@ -6,6 +6,7 @@ from spikeylab.stim.selectionmodel import ComponentSelectionModel
 PARAMETER_TYPES = ['duration', 'intensity', 'frequency']
 
 class AutoParameterListView(QtGui.QListView):
+    """List View which holds parameter widgets"""
     def __init__(self):
         QtGui.QListView.__init__(self)
 
@@ -15,6 +16,7 @@ class AutoParameterListView(QtGui.QListView):
         self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
 
     def edit(self, index, trigger, event):
+        "Sets editing widget for selected list item"
         self.model().updateSelectionModel(index)
         return super(AutoParameterListView, self).edit(index, trigger, event)
 
@@ -95,6 +97,7 @@ class AutoParameterModel(QtCore.QAbstractListModel):
             # self._stimview.setSelectionModel(
     
     def parentModel(self):
+        """The StimulusModel for which this model acts on"""
         return self._stimview.model()
 
 

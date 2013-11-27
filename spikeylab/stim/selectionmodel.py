@@ -6,7 +6,8 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
         QtGui.QItemSelectionModel.__init__(self, model)
         self._selected_components = []
 
-    def select(self, index, command):
+    def select(self, index, command=QtGui.QItemSelectionModel.Toggle):
+        """Changes the inclusion of the given index in the selection model"""
         component = self.model().data(index, QtCore.Qt.UserRole)
         if command == QtGui.QItemSelectionModel.Toggle:
             if component in self._selected_components:
@@ -15,8 +16,11 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
             else:
                 self._selected_components.append(component)
                 self.selectionChanged.emit(self.selection(), QtGui.QItemSelection())
+        else:
+            raise Exception("Selection command not supported")
 
     def selectedIndexes(self):
+        """Returns a list of QModelIndex currently in the model"""
         model = self.model()
         indexes = []
         for comp in self._selected_components:
@@ -29,10 +33,10 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
         return indexes
 
     def selection(self):
+        """Returns items in selection as a QItemSelection object"""
         sel = QtGui.QItemSelection()
         for index in self.selectedIndexes():
             sel.select(index, index)
-
         return sel
 
     def __str__(self):

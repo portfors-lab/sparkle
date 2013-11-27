@@ -16,7 +16,7 @@ BUILDMODE = 0
 AUTOPARAMMODE = 1
 
 class StimulusView(QtGui.QAbstractItemView):
-    """View for editing stimulus components"""
+    """View for building/editing stimulus components"""
     hashIsDirty = False
     _rects = [[]]
     _height = ROW_HEIGHT
@@ -27,7 +27,6 @@ class StimulusView(QtGui.QAbstractItemView):
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.dragline = None
-        self._drag_from = None
 
         self.setItemDelegate(ComponentDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked)
@@ -149,19 +148,6 @@ class StimulusView(QtGui.QAbstractItemView):
     def scrollContentsBy(self, dx, dy):
         # self.scrollDirtyRegion(dx,dy) #in web example
         self.viewport().scroll(dx, dy)
-
-    def setSelection(self, rect, command):
-        # I don't want RB selection -- do I need this?
-    
-        # translate from viewport coordinates to widget coordinates?
-        contentsRect = rect.translated(self.horizontalScrollBar().value(),
-                self.verticalScrollBar().value()).normalized()
-
-        self.calculateRects()
-
-        rows = self.model().rowCount(self.rootIndex())
-        columns = self.model().columnCount(self.rootIndex())
-        indexes = []
 
     def paintEvent(self, event):
         selections = self.selectionModel()
@@ -373,11 +359,9 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         # bring up separate window for component parameters
         component = index.data(QtCore.Qt.UserRole)
         # component = cPickle.loads(str(component.toString()))
-        # print parent, option, index, component
 
         if component is not None:
             editor = component.showEditor()
-
         else:
             print 'delegate data type', type(component)
             raise Exception('UnknownDelegateType')
@@ -386,10 +370,10 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
 
     def setModelData(self, editor, model, index):
+        """Saves the input from the editor widget to the model component"""
         editor.saveToObject()
         # need to save over component object in stimulus model
         model.setData(index, editor.component())
-
 
     def updateEditorGeometry(self, editor, option, index):
         # center the widget
