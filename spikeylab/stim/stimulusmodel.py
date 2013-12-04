@@ -68,15 +68,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # print '!!userrole!!'
             if len(self.segments[index.row()]) > index.column():
                 component = self.segments[index.row()][index.column()]
-                itemData = QtCore.QByteArray()
-                # dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-                # dataStream << component
-                # return dataStream
-                # if component.name == 'vocalization':
-                #     imagepickle = cPickle.dumps(component._image)
-                # component = QtCore.QVariant(cPickle.dumps(component))
-                # component = component.serialize()
-                return component
             else:
                 component = None
             return component
@@ -98,7 +89,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
             prow = self.segments.index(parent.internalPointer())
             return self.createIndex(prow, row, self.segments[prow][row])
         else:
-            return self.createIndex(row, col, self.segments[row][col])
+            if row < len(self.segments) and col < len(self.segments[row]):
+                return self.createIndex(row, col, self.segments[row][col])
+            else:
+                return QtCore.QModelIndex()
 
     def parentForRow(self, row):
         # get the whole row
@@ -135,12 +129,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
             self.endRemoveRows()
 
     def indexByComponent(self, component):
+        """return a QModelIndex for the given component, or None if
+        if is not in the model"""
         for row, rowcontents in enumerate(self.segments):
             if component in rowcontents:
                 column = rowcontents.index(component)
                 return self.index(row, column)
 
     def setData(self, index, value):
+        # item must already exist at provided index
         self.segments[index.row()][index.column()] = value
         self.dataChanged(index, index)
 

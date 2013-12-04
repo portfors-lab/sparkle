@@ -1,4 +1,6 @@
-
+import sip
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
 
 import cPickle, pickle
 
@@ -217,9 +219,6 @@ class StimulusView(QtGui.QAbstractItemView):
                 if not index.isValid():
                     return
                 selected = self.model().data(index,QtCore.Qt.UserRole)
-
-
-                self._drag_from = index
 
                 mimeData = QtCore.QMimeData()
                 mimeData.setData("application/x-component", selected.serialize())
