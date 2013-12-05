@@ -1,6 +1,7 @@
-from nose.tools import raises
+from nose.tools import raises, assert_equal
 
 from spikeylab.stim.stimulusmodel import StimulusModel, PureTone
+from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
 from PyQt4 import QtCore
 
 class TestStimModel():
@@ -46,3 +47,26 @@ class TestStimModel():
         model.insertComponent(fake_component0, (0,0))
         # there is always an extra empty row
         assert model.rowCount() == 2
+
+class TestAutoParamterModel():
+    def test_add_rows(self):
+        defaultparam = { 'start': 0,
+                         'delta': 1,
+                         'stop': 0,
+                         'parameter': 'duration',
+                         'paramid' : 0,
+                        }
+        stim_model = StimulusModel()
+        model = AutoParameterModel(stim_model)
+        model.insertRows(0, 1)
+        assert model.rowCount() == 1
+        assert_equal(model.data(model.index(0)), defaultparam)
+
+    def test_remove_rows(self):
+        stim_model = StimulusModel()
+        model = AutoParameterModel(stim_model)
+        model.insertRows(0, 1)
+        model.removeRows(0, 1)
+        assert model.rowCount() == 0
+
+        

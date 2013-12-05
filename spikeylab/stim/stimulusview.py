@@ -2,7 +2,7 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-import cPickle, pickle
+import cPickle
 
 from PyQt4 import QtGui, QtCore
 
@@ -198,7 +198,6 @@ class StimulusView(QtGui.QAbstractItemView):
         painter.save()
         painter.setClipRegion(region)
         painter.setOpacity(0.5)
-        # painter.fillRect(viewrect, option.palette.highlight())
         painter.fillRect(viewrect, QtCore.Qt.blue)
         painter.restore()
 
@@ -342,7 +341,6 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         component = index.data(QtCore.Qt.UserRole)
-        # component = cPickle.loads(str(component.toString()))
 
         painter.drawRect(option.rect)
 
@@ -357,7 +355,6 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         # bring up separate window for component parameters
         component = index.data(QtCore.Qt.UserRole)
-        # component = cPickle.loads(str(component.toString()))
 
         if component is not None:
             editor = component.showEditor()

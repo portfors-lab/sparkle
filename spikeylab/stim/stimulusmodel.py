@@ -23,7 +23,10 @@ COLORTABLE = []
 for i in range(16): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
 
 class StimulusModel(QtCore.QAbstractItemModel):
-    """Model to represent a unique stimulus, holds all relevant parameters"""
+    """
+    Model to represent any stimulus the system will present. 
+    Holds all relevant parameters
+    """
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self.nreps = 0
@@ -59,13 +62,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def data(self, index, role):
         if not index.isValid():
             return None
-        # print 'calling data!', role
         if role == QtCore.Qt.DisplayRole:
             component = self.segments[index.row()][index.column()]
-            # do I need anything here?
             return component.__class__.__name__
         elif role == QtCore.Qt.UserRole:  #return the whole python object
-            # print '!!userrole!!'
             if len(self.segments[index.row()]) > index.column():
                 component = self.segments[index.row()][index.column()]
             else:
@@ -74,9 +74,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         elif role == QtCore.Qt.SizeHintRole:
             component = self.segments[index.row()][index.column()]
             return component.duration() #* PIXELS_PER_MS * 1000
-        elif role == 33:
-            component = self.segments[index.row()][index.column()]
-            return component
 
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
@@ -130,7 +127,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def indexByComponent(self, component):
         """return a QModelIndex for the given component, or None if
-        if is not in the model"""
+        it is not in the model"""
         for row, rowcontents in enumerate(self.segments):
             if component in rowcontents:
                 column = rowcontents.index(component)
@@ -139,7 +136,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def setData(self, index, value):
         # item must already exist at provided index
         self.segments[index.row()][index.column()] = value
-        self.dataChanged(index, index)
+        self.dataChanged.emit(index, index)
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable

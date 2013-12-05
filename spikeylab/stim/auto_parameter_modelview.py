@@ -21,14 +21,18 @@ class AutoParameterListView(QtGui.QListView):
         return super(AutoParameterListView, self).edit(index, trigger, event)
 
 class AutoParameterModel(QtCore.QAbstractListModel):
-    _parameters = []
-    _stimview = None
-    _selectionmap = {}
     _paramid = 0
+    def __init__(self, stimulus=None):
+        super(AutoParameterModel, self).__init__()
+        self._parameters = []
+        self._stimview = None #this should be any view for StimulusModel
+        self._stimmodel = stimulus
+        self._selectionmap = {}
+
     def rowCount(self, parent=QtCore.QModelIndex()):
         return len(self._parameters)
 
-    def data(self, index, role):
+    def data(self, index, role=QtCore.Qt.UserRole):
         return self._parameters[index.row()]
         
     def setData(self, index, value, role):
@@ -53,7 +57,7 @@ class AutoParameterModel(QtCore.QAbstractListModel):
                              'paramid' : self._paramid,
                             }
             self._parameters.insert(position, defaultparam)
-            self._selectionmap[self._paramid] = ComponentSelectionModel(self._stimview.model())
+            self._selectionmap[self._paramid] = ComponentSelectionModel(self._stimmodel)
             self._paramid +=1
 
         self.endInsertRows()
@@ -62,7 +66,8 @@ class AutoParameterModel(QtCore.QAbstractListModel):
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
         self.beginRemoveRows(parent, position, position + rows - 1)
         for i in range(rows):
-            self._parameters.pop(position)
+            p = self._parameters.pop(position)
+            self._selectionmap.pop(p['paramid'])
         self.endRemoveRows()
         return True
 
@@ -78,23 +83,23 @@ class AutoParameterModel(QtCore.QAbstractListModel):
 
     def setStimView(self, stimview):
         self._stimview = stimview
+        self.setStimModel(stimview.model())
 
     def stimView(self):
         return self._stimview
+
+    def setStimModel(self, model):
+        self._stimmodel = model
 
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction
 
     def updateSelectionModel(self, index):
-        if index.isValid:
+        if self._stimview is not None:
             param = self._parameters[index.row()]
             paramid = param['paramid']
             self._stimview.setSelectionModel(self._selectionmap[paramid])
             self._stimview.viewport().update()
-        else:
-            print 'invalid index'
-            # set model selection to no selection allow
-            # self._stimview.setSelectionModel(
     
     def parentModel(self):
         """The StimulusModel for which this model acts on"""

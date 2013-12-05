@@ -26,7 +26,7 @@ class StimulusEditor(QtGui.QWidget):
 if __name__ == "__main__":
     import sys
     from spikeylab.stim.stimulusmodel import *
-    app  = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
 
     tone0 = PureTone()
     tone0.setDuration(0.02)
