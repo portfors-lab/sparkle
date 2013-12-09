@@ -1,0 +1,2 @@
+class DataIndexError(IndexError):
+    pass

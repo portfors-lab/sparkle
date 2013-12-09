@@ -24,7 +24,6 @@ class TestCalObj():
         self.caldata = CalibrationObject(fname, self.freqs, self.intensities, self.samplerate, 
                                          self.duration, self.risefall, self.nreps,v=self.dbv[1])
         
-
     def tearDown(self):
         # delete generated file
         self.caldata.close()
