@@ -14,7 +14,7 @@ class AcquisitionData():
     1. Finite datasets, where the amount of data to be stored in known
     in advance
     2. Open-ended aquisition, where the size of the acqusition window is
-    know, but the number of traces to acquire is not
+    known, but the number of traces to acquire is not
     3. Continuous acquisition, this is a 'chart' function where data is
     acquired continuously without break until the user stops the operation
     """
@@ -24,7 +24,10 @@ class AcquisitionData():
         self.datasets = {}
         self.meta = {}
 
+        self.open_set_size = 32
+
     def close(self):
+        # consolidate fractured data sets before closing file
         self.hdf5.close()
 
     def init_data(self, key, dims, mode='finite'):
@@ -32,7 +35,11 @@ class AcquisitionData():
             self.datasets[key] = self.hdf5.create_dataset(key, dims)
             self.meta[key] = {'mode':mode, 'cursor':[0]*len(dims)}
         elif mode == 'open':
-            pass
+            if len(dims) > 1:
+                print "open acquisition only for single dimension data"
+                return
+            self.datasets[key+'_set0'] = self.hdf5.create_dataset(key+'_set0', ((self.open_set_size,) + dims))
+            self.meta[key] = {'mode':mode, 'datalen':dims[0], 'set_counter':0, 'cursor':0}
         elif mode == 'continuous':
             pass
         else:
@@ -48,10 +55,21 @@ class AcquisitionData():
                 index = current_location[:-len(data.shape)]
             # if data does crosses dimensions of datastructure, raise error
             # turn the index into a tuple so not to trigger advanced indexing
-            print 'dataset shape', self.datasets[key].shape, 'index', index
             self.datasets[key][tuple(index)] = data[:]
             dims = self.datasets[key].shape
             increment(current_location, dims, data.shape)
+        if mode =='open':
+            setnum = self.meta[key]['set_counter']
+            current_index = self.meta[key]['cursor']
+            self.datasets[key+'_set'+str(setnum)][current_index] = data
+            current_index += 1
+            if current_index == self.open_set_size:
+                setnum += 1
+                self.datasets[key+'_set'+str(setnum)] = self.hdf5.create_dataset(
+                    key+'_set'+str(setnum), ((self.open_set_size,) + (self.meta[key]['datalen'],)))
+                current_index = 0
+            self.meta[key]['set_counter'] = setnum
+            self.meta[key]['cursor'] = current_index
 
     def insert(self, key, index, data):
         mode = self.meta[key]['mode']
@@ -59,6 +77,8 @@ class AcquisitionData():
             # turn the index into a tuple so not to trigger advanced indexing
             index = tuple(index)
             self.datasets[key][index] = data[:]
+        else:
+            print "insert not supported for mode: ", mode
 
     def get(self, key, index=None):
         if index is not None:
@@ -67,6 +87,25 @@ class AcquisitionData():
         else:
             data = self.datasets[key][:]
         return data
+
+    def consolidate(self, key):
+        setnum = self.meta[key]['set_counter']
+        current_index = self.meta[key]['cursor']
+        data_length = self.meta[key]['datalen']
+        total_traces = setnum*self.open_set_size + current_index
+        self.datasets[key] = self.hdf5.create_dataset(key, 
+                                (total_traces, data_length))
+
+        for iset in range(setnum):
+            self.datasets[key][iset*self.open_set_size:(iset+1)*self.open_set_size,:] = self.datasets[key+'_set'+str(iset)][:]
+
+        # last set may not be complete
+        if current_index != 0:
+            self.datasets[key][setnum*self.open_set_size:(setnum*self.open_set_size)+current_index,:] = self.datasets[key+'_set'+str(setnum)][:current_index]
+
+        # now go ahead and delete fractional sets.
+        for iset in range(setnum+1):
+            del self.datasets[key+'_set'+str(iset)]
 
     def set_stim_info(self, key, value):
         # key is an iterable of group keys (str), with the last

@@ -7,7 +7,7 @@ import datetime
 import win32com.client
 from multiprocessing import Process
 from spikeylab.data.datatypes import CurveObject
-from spikeylab.data.dataobjects import AcquisitionDataObject
+from spikeylab.data.dataobjects import AcquisitionData
 
 from spikeylab.io.fileio import mightysave
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask

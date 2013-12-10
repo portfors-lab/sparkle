@@ -128,3 +128,39 @@ class TestAcqusitionData():
         np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
 
         acq_data.close()
+
+    def test_open_dataset_append_even_sets(self):
+        nsets = 8
+        npoints = 10
+        fakedata = np.ones((npoints,))
+
+        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        acq_data = AcquisitionData(fname)
+        acq_data.open_set_size = 4
+            
+        acq_data.init_data('fake', (npoints,), mode='open')
+        for iset in range(nsets):
+            acq_data.append('fake', fakedata*iset)
+
+        acq_data.consolidate('fake')
+        np.testing.assert_array_equal(acq_data.get('fake', (6,)), fakedata*6)
+        np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
+        acq_data.close()
+
+    def test_open_dataset_append_mid_set(self):
+        nsets = 9
+        npoints = 10
+        fakedata = np.ones((npoints,))
+
+        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        acq_data = AcquisitionData(fname)
+        acq_data.open_set_size = 4
+        
+        acq_data.init_data('fake', (npoints,), mode='open')
+        for iset in range(nsets):
+            acq_data.append('fake', fakedata*iset)
+
+        acq_data.consolidate('fake')
+        np.testing.assert_array_equal(acq_data.get('fake', (8,)), fakedata*8)
+        np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
+        acq_data.close()
