@@ -327,8 +327,11 @@ class MainWindow(ControlWindow):
     def update_unit_labels(self):
         nf_lbls = 7
         nt_lbls = 8
+        self.ui.extone.setFScale(self.fscale)
+        self.ui.extone.setTScale(self.tscale)
         if self.fscale == 1000:
             # better way to do this than eval?
+            self.ui.funit_lbl.setText(u'kHz')
             for i in range(nf_lbls):
                 lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'kHz')"
                 try:
@@ -336,6 +339,7 @@ class MainWindow(ControlWindow):
                 except:
                     print "trouble with command: ", lbl_str
         elif self.fscale == 1:
+            self.ui.funit_lbl.setText(u'Hz')
             for i in range(nf_lbls):
                 lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'Hz')"
                 try:
@@ -347,6 +351,7 @@ class MainWindow(ControlWindow):
             raise Exception(u"Invalid frequency scale")
             
         if self.tscale == 0.001:
+            self.ui.tunit_lbl.setText(u'ms')
             for i in range(nt_lbls):
                 lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u'ms')"
                 try:
@@ -354,6 +359,7 @@ class MainWindow(ControlWindow):
                 except:
                     print "trouble with command: ", lbl_str
         elif self.tscale == 1:
+            self.ui.tunit_lbl.setText(u's')
             for i in range(nt_lbls):
                 lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u's')"
                 try:

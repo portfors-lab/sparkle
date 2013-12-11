@@ -35,7 +35,7 @@
       </widget>
      </item>
      <item>
-      <widget class="IncrementInput" name="freq_spnbx">
+      <widget class="IncrementInput" name="freq_spnbx" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -51,7 +51,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="funit_lbl1">
+      <widget class="QLabel" name="funit_lbl">
        <property name="text">
         <string>kHz</string>
        </property>
@@ -60,7 +60,7 @@
     </layout>
    </item>
    <item>
-    <widget class="ParameterWidget" name="common"/>
+    <widget class="ParameterWidget" name="common" native="true"/>
    </item>
   </layout>
  </widget>

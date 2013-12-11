@@ -45,7 +45,19 @@ class ToneParameterWidget(QtGui.QWidget, Ui_ToneParameterWidget):
         self.freq_spnbx.setFocus()
         # self.freq_spnbx.selectAll()
 
+    def setFScale(self, fscale):
+        self.fscale = fscale
+        if self.fscale == 1000:
+            self.funit_lbl.setText('kHz')
+        elif self.fscale == 1:
+            self.funit_lbl.setText('Hz')
+        else:
+            raise Exception(u"Invalid frequency scale:"+str(self.fscale))
 
+    def setTScale(self, tscale):
+        self.common.setTScale(tscale)
+
+            
 class SilenceParameterWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -58,7 +70,6 @@ class SilenceParameterWidget(QtGui.QWidget):
         layout.addWidget(self.dur_spnbx)
 
         self.setLayout(layout)
-
 
     def setComponent(self, component):
         self.dur_spnbx.setValue(component.duration()/self.tscale)

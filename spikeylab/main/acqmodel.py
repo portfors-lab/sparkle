@@ -251,7 +251,8 @@ class AcquisitionModel():
                 raise
 
     def close_data(self):
-        self.datafile.close()
+        if self.datafile is not None:
+            self.datafile.close()
         # self.tonecurve.closedata()
 
     def start_chart(self, aichan, samplerate):

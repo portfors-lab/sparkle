@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tone_parameters.ui'
 #
-# Created: Wed Nov 13 13:31:24 2013
+# Created: Wed Dec 11 12:31:23 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -51,9 +51,9 @@ class Ui_ToneParameterWidget(object):
         self.freq_spnbx.setMinimumSize(QtCore.QSize(0, 25))
         self.freq_spnbx.setObjectName(_fromUtf8("freq_spnbx"))
         self.horizontalLayout.addWidget(self.freq_spnbx)
-        self.funit_lbl1 = QtGui.QLabel(ToneParameterWidget)
-        self.funit_lbl1.setObjectName(_fromUtf8("funit_lbl1"))
-        self.horizontalLayout.addWidget(self.funit_lbl1)
+        self.funit_lbl = QtGui.QLabel(ToneParameterWidget)
+        self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
+        self.horizontalLayout.addWidget(self.funit_lbl)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.common = ParameterWidget(ToneParameterWidget)
         self.common.setObjectName(_fromUtf8("common"))
@@ -65,7 +65,7 @@ class Ui_ToneParameterWidget(object):
     def retranslateUi(self, ToneParameterWidget):
         ToneParameterWidget.setWindowTitle(_translate("ToneParameterWidget", "Form", None))
         self.label_41.setText(_translate("ToneParameterWidget", "Frequency", None))
-        self.funit_lbl1.setText(_translate("ToneParameterWidget", "kHz", None))
+        self.funit_lbl.setText(_translate("ToneParameterWidget", "kHz", None))
 
 from incrementer import IncrementInput
 from parameterwidget import ParameterWidget

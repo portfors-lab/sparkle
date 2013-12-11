@@ -39,3 +39,12 @@ class ParameterWidget(QtGui.QWidget,Ui_ParameterWidget):
 
     def setDuration(self, duration):
         self.dur_spnbx.setValue(duration/self.tscale)
+
+    def setTScale(self, tscale):
+        self.tscale = tscale
+        if self.tscale == 0.001:
+            self.tunit_lbl_0.setText('ms')
+            self.tunit_lbl_1.setText('ms')
+        elif self.tscale == 1:
+            self.tunit_lbl_0.setText('s')
+            self.tunit_lbl_1.setText('s')
