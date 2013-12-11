@@ -25,12 +25,26 @@ class AcquisitionData():
         self.meta = {}
 
         self.open_set_size = 32
+        self.chunk_size = 2**16 # better to have a multiple of fs?
 
     def close(self):
         # consolidate fractured data sets before closing file
         self.hdf5.close()
 
-    def init_data(self, key, dims, mode='finite'):
+    def init_data(self, key, dims=None, mode='finite'):
+        """
+        Initize a new dataset
+
+        :param key: the dataset name
+        :type key: str
+        :param dims: dimensions of dataset,
+        * if mode == 'finite', this is the total size
+        * if mode == 'open', this is the dimension of a single trace
+        * if mode == 'continuous', this is ignored
+        :type dims: tuple
+        :param mode: the kind of acquisition taking place
+        :type mode: str
+        """
         if mode == 'finite':
             self.datasets[key] = self.hdf5.create_dataset(key, dims)
             self.meta[key] = {'mode':mode, 'cursor':[0]*len(dims)}
@@ -38,14 +52,18 @@ class AcquisitionData():
             if len(dims) > 1:
                 print "open acquisition only for single dimension data"
                 return
-            self.datasets[key+'_set0'] = self.hdf5.create_dataset(key+'_set0', ((self.open_set_size,) + dims))
-            self.meta[key] = {'mode':mode, 'datalen':dims[0], 'set_counter':0, 'cursor':0}
+            self.datasets[key] = self.hdf5.create_dataset(key, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
+            self.meta[key] = {'mode':mode, 'datalen':dims[0], 'cursor':0}
         elif mode == 'continuous':
-            pass
+            self.datasets[key+'_set0'] = self.hdf5.create_dataset(key+'_set0', (self.chunk_size,))
+            self.meta[key] = {'mode':mode, 'set_counter':0, 'cursor':0}
         else:
             raise Exception("Unknown acquisition mode")
 
     def append(self, key, data):
+        """
+        Inserts data sequentially to structure in repeated calls.
+        """
         mode = self.meta[key]['mode']
         if mode == 'finite':
             current_location = self.meta[key]['cursor']
@@ -58,20 +76,21 @@ class AcquisitionData():
             self.datasets[key][tuple(index)] = data[:]
             dims = self.datasets[key].shape
             increment(current_location, dims, data.shape)
-        if mode =='open':
-            setnum = self.meta[key]['set_counter']
+        elif mode =='open':
             current_index = self.meta[key]['cursor']
-            self.datasets[key+'_set'+str(setnum)][current_index] = data
+            self.datasets[key][current_index] = data
             current_index += 1
-            if current_index == self.open_set_size:
-                setnum += 1
-                self.datasets[key+'_set'+str(setnum)] = self.hdf5.create_dataset(
-                    key+'_set'+str(setnum), ((self.open_set_size,) + (self.meta[key]['datalen'],)))
-                current_index = 0
-            self.meta[key]['set_counter'] = setnum
+            if current_index == self.datasets[key].shape[0]:
+                self.datasets[key].resize(current_index+self.open_set_size, axis=0)
             self.meta[key]['cursor'] = current_index
+        elif mode =='continuous':
+            print "TODO: add continuous append"
 
     def insert(self, key, index, data):
+        """
+        Inserts data to index location. For 'finite' mode only. Does not affect
+        appending location marker.
+        """
         mode = self.meta[key]['mode']
         if mode == 'finite':
             # turn the index into a tuple so not to trigger advanced indexing
@@ -88,7 +107,23 @@ class AcquisitionData():
             data = self.datasets[key][:]
         return data
 
+    def trim(self, key):
+        """
+        Removes empty rows from dataset
+        """
+        current_index = self.meta[key]['cursor']
+        self.datasets[key].resize(current_index, axis=0)
+
     def consolidate(self, key):
+        """
+        Collapse a 'continuous' acqusition into a single dataset.
+        This must be performed before calling get function for key in these 
+        modes.
+        """
+        if self.meta[key]['mode'] not in ['open', 'continuous']:
+            print "consolidation not supported for mode: ", self.meta[key]['mode']
+            return
+        print 'metadata for ', key, self.meta[key]
         setnum = self.meta[key]['set_counter']
         current_index = self.meta[key]['cursor']
         data_length = self.meta[key]['datalen']

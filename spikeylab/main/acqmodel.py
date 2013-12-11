@@ -7,6 +7,8 @@ from spikeylab.io.players import FinitePlayer, ToneCurve, ContinuousPlayer
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum
 from spikeylab.tools import spikestats
 from spikeylab.tools.qthreading import ProtocolSignals
+from spikeylab.tools.util import increment_title, create_unique_path
+from spikeylab.data.dataobjects import AcquisitionData
 
 class AcquisitionModel():
     """Holds state information for an experimental session"""
@@ -15,6 +17,9 @@ class AcquisitionModel():
         self.finite_player = None
         self.threshold = threshold
         self.signals = ProtocolSignals()
+
+        self.datafile = None
+        self.open_name = 'explore0'
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -26,6 +31,11 @@ class AcquisitionModel():
             print "Error: unable to load calibration data from file: ", cal_fname
         # calibration_vector = np.load(os.path.join(caldata_filename()))
         # calibration_freqs = np.load(os.path.join(calfreq_filename()))
+
+    def set_data_file(self):
+        # find first available file name
+        fname = create_unique_path(self.savefolder, self.savename)
+        self.datafile = AcquisitionData(fname)
 
     def set_threshold(self, threshold):
         """Spike detection threshold
@@ -89,6 +99,11 @@ class AcquisitionModel():
         
         # TODO: some error checking to make sure valid paramenters are set
 
+        # initize data set
+        self.current_dataset_name = self.open_name
+        self.datafile.init_data(self.current_dataset_name, self.aitimes.shape, mode='open')
+        self.open_name = increment_title(self.open_name)
+
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
         self.start_time = time.time()
@@ -140,6 +155,9 @@ class AcquisitionModel():
 
                 self.finite_player.reset()
 
+                # save response data
+                self.save_data(response)
+
                 irep +=1
                 if irep == self.nreps:
                     total_spikes = float(sum(spike_counts))
@@ -155,6 +173,10 @@ class AcquisitionModel():
             except:
                 raise
         self.finite_player.stop()
+        self.datafile.trim(self.current_dataset_name)
+
+    def save_data(self, data):
+        self.datafile.append(self.current_dataset_name, data)
 
     def halt(self):
         """Stop the current on-going generation/acquisition"""
@@ -228,8 +250,9 @@ class AcquisitionModel():
                 self.tonecurve.closedata()
                 raise
 
-    def closedata(self):
-        self.tonecurve.closedata()
+    def close_data(self):
+        self.datafile.close()
+        # self.tonecurve.closedata()
 
     def start_chart(self, aichan, samplerate):
         """Begin on-going chart style acqusition"""

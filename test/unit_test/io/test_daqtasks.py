@@ -1,5 +1,5 @@
 import numpy as np
-from audiolab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
+from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
 from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
 from PyDAQmx.DAQmxTypes import *
 import time

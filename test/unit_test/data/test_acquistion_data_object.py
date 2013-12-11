@@ -60,6 +60,10 @@ class TestAcqusitionData():
     Test creating, putting and getting to acquisition data structure
     """
     def test_finite_dataset_append(self):
+        """
+        Test appending to the data structure when trace data has single
+        dimension, e.g. (10,)
+        """
         # such as for a tuning curve
         nsets = 3
         npoints = 10
@@ -77,6 +81,10 @@ class TestAcqusitionData():
         acq_data.close()
 
     def test_finite_dataset_append_double_dimension(self):
+        """
+        Test appending to the data structure when trace data has double
+        dimension, but still a vector e.g. (10,1)
+        """
         # such as for a tuning curve
         nsets = 3
         npoints = 10
@@ -95,6 +103,10 @@ class TestAcqusitionData():
 
     @raises(TypeError)
     def test_finite_dataset_append_error(self):
+        """
+        Test appending to the data structure when trace data incorrect
+        dimension according to intialized dimensions
+        """
         # such as for a tuning curve
         nsets = 3
         npoints = 10
@@ -130,6 +142,10 @@ class TestAcqusitionData():
         acq_data.close()
 
     def test_open_dataset_append_even_sets(self):
+        """
+        Test appending to, and consolidating dataset, ending in a 
+        full temp set before consolidating.
+        """
         nsets = 8
         npoints = 10
         fakedata = np.ones((npoints,))
@@ -141,14 +157,18 @@ class TestAcqusitionData():
         acq_data.init_data('fake', (npoints,), mode='open')
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
+        acq_data.trim('fake')
 
-        acq_data.consolidate('fake')
         np.testing.assert_array_equal(acq_data.get('fake', (6,)), fakedata*6)
         np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
         acq_data.close()
 
     def test_open_dataset_append_mid_set(self):
-        nsets = 9
+        """
+        Test appending to, and consolidating dataset, ending in a 
+        partial temp set before consolidating.
+        """
+        nsets = 13
         npoints = 10
         fakedata = np.ones((npoints,))
 
@@ -159,8 +179,8 @@ class TestAcqusitionData():
         acq_data.init_data('fake', (npoints,), mode='open')
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
+        acq_data.trim('fake')
 
-        acq_data.consolidate('fake')
         np.testing.assert_array_equal(acq_data.get('fake', (8,)), fakedata*8)
         np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
         acq_data.close()

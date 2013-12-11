@@ -76,6 +76,10 @@ class MainWindow(ControlWindow):
     def on_start(self):
         # set plot axis to appropriate limits
         print 'on start'
+        # first time set up data file
+        if self.acqmodel.datafile is None:
+            self.acqmodel.set_save_params(self.savefolder, self.savename)
+            self.acqmodel.set_data_file()
         self.ui.plot_dock.setWidget(self.ui.display)
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         if not self.verify_inputs():
@@ -408,6 +412,7 @@ class MainWindow(ControlWindow):
     def closeEvent(self,event):
         # stop any tasks that may be running
         self.on_stop()
+        self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
 
 
