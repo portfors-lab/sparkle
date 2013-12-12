@@ -100,6 +100,9 @@ class AcquisitionData():
             print "insert not supported for mode: ", mode
 
     def get(self, key, index=None):
+        """
+        Return data for key at specified index
+        """
         if index is not None:
             index = tuple(index)
             data = self.datasets[key][index]
@@ -142,12 +145,11 @@ class AcquisitionData():
         for iset in range(setnum+1):
             del self.datasets[key+'_set'+str(iset)]
 
-    def set_stim_info(self, key, value):
+    def set_stim_info(self, key, attrdict):
         # key is an iterable of group keys (str), with the last
         # string being the attribute name
-        attrname = key[-1]
-        fullkey = '/'.join(key[:-1])
-        self.hdf5[fullkey].attrs[attrname] = value
+        for attr, val in attrdict.iteritems():
+            self.hdf5[key].attrs[attr] = val
 
 def increment(index, dims, data_shape):
     inc_amount = data_shape
