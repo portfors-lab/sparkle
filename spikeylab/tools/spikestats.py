@@ -16,6 +16,7 @@ def spike_times(signal, threshold, sr, mint=None):
     times = []
     over, = np.where(signal>threshold)
     segments, = np.where(np.diff(over) > 1)
+
     if len(over) > 1:
         if len(segments) == 0:
             segments = [0, len(over)-1]
@@ -34,7 +35,7 @@ def spike_times(signal, threshold, sr, mint=None):
         for iseg in range(1,len(segments)):
             if segments[iseg] - segments[iseg-1] == 1:
                 # only single point over threshold
-                idx = over[iseg]
+                idx = over[segments[iseg]]
             else:
                 segments[0] = segments[0]-1                
                 # find maximum of continuous set over max

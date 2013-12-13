@@ -9,3 +9,6 @@ def get_appdir():
         appdir = os.path.expanduser(path.join("~", "." + APPNAME))
 
     return appdir
+
+def get_project_directory():
+    return os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

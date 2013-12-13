@@ -240,7 +240,7 @@ class SpikePlotter(HasTraits):
 
         trace_plot = Plot(self.trace_data)
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
-        trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes', color='red')
+        trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes', color='black', marker_size=1.0)
         thresh_line, = trace_plot.plot(('thresh_anchor', 'threshold'), type='line', color='red')
         trace_plot.set(bounds=[600,500], position=[0,0])
         # must manually set sort order on array for map_index to work
@@ -477,10 +477,11 @@ class ScrollingPlotter(HasTraits):
 if __name__ == '__main__':
     import os
     import spikeylab.tools.audiotools as audiotools
+    import test.sample as sample
 
     app = QtGui.QApplication(sys.argv)
 
-    sylpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "sample_syl.wav")
+    sylpath = sample.samplewav()
     spec, f, bins, fs = audiotools.spectrogram(sylpath)
 
     # spec_plot = SpecWidget()
