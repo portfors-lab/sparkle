@@ -98,18 +98,28 @@ class LineDraggingTool(DragTool):
 
     def normal_mouse_move(self, event):
         plot = self.component
+        try:
+            ndx = plot.get_closest_line((event.x-self.xoffset, event.y-self.yoffset), self.tolerance)
+        except IndexError:
+            print 'WAAAAAAAAAAAAAAAAAAAAHH!!'
+            print 'inputs:'
+            print "event.x {}, self.xoffset {}, event.y {}, self.yoffset {}".format(event.x, self.xoffset, event.y, self.yoffset)
+            raise
 
-        # ndx = plot.map_index((event.x, event.y), self.threshold)
-        ndx = plot.get_closest_line((event.x-self.xoffset, event.y-self.yoffset), self.tolerance)
+        redraw = False
         if ndx is None:
-            plot.line_width = 1.0
-            plot.color = 'red'
+            if plot.color == 'crimson':
+                plot.line_width = 1.0
+                plot.color = 'red'
+                redraw = True
         else:
-            plot.line_width = 1.5
-            plot.color = 'crimson'
-
-        plot.invalidate_draw()
-        plot.request_redraw()
+            if plot.color == 'red':
+                plot.line_width = 1.5
+                plot.color = 'crimson'
+                redraw = True
+        if redraw:
+            plot.invalidate_draw()
+            plot.request_redraw()
 
     def drag_start(self, event):
         plot = self.component

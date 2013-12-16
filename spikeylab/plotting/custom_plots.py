@@ -86,10 +86,11 @@ class TraceWidget(BaseWidget):
         return SpikePlotter()
     
     def resizeEvent(self, event):
-        tp_bounds = self.traits.trace_plot.bounds
-        # print 'trace plot', self.traits.trace_plot.position, tp_bounds
-        # print 'stim plot', self.traits.stim_plot.position
-        self.traits.stim_plot.set(position=[50,tp_bounds[1]]) 
+        margin = self.traits.trace_plot.padding_left
+        vpos = event.size().height() - self.traits.trace_plot.padding_bottom \
+                                     - self.traits.trace_plot.padding_top \
+                                     - self.traits.stim_plot_height
+        self.traits.stim_plot.set(position=[margin,vpos]) 
 
     def contextMenuRequested(self, point):
         menu = QtGui.QMenu()
@@ -225,12 +226,6 @@ class SpikePlotter(HasTraits):
     raster_yslots = np.linspace(RASTER_YMIN, RASTER_YMAX, DEFAULT_NREPS)
     threshold_val = 0.25
     signals = ProtocolSignals()
-    # trace_data = ArrayPlotData
-    # times_index = Array
-    # response_data = Array
-    # spike_data = Array
-
-    # def __init__(self):
     
     def _plot_default(self):
         self.trace_data = ArrayPlotData(times=[], response=[], bins=[], spikes=[], 
@@ -242,7 +237,6 @@ class SpikePlotter(HasTraits):
         trace_plot.plot(('times', 'response'), type='line', name='response potential')
         trace_plot.plot(('bins', 'spikes'), type='scatter', name='detected spikes', color='black', marker_size=1.0)
         thresh_line, = trace_plot.plot(('thresh_anchor', 'threshold'), type='line', color='red')
-        trace_plot.set(bounds=[600,500], position=[0,0])
         # must manually set sort order on array for map_index to work
         trace_plot.datasources['thresh_anchor'].sort_order = "ascending"
 
@@ -252,13 +246,14 @@ class SpikePlotter(HasTraits):
                         name='stim signal', color='blue')
         stim_plot.set(resizable='h',
                       bounds=[600,self.stim_plot_height], 
-                      position=[50,350],
                       border_visible=False,
                       overlay_border=False)
-        stim_plot.y_axis.orientation = "right"
+
         stim_plot.x_axis.axis_line_visible = False
         stim_plot.x_axis.tick_visible = False
+        stim_plot.y_axis.tick_visible = False
         stim_plot.x_axis.tick_label_formatter = self._noticks
+        stim_plot.y_axis.tick_label_formatter = self._noticks
         stim_plot.y_grid.visible = False
 
         trace_plot.x_axis.title = 'Time (s)'
@@ -276,7 +271,6 @@ class SpikePlotter(HasTraits):
         linetool = LineDraggingTool(thresh_line)
         broadcaster.tools.append(linetool)
         trace_plot.tools.append(broadcaster)
-
 
         # setting the offsets after adding tools, sets it for all child tools
         broadcaster.set_offsets(trace_plot.padding_left, trace_plot.padding_bottom)
