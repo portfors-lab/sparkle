@@ -19,7 +19,7 @@ class AcquisitionModel():
         self.signals = ProtocolSignals()
 
         self.datafile = None
-        self.open_name = 'explore0'
+        self.set_name = 'data0'
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -100,9 +100,9 @@ class AcquisitionModel():
         # TODO: some error checking to make sure valid paramenters are set
 
         # initize data set
-        self.current_dataset_name = self.open_name
+        self.current_dataset_name = self.set_name
         self.datafile.init_data(self.current_dataset_name, self.aitimes.shape, mode='open')
-        self.open_name = increment_title(self.open_name)
+        self.set_name = increment_title(self.set_name)
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately

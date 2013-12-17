@@ -67,7 +67,8 @@ class AutoParameterModel(QtCore.QAbstractListModel):
         self.beginRemoveRows(parent, position, position + rows - 1)
         for i in range(rows):
             p = self._parameters.pop(position)
-            self._selectionmap.pop(p['paramid'])
+            # cannot purge selection model, or else we have no way of 
+            # recovering it when reordering
         self.endRemoveRows()
         return True
 
