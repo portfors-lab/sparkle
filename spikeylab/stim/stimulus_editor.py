@@ -7,6 +7,8 @@ from PyQt4 import QtGui, QtCore
 from stimeditor_form import Ui_StimulusEditor
 from auto_parameter import Parametizer
 
+from matplotlib.mlab import specgram
+
 class StimulusEditor(QtGui.QWidget):
     def __init__(self, parent=None):
         super(StimulusEditor,self).__init__(parent)
@@ -22,6 +24,23 @@ class StimulusEditor(QtGui.QWidget):
         parametizer.show()
         self.parametizer = parametizer
 
+    def signal(self):
+        stim_signal = self.ui.trackview.model().signal()
+        # import matplotlib.pyplot as plt
+        nfft = 512
+        Pxx, freqs, bins, im = specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
+                              pad_to=nfft*2)
+        # # print fig, spec
+        # plt.imshow(Pxx)
+        # plt.show()
+
+        from spikeylab.plotting.custom_plots import SpecWidget
+        fig = SpecWidget()
+        fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
+        fig.show()
+        self.asdkjfasdfk = fig
+        
+        return stim_signal
 
 if __name__ == "__main__":
     import sys
@@ -51,11 +70,11 @@ if __name__ == "__main__":
 
     stim = StimulusModel()
     stim.insertComponent(tone2)
-    stim.insertComponent(tone1)
-    stim.insertComponent(tone0)
+    # stim.insertComponent(tone1)
+    # stim.insertComponent(tone0)
 
     stim.insertComponent(tone4, (1,0))
-    stim.insertComponent(tone5, (1,0))
+    # stim.insertComponent(tone5, (1,0))
     stim.insertComponent(vocal0, (1,0))
 
     stim.insertComponent(tone3, (2,0))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Wed Nov 20 12:51:43 2013
+# Created: Wed Dec 18 10:48:35 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -122,6 +122,7 @@ class Ui_StimulusEditor(object):
 
         self.retranslateUi(StimulusEditor)
         QtCore.QObject.connect(self.autoparam_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.doAutoparameters)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), StimulusEditor.signal)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):

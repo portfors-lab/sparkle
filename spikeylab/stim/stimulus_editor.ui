@@ -208,8 +208,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>signal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>924</x>
+     <y>609</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1046</x>
+     <y>589</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>doAutoparameters()</slot>
+  <slot>signal()</slot>
  </slots>
 </ui>

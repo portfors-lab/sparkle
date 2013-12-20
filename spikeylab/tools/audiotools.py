@@ -62,17 +62,19 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
         #print("duration (s) :{}".format(dur))
         # equation for db from voltage is db = 20 * log10(V2/V1))
         # 10^(db/20)
-        db = db + adjustdb
-        if db < caldb:
-            atten = caldb - db
-            db = caldb
-        else:
-            atten = 0
+        # db = db + adjustdb
+        # if db < caldb:
+        #     atten = caldb - db
+        #     db = caldb
+        # else:
+        #     atten = 0
+        atten = 0
 
         v_at_caldB = calv
         caldB = caldb
+        print 'this db', db
         amp = (10 ** ((db-caldB)/DBFACTOR)*v_at_caldB)
-        print(amp)
+        print 'amp voltage', amp
 
         if VERBOSE:
             print("current dB: {}, attenuation: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, atten, freq/1000, amp))

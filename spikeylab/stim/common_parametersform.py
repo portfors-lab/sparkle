@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
-# Created: Wed Dec 11 12:39:27 2013
+# Created: Wed Dec 18 15:16:41 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -86,6 +86,7 @@ class Ui_ParameterWidget(object):
         font = QtGui.QFont()
         font.setPointSize(14)
         self.db_spnbx.setFont(font)
+        self.db_spnbx.setMaximum(110)
         self.db_spnbx.setObjectName(_fromUtf8("db_spnbx"))
         self.gridLayout_5.addWidget(self.db_spnbx, 0, 1, 1, 1)
         self.tunit_lbl_0 = QtGui.QLabel(ParameterWidget)

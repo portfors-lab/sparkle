@@ -6,7 +6,7 @@ import scipy.misc
 
 from spikeylab.stim.tone_parameters import ToneParameterWidget, SilenceParameterWidget
 from spikeylab.stim.vocal_parameters import VocalParameterWidget
-from spikeylab.tools.audiotools import spectrogram
+from spikeylab.tools.audiotools import spectrogram, make_tone
 from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
 
 import numpy as np
@@ -30,10 +30,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self.nreps = 0
+        self.samplerate = 375000
         # 2D array of simulus components track number x component number
         self.segments = [[]]
         # add an empty place to place components into new track
         self.auto_params = AutoParameterModel()
+
+        # reference for what voltage == what intensity
+        self.calv = 0.1
+        self.caldb = 100
 
     def setAutoParams(self, params):
         self.auto_params = params
@@ -141,12 +146,86 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
+    def expandedStim(self):
+        """
+        Apply the autoparameters to this stimulus and return a list of
+        the resulting stimuli
+        """
+        # initilize array to hold all varied parameters
+        params = self.auto_params.allData()
+        steps = []
+        ntraces = 1
+        for p in params:
+            steps.append(np.arange(p['start'], p['stop'], p['step']))
+            ntraces = ntraces*len(steps[-1])
+
+        varylist = [[steps[ip][itrace % len(steps[ip])] for ip in range(len(params))] for itrace in range(ntraces)]
+
+        # varylist = [[None for x in range(len(params))] for y in range(ntraces)]
+        # for ip, param in enumerate(params):
+        #     for itrace in range(ntraces):
+        #         value = steps[ip][itrace % len(steps[ip])]
+        #         varylist[itrace][ip] = value
+
+        # now create the stimuli according to steps
+        stim_list = []
+        for itrace in range(ntraces):
+            for ip, param in enumerate(params):
+                comp_inds = self.auto_params.selection(param)
+                for index in comp_inds:
+                    component = self.data(index, QtCore.Qt.UserRole)
+                    component.set(param['parameter'], varylist[itrace][ip])
+            # copy of current stim state, or go ahead and turn it into a signal?
+            # so then would I want to formulate some doc here as well?
+            stim_list.append(self.signal())
+
+        # now reset the components to start value
+        for ip, param in enumerate(params):
+            comp_inds = self.auto_params.selection(param)
+            for index in comp_inds:
+                component = self.data(index, QtCore.Qt.UserRole)
+                component.set(param['parameter'], varylist[0][ip])
+
+        return stim_list
+
+    def expanded_doc(self):
+        """
+        JSON/YAML/XML representation of exactly what was presented
+        """
+
+    def template_doc(self):
+        """
+        JSON/YAML/XML template to recreate this stimulus in another session
+        """
+
+    def signal(self):
+        """Return the current stimulus in signal representation"""
+        track_signals = []
+        max_db = max([comp.intensity() for t in self.segments for comp in t])
+        caldb = 100
+        atten = caldb - max_db
+        for track in self.segments:
+            # nsamples = sum([comp.duration() for comp in track])*self.samplerate
+            # track_signal = np.zeros((nsamples,))
+            track_list = []
+            for component in track:
+                track_list.append(component.signal(self.samplerate, atten))
+            if len(track_list) > 0:   
+                track_signals.append(np.hstack(track_list))
+
+        # track_signals = sorted(track_signals, key=len, reverse=True)
+        full_len = len(max(track_signals, key=len))
+        total_signal = np.zeros((full_len,))
+        for track in track_signals:
+            total_signal[0:len(track)] += track
+
+        return total_signal
+
 
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     _start_time = None
     _duration = .01 # in seconds
-    _fs = 400000 # in Hz
     _intensity = 20 # in dB SPL
     _risefall = 0
     def __init__(self):
@@ -163,18 +242,15 @@ class AbstractStimulusComponent(object):
 
     def setIntensity(self, intensity):
         self._intensity = intensity
-
-    def samplerate(self):
-        return self._fs
-
-    def setSamplerate(self, fs):
-        self._fs = fs
         
     def risefall(self):
         return self._risefall
 
     def setRisefall(self, risefall):
         self._risefall = risefall    
+
+    def set(self, param, value):
+        setattr(self, '_'+param, value)
 
     def paint(self, painter, rect, palette):
         painter.save()
@@ -189,6 +265,9 @@ class AbstractStimulusComponent(object):
         painter.restore()
 
     def showEditor(self):
+        raise NotImplementedError
+
+    def signal(self, fs, atten):
         raise NotImplementedError
 
     def serialize(self):
@@ -237,6 +316,11 @@ class PureTone(Tone):
         painter.drawText(rect.x()+5, rect.y()+12, rect.width()-5, rect.height()-12, QtCore.Qt.AlignLeft, "Pure Tone")
         painter.fillRect(rect.x()+5, rect.y()+35, rect.width()-10, 20, QtCore.Qt.black)
         painter.drawText(rect.x()+5, rect.y()+80, str(self._frequency/1000) + " kHz")
+
+    def signal(self, fs, atten):
+        tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs)[0]
+        return tone
+
 
 class FMSweep(Tone):
     name = "fmsweep"
@@ -309,6 +393,25 @@ class Vocalization(AbstractStimulusComponent):
         editor.setComponent(self)
         return editor
 
+    def signal(self, fs, atten):
+        try:
+            sr, wavdata = wv.read(self._filename)
+        except:
+            print u"Problem reading wav file"
+            raise
+        if fs != sr:
+            print 'specified', fs, 'wav file', sr
+            raise Exception("specified samplerate does not match wav stimulus")
+        # normalize to calibration
+        wavdata = wavdata.astype(float)
+        print "DANGER vocal wav files Hard-coded calibration 100db 0.1V"
+        caldB = 100
+        v_at_caldB = 0.1
+        max_amp = np.amax(wavdata)
+        amp = (10 ** ((self._intensity+atten-caldB)/20)*v_at_caldB)
+        wavdata = ((wavdata/max_amp)*amp)
+        return wavdata
+
 class Noise(AbstractStimulusComponent):
     name = "noise"
 
@@ -323,6 +426,9 @@ class Silence(AbstractStimulusComponent):
         editor = SilenceParameterWidget()
         editor.setComponent(self)
         return editor
+
+    def signal(self, fs, atten):
+        return np.zeros((self._duration*fs,))
 
 class Modulation(AbstractStimulusComponent):
     modulation_frequency = None

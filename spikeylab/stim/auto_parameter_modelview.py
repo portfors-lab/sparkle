@@ -35,6 +35,9 @@ class AutoParameterModel(QtCore.QAbstractListModel):
     def data(self, index, role=QtCore.Qt.UserRole):
         return self._parameters[index.row()]
         
+    def allData(self):
+        return self._parameters
+
     def setData(self, index, value, role):
         self._parameters[index.row()] = value
         return True
@@ -106,6 +109,12 @@ class AutoParameterModel(QtCore.QAbstractListModel):
         """The StimulusModel for which this model acts on"""
         return self._stimview.model()
 
+    def selection(self, param):
+        """
+        Return the selected Indexes for the given parameter
+        """
+        selection_model = self._selectionmap[param['paramid']]
+        return selection_model.selectedIndexes()
 
 class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 
