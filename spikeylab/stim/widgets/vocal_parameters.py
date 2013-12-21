@@ -5,13 +5,13 @@ from vocal_parameters_form import Ui_VocalParameterWidget
 from spikeylab.tools.audiotools import spectrogram
 from PyQt4 import QtGui, QtCore
 
-class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
+class ParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
+    include_in_stack = True
+    name = "Vocalization"
+
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
-
-        self.tscale = 0.001 # display in ms
-        self.fscale = 1000
 
         # grey out parameters determined by file, not to be altered by user
         self.common.dur_spnbx.setEnabled(False)
@@ -94,4 +94,10 @@ class VocalParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         self.current_wav_file = spath
 
     def setContentFocus(self):
+        pass
+
+    def inputsDict(self):
+        return {}
+
+    def loadInputsDict(self, inputs):
         pass

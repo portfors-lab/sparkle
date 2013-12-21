@@ -27,18 +27,18 @@ class ControlWindow(QtGui.QMainWindow):
         except Exception as e:
             print e
 
-
     def verify_inputs(self):
         allgood = True
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
                 pass
             elif self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
-                if self.ui.extone.durationValue() > self.ui.windowsz_spnbx.value():
+                extone = self.ui.parameter_stack.widget_for_name('Tone')
+                if extone.durationValue() > self.ui.windowsz_spnbx.value():
                     QtGui.QMessageBox.warning(self, "Invalid Input",
                         "Window size must equal or exceed stimulus length")
                     allgood = False
-                if self.ui.extone.freq_spnbx.value() > (self.ui.aosr_spnbx.value()/2):
+                if extone.freq_spnbx.value() > (self.ui.aosr_spnbx.value()/2):
                     QtGui.QMessageBox.warning(self, "Invalid Input",
                         "Generation sample rate must be at least twice the stimulus frequency")
                     allgood=False
@@ -58,8 +58,8 @@ class ControlWindow(QtGui.QMainWindow):
         fname = os.path.join(appdir, INPUTSFNAME)
 
         savedict = {}
-        savedict['wavrootdir'] = self.ui.exvocal.getTreeRoot()
-        savedict['filelistdir'] = self.ui.exvocal.getListRoot()
+        savedict['wavrootdir'] = self.exvocal.getTreeRoot()
+        savedict['filelistdir'] = self.exvocal.getListRoot()
         savedict['threshold'] = self.ui.thresh_lnedt.text()
         savedict['binsz'] = self.ui.binsz_lnedt.text()
         savedict['aisr'] = self.ui.aisr_spnbx.value()
@@ -70,13 +70,17 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['saveformat'] = self.saveformat
         savedict['ex_nreps'] = self.ui.ex_nreps_spnbx.value()
         savedict['ex_reprate'] = self.ui.ex_reprate_spnbx.value()
-        savedict['extone_freq'] = self.ui.extone.freq_spnbx.value()
-        savedict['extone_db'] = self.ui.extone.intensityValue()
-        savedict['extone_dur'] = self.ui.extone.durationValue()
-        savedict['extone_risefall'] = self.ui.extone.risefallValue()
+        # savedict['extone_freq'] = self.extone.freq_spnbx.value()
+        # savedict['extone_db'] = self.extone.intensityValue()
+        # savedict['extone_dur'] = self.extone.durationValue()
+        # savedict['extone_risefall'] = self.extone.risefallValue()
         savedict['aosr'] = self.ui.aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
+        # parameter settings
+        for i, name in enumerate(self.ui.parameter_stack.names):
+            savedict[name] = self.ui.parameter_stack.widget(i).inputsDict()
+
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 
@@ -105,12 +109,16 @@ class ControlWindow(QtGui.QMainWindow):
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.ex_nreps_spnbx.setValue(inputsdict.get('ex_nreps', 5))
         self.ui.ex_reprate_spnbx.setValue(inputsdict.get('ex_reprate', 1))
-        self.ui.extone.freq_spnbx.setValue(inputsdict.get('extone_freq', 5))
-        self.ui.extone.setIntensity(inputsdict.get('extone_db', 60))
-        self.ui.extone.setDuration(inputsdict.get('extone_dur', 200))
-        self.ui.extone.setRisefall(inputsdict.get('extone_risefall', 0))
         self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
+        
+        for name in self.ui.parameter_stack.names:
+            try:
+                self.ui.parameter_stack.widget_for_name(name).loadInputsDict(inputsdict[name])
+            except AttributeError:
+                pass
+            except:
+                raise
 
     def closeEvent(self,event):
         self.save_inputs()

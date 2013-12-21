@@ -60,7 +60,7 @@
     </layout>
    </item>
    <item>
-    <widget class="ParameterWidget" name="common" native="true"/>
+    <widget class="CommonParameterWidget" name="common" native="true"/>
    </item>
   </layout>
  </widget>
@@ -68,13 +68,13 @@
   <customwidget>
    <class>IncrementInput</class>
    <extends>QWidget</extends>
-   <header>incrementer</header>
+   <header>spikeylab.stim.incrementer</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ParameterWidget</class>
+   <class>CommonParameterWidget</class>
    <extends>QWidget</extends>
-   <header>parameterwidget</header>
+   <header>spikeylab.stim.common_parameters</header>
   </customwidget>
  </customwidgets>
  <resources/>

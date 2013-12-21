@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>555</width>
-    <height>444</height>
+    <width>545</width>
+    <height>427</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,15 +64,15 @@
     </widget>
    </item>
    <item>
-    <widget class="ParameterWidget" name="common" native="true"/>
+    <widget class="CommonParameterWidget" name="common" native="true"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ParameterWidget</class>
+   <class>CommonParameterWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.stim.parameterwidget</header>
+   <header>spikeylab.stim.common_parameters</header>
   </customwidget>
   <customwidget>
    <class>SpecWidget</class>

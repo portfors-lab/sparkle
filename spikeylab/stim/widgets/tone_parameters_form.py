@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tone_parameters.ui'
 #
-# Created: Wed Dec 11 12:31:23 2013
+# Created: Fri Dec 20 10:52:21 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,7 +55,7 @@ class Ui_ToneParameterWidget(object):
         self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
         self.horizontalLayout.addWidget(self.funit_lbl)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.common = ParameterWidget(ToneParameterWidget)
+        self.common = CommonParameterWidget(ToneParameterWidget)
         self.common.setObjectName(_fromUtf8("common"))
         self.verticalLayout.addWidget(self.common)
 
@@ -67,5 +67,5 @@ class Ui_ToneParameterWidget(object):
         self.label_41.setText(_translate("ToneParameterWidget", "Frequency", None))
         self.funit_lbl.setText(_translate("ToneParameterWidget", "kHz", None))
 
-from incrementer import IncrementInput
-from parameterwidget import ParameterWidget
+from spikeylab.stim.common_parameters import CommonParameterWidget
+from spikeylab.stim.incrementer import IncrementInput

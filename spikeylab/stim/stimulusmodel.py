@@ -4,8 +4,8 @@ import uuid
 
 import scipy.misc
 
-from spikeylab.stim.tone_parameters import ToneParameterWidget, SilenceParameterWidget
-from spikeylab.stim.vocal_parameters import VocalParameterWidget
+from spikeylab.stim.widgets import tone_parameters, silence_parameters
+from spikeylab.stim.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
 from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
 
@@ -306,7 +306,7 @@ class PureTone(Tone):
         self._frequency = freq
 
     def showEditor(self):
-        editor = ToneParameterWidget()
+        editor = tone_parameters.ParameterWidget()
         editor.setComponent(self)
         return editor
 
@@ -389,7 +389,7 @@ class Vocalization(AbstractStimulusComponent):
             painter.restore()
             
     def showEditor(self):
-        editor = VocalParameterWidget()
+        editor = vocal_parameters.ParameterWidget()
         editor.setComponent(self)
         return editor
 
@@ -423,7 +423,7 @@ class Silence(AbstractStimulusComponent):
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
 
     def showEditor(self):
-        editor = SilenceParameterWidget()
+        editor = silence_parameters.ParameterWidget()
         editor.setComponent(self)
         return editor
 

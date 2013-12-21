@@ -56,7 +56,6 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
 
-        
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
         
         self.current_operation = None
@@ -65,9 +64,12 @@ class MainWindow(ControlWindow):
         self.update_unit_labels()
         self.set_plot_thresh()
 
+        self.ui.explore_stim_type_cmbbx.insertItems(0, self.ui.parameter_stack.names)
+
         # set up wav file directory finder paths
-        self.ui.exvocal.setRootDirs(self.wavrootdir, self.filelistdir)
-        self.ui.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
+        self.exvocal = self.ui.parameter_stack.widget_for_name("Vocalization")
+        self.exvocal.setRootDirs(self.wavrootdir, self.filelistdir)
+        self.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
 
         # always show plots on load
         self.ui.plot_dock.setVisible(True)
@@ -120,6 +122,7 @@ class MainWindow(ControlWindow):
                                              acqtime=winsz, aisr=acq_rate,
                                              nreps=nreps, binsz=binsz)
 
+            # each widget should be in charge of putting its own stimulus together
             if self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
                 f = self.ui.extone.freq_spnbx.value()*self.fscale
                 gen_rate = self.ui.aosr_spnbx.value()*self.fscale
@@ -172,9 +175,9 @@ class MainWindow(ControlWindow):
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
         binsz = float(self.ui.binsz_lnedt.text())*self.tscale
-        nreps = self.ui.ex_nreps_spnbx.value()
         reprate = self.ui.ex_reprate_spnbx.value()
         interval = (1/reprate)*1000
+        nreps = self.ui.ex_nreps_spnbx.value()
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
@@ -187,7 +190,7 @@ class MainWindow(ControlWindow):
         if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
             # assume user has already clicked on wav file
             
-            self.acqmodel.set_explore_params(wavfile=self.ui.exvocal.current_wav_file, 
+            self.acqmodel.set_explore_params(wavfile=self.exvocal.current_wav_file, 
                                              aochan=aochan, aichan=aichan,
                                              acqtime=winsz, aisr=acq_rate, 
                                              nreps=nreps, binsz=binsz)
@@ -325,14 +328,15 @@ class MainWindow(ControlWindow):
         self.update_unit_labels()
 
     def update_unit_labels(self):
-        nf_lbls = 7
-        nt_lbls = 8
-        self.ui.extone.setFScale(self.fscale)
-        self.ui.extone.setTScale(self.tscale)
+        nf_lbls = 4
+        nt_lbls = 5
+        # self.ui.extone.setFScale(self.fscale)
+        # self.ui.extone.setTScale(self.tscale)
+        self.ui.parameter_stack.update_units(self.tscale, self.fscale)
         if self.fscale == 1000:
             # better way to do this than eval?
             self.ui.funit_lbl.setText(u'kHz')
-            for i in range(nf_lbls):
+            for i in range(2, nf_lbls):
                 lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'kHz')"
                 try:
                     eval(lbl_str)
@@ -340,7 +344,7 @@ class MainWindow(ControlWindow):
                     print "trouble with command: ", lbl_str
         elif self.fscale == 1:
             self.ui.funit_lbl.setText(u'Hz')
-            for i in range(nf_lbls):
+            for i in range(2, nf_lbls):
                 lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'Hz')"
                 try:
                     eval(lbl_str)
@@ -352,7 +356,7 @@ class MainWindow(ControlWindow):
             
         if self.tscale == 0.001:
             self.ui.tunit_lbl.setText(u'ms')
-            for i in range(nt_lbls):
+            for i in range(2, nt_lbls):
                 lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u'ms')"
                 try:
                     eval(lbl_str)
@@ -360,7 +364,7 @@ class MainWindow(ControlWindow):
                     print "trouble with command: ", lbl_str
         elif self.tscale == 1:
             self.ui.tunit_lbl.setText(u's')
-            for i in range(nt_lbls):
+            for i in range(2, nt_lbls):
                 lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u's')"
                 try:
                     eval(lbl_str)
@@ -373,7 +377,7 @@ class MainWindow(ControlWindow):
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """
         # display spectrogram of file
-        spath = self.ui.exvocal.current_wav_file
+        spath = self.exvocal.current_wav_file
         spec, f, bins, fs = spectrogram(spath)
         self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
 

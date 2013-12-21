@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
-# Created: Wed Nov 20 09:58:02 2013
+# Created: Fri Dec 20 10:42:26 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_VocalParameterWidget(object):
     def setupUi(self, VocalParameterWidget):
         VocalParameterWidget.setObjectName(_fromUtf8("VocalParameterWidget"))
-        VocalParameterWidget.resize(555, 444)
+        VocalParameterWidget.resize(545, 427)
         self.verticalLayout = QtGui.QVBoxLayout(VocalParameterWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
@@ -62,7 +62,7 @@ class Ui_VocalParameterWidget(object):
         self.spec_preview.setMinimumSize(QtCore.QSize(0, 150))
         self.spec_preview.setObjectName(_fromUtf8("spec_preview"))
         self.verticalLayout.addWidget(self.splitter_2)
-        self.common = ParameterWidget(VocalParameterWidget)
+        self.common = CommonParameterWidget(VocalParameterWidget)
         self.common.setObjectName(_fromUtf8("common"))
         self.verticalLayout.addWidget(self.common)
 
@@ -76,5 +76,5 @@ class Ui_VocalParameterWidget(object):
         VocalParameterWidget.setWindowTitle(_translate("VocalParameterWidget", "Form", None))
         self.wavrootdir_btn.setText(_translate("VocalParameterWidget", "change", None))
 
-from spikeylab.stim.parameterwidget import ParameterWidget
+from spikeylab.stim.common_parameters import CommonParameterWidget
 from spikeylab.plotting.mpl_spec_widget import SpecWidget
