@@ -10,6 +10,7 @@ from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.tools.util import increment_title, create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.load_stimuli import get_stimuli_models
 
 class AcquisitionModel():
     """Holds state information for an experimental session"""
@@ -23,6 +24,13 @@ class AcquisitionModel():
         self.set_name = 'data0'
 
         self.stimulus = StimulusModel()
+
+
+        stimuli_types = get_stimuli_models()
+        self.stimuli_types = [x for x in stimuli_types if x.valid]
+
+    def stimuli_list(self):
+        return self.stimuli_types
 
     def set_calibration(self, cal_fname):
         print "FIX ME"

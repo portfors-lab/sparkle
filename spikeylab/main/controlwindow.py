@@ -70,19 +70,19 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['saveformat'] = self.saveformat
         savedict['ex_nreps'] = self.ui.ex_nreps_spnbx.value()
         savedict['ex_reprate'] = self.ui.ex_reprate_spnbx.value()
-        # savedict['extone_freq'] = self.extone.freq_spnbx.value()
-        # savedict['extone_db'] = self.extone.intensityValue()
-        # savedict['extone_dur'] = self.extone.durationValue()
-        # savedict['extone_risefall'] = self.extone.risefallValue()
         savedict['aosr'] = self.ui.aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
         # parameter settings
-        for i, name in enumerate(self.ui.parameter_stack.names):
-            savedict[name] = self.ui.parameter_stack.widget(i).inputsDict()
+        for stim in self.explore_stimuli:
+            editor = self.ui.parameter_stack.widget_for_name(stim.name)
+            editor.saveToObject()
+            savedict[stim.name] = stim.stateDict()
 
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
+
+        print "INPUTS SAVED"
 
     def load_inputs(self):
         inputsfname = os.path.join(systools.get_appdir(), INPUTSFNAME)
@@ -112,13 +112,11 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         
-        for name in self.ui.parameter_stack.names:
+        for stim in self.explore_stimuli:
             try:
-                self.ui.parameter_stack.widget_for_name(name).loadInputsDict(inputsdict[name])
-            except AttributeError:
-                pass
-            except:
-                raise
+                stim.loadState(inputsdict[stim.name])
+            except KeyError:
+                print 'Unable to load saved inputs for', stim.__class__
 
     def closeEvent(self,event):
         self.save_inputs()

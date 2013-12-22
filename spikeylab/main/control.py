@@ -26,6 +26,15 @@ GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
 
 class MainWindow(ControlWindow):
     def __init__(self, dev_name):
+        # set up model and stimlui first, 
+        # as saved configuration relies on this
+        self.acqmodel = AcquisitionModel()
+        
+        # get stimuli editor widgets
+        stimuli_types = self.acqmodel.stimuli_list()
+        stimuli_instances = [x() for x in stimuli_types]
+        self.explore_stimuli = stimuli_instances
+        
         # auto generated code intialization
         ControlWindow.__init__(self)
         
@@ -48,23 +57,24 @@ class MainWindow(ControlWindow):
 
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         
-        self.acqmodel = AcquisitionModel()
         self.acqmodel.signals.response_collected.connect(self.display_response)
         self.acqmodel.signals.spikes_found.connect(self.display_raster)
         self.acqmodel.signals.trace_finished.connect(self.trace_done)
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
+        
+        for stim in stimuli_instances:
+            self.ui.parameter_stack.addWidget(stim.showEditor())
+            self.ui.explore_stim_type_cmbbx.addItem(stim.name)
 
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
         
         self.current_operation = None
-        
+
         # update GUI to reflect loaded values
         self.update_unit_labels()
         self.set_plot_thresh()
-
-        self.ui.explore_stim_type_cmbbx.insertItems(0, self.ui.parameter_stack.names)
 
         # set up wav file directory finder paths
         self.exvocal = self.ui.parameter_stack.widget_for_name("Vocalization")

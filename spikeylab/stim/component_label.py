@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.stim.stimulusmodel import PureTone, Vocalization, Silence, FMSweep
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence, FMSweep
 
 class ComponentTemplateLabel(QtGui.QLabel):
     def __init__(self, componentclass, parent=None):

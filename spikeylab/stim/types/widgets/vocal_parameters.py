@@ -1,13 +1,11 @@
 from os.path import dirname
 
 from vocal_parameters_form import Ui_VocalParameterWidget
-
+from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.audiotools import spectrogram
 from PyQt4 import QtGui, QtCore
 
-class ParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
-    include_in_stack = True
-    name = "Vocalization"
+class ParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -65,7 +63,7 @@ class ParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
 
     def saveToObject(self):
         self._component.setIntensity(self.common.intensityValue())
-        self._component.setFile(str(self.current_wav_file))
+        self._component.setFile(self.current_wav_file)
         # self._component.setDuration(self.common.durationValue())
         # self._component.setSamplerate(self.common.samplerateValue())
 
@@ -94,10 +92,4 @@ class ParameterWidget(QtGui.QWidget, Ui_VocalParameterWidget):
         self.current_wav_file = spath
 
     def setContentFocus(self):
-        pass
-
-    def inputsDict(self):
-        return {}
-
-    def loadInputsDict(self, inputs):
         pass

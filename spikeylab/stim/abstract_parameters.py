@@ -4,6 +4,7 @@ class AbstractParameterWidget(QtGui.QWidget):
     scales = [0.001, 1000] # time, frequency scaling factors
     funit_labels = []
     tunit_labels = []
+    _component = None
     
     def setFScale(self, fscale):
         """
@@ -34,12 +35,9 @@ class AbstractParameterWidget(QtGui.QWidget):
                 lbl.setText('s')
         else:
             raise Exception(u"Invalid time scale:"+str(self.tscale))
-            
-    def inputsDict(self):
-        return {}
 
-    def loadInputsDict(self, inputs):
-        pass
+    def name(self):
+        return self._component.name
 
     def setComponent(self, component):
         raise NotImplementedError
@@ -47,28 +45,3 @@ class AbstractParameterWidget(QtGui.QWidget):
     def saveToObject(self):
         raise NotImplementedError
 
-class ParrotParameterWidget(AbstractParameterWidget):
-    def changeTScale(self, n):
-        self.tscale[0] = n
-
-class RabbitParameterWidget(AbstractParameterWidget):
-    pass
-
-if __name__ == "__main__":
-
-    parrot = ParrotParameterWidget()
-    parrot2 = ParrotParameterWidget()
-    rabbit = RabbitParameterWidget()
-
-    print 'parrot start', parrot.tscale
-    parrot.changeTScale(7)
-    print 'and now', parrot.tscale, parrot2.tscale, rabbit.tscale
-    rabbit.tscale.append(2)
-    print 'and finally', parrot.tscale, parrot2.tscale, rabbit.tscale
-    parrot.tscale = [5]
-    print 'and finally', parrot.tscale, parrot2.tscale, rabbit.tscale
-    rabbit.tscale.append(99)
-    print 'and finally', parrot.tscale, parrot2.tscale, rabbit.tscale
-    this = parrot2.tscale
-    this.append('foo')
-    print 'and finally', parrot.tscale, parrot2.tscale, rabbit.tscale

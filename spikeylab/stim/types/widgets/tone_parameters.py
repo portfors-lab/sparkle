@@ -4,8 +4,6 @@ from tone_parameters_form import Ui_ToneParameterWidget
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 
 class ParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
-    include_in_stack = True
-    name = "Tone"
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -49,21 +47,3 @@ class ParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
         self.freq_spnbx.setFocus()
         # self.freq_spnbx.selectAll()
 
-    def inputsDict(self):
-        inputs = {
-            'freq': self.freq_spnbx.value(),
-            'db': self.intensityValue(),
-            'dur': self.durationValue(),
-            'rf' : self.risefallValue()
-            }
-        return inputs
-
-    def loadInputsDict(self, inputs):
-        try:
-            self.setIntensity(inputs.get('db', 60))
-            self.setDuration(inputs.get('dur', 200))
-            self.setRisefall(inputs.get('rf', 0))
-            self.freq_spnbx.setValue(inputs.get('freq', 5))
-        except:
-            print 'failure to initize', self.name, 'inputs'
-            raise
