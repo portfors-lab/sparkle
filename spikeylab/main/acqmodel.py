@@ -10,7 +10,7 @@ from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.tools.util import increment_title, create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.stim.load_stimuli import get_stimuli_models
+from spikeylab.stim.types import get_stimuli_models
 
 class AcquisitionModel():
     """Holds state information for an experimental session"""
