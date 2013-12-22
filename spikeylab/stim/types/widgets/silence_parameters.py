@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
             
-class ParameterWidget(QtGui.QWidget):
+class SilenceParameterWidget(QtGui.QWidget):
     include_in_stack = False
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)

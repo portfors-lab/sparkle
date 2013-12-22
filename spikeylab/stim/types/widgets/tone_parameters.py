@@ -3,7 +3,7 @@ from tone_parameters_form import Ui_ToneParameterWidget
 
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 
-class ParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
+class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)

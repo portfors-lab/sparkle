@@ -25,7 +25,7 @@ class PureTone(Tone):
         self._frequency = freq
 
     def showEditor(self):
-        editor = tone_parameters.ParameterWidget()
+        editor = tone_parameters.ToneParameterWidget()
         editor.setComponent(self)
         return editor
 
@@ -118,7 +118,7 @@ class Vocalization(AbstractStimulusComponent):
             painter.restore()
             
     def showEditor(self):
-        editor = vocal_parameters.ParameterWidget()
+        editor = vocal_parameters.VocalParameterWidget()
         editor.setComponent(self)
         return editor
 
@@ -152,7 +152,7 @@ class Silence(AbstractStimulusComponent):
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
 
     def showEditor(self):
-        editor = silence_parameters.ParameterWidget()
+        editor = silence_parameters.SilenceParameterWidget()
         editor.setComponent(self)
         return editor
 

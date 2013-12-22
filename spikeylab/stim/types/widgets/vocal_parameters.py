@@ -5,7 +5,7 @@ from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.audiotools import spectrogram
 from PyQt4 import QtGui, QtCore
 
-class ParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
+class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
