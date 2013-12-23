@@ -1,4 +1,5 @@
 import os
+import wave
 
 import scipy.io.wavfile as wv
 import numpy as np
@@ -9,6 +10,7 @@ from PyQt4 import QtGui, QtCore
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.types.widgets import tone_parameters, silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
+from spikeylab.tools.audiotools import spectrogram, make_tone
 
 class Tone(AbstractStimulusComponent):
     foo = None
@@ -69,6 +71,12 @@ class Vocalization(AbstractStimulusComponent):
 
     def file(self):
         return self._filename
+
+    def samplerate(self):
+        wf =  wave.open(self._filename)
+        fs= wf.getframerate()
+        wf.close()
+        return fs
 
     def setFile(self, fname):
         if fname is not None:

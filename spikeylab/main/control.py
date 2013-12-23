@@ -31,9 +31,7 @@ class MainWindow(ControlWindow):
         self.acqmodel = AcquisitionModel()
         
         # get stimuli editor widgets
-        stimuli_types = self.acqmodel.stimuli_list()
-        stimuli_instances = [x() for x in stimuli_types]
-        self.explore_stimuli = stimuli_instances
+        self.explore_stimuli = self.acqmodel.stimuli_list()
         
         # auto generated code intialization
         ControlWindow.__init__(self)
@@ -64,7 +62,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
         
-        for stim in stimuli_instances:
+        for stim in self.explore_stimuli:
             self.ui.parameter_stack.addWidget(stim.showEditor())
             self.ui.explore_stim_type_cmbbx.addItem(stim.name)
 
@@ -125,27 +123,26 @@ class MainWindow(ControlWindow):
             winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
             binsz = float(self.ui.binsz_lnedt.text())*self.tscale
 
+            gen_rate = self.ui.aosr_spnbx.value()*self.fscale
+
             nbins = np.ceil(winsz/binsz)
             bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
             self.ui.psth.set_bins(bin_centers)
             self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
                                              acqtime=winsz, aisr=acq_rate,
-                                             nreps=nreps, binsz=binsz)
+                                             nreps=nreps, binsz=binsz,
+                                             aosr=gen_rate)
 
             # each widget should be in charge of putting its own stimulus together
-            if self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
-                f = self.ui.extone.freq_spnbx.value()*self.fscale
-                gen_rate = self.ui.aosr_spnbx.value()*self.fscale
-                dur = self.ui.extone.durationValue()
-                db = self.ui.extone.intensityValue()
-                rft = self.ui.extone.risefallValue()
-                
-                tone, timevals = self.acqmodel.set_tone(f,db,dur,rft,gen_rate)
-
-                freq, spectrum = calc_spectrum(tone, gen_rate)
-
-                self.ui.display.update_fft(freq, spectrum)
-                self.ui.display.update_signal(timevals, tone)
+            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
+            stim_widget = self.ui.parameter_stack.widget(stim_index)
+            stim_widget.saveToObject()
+            # have model sort all signals stuff out?
+            signal = self.acqmodel.set_stim_by_index(stim_index)
+            freq, spectrum = calc_spectrum(signal, gen_rate)
+            timevals = np.arange(len(signal)).astype(float)/gen_rate
+            self.ui.display.update_fft(freq, spectrum)
+            self.ui.display.update_signal(timevals, signal)
 
 
     def on_stop(self):
@@ -197,21 +194,9 @@ class MainWindow(ControlWindow):
         self.ui.display.set_nreps(nreps)
         self.ui.display.set_xlimits((0,winsz))
         self.ui.psth.set_bins(bin_centers)
-        if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
-            # assume user has already clicked on wav file
-            
-            self.acqmodel.set_explore_params(wavfile=self.exvocal.current_wav_file, 
-                                             aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate, 
-                                             nreps=nreps, binsz=binsz)
-            self.acqmodel.run_explore(interval)
-
-        elif self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
-            self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate, 
-                                             nreps=nreps, binsz=binsz)
-            self.on_update()            
-            self.acqmodel.run_explore(interval)
+        
+        self.on_update()            
+        self.acqmodel.run_explore(interval)
 
 
     def tuning_curve(self):

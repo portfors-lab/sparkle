@@ -74,12 +74,12 @@ if __name__ == "__main__":
     # stim.insertComponent(tone1)
     # stim.insertComponent(tone0)
 
-    stim.insertComponent(tone4, (1,0))
+    # stim.insertComponent(tone4, (1,0))
     # stim.insertComponent(tone5, (1,0))
     stim.insertComponent(vocal0, (1,0))
 
-    stim.insertComponent(tone3, (2,0))
-    stim.insertComponent(silence0, (2,0))
+    # stim.insertComponent(tone3, (2,0))
+    # stim.insertComponent(silence0, (2,0))
 
     editor = StimulusEditor()
     editor.ui.trackview.setModel(stim)

@@ -108,13 +108,13 @@ class PlayerBase():
 
         return tone, timevals
 
-    def set_stim(self, signal, sr):
+    def set_stim(self, signal, sr, attenuation=0):
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
         self.tone_lock.acquire()
         self.stim = signal
         self.sr = sr
-        self.atten = 0
-        dur = float(len(signal))/sr
+        self.atten = attenuation
+        # dur = float(len(signal))/sr
         # self.aitime = dur
         # timevals = np.arange(npts).astype(float)/samplerate
         self.tone_lock.release()

@@ -25,12 +25,11 @@ class AcquisitionModel():
 
         self.stimulus = StimulusModel()
 
-
         stimuli_types = get_stimuli_models()
-        self.stimuli_types = [x for x in stimuli_types if x.valid]
+        self.explore_stimuli = [x() for x in stimuli_types if x.valid]
 
     def stimuli_list(self):
-        return self.stimuli_types
+        return self.explore_stimuli
 
     def set_calibration(self, cal_fname):
         print "FIX ME"
@@ -91,6 +90,8 @@ class AcquisitionModel():
             self.aichan = kwargs['aichan']
         if 'aisr' in kwargs and 'acqtime' in kwargs:
             self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
+        if 'aosr' in kwargs:
+            self.stimulus.setSamplerate(kwargs['aosr'])
         if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
         if 'binsz' in kwargs:
@@ -99,6 +100,15 @@ class AcquisitionModel():
     def set_tone(self, f,db,dur,rft,sr):
         """Build a tone and set as next tone to be output. Does not call write to hardware"""
         return self.finite_player.set_tone(f,db,dur,rft,sr)
+
+    def set_stim_by_index(self, index):
+        # remove any current components
+        if self.stimulus.columnCount() > 0:
+            self.stimulus.clearComponents()
+        self.stimulus.insertComponent(self.explore_stimuli[index])
+        signal, atten = self.stimulus.signal()
+        self.finite_player.set_stim(signal, self.stimulus.samplerate, attenuation=atten)
+        return signal
 
     def run_explore(self, interval):
         """Begin the set-up generation/acquisition

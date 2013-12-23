@@ -1,4 +1,5 @@
-from spikeylab.tools.audiotools import spectrogram, make_tone
+import numpy as np
+
 from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
 
 from PyQt4 import QtGui, QtCore
@@ -24,6 +25,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # reference for what voltage == what intensity
         self.calv = 0.1
         self.caldb = 100
+
+    def setSamplerate(self, fs):
+        self.samplerate = fs
 
     def setAutoParams(self, params):
         self.auto_params = params
@@ -103,6 +107,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
             self.segments.append([])
             self.endInsertRows()
 
+        # special case, where component is a wav file:
+        # it will set the master samplerate to match its own
+        if comp.__class__.__name__ == 'Vocalization':
+            self.samplerate = comp.samplerate()
+
     def removeComponent(self, rowcol):
         parent = self.parentForRow(rowcol[0])
 
@@ -114,6 +123,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
             self.beginRemoveRows(QtCore.QModelIndex(), len(self.segments)-1, len(self.segments)-1)
             self.segments.pop(len(self.segments)-1)
             self.endRemoveRows()
+
+    def clearComponents(self):
+        self.segments = [[]]
 
     def indexByComponent(self, component):
         """return a QModelIndex for the given component, or None if
@@ -204,6 +216,5 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for track in track_signals:
             total_signal[0:len(track)] += track
 
-        return total_signal
+        return total_signal, atten
 
-    
