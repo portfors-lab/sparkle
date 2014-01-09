@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Wed Dec 18 10:48:35 2013
+# Created: Thu Jan 09 14:53:56 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -105,9 +105,9 @@ class Ui_StimulusEditor(object):
         self.label_2.setWordWrap(False)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 1)
-        self.spinBox = QtGui.QSpinBox(self.frame)
-        self.spinBox.setObjectName(_fromUtf8("spinBox"))
-        self.gridLayout_3.addWidget(self.spinBox, 0, 1, 1, 1)
+        self.nreps_spnbx = QtGui.QSpinBox(self.frame)
+        self.nreps_spnbx.setObjectName(_fromUtf8("nreps_spnbx"))
+        self.gridLayout_3.addWidget(self.nreps_spnbx, 0, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.buttonBox = QtGui.QDialogButtonBox(self.frame)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -123,6 +123,7 @@ class Ui_StimulusEditor(object):
         self.retranslateUi(StimulusEditor)
         QtCore.QObject.connect(self.autoparam_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.doAutoparameters)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), StimulusEditor.signal)
+        QtCore.QObject.connect(self.nreps_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), StimulusEditor.setRepCount)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):

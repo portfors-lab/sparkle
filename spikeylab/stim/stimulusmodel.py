@@ -1,4 +1,5 @@
 import numpy as np
+import uuid
 
 from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
 
@@ -15,7 +16,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
     """
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
-        self.nreps = 0
+        self.nreps = 1 # reps of each unique stimulus
+        self.nloops = 1 # reps of entire expanded list of autoparams
         self.samplerate = 375000
         # 2D array of simulus components track number x component number
         self.segments = [[]]
@@ -25,6 +27,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # reference for what voltage == what intensity
         self.calv = 0.1
         self.caldb = 100
+
+        self.stimid = uuid.uuid1()
+
+        self.editor = None
 
     def setSamplerate(self, fs):
         self.samplerate = fs
@@ -141,10 +147,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.dataChanged.emit(index, index)
 
     def flags(self, index):
-        return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-
-    def traceCount()(self):
+    def traceCount(self):
         params = self.auto_params.allData()
         steps = []
         ntraces = 1
@@ -152,6 +157,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
             steps.append(np.arange(p['start'], p['stop'], p['delta']))
             ntraces = ntraces*len(steps[-1])
         return ntraces
+
+    def loopCount(self):
+        return self.nloops
+
+    def setLoopCount(self, count):
+        self.nloops = count
+
+    def repCount(self):
+        return self.nreps
+
+    def setRepCount(self, count):
+        self.nreps = count
 
     def expandedStim(self):
         """
@@ -249,3 +266,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         return {'samplerate_da':self.samplerate, 'reps': self.nreps, 
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
+
+
+    def stimType(self):
+        return 'Fix me'
+
+    def setEditor(self, editor):
+        self.editor = editor
+
+    def showEditor(self):
+        if self.editor is not None:
+            editor = self.editor()
+            editor.setStimulusModel(self)
+            return editor
+        else:
+            print 'Erm, no editor available :('
