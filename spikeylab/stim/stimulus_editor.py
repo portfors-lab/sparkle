@@ -25,25 +25,26 @@ class StimulusEditor(QtGui.QWidget):
         self.parametizer = parametizer
 
     def signal(self):
-        stim_signal = self.ui.trackview.model().signal()
-        # import matplotlib.pyplot as plt
-        nfft = 512
-        Pxx, freqs, bins, im = specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
-                              pad_to=nfft*2)
-        # # print fig, spec
-        # plt.imshow(Pxx)
-        # plt.show()
+        # stim_signal, atten = self.ui.trackview.model().signal()
+        # # import matplotlib.pyplot as plt
+        # nfft = 512
+        # Pxx, freqs, bins, im = specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
+        #                       pad_to=nfft*2)
 
-        from spikeylab.plotting.custom_plots import SpecWidget
-        fig = SpecWidget()
-        fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
-        fig.show()
-        self.asdkjfasdfk = fig
+        # from spikeylab.plotting.custom_plots import SpecWidget
+        # fig = SpecWidget()
+        # fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
+        # fig.show()
+        # self.asdkjfasdfk = fig
         
+        stim_list = self.ui.trackview.model().expandedStim()
+        stim_doc = self.ui.trackview.model().expandedDoc()
+        print 'stim list', len(stim_list)
+        print 'stim doc', stim_doc
         return stim_signal
 
 if __name__ == "__main__":
-    import sys
+    import sys, os
     from spikeylab.stim.stimulusmodel import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)
@@ -63,8 +64,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    # vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
-    vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    test_file = os.path.join(os.path.expanduser('~'),r'Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(test_file)
 
     silence0 = Silence()
     silence0.setDuration(0.025)

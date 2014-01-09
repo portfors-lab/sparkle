@@ -10,7 +10,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def __init__(self, data, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.tests = data
-        self.headers = ['Test name', 'Reps', 'Note']
+        self.headers = ['Test name', 'Reps', 'Length']
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
 
     def headerData(self, section, orientation, role):
@@ -41,7 +41,11 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             return test
 
     def flags(self, index):
-        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        print 'flag index', index
+        if index.column() == 2:
+            return QtCore.Qt.ItemIsEnabled
+        else:
+            return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:
@@ -57,9 +61,11 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             self.editCompleted.emit(value)
 
     def removeTest(self, index):
+        print 'remove index', index
         self.tests.pop(index)
 
     def insertTest(self, test, index):
+        print 'insert index', index
         self.tests.insert(index, test)
         self.layoutChanged.emit()
         

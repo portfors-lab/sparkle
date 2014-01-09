@@ -78,6 +78,12 @@ class Vocalization(AbstractStimulusComponent):
         wf.close()
         return fs
 
+    def stateDict(self):
+        state = super(Vocalization, self).stateDict()
+        state['file'] = self._filename
+
+        return state
+
     def setFile(self, fname):
         if fname is not None:
             self._filename = fname

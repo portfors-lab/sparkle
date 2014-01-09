@@ -192,7 +192,6 @@ class TestAcqusitionData():
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', (npoints,), mode='open')
 
-        attrs = [{'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25},
-                 {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}]
-        acq_data.set_stim_info('fake', attrs)
+        attrs = {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
+        acq_data.append_trace_info('fake', attrs)
         acq_data.close()

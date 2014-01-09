@@ -1,6 +1,8 @@
 import numpy as np
 import h5py
-import datetime
+import time
+import json
+import os
 from operator import add
 
 from spikeylab.tools.exceptions import DataIndexError
@@ -18,7 +20,7 @@ class AcquisitionData():
     3. Continuous acquisition, this is a 'chart' function where data is
     acquired continuously without break until the user stops the operation
     """
-    def __init__(self, filename):
+    def __init__(self, filename, user='unknown'):
         # check that filename ends with '.hdf5', appending if necessary
         self.hdf5 = h5py.File(filename, 'w')
         self.datasets = {}
@@ -27,10 +29,16 @@ class AcquisitionData():
         self.open_set_size = 32
         self.chunk_size = 2**16 # better to have a multiple of fs?
 
-    def close(self):
-        # consolidate fractured data sets before closing file
-        self.hdf5.close()
+        self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
+        self.hdf5.attrs['who'] = user
+        self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
 
+    def close(self):
+        for key in self.datasets.keys():
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
+
+        self.hdf5.close()
+        
     def init_data(self, key, dims=None, mode='finite'):
         """
         Initize a new dataset
@@ -59,6 +67,8 @@ class AcquisitionData():
             self.meta[key] = {'mode':mode, 'set_counter':0, 'cursor':0}
         else:
             raise Exception("Unknown acquisition mode")
+        self.datasets[key].attrs['stim'] = '['
+        self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 'mode':mode})
 
     def append(self, key, data):
         """
@@ -145,11 +155,20 @@ class AcquisitionData():
         for iset in range(setnum+1):
             del self.datasets[key+'_set'+str(iset)]
 
-    def set_stim_info(self, key, attrdict):
+    def set_metadata(self, key, attrdict):
         # key is an iterable of group keys (str), with the last
         # string being the attribute name
         for attr, val in attrdict.iteritems():
             self.hdf5[key].attrs[attr] = val
+
+    def append_trace_info(self, key, stim_data):
+        # append data to json list?
+        if not isinstance(stim_data, basestring):
+            stim_data = json.dumps(stim_data)
+        mode = self.meta[key]['mode']
+        if mode == 'open':
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + stim_data + ','
+
 
 def increment(index, dims, data_shape):
     inc_amount = data_shape

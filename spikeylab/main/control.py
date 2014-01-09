@@ -114,25 +114,26 @@ class MainWindow(ControlWindow):
 
     def on_update(self):
         print 'on_update'
+        aochan = self.ui.aochan_box.currentText()
+        aichan = self.ui.aichan_box.currentText()
+        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+
+        winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
+        binsz = float(self.ui.binsz_lnedt.text())*self.tscale
+
+        gen_rate = self.ui.aosr_spnbx.value()*self.fscale
+
+        nbins = np.ceil(winsz/binsz)
+        bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
+        self.ui.psth.set_bins(bin_centers)
+        self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
+                                         acqtime=winsz, aisr=acq_rate,
+                                         binsz=binsz, aosr=gen_rate)
+
+        self.ui.display.set_xlimits((0,winsz))
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            aochan = self.ui.aochan_box.currentText()
-            aichan = self.ui.aichan_box.currentText()
-            acq_rate = self.ui.aisr_spnbx.value()*self.fscale
             nreps = self.ui.ex_nreps_spnbx.value()
-
-            winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
-            binsz = float(self.ui.binsz_lnedt.text())*self.tscale
-
-            gen_rate = self.ui.aosr_spnbx.value()*self.fscale
-
-            nbins = np.ceil(winsz/binsz)
-            bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
-            self.ui.psth.set_bins(bin_centers)
-            self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate,
-                                             nreps=nreps, binsz=binsz,
-                                             aosr=gen_rate)
-
+            self.acqmodel.set_explore_params(nreps=nreps)
             # each widget should be in charge of putting its own stimulus together
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             stim_widget = self.ui.parameter_stack.widget(stim_index)
@@ -141,9 +142,9 @@ class MainWindow(ControlWindow):
             signal = self.acqmodel.set_stim_by_index(stim_index)
             freq, spectrum = calc_spectrum(signal, gen_rate)
             timevals = np.arange(len(signal)).astype(float)/gen_rate
+            self.ui.display.set_nreps(nreps)
             self.ui.display.update_fft(freq, spectrum)
             self.ui.display.update_signal(timevals, signal)
-
 
     def on_stop(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
@@ -177,26 +178,25 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.clicked.connect(self.on_update)
         # make this an enum!!!!
         self.current_operation = 'explore'
-        aochan = self.ui.aochan_box.currentText()
-        aichan = self.ui.aichan_box.currentText()
-        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
-        winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
-        binsz = float(self.ui.binsz_lnedt.text())*self.tscale
         reprate = self.ui.ex_reprate_spnbx.value()
         interval = (1/reprate)*1000
-        nreps = self.ui.ex_nreps_spnbx.value()
-
-        nbins = np.ceil(winsz/binsz)
-        bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
 
         print 'interval', interval
         # set up first stimulus, lets start with vocalizations for now
-        self.ui.display.set_nreps(nreps)
-        self.ui.display.set_xlimits((0,winsz))
-        self.ui.psth.set_bins(bin_centers)
         
         self.on_update()            
         self.acqmodel.run_explore(interval)
+
+    def run_test(self):
+        self.ui.start_btn.setEnabled(False)
+        self.current_operation = 'protocol'
+
+        print 'FIXME: reprate drawing from explore'
+        reprate = self.ui.ex_reprate_spnbx.value()
+        interval = (1/reprate)*1000
+        
+        self.on_update()
+        self.acqmodel.run_protocol(interval)
 
 
     def tuning_curve(self):

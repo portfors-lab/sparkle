@@ -12,6 +12,8 @@ from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types import get_stimuli_models
 
+SAVE_EXPLORE = True
+
 class AcquisitionModel():
     """Holds state information for an experimental session"""
     def __init__(self, threshold=None):
@@ -70,16 +72,6 @@ class AcquisitionModel():
         if self.finite_player is None:
             self.finite_player = FinitePlayer()
 
-        if 'wavfile' in kwargs:
-            sr, wavdata = wv.read(kwargs['wavfile'])
-            wavdata = wavdata.astype('float')
-            #normalize
-            mx = np.amax(wavdata)
-            wavdata = wavdata/mx
-
-            # self.current_gen_rate = sr
-            # self.current_signal = wavdata
-            self.finite_player.set_stim(wavdata,sr)
         if 'acqtime' in kwargs:
             self.finite_player.set_aidur(kwargs['acqtime'])
         if 'aisr' in kwargs:
@@ -176,8 +168,9 @@ class AcquisitionModel():
 
                 self.finite_player.reset()
 
-                # save response data
-                self.save_data(response)
+                if SAVE_EXPLORE:
+                    # save response data
+                    self.save_data(response)
 
                 irep +=1
                 if irep == self.nreps:
@@ -196,13 +189,19 @@ class AcquisitionModel():
         self.finite_player.stop()
         self.datafile.trim(self.current_dataset_name)
 
+    def run_protocol(self):
+        pass
+
     def save_data(self, data):
         self.datafile.append(self.current_dataset_name, data)
+        # save stimulu info
+        info = self.stimulus.expandedDoc()[0]
+        info['samplerate_ad'] = self.finite_player.aisr
+        self.datafile.append_trace_info(self.current_dataset_name, info)
 
     def halt(self):
         """Stop the current on-going generation/acquisition"""
         self._halt = True
-
 
     def setup_curve(self, dur, sr, rft, nreps, freqs, intensities, aisr, aichan, aochan, interval):
         """Prepare a tuning curve"""

@@ -143,28 +143,44 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable| QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
+
+    def traceCount()(self):
+        params = self.auto_params.allData()
+        steps = []
+        ntraces = 1
+        for p in params:
+            steps.append(np.arange(p['start'], p['stop'], p['delta']))
+            ntraces = ntraces*len(steps[-1])
+        return ntraces
+
     def expandedStim(self):
         """
         Apply the autoparameters to this stimulus and return a list of
         the resulting stimuli
         """
+        stim_list = self.expandFucntion(self.signal)
+        return stim_list
+
+    def expandFucntion(self, func):
         # initilize array to hold all varied parameters
         params = self.auto_params.allData()
         steps = []
         ntraces = 1
         for p in params:
-            steps.append(np.arange(p['start'], p['stop'], p['step']))
+            steps.append(np.arange(p['start'], p['stop'], p['delta']))
             ntraces = ntraces*len(steps[-1])
 
-        varylist = [[steps[ip][itrace % len(steps[ip])] for ip in range(len(params))] for itrace in range(ntraces)]
-
-        # varylist = [[None for x in range(len(params))] for y in range(ntraces)]
-        # for ip, param in enumerate(params):
-        #     for itrace in range(ntraces):
-        #         value = steps[ip][itrace % len(steps[ip])]
-        #         varylist[itrace][ip] = value
-
+        varylist = [[None for x in range(len(params))] for y in range(ntraces)]
+        x = 1
+        for iset, step_set in enumerate(steps):
+            for itrace in range(ntraces):
+                idx = (itrace / x) % len(step_set)
+                varylist[itrace][iset] = step_set[idx]
+            x = x*len(step_set)
+            
         # now create the stimuli according to steps
+        # go through list of modifing parameters, update this stimulus,
+        # and then save current state to list
         stim_list = []
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
@@ -174,7 +190,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
-            stim_list.append(self.signal())
+            stim_list.append(func())
 
         # now reset the components to start value
         for ip, param in enumerate(params):
@@ -185,12 +201,14 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         return stim_list
 
-    def expanded_doc(self):
+    def expandedDoc(self):
         """
         JSON/YAML/XML representation of exactly what was presented
         """
+        doc_list = self.expandFucntion(self.doc)
+        return doc_list
 
-    def template_doc(self):
+    def templateDoc(self):
         """
         JSON/YAML/XML template to recreate this stimulus in another session
         """
@@ -218,3 +236,16 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         return total_signal, atten
 
+    def doc(self):
+        doc_list = []
+        for track in self.segments:
+            start_time = 0
+            for component in track:
+                info = component.stateDict()
+                info['stim_type'] = component.name
+                info['start_s'] = start_time
+                start_time += info['duration']
+                doc_list.append(info)
+
+        return {'samplerate_da':self.samplerate, 'reps': self.nreps, 
+                'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
