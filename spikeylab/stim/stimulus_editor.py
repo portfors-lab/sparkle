@@ -2,27 +2,37 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 from stimeditor_form import Ui_StimulusEditor
 from auto_parameter import Parametizer
 
 from matplotlib.mlab import specgram
 
+class BuilderFactory():
+    name = 'Builder'
+    def editor(self):
+        return StimulusEditor
+
 class StimulusEditor(QtGui.QWidget):
     def __init__(self, parent=None):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()
         self.ui.setupUi(self)
-
-    def setStimulus(self, stimulus):
-        pass
+        # self.setWindowModality(2) # application modal
+    
+    def setStimulusModel(self, model):
+        self.ui.trackview.setModel(model)
 
     def doAutoparameters(self):
         self.ui.trackview.setMode(1)
         parametizer = Parametizer(self.ui.trackview)
         parametizer.show()
         self.parametizer = parametizer
+
+    def setRepCount(self, count):
+        print 'set rep count'
+        self.ui.trackview.model().setRepCount(count)
 
     def signal(self):
         # stim_signal, atten = self.ui.trackview.model().signal()
@@ -37,11 +47,11 @@ class StimulusEditor(QtGui.QWidget):
         # fig.show()
         # self.asdkjfasdfk = fig
         
-        stim_list = self.ui.trackview.model().expandedStim()
+        stim_signal_list = self.ui.trackview.model().expandedStim()
         stim_doc = self.ui.trackview.model().expandedDoc()
         print 'stim list', len(stim_list)
         print 'stim doc', stim_doc
-        return stim_signal
+        return stim_signal_list
 
 if __name__ == "__main__":
     import sys, os
@@ -82,8 +92,8 @@ if __name__ == "__main__":
     # stim.insertComponent(tone3, (2,0))
     # stim.insertComponent(silence0, (2,0))
 
-    editor = StimulusEditor()
-    editor.ui.trackview.setModel(stim)
+    editor = StimulusEditor(stim)
+    # editor.ui.trackview.setModel(stim)
 
     editor.show()
     app.exec_()

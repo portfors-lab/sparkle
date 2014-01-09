@@ -153,7 +153,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QSpinBox" name="spinBox"/>
+          <widget class="QSpinBox" name="nreps_spnbx"/>
          </item>
         </layout>
        </item>
@@ -182,6 +182,9 @@
    <extends>QWidget</extends>
    <header>spikeylab.stim.stimulusview</header>
    <container>1</container>
+   <slots>
+    <slot>setRepCount(int)</slot>
+   </slots>
   </customwidget>
   <customwidget>
    <class>ComponentTemplateTable</class>
@@ -224,9 +227,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>nreps_spnbx</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>setRepCount(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>978</x>
+     <y>578</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>892</x>
+     <y>636</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>doAutoparameters()</slot>
   <slot>signal()</slot>
+  <slot>setRepCount(int)</slot>
  </slots>
 </ui>

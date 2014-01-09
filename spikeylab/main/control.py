@@ -55,6 +55,8 @@ class MainWindow(ControlWindow):
 
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         
+        self.ui.protocolView.setModel(self.acqmodel.protocol_model)
+
         self.acqmodel.signals.response_collected.connect(self.display_response)
         self.acqmodel.signals.spikes_found.connect(self.display_raster)
         self.acqmodel.signals.trace_finished.connect(self.trace_done)
@@ -187,6 +189,9 @@ class MainWindow(ControlWindow):
         self.on_update()            
         self.acqmodel.run_explore(interval)
 
+    def add_protocol_stim(self):
+        print 'add stim'
+
     def run_test(self):
         self.ui.start_btn.setEnabled(False)
         self.current_operation = 'protocol'
@@ -196,6 +201,10 @@ class MainWindow(ControlWindow):
         interval = (1/reprate)*1000
         
         self.on_update()
+
+        # get protocol list from UI widget?
+
+
         self.acqmodel.run_protocol(interval)
 
 

@@ -11,6 +11,7 @@ from spikeylab.tools.util import increment_title, create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types import get_stimuli_models
+from spikeylab.main.protocol_model import ProtocolTabelModel
 
 SAVE_EXPLORE = True
 
@@ -25,6 +26,8 @@ class AcquisitionModel():
         self.datafile = None
         self.set_name = 'data0'
 
+        self.protocol_model = ProtocolTabelModel()
+        # stimulus for explore function
         self.stimulus = StimulusModel()
 
         stimuli_types = get_stimuli_models()

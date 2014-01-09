@@ -1,16 +1,21 @@
-import sys
-import cPickle
-import pickle
+import sip
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
 
+import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-class ProtocolTabelModel(QtCore.QAbstractTableModel):
+from spikeylab.stim.stimulus_label import StimulusLabel
+from spikeylab.stim.stimulusmodel import StimulusModel
 
-    def __init__(self, data, parent=None):
+
+class ProtocolTabelModel(QtCore.QAbstractTableModel):
+    def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.tests = data
-        self.headers = ['Test name', 'Reps', 'Length']
+        self.test_order = []
+        self.tests = {}
+        self.headers = ['Test type', 'Reps', 'Length', 'Total']
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
 
     def headerData(self, section, orientation, role):
@@ -22,34 +27,39 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         return len(self.tests)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
-        return 3
+        return 4
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
-            test = self.tests[index.row()]
+            stimid = self.test_order[index.row()]
+            test = self.tests[stimid]
             col = index.column()
             if col == 0:
-                item = test.name
+                item = test.stimType()
             elif col == 1:
-                item = test.reps
+                item = test.repCount()
             elif col == 2:
-                item = test.note
+                item = test.traceCount()
+            elif col == 3:
+                item = test.traceCount()*test.loopCount()*test.repCount()
 
             return item
         elif role == QtCore.Qt.UserRole:  #return the whole python object
-            test = self.tests[index.row()]
+            stimid = self.test_order[index.row()]
+            test = self.tests[stimid]
             return test
 
     def flags(self, index):
-        print 'flag index', index
         if index.column() == 2:
             return QtCore.Qt.ItemIsEnabled
         else:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def setData(self, index, value, role):
+        print 'setting data!'
         if role == QtCore.Qt.EditRole:
-            test = self.tests[index.row()]
+            stimid = self.test_order[index.row()]
+            test = self.tests[stimid]
             col = index.column()
             if col == 0:
                 test.set_name(value)
@@ -60,15 +70,29 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
             self.editCompleted.emit(value)
 
-    def removeTest(self, index):
-        print 'remove index', index
-        self.tests.pop(index)
+    def removeTest(self, position):
+        print 'remove index', position
+        self.beginRemoveRows(QtCore.QModelIndex(), position, position)
+        self.test_order.pop(position)
+        self.endRemoveRows()
 
-    def insertTest(self, test, index):
-        print 'insert index', index
-        self.tests.insert(index, test)
-        self.layoutChanged.emit()
-        
+    def insertTest(self, testid, position):
+        """Re-inserts exisiting stimulus into order list"""
+        print 'insert position', position
+        self.beginInsertRows(QtCore.QModelIndex(), position, position)
+        self.test_order.insert(position, testid)
+        self.endInsertRows()
+
+    def insertNewTest(self, stim, position):
+        """Creates a new Stimulus Model and opens it's appropriate editor"""
+
+        self.beginInsertRows(QtCore.QModelIndex(), position, position)
+
+        # cannot serialize Qt objects, so must use a proxy list
+        self.test_order.insert(position, stim.stimid)
+        self.tests[stim.stimid] = stim
+
+        self.endInsertRows()
 
 class ProtocolView(QtGui.QTableView):
     def __init__(self,parent=None):
@@ -79,14 +103,14 @@ class ProtocolView(QtGui.QTableView):
         self.dragline = None
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("application/x-person"):
+        if event.mimeData().hasFormat("application/x-protocol"):
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("application/x-person"):
+        if event.mimeData().hasFormat("application/x-protocol"):
             #find the nearest row break to cursor
             # assume all rows same height
             row_height = self.rowHeight(0)
@@ -112,53 +136,73 @@ class ProtocolView(QtGui.QTableView):
     def dropEvent(self, event):
         self.dragline = None
         data = event.mimeData()
-        bstream = data.retrieveData("application/x-person",
+        bstream = data.retrieveData("application/x-protocol",
             QtCore.QVariant.ByteArray)
-        selected = pickle.loads(bstream.toByteArray())
+
         location = self.rowAt(event.pos().y())
-        self.model().insertTest(selected, location)
+
+        if isinstance(event.source(), StimulusLabel):
+            factory = cPickle.loads(str(bstream))
+            # create new stimulus then!
+            stim = StimulusModel()
+            stim.setEditor(factory.editor())
+            self.model().insertNewTest(stim, location)
+        else:
+            selected_id = cPickle.loads(str(bstream))
+            self.model().insertTest(selected_id, location)
+
         event.accept()
 
     def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            index = self.indexAt(event.pos())
+            selected = self.model().data(index, QtCore.Qt.UserRole)
 
-        index = self.indexAt(event.pos())
-        selected = self.model().data(index,QtCore.Qt.UserRole)
+            ## convert to  a bytestream
+            bstream = cPickle.dumps(selected.stimid)
+            mimeData = QtCore.QMimeData()
+            mimeData.setData("application/x-protocol", bstream)
 
-        ## convert to  a bytestream
-        bstream = cPickle.dumps(selected)
-        mimeData = QtCore.QMimeData()
-        mimeData.setData("application/x-person", bstream)
+            drag = QtGui.QDrag(self)
+            drag.setMimeData(mimeData)
 
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
+            # grab an image of the cell we are moving
+            # assume all rows same height
+            row_height = self.rowHeight(0)
+            # -5 becuase it a a little off
+            y = (row_height*self.rowAt(event.pos().y())) + row_height - 5
+            x = self.width()
+            rect = QtCore.QRect(5,y,x,row_height)
+            pixmap = QtGui.QPixmap()
+            pixmap = pixmap.grabWidget(self, rect)
 
-        # grab an image of the cell we are moving
-        # assume all rows same height
-        row_height = self.rowHeight(0)
-        # -5 becuase it a a little off
-        y = (row_height*self.rowAt(event.pos().y())) + row_height - 5
-        x = self.width()
-        rect = QtCore.QRect(5,y,x,row_height)
-        pixmap = QtGui.QPixmap()
-        pixmap = pixmap.grabWidget(self, rect)
+            # below makes the pixmap half transparent
+            painter = QtGui.QPainter(pixmap)
+            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+            painter.end()
+            
+            drag.setPixmap(pixmap)
 
-        # below makes the pixmap half transparent
-        painter = QtGui.QPainter(pixmap)
-        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-        painter.end()
-        
-        drag.setPixmap(pixmap)
+            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+            drag.setPixmap(pixmap)
 
-        drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-        drag.setPixmap(pixmap)
+            # if result: # == QtCore.Qt.MoveAction:
+                # self.model().removeRow(index.row())
+            self.model().removeTest(index.row())
+            result = drag.start(QtCore.Qt.MoveAction)
 
-        # if result: # == QtCore.Qt.MoveAction:
-            # self.model().removeRow(index.row())
-        self.model().removeTest(index.row())
-        result = drag.start(QtCore.Qt.MoveAction)
+        elif event.button() == QtCore.Qt.RightButton:
+            index = self.indexAt(event.pos())
+            selected = self.model().data(index, QtCore.Qt.UserRole)
+            self.stim_editor = selected.showEditor()
+            self.stim_editor.show()
 
-        # super(ProtocolView, self).mousePressEvent(event)
+            # self.edit(index)
+            print 'modalness', self.stim_editor.isModal()
+
+            # super(ProtocolView, self).mousePressEvent(event)
+
 
 class DummyTest():
     def __init__(self, name, reps, note):
@@ -171,19 +215,54 @@ class DummyTest():
 
 if __name__ == '__main__':
     
+    import sys, os
+    from spikeylab.stim.stimulusmodel import StimulusModel
+    from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)
-    app.setStyle("plastique")
 
-    protocol = []
-    for itest in range(5):
-        dummy = DummyTest('test'+ str(itest), itest*2, 'nothing')
-        protocol.append(dummy)
+    tone0 = PureTone()
+    tone0.setDuration(0.02)
+    tone1 = PureTone()
+    tone1.setDuration(0.040)
+    tone2 = PureTone()
+    tone2.setDuration(0.010)
+
+    tone3 = PureTone()
+    tone3.setDuration(0.03)
+    tone4 = PureTone()
+    tone4.setDuration(0.030)
+    tone5 = PureTone()
+    tone5.setDuration(0.030)
+
+    vocal0 = Vocalization()
+    test_file = os.path.join(os.path.expanduser('~'),r'Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(test_file)
+
+    silence0 = Silence()
+    silence0.setDuration(0.025)
+
+    stim0 = StimulusModel()
+    stim1 = StimulusModel()
+    stim0.insertComponent(tone2)
+    stim1.insertComponent(tone1)
+    # stim.insertComponent(tone0)
+
+    # stim.insertComponent(tone4, (1,0))
+    stim1.insertComponent(tone5, (1,0))
+    stim0.insertComponent(vocal0, (1,0))
+
+    # stim.insertComponent(tone3, (2,0))
+    # stim.insertComponent(silence0, (2,0))
+
+    stim0.setLoopCount(3)
 
     tableView = ProtocolView()
     tableView.show()
     tableView.resize(400,400)
 
-    model = ProtocolTabelModel(protocol)
+    model = ProtocolTabelModel()
+    model.insertNewTest(stim0,0)
+    model.insertNewTest(stim1,0)
 
     tableView.setModel(model)
 
