@@ -19,6 +19,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self._nreps = 1 # reps of each unique stimulus
         self._nloops = 1 # reps of entire expanded list of autoparams
         self._samplerate = 375000
+
         # 2D array of simulus components track number x component number
         self.segments = [[]]
         # add an empty place to place components into new track
@@ -183,6 +184,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def setRepCount(self, count):
         self._nreps = count
 
+
+    def expandedStim(self):
+        """
+        Apply the autoparameters to this stimulus and return a list of
+        the resulting stimuli
+        """
+        stim_list = self.expandFucntion(self.signal)
+        return stim_list
+
     def expandFucntion(self, func):
         # initilize array to hold all varied parameters
         params = self.auto_params.allData()
@@ -278,6 +288,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 doc_list.append(info)
 
         return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
+
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
 
 

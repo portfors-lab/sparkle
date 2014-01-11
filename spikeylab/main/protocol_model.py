@@ -101,6 +101,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             stimuli.append(self.tests[testid])
         return stimuli
 
+
 class ProtocolView(QtGui.QTableView):
     def __init__(self,parent=None):
         QtGui.QTableView.__init__(self,parent)

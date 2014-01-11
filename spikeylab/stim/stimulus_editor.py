@@ -94,6 +94,7 @@ if __name__ == "__main__":
 
     editor = StimulusEditor()
     editor.setStimulusModel(stim)
+
     # editor.ui.trackview.setModel(stim)
 
     editor.show()
