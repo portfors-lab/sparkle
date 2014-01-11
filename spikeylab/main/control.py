@@ -63,6 +63,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
+        self.acqmodel.signals.group_finished.connect(self.group_done)
         
         for stim in self.explore_stimuli:
             self.ui.parameter_stack.addWidget(stim.showEditor())
@@ -91,7 +92,7 @@ class MainWindow(ControlWindow):
         # first time set up data file
         if self.acqmodel.datafile is None:
             self.acqmodel.set_save_params(self.savefolder, self.savename)
-            self.acqmodel.set_data_file()
+            self.acqmodel.create_data_file()
         self.ui.plot_dock.setWidget(self.ui.display)
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         if not self.verify_inputs():
@@ -109,10 +110,10 @@ class MainWindow(ControlWindow):
             self.ui.plot_dock.setWidget(self.scrollplot)
 
             self.start_chart(aichan, acq_rate)
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
-            pass
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
+            self.run_protocol()
         else: 
-            error("unrecognized tab selection")
+            raise Exception("unrecognized tab selection")
 
     def on_update(self):
         print 'on_update'
@@ -128,14 +129,14 @@ class MainWindow(ControlWindow):
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
         self.ui.psth.set_bins(bin_centers)
-        self.acqmodel.set_explore_params(aochan=aochan, aichan=aichan,
-                                         acqtime=winsz, aisr=acq_rate,
-                                         binsz=binsz, aosr=gen_rate)
+        self.acqmodel.set_params(aochan=aochan, aichan=aichan,
+                                 acqtime=winsz, aisr=acq_rate,
+                                 binsz=binsz, aosr=gen_rate)
 
         self.ui.display.set_xlimits((0,winsz))
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             nreps = self.ui.ex_nreps_spnbx.value()
-            self.acqmodel.set_explore_params(nreps=nreps)
+            self.acqmodel.set_params(nreps=nreps)
             # each widget should be in charge of putting its own stimulus together
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             stim_widget = self.ui.parameter_stack.widget(stim_index)
@@ -189,10 +190,7 @@ class MainWindow(ControlWindow):
         self.on_update()            
         self.acqmodel.run_explore(interval)
 
-    def add_protocol_stim(self):
-        print 'add stim'
-
-    def run_test(self):
+    def run_protocol(self):
         self.ui.start_btn.setEnabled(False)
         self.current_operation = 'protocol'
 
@@ -202,11 +200,10 @@ class MainWindow(ControlWindow):
         
         self.on_update()
 
-        # get protocol list from UI widget?
-
-
         self.acqmodel.run_protocol(interval)
 
+    def group_done(self):
+        self.ui.start_btn.setEnabled(True)
 
     def tuning_curve(self):
         print "run curve"

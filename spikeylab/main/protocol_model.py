@@ -94,6 +94,13 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
         self.endInsertRows()
 
+    def stimulusList(self):
+        """Return a list of StimulusModels in correct order"""
+        stimuli = []
+        for testid in self.test_order:
+            stimuli.append(self.tests[testid])
+        return stimuli
+
 class ProtocolView(QtGui.QTableView):
     def __init__(self,parent=None):
         QtGui.QTableView.__init__(self,parent)

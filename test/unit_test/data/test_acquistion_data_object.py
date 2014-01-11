@@ -76,7 +76,7 @@ class TestAcqusitionData():
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
 
-        np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
 
         acq_data.close()
 
@@ -97,7 +97,7 @@ class TestAcqusitionData():
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
 
-        np.testing.assert_array_equal(acq_data.get('fake', (2,)), np.squeeze(fakedata*2))
+        np.testing.assert_array_equal(acq_data.get('test_1', (2,)), np.squeeze(fakedata*2))
 
         acq_data.close()
 
@@ -137,7 +137,7 @@ class TestAcqusitionData():
         for iset in range(nsets):
             acq_data.insert('fake', [iset], fakedata*iset)
 
-        np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
 
         acq_data.close()
 

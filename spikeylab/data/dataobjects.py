@@ -23,6 +23,7 @@ class AcquisitionData():
     def __init__(self, filename, user='unknown'):
         # check that filename ends with '.hdf5', appending if necessary
         self.hdf5 = h5py.File(filename, 'w')
+        self.groups = {}
         self.datasets = {}
         self.meta = {}
 
@@ -33,12 +34,19 @@ class AcquisitionData():
         self.hdf5.attrs['who'] = user
         self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
 
+        self.test_count = -1
+
     def close(self):
         for key in self.datasets.keys():
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
 
         self.hdf5.close()
         
+    def init_group(self, key):
+        """create a high level group"""
+        self.groups[key] = self.hdf5.create_group(key)
+        self.meta[key] = {'mode': 'finite'}
+
     def init_data(self, key, dims=None, mode='finite'):
         """
         Initize a new dataset
@@ -54,21 +62,27 @@ class AcquisitionData():
         :type mode: str
         """
         if mode == 'finite':
-            self.datasets[key] = self.hdf5.create_dataset(key, dims)
-            self.meta[key] = {'mode':mode, 'cursor':[0]*len(dims)}
+            self.test_count +=1
+            setname = 'test_'+str(self.test_count)
+            if not key in self.groups:
+                self.init_group(key)
+            self.datasets[setname] = self.groups[key].create_dataset(setname, dims)
+            self.meta[setname] = {'cursor':[0]*len(dims)}
+            setpath = '/'.join([key, setname])
         elif mode == 'open':
             if len(dims) > 1:
                 print "open acquisition only for single dimension data"
                 return
             self.datasets[key] = self.hdf5.create_dataset(key, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
             self.meta[key] = {'mode':mode, 'datalen':dims[0], 'cursor':0}
+            setpath = key
         elif mode == 'continuous':
             self.datasets[key+'_set0'] = self.hdf5.create_dataset(key+'_set0', (self.chunk_size,))
             self.meta[key] = {'mode':mode, 'set_counter':0, 'cursor':0}
         else:
             raise Exception("Unknown acquisition mode")
-        self.datasets[key].attrs['stim'] = '['
-        self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 'mode':mode})
+        self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 'mode':mode,
+                                'stim': '['})
 
     def append(self, key, data):
         """
@@ -76,15 +90,16 @@ class AcquisitionData():
         """
         mode = self.meta[key]['mode']
         if mode == 'finite':
-            current_location = self.meta[key]['cursor']
+            setname = 'test_'+str(self.test_count)
+            current_location = self.meta[setname]['cursor']
             if data.shape == (1,):
                 index = current_location
             else:
                 index = current_location[:-len(data.shape)]
             # if data does crosses dimensions of datastructure, raise error
             # turn the index into a tuple so not to trigger advanced indexing
-            self.datasets[key][tuple(index)] = data[:]
-            dims = self.datasets[key].shape
+            self.datasets[setname][tuple(index)] = data[:]
+            dims = self.datasets[setname].shape
             increment(current_location, dims, data.shape)
         elif mode =='open':
             current_index = self.meta[key]['cursor']
@@ -103,9 +118,10 @@ class AcquisitionData():
         """
         mode = self.meta[key]['mode']
         if mode == 'finite':
+            setname = 'test_'+str(self.test_count)
             # turn the index into a tuple so not to trigger advanced indexing
             index = tuple(index)
-            self.datasets[key][index] = data[:]
+            self.datasets[setname][index] = data[:]
         else:
             print "insert not supported for mode: ", mode
 
@@ -168,7 +184,9 @@ class AcquisitionData():
         mode = self.meta[key]['mode']
         if mode == 'open':
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + stim_data + ','
-
+        if mode == 'finite':
+            setname = 'test_'+str(self.test_count)
+            self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
 
 def increment(index, dims, data_shape):
     inc_amount = data_shape

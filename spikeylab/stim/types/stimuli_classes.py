@@ -73,10 +73,11 @@ class Vocalization(AbstractStimulusComponent):
         return self._filename
 
     def samplerate(self):
-        wf =  wave.open(self._filename)
-        fs= wf.getframerate()
-        wf.close()
-        return fs
+        if self._filename is not None:
+            wf =  wave.open(self._filename)
+            fs= wf.getframerate()
+            wf.close()
+            return fs
 
     def stateDict(self):
         state = super(Vocalization, self).stateDict()

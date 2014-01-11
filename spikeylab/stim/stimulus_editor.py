@@ -92,7 +92,8 @@ if __name__ == "__main__":
     # stim.insertComponent(tone3, (2,0))
     # stim.insertComponent(silence0, (2,0))
 
-    editor = StimulusEditor(stim)
+    editor = StimulusEditor()
+    editor.setStimulusModel(stim)
     # editor.ui.trackview.setModel(stim)
 
     editor.show()

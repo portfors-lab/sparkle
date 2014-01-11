@@ -1,3 +1,7 @@
+import sip
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
+
 import os, time
 import threading
 import numpy as np
@@ -24,7 +28,10 @@ class AcquisitionModel():
         self.signals = ProtocolSignals()
 
         self.datafile = None
+        self.savefolder = None
+        self.savename = None
         self.set_name = 'data0'
+        self.group_name = 'segment_0'
 
         self.protocol_model = ProtocolTabelModel()
         # stimulus for explore function
@@ -32,6 +39,8 @@ class AcquisitionModel():
 
         stimuli_types = get_stimuli_models()
         self.explore_stimuli = [x() for x in stimuli_types if x.valid]
+
+        self.binsz = 0.005
 
     def stimuli_list(self):
         return self.explore_stimuli
@@ -47,8 +56,10 @@ class AcquisitionModel():
         # calibration_vector = np.load(os.path.join(caldata_filename()))
         # calibration_freqs = np.load(os.path.join(calfreq_filename()))
 
-    def set_data_file(self):
+    def create_data_file(self):
         # find first available file name
+        if self.savefolder is None or self.savename is None:
+            print "You must first set a save folder and filename"
         fname = create_unique_path(self.savefolder, self.savename)
         self.datafile = AcquisitionData(fname)
 
@@ -71,7 +82,7 @@ class AcquisitionModel():
         self.savefolder = savefolder
         self.savename = savename
 
-    def set_explore_params(self, **kwargs):
+    def set_params(self, **kwargs):
         if self.finite_player is None:
             self.finite_player = FinitePlayer()
 
@@ -102,7 +113,7 @@ class AcquisitionModel():
             self.stimulus.clearComponents()
         self.stimulus.insertComponent(self.explore_stimuli[index])
         signal, atten = self.stimulus.signal()
-        self.finite_player.set_stim(signal, self.stimulus.samplerate, attenuation=atten)
+        self.finite_player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         return signal
 
     def run_explore(self, interval):
@@ -141,17 +152,7 @@ class AcquisitionModel():
         while not self._halt:
             # print 'explore worker'
             try:
-                # calculate time since last interation and wait to acheive desired interval
-                now = time.time()
-                elapsed = (now - self.last_tick)*1000
-                #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
-                if elapsed < self.interval:
-                    #print('sleep ', (self.interval-elapsed))
-                    time.sleep((self.interval-elapsed)/1000)
-                    now = time.time()
-                elif elapsed > self.interval:
-                    self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
-                self.last_tick = now
+                self.interval_wait()
 
                 response = self.finite_player.read()
                 self.signals.response_collected.emit(self.aitimes, response)
@@ -189,11 +190,97 @@ class AcquisitionModel():
 
             except:
                 raise
+
         self.finite_player.stop()
         self.datafile.trim(self.current_dataset_name)
 
-    def run_protocol(self):
-        pass
+    def run_protocol(self, interval):
+
+        self.current_dataset_name = self.group_name
+        self.datafile.init_group(self.current_dataset_name)
+        self.group_name = increment_title(self.group_name)
+
+        # save common acq parameters
+
+        # save the start time and set last tick to expired, so first
+        # acquisition loop iteration executes immediately
+        self.start_time = time.time()
+        self.last_tick = self.start_time - (interval/1000)
+        self.interval = interval
+        self.acq_thread = threading.Thread(target=self._protocol_worker)
+
+        self.acq_thread.start()
+
+        return self.acq_thread
+
+    def _protocol_worker(self):
+        # pull out signal from stim model
+        stimuli = self.protocol_model.stimulusList()
+        info = {'samplerate_ad': self.finite_player.aisr}
+        self.datafile.set_metadata(self.current_dataset_name, info)
+
+        for test in stimuli:
+            traces = test.expandedStim()
+            doc  = test.expandedDoc()
+            nreps = test.repCount()
+            recording_length = self.aitimes.shape[0]
+            self.datafile.init_data(self.current_dataset_name, 
+                                    dims=(len(traces), nreps, recording_length),
+                                    mode='finite')
+            for trace, trace_doc in zip(traces, doc):
+                spike_counts = []
+                spike_latencies = []
+                spike_rates = []
+                signal, atten = trace
+                self.finite_player.set_stim(signal, test.samplerate(), atten)
+                self.finite_player.start(self.aochan, self.aichan)
+                for irep in range(nreps):
+                    self.interval_wait()
+
+                    response = self.finite_player.read()
+                    self.signals.response_collected.emit(self.aitimes, response)
+
+                    # process response; calculate spike times
+                    spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)
+                    spike_counts.append(len(spike_times))
+                    if len(spike_times) > 0:
+                        spike_latencies.append(spike_times[0])
+                    else:
+                        spike_latencies.append(np.nan)
+                    spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
+
+                    response_bins = spikestats.bin_spikes(spike_times, self.binsz)
+                    if len(response_bins) > 0:
+                        self.signals.spikes_found.emit(response_bins, irep)
+
+                    self.finite_player.reset()
+
+                    self.datafile.append(self.current_dataset_name, response)
+
+                self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+
+                total_spikes = float(sum(spike_counts))
+                avg_count = total_spikes/len(spike_counts)
+                avg_latency = sum(spike_latencies)/len(spike_latencies)
+                avg_rate = sum(spike_rates)/len(spike_rates)
+                self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
+
+                self.finite_player.stop()
+
+        self.signals.group_finished.emit()
+
+    def interval_wait(self):
+        # calculate time since last interation and wait to acheive desired interval
+        now = time.time()
+        elapsed = (now - self.last_tick)*1000
+        #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+        if elapsed < self.interval:
+            #print('sleep ', (self.interval-elapsed))
+            time.sleep((self.interval-elapsed)/1000)
+            now = time.time()
+        elif elapsed > self.interval:
+            self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
+        self.last_tick = now
 
     def save_data(self, data):
         self.datafile.append(self.current_dataset_name, data)

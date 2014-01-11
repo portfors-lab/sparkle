@@ -16,9 +16,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
     """
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
-        self.nreps = 1 # reps of each unique stimulus
-        self.nloops = 1 # reps of entire expanded list of autoparams
-        self.samplerate = 375000
+        self._nreps = 1 # reps of each unique stimulus
+        self._nloops = 1 # reps of entire expanded list of autoparams
+        self._samplerate = 375000
         # 2D array of simulus components track number x component number
         self.segments = [[]]
         # add an empty place to place components into new track
@@ -33,7 +33,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.editor = None
 
     def setSamplerate(self, fs):
-        self.samplerate = fs
+        self._samplerate = fs
+
+    def samplerate(self):
+
+        rates = []
+        for track in self.segments:
+            for component in track:
+                # special case, where component is a wav file:
+                # it will set the master samplerate to match its own
+                if component.__class__.__name__ == 'Vocalization':
+                    self._samplerate = component.samplerate()
+                    rates.append(component.samplerate())
+
+        if len(set(rates)) > 1:
+            raise Exception("Wav files with different sample rates in same stimulus")
+        return self._samplerate
 
     def setAutoParams(self, params):
         self.auto_params = params
@@ -113,10 +128,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             self.segments.append([])
             self.endInsertRows()
 
-        # special case, where component is a wav file:
-        # it will set the master samplerate to match its own
-        if comp.__class__.__name__ == 'Vocalization':
-            self.samplerate = comp.samplerate()
 
     def removeComponent(self, rowcol):
         parent = self.parentForRow(rowcol[0])
@@ -150,6 +161,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def traceCount(self):
+        """The number of unique stimului for this stimulus object"""
         params = self.auto_params.allData()
         steps = []
         ntraces = 1
@@ -159,24 +171,17 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return ntraces
 
     def loopCount(self):
-        return self.nloops
+        """The number of times to run through a set of autoparameters"""
+        return self._nloops
 
     def setLoopCount(self, count):
-        self.nloops = count
+        self._nloops = count
 
     def repCount(self):
-        return self.nreps
+        return self._nreps
 
     def setRepCount(self, count):
-        self.nreps = count
-
-    def expandedStim(self):
-        """
-        Apply the autoparameters to this stimulus and return a list of
-        the resulting stimuli
-        """
-        stim_list = self.expandFucntion(self.signal)
-        return stim_list
+        self._nreps = count
 
     def expandFucntion(self, func):
         # initilize array to hold all varied parameters
@@ -218,6 +223,14 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         return stim_list
 
+    def expandedStim(self):
+        """
+        Apply the autoparameters to this stimulus and return a list of
+        the resulting stimuli
+        """
+        stim_list = self.expandFucntion(self.signal)
+        return stim_list
+
     def expandedDoc(self):
         """
         JSON/YAML/XML representation of exactly what was presented
@@ -241,7 +254,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # track_signal = np.zeros((nsamples,))
             track_list = []
             for component in track:
-                track_list.append(component.signal(self.samplerate, atten))
+                track_list.append(component.signal(self._samplerate, atten))
             if len(track_list) > 0:   
                 track_signals.append(np.hstack(track_list))
 
@@ -264,7 +277,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 start_time += info['duration']
                 doc_list.append(info)
 
-        return {'samplerate_da':self.samplerate, 'reps': self.nreps, 
+        return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
 
 
