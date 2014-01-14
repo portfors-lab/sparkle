@@ -17,3 +17,7 @@ tmp/
 
 # build files
 /doc/_build/
+
+# testing
+cover/
+.coverage

@@ -1,6 +1,6 @@
 import os
 import glob
-from audiolab.io import fileio
+from spikeylab.io import fileio
 import numpy as np
 from nose.tools import with_setup
 

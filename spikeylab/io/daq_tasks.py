@@ -3,7 +3,6 @@
 #from PyDAQmx.DAQmxTypes import *
 from PyDAQmx import *
 import numpy as np
-import matplotlib.pyplot as plt
 
 class AITask(Task):
     def __init__(self, chan, samplerate, bufsize, clksrc=u""):

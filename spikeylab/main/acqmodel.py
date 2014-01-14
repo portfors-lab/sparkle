@@ -7,7 +7,7 @@ import threading
 import numpy as np
 import scipy.io.wavfile as wv
 
-from spikeylab.io.players import FinitePlayer, ToneCurve, ContinuousPlayer
+from spikeylab.io.players import FinitePlayer, ContinuousPlayer
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum
 from spikeylab.tools import spikestats
 from spikeylab.tools.qthreading import ProtocolSignals
@@ -30,7 +30,7 @@ class AcquisitionModel():
         self.datafile = None
         self.savefolder = None
         self.savename = None
-        self.set_name = 'data0'
+        self.set_name = 'explore_0'
         self.group_name = 'segment_0'
 
         self.protocol_model = ProtocolTabelModel()
@@ -115,6 +115,12 @@ class AcquisitionModel():
         self.finite_player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         return signal
 
+    def explore_stim_names(self):
+        stim_names = []
+        for stim in self.explore_stimuli:
+            stim_names.append(stim.name)
+        return stim_names
+
     def run_explore(self, interval):
         """Begin the set-up generation/acquisition
 
@@ -142,6 +148,8 @@ class AcquisitionModel():
 
         # and go!
         self.acq_thread.start()
+
+        return self.acq_thread
 
     def _explore_worker(self):
         spike_counts = []
@@ -205,8 +213,6 @@ class AcquisitionModel():
         self.current_dataset_name = self.group_name
         self.datafile.init_group(self.current_dataset_name)
         self.group_name = increment_title(self.group_name)
-
-        # save common acq parameters
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately

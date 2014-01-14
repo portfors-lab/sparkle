@@ -215,15 +215,6 @@ class ProtocolView(QtGui.QTableView):
             # super(ProtocolView, self).mousePressEvent(event)
 
 
-class DummyTest():
-    def __init__(self, name, reps, note):
-        self.name = name
-        self.reps = reps
-        self.note = note
-    def __repr__(self):
-        return "%s\n%s\n%s"% (self.name, self.reps, self.note)
-
-
 if __name__ == '__main__':
     
     import sys, os

@@ -1,7 +1,7 @@
 import numpy as np
 import uuid
 
-from spikeylab.stim.auto_parameter_modelview import AutoParameterModel
+from spikeylab.stim.auto_parameter_model import AutoParameterModel
 
 from PyQt4 import QtGui, QtCore
 
@@ -22,9 +22,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self._samplerate = 375000
 
         # 2D array of simulus components track number x component number
-        self.segments = [[]]
+        self._segments = [[]]
         # add an empty place to place components into new track
-        self.auto_params = AutoParameterModel()
+        self._auto_params = AutoParameterModel()
 
         # reference for what voltage == what intensity
         self.calv = 0.1
@@ -41,16 +41,16 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return self._samplerate
 
     def setAutoParams(self, params):
-        self.auto_params = params
+        self._auto_params = params
 
     def autoParams(self):
-        return self.auto_params
+        return self._auto_params
 
     def headerData(self, section, orientation, role):
         return ''
 
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.segments)
+        return len(self._segments)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         if parent.isValid():
@@ -58,26 +58,26 @@ class StimulusModel(QtCore.QAbstractItemModel):
             wholerow = parent.internalPointer()
             return len(wholerow)
         else:
-            column_lengths = [len(x) for x in self.segments]
+            column_lengths = [len(x) for x in self._segments]
             return max(column_lengths)
 
     def columnCountForRow(self, row):
-        return len(self.segments[row])
+        return len(self._segments[row])
 
     def data(self, index, role):
         if not index.isValid():
             return None
         if role == QtCore.Qt.DisplayRole:
-            component = self.segments[index.row()][index.column()]
+            component = self._segments[index.row()][index.column()]
             return component.__class__.__name__
         elif role == QtCore.Qt.UserRole:  #return the whole python object
-            if len(self.segments[index.row()]) > index.column():
-                component = self.segments[index.row()][index.column()]
+            if len(self._segments[index.row()]) > index.column():
+                component = self._segments[index.row()][index.column()]
             else:
                 component = None
             return component
         elif role == QtCore.Qt.SizeHintRole:
-            component = self.segments[index.row()][index.column()]
+            component = self._segments[index.row()][index.column()]
             return component.duration() #* PIXELS_PER_MS * 1000
 
     def printStimulus(self):
@@ -87,23 +87,23 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # need to convert row, col to correct element, however still have heirarchy?
         if parent.isValid():
             print 'valid parent', parent.row(), parent.col()
-            prow = self.segments.index(parent.internalPointer())
-            return self.createIndex(prow, row, self.segments[prow][row])
+            prow = self._segments.index(parent.internalPointer())
+            return self.createIndex(prow, row, self._segments[prow][row])
         else:
-            if row < len(self.segments) and col < len(self.segments[row]):
-                return self.createIndex(row, col, self.segments[row][col])
+            if row < len(self._segments) and col < len(self._segments[row]):
+                return self.createIndex(row, col, self._segments[row][col])
             else:
                 return QtCore.QModelIndex()
 
     def parentForRow(self, row):
         # get the whole row
-        return self.createIndex(row, -1, self.segments[row])
+        return self.createIndex(row, -1, self._segments[row])
 
     def parent(self, index):
         if index.column() == -1:
             return QtCore.QModelIndex()
         else:
-            return self.createIndex(index.row(), -1, self.segments[index.row()])
+            return self.createIndex(index.row(), -1, self._segments[index.row()])
 
     def insertComponent(self, comp, rowcol=(0,0)):
         # parent = self.parentForRow(rowcol[0])
@@ -111,12 +111,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # self.beginInsertRows(parent, rowcol[1], rowcol[1])
         # parent.internalPointer().insert(rowcol[1], comp)
         # self.endInsertRows()
-        self.segments[rowcol[0]].insert(rowcol[1], None)
+        self._segments[rowcol[0]].insert(rowcol[1], None)
         self.setData(self.index(rowcol[0],rowcol[1]), comp)
 
-        if len(self.segments[-1]) > 0:
-            self.beginInsertRows(QtCore.QModelIndex(), len(self.segments), len(self.segments))
-            self.segments.append([])
+        if len(self._segments[-1]) > 0:
+            self.beginInsertRows(QtCore.QModelIndex(), len(self._segments), len(self._segments))
+            self._segments.append([])
             self.endInsertRows()
 
 
@@ -127,29 +127,29 @@ class StimulusModel(QtCore.QAbstractItemModel):
         parent.internalPointer().pop(rowcol[1])
         self.endRemoveRows()
 
-        if len(self.segments[-2]) == 0:
-            self.beginRemoveRows(QtCore.QModelIndex(), len(self.segments)-1, len(self.segments)-1)
-            self.segments.pop(len(self.segments)-1)
+        if len(self._segments[-2]) == 0:
+            self.beginRemoveRows(QtCore.QModelIndex(), len(self._segments)-1, len(self._segments)-1)
+            self._segments.pop(len(self._segments)-1)
             self.endRemoveRows()
 
     def clearComponents(self):
-        self.segments = [[]]
+        self._segments = [[]]
 
     def indexByComponent(self, component):
         """return a QModelIndex for the given component, or None if
         it is not in the model"""
-        for row, rowcontents in enumerate(self.segments):
+        for row, rowcontents in enumerate(self._segments):
             if component in rowcontents:
                 column = rowcontents.index(component)
                 return self.index(row, column)
 
     def setData(self, index, value):
         # item must already exist at provided index
-        self.segments[index.row()][index.column()] = value
+        self._segments[index.row()][index.column()] = value
 
         if value.__class__.__name__ == 'Vocalization':
             rates = []
-            for track in self.segments:
+            for track in self._segments:
                 for component in track:
                     # special case, where component is a wav file:
                     # it will set the master samplerate to match its own
@@ -169,7 +169,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def traceCount(self):
         """The number of unique stimului for this stimulus object"""
-        params = self.auto_params.allData()
+        nsegs = sum([len(track) for track in self._segments])
+        if nsegs == 0:
+            return 0
+        params = self._auto_params.allData()
         steps = []
         ntraces = 1
         for p in params:
@@ -191,23 +194,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self._nreps = count
 
     def contains(self, stimtype):
-        for track in self.segments:
+        for track in self._segments:
             for component in track:
                 if component.__class__.__name__ == stimtype:
                     return True
         return False
 
-    def expandedStim(self):
-        """
-        Apply the autoparameters to this stimulus and return a list of
-        the resulting stimuli
-        """
-        stim_list = self.expandFucntion(self.signal)
-        return stim_list
-
     def expandFucntion(self, func):
         # initilize array to hold all varied parameters
-        params = self.auto_params.allData()
+        params = self._auto_params.allData()
         steps = []
         ntraces = 1
         for p in params:
@@ -228,7 +223,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         stim_list = []
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
-                comp_inds = self.auto_params.selection(param)
+                comp_inds = self._auto_params.selection(param)
                 for index in comp_inds:
                     component = self.data(index, QtCore.Qt.UserRole)
                     component.set(param['parameter'], varylist[itrace][ip])
@@ -238,7 +233,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         # now reset the components to start value
         for ip, param in enumerate(params):
-            comp_inds = self.auto_params.selection(param)
+            comp_inds = self._auto_params.selection(param)
             for index in comp_inds:
                 component = self.data(index, QtCore.Qt.UserRole)
                 component.set(param['parameter'], varylist[0][ip])
@@ -255,7 +250,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def expandedDoc(self):
         """
-        JSON/YAML/XML representation of exactly what was presented
+        dictionary representation of exactly what was presented. 
+        Contains only JSON compatable types
         """
         doc_list = self.expandFucntion(self.doc)
         return doc_list
@@ -268,10 +264,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def signal(self):
         """Return the current stimulus in signal representation"""
         track_signals = []
-        max_db = max([comp.intensity() for t in self.segments for comp in t])
+        max_db = max([comp.intensity() for t in self._segments for comp in t])
         caldb = 100
         atten = caldb - max_db
-        for track in self.segments:
+        for track in self._segments:
             # nsamples = sum([comp.duration() for comp in track])*self.samplerate
             # track_signal = np.zeros((nsamples,))
             track_list = []
@@ -290,7 +286,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def doc(self):
         doc_list = []
-        for track in self.segments:
+        for track in self._segments:
             start_time = 0
             for component in track:
                 info = component.stateDict()

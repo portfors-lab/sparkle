@@ -211,9 +211,15 @@ class StimulusView(QtGui.QAbstractItemView):
         # print "I done care about cursors!"
         return QtCore.QModelIndex()
 
-    def mousePressEvent(self, event):
+    def mouseDoubleClickEvent(self, event):
         if self.mode == BUILDMODE:
             if event.button() == QtCore.Qt.LeftButton:
+                index = self.indexAt(event.pos())
+                self.edit(index)
+                
+    def mousePressEvent(self, event):
+        if self.mode == BUILDMODE:
+            if event.button() == QtCore.Qt.RightButton:
                 index = self.indexAt(event.pos())
                 if not index.isValid():
                     return
@@ -241,19 +247,12 @@ class StimulusView(QtGui.QAbstractItemView):
                 drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
                 drag.setPixmap(pixmap)
 
-                # if result: # == QtCore.Qt.MoveAction:
-                    # self.model().removeRow(index.row())
                 self.model().removeComponent((index.row(), index.column()))
                 self.hashIsDirty = True
                 result = drag.start(QtCore.Qt.MoveAction)
 
-            elif event.button() == QtCore.Qt.RightButton:
-                index = self.indexAt(event.pos())
-                self.edit(index)
-                # super(StimulusView, self).mousePressEvent(event)
         else:
             # select and de-select components
-            # super(StimulusView, self).mousePressEvent(event)
             index = self.indexAt(event.pos())
             if not index.isValid():
                 return

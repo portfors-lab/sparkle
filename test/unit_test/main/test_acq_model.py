@@ -1,5 +1,6 @@
 import sys, os, glob
 import json
+import time
 
 import h5py
 from nose.tools import assert_in, assert_equal
@@ -55,6 +56,7 @@ class TestAcquisitionModel():
         hfile.close()
 
     def test_vocal_protocol(self):
+        """Run protocol with single vocal wav stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
@@ -81,7 +83,66 @@ class TestAcquisitionModel():
 
         hfile.close()
 
+    def test_tone_explore(self):
+        """Run search operation with tone stimulus"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)        
+
+        acqmodel.set_params(nreps=2)
+        stim_names = acqmodel.explore_stim_names()
+        acqmodel.set_stim_by_index(stim_names.index('Pure Tone'))
+        t = acqmodel.run_explore(0.25)
+
+        time.sleep(1)
+
+        acqmodel.halt()
+
+        t.join()
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['explore_0']
+        stim = json.loads(test.attrs['stim'])
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], acqmodel.stimulus.samplerate())
+        assert_equal(test.shape[1], winsz*acq_rate)
+
+        hfile.close()
+
+    def test_vocal_explore(self):
+        """Run search operation with vocal wav stimulus"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)        
+
+        acqmodel.set_params(nreps=2)
+        stim_names = acqmodel.explore_stim_names()
+
+        acqmodel.explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
+        acqmodel.set_stim_by_index(stim_names.index('Vocalization'))
         
+        t = acqmodel.run_explore(0.25)
+
+        time.sleep(1)
+
+        acqmodel.halt()
+
+        t.join()
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['explore_0']
+        stim = json.loads(test.attrs['stim'])
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], acqmodel.stimulus.samplerate())
+        assert_equal(test.shape[1], winsz*acq_rate)
+
+        hfile.close()
 
     def create_acqmodel(self, winsz, acq_rate):
         acqmodel = AcquisitionModel()

@@ -5,7 +5,7 @@ sip.setapi('QString', 2)
 from PyQt4 import QtGui
 
 from stimeditor_form import Ui_StimulusEditor
-from auto_parameter import Parametizer
+from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 from matplotlib.mlab import specgram

@@ -4,8 +4,8 @@ sip.setapi('QString', 2)
 
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.stim.auto_parameter_modelview import AutoParameterListView, AutoParameterDelegate, AutoParameterModel, AutoParamWidget
-
+from spikeylab.stim.auto_parameter_view import AutoParameterListView, AutoParameterDelegate,  AutoParamWidget
+from spikeylab.stim.auto_parameter_model import AutoParameterModel
 
 class Parametizer(QtGui.QWidget):
     def __init__(self, stimulusview, parent=None):
