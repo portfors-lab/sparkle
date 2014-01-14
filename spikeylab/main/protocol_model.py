@@ -15,7 +15,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.test_order = []
         self.tests = {}
-        self.headers = ['Test type', 'Reps', 'Length', 'Total']
+        self.headers = ['Test type', 'Reps', 'Length', 'Total', 'Generation rate']
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
 
     def headerData(self, section, orientation, role):
@@ -27,7 +27,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         return len(self.tests)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
-        return 4
+        return 5
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
@@ -42,6 +42,8 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
                 item = test.traceCount()
             elif col == 3:
                 item = test.traceCount()*test.loopCount()*test.repCount()
+            elif col ==4:
+                item = test.samplerate()
 
             return item
         elif role == QtCore.Qt.UserRole:  #return the whole python object
@@ -161,8 +163,18 @@ class ProtocolView(QtGui.QTableView):
 
         event.accept()
 
-    def mousePressEvent(self, event):
+    def mouseDoubleClickEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
+            index = self.indexAt(event.pos())
+            selected = self.model().data(index, QtCore.Qt.UserRole)
+            self.stim_editor = selected.showEditor()
+            self.stim_editor.show()
+
+            # self.edit(index)
+            print 'modalness', self.stim_editor.isModal()
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.RightButton:
             index = self.indexAt(event.pos())
             selected = self.model().data(index, QtCore.Qt.UserRole)
 
@@ -199,15 +211,6 @@ class ProtocolView(QtGui.QTableView):
                 # self.model().removeRow(index.row())
             self.model().removeTest(index.row())
             result = drag.start(QtCore.Qt.MoveAction)
-
-        elif event.button() == QtCore.Qt.RightButton:
-            index = self.indexAt(event.pos())
-            selected = self.model().data(index, QtCore.Qt.UserRole)
-            self.stim_editor = selected.showEditor()
-            self.stim_editor.show()
-
-            # self.edit(index)
-            print 'modalness', self.stim_editor.isModal()
 
             # super(ProtocolView, self).mousePressEvent(event)
 

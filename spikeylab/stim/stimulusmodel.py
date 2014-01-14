@@ -14,6 +14,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     Model to represent any stimulus the system will present. 
     Holds all relevant parameters
     """
+    samplerateChanged = QtCore.pyqtSignal(int)
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self._nreps = 1 # reps of each unique stimulus
@@ -37,18 +38,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self._samplerate = fs
 
     def samplerate(self):
-
-        rates = []
-        for track in self.segments:
-            for component in track:
-                # special case, where component is a wav file:
-                # it will set the master samplerate to match its own
-                if component.__class__.__name__ == 'Vocalization':
-                    self._samplerate = component.samplerate()
-                    rates.append(component.samplerate())
-
-        if len(set(rates)) > 1:
-            raise Exception("Wav files with different sample rates in same stimulus")
         return self._samplerate
 
     def setAutoParams(self, params):
@@ -94,7 +83,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
 
-
     def index(self, row, col, parent=QtCore.QModelIndex()):
         # need to convert row, col to correct element, however still have heirarchy?
         if parent.isValid():
@@ -118,11 +106,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
             return self.createIndex(index.row(), -1, self.segments[index.row()])
 
     def insertComponent(self, comp, rowcol=(0,0)):
-        parent = self.parentForRow(rowcol[0])
+        # parent = self.parentForRow(rowcol[0])
         # convert to index or done already?
-        self.beginInsertRows(parent, rowcol[1], rowcol[1])
-        parent.internalPointer().insert(rowcol[1], comp)
-        self.endInsertRows()
+        # self.beginInsertRows(parent, rowcol[1], rowcol[1])
+        # parent.internalPointer().insert(rowcol[1], comp)
+        # self.endInsertRows()
+        self.segments[rowcol[0]].insert(rowcol[1], None)
+        self.setData(self.index(rowcol[0],rowcol[1]), comp)
 
         if len(self.segments[-1]) > 0:
             self.beginInsertRows(QtCore.QModelIndex(), len(self.segments), len(self.segments))
@@ -156,6 +146,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def setData(self, index, value):
         # item must already exist at provided index
         self.segments[index.row()][index.column()] = value
+
+        if value.__class__.__name__ == 'Vocalization':
+            rates = []
+            for track in self.segments:
+                for component in track:
+                    # special case, where component is a wav file:
+                    # it will set the master samplerate to match its own
+                    if component.__class__.__name__ == 'Vocalization':
+                        rates.append(component.samplerate())
+
+            if len(set(rates)) > 1:
+                raise Exception("Wav files with different sample rates in same stimulus")
+            self._samplerate = value.samplerate()
+            print 'emitting samplerate change', value.samplerate()
+            self.samplerateChanged.emit(value.samplerate())
+
         self.dataChanged.emit(index, index)
 
     def flags(self, index):
@@ -184,6 +190,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def setRepCount(self, count):
         self._nreps = count
 
+    def contains(self, stimtype):
+        for track in self.segments:
+            for component in track:
+                if component.__class__.__name__ == stimtype:
+                    return True
+        return False
 
     def expandedStim(self):
         """
@@ -290,7 +302,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
 
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
-
 
     def stimType(self):
         return 'Fix me'

@@ -36,6 +36,7 @@ class AcquisitionModel():
         self.protocol_model = ProtocolTabelModel()
         # stimulus for explore function
         self.stimulus = StimulusModel()
+        self.signals.samplerateChanged = self.stimulus.samplerateChanged
 
         stimuli_types = get_stimuli_models()
         self.explore_stimuli = [x() for x in stimuli_types if x.valid]
@@ -62,6 +63,7 @@ class AcquisitionModel():
             print "You must first set a save folder and filename"
         fname = create_unique_path(self.savefolder, self.savename)
         self.datafile = AcquisitionData(fname)
+        return fname
 
     def set_threshold(self, threshold):
         """Spike detection threshold
@@ -96,16 +98,13 @@ class AcquisitionModel():
             self.aichan = kwargs['aichan']
         if 'aisr' in kwargs and 'acqtime' in kwargs:
             self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
-        if 'aosr' in kwargs:
-            self.stimulus.setSamplerate(kwargs['aosr'])
         if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
         if 'binsz' in kwargs:
             self.binsz = kwargs['binsz']
 
-    def set_tone(self, f,db,dur,rft,sr):
-        """Build a tone and set as next tone to be output. Does not call write to hardware"""
-        return self.finite_player.set_tone(f,db,dur,rft,sr)
+    def clear_explore_stimulus(self):
+        self.stimulus.clearComponents()
 
     def set_stim_by_index(self, index):
         # remove any current components
@@ -193,6 +192,13 @@ class AcquisitionModel():
 
         self.finite_player.stop()
         self.datafile.trim(self.current_dataset_name)
+
+    def set_explore_samplerate(self, fs):
+        print 'setting generation rate', fs
+        if not self.stimulus.contains('Vocalization'):
+            self.stimulus.setSamplerate(fs)
+        else:
+            print 'ERROR: cannot set samplerate on stimulus containing vocal file'
 
     def run_protocol(self, interval):
 

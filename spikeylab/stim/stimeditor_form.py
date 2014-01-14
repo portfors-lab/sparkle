@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Thu Jan 09 14:53:56 2014
+# Created: Mon Jan 13 15:00:42 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -94,6 +94,10 @@ class Ui_StimulusEditor(object):
         self.verticalLayout.addWidget(self.autoparam_btn)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        self.aosr_spnbx = QtGui.QSpinBox(self.frame)
+        self.aosr_spnbx.setMaximum(500)
+        self.aosr_spnbx.setObjectName(_fromUtf8("aosr_spnbx"))
+        self.gridLayout_3.addWidget(self.aosr_spnbx, 0, 1, 1, 1)
         self.label_2 = QtGui.QLabel(self.frame)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -104,10 +108,21 @@ class Ui_StimulusEditor(object):
         self.label_2.setFrameShadow(QtGui.QFrame.Plain)
         self.label_2.setWordWrap(False)
         self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_2, 1, 0, 1, 1)
         self.nreps_spnbx = QtGui.QSpinBox(self.frame)
         self.nreps_spnbx.setObjectName(_fromUtf8("nreps_spnbx"))
-        self.gridLayout_3.addWidget(self.nreps_spnbx, 0, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.nreps_spnbx, 1, 1, 1, 1)
+        self.label_3 = QtGui.QLabel(self.frame)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout_3.addWidget(self.label_3, 0, 0, 1, 1)
+        self.label_4 = QtGui.QLabel(self.frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
+        self.label_4.setSizePolicy(sizePolicy)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.gridLayout_3.addWidget(self.label_4, 0, 2, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.buttonBox = QtGui.QDialogButtonBox(self.frame)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -124,6 +139,7 @@ class Ui_StimulusEditor(object):
         QtCore.QObject.connect(self.autoparam_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.doAutoparameters)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), StimulusEditor.signal)
         QtCore.QObject.connect(self.nreps_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), StimulusEditor.setRepCount)
+        QtCore.QObject.connect(self.aosr_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), StimulusEditor.setModelSamplerate)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):
@@ -131,6 +147,8 @@ class Ui_StimulusEditor(object):
         self.label.setText(_translate("StimulusEditor", "Info:", None))
         self.autoparam_btn.setText(_translate("StimulusEditor", "Automatic parameter manipulation", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
+        self.label_3.setText(_translate("StimulusEditor", "Samplerate", None))
+        self.label_4.setText(_translate("StimulusEditor", "kHz", None))
 
 from spikeylab.stim.stimulusview import StimulusView
 from spikeylab.stim.component_label import ComponentTemplateTable

@@ -130,7 +130,14 @@
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="aosr_spnbx">
+           <property name="maximum">
+            <number>500</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
           <widget class="QLabel" name="label_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -152,8 +159,28 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="1" column="1">
           <widget class="QSpinBox" name="nreps_spnbx"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Samplerate</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>kHz</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -203,7 +230,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>1031</x>
-     <y>547</y>
+     <y>532</y>
     </hint>
     <hint type="destinationlabel">
      <x>1047</x>
@@ -243,10 +270,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>aosr_spnbx</sender>
+   <signal>editingFinished()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>setModelSamplerate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>950</x>
+     <y>547</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1048</x>
+     <y>515</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>doAutoparameters()</slot>
   <slot>signal()</slot>
   <slot>setRepCount(int)</slot>
+  <slot>setModelSamplerate()</slot>
  </slots>
 </ui>

@@ -70,7 +70,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -129,7 +129,7 @@
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_7">
-              <item row="1" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="label_35">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -147,7 +147,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
+              <item row="1" column="0">
                <widget class="QLabel" name="label_39">
                 <property name="font">
                  <font>
@@ -159,7 +159,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
+              <item row="1" column="1">
                <widget class="QSpinBox" name="ex_nreps_spnbx">
                 <property name="font">
                  <font>
@@ -177,7 +177,7 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QDoubleSpinBox" name="ex_reprate_spnbx">
                 <property name="font">
                  <font>
@@ -195,7 +195,7 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="2">
+              <item row="2" column="2">
                <widget class="QLabel" name="label_36">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -205,6 +205,40 @@
                 </property>
                 <property name="text">
                  <string>reps/s</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="aosr_spnbx">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="maximum">
+                 <number>500</number>
+                </property>
+                <property name="value">
+                 <number>400</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Gen. Sample rate</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="funit_lbl">
+                <property name="text">
+                 <string>kHz</string>
                 </property>
                </widget>
               </item>
@@ -592,39 +626,21 @@
          <attribute name="title">
           <string>Experiment</string>
          </attribute>
-         <widget class="QLabel" name="label_2">
-          <property name="geometry">
-           <rect>
-            <x>80</x>
-            <y>10</y>
-            <width>111</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Experiment Protocol:</string>
-          </property>
-         </widget>
-         <widget class="ProtocolView" name="protocolView">
-          <property name="geometry">
-           <rect>
-            <x>40</x>
-            <y>60</y>
-            <width>256</width>
-            <height>192</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="StimulusLabelTable" name="stimulus_choices" native="true">
-          <property name="geometry">
-           <rect>
-            <x>150</x>
-            <y>290</y>
-            <width>120</width>
-            <height>80</height>
-           </rect>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Experiment Protocol:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="ProtocolView" name="protocolView"/>
+          </item>
+          <item>
+           <widget class="StimulusLabelTable" name="stimulus_choices" native="true"/>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
@@ -668,6 +684,27 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="windowsz_spnbx">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="minimum">
+             <number>50</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+            <property name="singleStep">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QSpinBox" name="aisr_spnbx">
             <property name="font">
@@ -717,27 +754,6 @@
             </property>
             <property name="text">
              <string>Window size</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QSpinBox" name="windowsz_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="minimum">
-             <number>50</number>
-            </property>
-            <property name="maximum">
-             <number>10000</number>
-            </property>
-            <property name="singleStep">
-             <number>50</number>
-            </property>
-            <property name="value">
-             <number>100</number>
             </property>
            </widget>
           </item>
@@ -813,40 +829,6 @@
            <widget class="QLabel" name="tunit_lbl_2">
             <property name="text">
              <string>ms</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="aosr_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="maximum">
-             <number>500</number>
-            </property>
-            <property name="value">
-             <number>400</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Gen. Sample rate</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="funit_lbl">
-            <property name="text">
-             <string>kHz</string>
             </property>
            </widget>
           </item>
@@ -1234,5 +1216,6 @@
   <slot>show_display()</slot>
   <slot>show_psth()</slot>
   <slot>add_protocol_stim()</slot>
+  <slot>set_explore_samplerate()</slot>
  </slots>
 </ui>

@@ -6,6 +6,7 @@ from PyQt4 import QtGui
 
 from stimeditor_form import Ui_StimulusEditor
 from auto_parameter import Parametizer
+from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 from matplotlib.mlab import specgram
 
@@ -14,7 +15,7 @@ class BuilderFactory():
     def editor(self):
         return StimulusEditor
 
-class StimulusEditor(QtGui.QWidget):
+class StimulusEditor(AbstractEditorWidget):
     def __init__(self, parent=None):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()
@@ -23,6 +24,8 @@ class StimulusEditor(QtGui.QWidget):
     
     def setStimulusModel(self, model):
         self.ui.trackview.setModel(model)
+        self.ui.aosr_spnbx.setValue(model.samplerate()/self.scales[1])
+        model.samplerateChanged.connect(self.updateSamplerate)
 
     def doAutoparameters(self):
         self.ui.trackview.setMode(1)
@@ -33,6 +36,15 @@ class StimulusEditor(QtGui.QWidget):
     def setRepCount(self, count):
         print 'set rep count'
         self.ui.trackview.model().setRepCount(count)
+
+    def updateSamplerate(self, fs):
+        # still need to handle units?!
+        print 'updating to', fs/self.scales[1]
+        self.ui.aosr_spnbx.setValue(fs/self.scales[1])
+
+    def setModelSamplerate(self):
+        fs = self.ui.aosr_spnbx.value()
+        self.ui.trackview.model().setSamplerate(fs*self.scales[1])
 
     def signal(self):
         # stim_signal, atten = self.ui.trackview.model().signal()

@@ -15,6 +15,7 @@ from spikeylab.dialogs.saving_dlg import SavingDialog
 from spikeylab.dialogs.scale_dlg import ScaleDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum
+from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 from controlwindow import ControlWindow
 
@@ -64,6 +65,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
         self.acqmodel.signals.group_finished.connect(self.group_done)
+        self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
         
         for stim in self.explore_stimuli:
             self.ui.parameter_stack.addWidget(stim.showEditor())
@@ -124,18 +126,19 @@ class MainWindow(ControlWindow):
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
         binsz = float(self.ui.binsz_lnedt.text())*self.tscale
 
-        gen_rate = self.ui.aosr_spnbx.value()*self.fscale
-
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
         self.ui.psth.set_bins(bin_centers)
         self.acqmodel.set_params(aochan=aochan, aichan=aichan,
                                  acqtime=winsz, aisr=acq_rate,
-                                 binsz=binsz, aosr=gen_rate)
+                                 binsz=binsz)
 
         self.ui.display.set_xlimits((0,winsz))
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
+            self.acqmodel.clear_explore_stimulus()
             nreps = self.ui.ex_nreps_spnbx.value()
+            gen_rate = self.ui.aosr_spnbx.value()*self.fscale
+            self.acqmodel.set_explore_samplerate(gen_rate)
             self.acqmodel.set_params(nreps=nreps)
             # each widget should be in charge of putting its own stimulus together
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
@@ -174,6 +177,9 @@ class MainWindow(ControlWindow):
 
     def update_chart(self, data):
         self.scrollplot.append_data(data)
+
+    def update_generation_rate(self, fs):
+        self.ui.aosr_spnbx.setValue(fs*self.tscale)
 
     def run_explore(self):
         self.ui.start_btn.setText('Update')
@@ -332,9 +338,11 @@ class MainWindow(ControlWindow):
     def update_unit_labels(self):
         nf_lbls = 4
         nt_lbls = 5
-        # self.ui.extone.setFScale(self.fscale)
-        # self.ui.extone.setTScale(self.tscale)
-        self.ui.parameter_stack.update_units(self.tscale, self.fscale)
+
+        # bad!
+        AbstractEditorWidget().setTScale(self.tscale)
+        AbstractEditorWidget().setFScale(self.fscale)
+
         if self.fscale == 1000:
             # better way to do this than eval?
             self.ui.funit_lbl.setText(u'kHz')
@@ -396,8 +404,7 @@ class MainWindow(ControlWindow):
             aichan = self.ui.aichan_box.currentText()
             acq_rate = self.ui.aisr_spnbx.value()*self.fscale
             winsz = float(self.ui.windowsz_spnbx.value())*0.001
-            self.acqmodel.set_explore_params(wavfile=spath, aochan=aochan, aichan=aichan,
-                                             acqtime=winsz, aisr=acq_rate)
+
             print 'win size', winsz
             self.ui.display.set_xlimits((0,winsz))
         # self.current_gen_rate = sr

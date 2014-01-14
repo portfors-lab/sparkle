@@ -56,7 +56,7 @@ class Parametizer(QtGui.QWidget):
         print 'save to stim model'
         # this is the same model from stimulusview.model() we set in contructor
         # do I need to do this?
-        self.param_model.parentModel().setAutoParams(self.param_model)
+        # self.param_model.parentModel().setAutoParams(self.param_model)
 
         self.param_model.stimView().setMode(0)
         self.close()
