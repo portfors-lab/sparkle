@@ -29,7 +29,8 @@ class TestChacoPlots():
         fig.show()
         for i in range(1,5):
             y = self.data_func(i)
-            fig.update_data(self.t, y)
+            fig.update_data(self.t*1000, y) # gets integer divided by 1000
+            fig.traits.reset_lims()
             QApplication.processEvents()
             time.sleep(PAUSE)
 
@@ -38,6 +39,7 @@ class TestChacoPlots():
     def test_trace_widget_spike(self):
         fig = TraceWidget()
         fig.setWindowTitle(inspect.stack()[0][3])
+        fig.set_threshold(0.5)
         fig.show()
         fig.update_data(self.t, datakey='times', axeskey='response')
         for i in range(1,5):
@@ -51,6 +53,7 @@ class TestChacoPlots():
     def test_trace_widget_raster(self):
         fig = TraceWidget()
         fig.setWindowTitle(inspect.stack()[0][3])
+        fig.set_nreps(5)
         fig.show()
 
         acq_rate = 50000
@@ -121,6 +124,9 @@ class TestChacoPlots():
 
         QApplication.processEvents()
         time.sleep(PAUSE)
+
+        fig.traits.reset_lims()
+        fig.clear_data()
 
         fig.close()
 
