@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Mon Jan 13 15:00:42 2014
+# Created: Wed Jan 15 11:50:04 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -124,22 +124,20 @@ class Ui_StimulusEditor(object):
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.gridLayout_3.addWidget(self.label_4, 0, 2, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
-        self.buttonBox = QtGui.QDialogButtonBox(self.frame)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.buttonBox.sizePolicy().hasHeightForWidth())
-        self.buttonBox.setSizePolicy(sizePolicy)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.preview_btn = QtGui.QPushButton(self.frame)
+        self.preview_btn.setObjectName(_fromUtf8("preview_btn"))
+        self.verticalLayout.addWidget(self.preview_btn)
+        self.ok_btn = QtGui.QPushButton(self.frame)
+        self.ok_btn.setObjectName(_fromUtf8("ok_btn"))
+        self.verticalLayout.addWidget(self.ok_btn)
         self.verticalLayout_2.addWidget(self.splitter)
 
         self.retranslateUi(StimulusEditor)
         QtCore.QObject.connect(self.autoparam_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.doAutoparameters)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), StimulusEditor.signal)
         QtCore.QObject.connect(self.nreps_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), StimulusEditor.setRepCount)
         QtCore.QObject.connect(self.aosr_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), StimulusEditor.setModelSamplerate)
+        QtCore.QObject.connect(self.preview_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.preview)
+        QtCore.QObject.connect(self.ok_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.close)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):
@@ -149,6 +147,8 @@ class Ui_StimulusEditor(object):
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
         self.label_3.setText(_translate("StimulusEditor", "Samplerate", None))
         self.label_4.setText(_translate("StimulusEditor", "kHz", None))
+        self.preview_btn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
+        self.ok_btn.setText(_translate("StimulusEditor", "Ok", None))
 
 from spikeylab.stim.stimulusview import StimulusView
 from spikeylab.stim.component_label import ComponentTemplateTable

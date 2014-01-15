@@ -4,7 +4,7 @@ ETSConfig.toolkit = "qt4"
 
 from traits.api import HasTraits, Instance, List, Int, Tuple, Float, Trait, Class, Property
 from traitsui.api import View, Item
-from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer, DataRange1D
+from chaco.api import Plot, ArrayPlotData, OverlayPlotContainer, DataRange1D, PlotLabel
 from enable.component_editor import ComponentEditor
 from enthought.enable.api import Window, Component
 from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool, DragZoom
@@ -63,6 +63,10 @@ class BaseWidget(QtGui.QWidget):
 
     def clear_data(self, *args, **kwargs):
         self.traits.clear_data(*args, **kwargs)
+
+    def set_title(self, title):
+        # Add the title at the top
+        self.traits.set_title(title)
 
     def sizeHint(self):
         return QtCore.QSize(500, 300)
@@ -416,6 +420,7 @@ class FFTPlotter(HasTraits):
 class ImagePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     fscale = 1000
+    tscale = 0.001
     def _plot_default(self):
         self.img_data = ArrayPlotData()
         self.img_data.set_data('imagedata', np.zeros((5,5)))
@@ -443,12 +448,45 @@ class ImagePlotter(HasTraits):
         self.plot.range2d.x_range.low = lim[0]
         self.plot.range2d.x_range.high = lim[1]
 
+    def set_title(self, title):
+        # make space for a title
+        self.plot.padding_top = 25
+        self.plot.overlays.append(PlotLabel(title,
+                      component=self.plot,
+                      font = "swiss 16",
+                      overlay_position="top"))
+        self.plot.padding_bottom = 35
+        self.plot.x_axis.tick_visible = True
+        self.set_tscale(self.tscale)
+        self.set_fscale(self.fscale)
+        
+    def set_fscale(self, scale):
+        self.fscale = scale
+        if self.fscale == 1000:
+            self.plot.y_axis.title = u'Frequency (kHz)'
+        elif self.fscale == 1:
+            self.plot.y_axis.title = u'Frequency (Hz)'
+        else:
+            raise Exception(u"Invalid frequency scale")
+            
+    def set_tscale(self, scale):
+        self.tscale = scale
+        if self.plot.x_axis.tick_visible:
+            if self.tscale == 0.001:
+                self.plot.x_axis.title = 'Time (ms)'
+            elif self.tscale == 1:
+                self.plot.x_axis.title = 'Time (s)'
+            else:
+                raise Exception(u"Invalid time scale")
+
     def _freq_ticks(self, num):
         num = num/self.fscale
         return self.default_tick_formatter(num)
 
-    def set_fscale(self, scale):
-        self.fscale = scale
+    def _time_ticks(self, num):
+        num = num/self.tscale
+        return self.default_tick_formatter(num)
+
 
 class ScrollingPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)

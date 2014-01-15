@@ -185,15 +185,16 @@
         </layout>
        </item>
        <item>
-        <widget class="QDialogButtonBox" name="buttonBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QPushButton" name="preview_btn">
+         <property name="text">
+          <string>Preview Spectrogram</string>
          </property>
-         <property name="standardButtons">
-          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="ok_btn">
+         <property name="text">
+          <string>Ok</string>
          </property>
         </widget>
        </item>
@@ -230,27 +231,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>1031</x>
-     <y>532</y>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>1047</x>
      <y>557</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>StimulusEditor</receiver>
-   <slot>signal()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>924</x>
-     <y>609</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1046</x>
-     <y>589</y>
     </hint>
    </hints>
   </connection>
@@ -261,8 +246,8 @@
    <slot>setRepCount(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>978</x>
-     <y>578</y>
+     <x>1007</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel">
      <x>892</x>
@@ -277,12 +262,44 @@
    <slot>setModelSamplerate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>950</x>
-     <y>547</y>
+     <x>1007</x>
+     <y>530</y>
     </hint>
     <hint type="destinationlabel">
      <x>1048</x>
      <y>515</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preview_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>preview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>901</x>
+     <y>576</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1053</x>
+     <y>601</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ok_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>929</x>
+     <y>609</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1052</x>
+     <y>585</y>
     </hint>
    </hints>
   </connection>
@@ -292,5 +309,6 @@
   <slot>signal()</slot>
   <slot>setRepCount(int)</slot>
   <slot>setModelSamplerate()</slot>
+  <slot>preview()</slot>
  </slots>
 </ui>

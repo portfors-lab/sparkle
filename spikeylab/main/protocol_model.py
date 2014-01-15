@@ -6,7 +6,7 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.stim.stimulus_label import StimulusLabel
+from spikeylab.main.drag_label import FactoryLabel
 from spikeylab.stim.stimulusmodel import StimulusModel
 
 
@@ -151,7 +151,7 @@ class ProtocolView(QtGui.QTableView):
 
         location = self.rowAt(event.pos().y())
 
-        if isinstance(event.source(), StimulusLabel):
+        if isinstance(event.source(), FactoryLabel):
             factory = cPickle.loads(str(bstream))
             # create new stimulus then!
             stim = StimulusModel()

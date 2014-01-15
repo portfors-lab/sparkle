@@ -17,8 +17,6 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spec_plot = SpecWidget(self)
 
         print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
-        # self.spec_plot.traits.plot.range2d.x_range = self.spiketrace_plot.traits.trace_plot.range2d.x_range
-        # self.spiketrace_plot.traits.trace_plot.components[0].index_mapper.range = self.spec_plot.traits.plot.components[0].index_mapper.range.x_range
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
@@ -69,13 +67,10 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.append_data(ydata, "response", 'spikes')
 
     def update_signal(self, xdata, ydata):
-        # self.signal_plot.update_data(*args, **kwargs)
         self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='stim')
         self.spiketrace_plot.update_data(ydata, datakey='signal', axeskey='stim')
 
     def set_xlimits(self, lims):
-        # print self.spec_plot.traits.plot.range2d.x_range.low, self.spec_plot.traits.plot.range2d.x_range.high
-
         self.spiketrace_plot.set_xlim(lims)
         self.spec_plot.set_xlim(lims)
 

@@ -288,6 +288,7 @@ class AcquisitionModel():
         #print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
         if elapsed < self.interval:
             #print('sleep ', (self.interval-elapsed))
+            self.signals.warning.emit('')
             time.sleep((self.interval-elapsed)/1000)
             now = time.time()
         elif elapsed > self.interval:

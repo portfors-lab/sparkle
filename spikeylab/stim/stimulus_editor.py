@@ -8,6 +8,7 @@ from stimeditor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
+from spikeylab.plotting.custom_plots import SpecWidget
 from matplotlib.mlab import specgram
 
 class BuilderFactory():
@@ -47,18 +48,20 @@ class StimulusEditor(AbstractEditorWidget):
         fs = self.ui.aosr_spnbx.value()
         self.ui.trackview.model().setSamplerate(fs*self.scales[1])
 
-    def signal(self):
-        # stim_signal, atten = self.ui.trackview.model().signal()
-        # # import matplotlib.pyplot as plt
-        # nfft = 512
-        # Pxx, freqs, bins, im = specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
-        #                       pad_to=nfft*2)
+    def preview(self):
+        stim_signal, atten = self.ui.trackview.model().signal()
+        # import matplotlib.pyplot as plt
+        nfft = 512
+        Pxx, freqs, bins, im = specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
+                              pad_to=nfft*2)
 
-        # from spikeylab.plotting.custom_plots import SpecWidget
-        # fig = SpecWidget()
-        # fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
-        # fig.show()
-        # self.asdkjfasdfk = fig
+        fig = SpecWidget()
+        fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
+        fig.set_title('Stimulus Preview')
+        fig.show()
+        self.asdkjfasdfk = fig
+
+    def signal(self):
         
         stim_signal_list = self.ui.trackview.model().expandedStim()
         stim_doc = self.ui.trackview.model().expandedDoc()

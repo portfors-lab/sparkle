@@ -1,5 +1,8 @@
 from PyQt4 import QtGui, QtCore
 
+import cPickle
+
+from spikeylab.main.drag_label import FactoryLabel
 from auto_parameter_form import Ui_AutoParamWidget
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
 
@@ -11,15 +14,107 @@ class AutoParameterListView(QtGui.QListView):
         QtGui.QListView.__init__(self)
 
         self.setItemDelegate(AutoParameterDelegate())
-        self.setEditTriggers(QtGui.QAbstractItemView.CurrentChanged | QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
+        self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
+        self.setDragEnabled(True)
         self.setAcceptDrops(True)
-        self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        # self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.dragline = None
 
     def edit(self, index, trigger, event):
         "Sets editing widget for selected list item"
         self.model().updateSelectionModel(index)
         return super(AutoParameterListView, self).edit(index, trigger, event)
 
+    def mousePressEvent(self, event):
+        index = self.indexAt(event.pos())
+        if event.button() == QtCore.Qt.RightButton:
+            selected = self.model().data(index, QtCore.Qt.UserRole)
+
+            ## convert to  a bytestream
+            bstream = cPickle.dumps(selected)
+            mimeData = QtCore.QMimeData()
+            mimeData.setData("application/x-protocol", bstream)
+
+            drag = QtGui.QDrag(self)
+            drag.setMimeData(mimeData)
+
+            # grab an image of the cell we are moving
+            # assume all rows same height
+            row_height = 150
+            # -5 becuase it a a little off
+            y = (row_height*index.row()) + row_height - 5
+            x = self.width()
+            rect = QtCore.QRect(5,y,x,row_height)
+            pixmap = QtGui.QPixmap()
+            pixmap = pixmap.grabWidget(self, rect)
+
+            # below makes the pixmap half transparent
+            painter = QtGui.QPainter(pixmap)
+            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+            painter.end()
+            
+            drag.setPixmap(pixmap)
+
+            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+            drag.setPixmap(pixmap)
+
+            # if result: # == QtCore.Qt.MoveAction:
+                # self.model().removeRow(index.row())
+            self.model().removeRows(index.row(),1)
+            result = drag.start(QtCore.Qt.MoveAction)
+        else:
+            self.edit(index, QtGui.QAbstractItemView.SelectedClicked, event)
+
+    def dragEnterEvent(self, event):
+        print 'drag enter'
+        if event.mimeData().hasFormat("application/x-protocol"):
+            print 'correct format'
+            event.setDropAction(QtCore.Qt.MoveAction)
+            event.accept()
+        else:
+            super(AutoParameterListView, self).dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat("application/x-protocol"):
+            #find the nearest row break to cursor
+            # assume all rows same height
+            index = self.indexAt(event.pos())
+            row_height = 150
+            y = (row_height*index.row()) + row_height - 5
+            x = self.width()
+            self.dragline = QtCore.QLine(0,y,x,y)          
+            self.viewport().update()
+            event.setDropAction(QtCore.Qt.MoveAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def paintEvent(self, event):
+        super(AutoParameterListView, self).paintEvent(event)
+
+        if self.dragline is not None:
+            pen = QtGui.QPen(QtCore.Qt.blue)
+            painter = QtGui.QPainter(self.viewport())
+            painter.setPen(pen)
+            painter.drawLine(self.dragline)
+
+    def dropEvent(self, event):
+        print 'dropped'
+        self.dragline = None
+        location = self.indexAt(event.pos())
+        self.model().insertRows(location.row(),1)
+        if isinstance(event.source(), FactoryLabel):
+            pass
+        else:
+            data = event.mimeData()
+            bstream = data.retrieveData("application/x-protocol",
+                                        QtCore.QVariant.ByteArray)
+            selected = cPickle.loads(str(bstream))
+            print 'selected', selected
+            self.model().setData(location, selected)
+
+        event.accept()
 
 class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 

@@ -4,8 +4,12 @@ sip.setapi('QString', 2)
 
 from PyQt4 import QtGui, QtCore
 
+from spikeylab.main.drag_label import FactoryLabel
 from spikeylab.stim.auto_parameter_view import AutoParameterListView, AutoParameterDelegate,  AutoParamWidget
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+
+class AddLabel():
+    name = "Add"
 
 class Parametizer(QtGui.QWidget):
     def __init__(self, stimulusview, parent=None):
@@ -14,23 +18,22 @@ class Parametizer(QtGui.QWidget):
         layout = QtGui.QVBoxLayout()
         btn_layout = QtGui.QHBoxLayout()
         
-        add_btn = QtGui.QPushButton('Add')
-        remove_btn = QtGui.QPushButton('Remove')
+        add_lbl = FactoryLabel(AddLabel)
+        # remove_btn = QtGui.QPushButton('Remove')
         ok_btn = QtGui.QPushButton('OK')
-        cancel_btn = QtGui.QPushButton('Cancel')
-        add_btn.clicked.connect(self.addParameter)
-        remove_btn.clicked.connect(self.removeParameter)
+        # cancel_btn = QtGui.QPushButton('Cancel')
+        # remove_btn.clicked.connect(self.removeParameter)
         ok_btn.clicked.connect(self.saveParameters)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
         separator.setFrameShadow(QtGui.QFrame.Sunken)
 
-        btn_layout.addWidget(add_btn)
-        btn_layout.addWidget(remove_btn)
+        btn_layout.addWidget(add_lbl)
+        # btn_layout.addWidget(remove_btn)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # btn_layout.addWidget(cancel_btn)
 
         self.param_list = AutoParameterListView()
 
@@ -44,9 +47,6 @@ class Parametizer(QtGui.QWidget):
 
     def setParameterList(self, paramlist):
         self.param_model.setParameterList(paramlist)
-
-    def addParameter(self):
-        self.param_model.insertRows(-1,1)
 
     def removeParameter(self):
         current = self.param_list.currentIndex()
