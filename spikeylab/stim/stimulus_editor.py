@@ -25,6 +25,7 @@ class StimulusEditor(AbstractEditorWidget):
     def setStimulusModel(self, model):
         self.ui.trackview.setModel(model)
         self.ui.aosr_spnbx.setValue(model.samplerate()/self.scales[1])
+        self.ui.nreps_spnbx.setValue(model.repCount())
         model.samplerateChanged.connect(self.updateSamplerate)
 
     def doAutoparameters(self):

@@ -85,6 +85,13 @@ class ProtocolDisplay(QtGui.QWidget):
     def sizeHint(self):
         return QtCore.QSize(500,300)
 
+    def set_tscale(self, scale):
+        self.spiketrace_plot.traits.set_tscale(scale)
+
+    def set_fscale(self, scale):
+        self.fft_plot.traits.set_fscale(scale)
+        self.spec_plot.traits.set_fscale(scale)
+
 if __name__ == "__main__":
     import random, time, os
     import numpy as np
@@ -145,5 +152,8 @@ if __name__ == "__main__":
 
     # coerce x ranges to match
     plot.set_xlimits([0, resp_times[-1]])
+
+    plot.set_tscale(0.001)
+    plot.set_fscale(1000)
 
     sys.exit(app.exec_())

@@ -343,6 +343,9 @@ class MainWindow(ControlWindow):
         AbstractEditorWidget().setTScale(self.tscale)
         AbstractEditorWidget().setFScale(self.fscale)
 
+        self.ui.display.set_tscale(self.tscale)
+        self.ui.display.set_fscale(self.fscale)
+
         if self.fscale == 1000:
             # better way to do this than eval?
             self.ui.funit_lbl.setText(u'kHz')

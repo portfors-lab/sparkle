@@ -22,7 +22,6 @@ from spikeylab.dialogs.raster_bounds_dlg import RasterBoundsDialog
 
 LEFT_MARGIN = 50
 RIGHT_MARGIN = 10
-FREQ_UNIT = 1000
 
 DEFAULT_NREPS = 20
 RASTER_YMAX = 1
@@ -70,6 +69,7 @@ class BaseWidget(QtGui.QWidget):
 
 class FFTWidget(BaseWidget):
     def _create_plotter(self):
+        self.setToolTip('FFT of stimulus signal')
         return FFTPlotter()
 
     def contextMenuRequested(self, point):
@@ -131,6 +131,7 @@ class TraceWidget(BaseWidget):
 
 class SpecWidget(BaseWidget):
     def _create_plotter(self):
+        self.setToolTip('Spectrogram of stimulus signal')
         return ImagePlotter()
 
 class ChartWidget(BaseWidget):
@@ -225,6 +226,7 @@ class SpikePlotter(HasTraits):
     raster_ymin = Float(RASTER_YMIN)
     raster_yslots = np.linspace(RASTER_YMIN, RASTER_YMAX, DEFAULT_NREPS)
     threshold_val = 0.25
+    tscale = 0.001 # ms
     signals = ProtocolSignals()
     
     def _plot_default(self):
@@ -256,8 +258,10 @@ class SpikePlotter(HasTraits):
         stim_plot.y_axis.tick_label_formatter = self._noticks
         stim_plot.y_grid.visible = False
 
-        trace_plot.x_axis.title = 'Time (s)'
+        trace_plot.x_axis.title = 'Time (ms)'
         trace_plot.y_axis.title = 'voltage (mV)'
+        self.default_tick_formatter = trace_plot.x_axis.tick_label_formatter
+        trace_plot.x_axis.tick_label_formatter = self._time_ticks
 
         trace_plot.padding_bottom = 35
         trace_plot.padding_top = 0
@@ -329,9 +333,22 @@ class SpikePlotter(HasTraits):
         ydata = self.trace_data.get_data('response')
         self.set_ylim((ydata.min(), ydata.max()))
 
+    def set_tscale(self, scale):
+        self.tscale = scale
+        if self.tscale == 0.001:
+            self.trace_plot.x_axis.title = 'Time (ms)'
+        elif self.tscale == 1:
+            self.trace_plot.x_axis.title = 'Time (s)'
+        else:
+            raise Exception(u"Invalid time scale")
+
     def _update_thresh_data(self, threshold):
         # manual drag does not update datasource, so do so here
         self.trace_data.set_data('threshold', [threshold, threshold])
+
+    def _time_ticks(self, num):
+        num = num/self.tscale
+        return self.default_tick_formatter(num)
 
     def _noticks(self,num):
         return ''
@@ -348,6 +365,7 @@ class SpikePlotter(HasTraits):
 
 class FFTPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
+    fscale = 1000
     def _plot_default(self):
         self.fft_data = ArrayPlotData(freq=[], fft=[])
         plot = Plot(self.fft_data)
@@ -356,6 +374,9 @@ class FFTPlotter(HasTraits):
 
         plot.x_axis.title = 'Intensity'
         plot.y_axis.title = 'Frequency (kHz)'
+
+        self.default_tick_formatter = plot.y_axis.tick_label_formatter
+        plot.y_axis.tick_label_formatter = self._freq_ticks
 
         plot.padding_left = 50
         plot.padding_right = 10
@@ -368,7 +389,6 @@ class FFTPlotter(HasTraits):
         return plot
 
     def update_data(self, freq, fft):
-        freq = freq/FREQ_UNIT
         self.fft_data.set_data('freq', freq)
         self.fft_data.set_data('fft', fft)
 
@@ -380,13 +400,30 @@ class FFTPlotter(HasTraits):
         self.plot.value_range.low = value.min()
         self.plot.value_range.high = value.max()
 
+    def set_fscale(self, scale):
+        self.fscale = scale
+        if self.fscale == 1000:
+            self.plot.y_axis.title = u'Frequency (kHz)'
+        elif self.fscale == 1:
+            self.plot.y_axis.title = u'Frequency (Hz)'
+        else:
+            raise Exception(u"Invalid frequency scale")
+
+    def _freq_ticks(self, num):
+        num = num/self.fscale
+        return self.default_tick_formatter(num)
+
 class ImagePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
+    fscale = 1000
     def _plot_default(self):
         self.img_data = ArrayPlotData()
         self.img_data.set_data('imagedata', np.zeros((5,5)))
         plot = Plot(self.img_data)
         plot.img_plot('imagedata', name="spectrogram")
+
+        self.default_tick_formatter = plot.y_axis.tick_label_formatter
+        plot.y_axis.tick_label_formatter = self._freq_ticks
 
         plot.padding_top = 5
         plot.padding_bottom = 5
@@ -399,13 +436,19 @@ class ImagePlotter(HasTraits):
     def update_data(self, imgdata, xaxis=None, yaxis=None):
         self.img_data.set_data('imagedata',imgdata)
         if xaxis is not None and yaxis is not None:
-            yaxis = yaxis/FREQ_UNIT
             self.plot.components[0].index.set_data(xaxis, yaxis)
         self.plot.components[0].request_redraw()
 
     def set_xlim(self, lim):
         self.plot.range2d.x_range.low = lim[0]
         self.plot.range2d.x_range.high = lim[1]
+
+    def _freq_ticks(self, num):
+        num = num/self.fscale
+        return self.default_tick_formatter(num)
+
+    def set_fscale(self, scale):
+        self.fscale = scale
 
 class ScrollingPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
