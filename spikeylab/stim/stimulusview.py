@@ -294,7 +294,6 @@ class StimulusView(QtGui.QAbstractItemView):
             event.ignore()
 
     def dropEvent(self, event):
-
         self.dragline = None
         data = event.mimeData()
         stream = data.retrieveData("application/x-component",
@@ -335,6 +334,7 @@ class StimulusView(QtGui.QAbstractItemView):
             region = region.united(self._rects[index.row()][index.column()])
 
         return region
+
 
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 

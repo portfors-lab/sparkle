@@ -26,13 +26,21 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def data(self, index, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             col = index.column()
+            param = self._parameters[index.row()]
             if col < 4:
-                param = self._parameters[index.row()]
                 item = param[self.headers[col]]            
             elif col == 4:
-                item = '?'
+                if param['start'] > param['stop'] and param['step'] > 0:
+                    step = -1*param['step']
+                else:
+                    step = param['step']
+                item = len(range(param['start'], param['stop'], step))
             return item
-
+        elif role == QtCore.Qt.ToolTipRole:
+            if 1 <= index.column() <= 3: 
+                param = self._parameters[index.row()]
+                param_type = param['parameter']
+                return 'parsecs'
         elif role == QtCore.Qt.UserRole:  #return the whole python object
             return self._parameters[index.row()]
         
@@ -82,10 +90,14 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         if index.isValid():
-            return QtCore.Qt.ItemIsDragEnabled | \
-                   QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
-                   QtCore.Qt.ItemIsEditable
+            if index.column() < 4:
+                return QtCore.Qt.ItemIsDragEnabled | \
+                       QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
+                       QtCore.Qt.ItemIsEditable
+            else:
+                return QtCore.Qt.ItemIsSelectable
         else:
+            print 'flags: index invalid'
             return QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | \
                    QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
                    QtCore.Qt.ItemIsEditable

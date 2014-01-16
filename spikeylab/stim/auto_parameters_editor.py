@@ -7,6 +7,7 @@ from PyQt4 import QtGui, QtCore
 from spikeylab.main.drag_label import FactoryLabel
 from spikeylab.stim.auto_parameter_view import AutoParameterListView, AutoParameterDelegate,  AutoParamWidget
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+from spikeylab.main.trashcan import TrashWidget
 
 class AddLabel():
     name = "Add"
@@ -19,23 +20,23 @@ class Parametizer(QtGui.QWidget):
         btn_layout = QtGui.QHBoxLayout()
         
         add_lbl = FactoryLabel(AddLabel)
-        # remove_btn = QtGui.QPushButton('Remove')
         ok_btn = QtGui.QPushButton('OK')
-        # cancel_btn = QtGui.QPushButton('Cancel')
-        # remove_btn.clicked.connect(self.removeParameter)
         ok_btn.clicked.connect(self.saveParameters)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
         separator.setFrameShadow(QtGui.QFrame.Sunken)
+        
+        self.trash_lbl = TrashWidget()
+        
 
         btn_layout.addWidget(add_lbl)
-        # btn_layout.addWidget(remove_btn)
+        btn_layout.addWidget(self.trash_lbl)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(ok_btn)
-        # btn_layout.addWidget(cancel_btn)
 
         self.param_list = AutoParameterListView()
+        self.param_list.installEventFilter(self)
 
         self.param_model = stimulusview.model().autoParams()
         self.param_model.setStimView(stimulusview)
@@ -48,21 +49,26 @@ class Parametizer(QtGui.QWidget):
     def setParameterList(self, paramlist):
         self.param_model.setParameterList(paramlist)
 
-    def removeParameter(self):
-        current = self.param_list.currentIndex()
-        self.param_model.removeRows(current.row(), 1)
-
     def saveParameters(self): 
-        print 'save to stim model'
+        # print 'save to stim model'
         # this is the same model from stimulusview.model() we set in contructor
         # do I need to do this?
         # self.param_model.parentModel().setAutoParams(self.param_model)
 
-        self.param_model.stimView().setMode(0)
         self.close()
 
     def sizeHint(self):
-        return QtCore.QSize(500,500)
+        return QtCore.QSize(560,200)
+
+    def closeEvent(self, event):
+        self.param_model.stimView().setMode(0)
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.ChildRemoved and self.trash_lbl.underMouse():
+            return True
+        else:
+            return super(Parametizer, self).eventFilter(source, event)
+
 
 if __name__ == '__main__':
     import sys

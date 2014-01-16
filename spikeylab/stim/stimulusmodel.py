@@ -176,7 +176,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         steps = []
         ntraces = 1
         for p in params:
-            steps.append(np.arange(p['start'], p['stop'], p['delta']))
+            steps.append(np.arange(p['start'], p['stop'], p['step']))
             ntraces = ntraces*len(steps[-1])
         return ntraces
 

@@ -429,7 +429,8 @@ class ImagePlotter(HasTraits):
 
         self.default_tick_formatter = plot.y_axis.tick_label_formatter
         plot.y_axis.tick_label_formatter = self._freq_ticks
-
+        plot.x_axis.tick_label_formatter = self._time_ticks
+        
         plot.padding_top = 5
         plot.padding_bottom = 5
         plot.padding_right = RIGHT_MARGIN

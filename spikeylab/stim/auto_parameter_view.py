@@ -18,8 +18,8 @@ class AutoParameterListView(QtGui.QTableView):
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
-        # self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
         self.dragline = None
+        self.original_pos = None
 
     def edit(self, index, trigger, event):
         "Sets editing widget for selected list item"
@@ -29,6 +29,8 @@ class AutoParameterListView(QtGui.QTableView):
     def mousePressEvent(self, event):
         index = self.indexAt(event.pos())
         if event.button() == QtCore.Qt.RightButton:
+        # if False:
+            print 'drag start', index.row()
             selected = self.model().data(index, QtCore.Qt.UserRole)
 
             ## convert to  a bytestream
@@ -36,6 +38,7 @@ class AutoParameterListView(QtGui.QTableView):
             mimeData = QtCore.QMimeData()
             mimeData.setData("application/x-protocol", bstream)
 
+            self.limbo_component = selected
             drag = QtGui.QDrag(self)
             drag.setMimeData(mimeData)
 
@@ -60,9 +63,12 @@ class AutoParameterListView(QtGui.QTableView):
             drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
             drag.setPixmap(pixmap)
 
+            self.original_pos = index.row()
+
             self.model().removeRows(index.row(),1)
             result = drag.start(QtCore.Qt.MoveAction)
         else:
+            self.selectRow(index.row())
             self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
 
     def dragEnterEvent(self, event):
@@ -71,6 +77,14 @@ class AutoParameterListView(QtGui.QTableView):
             event.accept()
         else:
             super(AutoParameterListView, self).dragEnterEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        print 'mouse release', event.button()
+
+    def dragLeaveEvent(self, event):
+        self.dragline = None
+        self.viewport().update()
+        event.accept()
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("application/x-protocol"):
@@ -101,6 +115,7 @@ class AutoParameterListView(QtGui.QTableView):
     def dropEvent(self, event):
         self.dragline = None
         index = self.indexAt(event.pos())
+        print 'drop!', index.row()
         self.model().insertRows(index.row(),1)
         if isinstance(event.source(), FactoryLabel):
             pass
@@ -111,7 +126,17 @@ class AutoParameterListView(QtGui.QTableView):
             selected = cPickle.loads(str(bstream))
             self.model().setData(index, selected)
 
+        self.original_pos = None
         event.accept()
+
+    def childEvent(self, event):
+        if event.type() == QtCore.QEvent.ChildRemoved:
+            # hack to catch drop offs   
+            if self.original_pos is not None:
+                selected = self.limbo_component
+                self.model().insertRows(self.original_pos,1)
+                self.model().setData(self.model().index(self.original_pos,0), selected)
+                self.original_pos = None
 
 class ComboboxDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
@@ -172,7 +197,7 @@ class AutoParamWidget(QtGui.QWidget, Ui_AutoParamWidget):
         self.type_cmbx.addItems(PARAMETER_TYPES)
 
     def setParamValues(self, paramdict):
-        self.step_lnedt.setText(str(paramdict['delta']))
+        self.step_lnedt.setText(str(paramdict['step']))
         self.stop_lnedt.setText(str(paramdict['stop']))
         self.start_lnedt.setText(str(paramdict['start']))
         typeidx = PARAMETER_TYPES.index(paramdict['parameter'])
@@ -182,7 +207,7 @@ class AutoParamWidget(QtGui.QWidget, Ui_AutoParamWidget):
     def paramValues(self):
         paramdict = self._paramdict
         paramdict['start'] = float(self.start_lnedt.text())
-        paramdict['delta'] = float(self.step_lnedt.text())
+        paramdict['step'] = float(self.step_lnedt.text())
         paramdict['stop'] = float(self.stop_lnedt.text())
         paramdict['parameter'] = self.type_cmbx.currentText()
         return paramdict

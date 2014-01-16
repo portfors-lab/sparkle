@@ -9,8 +9,7 @@ from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 from spikeylab.plotting.custom_plots import SpecWidget
-from matplotlib.mlab import specgram
-
+from matplotlib import mlab
 class BuilderFactory():
     name = 'Builder'
     def editor(self):
@@ -52,14 +51,17 @@ class StimulusEditor(AbstractEditorWidget):
         stim_signal, atten = self.ui.trackview.model().signal()
         # import matplotlib.pyplot as plt
         nfft = 512
-        Pxx, freqs, bins, im = specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
-                              pad_to=nfft*2)
+        Pxx, freqs, bins = mlab.specgram(stim_signal, NFFT=nfft, Fs=375000,
+                                        noverlap=int(nfft*0.9), pad_to=nfft*2)
 
         fig = SpecWidget()
         fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
         fig.set_title('Stimulus Preview')
         fig.show()
         self.asdkjfasdfk = fig
+
+    def mouseReleaseEvent(self, event):
+        print 'editor mouse release', event.button()
 
     def signal(self):
         
@@ -98,14 +100,14 @@ if __name__ == "__main__":
 
     stim = StimulusModel()
     stim.insertComponent(tone2)
-    # stim.insertComponent(tone1)
+    stim.insertComponent(tone1)
     # stim.insertComponent(tone0)
 
     # stim.insertComponent(tone4, (1,0))
     # stim.insertComponent(tone5, (1,0))
     stim.insertComponent(vocal0, (1,0))
 
-    # stim.insertComponent(tone3, (2,0))
+    stim.insertComponent(tone3, (2,0))
     # stim.insertComponent(silence0, (2,0))
 
     editor = StimulusEditor()
