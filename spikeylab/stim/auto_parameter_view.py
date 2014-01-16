@@ -8,12 +8,13 @@ from spikeylab.stim.selectionmodel import ComponentSelectionModel
 
 PARAMETER_TYPES = ['duration', 'intensity', 'frequency']
 
-class AutoParameterListView(QtGui.QListView):
+class AutoParameterListView(QtGui.QTableView):
     """List View which holds parameter widgets"""
     def __init__(self):
         QtGui.QListView.__init__(self)
 
-        self.setItemDelegate(AutoParameterDelegate())
+        # self.setItemDelegate(AutoParameterDelegate())
+        self.setItemDelegateForColumn(0,ComboboxDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
@@ -40,7 +41,7 @@ class AutoParameterListView(QtGui.QListView):
 
             # grab an image of the cell we are moving
             # assume all rows same height
-            row_height = 150
+            row_height = self.rowHeight(0)
             # -5 becuase it a a little off
             y = (row_height*index.row()) + row_height - 5
             x = self.width()
@@ -59,17 +60,13 @@ class AutoParameterListView(QtGui.QListView):
             drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
             drag.setPixmap(pixmap)
 
-            # if result: # == QtCore.Qt.MoveAction:
-                # self.model().removeRow(index.row())
             self.model().removeRows(index.row(),1)
             result = drag.start(QtCore.Qt.MoveAction)
         else:
-            self.edit(index, QtGui.QAbstractItemView.SelectedClicked, event)
+            self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
 
     def dragEnterEvent(self, event):
-        print 'drag enter'
         if event.mimeData().hasFormat("application/x-protocol"):
-            print 'correct format'
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()
         else:
@@ -79,9 +76,11 @@ class AutoParameterListView(QtGui.QListView):
         if event.mimeData().hasFormat("application/x-protocol"):
             #find the nearest row break to cursor
             # assume all rows same height
-            index = self.indexAt(event.pos())
-            row_height = 150
-            y = (row_height*index.row()) + row_height - 5
+            row = self.indexAt(event.pos()).row()
+            if row == -1:
+                row = self.model().rowCount()
+            row_height = self.rowHeight(0)
+            y = (row_height*row)
             x = self.width()
             self.dragline = QtCore.QLine(0,y,x,y)          
             self.viewport().update()
@@ -100,10 +99,9 @@ class AutoParameterListView(QtGui.QListView):
             painter.drawLine(self.dragline)
 
     def dropEvent(self, event):
-        print 'dropped'
         self.dragline = None
-        location = self.indexAt(event.pos())
-        self.model().insertRows(location.row(),1)
+        index = self.indexAt(event.pos())
+        self.model().insertRows(index.row(),1)
         if isinstance(event.source(), FactoryLabel):
             pass
         else:
@@ -111,10 +109,27 @@ class AutoParameterListView(QtGui.QListView):
             bstream = data.retrieveData("application/x-protocol",
                                         QtCore.QVariant.ByteArray)
             selected = cPickle.loads(str(bstream))
-            print 'selected', selected
-            self.model().setData(location, selected)
+            self.model().setData(index, selected)
 
         event.accept()
+
+class ComboboxDelegate(QtGui.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = QtGui.QComboBox(parent)
+        editor.addItems(PARAMETER_TYPES)
+        return editor
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, QtCore.Qt.EditRole)
+        typeidx = PARAMETER_TYPES.index(value)
+        editor.setCurrentIndex(typeidx)
+
+    def setModelData(self, editor, model, index):
+        value = editor.currentText()
+        model.setData(index, value, QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, editor, option, index):
+        editor.setGeometry(option.rect)
 
 class AutoParameterDelegate(QtGui.QStyledItemDelegate):
 

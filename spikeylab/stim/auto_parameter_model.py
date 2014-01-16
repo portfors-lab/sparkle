@@ -2,7 +2,7 @@ from PyQt4 import QtCore
 
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
 
-class AutoParameterModel(QtCore.QAbstractListModel):
+class AutoParameterModel(QtCore.QAbstractTableModel):
     _paramid = 0
     def __init__(self, stimulus=None):
         super(AutoParameterModel, self).__init__()
@@ -10,28 +10,56 @@ class AutoParameterModel(QtCore.QAbstractListModel):
         self._stimview = None #this should be any view for StimulusModel
         self._stimmodel = stimulus
         self._selectionmap = {}
+        self.headers = ['parameter', 'start', 'stop', 'step', 'nsteps']
+
+    def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.DisplayRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return self.headers[section]
 
     def rowCount(self, parent=QtCore.QModelIndex()):
         return len(self._parameters)
 
+    def columnCount(self, parent=QtCore.QModelIndex()):
+        return 5
+
     def data(self, index, role=QtCore.Qt.UserRole):
-        return self._parameters[index.row()]
+        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+            col = index.column()
+            if col < 4:
+                param = self._parameters[index.row()]
+                item = param[self.headers[col]]            
+            elif col == 4:
+                item = '?'
+            return item
+
+        elif role == QtCore.Qt.UserRole:  #return the whole python object
+            return self._parameters[index.row()]
         
     def allData(self):
         return self._parameters
 
     def setData(self, index, value, role=0):
-        self._parameters[index.row()] = value
+        if role == QtCore.Qt.EditRole:
+            param = self._parameters[index.row()]
+            param[self.headers[index.column()]] = value
+        else:
+            row = index.row()
+            if row == -1:
+                row = self.rowCount() -1
+            self._parameters[row] = value
         return True
 
     def setParameterList(self, paramlist):
         self._parameters = paramlist
 
     def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
+        if position == -1:
+            position = self.rowCount()
         self.beginInsertRows(parent, position, position + rows - 1)
         for i in range(rows):
             defaultparam = { 'start': 0,
-                             'delta': 1,
+                             'step': 1,
                              'stop': 0,
                              'parameter': 'duration',
                              'paramid' : self._paramid,
