@@ -7,9 +7,9 @@ class TestAutoParameterModel():
         param_model = AutoParameterModel()
         param_model.insertRows(0, 1)
 
-        param = param_model.data(param_model.index(0))
+        param = param_model.data(param_model.index(0,0))
         assert param_model.rowCount() == 1
-        for item in ['start', 'stop', 'delta', 'parameter']:
+        for item in ['start', 'stop', 'step', 'parameter']:
             assert_in(item, param)
 
     def test_remove_rows(self):

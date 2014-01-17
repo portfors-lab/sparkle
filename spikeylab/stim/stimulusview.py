@@ -7,6 +7,8 @@ import cPickle
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.stim.component_label import ComponentTemplateLabel
+from spikeylab.main.abstract_drag_view import AbstractDragView
+
 ROW_HEIGHT = 100
 ROW_SPACE = 25
 
@@ -17,13 +19,15 @@ GRID_MS = 25
 BUILDMODE = 0
 AUTOPARAMMODE = 1
 
-class StimulusView(QtGui.QAbstractItemView):
+class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     """View for building/editing stimulus components"""
     hashIsDirty = False
     _rects = [[]]
     _height = ROW_HEIGHT
     def __init__(self, parent=None):
-        super(StimulusView, self).__init__(parent)
+        QtGui.QAbstractItemView.__init__(self)
+        AbstractDragView.__init__(self)
+
         self.horizontalScrollBar().setRange(0, 0)
         self.verticalScrollBar().setRange(0, 0)
         self.setDragEnabled(True)
@@ -216,41 +220,17 @@ class StimulusView(QtGui.QAbstractItemView):
             if event.button() == QtCore.Qt.LeftButton:
                 index = self.indexAt(event.pos())
                 self.edit(index)
-                
+
+    def grabImage(self, index):
+        # grab an image of the cell  we are moving
+        rect = self._rects[index.row()][index.column()]
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, rect)     
+        return pixmap
+
     def mousePressEvent(self, event):
         if self.mode == BUILDMODE:
-            if event.button() == QtCore.Qt.RightButton:
-                index = self.indexAt(event.pos())
-                if not index.isValid():
-                    return
-                selected = self.model().data(index,QtCore.Qt.UserRole)
-
-                mimeData = QtCore.QMimeData()
-                mimeData.setData("application/x-component", selected.serialize())
-
-                drag = QtGui.QDrag(self)
-                drag.setMimeData(mimeData)
-
-                # grab an image of the cell  we are moving
-                rect = self._rects[index.row()][index.column()]
-                pixmap = QtGui.QPixmap()
-                pixmap = pixmap.grabWidget(self, rect)
-
-                # below makes the pixmap half transparent
-                painter = QtGui.QPainter(pixmap)
-                painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-                painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-                painter.end()
-                
-                drag.setPixmap(pixmap)
-
-                drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-                drag.setPixmap(pixmap)
-
-                self.model().removeComponent((index.row(), index.column()))
-                self.hashIsDirty = True
-                result = drag.start(QtCore.Qt.MoveAction)
-
+            super(StimulusView, self).mousePressEvent(event)
         else:
             # select and de-select components
             index = self.indexAt(event.pos())
@@ -258,15 +238,8 @@ class StimulusView(QtGui.QAbstractItemView):
                 return
             self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
 
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("application/x-component"):
-            event.setDropAction(QtCore.Qt.MoveAction)
-            event.accept()
-        else:
-            event.ignore()
-
     def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("application/x-component"):
+        if event.mimeData().hasFormat("application/x-protocol"):
             #find the nearest row break to cursor
             # assume all rows same height
 
@@ -294,24 +267,21 @@ class StimulusView(QtGui.QAbstractItemView):
             event.ignore()
 
     def dropEvent(self, event):
-        self.dragline = None
-        data = event.mimeData()
-        stream = data.retrieveData("application/x-component",
-            QtCore.QVariant.ByteArray)
-        component = cPickle.loads(str(stream))
+        if isinstance(event.source(), self.__class__) or isinstance(event.source(), ComponentTemplateLabel):
+            component = self.dropAssist(event)
 
-        location = self.splitAt(event.pos())
+            location = self.splitAt(event.pos())
 
-        self.model().insertComponent(component, location)
+            self.model().insertComponent(component, location)
 
-        if isinstance(event.source(), ComponentTemplateLabel):
-            index = self.model().index(location[0], location[1])
-            self.edit(index)
+            if isinstance(event.source(), ComponentTemplateLabel):
+                index = self.model().index(location[0], location[1])
+                self.edit(index)
 
-        self.hashIsDirty = True
-        self.viewport().update()
+            self.hashIsDirty = True
+            self.viewport().update()
 
-        event.accept()
+            event.accept()
 
     def sizeHint(self):
         return QtCore.QSize(self.width(), self._height)

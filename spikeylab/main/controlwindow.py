@@ -15,6 +15,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
+        self.ui.protocolView.installEventFilter(self.ui.stimulus_choices.trash())
         self.ui.plot_dock.setTitleBarWidget(MaximizableTitleBar(self.ui.plot_dock))
         self.load_inputs()
         

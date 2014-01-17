@@ -37,11 +37,11 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 item = len(range(param['start'], param['stop'], step))
             return item
         elif role == QtCore.Qt.ToolTipRole:
-            if 1 <= index.column() <= 3: 
+            if 1 <= index.column() <= 3:
                 param = self._parameters[index.row()]
                 param_type = param['parameter']
                 return 'parsecs'
-        elif role == QtCore.Qt.UserRole:  #return the whole python object
+        elif role >= QtCore.Qt.UserRole:  #return the whole python object
             return self._parameters[index.row()]
         
     def allData(self):
@@ -87,6 +87,13 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             # recovering it when reordering
         self.endRemoveRows()
         return True
+
+    def removeItem(self, index):
+        self.removeRows(index.row(),1)
+
+    def insertItem(self, index, item):
+        self.insertRows(index.row(), 1)
+        self.setData(index, item)
 
     def flags(self, index):
         if index.isValid():

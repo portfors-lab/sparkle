@@ -1,110 +1,50 @@
 from PyQt4 import QtGui, QtCore
 
-import cPickle
-
 from spikeylab.main.drag_label import FactoryLabel
 from auto_parameter_form import Ui_AutoParamWidget
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
+from spikeylab.main.abstract_drag_view import AbstractDragView
 
 PARAMETER_TYPES = ['duration', 'intensity', 'frequency']
 
-class AutoParameterListView(QtGui.QTableView):
+class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     """List View which holds parameter widgets"""
     def __init__(self):
-        QtGui.QListView.__init__(self)
+        QtGui.QTableView.__init__(self)
+        AbstractDragView.__init__(self)
 
-        # self.setItemDelegate(AutoParameterDelegate())
         self.setItemDelegateForColumn(0,ComboboxDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
-        self.setDragEnabled(True)
-        self.setAcceptDrops(True)
-        self.dragline = None
-        self.original_pos = None
+        
 
     def edit(self, index, trigger, event):
         "Sets editing widget for selected list item"
         self.model().updateSelectionModel(index)
-        return super(AutoParameterListView, self).edit(index, trigger, event)
+        return super(AutoParameterTableView, self).edit(index, trigger, event)
+
+
+    def grabImage(self, index):
+        # grab an image of the cell we are moving
+            # assume all rows same height
+        row_height = self.rowHeight(0)
+        # -5 becuase it a a little off
+        y = (row_height*index.row()) + row_height - 5
+        x = self.width()
+        rect = QtCore.QRect(5,y,x,row_height)
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, rect)
+        return pixmap
 
     def mousePressEvent(self, event):
-        index = self.indexAt(event.pos())
-        if event.button() == QtCore.Qt.RightButton:
-        # if False:
-            print 'drag start', index.row()
-            selected = self.model().data(index, QtCore.Qt.UserRole)
-
-            ## convert to  a bytestream
-            bstream = cPickle.dumps(selected)
-            mimeData = QtCore.QMimeData()
-            mimeData.setData("application/x-protocol", bstream)
-
-            self.limbo_component = selected
-            drag = QtGui.QDrag(self)
-            drag.setMimeData(mimeData)
-
-            # grab an image of the cell we are moving
-            # assume all rows same height
-            row_height = self.rowHeight(0)
-            # -5 becuase it a a little off
-            y = (row_height*index.row()) + row_height - 5
-            x = self.width()
-            rect = QtCore.QRect(5,y,x,row_height)
-            pixmap = QtGui.QPixmap()
-            pixmap = pixmap.grabWidget(self, rect)
-
-            # below makes the pixmap half transparent
-            painter = QtGui.QPainter(pixmap)
-            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-            painter.end()
-            
-            drag.setPixmap(pixmap)
-
-            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-            drag.setPixmap(pixmap)
-
-            self.original_pos = index.row()
-
-            self.model().removeRows(index.row(),1)
-            result = drag.start(QtCore.Qt.MoveAction)
-        else:
+        if event.button() == QtCore.Qt.LeftButton:
+            index = self.indexAt(event.pos())
             self.selectRow(index.row())
             self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("application/x-protocol"):
-            event.setDropAction(QtCore.Qt.MoveAction)
-            event.accept()
         else:
-            super(AutoParameterListView, self).dragEnterEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        print 'mouse release', event.button()
-
-    def dragLeaveEvent(self, event):
-        self.dragline = None
-        self.viewport().update()
-        event.accept()
-
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("application/x-protocol"):
-            #find the nearest row break to cursor
-            # assume all rows same height
-            row = self.indexAt(event.pos()).row()
-            if row == -1:
-                row = self.model().rowCount()
-            row_height = self.rowHeight(0)
-            y = (row_height*row)
-            x = self.width()
-            self.dragline = QtCore.QLine(0,y,x,y)          
-            self.viewport().update()
-            event.setDropAction(QtCore.Qt.MoveAction)
-            event.accept()
-        else:
-            event.ignore()
+            super(AutoParameterTableView, self).mousePressEvent(event)
 
     def paintEvent(self, event):
-        super(AutoParameterListView, self).paintEvent(event)
+        super(AutoParameterTableView, self).paintEvent(event)
 
         if self.dragline is not None:
             pen = QtGui.QPen(QtCore.Qt.blue)
@@ -113,30 +53,16 @@ class AutoParameterListView(QtGui.QTableView):
             painter.drawLine(self.dragline)
 
     def dropEvent(self, event):
-        self.dragline = None
+        param = self.dropAssist(event)
         index = self.indexAt(event.pos())
-        print 'drop!', index.row()
         self.model().insertRows(index.row(),1)
         if isinstance(event.source(), FactoryLabel):
             pass
         else:
-            data = event.mimeData()
-            bstream = data.retrieveData("application/x-protocol",
-                                        QtCore.QVariant.ByteArray)
-            selected = cPickle.loads(str(bstream))
-            self.model().setData(index, selected)
+            self.model().setData(index, param)
 
-        self.original_pos = None
         event.accept()
 
-    def childEvent(self, event):
-        if event.type() == QtCore.QEvent.ChildRemoved:
-            # hack to catch drop offs   
-            if self.original_pos is not None:
-                selected = self.limbo_component
-                self.model().insertRows(self.original_pos,1)
-                self.model().setData(self.model().index(self.original_pos,0), selected)
-                self.original_pos = None
 
 class ComboboxDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):

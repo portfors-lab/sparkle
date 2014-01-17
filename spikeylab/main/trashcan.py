@@ -29,3 +29,9 @@ class TrashWidget(QtGui.QPushButton):
     def leaveEvent(self, event):
         self.setFlat(True)
         event.accept()
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.ChildRemoved and self.underMouse():
+            return True
+        else:
+            return super(type(self.parent()), self.parent()).eventFilter(source, event)

@@ -8,6 +8,7 @@ from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.drag_label import FactoryLabel
 from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.main.abstract_drag_view import AbstractDragView
 
 
 class ProtocolTabelModel(QtCore.QAbstractTableModel):
@@ -24,7 +25,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
                 return self.headers[section]
                         
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.tests)
+        return len(self.test_order)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         return 5
@@ -50,6 +51,9 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             stimid = self.test_order[index.row()]
             test = self.tests[stimid]
             return test
+        elif role == QtCore.Qt.UserRole+1:  #return the whole python object
+            stimid = self.test_order[index.row()]
+            return stimid
 
     def flags(self, index):
         if index.column() == 2:
@@ -72,6 +76,12 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
             self.editCompleted.emit(value)
 
+    def removeItem(self, index):
+        self.removeTest(index.row())
+        
+    def insertItem(self, index, item):
+        self.insertTest(item, index.row())
+
     def removeTest(self, position):
         print 'remove index', position
         self.beginRemoveRows(QtCore.QModelIndex(), position, position)
@@ -81,6 +91,8 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def insertTest(self, testid, position):
         """Re-inserts exisiting stimulus into order list"""
         print 'insert position', position
+        if position == -1:
+            position = self.rowCount()
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
         self.test_order.insert(position, testid)
         self.endInsertRows()
@@ -95,7 +107,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.tests[stim.stimid] = stim
 
         self.endInsertRows()
-
+    
     def stimulusList(self):
         """Return a list of StimulusModels in correct order"""
         stimuli = []
@@ -104,34 +116,12 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         return stimuli
 
 
-class ProtocolView(QtGui.QTableView):
+class ProtocolView(AbstractDragView, QtGui.QTableView):
     def __init__(self,parent=None):
         QtGui.QTableView.__init__(self,parent)
-        self.setDragEnabled(True)
-        self.setAcceptDrops(True)
+        AbstractDragView.__init__(self)
+
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.dragline = None
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("application/x-protocol"):
-            event.setDropAction(QtCore.Qt.MoveAction)
-            event.accept()
-        else:
-            event.ignore()
-
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("application/x-protocol"):
-            #find the nearest row break to cursor
-            # assume all rows same height
-            row_height = self.rowHeight(0)
-            y = row_height*self.rowAt(event.pos().y())
-            x = self.width()
-            self.dragline = QtCore.QLine(0,y,x,y)          
-            self.viewport().update()
-            event.setDropAction(QtCore.Qt.MoveAction)
-            event.accept()
-        else:
-            event.ignore()
 
     def paintEvent(self, event):
         super(ProtocolView, self).paintEvent(event)
@@ -142,26 +132,33 @@ class ProtocolView(QtGui.QTableView):
             painter.setPen(pen)
             painter.drawLine(self.dragline)
 
-
     def dropEvent(self, event):
-        self.dragline = None
-        data = event.mimeData()
-        bstream = data.retrieveData("application/x-protocol",
-            QtCore.QVariant.ByteArray)
-
+        item = self.dropAssist(event)
         location = self.rowAt(event.pos().y())
 
         if isinstance(event.source(), FactoryLabel):
-            factory = cPickle.loads(str(bstream))
+            factory = item
             # create new stimulus then!
             stim = StimulusModel()
             stim.setEditor(factory.editor())
             self.model().insertNewTest(stim, location)
         else:
-            selected_id = cPickle.loads(str(bstream))
+            selected_id = item
             self.model().insertTest(selected_id, location)
 
         event.accept()
+
+    def grabImage(self, index):
+        # grab an image of the cell we are moving
+        # assume all rows same height
+        row_height = self.rowHeight(0)
+        # -5 because it's a little off
+        y = (row_height*index.row()) + row_height - 5
+        x = self.width()
+        rect = QtCore.QRect(5,y,x,row_height)
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, rect)
+        return pixmap
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -173,46 +170,6 @@ class ProtocolView(QtGui.QTableView):
             # self.edit(index)
             print 'modalness', self.stim_editor.isModal()
 
-    def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
-            index = self.indexAt(event.pos())
-            selected = self.model().data(index, QtCore.Qt.UserRole)
-
-            ## convert to  a bytestream
-            bstream = cPickle.dumps(selected.stimid)
-            mimeData = QtCore.QMimeData()
-            mimeData.setData("application/x-protocol", bstream)
-
-            drag = QtGui.QDrag(self)
-            drag.setMimeData(mimeData)
-
-            # grab an image of the cell we are moving
-            # assume all rows same height
-            row_height = self.rowHeight(0)
-            # -5 becuase it a a little off
-            y = (row_height*self.rowAt(event.pos().y())) + row_height - 5
-            x = self.width()
-            rect = QtCore.QRect(5,y,x,row_height)
-            pixmap = QtGui.QPixmap()
-            pixmap = pixmap.grabWidget(self, rect)
-
-            # below makes the pixmap half transparent
-            painter = QtGui.QPainter(pixmap)
-            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-            painter.end()
-            
-            drag.setPixmap(pixmap)
-
-            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-            drag.setPixmap(pixmap)
-
-            # if result: # == QtCore.Qt.MoveAction:
-                # self.model().removeRow(index.row())
-            self.model().removeTest(index.row())
-            result = drag.start(QtCore.Qt.MoveAction)
-
-            # super(ProtocolView, self).mousePressEvent(event)
 
 
 if __name__ == '__main__':

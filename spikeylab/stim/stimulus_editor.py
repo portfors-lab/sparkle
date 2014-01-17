@@ -20,6 +20,7 @@ class StimulusEditor(AbstractEditorWidget):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()
         self.ui.setupUi(self)
+        self.ui.trackview.installEventFilter(self.ui.template_box.trash())
         # self.setWindowModality(2) # application modal
     
     def setStimulusModel(self, model):

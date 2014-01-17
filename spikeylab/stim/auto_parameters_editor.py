@@ -5,7 +5,7 @@ sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.drag_label import FactoryLabel
-from spikeylab.stim.auto_parameter_view import AutoParameterListView, AutoParameterDelegate,  AutoParamWidget
+from spikeylab.stim.auto_parameter_view import AutoParameterTableView, AutoParameterDelegate,  AutoParamWidget
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.main.trashcan import TrashWidget
 
@@ -21,22 +21,21 @@ class Parametizer(QtGui.QWidget):
         
         add_lbl = FactoryLabel(AddLabel)
         ok_btn = QtGui.QPushButton('OK')
-        ok_btn.clicked.connect(self.saveParameters)
+        ok_btn.clicked.connect(self.close)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
         separator.setFrameShadow(QtGui.QFrame.Sunken)
         
-        self.trash_lbl = TrashWidget()
+        self.trash_lbl = TrashWidget(self)
         
-
         btn_layout.addWidget(add_lbl)
         btn_layout.addWidget(self.trash_lbl)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(ok_btn)
 
-        self.param_list = AutoParameterListView()
-        self.param_list.installEventFilter(self)
+        self.param_list = AutoParameterTableView()
+        self.param_list.installEventFilter(self.trash_lbl)
 
         self.param_model = stimulusview.model().autoParams()
         self.param_model.setStimView(stimulusview)
@@ -49,25 +48,12 @@ class Parametizer(QtGui.QWidget):
     def setParameterList(self, paramlist):
         self.param_model.setParameterList(paramlist)
 
-    def saveParameters(self): 
-        # print 'save to stim model'
-        # this is the same model from stimulusview.model() we set in contructor
-        # do I need to do this?
-        # self.param_model.parentModel().setAutoParams(self.param_model)
-
-        self.close()
-
     def sizeHint(self):
         return QtCore.QSize(560,200)
 
     def closeEvent(self, event):
         self.param_model.stimView().setMode(0)
 
-    def eventFilter(self, source, event):
-        if event.type() == QtCore.QEvent.ChildRemoved and self.trash_lbl.underMouse():
-            return True
-        else:
-            return super(Parametizer, self).eventFilter(source, event)
 
 
 if __name__ == '__main__':

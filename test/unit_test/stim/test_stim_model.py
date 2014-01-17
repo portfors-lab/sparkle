@@ -119,11 +119,11 @@ class TestStimModel():
 
         parameter_model = model.autoParams()
         parameter_model.insertRows(0,1)
-        auto_parameter = parameter_model.data(parameter_model.index(0))
+        auto_parameter = parameter_model.data(parameter_model.index(0,0))
         auto_parameter['start'] = start
         auto_parameter['delta'] = step
         auto_parameter['stop'] = stop
-        parameter_model.setData(parameter_model.index(0), auto_parameter)
+        parameter_model.setData(parameter_model.index(0,0), auto_parameter)
 
         return len(range(start,stop,step))
 

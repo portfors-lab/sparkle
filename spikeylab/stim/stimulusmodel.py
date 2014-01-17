@@ -70,15 +70,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if role == QtCore.Qt.DisplayRole:
             component = self._segments[index.row()][index.column()]
             return component.__class__.__name__
-        elif role == QtCore.Qt.UserRole:  #return the whole python object
+        elif role == QtCore.Qt.SizeHintRole:
+            component = self._segments[index.row()][index.column()]
+            return component.duration() #* PIXELS_PER_MS * 1000
+        elif role >= QtCore.Qt.UserRole:  #return the whole python object
             if len(self._segments[index.row()]) > index.column():
                 component = self._segments[index.row()][index.column()]
             else:
                 component = None
             return component
-        elif role == QtCore.Qt.SizeHintRole:
-            component = self._segments[index.row()][index.column()]
-            return component.duration() #* PIXELS_PER_MS * 1000
 
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
@@ -131,6 +131,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
             self.beginRemoveRows(QtCore.QModelIndex(), len(self._segments)-1, len(self._segments)-1)
             self._segments.pop(len(self._segments)-1)
             self.endRemoveRows()
+
+    def insertItem(self, index, item):
+        self.insertComponent(item, (index.row(), index.column()))
+
+    def removeItem(self, index):
+        self.removeComponent((index.row(), index.column()))
 
     def clearComponents(self):
         self._segments = [[]]

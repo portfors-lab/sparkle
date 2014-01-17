@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence, FMSweep
+from spikeylab.main.trashcan import TrashWidget
 
 class ComponentTemplateLabel(QtGui.QLabel):
     def __init__(self, componentclass, parent=None):
@@ -19,7 +20,7 @@ class ComponentTemplateLabel(QtGui.QLabel):
             newcomponent = self.componentclass()
 
             mimeData = QtCore.QMimeData()
-            mimeData.setData("application/x-component", newcomponent.serialize())
+            mimeData.setData("application/x-protocol", newcomponent.serialize())
 
             drag = QtGui.QDrag(self)
             drag.setMimeData(mimeData)
@@ -51,13 +52,18 @@ class ComponentTemplateTable(QtGui.QWidget):
         silence_lbl = ComponentTemplateLabel(Silence)
         fmsweep_lbl = ComponentTemplateLabel(FMSweep)
 
+        self.trash_lbl = TrashWidget()
+
         layout.addWidget(tone_lbl, 0,0)
         layout.addWidget(vocal_lbl, 0,1)
         layout.addWidget(silence_lbl, 1,0)
         layout.addWidget(fmsweep_lbl, 1,1)
+        layout.addWidget(self.trash_lbl, 2,0)
 
         self.setLayout(layout)
 
+    def trash(self):
+        return self.trash_lbl
 
 if __name__ == '__main__':
     import sys
