@@ -52,6 +52,15 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
             painter.setPen(pen)
             painter.drawLine(self.dragline)
 
+    def cursor(self, pos):
+        row = self.indexAt(pos).row()
+        if row == -1:
+            row = self.model().rowCount()
+        row_height = self.rowHeight(0)
+        y = (row_height*row)
+        x = self.width()
+        return QtCore.QLine(0,y,x,y)
+
     def dropEvent(self, event):
         param = self.dropAssist(event)
         index = self.indexAt(event.pos())

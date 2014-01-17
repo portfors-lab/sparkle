@@ -39,7 +39,7 @@ class AcquisitionModel():
         self.signals.samplerateChanged = self.stimulus.samplerateChanged
 
         stimuli_types = get_stimuli_models()
-        self.explore_stimuli = [x() for x in stimuli_types if x.valid]
+        self.explore_stimuli = [x() for x in stimuli_types if x.explore]
 
         self.binsz = 0.005
 

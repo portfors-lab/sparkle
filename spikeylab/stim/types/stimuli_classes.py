@@ -17,7 +17,8 @@ class Tone(AbstractStimulusComponent):
 
 class PureTone(Tone):
     name = "Pure Tone"
-    valid = True
+    explore = True
+    protocol = True
     _frequency = 5000
 
     def frequency(self):
@@ -52,6 +53,11 @@ class PureTone(Tone):
         super(PureTone,self).loadState(state)
         self._frequency = state['frequency']
 
+    def param_names(self):
+        names = super(PureTone, self).param_names()
+        names.append('frequency')
+        return names
+
 class FMSweep(Tone):
     name = "fmsweep"
     start_frequency = None
@@ -59,7 +65,8 @@ class FMSweep(Tone):
 
 class Vocalization(AbstractStimulusComponent):
     name = "Vocalization"
-    valid = True
+    explore = True
+    protocol = True
     _filename = None
     _browsedir = os.path.expanduser('~')
 
@@ -161,7 +168,7 @@ class Noise(AbstractStimulusComponent):
 
 class Silence(AbstractStimulusComponent):
     name = "silence"
-
+    protocol = True
     def paint(self, painter, rect, palette):
         mid = rect.y() + (rect.height()/2)
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)

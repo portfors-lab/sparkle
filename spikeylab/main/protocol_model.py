@@ -78,19 +78,17 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
     def removeItem(self, index):
         self.removeTest(index.row())
-        
+
     def insertItem(self, index, item):
         self.insertTest(item, index.row())
 
     def removeTest(self, position):
-        print 'remove index', position
         self.beginRemoveRows(QtCore.QModelIndex(), position, position)
         self.test_order.pop(position)
         self.endRemoveRows()
 
     def insertTest(self, testid, position):
         """Re-inserts exisiting stimulus into order list"""
-        print 'insert position', position
         if position == -1:
             position = self.rowCount()
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
@@ -159,6 +157,15 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         pixmap = QtGui.QPixmap()
         pixmap = pixmap.grabWidget(self, rect)
         return pixmap
+
+    def cursor(self, pos):
+        row = self.indexAt(pos).row()
+        if row == -1:
+            row = self.model().rowCount()
+        row_height = self.rowHeight(0)
+        y = (row_height*row)
+        x = self.width()
+        return QtCore.QLine(0,y,x,y)
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:

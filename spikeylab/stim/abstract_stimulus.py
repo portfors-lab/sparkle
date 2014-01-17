@@ -10,7 +10,8 @@ class AbstractStimulusComponent(object):
     _intensity = 20 # in dB SPL
     _risefall = 0
     name = 'unknown'
-    valid = False
+    protocol = False
+    explore = False
     def __init__(self):
         self.idnum = uuid.uuid1()
 
@@ -52,6 +53,12 @@ class AbstractStimulusComponent(object):
 
     def signal(self, fs, atten):
         raise NotImplementedError
+
+    def param_names(self):
+        """A list of the parameter names that are available to
+        be set using auto-paramter manipulation. Subclasses should
+        reimplement and add to this list"""
+        return ['duration', 'intensity', 'risefall']
 
     def stateDict(self):
         state = {

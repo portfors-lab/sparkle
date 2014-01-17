@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence, FMSweep
+from spikeylab.stim.types import get_stimuli_models
+# from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence, FMSweep
 from spikeylab.main.trashcan import TrashWidget
 
 class ComponentTemplateLabel(QtGui.QLabel):
@@ -46,19 +47,18 @@ class ComponentTemplateTable(QtGui.QWidget):
         super(ComponentTemplateTable, self).__init__(parent)
 
         layout = QtGui.QGridLayout()
+        ncolumns = 2
 
-        tone_lbl = ComponentTemplateLabel(PureTone)
-        vocal_lbl = ComponentTemplateLabel(Vocalization)
-        silence_lbl = ComponentTemplateLabel(Silence)
-        fmsweep_lbl = ComponentTemplateLabel(FMSweep)
+        stimuli = get_stimuli_models()
+        count = 0
+        for stimulus in stimuli:
+            if stimulus.protocol:
+                label = ComponentTemplateLabel(stimulus)
+                layout.addWidget(label, count/ncolumns, count % ncolumns)
+                count += 1
 
         self.trash_lbl = TrashWidget()
-
-        layout.addWidget(tone_lbl, 0,0)
-        layout.addWidget(vocal_lbl, 0,1)
-        layout.addWidget(silence_lbl, 1,0)
-        layout.addWidget(fmsweep_lbl, 1,1)
-        layout.addWidget(self.trash_lbl, 2,0)
+        layout.addWidget(self.trash_lbl, count/ncolumns, count % ncolumns)
 
         self.setLayout(layout)
 

@@ -238,33 +238,25 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                 return
             self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
 
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("application/x-protocol"):
-            #find the nearest row break to cursor
-            # assume all rows same height
+    def cursor(self, pos):
+        index = self.splitAt(pos)
 
-            index = self.splitAt(event.pos())
-            if len(self._rects[index[0]])-1 < index[1]:
-                if index[1] == 0:
-                    # empty row
-                    x = 0
-                else:
-                    rect = self._rects[index[0]][index[1]-1]
-                    x = rect.x() + rect.width()
+        if len(self._rects[index[0]])-1 < index[1]:
+            if index[1] == 0:
+                # empty row
+                x = 0
             else:
-                rect = self._rects[index[0]][index[1]]
-                x = rect.x()
-
-            y0 = index[0]*(ROW_HEIGHT + ROW_SPACE)
-            y1 = y0 + ROW_HEIGHT
-
-            self.dragline = QtCore.QLine(x,y0,x,y1)          
-            self.viewport().update()
-
-            event.setDropAction(QtCore.Qt.MoveAction)
-            event.accept()
+                rect = self._rects[index[0]][index[1]-1]
+                x = rect.x() + rect.width()
         else:
-            event.ignore()
+            rect = self._rects[index[0]][index[1]]
+            x = rect.x()
+
+        y0 = index[0]*(ROW_HEIGHT + ROW_SPACE)
+        y1 = y0 + ROW_HEIGHT
+
+        return QtCore.QLine(x,y0,x,y1)
+
 
     def dropEvent(self, event):
         if isinstance(event.source(), self.__class__) or isinstance(event.source(), ComponentTemplateLabel):

@@ -12,6 +12,9 @@ class AbstractDragView():
     def grabImage(self, index):
         raise NotImplementedError
 
+    def cursor(self, index):
+        raise NotImplementedError
+
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
             index = self.indexAt(event.pos())
@@ -54,15 +57,8 @@ class AbstractDragView():
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("application/x-protocol"):
-            #find the nearest row break to cursor
-            # assume all rows same height
-            row = self.indexAt(event.pos()).row()
-            if row == -1:
-                row = self.model().rowCount()
-            row_height = self.rowHeight(0)
-            y = (row_height*row)
-            x = self.width()
-            self.dragline = QtCore.QLine(0,y,x,y)          
+            # find the nearest break to cursor
+            self.dragline = self.cursor(event.pos())
             self.viewport().update()
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()

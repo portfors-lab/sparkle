@@ -160,7 +160,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     # special case, where component is a wav file:
                     # it will set the master samplerate to match its own
                     if component.__class__.__name__ == 'Vocalization':
-                        rates.append(component.samplerate())
+                        if component.samplerate() is not None:
+                            rates.append(component.samplerate())
 
             if len(set(rates)) > 1:
                 raise Exception("Wav files with different sample rates in same stimulus")
