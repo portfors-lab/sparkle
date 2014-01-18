@@ -20,7 +20,7 @@ class PureTone(Tone):
     explore = True
     protocol = True
     _frequency = 5000
-
+    _frequency_details = {'label':'kHz', 'multiplier':1000, 'min':0, 'max':200}
     def frequency(self):
         return self._frequency
 
@@ -53,10 +53,10 @@ class PureTone(Tone):
         super(PureTone,self).loadState(state)
         self._frequency = state['frequency']
 
-    def param_names(self):
-        names = super(PureTone, self).param_names()
-        names.append('frequency')
-        return names
+    def auto_details(self):
+        details = super(PureTone, self).auto_details()
+        details['frequency'] = self._frequency_details
+        return details
 
 class FMSweep(Tone):
     name = "fmsweep"

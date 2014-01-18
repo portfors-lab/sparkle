@@ -5,8 +5,6 @@ from auto_parameter_form import Ui_AutoParamWidget
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
 from spikeylab.main.abstract_drag_view import AbstractDragView
 
-PARAMETER_TYPES = ['duration', 'intensity', 'frequency']
-
 class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     """List View which holds parameter widgets"""
     def __init__(self):
@@ -75,14 +73,19 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
 
 class ComboboxDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
+        param = index.data(QtCore.Qt.UserRole)
+        parameter_types = index.model().selectionParameters(param)
         editor = QtGui.QComboBox(parent)
-        editor.addItems(PARAMETER_TYPES)
+        editor.addItems(parameter_types)
         return editor
 
     def setEditorData(self, editor, index):
         value = index.model().data(index, QtCore.Qt.EditRole)
-        typeidx = PARAMETER_TYPES.index(value)
-        editor.setCurrentIndex(typeidx)
+        if value != '':
+            param = index.data(QtCore.Qt.UserRole)
+            parameter_types = index.model().selectionParameters(param)
+            typeidx = parameter_types.index(value)
+            editor.setCurrentIndex(typeidx)
 
     def setModelData(self, editor, model, index):
         value = editor.currentText()

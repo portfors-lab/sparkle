@@ -39,5 +39,15 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
             sel.select(index, index)
         return sel
 
+    def selectionComponents(self):
+        """Returns the names of the component types in this selection"""
+        comps = []
+        model = self.model()
+        for comp in self._selected_components:
+            index = model.indexByComponent(comp)
+            if index is not None:
+                comps.append(comp)
+        return comps
+
     def __str__(self):
         return "ComponentSelectionModel " + str(id(self))

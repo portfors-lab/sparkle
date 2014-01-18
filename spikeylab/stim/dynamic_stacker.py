@@ -1,13 +1,4 @@
-import os
-import importlib
-import sys
-import glob
-import inspect
-
 from PyQt4 import QtGui, QtCore
-
-from spikeylab.stim.abstract_parameters import AbstractParameterWidget
-
 
 class DynamicStackedWidget(QtGui.QStackedWidget):
 

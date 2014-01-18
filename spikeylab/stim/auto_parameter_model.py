@@ -1,6 +1,8 @@
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
+
+ERRCELL = QtGui.QColor('firebrick')
 
 class AutoParameterModel(QtCore.QAbstractTableModel):
     _paramid = 0
@@ -40,7 +42,42 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             if 1 <= index.column() <= 3:
                 param = self._parameters[index.row()]
                 param_type = param['parameter']
-                return 'parsecs'
+                selection_model = self._selectionmap[param['paramid']]
+                comps = selection_model.selectionComponents()
+                if len(comps) == 0 or param_type == '':
+                    return 'parsecs'
+                # all components must match units
+                multipliers = []
+                labels = []
+                for comp in comps:
+                    details = comp.auto_details()[param_type]
+                    multipliers.append(details['multiplier'])
+                    labels.append(details['label'])
+                multipliers = set(multipliers)
+                labels = set(labels)
+                if len(multipliers) > 1 or len(labels) > 1:
+                    print 'Components with mis-matched units!'
+                    return 'mana'
+                return labels.pop()
+        elif role == QtCore.Qt.BackgroundRole:
+            col = index.column()
+            param = self._parameters[index.row()]
+            if param['parameter'] == '':
+                return None
+            if col == 1:
+                # I don't want to do this every time maybe...
+                ok = self.checkLimits(param['start'], param)
+                if not ok:
+                    return QtGui.QBrush(ERRCELL)
+            if col == 2:
+                ok = self.checkLimits(param['stop'], param)
+                if not ok:
+                    return QtGui.QBrush(ERRCELL)
+            if col == 4:
+                nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
+                if nsteps == 0 :
+                    return QtGui.QBrush(ERRCELL)
+
         elif role >= QtCore.Qt.UserRole:  #return the whole python object
             return self._parameters[index.row()]
         
@@ -50,13 +87,43 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role=0):
         if role == QtCore.Qt.EditRole:
             param = self._parameters[index.row()]
-            param[self.headers[index.column()]] = value
+            if index.column() == 0 :
+                param[self.headers[index.column()]] = value
+
+            elif 1 <= index.column() <= 2:
+                # check that start and stop values are within limits
+                # specified by component type
+                if self.checkLimits(value, param):
+                    param[self.headers[index.column()]] = value
+            else:
+                param[self.headers[index.column()]] = value
         else:
             row = index.row()
             if row == -1:
                 row = self.rowCount() -1
             self._parameters[row] = value
         return True
+
+    def checkLimits(self, value, param):
+        selection_model = self._selectionmap[param['paramid']]
+        comps = selection_model.selectionComponents()
+        if len(comps) == 0:
+            return False
+        mins = []
+        maxs = []
+        for comp in comps:
+            # get the limit details for the currently selected parameter type
+            details = comp.auto_details()[param['parameter']]
+            mins.append(details['min'])
+            maxs.append(details['max'])
+        lower = max(mins)
+        upper = min(maxs)
+        if lower <= value <= upper:
+            return True
+        else:
+            print 'value out of bounds'
+            print 'lower', lower, 'upper', upper, 'value', value
+            return False
 
     def setParameterList(self, paramlist):
         self._parameters = paramlist
@@ -69,7 +136,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             defaultparam = { 'start': 0,
                              'step': 1,
                              'stop': 0,
-                             'parameter': 'duration',
+                             'parameter': '',
                              'paramid' : self._paramid,
                             }
             self._parameters.insert(position, defaultparam)
@@ -102,7 +169,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                        QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
                        QtCore.Qt.ItemIsEditable
             else:
-                return QtCore.Qt.ItemIsSelectable
+                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
         else:
             print 'flags: index invalid'
             return QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | \
@@ -139,3 +206,12 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         """
         selection_model = self._selectionmap[param['paramid']]
         return selection_model.selectedIndexes()
+
+    def selectionParameters(self, param):
+        selection_model = self._selectionmap[param['paramid']]
+        comps = selection_model.selectionComponents()
+        editable_sets = []
+        for comp in comps:
+            editable_sets.append(set(comp.auto_details().keys()))
+        editable_paramters = set.intersection(*editable_sets)
+        return list(editable_paramters)

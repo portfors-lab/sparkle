@@ -54,11 +54,13 @@ class AbstractStimulusComponent(object):
     def signal(self, fs, atten):
         raise NotImplementedError
 
-    def param_names(self):
+    def auto_details(self):
         """A list of the parameter names that are available to
         be set using auto-paramter manipulation. Subclasses should
         reimplement and add to this list"""
-        return ['duration', 'intensity', 'risefall']
+        return {'duration':{'label':'ms', 'multiplier':0.001, 'min':0, 'max':500},
+                'intensity':{'label': 'dbSPL', 'multiplier':1, 'min':0, 'max':100}, 
+                'risefall':{'label':'ms', 'multiplier':0.001, 'min':0, 'max':100}}
 
     def stateDict(self):
         state = {
@@ -81,7 +83,7 @@ class AbstractStimulusComponent(object):
         return cPickle.loads(stream)
 
     def __repr__(self):
-        return "StimComponent:"  + str(self.idnum)
+        return "StimComponent:" + str(self.idnum)
 
     def __eq__(self, other):
         if self.idnum == other.idnum:

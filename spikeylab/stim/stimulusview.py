@@ -325,7 +325,6 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
         return editor
 
-
     def setModelData(self, editor, model, index):
         """Saves the input from the editor widget to the model component"""
         editor.saveToObject()
