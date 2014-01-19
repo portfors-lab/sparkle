@@ -19,7 +19,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self._nreps = 1 # reps of each unique stimulus
         self._nloops = 1 # reps of entire expanded list of autoparams
-        self._samplerate = 375000
+        self._samplerate = 400000
 
         # 2D array of simulus components track number x component number
         self._segments = [[]]

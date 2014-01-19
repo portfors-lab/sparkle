@@ -20,7 +20,10 @@ class PureTone(Tone):
     explore = True
     protocol = True
     _frequency = 5000
-    _frequency_details = {'label':'kHz', 'multiplier':1000, 'min':0, 'max':200}
+    def update_fscale(self, scale):
+        print '!updating tone scale'
+        self._frequency_details['multiplier'] = scale
+
     def frequency(self):
         return self._frequency
 
@@ -55,7 +58,7 @@ class PureTone(Tone):
 
     def auto_details(self):
         details = super(PureTone, self).auto_details()
-        details['frequency'] = self._frequency_details
+        details['frequency'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000}
         return details
 
 class FMSweep(Tone):

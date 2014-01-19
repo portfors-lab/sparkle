@@ -5,13 +5,15 @@ from PyQt4 import QtGui, QtCore
 
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
+    name = 'unknown'
+    protocol = False
+    explore = False
     _start_time = None
     _duration = .01 # in seconds
     _intensity = 20 # in dB SPL
     _risefall = 0
-    name = 'unknown'
-    protocol = False
-    explore = False
+    _scales = [0.001, 1000] # time, frequency scaling factors
+    _labels = ['ms', 'kHz']
     def __init__(self):
         self.idnum = uuid.uuid1()
 
@@ -58,9 +60,9 @@ class AbstractStimulusComponent(object):
         """A list of the parameter names that are available to
         be set using auto-paramter manipulation. Subclasses should
         reimplement and add to this list"""
-        return {'duration':{'label':'ms', 'multiplier':0.001, 'min':0, 'max':500},
-                'intensity':{'label': 'dbSPL', 'multiplier':1, 'min':0, 'max':100}, 
-                'risefall':{'label':'ms', 'multiplier':0.001, 'min':0, 'max':100}}
+        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':1},
+                'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':100}, 
+                'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 
     def stateDict(self):
         state = {
@@ -74,6 +76,24 @@ class AbstractStimulusComponent(object):
         self._duration = state['duration']
         self._intensity = state['intensity']
         self._risefall = state['risefall']
+
+    def update_fscale(self, scale):
+        self._scales[1] = scale
+        if scale == 1000:
+            self._labels[1] = 'kHz'
+        elif scale == 1:
+            self._labels[1] = 'Hz'
+        else:
+            raise Exception(u"Invalid frequency scale")
+
+    def update_tscale(self, scale):
+        self._scales[0] = scale
+        if scale == 0.001:
+            self._labels[0] = 'ms'
+        elif scale == 1:
+            self._labels[0] = 's'
+        else:
+            raise Exception(u"Invalid time scale")
 
     def serialize(self):
         return cPickle.dumps(self)

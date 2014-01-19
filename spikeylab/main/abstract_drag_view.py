@@ -3,6 +3,7 @@ from PyQt4 import QtGui, QtCore
 import cPickle
 
 class AbstractDragView():
+    DragRole = 33
     def __init__(self):
         self.setDragEnabled(True)
         self.setAcceptDrops(True)

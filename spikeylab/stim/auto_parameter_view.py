@@ -13,13 +13,11 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
 
         self.setItemDelegateForColumn(0,ComboboxDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
-        
 
     def edit(self, index, trigger, event):
         "Sets editing widget for selected list item"
         self.model().updateSelectionModel(index)
         return super(AutoParameterTableView, self).edit(index, trigger, event)
-
 
     def grabImage(self, index):
         # grab an image of the cell we are moving

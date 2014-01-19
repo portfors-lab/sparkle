@@ -1,10 +1,14 @@
 from PyQt4 import QtCore, QtGui
 
+import numpy as np
+
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
+from spikeylab.main.abstract_drag_view import AbstractDragView
 
 ERRCELL = QtGui.QColor('firebrick')
 
 class AutoParameterModel(QtCore.QAbstractTableModel):
+    SelectionModelRole = 34
     _paramid = 0
     def __init__(self, stimulus=None):
         super(AutoParameterModel, self).__init__()
@@ -29,37 +33,27 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             col = index.column()
             param = self._parameters[index.row()]
-            if col < 4:
+            if col == 0:
                 item = param[self.headers[col]]            
+            if 0 < col < 4:
+                item = param[self.headers[col]]
+                # scale appropriately
+                multiplier = self.getDetail(index, 'multiplier')
+                if multiplier is not None:
+                    return item/multiplier
             elif col == 4:
                 if param['start'] > param['stop'] and param['step'] > 0:
                     step = -1*param['step']
                 else:
                     step = param['step']
-                item = len(range(param['start'], param['stop'], step))
+                item = len(np.arange(param['start'], param['stop'], step))
             return item
         elif role == QtCore.Qt.ToolTipRole:
             if 1 <= index.column() <= 3:
-                param = self._parameters[index.row()]
-                param_type = param['parameter']
-                selection_model = self._selectionmap[param['paramid']]
-                comps = selection_model.selectionComponents()
-                if len(comps) == 0 or param_type == '':
-                    return 'parsecs'
-                # all components must match units
-                multipliers = []
-                labels = []
-                for comp in comps:
-                    details = comp.auto_details()[param_type]
-                    multipliers.append(details['multiplier'])
-                    labels.append(details['label'])
-                multipliers = set(multipliers)
-                labels = set(labels)
-                if len(multipliers) > 1 or len(labels) > 1:
-                    print 'Components with mis-matched units!'
-                    return 'mana'
-                return labels.pop()
+                label = self.getDetail(index, 'label')
+                return label
         elif role == QtCore.Qt.BackgroundRole:
+            # color the background red for bad values
             col = index.column()
             param = self._parameters[index.row()]
             if param['parameter'] == '':
@@ -78,31 +72,53 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 if nsteps == 0 :
                     return QtGui.QBrush(ERRCELL)
 
-        elif role >= QtCore.Qt.UserRole:  #return the whole python object
+        elif role == QtCore.Qt.UserRole or role == AbstractDragView.DragRole:  #return the whole python object
             return self._parameters[index.row()]
-        
+        elif role == self.SelectionModelRole:
+            return self._selectionmap[self._parameters[index.row()]['paramid']]
+
     def allData(self):
         return self._parameters
 
-    def setData(self, index, value, role=0):
+    def setData(self, index, value, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.EditRole:
             param = self._parameters[index.row()]
             if index.column() == 0 :
                 param[self.headers[index.column()]] = value
 
-            elif 1 <= index.column() <= 2:
+            elif 1 <= index.column() <= 3:
                 # check that start and stop values are within limits
                 # specified by component type
-                if self.checkLimits(value, param):
-                    param[self.headers[index.column()]] = value
+                multiplier = self.getDetail(index, 'multiplier')
+                if multiplier is not None:
+                    if self.checkLimits(value*multiplier, param):
+                        param[self.headers[index.column()]] = value*multiplier
             else:
                 param[self.headers[index.column()]] = value
-        else:
+        elif role == QtCore.Qt.UserRole:
             row = index.row()
             if row == -1:
                 row = self.rowCount() -1
             self._parameters[row] = value
         return True
+
+    def getDetail(self, index, detail):
+        param = self._parameters[index.row()]
+        param_type = param['parameter']
+        selection_model = self._selectionmap[param['paramid']]
+        comps = selection_model.selectionComponents()
+        if len(comps) == 0 or param_type == '':
+            return None
+        # all components must match
+        matching_details = []
+        for comp in comps:
+            details = comp.auto_details()[param_type]
+            matching_details.append(details[detail])
+        matching_details = set(matching_details)
+        if len(matching_details) > 1:
+            print 'Components with mis-matched units!'
+            return None
+        return matching_details.pop()
 
     def checkLimits(self, value, param):
         selection_model = self._selectionmap[param['paramid']]
@@ -159,6 +175,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         self.removeRows(index.row(),1)
 
     def insertItem(self, index, item):
+        """For reorder only, item must already have selectionModel in
+        for its id"""
         self.insertRows(index.row(), 1)
         self.setData(index, item)
 
@@ -210,6 +228,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def selectionParameters(self, param):
         selection_model = self._selectionmap[param['paramid']]
         comps = selection_model.selectionComponents()
+        if len(comps) == 0:
+            return []
         editable_sets = []
         for comp in comps:
             editable_sets.append(set(comp.auto_details().keys()))

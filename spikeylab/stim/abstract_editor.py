@@ -13,10 +13,16 @@ class AbstractEditorWidget(QtGui.QWidget):
         self.scales[1] = fscale
         if fscale == 1000:
             for lbl in self.funit_labels:
-                lbl.setText('kHz')
+                try:
+                    lbl.setText('kHz')
+                except:
+                    pass
         elif fscale == 1:
             for lbl in self.funit_labels:
-                lbl.setText('Hz')
+                try:
+                    lbl.setText('Hz')
+                except:
+                    pass
         else:
             raise Exception(u"Invalid frequency scale:"+str(self.fscale))
 
@@ -28,9 +34,15 @@ class AbstractEditorWidget(QtGui.QWidget):
         self.scales[0] = tscale
         if tscale == 0.001:
             for lbl in self.tunit_labels:
-                lbl.setText('ms')
+                try:
+                    lbl.setText('ms')
+                except:
+                    pass
         elif tscale == 1:
             for lbl in self.tunit_labels:
-                lbl.setText('s')
+                try:
+                    lbl.setText('s')
+                except:
+                    pass
         else:
             raise Exception(u"Invalid time scale:"+str(self.tscale))

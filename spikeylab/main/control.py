@@ -15,7 +15,6 @@ from spikeylab.dialogs.saving_dlg import SavingDialog
 from spikeylab.dialogs.scale_dlg import ScaleDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum
-from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 from controlwindow import ControlWindow
 
@@ -24,9 +23,10 @@ RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
 GREEN = QtGui.QPalette()
 GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
 
+DEVNAME = "PCI-6259"
 
 class MainWindow(ControlWindow):
-    def __init__(self, dev_name):
+    def __init__(self, inputs_filename):
         # set up model and stimlui first, 
         # as saved configuration relies on this
         self.acqmodel = AcquisitionModel()
@@ -35,14 +35,14 @@ class MainWindow(ControlWindow):
         self.explore_stimuli = self.acqmodel.stimuli_list()
         
         # auto generated code intialization
-        ControlWindow.__init__(self)
+        ControlWindow.__init__(self, inputs_filename)
         
         self.ui.start_btn.clicked.connect(self.on_start)
         self.ui.stop_btn.clicked.connect(self.on_stop)
 
-        cnames = get_ao_chans(dev_name.encode())
+        cnames = get_ao_chans(DEVNAME.encode())
         self.ui.aochan_box.addItems(cnames)
-        cnames = get_ai_chans(dev_name.encode())
+        cnames = get_ai_chans(DEVNAME.encode())
         self.ui.aichan_box.addItems(cnames)
 
         self.ui.running_label.setPalette(RED)
@@ -76,7 +76,6 @@ class MainWindow(ControlWindow):
         self.current_operation = None
 
         # update GUI to reflect loaded values
-        self.update_unit_labels()
         self.set_plot_thresh()
 
         # set up wav file directory finder paths
@@ -331,61 +330,8 @@ class MainWindow(ControlWindow):
         dlg = ScaleDialog(default_vals=field_vals)
         if dlg.exec_():
             fscale, tscale = dlg.get_values()
-            self.fscale = fscale
-            self.tscale = tscale
-        self.update_unit_labels()
+            self.update_unit_labels(tscale, fscale)
 
-    def update_unit_labels(self):
-        nf_lbls = 4
-        nt_lbls = 5
-
-        # bad!
-        AbstractEditorWidget().setTScale(self.tscale)
-        AbstractEditorWidget().setFScale(self.fscale)
-
-        self.ui.display.set_tscale(self.tscale)
-        self.ui.display.set_fscale(self.fscale)
-
-        if self.fscale == 1000:
-            # better way to do this than eval?
-            self.ui.funit_lbl.setText(u'kHz')
-            for i in range(2, nf_lbls):
-                lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'kHz')"
-                try:
-                    eval(lbl_str)
-                except:
-                    print "trouble with command: ", lbl_str
-        elif self.fscale == 1:
-            self.ui.funit_lbl.setText(u'Hz')
-            for i in range(2, nf_lbls):
-                lbl_str = "self.ui.funit_lbl_" + str(i) + ".setText(u'Hz')"
-                try:
-                    eval(lbl_str)
-                except:
-                    print "trouble with command: ", lbl_str
-        else:
-            print self.fscale
-            raise Exception(u"Invalid frequency scale")
-            
-        if self.tscale == 0.001:
-            self.ui.tunit_lbl.setText(u'ms')
-            for i in range(2, nt_lbls):
-                lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u'ms')"
-                try:
-                    eval(lbl_str)
-                except:
-                    print "trouble with command: ", lbl_str
-        elif self.tscale == 1:
-            self.ui.tunit_lbl.setText(u's')
-            for i in range(2, nt_lbls):
-                lbl_str = "self.ui.tunit_lbl_" + str(i) + ".setText(u's')"
-                try:
-                    eval(lbl_str)
-                except:
-                    print "trouble with command: ", lbl_str
-        else:
-            print self.tscale
-            raise Exception(u"Invalid time scale")
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """
@@ -440,7 +386,6 @@ class MainWindow(ControlWindow):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    devName = "PCI-6259"
-    myapp = MainWindow(devName)
+    myapp = MainWindow("controlinputs.json")
     myapp.show()
     sys.exit(app.exec_())
