@@ -3,7 +3,6 @@ import wave
 
 import scipy.io.wavfile as wv
 import numpy as np
-from pylab import specgram
 
 from PyQt4 import QtGui, QtCore
 
@@ -11,6 +10,19 @@ from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.types.widgets import tone_parameters, silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
+
+from matplotlib.cm import get_cmap
+from enthought.chaco import default_colormaps
+from chaco.api import DataRange1D
+
+generator = default_colormaps.color_map_name_dict['jet']
+cmap = generator(DataRange1D())
+cmap = np.array(cmap.color_bands)
+cmap = cmap[:,0:3]
+COLORTABLE=[]
+for i in range(256): 
+    row = cmap[i,:]*255
+    COLORTABLE.append(QtGui.qRgb(*row))
 
 class Tone(AbstractStimulusComponent):
     foo = None
@@ -99,14 +111,14 @@ class Vocalization(AbstractStimulusComponent):
         if fname is not None:
             self._filename = fname
 
-            nfft=512
             try:
                 sr, wavdata = wv.read(fname)
             except:
                 print u"Problem reading wav file"
                 raise
-            wavdata = wavdata.astype(float)
-            Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
+            # wavdata = wavdata.astype(float)
+            # nfft=512
+            # Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
 
             self._duration = float(len(wavdata))/sr
 
@@ -114,22 +126,26 @@ class Vocalization(AbstractStimulusComponent):
     def paint(self, painter, rect, palette):
 
         if self._filename is not None:
-            nfft=512
-            try:
-                sr, wavdata = wv.read(self._filename)
-            except:
-                print u"Problem reading wav file"
-                raise
-            wavdata = wavdata.astype(float)
-            Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
-
-            self._duration = float(len(wavdata))/sr
-
-            rows, cols, rgb = im.make_image().as_rgba_str()
-            image = QtGui.QImage(rgb, cols, rows, QtGui.QImage.Format_ARGB32)
+            # nfft=512
+            # try:
+            #     sr, wavdata = wv.read(self._filename)
+            # except:
+            #     print u"Problem reading wav file"
+            #     raise
+            # wavdata = wavdata.astype(float)
+            # Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
+            # self._duration = float(len(wavdata))/fs
+            
+            spec, f, bins, fs = spectrogram(self._filename)
+            spec_max = np.amax(spec)
+            scaled = spec/(spec_max/255)
+            scaled = np.require(scaled, np.uint8, 'C')
+            data = scaled.data[::-1]
+            image = QtGui.QImage(data, len(bins), len(f), QtGui.QImage.Format_Indexed8)
+            image.setColorTable(COLORTABLE)
+            # image = image.mirrored(True,False)
             pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(image))
-            # Why is the rect not equal to the draw rect seen in GUI?????
-            painter.drawPixmap(rect.x(), rect.y(), rect.width()+25, rect.height()+6, pixmap)
+            painter.drawPixmap(rect.x(), rect.y(), rect.width(), rect.height(), pixmap)
         else:
             painter.save()
             # draw a warning symbol

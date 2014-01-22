@@ -61,9 +61,6 @@ class StimulusEditor(AbstractEditorWidget):
         fig.show()
         self.asdkjfasdfk = fig
 
-    def mouseReleaseEvent(self, event):
-        print 'editor mouse release', event.button()
-
     def signal(self):
         
         stim_signal_list = self.ui.trackview.model().expandedStim()

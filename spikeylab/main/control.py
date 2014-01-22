@@ -123,7 +123,7 @@ class MainWindow(ControlWindow):
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
 
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
-        binsz = float(self.ui.binsz_lnedt.text())*self.tscale
+        binsz = float(self.ui.binsz_spnbx.value())*self.tscale
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
@@ -349,15 +349,10 @@ class MainWindow(ControlWindow):
         self.ui.display.update_signal(t, wavdata)
 
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            aochan = self.ui.aochan_box.currentText()
-            aichan = self.ui.aichan_box.currentText()
-            acq_rate = self.ui.aisr_spnbx.value()*self.fscale
             winsz = float(self.ui.windowsz_spnbx.value())*0.001
 
             print 'win size', winsz
             self.ui.display.set_xlimits((0,winsz))
-        # self.current_gen_rate = sr
-        # self.current_wav_signal = wavdata
 
     def update_thresh(self, thresh):
         self.ui.thresh_lnedt.setText(str(thresh))

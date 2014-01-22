@@ -9,6 +9,7 @@ from enable.component_editor import ComponentEditor
 from enthought.enable.api import Window, Component
 from chaco.tools.api import PanTool, ZoomTool, BroadcasterTool, DragZoom
 from enthought.chaco.tools.rect_zoom import RectZoomTool
+from enthought.chaco import default_colormaps
 
 import numpy as np
 from scipy.special import jn
@@ -425,7 +426,8 @@ class ImagePlotter(HasTraits):
         self.img_data = ArrayPlotData()
         self.img_data.set_data('imagedata', np.zeros((5,5)))
         plot = Plot(self.img_data)
-        plot.img_plot('imagedata', name="spectrogram")
+        p = plot.img_plot('imagedata', name="spectrogram", colormap=default_colormaps.jet)
+        # print p[0].value_mapper.map_data(self.img_data.get_data('imagedata'))
 
         self.default_tick_formatter = plot.y_axis.tick_label_formatter
         plot.y_axis.tick_label_formatter = self._freq_ticks

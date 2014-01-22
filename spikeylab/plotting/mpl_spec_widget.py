@@ -35,7 +35,7 @@ class SpecWidget(QtGui.QWidget):
         wavdata = wavdata.astype(float)
         self.ax.clear()
         data = self.ax.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9),
-                              pad_to=nfft*2)
+                                pad_to=nfft*2)
         self.ax.axis('tight')
         self.canvas.draw()
         return float(len(wavdata))/sr
