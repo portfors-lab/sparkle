@@ -13,8 +13,10 @@ from spikeylab.io.daq_tasks import *
 from spikeylab.config.info import caldata_filename, calfreq_filename
 from spikeylab.dialogs.saving_dlg import SavingDialog 
 from spikeylab.dialogs.scale_dlg import ScaleDialog
+from spikeylab.dialogs.specgram_dlg import SpecDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum
+from spikeylab.plotting.custom_plots import SpecWidget
 
 from controlwindow import ControlWindow
 
@@ -317,7 +319,7 @@ class MainWindow(ControlWindow):
         field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}
         dlg = SavingDialog(default_vals = field_vals)
         if dlg.exec_():
-            savefolder, savename, saveformat = dlg.get_values()
+            savefolder, savename, saveformat = dlg.values()
             self.savefolder = savefolder
             self.savename = savename
             self.saveformat = saveformat
@@ -329,18 +331,24 @@ class MainWindow(ControlWindow):
         field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}
         dlg = ScaleDialog(default_vals=field_vals)
         if dlg.exec_():
-            fscale, tscale = dlg.get_values()
+            fscale, tscale = dlg.values()
             self.update_unit_labels(tscale, fscale)
 
+    def launch_specgram_dlg(self):
+        dlg = SpecDialog(default_vals=self.spec_args)
+        if dlg.exec_():
+            argdict = dlg.values()
+            SpecWidget().set_spec_args(**argdict)
+            self.spec_args = argdict
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """
         # display spectrogram of file
         spath = self.exvocal.current_wav_file
-        spec, f, bins, fs = spectrogram(spath)
-        self.ui.display.update_spec(spec, xaxis=bins, yaxis=f)
 
+        self.ui.display.update_spec(spath)
         sr, wavdata = wv.read(spath)
+
         freq, spectrum = calc_spectrum(wavdata,sr)
 
         self.ui.display.update_fft(freq, spectrum)
@@ -349,9 +357,8 @@ class MainWindow(ControlWindow):
         self.ui.display.update_signal(t, wavdata)
 
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            winsz = float(self.ui.windowsz_spnbx.value())*0.001
+            winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
 
-            print 'win size', winsz
             self.ui.display.set_xlimits((0,winsz))
 
     def update_thresh(self, thresh):

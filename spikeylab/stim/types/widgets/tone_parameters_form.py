@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tone_parameters.ui'
 #
-# Created: Fri Dec 20 10:52:21 2013
+# Created: Wed Jan 22 12:30:37 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!

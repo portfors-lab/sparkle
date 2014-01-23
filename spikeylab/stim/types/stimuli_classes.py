@@ -126,25 +126,17 @@ class Vocalization(AbstractStimulusComponent):
     def paint(self, painter, rect, palette):
 
         if self._filename is not None:
-            # nfft=512
-            # try:
-            #     sr, wavdata = wv.read(self._filename)
-            # except:
-            #     print u"Problem reading wav file"
-            #     raise
-            # wavdata = wavdata.astype(float)
-            # Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
-            # self._duration = float(len(wavdata))/fs
             
             spec, f, bins, fs = spectrogram(self._filename)
             spec_max = np.amax(spec)
             scaled = spec/(spec_max/255)
             scaled = np.require(scaled, np.uint8, 'C')
             data = scaled.data[::-1]
+
             image = QtGui.QImage(data, len(bins), len(f), QtGui.QImage.Format_Indexed8)
             image.setColorTable(COLORTABLE)
             # image = image.mirrored(True,False)
-            pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(image))
+            pixmap = QtGui.QPixmap.fromImage(image)
             painter.drawPixmap(rect.x(), rect.y(), rect.width(), rect.height(), pixmap)
         else:
             painter.save()

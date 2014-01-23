@@ -51,12 +51,9 @@ class StimulusEditor(AbstractEditorWidget):
     def preview(self):
         stim_signal, atten = self.ui.trackview.model().signal()
         # import matplotlib.pyplot as plt
-        nfft = 512
-        Pxx, freqs, bins = mlab.specgram(stim_signal, NFFT=nfft, Fs=375000,
-                                        noverlap=int(nfft*0.9), pad_to=nfft*2)
 
         fig = SpecWidget()
-        fig.update_data(Pxx, xaxis=bins, yaxis=freqs)
+        fig.update_data(stim_signal, self.ui.trackview.model().samplerate())
         fig.set_title('Stimulus Preview')
         fig.show()
         self.asdkjfasdfk = fig

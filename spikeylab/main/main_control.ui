@@ -875,6 +875,7 @@
     <addaction name="actionSave_Options"/>
     <addaction name="actionSet_Calibration"/>
     <addaction name="actionSet_Scale"/>
+    <addaction name="actionSpectrogram_Parameters"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -1061,6 +1062,11 @@
     <string>Show PSTH</string>
    </property>
   </action>
+  <action name="actionSpectrogram_Parameters">
+   <property name="text">
+    <string>Spectrogram Parameters...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1191,6 +1197,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSpectrogram_Parameters</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>launch_specgram_dlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>544</x>
+     <y>342</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1205,5 +1227,6 @@
   <slot>show_psth()</slot>
   <slot>add_protocol_stim()</slot>
   <slot>set_explore_samplerate()</slot>
+  <slot>launch_specgram_dlg()</slot>
  </slots>
 </ui>

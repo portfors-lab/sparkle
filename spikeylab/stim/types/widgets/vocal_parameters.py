@@ -6,7 +6,6 @@ from spikeylab.tools.audiotools import spectrogram
 from PyQt4 import QtGui, QtCore
 
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
-
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
@@ -29,10 +28,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         if self.current_wav_file is not None:
 
             self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
-
-            # spec, f, bins, fs = spectrogram(self.current_wav_file)
-            # self.spec_preview.update_data(spec, xaxis=bins, yaxis=f)
-            self.spec_preview.update_file(self.current_wav_file)
+            dur = self.spec_preview.from_file(self.current_wav_file)
+            self.common.setDuration(dur)
 
         self._component = component
 
@@ -85,11 +82,12 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     def wavfile_clicked(self, model_index):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
-        # spec, f, bins, fs = spectrogram(spath)
-        # self.spec_preview.update_data(spec,xaxis=bins,yaxis=f)
-        dur = self.spec_preview.update_file(spath)
+        dur = self.spec_preview.from_file(spath)
         self.common.setDuration(dur)
         self.current_wav_file = spath
 
     def setContentFocus(self):
         pass
+
+    def setSpecgramArgs(self, argsdict):
+        self._specgram_inputs = argsdict

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Sun Jan 19 12:05:43 2014
+# Created: Wed Jan 22 09:41:11 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -583,9 +583,12 @@ class Ui_ControlWindow(object):
         self.actionShow_Data_display.setObjectName(_fromUtf8("actionShow_Data_display"))
         self.actionShow_PSTH = QtGui.QAction(ControlWindow)
         self.actionShow_PSTH.setObjectName(_fromUtf8("actionShow_PSTH"))
+        self.actionSpectrogram_Parameters = QtGui.QAction(ControlWindow)
+        self.actionSpectrogram_Parameters.setObjectName(_fromUtf8("actionSpectrogram_Parameters"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
+        self.menuOptions.addAction(self.actionSpectrogram_Parameters)
         self.menuView.addAction(self.actionShow_Data_display)
         self.menuView.addAction(self.actionShow_PSTH)
         self.menubar.addAction(self.menuOptions.menuAction())
@@ -600,6 +603,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionShow_Data_display, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_display)
         QtCore.QObject.connect(self.actionShow_PSTH, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_psth)
         QtCore.QObject.connect(self.explore_stim_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.parameter_stack.setCurrentIndex)
+        QtCore.QObject.connect(self.actionSpectrogram_Parameters, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_specgram_dlg)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -662,6 +666,7 @@ class Ui_ControlWindow(object):
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
         self.actionShow_Data_display.setText(_translate("ControlWindow", "Show Data Display", None))
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
+        self.actionSpectrogram_Parameters.setText(_translate("ControlWindow", "Spectrogram Parameters...", None))
 
 from spikeylab.plotting.custom_plots import PSTHWidget
 from spikeylab.main.protocol_model import ProtocolView

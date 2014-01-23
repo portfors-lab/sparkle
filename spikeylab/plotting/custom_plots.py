@@ -15,6 +15,7 @@ import numpy as np
 from scipy.special import jn
 
 from spikeylab.plotting.plottools import SpikeTraceBroadcasterTool, LineDraggingTool, AxisZoomTool
+import spikeylab.tools.audiotools as audiotools
 
 from PyQt4 import QtCore, QtGui
 
@@ -135,9 +136,26 @@ class TraceWidget(BaseWidget):
             self.traits.trace_plot.range2d.y_range.reset()
 
 class SpecWidget(BaseWidget):
+    specgram_args = {u'nfft':512, u'window':u'hanning', u'overlap':90}
     def _create_plotter(self):
         self.setToolTip('Spectrogram of stimulus signal')
         return ImagePlotter()
+
+    def from_file(self, filename):
+        spec, f, bins, dur = audiotools.spectrogram(filename, **self.specgram_args)
+        self.traits.update_data(spec, xaxis=bins, yaxis=f)
+        return dur
+
+    def update_data(self, signal, fs):
+        spec, f, bins, fs = audiotools.spectrogram((fs, signal), **self.specgram_args)
+        self.traits.update_data(spec, xaxis=bins, yaxis=f)
+
+    def set_spec_args(self, **kwargs):
+        for key, value in kwargs.items():
+            if key == 'colormap':
+                self.traits.set_colormap(value)
+            else:
+                self.specgram_args[key] = value
 
 class ChartWidget(BaseWidget):
     def _create_plotter(self):
@@ -422,12 +440,12 @@ class ImagePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     fscale = 1000
     tscale = 0.001
+
     def _plot_default(self):
         self.img_data = ArrayPlotData()
         self.img_data.set_data('imagedata', np.zeros((5,5)))
         plot = Plot(self.img_data)
-        p = plot.img_plot('imagedata', name="spectrogram", colormap=default_colormaps.jet)
-        # print p[0].value_mapper.map_data(self.img_data.get_data('imagedata'))
+        p = plot.img_plot('imagedata', name="spectrogram", colormap=default_colormaps.winter)
 
         self.default_tick_formatter = plot.y_axis.tick_label_formatter
         plot.y_axis.tick_label_formatter = self._freq_ticks
@@ -439,6 +457,7 @@ class ImagePlotter(HasTraits):
 
         plot.overlays.append(ZoomTool(plot))
 
+        self.cimage = p[0]
         return plot
 
     def update_data(self, imgdata, xaxis=None, yaxis=None):
@@ -450,6 +469,15 @@ class ImagePlotter(HasTraits):
     def set_xlim(self, lim):
         self.plot.range2d.x_range.low = lim[0]
         self.plot.range2d.x_range.high = lim[1]
+
+    def set_colormap(self, cmap_name):
+        cmap = default_colormaps.color_map_name_dict[cmap_name]
+        print cmap
+        print self.plot.components[0].__dict__['value_mapper'].name
+        self.cimage.value_mapper = cmap(self.cimage.color_mapper.range)
+        # self.cimage.__dict__['value_mapper'] = cmap(self.cimage.color_mapper.range)
+        # self.cimage.color_mapper = None
+        # print 'new name', self.plot.components[0].color_mapper.name
 
     def set_title(self, title):
         # make space for a title

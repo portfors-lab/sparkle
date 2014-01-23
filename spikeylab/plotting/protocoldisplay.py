@@ -44,7 +44,8 @@ class ProtocolDisplay(QtGui.QWidget):
         self.setLayout(layout)
 
     def update_spec(self, *args, **kwargs):
-        self.spec_plot.update_data(*args, **kwargs)
+        # self.spec_plot.update_data(*args, **kwargs)
+        self.spec_plot.from_file(*args, **kwargs)
 
     def update_fft(self, *args, **kwargs):
         self.fft_plot.update_data(*args, **kwargs)

@@ -14,14 +14,14 @@ class SavingDialog(QtGui.QDialog):
             formatidx = formats.index(default_vals[u'saveformat'])
             self.ui.saveformat_cmbx.setCurrentIndex(formatidx)
 
-    def browse_folders(self):
+    def browseFolders(self):
         folder = QtGui.QFileDialog.getExistingDirectory(self, u"select folder",  self.ui.savefolder_lnedt.text())
         self.ui.savefolder_lnedt.setText(folder)
         #bdlg.setFileMode(QtGui.QFileDialog.Directory)
         #bdlg.setOption(QtGui.QFileDialog.ShowDirsOnly)
         #bdlg.exec_()
 
-    def get_values(self):
+    def values(self):
         folder = str(self.ui.savefolder_lnedt.text())
         name = str(self.ui.savename_lnedt.text())
         sformat = str(self.ui.saveformat_cmbx.currentText())

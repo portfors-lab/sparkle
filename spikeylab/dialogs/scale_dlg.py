@@ -22,7 +22,7 @@ class ScaleDialog(QtGui.QDialog):
             else:
                 raise Exception(u"Invalid time scale")
 
-    def get_values(self):
+    def values(self):
 
         if self.ui.hz_btn.isChecked():
             fscale = 1

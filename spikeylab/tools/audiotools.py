@@ -2,8 +2,10 @@ from __future__ import division
 import numpy as np
 from scipy.integrate import simps, trapz
 import scipy.io.wavfile as wv
-from matplotlib.mlab import specgram
+from matplotlib import mlab
+from matplotlib import pyplot
 
+from PyQt4.QtGui import QImage
 
 VERBOSE = True
 DBFACTOR = 20
@@ -105,17 +107,37 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
 
     return tone, timevals, atten
 
-def spectrogram(filename, nfft=512):
-    try:
-        sr, wavdata = wv.read(filename)
-    except:
-        print u"Problem reading wav file"
-        raise
-    wavdata = wavdata.astype(float)
+
+def spectrogram(source, nfft=512, overlap=90, window='hanning'):
+    if isinstance(source, basestring):
+        try:
+            sr, wavdata = wv.read(source)
+        except:
+            print u"Problem reading wav file"
+            raise
+        wavdata = wavdata.astype(float)
+    else:
+        sr, wavdata = source
+    duration = len(wavdata)/sr
     # mx = np.amax(wavdata)
     # wavdata = wavdata/mx
+    if window == 'hanning':
+        winfnc = mlab.window_hanning
+    elif window == 'hamming':
+        winfnc = np.hamming
+    elif window == 'blackman':
+        winfnc = np.blackman
+    elif window == 'bartlett':
+        winfnc = np.bartlett
+    elif window == None:
+        winfnc = mlab.window_none
 
-    Pxx, freqs, bins = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9),
-                              pad_to=nfft*2)
+    noverlap = int(nfft*(float(overlap)/100))
 
-    return Pxx, freqs, bins, sr
+    Pxx, freqs, bins = mlab.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=noverlap,
+                                     pad_to=nfft*2, window=winfnc)
+
+    # convert to db scale for display
+    spec = 10. * np.log10(Pxx)
+    
+    return spec, freqs, bins, duration

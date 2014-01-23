@@ -7,6 +7,7 @@ import spikeylab.tools.systools as systools
 from maincontrol_form import Ui_ControlWindow
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.plotting.custom_plots import SpecWidget
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
@@ -63,6 +64,7 @@ class ControlWindow(QtGui.QMainWindow):
             self.tscale = tscale
             # bad!
             AbstractEditorWidget().setTScale(self.tscale)
+            AbstractStimulusComponent().update_tscale(self.tscale)
 
             self.ui.display.set_tscale(self.tscale)
             
@@ -139,6 +141,8 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['aosr'] = self.ui.aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
+        savedict['specargs'] = self.spec_args
+
         # parameter settings
         for stim in self.explore_stimuli:
             editor = self.ui.parameter_stack.widget_for_name(stim.name)
@@ -175,7 +179,9 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.ex_reprate_spnbx.setValue(inputsdict.get('ex_reprate', 1))
         self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
-        
+        self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':'jet'})
+        SpecWidget().set_spec_args(**self.spec_args)
+
         self.fscale = 0
         self.tscale = 0
         tscale = inputsdict.get('tscale', 0.001)
