@@ -50,6 +50,22 @@ def test_increment_index_high_dimension():
     current_index = increment(current_index, dimensions, data_shape)
     assert current_index == [1,0,0]
 
+def test_increment_double_boundary():
+    dimensions = (2,2,3,4)
+    data_shape = (4,)
+    current_index = [0,1,2,0]
+
+    current_index = increment(current_index, dimensions, data_shape)
+    assert current_index == [1,0,0,0]
+
+def test_increment_single_middle_dim():
+    dimensions = (2,1,4)
+    data_shape = (4,)
+    current_index = [0,0,0]
+
+    current_index = increment(current_index, dimensions, data_shape)
+    assert current_index == [1,0,0]
+
 @raises(DataIndexError)
 def test_bad_data_shape():
     dimensions = (2,3,4)

@@ -189,17 +189,17 @@ class AcquisitionData():
             self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
 
 def increment(index, dims, data_shape):
-    inc_amount = data_shape
+    data_shape = data_shape
 
     # check dimensions of data match structure
-    inc_to_match = inc_amount[1:]
+    inc_to_match = data_shape[1:]
     for dim_a, dim_b in zip(inc_to_match, dims[-1*(len(inc_to_match)):]):
         if dim_a != dim_b:
             raise DataIndexError()
 
     # now we can safely discard all but the highest dimension
-    inc_index = len(index) - len(inc_amount)
-    inc_amount = inc_amount[0]
+    inc_index = len(index) - len(data_shape)
+    inc_amount = data_shape[0]
     # make the index and increment amount dimensions match
     index[inc_index] += inc_amount
 
@@ -207,9 +207,8 @@ def increment(index, dims, data_shape):
     if index[inc_index] > dims[inc_index]:
         raise DataIndexError()
 
-    # increment dimension, if now full
-    if index[inc_index] == dims[inc_index]:
+    while inc_index > 0 and index[inc_index] == dims[inc_index]:
         index[inc_index-1] +=1
         index[inc_index:] = [0]*len(index[inc_index:])
-
+        inc_index -=1
     return index

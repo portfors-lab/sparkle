@@ -10,12 +10,17 @@ from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 from spikeylab.plotting.custom_plots import SpecWidget
 from matplotlib import mlab
+
 class BuilderFactory():
     name = 'Builder'
     def editor(self):
         return StimulusEditor
 
+    def init_stim(self, stim):
+        pass
+
 class StimulusEditor(AbstractEditorWidget):
+    name = 'Rawr!'
     def __init__(self, parent=None):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()

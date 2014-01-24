@@ -96,6 +96,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             else:
                 param[self.headers[index.column()]] = value
         elif role == QtCore.Qt.UserRole:
+            "replace all values"
             row = index.row()
             if row == -1:
                 row = self.rowCount() -1

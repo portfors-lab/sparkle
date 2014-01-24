@@ -7,7 +7,8 @@ from nose.tools import assert_in, assert_equal
 
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.stim.types.stimuli_classes import *
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
+from spikeylab.stim.tceditor import TCFactory
 
 import test.sample as sample
 
@@ -141,6 +142,34 @@ class TestAcquisitionModel():
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], acqmodel.stimulus.samplerate())
         assert_equal(test.shape[1], winsz*acq_rate)
+
+        hfile.close()
+
+    def test_tuning_curve(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+
+        tc = StimulusModel()
+        TCFactory().init_stim(tc)
+        nreps = tc.repCount()
+        ntraces = tc.traceCount()
+
+        acqmodel.protocol_model.insertNewTest(tc,0)
+
+        t = acqmodel.run_protocol(0.25)
+        t.join()
+
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_0']['test_0']
+        stim = json.loads(test.attrs['stim'])
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        assert_equal(test.shape,(ntraces,nreps,winsz*acq_rate))
 
         hfile.close()
 

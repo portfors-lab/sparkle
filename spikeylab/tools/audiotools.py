@@ -7,7 +7,7 @@ from matplotlib import pyplot
 
 from PyQt4.QtGui import QImage
 
-VERBOSE = True
+VERBOSE = False
 DBFACTOR = 20
 OUTPUT_MINIMUM = 0.01
 
@@ -61,22 +61,11 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
     # ability to generate tones that modifyable on-the-fly
     npts = dur * samplerate
     try:
-        #print("duration (s) :{}".format(dur))
-        # equation for db from voltage is db = 20 * log10(V2/V1))
-        # 10^(db/20)
-        # db = db + adjustdb
-        # if db < caldb:
-        #     atten = caldb - db
-        #     db = caldb
-        # else:
-        #     atten = 0
         atten = 0
 
         v_at_caldB = calv
         caldB = caldb
-        print 'this db', db
         amp = (10 ** ((db-caldB)/DBFACTOR)*v_at_caldB)
-        print 'amp voltage', amp
 
         if VERBOSE:
             print("current dB: {}, attenuation: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, atten, freq/1000, amp))

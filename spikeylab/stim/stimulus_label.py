@@ -8,6 +8,7 @@ import cPickle
 
 from spikeylab.main.drag_label import FactoryLabel
 from spikeylab.stim.stimulus_editor import BuilderFactory
+from spikeylab.stim.tceditor import TCFactory
 from spikeylab.main.trashcan import TrashWidget
 
 class StimulusLabelTable(QtGui.QWidget):
@@ -17,10 +18,12 @@ class StimulusLabelTable(QtGui.QWidget):
         layout = QtGui.QGridLayout()
 
         builder_lbl = FactoryLabel(BuilderFactory)
+        tc_lbl = FactoryLabel(TCFactory)
         self.trash_lbl = TrashWidget()
 
         layout.addWidget(builder_lbl, 0,0)
-        layout.addWidget(self.trash_lbl, 0,1)
+        layout.addWidget(tc_lbl,0,1)
+        layout.addWidget(self.trash_lbl, 0,2)
 
         self.setLayout(layout)
 

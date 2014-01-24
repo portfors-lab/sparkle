@@ -138,6 +138,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             factory = item
             # create new stimulus then!
             stim = StimulusModel()
+            factory.init_stim(stim)
             stim.setEditor(factory.editor())
             self.model().insertNewTest(stim, location)
         else:
@@ -173,9 +174,6 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             selected = self.model().data(index, QtCore.Qt.UserRole)
             self.stim_editor = selected.showEditor()
             self.stim_editor.show()
-
-            # self.edit(index)
-            print 'modalness', self.stim_editor.isModal()
 
 
 

@@ -5,9 +5,7 @@ from spikeylab.stim.auto_parameter_model import AutoParameterModel
 
 from PyQt4 import QtGui, QtCore
 
-# COLORTABLE=cm.get_cmap('jet')
-COLORTABLE = []
-for i in range(16): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
+
 
 class StimulusModel(QtCore.QAbstractItemModel):
     """
@@ -24,7 +22,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # 2D array of simulus components track number x component number
         self._segments = [[]]
         # add an empty place to place components into new track
-        self._auto_params = AutoParameterModel()
+        self._auto_params = AutoParameterModel(self)
 
         # reference for what voltage == what intensity
         self.calv = 0.1
@@ -87,6 +85,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # need to convert row, col to correct element, however still have heirarchy?
         if parent.isValid():
             print 'valid parent', parent.row(), parent.col()
+            print 'Still trying to use tree!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
             prow = self._segments.index(parent.internalPointer())
             return self.createIndex(prow, row, self._segments[prow][row])
         else:
@@ -149,7 +148,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 column = rowcontents.index(component)
                 return self.index(row, column)
 
-    def setData(self, index, value):
+    def setData(self, index, value, role=QtCore.Qt.UserRole):
         # item must already exist at provided index
         self._segments[index.row()][index.column()] = value
 
@@ -169,7 +168,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             print 'emitting samplerate change', value.samplerate()
             self.samplerateChanged.emit(value.samplerate())
 
-        self.dataChanged.emit(index, index)
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
@@ -213,7 +211,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         steps = []
         ntraces = 1
         for p in params:
-            steps.append(np.arange(p['start'], p['stop'], p['delta']))
+            steps.append(np.arange(p['start'], p['stop'], p['step']))
             ntraces = ntraces*len(steps[-1])
 
         varylist = [[None for x in range(len(params))] for y in range(ntraces)]
@@ -300,6 +298,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 info['stim_type'] = component.name
                 info['start_s'] = start_time
                 start_time += info['duration']
+                # must convert any numpy types to python types to be json serializable
+                for key, value in info.items():
+                    if type(value).__module__ == 'numpy':
+                        info[key] = np.asscalar(value)
                 doc_list.append(info)
 
         return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
@@ -307,7 +309,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
 
     def stimType(self):
-        return 'Fix me'
+        return self.editor.name
 
     def setEditor(self, editor):
         self.editor = editor

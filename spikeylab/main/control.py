@@ -66,7 +66,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
-        self.acqmodel.signals.group_finished.connect(self.group_done)
+        self.acqmodel.signals.group_finished.connect(self.on_stop)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
         
         for stim in self.explore_stimuli:
@@ -91,7 +91,6 @@ class MainWindow(ControlWindow):
 
     def on_start(self):
         # set plot axis to appropriate limits
-        print 'on start'
         # first time set up data file
         if self.acqmodel.datafile is None:
             self.acqmodel.set_save_params(self.savefolder, self.savename)
@@ -100,14 +99,15 @@ class MainWindow(ControlWindow):
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         if not self.verify_inputs():
             return
-        aichan = str(self.ui.aichan_box.currentText())
+        self.ui.running_label.setText(u"RUNNING")
+        self.ui.running_label.setPalette(GREEN)
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.run_explore()
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
-            self.tuning_curve()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             # change plot to scrolling plot
             winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
+            aichan = str(self.ui.aichan_box.currentText())
+
             self.scrollplot.set_windowsize(winsz)
             self.scrollplot.set_sr(acq_rate)
             self.ui.plot_dock.setWidget(self.scrollplot)
@@ -119,7 +119,6 @@ class MainWindow(ControlWindow):
             raise Exception("unrecognized tab selection")
 
     def on_update(self):
-        print 'on_update'
         aochan = self.ui.aochan_box.currentText()
         aichan = self.ui.aichan_box.currentText()
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
@@ -156,18 +155,14 @@ class MainWindow(ControlWindow):
     def on_stop(self):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
             self.acqmodel.stop_chart()
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
-            self.acqmodel.halt()
-            if isinstance(self.sender(), QtGui.QPushButton):
-                self.acqmodel.closedata()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.halt()
 
         self.current_operation = None
-        self.ui.start_btn.setEnabled(True)
         self.live_lock.unlock()
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
+        self.ui.start_btn.setEnabled(True)
         self.ui.start_btn.setText('Start')
         self.ui.start_btn.clicked.disconnect()
         self.ui.start_btn.clicked.connect(self.on_start)
@@ -209,87 +204,6 @@ class MainWindow(ControlWindow):
         self.on_update()
 
         self.acqmodel.run_protocol(interval)
-
-    def group_done(self):
-        self.ui.start_btn.setEnabled(True)
-
-    def tuning_curve(self):
-        print "run curve"
-        if self.live_lock.tryLock():
-            pass
-        else:
-            print u"Operation already in progress"
-            return
-
-        # will need to replace this with user defined filepath
-        if self.apply_calibration:
-            self.acqmodel.set_calibration(self.calfname)
-        else:
-            self.acqmodel.set_calibration(None)
-
-        self.ui.start_btn.setEnabled(False)
-
-        try:
-            #scale_factor = 1000
-            aochan = self.ui.aochan_box.currentText()
-            aichan = self.ui.aichan_box.currentText()
-            f_start = self.ui.freq_start_spnbx.value()*self.fscale
-            f_stop = self.ui.freq_stop_spnbx.value()*self.fscale
-            f_step = self.ui.freq_step_spnbx.value()*self.fscale
-            db_start = self.ui.db_start_spnbx.value()
-            db_stop = self.ui.db_stop_spnbx.value()
-            db_step = self.ui.db_step_spnbx.value()
-            dur = self.ui.dur_spnbx_2.value()*self.tscale
-            rft = self.ui.risefall_spnbx_2.value()*self.tscale
-            reprate = self.ui.reprate_spnbx.value()
-            sr = self.ui.aosr_spnbx.value()*self.fscale
-            aisr = self.ui.aisr_spnbx.value()*self.fscale
-            nreps = self.ui.nreps_spnbx.value()
-
-            if f_start < f_stop:
-                freqs = range(f_start, f_stop+1, f_step)
-            else:
-                freqs = range(f_start, f_stop-1, -f_step)
-            if db_start < db_stop:
-                intensities = range(db_start, db_stop+1, db_step)
-            else:
-                intensities = range(db_start, db_stop-1, -db_step)
-
-            # calculate ms interval from reprate
-            interval = (1/reprate)*1000
-            self.sr = sr
-            self.interval = interval
-
-            # set up display
-            if self.display == None or not(self.display.active):
-                pass
-                # self.spawn_display()
-                #self.display.show()
-
-            if not os.path.isdir(self.savefolder):
-                os.makedirs(self.savefolder)
-
-            self.acqmodel.set_save_params(self.savefolder, self.savename)
-            self.acqmodel.setup_curve(dur=dur, sr=sr, rft=rft, 
-                                      nreps=nreps, freqs=freqs,
-                                      intensities=intensities,
-                                      aisr=aisr, aochan=aochan, 
-                                      aichan=aichan, interval=interval)
-            
-            self.ui.running_label.setText(u"RUNNING")
-            self.ui.running_label.setPalette(GREEN)
-
-            # save these lists for easier plotting later
-            self.freqs = freqs
-            self.intensities = intensities
-
-            self.acqmodel.run_curve()
-
-        except:
-            self.live_lock.unlock()
-            print u"handle curve set-up exception"
-            self.ui.start_btn.setEnabled(True)
-            raise
 
     def display_stim(self, stimdeets, times, signal, xfft, yfft):
         print "display stim"

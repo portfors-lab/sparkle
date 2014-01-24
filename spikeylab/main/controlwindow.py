@@ -152,8 +152,6 @@ class ControlWindow(QtGui.QMainWindow):
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 
-        print "INPUTS SAVED"
-
     def load_inputs(self, fname):
         inputsfname = os.path.join(systools.get_appdir(), fname)
         try:
@@ -201,4 +199,5 @@ class ControlWindow(QtGui.QMainWindow):
         settings = QtCore.QSettings("audiolab")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
+        print 'All user settings saved'
         # settings.setValue("psth_dock/state", self.ui.psth.saveGeometry())
