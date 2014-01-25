@@ -1,7 +1,3 @@
-import sip
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 2)
-
 import sys, os
 import scipy.io.wavfile as wv
 
@@ -96,7 +92,6 @@ class MainWindow(ControlWindow):
             self.acqmodel.set_save_params(self.savefolder, self.savename)
             self.acqmodel.create_data_file()
         self.ui.plot_dock.setWidget(self.ui.display)
-        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
         if not self.verify_inputs():
             return
         self.ui.running_label.setText(u"RUNNING")
@@ -104,17 +99,7 @@ class MainWindow(ControlWindow):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.run_explore()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
-            # change plot to scrolling plot
-            winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
-            aichan = str(self.ui.aichan_box.currentText())
-            aochan = str(self.ui.aochan_box.currentText())
-
-            self.scrollplot.set_windowsize(winsz)
-            self.scrollplot.set_sr(acq_rate)
-            self.ui.plot_dock.setWidget(self.scrollplot)
-
-            self.acqmodel.set_params(aochan=aochan, aichan=aichan)
-            self.start_chart(acq_rate)
+            self.run_chart()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
         else: 
@@ -153,9 +138,11 @@ class MainWindow(ControlWindow):
             self.ui.display.set_nreps(nreps)
             self.ui.display.update_fft(freq, spectrum)
             self.ui.display.update_signal(timevals, signal)
-
+        if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
+            return winsz, acq_rate
+            
     def on_stop(self):
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_chart' and self.current_operation != None:
+        if self.current_operation == 'chart':
             self.acqmodel.stop_chart()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.halt()
@@ -170,9 +157,15 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.clicked.connect(self.on_start)
 
 
-    def start_chart(self, samplerate):
+    def run_chart(self):
+        winsz, acq_rate = self.on_update()
+        # change plot to scrolling plot
+        self.scrollplot.set_windowsize(winsz)
+        self.scrollplot.set_sr(acq_rate)
+        self.ui.plot_dock.setWidget(self.scrollplot)
+
         self.current_operation = 'chart'
-        self.acqmodel.start_chart(samplerate)
+        self.acqmodel.start_chart()
 
     def update_chart(self, data):
         self.scrollplot.append_data(data)

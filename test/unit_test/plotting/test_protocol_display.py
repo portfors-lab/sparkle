@@ -9,7 +9,7 @@ from PyQt4.QtGui import QApplication
 import numpy as np
 
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay
-
+from test.sample import samplewav
 
 PAUSE = 3
 
@@ -28,14 +28,7 @@ class TestProtocolDisplay():
 
         display.set_nreps(5)
 
-        # generate dummy 2D data
-        xy_range = (-200, 200)
-        x = np.linspace(xy_range[0], xy_range[1], 100)
-        y = np.linspace(xy_range[0], xy_range[1], 100)
-        X,Y = np.meshgrid(x, y)
-        Z = np.sin(X)*np.arctan2(Y,X)
-
-        display.update_spec(Z, xaxis=x, yaxis=y)
+        display.update_spec(samplewav())
 
         data = self.data_func(3)
         nbins = 50

@@ -4,7 +4,6 @@ from spikeylab.plotting.custom_plots import FFTWidget, \
 import sys, os, time
 import inspect
 import numpy as np
-import Image
 
 from PyQt4.QtGui import QApplication
 
@@ -100,17 +99,12 @@ class TestChacoPlots():
         fig.setWindowTitle(inspect.stack()[0][3])
         fig.show()
 
-        # generate dummy 2D data
-        xy_range = (-5, 5)
-        x = np.linspace(xy_range[0], xy_range[1] ,100)
-        y = np.linspace(xy_range[0], xy_range[1] ,100)
-        X,Y = np.meshgrid(x, y)
-        Z = np.sin(X)*np.arctan2(Y,X)
-
-        fig.update_data(Z)
-        QApplication.processEvents()
-        time.sleep(PAUSE)
-
+        for i in range(1,5):
+            y = self.data_func(i)
+            fig.update_data(y, 32)
+            QApplication.processEvents()
+            time.sleep(PAUSE)
+            
         fig.close()
 
     def test_psth_widget(self):

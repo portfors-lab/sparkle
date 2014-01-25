@@ -3,7 +3,6 @@ import h5py
 import time
 import json
 import os
-from operator import add
 
 from spikeylab.tools.exceptions import DataIndexError
 

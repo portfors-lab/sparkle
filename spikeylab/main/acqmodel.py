@@ -1,7 +1,3 @@
-import sip
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 2)
-
 import os, time
 import threading
 import numpy as np
@@ -23,9 +19,11 @@ class AcquisitionModel():
     """Holds state information for an experimental session"""
     def __init__(self, threshold=None):
         self.signals = {}
-        self.finite_player = None
         self.threshold = threshold
         self.signals = ProtocolSignals()
+        self.finite_player = FinitePlayer()
+        self.chart_player = ContinuousPlayer()
+        self.chart_player.set_read_function(self.emit_ncollected)
 
         self.datafile = None
         self.savefolder = None
@@ -87,13 +85,12 @@ class AcquisitionModel():
         self.savename = savename
 
     def set_params(self, **kwargs):
-        if self.finite_player is None:
-            self.finite_player = FinitePlayer()
 
         if 'acqtime' in kwargs:
             self.finite_player.set_aidur(kwargs['acqtime'])
         if 'aisr' in kwargs:
             self.finite_player.set_aisr(kwargs['aisr'])
+            self.chart_player.set_aisr(kwargs['aisr'])
         if 'aochan' in kwargs:
             self.aochan = kwargs['aochan']
         if 'aichan' in kwargs:
@@ -314,15 +311,13 @@ class AcquisitionModel():
         if self.datafile is not None:
             self.datafile.close()
 
-    def start_chart(self, samplerate):
+    def start_chart(self):
         """Begin on-going chart style acqusition"""
         self.current_dataset_name = self.chart_name
         self.datafile.init_data(self.current_dataset_name, mode='continuous')
         self.chart_name = increment_title(self.chart_name)
-
-        self.chart_player = ContinuousPlayer()
-        self.chart_player.set_read_function(self.emit_ncollected)
-        self.chart_player.start(self.aichan, samplerate)
+        
+        self.chart_player.start(self.aichan)
 
     def stop_chart(self):
         self.chart_player.stop()

@@ -1,5 +1,5 @@
 import numpy as np
-import os
+import os, glob
 import json
 
 import h5py
@@ -78,6 +78,13 @@ class TestAcqusitionData():
     """
     Test creating, putting and getting to acquisition data structure
     """
+    def tearDown(self):
+        # delete all data files in temp folder -- this will also clear out past
+        # test runs that produced errors and did not delete their files
+        files = glob.glob(tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
+        for f in files:
+            os.remove(f)
+
     def test_finite_dataset_append(self):
         """
         Test appending to the data structure when trace data has single
@@ -225,6 +232,7 @@ class TestAcqusitionData():
         npoints = 10
 
         fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        print 'fname', fname
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', (npoints,), mode='finite')
 

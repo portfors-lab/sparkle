@@ -185,9 +185,8 @@ class TestAcquisitionModel():
         acq_rate = 100000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
         acqmodel.set_params(savechart=True)
-        acqmodel.start_chart(acq_rate)
+        acqmodel.start_chart()
         self.done = False
-        # t = threading.Thread(target=self.dochart)
         self.timer = threading.Timer(1.0, self.stopchart, args=(acqmodel, fname))
         self.timer.start()
 
