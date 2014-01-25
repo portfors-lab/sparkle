@@ -10,6 +10,8 @@ from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.stim.tceditor import TCFactory
+from PyQt4.QtGui import QApplication
+from PyQt4.QtCore import QThread, QTimer
 
 import test.sample as sample
 
@@ -17,8 +19,12 @@ class TestAcquisitionModel():
 
     def setUp(self):
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
+        self.done = True
 
     def tearDown(self):
+        # bit of a hack to wait for chart acquisition to finish
+        while not self.done:
+            time.sleep(1)
         # delete all data files in temp folder -- this will also clear out past
         # test runs that produced errors and did not delete their files
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
@@ -175,39 +181,29 @@ class TestAcquisitionModel():
         hfile.close()
 
     def test_chart_no_stim(self):
-        q = Queue.Queue()
-        t = threading.Thread(target=self.dochart, args=(q,))
-        
-        t.start()
-        time.sleep(1)
+        winsz = 1.0 # this is actually ignored by acqmodel in this case
+        acq_rate = 100000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        acqmodel.set_params(savechart=True)
+        acqmodel.start_chart(acq_rate)
+        self.done = False
+        # t = threading.Thread(target=self.dochart)
+        self.timer = threading.Timer(1.0, self.stopchart, args=(acqmodel, fname))
+        self.timer.start()
 
-        acqmodel = q.get()
-        fname = q.get()
-
+    def stopchart(self, acqmodel, fname):
         acqmodel.stop_chart()
-
         acqmodel.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['chart_0']
         stim = json.loads(test.attrs['stim'])
-        print 'test size', test.size, test.shape
         assert stim == []
         assert test.size > 1
 
         hfile.close()
-        print 'assertion done and file closed'
-
-    def dochart(self, q):
-        winsz = 1.0 # this is actuall ignored by acqmodel in this case
-        acq_rate = 100000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
-        acqmodel.set_params(savechart=True)
-        acqmodel.start_chart(acq_rate)
-
-        q.put(acqmodel)
-        q.put(fname)
+        self.done = True
 
     def create_acqmodel(self, winsz, acq_rate):
         acqmodel = AcquisitionModel()

@@ -321,7 +321,7 @@ class AcquisitionModel():
         self.chart_name = increment_title(self.chart_name)
 
         self.chart_player = ContinuousPlayer()
-        self.chart_player.signals.ncollected.connect(self.emit_ncollected)
+        self.chart_player.set_read_function(self.emit_ncollected)
         self.chart_player.start(self.aichan, samplerate)
 
     def stop_chart(self):
@@ -332,5 +332,4 @@ class AcquisitionModel():
         # relay emit signal
         self.signals.ncollected.emit(data)
         if self.saveall:
-            print 'appending to chart data'
             self.datafile.append(self.current_dataset_name, data)

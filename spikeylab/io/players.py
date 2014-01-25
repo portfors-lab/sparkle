@@ -215,19 +215,22 @@ class ContinuousPlayer(PlayerBase):
     def __init__(self, dbv=(100,0.1)):
         PlayerBase.__init__(self, dbv)
         self.signals = ProtocolSignals()
+        self.on_read = lambda x: x # placeholder
 
     def start(self, aichan, samplerate, update_hz=10):
         """Begins a continuous analog generation, emitting an ncollected 
         signal at a rate of 10Hz"""
         npts = int(samplerate/update_hz) #update display at 10Hz rate
-        print 'inputs', aichan, samplerate, npts
         self.ait = AITask(aichan, samplerate, npts*5)
         self.ait.register_callback(self._read_continuous, npts)
         self.ait.start()
 
+    def set_read_function(self, fun):
+        self.on_read = fun
+
     def _read_continuous(self, task):
         inbuffer = task.read()
-        self.signals.ncollected.emit(inbuffer)
+        self.on_read(inbuffer)
 
     def stop(self):
         self.ait.stop()
