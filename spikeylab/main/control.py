@@ -208,7 +208,7 @@ class MainWindow(ControlWindow):
 
     def display_raster(self, bins, repnum):
         # convert to times for raster
-        binsz = float(self.ui.binsz_lnedt.text())*self.tscale
+        binsz = float(self.ui.binsz_spnbx.value())*self.tscale
         bin_times = (np.array(bins)*binsz)+(binsz/2)
         self.ui.display.add_raster_points(bin_times, repnum)
         self.ui.psth.append_data(bins, repnum)

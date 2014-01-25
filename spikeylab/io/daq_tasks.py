@@ -109,6 +109,8 @@ class AOTaskFinite(Task):
         w = c_int32()
         self.WriteAnalogF64(self.npoints, 0, 10.0, DAQmx_Val_GroupByChannel,
                             output, w, None);
+    def wait(self):
+        self.WaitUntilTaskDone(10.0)
     def stop(self):
         # attempts to stop task after already clear throw error
         try:

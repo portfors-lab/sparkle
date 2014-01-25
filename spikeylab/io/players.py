@@ -6,9 +6,7 @@ import re
 import datetime
 import win32com.client
 from multiprocessing import Process
-# from spikeylab.data.datatypes import CurveObject
 
-# from spikeylab.io.fileio import mightysave
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
 from spikeylab.config.info import caldata_filename, calfreq_filename
 
@@ -71,6 +69,30 @@ class PlayerBase():
 
     def stop(self):
         raise NotImplementedError
+
+    def reset_generation(self, trigger):
+        self.tone_lock.acquire()
+
+        npts =  self.stim.size
+        try:
+            self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=trigger)
+            self.aotask.write(self.stim)
+            try:
+                self.attenuator.SetAtten(self.atten)
+            except:
+                print "ERROR: attenuation not set!"
+                # raise
+
+            self.ngenerated +=1
+
+            if SAVE_OUTPUT:
+                self.played_tones.append(self.stim[:])
+        except:
+            print u'ERROR! TERMINATE!'
+            self.tone_lock.release()
+            raise
+
+        self.tone_lock.release()
 
     def set_calibration(self, db_boost_array, frequencies):
         # use supplied array of intensity adjustment to adjust tone output
@@ -172,33 +194,17 @@ class FinitePlayer(PlayerBase):
     def reset(self):
         """Rearms the gen/acq task, to the same channels as before"""
 
-        self.tone_lock.acquire()
-
-        npts =  self.stim.size
         response_npts = int(self.aitime*self.aisr)
         try:
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
-            self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=u"ai/StartTrigger")
-            self.aotask.write(self.stim)
-            try:
-                self.attenuator.SetAtten(self.atten)
-            except:
-                print "ERROR: attenuation not set!"
-                # raise
-
-            self.ngenerated +=1
-
-            if SAVE_OUTPUT:
-                self.played_tones.append(self.stim[:])
+            self.reset_generation(u"ai/StartTrigger")
         except:
             print u'ERROR! TERMINATE!'
             self.daq_lock.release()
-            self.tone_lock.release()
-            self.stop
+            self.stop()
             raise
 
         self.daq_lock.release()
-        self.tone_lock.release()
 
     def stop(self):
         try:
@@ -219,10 +225,13 @@ class ContinuousPlayer(PlayerBase):
     def start(self, aichan, update_hz=10):
         """Begins a continuous analog generation, emitting an ncollected 
         signal at a rate of 10Hz"""
+        self.daq_lock.acquire()
+
+        self.ngenerated = 0 # number of stimuli presented during chart run
         npts = int(self.aisr/update_hz) #update display at 10Hz rate
-        self.ait = AITask(aichan, self.aisr, npts*5)
-        self.ait.register_callback(self._read_continuous, npts)
-        self.ait.start()
+        self.aitask = AITask(aichan, self.aisr, npts*5)
+        self.aitask.register_callback(self._read_continuous, npts)
+        self.aitask.start()
 
     def set_read_function(self, fun):
         self.on_read = fun
@@ -231,5 +240,31 @@ class ContinuousPlayer(PlayerBase):
         inbuffer = task.read()
         self.on_read(inbuffer)
 
+    def generate(self):
+        self.aotask.StartTask()
+        self.aotask.wait() # don't return until generation finished
+        self.aotask.stop()
+        self.aotask = None
+
+    def reset(self):
+        try:
+            self.reset_generation(u"")
+        except:
+            print u'ERROR! GENERATION FAILED!'
+            # self.stop()
+            raise
+
+    def set_aochan(self, aochan):
+        self.aochan = aochan
+
     def stop(self):
-        self.ait.stop()
+        if self.aotask is not None:
+            self.aotask.stop()
+        self.aitask.stop()
+        self.daq_lock.release()
+        self.aitask = None
+        self.aotask = None
+
+    def generation_count(self):
+        #not safe
+        return self.ngenerated

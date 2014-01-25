@@ -70,7 +70,6 @@ def test_sync_continuous():
     ait.stop()
     print('no. data points acquired: ', len(glblist))
 
-
     assert len(glblist) == acqtime*sr
 
 def stashacq(task):
