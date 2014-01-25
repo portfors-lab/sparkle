@@ -237,3 +237,55 @@ class TestAcqusitionData():
         stim = json.loads(test.attrs['stim'])
         assert_equal(stim[0]['duration'], 0.1)
         hfile.close()
+
+    def test_continuous(self):
+        nsets = 32
+        npoints = 10000
+        fakedata = np.ones((npoints,))
+
+        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        acq_data = AcquisitionData(fname)
+        acq_data.init_data('fake', mode='continuous')
+        for iset in range(nsets):
+            acq_data.append('fake', fakedata*iset)
+
+        acq_data.consolidate('fake')
+
+        assert acq_data.get('fake').size == nsets*npoints
+        acq_data.close()
+
+        hfile = h5py.File(fname)
+        test = hfile['fake']
+        stim = json.loads(test.attrs['stim'])
+        assert hfile['fake'].size == nsets*npoints
+        assert hfile['fake'][0] == 0
+        assert hfile['fake'][-1] == 31
+        assert stim == []
+        hfile.close()
+
+    def test_continuous_with_stimattr(self):
+        nsets = 32
+        npoints = 10000
+        fakedata = np.ones((npoints,))
+        attrs = {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_time': 4.1}
+
+        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        acq_data = AcquisitionData(fname)
+        acq_data.init_data('fake', mode='continuous')
+        for iset in range(nsets):
+            acq_data.append('fake', fakedata*iset)
+            acq_data.append_trace_info('fake', attrs)
+
+        acq_data.consolidate('fake')
+
+        assert acq_data.get('fake').size == nsets*npoints
+        acq_data.close()
+
+        hfile = h5py.File(fname)
+        test = hfile['fake']
+        stim = json.loads(test.attrs['stim'])
+        assert hfile['fake'].size == nsets*npoints
+        assert hfile['fake'][0] == 0
+        assert hfile['fake'][-1] == 31
+        assert len(stim) == nsets
+        hfile.close()

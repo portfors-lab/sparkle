@@ -1,6 +1,7 @@
 import sys, os, glob
 import json
 import time
+import threading, Queue
 
 import h5py
 from nose.tools import assert_in, assert_equal
@@ -172,6 +173,41 @@ class TestAcquisitionModel():
         assert_equal(test.shape,(ntraces,nreps,winsz*acq_rate))
 
         hfile.close()
+
+    def test_chart_no_stim(self):
+        q = Queue.Queue()
+        t = threading.Thread(target=self.dochart, args=(q,))
+        
+        t.start()
+        time.sleep(1)
+
+        acqmodel = q.get()
+        fname = q.get()
+
+        acqmodel.stop_chart()
+
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['chart_0']
+        stim = json.loads(test.attrs['stim'])
+        print 'test size', test.size, test.shape
+        assert stim == []
+        assert test.size > 1
+
+        hfile.close()
+        print 'assertion done and file closed'
+
+    def dochart(self, q):
+        winsz = 1.0 # this is actuall ignored by acqmodel in this case
+        acq_rate = 100000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        acqmodel.set_params(savechart=True)
+        acqmodel.start_chart(acq_rate)
+
+        q.put(acqmodel)
+        q.put(fname)
 
     def create_acqmodel(self, winsz, acq_rate):
         acqmodel = AcquisitionModel()

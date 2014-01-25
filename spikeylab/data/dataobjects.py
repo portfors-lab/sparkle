@@ -69,20 +69,24 @@ class AcquisitionData():
             self.datasets[setname] = self.groups[key].create_dataset(setname, dims)
             self.meta[setname] = {'cursor':[0]*len(dims)}
             setpath = '/'.join([key, setname])
+            self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
+                              'mode':mode, 'stim': '[ '})
         elif mode == 'open':
             if len(dims) > 1:
                 print "open acquisition only for single dimension data"
                 return
             self.datasets[key] = self.hdf5.create_dataset(key, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
-            self.meta[key] = {'mode':mode, 'datalen':dims[0], 'cursor':0}
+            self.meta[key] = {'mode':mode, 'cursor':0}
             setpath = key
+            self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
+                              'mode':mode, 'stim': '[ '})
         elif mode == 'continuous':
             self.datasets[key+'_set0'] = self.hdf5.create_dataset(key+'_set0', (self.chunk_size,))
-            self.meta[key] = {'mode':mode, 'set_counter':0, 'cursor':0}
+            self.datasets[key+'_set0'].attrs['stim'] = ''
+            self.meta[key] = {'mode':mode, 'set_counter':0, 'cursor':0, 'start': time.strftime('%H:%M:%S')}
         else:
             raise Exception("Unknown acquisition mode")
-        self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 'mode':mode,
-                                'stim': '['})
+        
 
     def append(self, key, data):
         """
@@ -109,7 +113,28 @@ class AcquisitionData():
                 self.datasets[key].resize(current_index+self.open_set_size, axis=0)
             self.meta[key]['cursor'] = current_index
         elif mode =='continuous':
-            print "TODO: add continuous append"
+            # assumes size of data < chunk size
+            setnum = self.meta[key]['set_counter']
+            current_index = self.meta[key]['cursor']
+            end_index = current_index + data.size
+            if end_index < self.chunk_size:
+                self.datasets[key+'_set'+str(setnum)][current_index:end_index] = data
+            else:
+                nleft = self.chunk_size - current_index
+                if nleft > 0:
+                # fill the rest of this data set
+                    self.datasets[key+'_set'+str(setnum)][current_index:] = data[:nleft]
+
+                print 'starting new set'
+                setnum +=1
+                current_index = 0
+                end_index = data[nleft:].size
+                self.datasets[key+'_set'+str(setnum)] = self.hdf5.create_dataset(key+'_set'+str(setnum), (self.chunk_size,))
+                self.datasets[key+'_set'+str(setnum)][current_index:end_index] = data[nleft:]
+                self.datasets[key+'_set'+str(setnum)].attrs['stim'] = ''
+
+            self.meta[key]['set_counter'] = setnum
+            self.meta[key]['cursor'] = end_index
 
     def insert(self, key, index, data):
         """
@@ -149,23 +174,26 @@ class AcquisitionData():
         This must be performed before calling get function for key in these 
         modes.
         """
-        if self.meta[key]['mode'] not in ['open', 'continuous']:
+        if self.meta[key]['mode'] not in ['continuous']:
             print "consolidation not supported for mode: ", self.meta[key]['mode']
             return
         print 'metadata for ', key, self.meta[key]
         setnum = self.meta[key]['set_counter']
         current_index = self.meta[key]['cursor']
-        data_length = self.meta[key]['datalen']
-        total_traces = setnum*self.open_set_size + current_index
-        self.datasets[key] = self.hdf5.create_dataset(key, 
-                                (total_traces, data_length))
+        total_samples = (self.chunk_size * setnum) + current_index
+        self.datasets[key] = self.hdf5.create_dataset(key, (total_samples,))
+        self.datasets[key].attrs['stim'] = '[ ' # space in case empty, closing replaces the space and not the [
+        self.datasets[key].attrs['start'] = self.meta[key]['start']
+        self.datasets[key].attrs['mode'] = 'continuous'
 
         for iset in range(setnum):
-            self.datasets[key][iset*self.open_set_size:(iset+1)*self.open_set_size,:] = self.datasets[key+'_set'+str(iset)][:]
-
+            self.datasets[key][iset*self.chunk_size:(iset+1)*self.chunk_size] = self.datasets[key+'_set'+str(iset)][:]
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(iset)].attrs['stim']
+        
         # last set may not be complete
         if current_index != 0:
-            self.datasets[key][setnum*self.open_set_size:(setnum*self.open_set_size)+current_index,:] = self.datasets[key+'_set'+str(setnum)][:current_index]
+            self.datasets[key][setnum*self.chunk_size:(setnum*self.chunk_size)+current_index] = self.datasets[key+'_set'+str(setnum)][:current_index]
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(setnum)].attrs['stim']
 
         # now go ahead and delete fractional sets.
         for iset in range(setnum+1):
@@ -187,6 +215,9 @@ class AcquisitionData():
         if mode == 'finite':
             setname = 'test_'+str(self.test_count)
             self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
+        elif mode =='continuous':
+            setnum = self.meta[key]['set_counter']
+            self.datasets[key+'_set'+str(setnum)].attrs['stim'] = self.datasets[key+'_set'+str(setnum)].attrs['stim'] + stim_data + ','
 
 def increment(index, dims, data_shape):
     data_shape = data_shape

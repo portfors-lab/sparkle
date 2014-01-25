@@ -137,7 +137,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['savename'] = self.savename
         savedict['saveformat'] = self.saveformat
         savedict['ex_nreps'] = self.ui.ex_nreps_spnbx.value()
-        savedict['ex_reprate'] = self.ui.ex_reprate_spnbx.value()
+        savedict['reprate'] = self.ui.reprate_spnbx.value()
         savedict['aosr'] = self.ui.aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
@@ -174,7 +174,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.savename = inputsdict.get('savename', "untitled")
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.ex_nreps_spnbx.setValue(inputsdict.get('ex_nreps', 5))
-        self.ui.ex_reprate_spnbx.setValue(inputsdict.get('ex_reprate', 1))
+        self.ui.reprate_spnbx.setValue(inputsdict.get('reprate', 1))
         self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':'jet'})

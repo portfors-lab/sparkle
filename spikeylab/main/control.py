@@ -107,12 +107,14 @@ class MainWindow(ControlWindow):
             # change plot to scrolling plot
             winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
             aichan = str(self.ui.aichan_box.currentText())
+            aochan = str(self.ui.aochan_box.currentText())
 
             self.scrollplot.set_windowsize(winsz)
             self.scrollplot.set_sr(acq_rate)
             self.ui.plot_dock.setWidget(self.scrollplot)
 
-            self.start_chart(aichan, acq_rate)
+            self.acqmodel.set_params(aochan=aochan, aichan=aichan)
+            self.start_chart(acq_rate)
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
         else: 
@@ -153,7 +155,7 @@ class MainWindow(ControlWindow):
             self.ui.display.update_signal(timevals, signal)
 
     def on_stop(self):
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
+        if self.ui.tab_group.currentWidget().objectName() == 'tab_chart' and self.current_operation != None:
             self.acqmodel.stop_chart()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.halt()
@@ -168,8 +170,9 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.clicked.connect(self.on_start)
 
 
-    def start_chart(self, aichan, samplerate):
-        self.acqmodel.start_chart(aichan, samplerate)
+    def start_chart(self, samplerate):
+        self.current_operation = 'chart'
+        self.acqmodel.start_chart(samplerate)
 
     def update_chart(self, data):
         self.scrollplot.append_data(data)
@@ -183,12 +186,9 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.clicked.connect(self.on_update)
         # make this an enum!!!!
         self.current_operation = 'explore'
-        reprate = self.ui.ex_reprate_spnbx.value()
+        reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
 
-        print 'interval', interval
-        # set up first stimulus, lets start with vocalizations for now
-        
         self.on_update()            
         self.acqmodel.run_explore(interval)
 
@@ -197,8 +197,7 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.setEnabled(False)
         self.current_operation = 'protocol'
 
-        print 'FIXME: reprate drawing from explore'
-        reprate = self.ui.ex_reprate_spnbx.value()
+        reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
         
         self.on_update()

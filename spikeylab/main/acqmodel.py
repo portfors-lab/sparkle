@@ -30,8 +30,10 @@ class AcquisitionModel():
         self.datafile = None
         self.savefolder = None
         self.savename = None
+        self.saveall = True
         self.set_name = 'explore_0'
         self.group_name = 'segment_0'
+        self.chart_name = 'chart_0'
 
         self.protocol_model = ProtocolTabelModel()
         # stimulus for explore function
@@ -102,6 +104,8 @@ class AcquisitionModel():
             self.nreps = kwargs['nreps']
         if 'binsz' in kwargs:
             self.binsz = kwargs['binsz']
+        if 'savechart' in kwargs:
+            self.saveall = kwargs['savechart']
 
     def clear_explore_stimulus(self):
         self.stimulus.clearComponents()
@@ -130,11 +134,11 @@ class AcquisitionModel():
         self._halt = False
         
         # TODO: some error checking to make sure valid paramenters are set
-
-        # initize data set
-        self.current_dataset_name = self.set_name
-        self.datafile.init_data(self.current_dataset_name, self.aitimes.shape, mode='open')
-        self.set_name = increment_title(self.set_name)
+        if SAVE_EXPLORE:
+            # initize data set
+            self.current_dataset_name = self.set_name
+            self.datafile.init_data(self.current_dataset_name, self.aitimes.shape, mode='open')
+            self.set_name = increment_title(self.set_name)
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
@@ -309,17 +313,24 @@ class AcquisitionModel():
     def close_data(self):
         if self.datafile is not None:
             self.datafile.close()
-        # self.tonecurve.closedata()
 
-    def start_chart(self, aichan, samplerate):
+    def start_chart(self, samplerate):
         """Begin on-going chart style acqusition"""
+        self.current_dataset_name = self.chart_name
+        self.datafile.init_data(self.current_dataset_name, mode='continuous')
+        self.chart_name = increment_title(self.chart_name)
+
         self.chart_player = ContinuousPlayer()
         self.chart_player.signals.ncollected.connect(self.emit_ncollected)
-        self.chart_player.start(aichan,samplerate)
+        self.chart_player.start(self.aichan, samplerate)
 
     def stop_chart(self):
         self.chart_player.stop()
+        self.datafile.consolidate(self.current_dataset_name)
 
     def emit_ncollected(self, data):
         # relay emit signal
         self.signals.ncollected.emit(data)
+        if self.saveall:
+            print 'appending to chart data'
+            self.datafile.append(self.current_dataset_name, data)

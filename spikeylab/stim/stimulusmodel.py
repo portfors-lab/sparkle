@@ -6,7 +6,6 @@ from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from PyQt4 import QtGui, QtCore
 
 
-
 class StimulusModel(QtCore.QAbstractItemModel):
     """
     Model to represent any stimulus the system will present. 

@@ -535,9 +535,8 @@ class ScrollingPlotter(HasTraits):
         plot.y_axis.title = 'voltage (mV)'
 
         plot.tools.append(PanTool(plot))
-        plot.tools.append(ZoomTool(plot))
+        plot.tools.append(ZoomTool(plot, axis='value'))
 
-        # self.plot = plot
         return plot
 
     def set_time_delta(self, delta):
