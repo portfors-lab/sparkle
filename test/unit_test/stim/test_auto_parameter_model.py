@@ -125,6 +125,22 @@ class TestAutoParameterModel():
         assert values[3]*multiplier == model.data(model.index(0,3), QtCore.Qt.EditRole)
         assert nsteps0 == model.data(model.index(0,4), QtCore.Qt.EditRole)
 
+
+    def test_update_stim_model_start_value(self):
+        component = PureTone()
+        model = self.create_model(component)
+
+        values = ['duration', 0, 100, 10]
+        for i, value in enumerate(values):
+            model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
+
+        # make sure it component is at orignal value
+        assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
+
+        model.setData(model.index(0,1), value, QtCore.Qt.EditRole)
+
+        assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
+
     def create_model(self, component):
         stim_model = StimulusModel()
         stim_model.insertComponent(component, (0,0))

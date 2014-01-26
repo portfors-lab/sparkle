@@ -36,6 +36,7 @@ class AbstractStimulusComponent(object):
         self._risefall = risefall    
 
     def set(self, param, value):
+        print 'setting attribute', '_'+param, value
         setattr(self, '_'+param, value)
 
     def paint(self, painter, rect, palette):

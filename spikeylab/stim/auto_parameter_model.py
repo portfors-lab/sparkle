@@ -93,6 +93,13 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 if multiplier is not None:
                     if self.checkLimits(value*multiplier, param):
                         param[self.headers[index.column()]] = value*multiplier
+                        if index.column() == 1: # start value, change component to match
+                            print 'setting start value of components'
+                            selection_model = self._selectionmap[param['paramid']]
+                            comps = selection_model.selectionComponents()
+                            for component in comps:
+                                print 'setting comp', value*multiplier
+                                component.set(param['parameter'], value*multiplier)
             else:
                 param[self.headers[index.column()]] = value
         elif role == QtCore.Qt.UserRole:
