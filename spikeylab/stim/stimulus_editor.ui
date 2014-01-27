@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1050</width>
+    <width>942</width>
     <height>634</height>
    </rect>
   </property>
@@ -46,8 +46,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>835</width>
-         <height>614</height>
+         <width>643</width>
+         <height>384</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -202,6 +202,9 @@
      </widget>
     </widget>
    </item>
+   <item>
+    <widget class="HidableParameterEditor" name="parametizer" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -220,25 +223,15 @@
    <header>spikeylab.stim.component_label</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>HidableParameterEditor</class>
+   <extends>QWidget</extends>
+   <header>spikeylab.stim.auto_parameters_editor</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>
-  <connection>
-   <sender>autoparam_btn</sender>
-   <signal>clicked()</signal>
-   <receiver>StimulusEditor</receiver>
-   <slot>doAutoparameters()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1031</x>
-     <y>503</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1047</x>
-     <y>557</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>nreps_spnbx</sender>
    <signal>valueChanged(int)</signal>

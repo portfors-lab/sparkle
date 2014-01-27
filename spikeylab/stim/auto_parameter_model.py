@@ -40,13 +40,21 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 # scale appropriately
                 multiplier = self.getDetail(index, 'multiplier')
                 if multiplier is not None:
-                    return item/multiplier
+                    # return integers for whole numbers, floats otherwise
+                    val = float(item)/multiplier
+                    if val - np.floor(val) > 0.0:
+                        return val
+                    else:
+                        return int(val)
             elif col == 4:
-                if param['start'] > param['stop'] and param['step'] > 0:
-                    step = -1*param['step']
+                if param['step'] > 0:
+                    if param['start'] > param['stop']:
+                        step = -1*param['step']
+                    else:
+                        step = param['step']
+                    item = len(np.arange(param['start'], param['stop'], step))
                 else:
-                    step = param['step']
-                item = len(np.arange(param['start'], param['stop'], step))
+                    item = 0
             return item
         elif role == QtCore.Qt.ToolTipRole:
             if 1 <= index.column() <= 3:
@@ -85,7 +93,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             param = self._parameters[index.row()]
             if index.column() == 0 :
                 param[self.headers[index.column()]] = value
-
+                # should I reset the start, stop and step values here?
+                # at least go through and multiply by new multiplier?
             elif 1 <= index.column() <= 3:
                 # check that start and stop values are within limits
                 # specified by component type
@@ -156,7 +165,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(parent, position, position + rows - 1)
         for i in range(rows):
             defaultparam = { 'start': 0,
-                             'step': 1,
+                             'step': 0,
                              'stop': 0,
                              'parameter': '',
                              'paramid' : self._paramid,

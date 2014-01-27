@@ -1,8 +1,8 @@
-import os
-
 from PyQt4 import QtGui
-from incrementer_form import Ui_IncrementInput
 from numpy import floor
+
+from incrementer_form import Ui_IncrementInput
+from spikeylab.resources.icons import arrowup, arrowdown
 
 class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     numtype = float
@@ -15,11 +15,10 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
                             border-top:1px inset lightgrey; \
                             border-right:1px inset lightgrey}\
                             ")
-        thisfolder = os.path.dirname(os.path.realpath(__file__))
-        self.up10.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowup.png')))
-        self.up1.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowup.png')))
-        self.down10.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowdown.png')))
-        self.down1.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowdown.png')))
+        self.up10.setIcon(arrowup())
+        self.up1.setIcon(arrowup())
+        self.down10.setIcon(arrowdown())
+        self.down1.setIcon(arrowdown())
 
     def increment1(self):
         self.incrementn(1)

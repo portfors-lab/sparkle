@@ -33,12 +33,8 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.aosr_spnbx.setValue(model.samplerate()/self.scales[1])
         self.ui.nreps_spnbx.setValue(model.repCount())
         model.samplerateChanged.connect(self.updateSamplerate)
-
-    def doAutoparameters(self):
-        self.ui.trackview.setMode(1)
-        parametizer = Parametizer(self.ui.trackview)
-        parametizer.show()
-        self.parametizer = parametizer
+        # parametizer grabs model from view
+        self.ui.parametizer.setStimulusView(self.ui.trackview)
 
     def setRepCount(self, count):
         print 'set rep count'

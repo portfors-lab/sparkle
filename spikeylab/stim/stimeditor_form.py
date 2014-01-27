@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Fri Jan 17 12:51:35 2014
+# Created: Mon Jan 27 11:57:57 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_StimulusEditor(object):
     def setupUi(self, StimulusEditor):
         StimulusEditor.setObjectName(_fromUtf8("StimulusEditor"))
-        StimulusEditor.resize(1050, 634)
+        StimulusEditor.resize(942, 634)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -47,7 +47,7 @@ class Ui_StimulusEditor(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 835, 614))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 384))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setMargin(0)
@@ -131,9 +131,11 @@ class Ui_StimulusEditor(object):
         self.ok_btn.setObjectName(_fromUtf8("ok_btn"))
         self.verticalLayout.addWidget(self.ok_btn)
         self.verticalLayout_2.addWidget(self.splitter)
+        self.parametizer = HidableParameterEditor(StimulusEditor)
+        self.parametizer.setObjectName(_fromUtf8("parametizer"))
+        self.verticalLayout_2.addWidget(self.parametizer)
 
         self.retranslateUi(StimulusEditor)
-        QtCore.QObject.connect(self.autoparam_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.doAutoparameters)
         QtCore.QObject.connect(self.nreps_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), StimulusEditor.setRepCount)
         QtCore.QObject.connect(self.aosr_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), StimulusEditor.setModelSamplerate)
         QtCore.QObject.connect(self.preview_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.preview)
@@ -150,5 +152,6 @@ class Ui_StimulusEditor(object):
         self.preview_btn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
         self.ok_btn.setText(_translate("StimulusEditor", "Ok", None))
 
+from spikeylab.stim.auto_parameters_editor import HidableParameterEditor
 from spikeylab.stim.stimulusview import StimulusView
 from spikeylab.stim.component_label import ComponentTemplateTable
