@@ -232,7 +232,7 @@ class AcquisitionModel():
         info = {'samplerate_ad': self.finite_player.aisr}
         self.datafile.set_metadata(self.current_dataset_name, info)
 
-        for test in stimuli:
+        for itest, test in enumerate(stimuli):
             traces = test.expandedStim()
             doc  = test.expandedDoc()
             nreps = test.repCount()
@@ -240,7 +240,7 @@ class AcquisitionModel():
             self.datafile.init_data(self.current_dataset_name, 
                                     dims=(len(traces), nreps, recording_length),
                                     mode='finite')
-            for trace, trace_doc in zip(traces, doc):
+            for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
                 spike_counts = []
                 spike_latencies = []
                 spike_rates = []
@@ -252,6 +252,10 @@ class AcquisitionModel():
 
                     response = self.finite_player.read()
                     self.signals.response_collected.emit(self.aitimes, response)
+                    if irep == 0:
+                        # do this after collection so plots match details
+                        self.signals.current_trace.emit(itest,itrace,trace_doc)
+                    self.signals.current_rep.emit(irep)
 
                     # process response; calculate spike times
                     spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)

@@ -62,6 +62,8 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
         self.acqmodel.signals.warning.connect(self.set_status_msg)
         self.acqmodel.signals.ncollected.connect(self.update_chart)
+        self.acqmodel.signals.current_trace.connect(self.report_progress)
+        self.acqmodel.signals.current_rep.connect(self.report_rep)
         self.acqmodel.signals.group_finished.connect(self.on_stop)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
 
@@ -208,6 +210,20 @@ class MainWindow(ControlWindow):
         bin_times = (np.array(bins)*binsz)+(binsz/2)
         self.ui.display.add_raster_points(bin_times, repnum)
         self.ui.psth.append_data(bins, repnum)
+
+    def report_progress(self, itest, itrace, stim_info):
+        self.ui.test_num.setText(str(itest))
+        self.ui.trace_num.setText(str(itrace))
+        stim_types = [comp['stim_type'] for comp in stim_info['components']]
+        print 'stim_types', stim_types
+        if len(set(stim_types)) == 1:
+            self.ui.trace_type.setText(stim_types[0])
+        else:
+            self.ui.trace_type.setText('who knows?')
+        self.ui.trace_info.setText(" A 500g jar of honey represents about ten million trips from the hive to flowers and back again.")
+
+    def report_rep(self, irep):
+        self.ui.rep_num.setText(str(irep))
 
     def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
         self.ui.display.clear_raster()
