@@ -64,10 +64,6 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.ncollected.connect(self.update_chart)
         self.acqmodel.signals.group_finished.connect(self.on_stop)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
-        
-        for stim in self.explore_stimuli:
-            self.ui.parameter_stack.addWidget(stim.showEditor())
-            self.ui.explore_stim_type_cmbbx.addItem(stim.name)
 
         self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
         

@@ -26,6 +26,13 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.plot_dock.setTitleBarWidget(MaximizableTitleBar(self.ui.plot_dock))
         self.load_inputs(inputs_filename)
         self.inputs_filename = inputs_filename
+
+        # hack so that original values use correct multiplications
+        # AbstractEditorWidget().
+        for stim in self.explore_stimuli:
+            self.ui.parameter_stack.addWidget(stim.showEditor())
+            self.ui.explore_stim_type_cmbbx.addItem(stim.name)
+
         try:
             settings = QtCore.QSettings("audiolab")
             self.restoreGeometry(settings.value("geometry"))
@@ -63,7 +70,7 @@ class ControlWindow(QtGui.QMainWindow):
         if tscale != self.tscale:
             self.tscale = tscale
             # bad!
-            AbstractEditorWidget().setTScale(self.tscale)
+            AbstractEditorWidget().setTScale(self.tscale, setup=setup)
             AbstractStimulusComponent().update_tscale(self.tscale)
 
             self.ui.display.set_tscale(self.tscale)
@@ -90,13 +97,12 @@ class ControlWindow(QtGui.QMainWindow):
 
         if fscale != self.fscale:
             self.fscale = fscale
-            AbstractEditorWidget().setFScale(self.fscale)
+            AbstractEditorWidget().setFScale(self.fscale, setup=setup)
             AbstractStimulusComponent().update_fscale(self.fscale)
 
             self.ui.display.set_fscale(self.fscale)
 
             if self.fscale == 1000:
-                print 'changing to khz'
                 for field in self.frequency_inputs:
                     field.setDecimals(3)
                     if not setup:
@@ -106,7 +112,6 @@ class ControlWindow(QtGui.QMainWindow):
                     lbl.setText(u'kHz')
 
             elif self.fscale == 1:
-                print 'changing to hz'
                 for field in self.frequency_inputs:
                     field.setMaximum(500000)
                     if not setup:
@@ -180,17 +185,20 @@ class ControlWindow(QtGui.QMainWindow):
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':'jet'})
         SpecWidget().set_spec_args(**self.spec_args)
 
-        self.fscale = 0
-        self.tscale = 0
         tscale = inputsdict.get('tscale', 0.001)
         fscale = inputsdict.get('fscale', 1000)
+
+        self.tscale = 0
+        self.fscale = 0
         self.update_unit_labels(tscale, fscale, setup=True)
 
         for stim in self.explore_stimuli:
             try:
                 stim.loadState(inputsdict[stim.name])
+
             except KeyError:
                 print 'Unable to load saved inputs for', stim.__class__
+
 
     def closeEvent(self, event):
         self.save_inputs(self.inputs_filename)

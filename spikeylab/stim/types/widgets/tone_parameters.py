@@ -10,9 +10,12 @@ class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
         self.setupUi(self)
         # include in class variable list of all unit labels
         self.funit_labels.append(self.funit_lbl)
+        self.funit_fields.append(self.freq_spnbx)
+        self.setFScale(self.scales[1], setup=True)
 
     def setComponent(self, component):
         self.common.setFields(component)
+        print 'current scales', self.scales[1]
         self.freq_spnbx.setValue(component.frequency()/self.scales[1])
         self._component = component
 

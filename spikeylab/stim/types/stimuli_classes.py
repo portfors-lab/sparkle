@@ -67,6 +67,7 @@ class PureTone(Tone):
     def loadState(self, state):
         super(PureTone,self).loadState(state)
         self._frequency = state['frequency']
+        print 'loaded freq', self._frequency
 
     def auto_details(self):
         details = super(PureTone, self).auto_details()

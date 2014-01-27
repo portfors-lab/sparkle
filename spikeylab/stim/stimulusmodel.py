@@ -163,9 +163,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
             if len(set(rates)) > 1:
                 raise Exception("Wav files with different sample rates in same stimulus")
-            self._samplerate = value.samplerate()
-            print 'emitting samplerate change', value.samplerate()
-            self.samplerateChanged.emit(value.samplerate())
+            if value.samplerate() is not None:
+                self._samplerate = value.samplerate()
+                print 'emitting samplerate change', value.samplerate()
+                self.samplerateChanged.emit(value.samplerate())
 
 
     def flags(self, index):
