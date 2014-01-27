@@ -98,7 +98,7 @@
       <widget class="IncrementInput" name="db_spnbx" native="true"/>
      </item>
      <item row="1" column="1">
-      <widget class="QDoubleSpinBox" name="dur_spnbx">
+      <widget class="SmartSpinBox" name="dur_spnbx">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -116,7 +116,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="risefall_spnbx">
+      <widget class="SmartSpinBox" name="risefall_spnbx">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -156,6 +156,11 @@
    <extends>QWidget</extends>
    <header>spikeylab.stim.incrementer</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SmartSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>spikeylab.stim.smart_spinbox</header>
   </customwidget>
  </customwidgets>
  <resources/>

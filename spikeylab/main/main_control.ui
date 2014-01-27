@@ -179,7 +179,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QDoubleSpinBox" name="aosr_spnbx">
+               <widget class="SmartSpinBox" name="aosr_spnbx">
                 <property name="font">
                  <font>
                   <pointsize>10</pointsize>
@@ -343,7 +343,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="aisr_spnbx">
+           <widget class="SmartSpinBox" name="aisr_spnbx">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -358,7 +358,7 @@
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QDoubleSpinBox" name="binsz_spnbx">
+           <widget class="SmartSpinBox" name="binsz_spnbx">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -373,7 +373,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="windowsz_spnbx">
+           <widget class="SmartSpinBox" name="windowsz_spnbx">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -737,6 +737,11 @@
    <extends>QWidget</extends>
    <header>spikeylab.stim.stimulus_label</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SmartSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>spikeylab.stim.smart_spinbox</header>
   </customwidget>
  </customwidgets>
  <resources/>

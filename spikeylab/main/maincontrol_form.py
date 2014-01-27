@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Sun Jan 26 17:42:35 2014
+# Created: Sun Jan 26 23:38:03 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -115,7 +115,7 @@ class Ui_ControlWindow(object):
         self.funit_lbl = QtGui.QLabel(self.tab_explore)
         self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
         self.gridLayout_7.addWidget(self.funit_lbl, 0, 2, 1, 1)
-        self.aosr_spnbx = QtGui.QDoubleSpinBox(self.tab_explore)
+        self.aosr_spnbx = SmartSpinBox(self.tab_explore)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.aosr_spnbx.setFont(font)
@@ -209,7 +209,7 @@ class Ui_ControlWindow(object):
         self.tunit_lbl_2 = QtGui.QLabel(self.centralwidget)
         self.tunit_lbl_2.setObjectName(_fromUtf8("tunit_lbl_2"))
         self.gridLayout.addWidget(self.tunit_lbl_2, 4, 2, 1, 1)
-        self.aisr_spnbx = QtGui.QDoubleSpinBox(self.centralwidget)
+        self.aisr_spnbx = SmartSpinBox(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.aisr_spnbx.setFont(font)
@@ -217,7 +217,7 @@ class Ui_ControlWindow(object):
         self.aisr_spnbx.setMaximum(500000.0)
         self.aisr_spnbx.setObjectName(_fromUtf8("aisr_spnbx"))
         self.gridLayout.addWidget(self.aisr_spnbx, 0, 1, 1, 1)
-        self.binsz_spnbx = QtGui.QDoubleSpinBox(self.centralwidget)
+        self.binsz_spnbx = SmartSpinBox(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.binsz_spnbx.setFont(font)
@@ -225,7 +225,7 @@ class Ui_ControlWindow(object):
         self.binsz_spnbx.setMaximum(3000.0)
         self.binsz_spnbx.setObjectName(_fromUtf8("binsz_spnbx"))
         self.gridLayout.addWidget(self.binsz_spnbx, 4, 1, 1, 1)
-        self.windowsz_spnbx = QtGui.QDoubleSpinBox(self.centralwidget)
+        self.windowsz_spnbx = SmartSpinBox(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.windowsz_spnbx.setFont(font)
@@ -455,8 +455,9 @@ class Ui_ControlWindow(object):
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
         self.actionSpectrogram_Parameters.setText(_translate("ControlWindow", "Spectrogram Parameters...", None))
 
-from spikeylab.plotting.custom_plots import PSTHWidget
-from spikeylab.main.protocol_model import ProtocolView
 from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
+from spikeylab.stim.smart_spinbox import SmartSpinBox
+from spikeylab.plotting.custom_plots import PSTHWidget
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay
+from spikeylab.main.protocol_model import ProtocolView
 from spikeylab.stim.stimulus_label import StimulusLabelTable

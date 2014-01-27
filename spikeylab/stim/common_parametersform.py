@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
-# Created: Sun Jan 26 21:19:19 2014
+# Created: Sun Jan 26 23:38:54 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -77,7 +77,7 @@ class Ui_ParameterWidget(object):
         self.db_spnbx = IncrementInput(ParameterWidget)
         self.db_spnbx.setObjectName(_fromUtf8("db_spnbx"))
         self.gridLayout_5.addWidget(self.db_spnbx, 0, 1, 1, 1)
-        self.dur_spnbx = QtGui.QDoubleSpinBox(ParameterWidget)
+        self.dur_spnbx = SmartSpinBox(ParameterWidget)
         font = QtGui.QFont()
         font.setPointSize(14)
         self.dur_spnbx.setFont(font)
@@ -86,7 +86,7 @@ class Ui_ParameterWidget(object):
         self.dur_spnbx.setMaximum(1000.0)
         self.dur_spnbx.setObjectName(_fromUtf8("dur_spnbx"))
         self.gridLayout_5.addWidget(self.dur_spnbx, 1, 1, 1, 1)
-        self.risefall_spnbx = QtGui.QDoubleSpinBox(ParameterWidget)
+        self.risefall_spnbx = SmartSpinBox(ParameterWidget)
         font = QtGui.QFont()
         font.setPointSize(14)
         self.risefall_spnbx.setFont(font)
@@ -111,4 +111,5 @@ class Ui_ParameterWidget(object):
         self.label_42.setText(_translate("ParameterWidget", "Intensity", None))
         self.tunit_lbl_1.setText(_translate("ParameterWidget", "ms", None))
 
+from spikeylab.stim.smart_spinbox import SmartSpinBox
 from spikeylab.stim.incrementer import IncrementInput
