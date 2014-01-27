@@ -1,3 +1,5 @@
+import os
+
 from PyQt4 import QtGui
 from incrementer_form import Ui_IncrementInput
 from numpy import floor
@@ -9,6 +11,15 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
+        self.setStyleSheet("IncrementInput { background-color: white; \
+                            border-top:1px inset lightgrey; \
+                            border-right:1px inset lightgrey}\
+                            ")
+        thisfolder = os.path.dirname(os.path.realpath(__file__))
+        self.up10.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowup.png')))
+        self.up1.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowup.png')))
+        self.down10.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowdown.png')))
+        self.down1.setIcon(QtGui.QIcon(os.path.join(thisfolder,'arrowdown.png')))
 
     def increment1(self):
         self.incrementn(1)
@@ -38,6 +49,11 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         else:
             self.value_lnedt.setText(str(int(val)))
 
+    def paintEvent(self, event):
+        o = QtGui.QStyleOption()
+        o.initFrom(self)
+        p = QtGui.QPainter(self)
+        self.style().drawPrimitive(QtGui.QStyle.PE_Widget, o, p, self)
 
 if __name__ == '__main__':
     import sys

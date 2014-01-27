@@ -6,7 +6,6 @@ class AbstractEditorWidget(QtGui.QWidget):
     tunit_labels = []
     funit_fields = []
     tunit_fields = []
-
     def setFScale(self, fscale, setup=False):
         """
         Updates the frequency unit labels, and stores unit to

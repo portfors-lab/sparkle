@@ -6,7 +6,7 @@ from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
 
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(ToneParameterWidget, self).__init__(parent)
         self.setupUi(self)
         # include in class variable list of all unit labels
         self.funit_labels.append(self.funit_lbl)

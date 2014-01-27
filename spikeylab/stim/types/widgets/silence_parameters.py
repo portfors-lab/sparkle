@@ -13,6 +13,7 @@ class SilenceParameterWidget(QtGui.QWidget):
         layout.addWidget(self.dur_spnbx)
 
         self.setLayout(layout)
+        self.setWindowTitle("Silence")
 
     def setComponent(self, component):
         self.dur_spnbx.setValue(component.duration()/self.tscale)

@@ -133,7 +133,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict = {}
         savedict['wavrootdir'] = self.exvocal.getTreeRoot()
         savedict['filelistdir'] = self.exvocal.getListRoot()
-        savedict['threshold'] = self.ui.thresh_lnedt.text()
+        savedict['threshold'] = self.ui.thresh_spnbx.value()
         savedict['binsz'] = self.ui.binsz_spnbx.value()
         savedict['aisr'] = self.ui.aisr_spnbx.value()
         savedict['tscale'] = self.tscale
@@ -171,7 +171,7 @@ class ControlWindow(QtGui.QMainWindow):
 
         self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
         self.filelistdir = inputsdict.get('filelistdir', self.wavrootdir)
-        self.ui.thresh_lnedt.setText(str(inputsdict.get('threshold', '0.5')))
+        self.ui.thresh_spnbx.setValue(inputsdict.get('threshold', 0.5))
         self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
         self.ui.windowsz_spnbx.setValue(inputsdict.get('windowsz', 100))
         self.ui.binsz_spnbx.setValue(inputsdict.get('binsz', 5))        

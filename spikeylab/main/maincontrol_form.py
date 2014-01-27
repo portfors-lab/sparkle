@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Jan 24 09:07:05 2014
+# Created: Sun Jan 26 17:42:35 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -200,17 +200,6 @@ class Ui_ControlWindow(object):
         self.label_13 = QtGui.QLabel(self.centralwidget)
         self.label_13.setObjectName(_fromUtf8("label_13"))
         self.gridLayout.addWidget(self.label_13, 3, 2, 1, 1)
-        self.thresh_lnedt = QtGui.QLineEdit(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.thresh_lnedt.sizePolicy().hasHeightForWidth())
-        self.thresh_lnedt.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.thresh_lnedt.setFont(font)
-        self.thresh_lnedt.setObjectName(_fromUtf8("thresh_lnedt"))
-        self.gridLayout.addWidget(self.thresh_lnedt, 3, 1, 1, 1)
         self.label_43 = QtGui.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -248,6 +237,8 @@ class Ui_ControlWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.reprate_spnbx.setFont(font)
+        self.reprate_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.reprate_spnbx.setPrefix(_fromUtf8(""))
         self.reprate_spnbx.setMinimum(0.1)
         self.reprate_spnbx.setMaximum(10.0)
         self.reprate_spnbx.setProperty("value", 0.5)
@@ -272,6 +263,15 @@ class Ui_ControlWindow(object):
         self.label_36.setSizePolicy(sizePolicy)
         self.label_36.setObjectName(_fromUtf8("label_36"))
         self.gridLayout.addWidget(self.label_36, 5, 2, 1, 1)
+        self.thresh_spnbx = QtGui.QDoubleSpinBox(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.thresh_spnbx.setFont(font)
+        self.thresh_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.thresh_spnbx.setDecimals(3)
+        self.thresh_spnbx.setMaximum(500.0)
+        self.thresh_spnbx.setObjectName(_fromUtf8("thresh_spnbx"))
+        self.gridLayout.addWidget(self.thresh_spnbx, 3, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem2)

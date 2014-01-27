@@ -65,7 +65,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.group_finished.connect(self.on_stop)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
 
-        self.ui.thresh_lnedt.returnPressed.connect(self.set_plot_thresh)        
+        self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
         
         self.current_operation = None
 
@@ -264,11 +264,11 @@ class MainWindow(ControlWindow):
             self.ui.display.set_xlimits((0,winsz))
 
     def update_thresh(self, thresh):
-        self.ui.thresh_lnedt.setText(str(thresh))
+        self.ui.thresh_spnbx.setValue(thresh)
         self.acqmodel.set_threshold(thresh)
 
     def set_plot_thresh(self):
-        thresh = float(self.ui.thresh_lnedt.text())
+        thresh = self.ui.thresh_spnbx.value()
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
 

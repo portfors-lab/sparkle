@@ -9,8 +9,12 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
+        self.db_spnbx.numtype = int
         self.tunit_labels.append(self.tunit_lbl_0)
         self.tunit_labels.append(self.tunit_lbl_1)
+        self.tunit_fields.append(self.dur_spnbx)
+        self.tunit_fields.append(self.risefall_spnbx)
+        self.setTScale(self.scales[0], setup=True)
 
     def intensityValue(self):
         return self.db_spnbx.value()
