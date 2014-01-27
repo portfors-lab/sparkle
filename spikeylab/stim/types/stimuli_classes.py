@@ -48,11 +48,14 @@ class PureTone(Tone):
         return editor
 
     def paint(self, painter, rect, palette):
-
+        if (self._frequency/self._scales[1]) - np.floor(self._frequency/self._scales[1]) > 0.0:
+            freq = str(self._frequency/self._scales[1])
+        else:
+            freq = str(int(self._frequency/self._scales[1]))
         painter.fillRect(rect, palette.base())
         painter.drawText(rect.x()+5, rect.y()+12, rect.width()-5, rect.height()-12, QtCore.Qt.AlignLeft, "Pure Tone")
         painter.fillRect(rect.x()+5, rect.y()+35, rect.width()-10, 20, QtCore.Qt.black)
-        painter.drawText(rect.x()+5, rect.y()+80, str(self._frequency/1000) + " kHz")
+        painter.drawText(rect.x()+5, rect.y()+80,  freq+ " "+self._labels[1])
 
     def signal(self, fs, atten):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs)[0]
@@ -67,7 +70,6 @@ class PureTone(Tone):
     def loadState(self, state):
         super(PureTone,self).loadState(state)
         self._frequency = state['frequency']
-        print 'loaded freq', self._frequency
 
     def auto_details(self):
         details = super(PureTone, self).auto_details()
