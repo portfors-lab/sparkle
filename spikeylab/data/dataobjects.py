@@ -34,12 +34,17 @@ class AcquisitionData():
         self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
 
         self.test_count = -1
+        self.needs_repack = False
 
     def close(self):
         for key in self.datasets.keys():
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
 
+        fname = self.hdf5.filename
         self.hdf5.close()
+
+        if self.needs_repack:
+            repack(fname)
         
     def init_group(self, key):
         """create a high level group"""
@@ -197,6 +202,10 @@ class AcquisitionData():
         # now go ahead and delete fractional sets.
         for iset in range(setnum+1):
             del self.datasets[key+'_set'+str(iset)]
+            del self.hdf5[key+'_set'+str(iset)]
+
+        print 'consolidated', self.hdf5.keys()
+        self.needs_repack = True
 
     def set_metadata(self, key, attrdict):
         # key is an iterable of group keys (str), with the last
@@ -242,3 +251,61 @@ def increment(index, dims, data_shape):
         index[inc_index:] = [0]*len(index[inc_index:])
         inc_index -=1
     return index
+
+def repack(h5file):
+    """
+    Repack archive to remove freespace.
+               
+    Returns
+    -------
+    file : h5py File or None
+        If the input is a h5py.File then a h5py File instance of the
+        repacked archive is returned. The input File instance will no longer
+        be useable. 
+    """
+    f1, opened = _openfile(h5file) 
+    filename1 = f1.filename
+    filename2 = filename1 + '_repack_tmp'
+    f2 = h5py.File(filename2)
+    for key in f1.keys():
+        print 'copying', key
+        f1.copy(key, f2)
+    f1.close()
+    f2.close()
+    filename_tmp = filename1 + '_repack_rename_tmp'
+    os.rename(filename1, filename_tmp)
+    os.rename(filename2, filename1) 
+    if opened:
+        f = None  
+    else:
+        f = h5py.File(filename1)
+    os.remove(filename_tmp)
+    return f   
+
+def _openfile(h5file):
+    """
+    Open an archive if input is a path.
+    
+    Parameters
+    ----------
+    h5file : str or h5py.File
+        Filename or h5py.File instance of the archive.
+        
+    Returns
+    ------- 
+    f : h5py.File
+        Returns a h5py.File instance.
+    opened : bool
+        True is `h5file` is a path; False if `h5file` is a h5py.File object.   
+    
+    """
+    if isinstance(h5file, h5py.File):
+        f = h5file
+        opened = False
+    elif isinstance(h5file, basestring):
+        f = h5py.File(h5file)
+        opened = True
+    else:
+        msg = "h5file must be a h5py.File object or a string (path)."
+        raise TypeError, msg    
+    return f, opened                 

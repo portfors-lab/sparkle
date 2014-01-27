@@ -1,6 +1,9 @@
 import numpy as np
 import os, glob
+import shutil
 import json
+import random, string
+import re
 
 import h5py
 from nose.tools import raises, assert_in, assert_equal
@@ -9,6 +12,10 @@ from spikeylab.data.dataobjects import AcquisitionData, increment
 from spikeylab.tools.exceptions import DataIndexError
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
+
+def rand_id():
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(chars) for x in range(4))
 
 def test_increment_index_by_1():
     dimensions = (2,3,4)
@@ -83,7 +90,10 @@ class TestAcqusitionData():
         # test runs that produced errors and did not delete their files
         files = glob.glob(tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
-            os.remove(f)
+            try:
+                os.remove(f)
+            except:
+                pass
 
     def test_finite_dataset_append(self):
         """
@@ -95,7 +105,7 @@ class TestAcqusitionData():
         npoints = 10
         fakedata = np.ones((npoints,))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
             
         acq_data.init_data('fake', (nsets, npoints))
@@ -116,7 +126,7 @@ class TestAcqusitionData():
         npoints = 10
         fakedata = np.ones((1,npoints))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
             
         acq_data.init_data('fake', (nsets, npoints))
@@ -138,7 +148,7 @@ class TestAcqusitionData():
         npoints = 10
         fakedata = np.ones((npoints,))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
             
         try:
@@ -156,7 +166,7 @@ class TestAcqusitionData():
         npoints = 10
         fakedata = np.ones((npoints,))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
             
         acq_data.init_data('fake', (nsets, npoints))
@@ -176,7 +186,7 @@ class TestAcqusitionData():
         npoints = 10
         fakedata = np.ones((npoints,))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
         acq_data.open_set_size = 4
             
@@ -198,7 +208,7 @@ class TestAcqusitionData():
         npoints = 10
         fakedata = np.ones((npoints,))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
         acq_data.open_set_size = 4
         
@@ -214,7 +224,7 @@ class TestAcqusitionData():
     def test_adding_open_attrs(self):
         npoints = 10
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', (npoints,), mode='open')
 
@@ -231,7 +241,7 @@ class TestAcqusitionData():
     def test_adding_finite_attrs(self):
         npoints = 10
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         print 'fname', fname
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', (npoints,), mode='finite')
@@ -251,7 +261,7 @@ class TestAcqusitionData():
         npoints = 10000
         fakedata = np.ones((npoints,))
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', mode='continuous')
         for iset in range(nsets):
@@ -269,6 +279,9 @@ class TestAcqusitionData():
         assert hfile['fake'][0] == 0
         assert hfile['fake'][-1] == 31
         assert stim == []
+
+        allsets = ''.join(hfile.keys())
+        assert re.search('fake_set\d+', allsets) == None
         hfile.close()
 
     def test_continuous_with_stimattr(self):
@@ -277,7 +290,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
         attrs = {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_time': 4.1}
 
-        fname = os.path.join(tempfolder, 'savetemp.hdf5')
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', mode='continuous')
         for iset in range(nsets):
