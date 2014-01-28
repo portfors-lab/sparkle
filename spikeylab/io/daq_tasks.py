@@ -5,9 +5,15 @@ from PyDAQmx import *
 import numpy as np
 
 class AITask(Task):
-    def __init__(self, chan, samplerate, bufsize, clksrc=u""):
+    def __init__(self, chans, samplerate, bufsize, clksrc=u""):
         Task.__init__(self)
-        self.CreateAIVoltageChan(chan,u"",DAQmx_Val_Cfg_Default,
+        if isinstance(chans, basestring):
+            chan_str = chans
+            self.nchans = 1
+        else:
+            chan_str = ','.join(chans)
+            self.nchans = len(chans)
+        self.CreateAIVoltageChan(chan_str,u"",DAQmx_Val_Cfg_Default,
             -10.0,10.0,DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_ContSamps,bufsize)
@@ -24,10 +30,11 @@ class AITask(Task):
         self.callback_fun(self)
     def read(self):
         r = c_int32()
-        inbuffer = np.zeros(self.n)
-        self.ReadAnalogF64(self.n,10.0,DAQmx_Val_GroupByScanNumber,
-                            inbuffer, self.n,byref(r),None)
-        return inbuffer
+        inbuffer = np.zeros(self.n*self.nchans)
+        self.ReadAnalogF64(self.n,10.0,DAQmx_Val_GroupByChannel,
+                            inbuffer, self.n*self.nchans, byref(r), None)
+        data = inbuffer.reshape(self.nchans, self.n)
+        return data
     def DoneCallback(self,status):
         print u"Status"+unicode(status)
         return 0
@@ -100,8 +107,6 @@ class AOTaskFinite(Task):
                               DAQmx_Val_FiniteSamps, npoints)
         if len(trigsrc) > 0:
             self.CfgDigEdgeStartTrig(trigsrc,DAQmx_Val_Rising)
-        #starts the AO and AI at the same time
-        #self.CfgDigEdgeStartTrig(b"ai/StartTrigger",DAQmx_Val_Rising)
     def start(self):
         self.StartTask()
     def write(self,output):

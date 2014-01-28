@@ -1,80 +1,107 @@
 import numpy as np
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
-from PyDAQmx.DAQmxConstants import DAQmx_Val_GroupByScanNumber
 from PyDAQmx.DAQmxTypes import *
 import time
 
-glblist = []
 DEBUG = False
 
-def test_syncfinite():
-    u"""
-    Test basic operation of DAQ and drivers
-    """
+class TestDAQTasks():
+    def setup(self):
+        self.data = []
+        self.sr = 1000000 # 1000000 is max for PCI-6259
 
-    #amps = [0.00002, 0.0001, 0.001, 0.01, 0.1, 1]
-    amps = [0.01, 0.1, 1]
-    frequency = 50000
-    npts = 10000
-    for amp in amps:
-        aot = AOTaskFinite(u"PCI-6259/ao0", 1000000, npts, trigsrc=u"ai/StartTrigger")
-        ait = AITaskFinite(u"PCI-6259/ai0", 1000000, npts)
+    def test_syncfinite(self):
+        u"""
+        Test basic operation of DAQ and drivers
+        """
 
+        #amps = [0.00002, 0.0001, 0.001, 0.01, 0.1, 1]
+        amps = [0.01, 0.1, 1]
+        frequency = 5#0000
+        npts = 10000
         x = np.linspace(0,np.pi, npts)
+        for amp in amps:
+            aot = AOTaskFinite(u"PCI-6259/ao0", self.sr, npts, trigsrc=u"ai/StartTrigger")
+            ait = AITaskFinite(u"PCI-6259/ai0", self.sr, npts)
+
+            stim = amp * np.sin(frequency*x*2*np.pi)
+
+            aot.write(stim)
+
+            aot.StartTask()
+            ait.StartTask()
+
+            response = ait.read()
+
+            aot.stop()
+            ait.stop()
+
+            response = np.roll(response, -1)
+            response[-1] = stim[-1] # free pass on first point
+            if DEBUG:
+                import matplotlib.pyplot as plt
+                plt.plot(x, stim, x, response)
+                plt.show()
+
+            tolerance = max(amp*0.1, 0.005) #noise floor
+
+            assert np.allclose(stim,response,rtol=0,atol=tolerance)
+
+    def test_sync_continuous(self):
+
+        npts = 10000
+        frequency = 50000
+        amp = 2
+        x = np.linspace(0, np.pi, npts)
         stim = amp * np.sin(frequency*x*2*np.pi)
 
+        aot = AOTask(b"PCI-6259/ao0", self.sr, npts, trigsrc=b"ai/StartTrigger")
+        ait = AITask(b"PCI-6259/ai0", self.sr, npts)
+
+        ait.register_callback(self.stashacq,npts)
+
         aot.write(stim)
+        aot.start()
+        ait.start()
 
-        aot.StartTask()
-        ait.StartTask()
-
-        response = ait.read()
+        acqtime = 6 #seconds 
+        time.sleep(acqtime)
 
         aot.stop()
         ait.stop()
+        print('no. data points acquired: ', len(self.data), 'expected', acqtime*self.sr)
+        print type(self.data[0])
 
-        response = np.roll(response, -1)
-        response[-1] = stim[-1] # free pass on first point
-        if DEBUG:
-            import matplotlib.pyplot as plt
-            plt.plot(x, stim, x, response)
-            plt.show()
+        assert len(self.data) == acqtime*self.sr
 
-        tolerance = max(amp*0.1, 0.005) #noise floor
+    def test_asynch_continuous_finite(self):
+        ainpts = 1000
 
-        print(amp)       
-        assert np.allclose(stim,response,rtol=0,atol=tolerance)
+        ait = AITask(u"PCI-6259/ai0", self.sr, ainpts)
+        ait.register_callback(self.stashacq, ainpts)
+        ait.start()
+        
+        amps = [0.01, 0.1, 1]
+        frequency = 50000
+        aonpts = 10000
+        x = np.linspace(0, np.pi, aonpts)
+        for amp in amps:
+            aot = AOTaskFinite(u"PCI-6259/ao0", self.sr, aonpts, trigsrc=u"")
 
-def test_sync_continuous():
+            stim = amp * np.sin(frequency*x*2*np.pi)
 
-    npts = 10000
-    frequency = 50000
-    amp = 2
-    x = np.linspace(0,np.pi, npts)
-    stim = amp * np.sin(frequency*x*2*np.pi)
+            aot.write(stim)
+            aot.StartTask()
+            aot.wait()
+            aot.stop()
 
-    sr = 1000000
-    aot = AOTask(b"PCI-6259/ao0", sr, npts, trigsrc=b"ai/StartTrigger")
-    ait = AITask(b"PCI-6259/ai0", sr, npts)
+        ait.stop()
 
-    ait.register_callback(stashacq,npts)
+        assert len(self.data) > aonpts*len(amps)
 
-    aot.write(stim)
-    aot.start()
-    ait.start()
-
-    acqtime = 6 #seconds 
-    time.sleep(acqtime)
-
-    aot.stop()
-    ait.stop()
-    print('no. data points acquired: ', len(glblist))
-
-    assert len(glblist) == acqtime*sr
-
-def stashacq(task):
-    inbuffer = task.read()
-    glblist.extend(inbuffer.tolist())
+    def stashacq(self, task):
+        inbuffer = task.read()
+        self.data.extend(inbuffer.squeeze().tolist())
 
 
 

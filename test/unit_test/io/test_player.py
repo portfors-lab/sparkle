@@ -1,4 +1,5 @@
 import numpy as np
+# import matplotlib.pyplot as plt
 
 from spikeylab.io.players import FinitePlayer, ContinuousPlayer
 class TestDAQPlayers():
@@ -6,8 +7,7 @@ class TestDAQPlayers():
         player = FinitePlayer()
         fs = 500000
         dur = 0.01
-        x = np.arange(fs*dur)
-        tone = data_func(x, 5)
+        tone = data_func(fs*dur, 5)
         player.set_stim(tone, fs)
         player.set_aidur(0.01)
         player.set_aisr(fs)
@@ -30,8 +30,7 @@ class TestDAQPlayers():
         player = FinitePlayer()
         fs = 500000
         dur = 0.02
-        x = np.arange((fs*dur)/2)
-        tone = data_func(x, 5)
+        tone = data_func((fs*dur)/2, 5)
         player.set_stim(tone, fs)
         player.set_aidur(0.02)
         player.set_aisr(fs/4)
@@ -48,16 +47,16 @@ class TestDAQPlayers():
         player = ContinuousPlayer()
         fs = 500000
         dur = 0.2
-        x = np.arange((fs*dur)/2)
-        tone = data_func(x, 5)
+        tone = data_func((fs*dur)/2, 5)
         player.set_stim(tone, fs)
         player.set_aidur(0.02)
         player.set_aisr(fs/4) 
         player.set_aochan(u"PCI-6259/ao0")   
         #start the acquisition
         self.data = []
+        self.single = []
         player.set_read_function(self.stash_acq)
-        player.start(u"PCI-6259/ai0")
+        player.start([u"PCI-6259/ai0",u"PCI-6259/ai1"])
 
         # now start a generation
         player.reset()
@@ -66,12 +65,19 @@ class TestDAQPlayers():
         player.stop()
         nstims = player.generation_count()
 
+        # print 'data shape', self.single.shape
+        # plt.plot(self.single.T)
+        # plt.show()
+
         assert nstims == 1
         assert len(self.data) > 1
 
     def stash_acq(self, databuffer):
+        print 'stashing'
+        self.single = databuffer
         self.data.extend(databuffer)
 
-def data_func(x, f):
+def data_func(nx, f):
+    x = np.arange(nx)
     return 2*np.sin(2*np.pi*f*x/len(x))
 

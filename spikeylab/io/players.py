@@ -222,14 +222,15 @@ class ContinuousPlayer(PlayerBase):
         PlayerBase.__init__(self, dbv)
         self.on_read = lambda x: x # placeholder
 
-    def start(self, aichan, update_hz=10):
+    def start(self, aichans, update_hz=10):
         """Begins a continuous analog generation, emitting an ncollected 
         signal at a rate of 10Hz"""
         self.daq_lock.acquire()
 
         self.ngenerated = 0 # number of stimuli presented during chart run
         npts = int(self.aisr/update_hz) #update display at 10Hz rate
-        self.aitask = AITask(aichan, self.aisr, npts*5)
+        nchans = len(aichans)
+        self.aitask = AITask(aichans, self.aisr, npts*5*nchans)
         self.aitask.register_callback(self._read_continuous, npts)
         self.aitask.start()
 
@@ -237,7 +238,7 @@ class ContinuousPlayer(PlayerBase):
         self.on_read = fun
 
     def _read_continuous(self, task):
-        inbuffer = task.read()
+        inbuffer = task.read().squeeze()
         self.on_read(inbuffer)
 
     def generate(self):
