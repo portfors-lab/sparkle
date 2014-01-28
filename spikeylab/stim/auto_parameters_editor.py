@@ -21,8 +21,6 @@ class Parametizer(QtGui.QWidget):
         btn_layout = QtGui.QHBoxLayout()
         
         add_lbl = FactoryLabel(AddLabel)
-        ok_btn = QtGui.QPushButton('OK')
-        ok_btn.clicked.connect(self.close)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
@@ -31,9 +29,9 @@ class Parametizer(QtGui.QWidget):
         self.trash_lbl = TrashWidget(self)
         
         btn_layout.addWidget(add_lbl)
-        btn_layout.addWidget(self.trash_lbl)
         btn_layout.addWidget(separator)
-        btn_layout.addWidget(ok_btn)
+        btn_layout.addWidget(self.trash_lbl)
+        btn_layout.addWidget(QtGui.QLabel())
 
         self.param_list = AutoParameterTableView()
         self.param_list.installEventFilter(self.trash_lbl)
