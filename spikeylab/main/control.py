@@ -24,7 +24,7 @@ GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
 DEVNAME = "PCI-6259"
 
 class MainWindow(ControlWindow):
-    def __init__(self, inputs_filename):
+    def __init__(self, inputs_filename=''):
         # set up model and stimlui first, 
         # as saved configuration relies on this
         self.acqmodel = AcquisitionModel()
@@ -37,6 +37,8 @@ class MainWindow(ControlWindow):
         
         self.ui.start_btn.clicked.connect(self.on_start)
         self.ui.stop_btn.clicked.connect(self.on_stop)
+        self.ui.start_chart_btn.clicked.connect(self.on_start_chart)
+        self.ui.stop_chart_btn.clicked.connect(self.on_stop_chart)
 
         cnames = get_ao_chans(DEVNAME.encode())
         self.ui.aochan_box.addItems(cnames)
@@ -69,7 +71,7 @@ class MainWindow(ControlWindow):
 
         self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
         
-        self.current_operation = None
+        self.active_operation = None
 
         # update GUI to reflect loaded values
         self.set_plot_thresh()
@@ -79,6 +81,8 @@ class MainWindow(ControlWindow):
         self.exvocal.setRootDirs(self.wavrootdir, self.filelistdir)
         self.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
 
+        # always start in windowed mode
+        self.mode_toggled('Windowed')
         # always show plots on load
         self.ui.plot_dock.setVisible(True)
         self.ui.psth_dock.setVisible(True)
@@ -86,22 +90,34 @@ class MainWindow(ControlWindow):
     def on_start(self):
         # set plot axis to appropriate limits
         # first time set up data file
-        if self.acqmodel.datafile is None:
-            self.acqmodel.set_save_params(self.savefolder, self.savename)
-            self.acqmodel.create_data_file()
-        self.ui.plot_dock.setWidget(self.ui.display)
         if not self.verify_inputs():
             return
-        self.ui.running_label.setText(u"RUNNING")
-        self.ui.running_label.setPalette(GREEN)
+        
+        if self.current_mode == 'windowed':
+            if self.acqmodel.datafile is None:
+                self.acqmodel.set_save_params(self.savefolder, self.savename)
+                self.acqmodel.create_data_file()
+            self.ui.plot_dock.setWidget(self.ui.display)
+            self.ui.running_label.setText(u"RECORDING")
+            self.ui.running_label.setPalette(GREEN)
+
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.run_explore()
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
-            self.run_chart()
+
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
         else: 
             raise Exception("unrecognized tab selection")
+
+    def on_start_chart(self):
+        if self.acqmodel.datafile is None:
+            self.acqmodel.set_save_params(self.savefolder, self.savename)
+            self.acqmodel.create_data_file()
+
+        self.run_chart()
+        self.ui.running_label.setText(u"RECORDING")
+        self.ui.running_label.setPalette(GREEN)
+        self.ui.start_chart_btn.setEnabled(False)
 
     def on_update(self):
         aochan = self.ui.aochan_box.currentText()
@@ -136,24 +152,28 @@ class MainWindow(ControlWindow):
             self.ui.display.set_nreps(nreps)
             self.ui.display.update_fft(freq, spectrum)
             self.ui.display.update_signal(timevals, signal)
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
+        if self.current_mode == 'chart':
             return winsz, acq_rate
             
     def on_stop(self):
-        if self.current_operation == 'chart':
-            self.acqmodel.stop_chart()
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            self.acqmodel.halt()
-
-        self.current_operation = None
-        self.live_lock.unlock()
-        self.ui.running_label.setText(u"OFF")
-        self.ui.running_label.setPalette(RED)
+        self.acqmodel.halt() # stops generation, and acquistion if linked
+        if self.current_mode == 'windowed':
+            self.active_operation = None
+            self.live_lock.unlock()
+            self.ui.running_label.setText(u"OFF")
+            self.ui.running_label.setPalette(RED)
         self.ui.start_btn.setEnabled(True)
         self.ui.start_btn.setText('Start')
         self.ui.start_btn.clicked.disconnect()
         self.ui.start_btn.clicked.connect(self.on_start)
 
+    def on_stop_chart(self):
+        self.acqmodel.stop_chart()
+        self.ui.start_chart_btn.setEnabled(True)
+        self.active_operation = None
+        self.live_lock.unlock()
+        self.ui.running_label.setText(u"OFF")
+        self.ui.running_label.setPalette(RED)
 
     def run_chart(self):
         winsz, acq_rate = self.on_update()
@@ -162,11 +182,11 @@ class MainWindow(ControlWindow):
         self.scrollplot.set_sr(acq_rate)
         self.ui.plot_dock.setWidget(self.scrollplot)
 
-        self.current_operation = 'chart'
+        self.active_operation = 'chart'
         self.acqmodel.start_chart()
 
-    def update_chart(self, data):
-        self.scrollplot.append_data(data)
+    def update_chart(self, stim_data, response_data):
+        self.scrollplot.append_data(stim_data, response_data)
 
     def update_generation_rate(self, fs):
         self.ui.aosr_spnbx.setValue(fs*self.tscale)
@@ -176,7 +196,7 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.clicked.disconnect()
         self.ui.start_btn.clicked.connect(self.on_update)
         # make this an enum!!!!
-        self.current_operation = 'explore'
+        self.active_operation = 'explore'
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
 
@@ -186,15 +206,17 @@ class MainWindow(ControlWindow):
     def run_protocol(self):
 
         self.ui.start_btn.setEnabled(False)
-        self.current_operation = 'protocol'
+        self.active_operation = 'protocol'
 
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
         
         self.on_update()
-
-        self.acqmodel.run_protocol(interval)
-
+        if self.current_mode == 'windowed':
+            self.acqmodel.run_protocol(interval)
+        else:
+            self.acqmodel.run_chart_protocol(interval)
+            
     def display_stim(self, stimdeets, times, signal, xfft, yfft):
         print "display stim"
         self.ui.display.update_signal(times, signal)
@@ -215,7 +237,7 @@ class MainWindow(ControlWindow):
         self.ui.test_num.setText(str(itest))
         self.ui.trace_num.setText(str(itrace))
         stim_types = [comp['stim_type'] for comp in stim_info['components']]
-        print 'stim_types', stim_types
+        # print 'stim_types', stim_types
         if len(set(stim_types)) == 1:
             self.ui.trace_type.setText(stim_types[0])
         else:
@@ -287,6 +309,17 @@ class MainWindow(ControlWindow):
         thresh = self.ui.thresh_spnbx.value()
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
+
+    def mode_toggled(self, mode):
+        self.current_mode = mode.lower()
+        if self.current_mode == "windowed":
+            self.ui.start_chart_btn.hide()
+            self.ui.stop_chart_btn.hide()
+        elif self.current_mode == "chart":
+            self.ui.stop_chart_btn.show()
+            self.ui.start_chart_btn.show()
+        else:
+            raise Exception('unknown acquistion mode '+mode)
 
     def show_display(self):
         self.ui.plot_dock.setVisible(True)

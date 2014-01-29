@@ -17,7 +17,7 @@ class GenericThread(QtCore.QThread):
 
 class BaseSignals(QtCore.QObject):
     curve_finished = QtCore.pyqtSignal()
-    ncollected = QtCore.pyqtSignal(numpy.ndarray)
+    ncollected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
     warning = QtCore.pyqtSignal(str)
 
 class CalibrationSignals(BaseSignals):

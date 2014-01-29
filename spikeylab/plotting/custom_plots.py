@@ -167,6 +167,13 @@ class ChartWidget(BaseWidget):
     def set_windowsize(self, winsz):
         self.traits.set_windowsize(winsz)
 
+    def resizeEvent(self, event):
+        margin = self.traits.response_plot.padding_left
+        vpos = event.size().height() - self.traits.response_plot.padding_bottom \
+                                     - self.traits.response_plot.padding_top \
+                                     - self.traits.stim_plot_height
+        self.traits.stim_plot.set(position=[margin,vpos]) 
+
 class PSTHWidget(BaseWidget):
     def _create_plotter(self):
         return PSTPlotter()
@@ -274,12 +281,7 @@ class SpikePlotter(HasTraits):
                       border_visible=False,
                       overlay_border=False)
 
-        stim_plot.x_axis.axis_line_visible = False
-        stim_plot.x_axis.tick_visible = False
-        stim_plot.y_axis.tick_visible = False
-        stim_plot.x_axis.tick_label_formatter = self._noticks
-        stim_plot.y_axis.tick_label_formatter = self._noticks
-        stim_plot.y_grid.visible = False
+        bare_axes(stim_plot)
 
         trace_plot.x_axis.title = 'Time (ms)'
         trace_plot.y_axis.title = 'voltage (mV)'
@@ -335,7 +337,7 @@ class SpikePlotter(HasTraits):
     def append_data(self, data, axeskey, datakey):
         if axeskey == 'response':
             if datakey == 'spikes':
-                # adjust repetition number to y scale
+                # adjust repetition number to response scale
                 data = np.ones_like(data)*self.raster_yslots[data[0]]
             d = self.trace_data.get_data(datakey)
             d = append(d, data)
@@ -524,29 +526,49 @@ class ScrollingPlotter(HasTraits):
     deltax = Float(1.0)
     windowsize = Float(10.0)
     def _plot_default(self):
-        self.chart_data = ArrayPlotData(x=[], y=[])
-        plot = Plot(self.chart_data)
-        plot.plot(('x', 'y'), type='line', name='chart')
+        self.chart_data = ArrayPlotData(x=[], response=[], stim=[])
+        response_plot = Plot(self.chart_data)
+        response_plot.plot(('x', 'response'), type='line', name='chart')
 
-        plot.range2d.x_range.low = 0
-        plot.range2d.x_range.high = 1
+        response_plot.range2d.x_range.low = 0
+        response_plot.range2d.x_range.high = 1
 
-        plot.x_axis.title = 'Time (s)'
-        plot.y_axis.title = 'voltage (mV)'
+        response_plot.x_axis.title = 'Time (s)'
+        response_plot.y_axis.title = 'voltage (mV)'
+        
+        self.stim_plot_height = 20
+        stim_plot = Plot(self.chart_data)
+        stim_plot.plot(('x', 'stim'), type='line', name='chart')
+        stim_plot.set(resizable='h',
+                      bounds=[600,self.stim_plot_height], 
+                      border_visible=False,
+                      overlay_border=False)
+        bare_axes(stim_plot)
 
-        plot.tools.append(PanTool(plot))
-        plot.tools.append(ZoomTool(plot, axis='value'))
+        stim_plot.index_range = response_plot.index_range
 
-        return plot
+        response_plot.tools.append(PanTool(response_plot))
+        response_plot.tools.append(ZoomTool(response_plot, axis='value'))
+        
+        container = OverlayPlotContainer()
+
+        container.add(response_plot)
+        container.add(stim_plot)
+
+        # container.bgcolor = "transparent"
+        self.response_plot = response_plot
+        self.stim_plot = stim_plot
+
+        return container
 
     def set_time_delta(self, delta):
         self.deltax = delta
 
     def set_windowsize(self, winsz):
         self.windowsize = winsz
-        self.plot.range2d.x_range.high = self.plot.range2d.x_range.low + winsz
+        self.response_plot.range2d.x_range.high = self.response_plot.range2d.x_range.low + winsz
 
-    def append_data(self, data):
+    def append_data(self, stim, data):
         npoints_to_add = len(data)
         xdata = self.chart_data.get_data('x')
         if len(xdata) == 0:
@@ -560,24 +582,39 @@ class ScrollingPlotter(HasTraits):
                                 self.deltax)
         xdata = np.append(xdata, x_to_append)
 
-        ydata = self.chart_data.get_data('y')
-        ydata = np.append(ydata, data)
+        ydata = self.chart_data.get_data('response')
+        ydata = np.append(ydata, data)        
+        stimdata = self.chart_data.get_data('stim')
+        stimdata = np.append(stimdata, stim)
 
         # remove data that has gone off screen
-        xlow = self.plot.range2d.x_range.low
+        xlow = self.response_plot.range2d.x_range.low
         removex, = np.where(xdata < xlow)
 
         xdata = np.delete(xdata, removex)
         ydata = np.delete(ydata, removex)
+        stimdata = np.delete(stimdata, removex)
 
         self.chart_data.set_data('x', xdata)
-        self.chart_data.set_data("y", ydata)
+        self.chart_data.set_data("response", ydata)
+        self.chart_data.set_data("stim", stimdata)
 
         # now scroll axis limits
-        if self.plot.range2d.x_range.high < xdata[-1]:
-            self.plot.range2d.x_range.high += self.deltax*npoints_to_add
-            self.plot.range2d.x_range.low += self.deltax*npoints_to_add
+        if self.response_plot.range2d.x_range.high < xdata[-1]:
+            self.response_plot.range2d.x_range.high += self.deltax*npoints_to_add
+            self.response_plot.range2d.x_range.low += self.deltax*npoints_to_add
 
+
+def bare_axes(plot):
+    plot.x_axis.axis_line_visible = False
+    plot.x_axis.tick_visible = False
+    plot.y_axis.tick_visible = False
+    plot.x_axis.tick_label_formatter = _noticks
+    plot.y_axis.tick_label_formatter = _noticks
+    plot.y_grid.visible = False
+
+def _noticks(num):
+    return ''
 
 if __name__ == '__main__':
     import os

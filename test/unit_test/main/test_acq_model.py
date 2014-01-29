@@ -190,6 +190,42 @@ class TestAcquisitionModel():
         self.timer = threading.Timer(1.0, self.stopchart, args=(acqmodel, fname))
         self.timer.start()
 
+    def test_chart_tone_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        acqmodel.set_params(savechart=True)
+
+        #insert some stimuli
+        gen_rate = 500000
+
+        tone0 = PureTone()
+        tone0.setDuration(0.2)
+        stim0 = StimulusModel()
+        stim0.insertComponent(tone0)
+        stim0.setSamplerate(gen_rate)
+        acqmodel.protocol_model.insertNewTest(stim0,0)
+
+        acqmodel.start_chart()
+        t = acqmodel.run_chart_protocol(0.25)
+        t.join()
+
+        acqmodel.stop_chart()
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['chart_0']
+        stim = json.loads(test.attrs['stim'])
+
+        print 'stim', stim
+        # assert_in('components', stim[0])
+        # assert_equal(stim[0]['samplerate_da'], gen_rate)
+        assert_equal(test.shape,(winsz*acq_rate,))
+        assert len(test.shape) == 1
+        
+        hfile.close()
+
     def stopchart(self, acqmodel, fname):
         acqmodel.stop_chart()
         acqmodel.close_data()
@@ -200,6 +236,7 @@ class TestAcquisitionModel():
         stim = json.loads(test.attrs['stim'])
         assert stim == []
         assert test.size > 1
+        assert len(test.shape) == 1
 
         hfile.close()
         self.done = True

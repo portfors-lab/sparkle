@@ -136,12 +136,18 @@ class PlayerBase():
     def set_calv(self, calv):
         self.calv
 
+    def set_aochan(self, aochan):
+        self.aochan = aochan
+
+    def set_aichan(self, aichan):
+        self.aichan = aichan
+
 class FinitePlayer(PlayerBase):
     """For finite generation/acquisition tasks"""
     def __init__(self, dbv=(100,0.1)):
         PlayerBase.__init__(self, dbv)
 
-    def start(self, aochan, aichan):
+    def start(self):
         """Write output buffer and settings to device"""
 
         # this shouldn't actually be possible still...
@@ -154,13 +160,9 @@ class FinitePlayer(PlayerBase):
         self.ngenerated = 0
         self.nacquired = 0
 
-        # save for later -- allow not to be changed?
-        self.aochan = aochan
-        self.aichan = aichan
-
         self.reset()
 
-    def read(self):
+    def run(self):
         """Begin simultaneous generation/acquisition, returns read samples"""
         try:
             if self.aotask is None:
@@ -222,7 +224,7 @@ class ContinuousPlayer(PlayerBase):
         PlayerBase.__init__(self, dbv)
         self.on_read = lambda x: x # placeholder
 
-    def start(self, aichans, update_hz=10):
+    def start_continuous(self, aichans, update_hz=10):
         """Begins a continuous analog generation, emitting an ncollected 
         signal at a rate of 10Hz"""
         self.daq_lock.acquire()
@@ -241,11 +243,14 @@ class ContinuousPlayer(PlayerBase):
         inbuffer = task.read().squeeze()
         self.on_read(inbuffer)
 
-    def generate(self):
+    def run(self):
         self.aotask.StartTask()
         self.aotask.wait() # don't return until generation finished
         self.aotask.stop()
         self.aotask = None
+
+    def start(self):
+        self.reset()
 
     def reset(self):
         try:
@@ -255,10 +260,14 @@ class ContinuousPlayer(PlayerBase):
             # self.stop()
             raise
 
-    def set_aochan(self, aochan):
-        self.aochan = aochan
-
     def stop(self):
+        try:
+            self.aotask.stop()
+        except:     
+            print u"No task running"
+        self.aotask = None
+
+    def stop_all(self):
         if self.aotask is not None:
             self.aotask.stop()
         self.aitask.stop()

@@ -15,6 +15,8 @@ from spikeylab.main.protocol_model import ProtocolTabelModel
 
 SAVE_EXPLORE = True
 
+class Broken(Exception): pass
+
 class AcquisitionModel():
     """Holds state information for an experimental session"""
     def __init__(self, threshold=None):
@@ -42,6 +44,7 @@ class AcquisitionModel():
         self.explore_stimuli = [x() for x in stimuli_types if x.explore]
 
         self.binsz = 0.005
+
 
     def stimuli_list(self):
         return self.explore_stimuli
@@ -145,7 +148,9 @@ class AcquisitionModel():
         self.acq_thread = threading.Thread(target=self._explore_worker)
 
         # arm the first read
-        self.finite_player.start(self.aochan, self.aichan)
+        self.finite_player.set_aochan(self.aochan)
+        self.finite_player.set_aichan(self.aichan)
+        self.finite_player.start()
 
         # and go!
         self.acq_thread.start()
@@ -162,7 +167,7 @@ class AcquisitionModel():
             try:
                 self.interval_wait()
 
-                response = self.finite_player.read()
+                response = self.finite_player.run()
                 self.signals.response_collected.emit(self.aitimes, response)
 
                 # process response; calculate spike times
@@ -210,81 +215,104 @@ class AcquisitionModel():
             print 'ERROR: cannot set samplerate on stimulus containing vocal file'
 
     def run_protocol(self, interval):
+        self._halt = False
 
         self.current_dataset_name = self.group_name
         self.datafile.init_group(self.current_dataset_name)
         self.group_name = increment_title(self.group_name)
+        info = {'samplerate_ad': self.finite_player.aisr}
+        self.datafile.set_metadata(self.current_dataset_name, info)
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
         self.start_time = time.time()
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
-        self.acq_thread = threading.Thread(target=self._protocol_worker)
+        self.finite_player.set_aochan(self.aochan)
+        self.finite_player.set_aichan(self.aichan)
+        self.acq_thread = threading.Thread(target=self._protocol_worker, 
+                                           args=(self.finite_player, True))
 
         self.acq_thread.start()
 
         return self.acq_thread
 
-    def _protocol_worker(self):
+    def _protocol_worker(self, player, read):
         # pull out signal from stim model
         stimuli = self.protocol_model.stimulusList()
-        info = {'samplerate_ad': self.finite_player.aisr}
-        self.datafile.set_metadata(self.current_dataset_name, info)
+        try:
+            for itest, test in enumerate(stimuli):
+                traces = test.expandedStim()
+                doc  = test.expandedDoc()
+                nreps = test.repCount()
+                if read:
+                    recording_length = self.aitimes.shape[0]
+                    self.datafile.init_data(self.current_dataset_name, 
+                                            dims=(len(traces), nreps, recording_length),
+                                            mode='finite')
+                for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
 
-        for itest, test in enumerate(stimuli):
-            traces = test.expandedStim()
-            doc  = test.expandedDoc()
-            nreps = test.repCount()
-            recording_length = self.aitimes.shape[0]
-            self.datafile.init_data(self.current_dataset_name, 
-                                    dims=(len(traces), nreps, recording_length),
-                                    mode='finite')
-            for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
-                spike_counts = []
-                spike_latencies = []
-                spike_rates = []
-                signal, atten = trace
-                self.finite_player.set_stim(signal, test.samplerate(), atten)
-                self.finite_player.start(self.aochan, self.aichan)
-                for irep in range(nreps):
-                    self.interval_wait()
+                    signal, atten = trace
+                    player.set_stim(signal, test.samplerate(), atten)
+                    player.start()
+                    for irep in range(nreps):
+                        self.interval_wait()
+                        if self._halt:
+                            raise Broken
+                        response = player.run()
+                        if irep == 0:
+                            # do this after collection so plots match details
+                            self.signals.current_trace.emit(itest,itrace,trace_doc)
+                        self.signals.current_rep.emit(irep)
+                        if read:
+                            self.process_response(response, irep, nreps)
 
-                    response = self.finite_player.read()
-                    self.signals.response_collected.emit(self.aitimes, response)
-                    if irep == 0:
-                        # do this after collection so plots match details
-                        self.signals.current_trace.emit(itest,itrace,trace_doc)
-                    self.signals.current_rep.emit(irep)
+                        player.reset()
+                    self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
 
-                    # process response; calculate spike times
-                    spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)
-                    spike_counts.append(len(spike_times))
-                    if len(spike_times) > 0:
-                        spike_latencies.append(spike_times[0])
-                    else:
-                        spike_latencies.append(np.nan)
-                    spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
-
-                    response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-                    if len(response_bins) > 0:
-                        self.signals.spikes_found.emit(response_bins, irep)
-
-                    self.finite_player.reset()
-
-                    self.datafile.append(self.current_dataset_name, response)
-
-                self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
-
-                total_spikes = float(sum(spike_counts))
-                avg_count = total_spikes/len(spike_counts)
-                avg_latency = sum(spike_latencies)/len(spike_latencies)
-                avg_rate = sum(spike_rates)/len(spike_rates)
-                self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
-
-                self.finite_player.stop()
+                    player.stop()
+        except Broken:
+            pass
 
         self.signals.group_finished.emit()
+
+    def process_response(self, response, irep, nreps):
+        if irep == 0:
+            spike_counts = []
+            spike_latencies = []
+            spike_rates = []
+        else:
+            spike_counts = self.spike_counts
+            spike_latencies = self.spike_latencies
+            spike_rates = self.spike_rates
+
+        self.signals.response_collected.emit(self.aitimes, response)
+
+        # process response; calculate spike times
+        spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)
+        spike_counts.append(len(spike_times))
+        if len(spike_times) > 0:
+            spike_latencies.append(spike_times[0])
+        else:
+            spike_latencies.append(np.nan)
+        spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
+
+        response_bins = spikestats.bin_spikes(spike_times, self.binsz)
+        if len(response_bins) > 0:
+            self.signals.spikes_found.emit(response_bins, irep)
+
+        self.datafile.append(self.current_dataset_name, response)
+
+        if irep == nreps-1:
+            total_spikes = float(sum(spike_counts))
+            avg_count = total_spikes/len(spike_counts)
+            avg_latency = sum(spike_latencies)/len(spike_latencies)
+            avg_rate = sum(spike_rates)/len(spike_rates)
+            self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
+    
+        self.spike_counts = spike_counts
+        self.spike_latencies = spike_latencies
+        self.spike_rates = spike_rates
 
     def interval_wait(self):
         # calculate time since last interation and wait to acheive desired interval
@@ -321,14 +349,29 @@ class AcquisitionModel():
         self.datafile.init_data(self.current_dataset_name, mode='continuous')
         self.chart_name = increment_title(self.chart_name)
         
-        self.chart_player.start(self.aichan)
+        # stimulus tracker channel hard-coded at last chan for now
+        self.chart_player.start_continuous([self.aichan, u"PCI-6259/ai31"])
 
     def stop_chart(self):
-        self.chart_player.stop()
+        self.chart_player.stop_all()
         self.datafile.consolidate(self.current_dataset_name)
 
     def emit_ncollected(self, data):
         # relay emit signal
-        self.signals.ncollected.emit(data)
+        response = data[0,:]
+        stim_recording = data[1,:]
+        self.signals.ncollected.emit(stim_recording, response)
         if self.saveall:
-            self.datafile.append(self.current_dataset_name, data)
+            self.datafile.append(self.current_dataset_name, response)
+
+    def run_chart_protocol(self, interval):
+        self._halt = False
+
+        self.chart_player.set_aochan(self.aochan)
+        self.start_time = time.time()
+        self.last_tick = self.start_time - (interval/1000)
+        self.interval = interval
+        self.acq_thread = threading.Thread(target=self._protocol_worker, args=(self.chart_player, False))
+
+        self.acq_thread.start()
+        return self.acq_thread

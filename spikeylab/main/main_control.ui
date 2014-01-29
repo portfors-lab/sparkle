@@ -70,7 +70,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -204,11 +204,6 @@
            </layout>
           </item>
          </layout>
-        </widget>
-        <widget class="QWidget" name="tab_chart">
-         <attribute name="title">
-          <string>Chart</string>
-         </attribute>
         </widget>
         <widget class="QWidget" name="tab_protocol">
          <attribute name="title">
@@ -543,6 +538,31 @@
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBox">
+            <item>
+             <property name="text">
+              <string>Windowed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Chart</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -554,6 +574,24 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QPushButton" name="start_chart_btn">
+            <property name="text">
+             <string>Start Chart</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stop_chart_btn">
+            <property name="text">
+             <string>Stop Chart</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -938,6 +976,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>comboBox</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>mode_toggled(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>734</x>
+     <y>277</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>705</x>
+     <y>407</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -953,5 +1007,6 @@
   <slot>add_protocol_stim()</slot>
   <slot>set_explore_samplerate()</slot>
   <slot>launch_specgram_dlg()</slot>
+  <slot>mode_toggled(QString)</slot>
  </slots>
 </ui>

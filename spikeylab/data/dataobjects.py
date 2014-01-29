@@ -27,7 +27,7 @@ class AcquisitionData():
         self.meta = {}
 
         self.open_set_size = 32
-        self.chunk_size = 2**16 # better to have a multiple of fs?
+        self.chunk_size = 2**24 # better to have a multiple of fs?
 
         self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
         self.hdf5.attrs['who'] = user

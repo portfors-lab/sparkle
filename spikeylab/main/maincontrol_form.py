@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Jan 27 00:59:09 2014
+# Created: Wed Jan 29 10:12:14 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -128,9 +128,6 @@ class Ui_ControlWindow(object):
         self.verticalLayout_8.addLayout(self.gridLayout_7)
         self.horizontalLayout_7.addLayout(self.verticalLayout_8)
         self.tab_group.addTab(self.tab_explore, _fromUtf8(""))
-        self.tab_chart = QtGui.QWidget()
-        self.tab_chart.setObjectName(_fromUtf8("tab_chart"))
-        self.tab_group.addTab(self.tab_chart, _fromUtf8(""))
         self.tab_protocol = QtGui.QWidget()
         self.tab_protocol.setObjectName(_fromUtf8("tab_protocol"))
         self.verticalLayout_5 = QtGui.QVBoxLayout(self.tab_protocol)
@@ -308,8 +305,28 @@ class Ui_ControlWindow(object):
         self.thresh_spnbx.setObjectName(_fromUtf8("thresh_spnbx"))
         self.gridLayout.addWidget(self.thresh_spnbx, 3, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
+        self.horizontalLayout_6 = QtGui.QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
+        self.label_17 = QtGui.QLabel(self.centralwidget)
+        self.label_17.setObjectName(_fromUtf8("label_17"))
+        self.horizontalLayout_6.addWidget(self.label_17)
+        self.comboBox = QtGui.QComboBox(self.centralwidget)
+        self.comboBox.setObjectName(_fromUtf8("comboBox"))
+        self.comboBox.addItem(_fromUtf8(""))
+        self.comboBox.addItem(_fromUtf8(""))
+        self.horizontalLayout_6.addWidget(self.comboBox)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem2)
+        self.horizontalLayout_8 = QtGui.QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
+        self.start_chart_btn = QtGui.QPushButton(self.centralwidget)
+        self.start_chart_btn.setObjectName(_fromUtf8("start_chart_btn"))
+        self.horizontalLayout_8.addWidget(self.start_chart_btn)
+        self.stop_chart_btn = QtGui.QPushButton(self.centralwidget)
+        self.stop_chart_btn.setObjectName(_fromUtf8("stop_chart_btn"))
+        self.horizontalLayout_8.addWidget(self.stop_chart_btn)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_8)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.start_btn = QtGui.QPushButton(self.centralwidget)
@@ -432,7 +449,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tab_group.setCurrentIndex(2)
+        self.tab_group.setCurrentIndex(1)
         self.parameter_stack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
@@ -441,6 +458,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionShow_PSTH, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_psth)
         QtCore.QObject.connect(self.explore_stim_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.parameter_stack.setCurrentIndex)
         QtCore.QObject.connect(self.actionSpectrogram_Parameters, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_specgram_dlg)
+        QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.mode_toggled)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -457,7 +475,6 @@ class Ui_ControlWindow(object):
         self.label_6.setText(_translate("ControlWindow", "Gen. Sample rate", None))
         self.funit_lbl.setText(_translate("ControlWindow", "kHz", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_explore), _translate("ControlWindow", "Explore", None))
-        self.tab_group.setTabText(self.tab_group.indexOf(self.tab_chart), _translate("ControlWindow", "Chart", None))
         self.label_14.setText(_translate("ControlWindow", "Rep:", None))
         self.label_8.setText(_translate("ControlWindow", "Test:", None))
         self.label_9.setText(_translate("ControlWindow", "Trace:", None))
@@ -482,6 +499,11 @@ class Ui_ControlWindow(object):
         self.tunit_lbl_2.setText(_translate("ControlWindow", "ms", None))
         self.label_35.setText(_translate("ControlWindow", "Rep rate", None))
         self.label_36.setText(_translate("ControlWindow", "reps/s", None))
+        self.label_17.setText(_translate("ControlWindow", "Mode", None))
+        self.comboBox.setItemText(0, _translate("ControlWindow", "Windowed", None))
+        self.comboBox.setItemText(1, _translate("ControlWindow", "Chart", None))
+        self.start_chart_btn.setText(_translate("ControlWindow", "Start Chart", None))
+        self.stop_chart_btn.setText(_translate("ControlWindow", "Stop Chart", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
         self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))

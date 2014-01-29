@@ -11,11 +11,13 @@ class TestDAQPlayers():
         player.set_stim(tone, fs)
         player.set_aidur(0.01)
         player.set_aisr(fs)
-        player.start(u"PCI-6259/ao0",u"PCI-6259/ai0")
+        player.set_aichan(u"PCI-6259/ai0")
+        player.set_aochan(u"PCI-6259/ao0")
+        player.start()
 
-        response0 = player.read()
+        response0 = player.run()
         player.reset()
-        response1 = player.read()
+        response1 = player.run()
         player.stop()
 
         # pyplot.plot(tone)
@@ -34,11 +36,13 @@ class TestDAQPlayers():
         player.set_stim(tone, fs)
         player.set_aidur(0.02)
         player.set_aisr(fs/4)
-        player.start(u"PCI-6259/ao0",u"PCI-6259/ai0")
+        player.set_aichan(u"PCI-6259/ai0")
+        player.set_aochan(u"PCI-6259/ao0")
+        player.start()
 
-        response0 = player.read()
+        response0 = player.run()
         player.reset()
-        response1 = player.read()
+        response1 = player.run()
         player.stop()
 
         # Just make sure doesn't throw error then?
@@ -56,13 +60,13 @@ class TestDAQPlayers():
         self.data = []
         self.single = []
         player.set_read_function(self.stash_acq)
-        player.start([u"PCI-6259/ai0",u"PCI-6259/ai1"])
+        player.start_continuous([u"PCI-6259/ai0",u"PCI-6259/ai1"])
 
         # now start a generation
         player.reset()
-        player.generate()
+        player.run()
 
-        player.stop()
+        player.stop_all()
         nstims = player.generation_count()
 
         # print 'data shape', self.single.shape
