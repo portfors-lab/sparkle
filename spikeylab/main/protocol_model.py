@@ -75,6 +75,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.insertTest(item, index.row())
 
     def removeTest(self, position):
+        """Removes a test from the order list, but not keeps a reference"""
         self.beginRemoveRows(QtCore.QModelIndex(), position, position)
         self.test_order.pop(position)
         self.endRemoveRows()
@@ -88,7 +89,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.endInsertRows()
 
     def insertNewTest(self, stim, position):
-        """Creates a new Stimulus Model and opens it's appropriate editor"""
+        """Creates inserts a new test into list"""
 
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
 
