@@ -16,18 +16,26 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
                             border-right:1px inset lightgrey}\
                             ")
         self.up10.setIcon(arrowup())
+        self.up5.setIcon(arrowup())
         self.up1.setIcon(arrowup())
         self.down10.setIcon(arrowdown())
+        self.down5.setIcon(arrowdown())
         self.down1.setIcon(arrowdown())
 
     def increment1(self):
         self.incrementn(1)
+
+    def increment5(self):
+        self.incrementn(5)
 
     def increment10(self):
         self.incrementn(10)
 
     def decrement1(self):
         self.incrementn(-1)
+
+    def decrement5(self):
+        self.incrementn(-5)
 
     def decrement10(self):
         self.incrementn(-10)

@@ -56,25 +56,17 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             return stimid
 
     def flags(self, index):
-        if index.column() == 2:
-            return QtCore.Qt.ItemIsEnabled
-        else:
+        if index.column() == 1:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        else:
+            return QtCore.Qt.ItemIsEnabled
 
     def setData(self, index, value, role):
-        print 'setting data!'
         if role == QtCore.Qt.EditRole:
-            stimid = self.test_order[index.row()]
-            test = self.tests[stimid]
-            col = index.column()
-            if col == 0:
-                test.set_name(value)
-            elif col == 1:
-                test.set_reps(value)
-            elif col == 2:
-                test.set_note(value)
-
-            self.editCompleted.emit(value)
+            if index.column() == 1:
+                stimid = self.test_order[index.row()]
+                test = self.tests[stimid]
+                test.setRepCount(value)
 
     def removeItem(self, index):
         self.removeTest(index.row())
