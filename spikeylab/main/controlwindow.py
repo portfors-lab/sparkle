@@ -125,6 +125,9 @@ class ControlWindow(QtGui.QMainWindow):
             
     def save_inputs(self, fname):
         # save current inputs to file for loading next time
+        if not fname:
+            return
+            
         appdir = systools.get_appdir()
         if not os.path.isdir(appdir):
             os.makedirs(appdir)
