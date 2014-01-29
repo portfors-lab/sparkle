@@ -76,11 +76,11 @@
      <property name="spacing">
       <number>0</number>
      </property>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="up1">
+     <item row="2" column="0">
+      <widget class="QPushButton" name="down10">
        <property name="minimumSize">
         <size>
-         <width>30</width>
+         <width>20</width>
          <height>0</height>
         </size>
        </property>
@@ -94,7 +94,7 @@
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
        </property>
        <property name="text">
-        <string>1</string>
+        <string>   </string>
        </property>
       </widget>
      </item>
@@ -131,11 +131,11 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QPushButton" name="down10">
+     <item row="1" column="2">
+      <widget class="QPushButton" name="up1">
        <property name="minimumSize">
         <size>
-         <width>20</width>
+         <width>30</width>
          <height>0</height>
         </size>
        </property>
@@ -149,11 +149,11 @@
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
        </property>
        <property name="text">
-        <string>    </string>
+        <string>1</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="2" column="2">
       <widget class="QPushButton" name="down1">
        <property name="minimumSize">
         <size>
@@ -171,7 +171,51 @@
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
        </property>
        <property name="text">
-        <string>  </string>
+        <string>   </string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="up5">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
+       </property>
+       <property name="text">
+        <string>5</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QPushButton" name="down5">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
+       </property>
+       <property name="text">
+        <string>   </string>
        </property>
       </widget>
      </item>
@@ -204,8 +248,8 @@
    <slot>decrement10()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>275</x>
-     <y>52</y>
+     <x>268</x>
+     <y>47</y>
     </hint>
     <hint type="destinationlabel">
      <x>135</x>
@@ -245,11 +289,45 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>down5</sender>
+   <signal>clicked()</signal>
+   <receiver>IncrementInput</receiver>
+   <slot>decrement5()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>185</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>up5</sender>
+   <signal>clicked()</signal>
+   <receiver>IncrementInput</receiver>
+   <slot>increment5()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>13</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>185</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>increment10()</slot>
   <slot>increment1()</slot>
   <slot>decrement10()</slot>
   <slot>decrement1()</slot>
+  <slot>increment5()</slot>
+  <slot>decrement5()</slot>
  </slots>
 </ui>
