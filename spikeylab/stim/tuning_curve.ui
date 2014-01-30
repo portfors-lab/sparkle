@@ -395,7 +395,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="ok_btn">
        <property name="text">
         <string>Ok</string>
        </property>
@@ -415,7 +415,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>ok_btn</sender>
    <signal>clicked()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>close()</slot>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Jan 29 10:12:14 2014
+# Created: Wed Jan 29 16:32:27 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -175,6 +175,14 @@ class Ui_ControlWindow(object):
         self.stimulus_choices.setObjectName(_fromUtf8("stimulus_choices"))
         self.verticalLayout_5.addWidget(self.stimulus_choices)
         self.tab_group.addTab(self.tab_protocol, _fromUtf8(""))
+        self.tab_calibrate = QtGui.QWidget()
+        self.tab_calibrate.setObjectName(_fromUtf8("tab_calibrate"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.tab_calibrate)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.widget = CalibrationWidget(self.tab_calibrate)
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.verticalLayout.addWidget(self.widget)
+        self.tab_group.addTab(self.tab_calibrate, _fromUtf8(""))
         self.horizontalLayout_5.addWidget(self.tab_group)
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
@@ -449,7 +457,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tab_group.setCurrentIndex(1)
+        self.tab_group.setCurrentIndex(2)
         self.parameter_stack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
@@ -487,6 +495,7 @@ class Ui_ControlWindow(object):
         self.trace_info.setText(_translate("ControlWindow", "Super cool info", None))
         self.label_2.setText(_translate("ControlWindow", "Experiment Protocol:", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_protocol), _translate("ControlWindow", "Experiment", None))
+        self.tab_group.setTabText(self.tab_group.indexOf(self.tab_calibrate), _translate("ControlWindow", "Calibration", None))
         self.label_30.setText(_translate("ControlWindow", "AI channel", None))
         self.label_29.setText(_translate("ControlWindow", "Stim channel", None))
         self.label.setText(_translate("ControlWindow", "Acq. Sample rate", None))
@@ -529,6 +538,7 @@ class Ui_ControlWindow(object):
 
 from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox
+from spikeylab.calibration.calibration_widget import CalibrationWidget
 from spikeylab.plotting.custom_plots import PSTHWidget
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay
 from spikeylab.main.protocol_model import ProtocolView

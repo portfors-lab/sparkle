@@ -70,7 +70,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -296,6 +296,16 @@
           </item>
           <item>
            <widget class="StimulusLabelTable" name="stimulus_choices" native="true"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_calibrate">
+         <attribute name="title">
+          <string>Calibration</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="CalibrationWidget" name="widget" native="true"/>
           </item>
          </layout>
         </widget>
@@ -860,6 +870,12 @@
    <class>SmartSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>spikeylab.stim.smart_spinbox</header>
+  </customwidget>
+  <customwidget>
+   <class>CalibrationWidget</class>
+   <extends>QWidget</extends>
+   <header>spikeylab.calibration.calibration_widget</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

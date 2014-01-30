@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Wed Jan 29 15:43:11 2014
+# Created: Wed Jan 29 15:47:49 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -226,13 +226,13 @@ class Ui_TuningCurveEditor(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
-        self.pushButton = QtGui.QPushButton(TuningCurveEditor)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.horizontalLayout.addWidget(self.pushButton)
+        self.ok_btn = QtGui.QPushButton(TuningCurveEditor)
+        self.ok_btn.setObjectName(_fromUtf8("ok_btn"))
+        self.horizontalLayout.addWidget(self.ok_btn)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(TuningCurveEditor)
-        QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), TuningCurveEditor.close)
+        QtCore.QObject.connect(self.ok_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), TuningCurveEditor.close)
         QtCore.QObject.connect(self.nreps_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimReps)
         QtCore.QObject.connect(self.freq_start_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.db_start_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
@@ -262,6 +262,6 @@ class Ui_TuningCurveEditor(object):
         self.label_31.setText(_translate("TuningCurveEditor", "Reps", None))
         self.label.setText(_translate("TuningCurveEditor", "Generation rate", None))
         self.funit_lbl_1.setText(_translate("TuningCurveEditor", "kHz", None))
-        self.pushButton.setText(_translate("TuningCurveEditor", "Ok", None))
+        self.ok_btn.setText(_translate("TuningCurveEditor", "Ok", None))
 
 from spikeylab.stim.smart_spinbox import SmartSpinBox
