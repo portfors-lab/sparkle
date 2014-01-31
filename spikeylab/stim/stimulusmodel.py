@@ -61,7 +61,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def columnCountForRow(self, row):
         return len(self._segments[row])
 
-    def data(self, index, role):
+    def data(self, index, role=QtCore.Qt.UserRole):
         if not index.isValid():
             return None
         if role == QtCore.Qt.DisplayRole:

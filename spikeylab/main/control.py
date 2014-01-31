@@ -57,6 +57,7 @@ class MainWindow(ControlWindow):
         self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         
         self.ui.protocolView.setModel(self.acqmodel.protocol_model)
+        self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
 
         self.acqmodel.signals.response_collected.connect(self.display_response)
         self.acqmodel.signals.spikes_found.connect(self.display_raster)
@@ -216,15 +217,24 @@ class MainWindow(ControlWindow):
             self.acqmodel.run_protocol(interval)
         else:
             self.acqmodel.run_chart_protocol(interval)
-            
-    def display_stim(self, stimdeets, times, signal, xfft, yfft):
-        print "display stim"
-        self.ui.display.update_signal(times, signal)
-        self.ui.display.update_fft(xfft, yfft)
 
     def display_response(self, times, response):
         # print "display reponse"
         self.ui.display.update_spiketrace(times, response)
+
+    def display_calibration_response(self, spectrum, freqs, spec_peak, vmax):
+        # display fft here
+        self.ui.aiv_lbl.setText(str(vmax))
+        self.ui.fftf_lbl.setText(str(spec_peak))
+        try:
+            times = np.arange(len(data))/sr
+            self.display.draw_line(1,0, times, data)
+            self.display.draw_line(2,1, freq, spectrum)
+            if self.current_operation == 1:
+                resultdb = calc_db(vmax, self.caldb, self.calval)
+                self.livecurve.set_point(f,db,resultdb)
+        except:
+            print u"WARNING : Problem drawing to calibration plot"
 
     def display_raster(self, bins, repnum):
         # convert to times for raster
@@ -232,6 +242,13 @@ class MainWindow(ControlWindow):
         bin_times = (np.array(bins)*binsz)+(binsz/2)
         self.ui.display.add_raster_points(bin_times, repnum)
         self.ui.psth.append_data(bins, repnum)
+            
+    def display_stim(self, signal, fs):
+        print "display stim"
+        freq, spectrum = calc_spectrum(signal, fs)
+        timevals = np.arange(len(signal)).astype(float)/fs
+        self.ui.display.update_signal(timevals, signal)
+        self.ui.display.update_fft(freq, spectrum)
 
     def report_progress(self, itest, itrace, stim_info):
         self.ui.test_num.setText(str(itest))

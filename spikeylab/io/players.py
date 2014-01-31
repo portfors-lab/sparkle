@@ -225,8 +225,8 @@ class ContinuousPlayer(PlayerBase):
         self.on_read = lambda x: x # placeholder
 
     def start_continuous(self, aichans, update_hz=10):
-        """Begins a continuous analog generation, emitting an ncollected 
-        signal at a rate of 10Hz"""
+        """Begins a continuous analog generation, calling a provided function
+         at a rate of 10Hz"""
         self.daq_lock.acquire()
 
         self.ngenerated = 0 # number of stimuli presented during chart run

@@ -14,7 +14,8 @@ class TCFactory():
     def editor(self):
         return TuningCurveEditor
 
-    def init_stim(self, stim):
+    @staticmethod
+    def init_stim(stim):
         """
         takes and inital empty stim and populates 
         it with a default tuning curve

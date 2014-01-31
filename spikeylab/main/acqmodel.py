@@ -1,10 +1,11 @@
 import os, time
 import threading
+import json
 import numpy as np
 import scipy.io.wavfile as wv
 
 from spikeylab.io.players import FinitePlayer, ContinuousPlayer
-from spikeylab.tools.audiotools import spectrogram, calc_spectrum
+from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
 from spikeylab.tools import spikestats
 from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.tools.util import increment_title, create_unique_path
@@ -12,6 +13,7 @@ from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.main.protocol_model import ProtocolTabelModel
+from spikeylab.stim.tceditor import TCFactory
 
 SAVE_EXPLORE = True
 
@@ -34,10 +36,14 @@ class AcquisitionModel():
         self.set_name = 'explore_0'
         self.group_name = 'segment_0'
         self.chart_name = 'chart_0'
+        self.caldb = 100
+        self.calv = 0.1
 
         self.protocol_model = ProtocolTabelModel()
         # stimulus for explore function
         self.stimulus = StimulusModel()
+        self.calibration_stimulus = StimulusModel()
+        TCFactory.init_stim(self.calibration_stimulus)
         self.signals.samplerateChanged = self.stimulus.samplerateChanged
 
         stimuli_types = get_stimuli_models()
@@ -230,30 +236,32 @@ class AcquisitionModel():
         self.interval = interval
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
+        stimuli = self.protocol_model.stimulusList()
+
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
-                                           args=(self.finite_player, True))
+                                           args=(self.finite_player, stimuli),
+                                           kwargs={'initialize_test':self.init_test, 
+                                           'process_response':self.process_response})
 
         self.acq_thread.start()
 
         return self.acq_thread
 
-    def _protocol_worker(self, player, read):
-        # pull out signal from stim model
-        stimuli = self.protocol_model.stimulusList()
+    def _protocol_worker(self, player, stimuli, initialize_test=None, process_response=None):
         try:
             for itest, test in enumerate(stimuli):
+                # pull out signal from stim model
                 traces = test.expandedStim()
                 doc  = test.expandedDoc()
                 nreps = test.repCount()
-                if read:
-                    recording_length = self.aitimes.shape[0]
-                    self.datafile.init_data(self.current_dataset_name, 
-                                            dims=(len(traces), nreps, recording_length),
-                                            mode='finite')
+                if initialize_test:
+                    initialize_test(test)
+                self.nreps = test.repCount() # not sure I like this
                 for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
 
                     signal, atten = trace
                     player.set_stim(signal, test.samplerate(), atten)
+
                     player.start()
                     for irep in range(nreps):
                         self.interval_wait()
@@ -262,21 +270,42 @@ class AcquisitionModel():
                         response = player.run()
                         if irep == 0:
                             # do this after collection so plots match details
+                            self.signals.stim_generated.emit(signal, test.samplerate())
                             self.signals.current_trace.emit(itest,itrace,trace_doc)
                         self.signals.current_rep.emit(irep)
-                        if read:
-                            self.process_response(response, irep, nreps)
+                        if process_response:
+                            process_response(response, trace_doc, irep)
 
                         player.reset()
+                    # always save protocol response
                     self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
 
                     player.stop()
+            # cheat
+            if self.current_dataset_name == 'calibration':
+                self.process_calibration()
         except Broken:
-            pass
+            # save some abortion message
+            player.stop()
 
         self.signals.group_finished.emit()
 
-    def process_response(self, response, irep, nreps):
+    def init_test(self, test):
+        recording_length = self.aitimes.shape[0]
+        self.datafile.init_data(self.current_dataset_name, 
+                                dims=(test.traceCount(), test.repCount(), recording_length),
+                                mode='finite')
+
+    def init_calibration(self, test):
+        self.datafile.init_group(self.current_dataset_name)
+        self.datafile.init_data(self.current_dataset_name, mode='finite',
+                                dims=(test.traceCount(), test.repCount()),
+                                nested_name='fft_peaks')
+        self.datafile.init_data(self.current_dataset_name, mode='finite',
+                                dims=(test.traceCount(), test.repCount()),
+                                nested_name='vmax')
+
+    def process_response(self, response, trace_info, irep):
         if irep == 0:
             spike_counts = []
             spike_latencies = []
@@ -303,7 +332,7 @@ class AcquisitionModel():
 
         self.datafile.append(self.current_dataset_name, response)
 
-        if irep == nreps-1:
+        if irep == self.nreps-1:
             total_spikes = float(sum(spike_counts))
             avg_count = total_spikes/len(spike_counts)
             avg_latency = sum(spike_latencies)/len(spike_latencies)
@@ -371,7 +400,71 @@ class AcquisitionModel():
         self.start_time = time.time()
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
-        self.acq_thread = threading.Thread(target=self._protocol_worker, args=(self.chart_player, False))
+        
+        stimuli = self.protocol_model.stimulusList()
+        self.acq_thread = threading.Thread(target=self._protocol_worker, 
+                                           args=(self.chart_player, stimuli))
 
         self.acq_thread.start()
         return self.acq_thread
+
+    def run_calibration(self, interval):
+        self._halt = False
+        self.current_dataset_name = 'calibration'
+        self.calf = 15000
+        self.calibration_frequencies = []
+        self.calibration_indexes = []
+        self.trace_counter = 0 # don't like this!!!
+        # save the start time and set last tick to expired, so first
+        # acquisition loop iteration executes immediately
+        self.start_time = time.time()
+        self.last_tick = self.start_time - (interval/1000)
+        self.interval = interval
+        self.finite_player.set_aochan(self.aochan)
+        self.finite_player.set_aichan(self.aichan)
+        self.acq_thread = threading.Thread(target=self._protocol_worker, 
+                                           args=(self.finite_player, [self.calibration_stimulus]),
+                                           kwargs={'initialize_test':self.init_calibration, 
+                                           'process_response':self.process_caltone})
+
+        self.acq_thread.start()
+        return self.acq_thread
+
+    def process_caltone(self, recorded_tone, trace_info, irep):
+        freq, spectrum = calc_spectrum(recorded_tone, self.finite_player.aisr)
+
+        f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
+        db = trace_info['components'][0]['intensity']
+        if db == self.caldb:
+            self.calibration_frequencies.append(f)
+            self.calibration_indexes.append(self.trace_counter)
+        self.trace_counter +=1
+
+        spec_max, max_freq = get_fft_peak(spectrum, freq)
+        spec_peak_at_f = spectrum[freq == f]
+        if len(spec_peak_at_f) == 0:
+            print u"COULD NOT FIND TARGET FREQUENCY ",f
+            print 'target', f, 'freqs', freq
+            spec_peak_at_f = np.array([-1])
+            # self._halt = True
+
+        vmax = np.amax(abs(recorded_tone))
+
+        self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
+                             nested_name='fft_peaks')
+        self.datafile.append(self.current_dataset_name, np.array([vmax]), 
+                             nested_name='vmax')
+
+        self.signals.response_collected.emit(self.aitimes, recorded_tone)
+        self.signals.calibration_response_collected.emit(spectrum, freq, spec_peak_at_f[0], vmax)
+
+    def process_calibration(self):
+        print 'process the calibration'
+
+        vfunc = np.vectorize(calc_db)
+
+        peaks = self.datafile.get('fft_peaks')
+        vmaxes = self.datafile.get('vmax')
+
+        stim_info_str = dict(self.datafile.get_info('calibration'))['stim']
+        stim_info = json.loads(stim_info_str[:-1] +']') # closing bracket is only added at file close

@@ -305,7 +305,7 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="CalibrationWidget" name="widget" native="true"/>
+           <widget class="CalibrationWidget" name="calibration_widget" native="true"/>
           </item>
          </layout>
         </widget>

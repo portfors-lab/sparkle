@@ -38,8 +38,12 @@ class AcquisitionData():
 
     def close(self):
         for key in self.datasets.keys():
-            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
-
+            if 'stim' in self.datasets[key].attrs.keys():
+                self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
+        for key in self.groups.keys():
+            if 'stim' in self.groups[key].attrs.keys():
+                self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
+        
         fname = self.hdf5.filename
         self.hdf5.close()
 
@@ -51,11 +55,11 @@ class AcquisitionData():
         self.groups[key] = self.hdf5.create_group(key)
         self.meta[key] = {'mode': 'finite'}
 
-    def init_data(self, key, dims=None, mode='finite'):
+    def init_data(self, key, dims=None, mode='finite', nested_name=None):
         """
         Initize a new dataset
 
-        :param key: the dataset name
+        :param key: the dataset or group name
         :type key: str
         :param dims: dimensions of dataset,
         * if mode == 'finite', this is the total size
@@ -66,13 +70,17 @@ class AcquisitionData():
         :type mode: str
         """
         if mode == 'finite':
-            self.test_count +=1
-            setname = 'test_'+str(self.test_count)
+            if nested_name is None:
+                self.test_count +=1
+                setname = 'test_'+str(self.test_count)
+                setpath ='/'.join([key, setname])
+            else:
+                setname = nested_name
+                setpath = key
             if not key in self.groups:
                 self.init_group(key)
             self.datasets[setname] = self.groups[key].create_dataset(setname, dims)
             self.meta[setname] = {'cursor':[0]*len(dims)}
-            setpath = '/'.join([key, setname])
             self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
                               'mode':mode, 'stim': '[ '})
         elif mode == 'open':
@@ -92,13 +100,16 @@ class AcquisitionData():
             raise Exception("Unknown acquisition mode")
         
 
-    def append(self, key, data):
+    def append(self, key, data, nested_name=None):
         """
         Inserts data sequentially to structure in repeated calls.
         """
         mode = self.meta[key]['mode']
         if mode == 'finite':
-            setname = 'test_'+str(self.test_count)
+            if nested_name is None:
+                setname = 'test_'+str(self.test_count)
+            else:
+                setname = nested_name
             current_location = self.meta[setname]['cursor']
             if data.shape == (1,):
                 index = current_location
@@ -165,6 +176,9 @@ class AcquisitionData():
             data = self.datasets[key][:]
         return data
 
+    def get_info(self, key):
+        return self.hdf5[key].attrs.items()
+
     def trim(self, key):
         """
         Removes empty rows from dataset
@@ -222,7 +236,11 @@ class AcquisitionData():
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + stim_data + ','
         if mode == 'finite':
             setname = 'test_'+str(self.test_count)
-            self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
+            if setname in self.datasets.keys():
+                self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
+            else:
+                # there is no test_; append to group e.g. calibration
+                self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'] + stim_data + ','
         elif mode =='continuous':
             setnum = self.meta[key]['set_counter']
             self.datasets[key+'_set'+str(setnum)].attrs['stim'] = self.datasets[key+'_set'+str(setnum)].attrs['stim'] + stim_data + ','
@@ -266,9 +284,9 @@ def repack(h5file):
     f1, opened = _openfile(h5file) 
     filename1 = f1.filename
     filename2 = filename1 + '_repack_tmp'
-    f2 = h5py.File(filename2)
+    f2 = h5py.File(filename2, 'w')
     for key in f1.keys():
-        print 'copying', key
+        # print 'copying', key
         f1.copy(key, f2)
     f1.close()
     f2.close()

@@ -190,6 +190,21 @@ class TestAcquisitionModel():
         self.timer = threading.Timer(1.0, self.stopchart, args=(acqmodel, fname))
         self.timer.start()
 
+    def stopchart(self, acqmodel, fname):
+        acqmodel.stop_chart()
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['chart_0']
+        stim = json.loads(test.attrs['stim'])
+        assert stim == []
+        assert test.size > 1
+        assert len(test.shape) == 1
+
+        hfile.close()
+        self.done = True
+
     def test_chart_tone_protocol(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
@@ -226,20 +241,30 @@ class TestAcquisitionModel():
         
         hfile.close()
 
-    def stopchart(self, acqmodel, fname):
-        acqmodel.stop_chart()
+    def test_calibration_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 500000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+
+        tc = acqmodel.calibration_stimulus
+        ntraces = tc.traceCount()
+        nreps = tc.repCount()
+        # use tuning curve defaults?
+        t = acqmodel.run_calibration(0.25)
+        t.join()
+
         acqmodel.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['chart_0']
-        stim = json.loads(test.attrs['stim'])
-        assert stim == []
-        assert test.size > 1
-        assert len(test.shape) == 1
+        peaks = hfile['calibration']['fft_peaks']
+        stim = json.loads(hfile['calibration'].attrs['stim'])
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        assert_equal(peaks.shape,(ntraces,nreps))
 
         hfile.close()
-        self.done = True
 
     def create_acqmodel(self, winsz, acq_rate):
         acqmodel = AcquisitionModel()
