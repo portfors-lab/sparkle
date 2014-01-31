@@ -67,7 +67,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.ncollected.connect(self.update_chart)
         self.acqmodel.signals.current_trace.connect(self.report_progress)
         self.acqmodel.signals.current_rep.connect(self.report_rep)
-        self.acqmodel.signals.group_finished.connect(self.on_stop)
+        self.acqmodel.signals.group_finished.connect(self.on_group_done)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
 
         self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
@@ -104,9 +104,10 @@ class MainWindow(ControlWindow):
 
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.run_explore()
-
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
+            self.run_calibration()
         else: 
             raise Exception("unrecognized tab selection")
 
@@ -176,6 +177,11 @@ class MainWindow(ControlWindow):
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
 
+    def on_group_done(self):
+        if self.active_operation == 'calibration':
+            results = acqmodel.process_calibration()
+        self.on_stop()
+
     def run_chart(self):
         winsz, acq_rate = self.on_update()
         # change plot to scrolling plot
@@ -217,6 +223,16 @@ class MainWindow(ControlWindow):
             self.acqmodel.run_protocol(interval)
         else:
             self.acqmodel.run_chart_protocol(interval)
+
+    def run_calibration(self):
+        self.ui.start_btn.setEnabled(False)
+        self.active_operation = 'calibration'
+
+        reprate = self.ui.reprate_spnbx.value()
+        interval = (1/reprate)*1000
+
+        self.on_update()
+        self.acqmodel.run_calibration(interval)
 
     def display_response(self, times, response):
         # print "display reponse"

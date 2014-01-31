@@ -37,6 +37,38 @@ class TCFactory():
         tuning_curve.setData(tuning_curve.index(0,2), 100, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(0,3), 10, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(1,1), 0, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)
+
+class CCFactory():
+    name = 'Calibration Curve'
+    def editor(self):
+        return TuningCurveEditor
+
+    @staticmethod
+    def init_stim(stim):
+        """
+        takes and inital empty stim and populates 
+        it with a default tuning curve
+        """
+        tone = PureTone()
+        tone.setDuration(1.0)
+        stim.insertComponent(tone)
+
+        tuning_curve = stim.autoParams()
+        tuning_curve.insertRows(0,2)
+
+        selection_model = tuning_curve.data(tuning_curve.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim.index(0,0))
+        selection_model = tuning_curve.data(tuning_curve.index(1,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim.index(0,0))
+
+        tuning_curve.setData(tuning_curve.index(0,0), 'frequency', role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,1), 0, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,2), 200, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,3), 10, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,1), 90, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)

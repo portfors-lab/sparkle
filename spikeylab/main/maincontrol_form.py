@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Jan 29 16:32:27 2014
+# Created: Fri Jan 31 09:36:14 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -179,9 +179,9 @@ class Ui_ControlWindow(object):
         self.tab_calibrate.setObjectName(_fromUtf8("tab_calibrate"))
         self.verticalLayout = QtGui.QVBoxLayout(self.tab_calibrate)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.widget = CalibrationWidget(self.tab_calibrate)
-        self.widget.setObjectName(_fromUtf8("widget"))
-        self.verticalLayout.addWidget(self.widget)
+        self.calibration_widget = CalibrationWidget(self.tab_calibrate)
+        self.calibration_widget.setObjectName(_fromUtf8("calibration_widget"))
+        self.verticalLayout.addWidget(self.calibration_widget)
         self.tab_group.addTab(self.tab_calibrate, _fromUtf8(""))
         self.horizontalLayout_5.addWidget(self.tab_group)
         self.verticalLayout_2 = QtGui.QVBoxLayout()

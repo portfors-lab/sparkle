@@ -253,7 +253,7 @@ class TestAcquisitionModel():
         # use tuning curve defaults?
         t = acqmodel.run_calibration(0.25)
         t.join()
-
+        acqmodel.process_calibration()
         acqmodel.close_data()
 
         # now check saved data
@@ -265,7 +265,7 @@ class TestAcquisitionModel():
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
         assert_equal(peaks.shape,(ntraces,nreps))
-        assert cal_vector.shape == (11,)
+        assert cal_vector.shape == (21,) #beware, will fail if defaults change
 
         hfile.close()
 

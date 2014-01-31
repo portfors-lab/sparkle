@@ -13,7 +13,7 @@ from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.main.protocol_model import ProtocolTabelModel
-from spikeylab.stim.tceditor import TCFactory
+from spikeylab.stim.tceditor import CCFactory
 
 SAVE_EXPLORE = True
 
@@ -43,7 +43,7 @@ class AcquisitionModel():
         # stimulus for explore function
         self.stimulus = StimulusModel()
         self.calibration_stimulus = StimulusModel()
-        TCFactory.init_stim(self.calibration_stimulus)
+        CCFactory.init_stim(self.calibration_stimulus)
         self.signals.samplerateChanged = self.stimulus.samplerateChanged
 
         stimuli_types = get_stimuli_models()
@@ -281,9 +281,6 @@ class AcquisitionModel():
                     self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
 
                     player.stop()
-            # cheat
-            if self.current_dataset_name == 'calibration':
-                self.process_calibration()
         except Broken:
             # save some abortion message
             player.stop()
@@ -459,7 +456,10 @@ class AcquisitionModel():
         self.signals.calibration_response_collected.emit(spectrum, freq, spec_peak_at_f[0], vmax)
 
     def process_calibration(self):
+        """processes the data gathered in a calibration run (does not work if multiple
+            calibrations), returns resultant dB"""
         print 'process the calibration'
+        dataset_name = 'calibration'
 
         vfunc = np.vectorize(calc_db)
 
@@ -472,18 +472,20 @@ class AcquisitionModel():
         cal_peak = peaks[cal_index]
         cal_vmax = vmaxes[cal_index]
 
+        print 'vfunc inputs', vmaxes, self.caldb, cal_peak
         resultant_dB = vfunc(vmaxes, self.caldb, cal_peak)
         print 'results', resultant_dB
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+        self.datafile.init_data(dataset_name, mode='calibration',
                                 dims=calibration_vector.shape,
                                 nested_name='calibration_intensities')
-        self.datafile.append(self.current_dataset_name, calibration_vector,
+        self.datafile.append(dataset_name, calibration_vector,
                              nested_name='calibration_intensities')
 
         relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
                          'calibration_voltage': self.calv}
-        self.datafile.set_metadata(self.current_dataset_name+'/'+'calibration_intensities',
+        self.datafile.set_metadata(dataset_name+'/'+'calibration_intensities',
                                    relevant_info)
+        return resultant_dB
