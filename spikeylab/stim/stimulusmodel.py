@@ -181,8 +181,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
         steps = []
         ntraces = 1
         for p in params:
-            steps.append(np.arange(p['start'], p['stop'], p['step']))
-            ntraces = ntraces*len(steps[-1])
+            if p['start'] > p['stop']:
+                step = -1*p['step']
+            else:
+                step = p['step']
+            ntraces = ntraces*(len(np.arange(p['start'], p['stop'], step)) + 1)
         return ntraces
 
     def loopCount(self):
@@ -211,7 +214,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
         steps = []
         ntraces = 1
         for p in params:
-            steps.append(np.arange(p['start'], p['stop'], p['step']))
+            # inclusive range
+            steps.append(np.append(np.arange(p['start'], p['stop'], p['step']),p['stop']))
             ntraces = ntraces*len(steps[-1])
 
         varylist = [[None for x in range(len(params))] for y in range(ntraces)]

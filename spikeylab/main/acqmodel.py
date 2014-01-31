@@ -298,10 +298,10 @@ class AcquisitionModel():
 
     def init_calibration(self, test):
         self.datafile.init_group(self.current_dataset_name)
-        self.datafile.init_data(self.current_dataset_name, mode='finite',
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(test.traceCount(), test.repCount()),
                                 nested_name='fft_peaks')
-        self.datafile.init_data(self.current_dataset_name, mode='finite',
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(test.traceCount(), test.repCount()),
                                 nested_name='vmax')
 
@@ -411,7 +411,7 @@ class AcquisitionModel():
     def run_calibration(self, interval):
         self._halt = False
         self.current_dataset_name = 'calibration'
-        self.calf = 15000
+        self.calf = 20000
         self.calibration_frequencies = []
         self.calibration_indexes = []
         self.trace_counter = 0 # don't like this!!!
@@ -442,7 +442,7 @@ class AcquisitionModel():
 
         spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
-        if len(spec_peak_at_f) == 0:
+        if len(spec_peak_at_f) != 1:
             print u"COULD NOT FIND TARGET FREQUENCY ",f
             print 'target', f, 'freqs', freq
             spec_peak_at_f = np.array([-1])
@@ -466,5 +466,24 @@ class AcquisitionModel():
         peaks = self.datafile.get('fft_peaks')
         vmaxes = self.datafile.get('vmax')
 
-        stim_info_str = dict(self.datafile.get_info('calibration'))['stim']
-        stim_info = json.loads(stim_info_str[:-1] +']') # closing bracket is only added at file close
+        print 'calibration frequencies', self.calibration_frequencies
+        cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
+
+        cal_peak = peaks[cal_index]
+        cal_vmax = vmaxes[cal_index]
+
+        resultant_dB = vfunc(vmaxes, self.caldb, cal_peak)
+        print 'results', resultant_dB
+
+        calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
+        # save a vector of only the calibration intensity results
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                dims=calibration_vector.shape,
+                                nested_name='calibration_intensities')
+        self.datafile.append(self.current_dataset_name, calibration_vector,
+                             nested_name='calibration_intensities')
+
+        relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
+                         'calibration_voltage': self.calv}
+        self.datafile.set_metadata(self.current_dataset_name+'/'+'calibration_intensities',
+                                   relevant_info)

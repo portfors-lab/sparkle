@@ -53,7 +53,12 @@ class AcquisitionData():
     def init_group(self, key):
         """create a high level group"""
         self.groups[key] = self.hdf5.create_group(key)
-        self.meta[key] = {'mode': 'finite'}
+        if key == 'calibration':
+            self.meta[key] = {'mode': 'calibration'}
+            self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 
+                              'mode':'calibration', 'stim': '[ '})
+        else:
+            self.meta[key] = {'mode': 'finite'}
 
     def init_data(self, key, dims=None, mode='finite', nested_name=None):
         """
@@ -69,14 +74,13 @@ class AcquisitionData():
         :param mode: the kind of acquisition taking place
         :type mode: str
         """
-        if mode == 'finite':
-            if nested_name is None:
-                self.test_count +=1
-                setname = 'test_'+str(self.test_count)
-                setpath ='/'.join([key, setname])
-            else:
-                setname = nested_name
-                setpath = key
+        if mode == 'calibration':
+            self.datasets[nested_name] = self.groups[key].create_dataset(nested_name, dims)
+            self.meta[nested_name] = {'cursor':[0]*len(dims)}
+        elif mode == 'finite':
+            self.test_count +=1
+            setname = 'test_'+str(self.test_count)
+            setpath ='/'.join([key, setname])
             if not key in self.groups:
                 self.init_group(key)
             self.datasets[setname] = self.groups[key].create_dataset(setname, dims)
@@ -105,7 +109,7 @@ class AcquisitionData():
         Inserts data sequentially to structure in repeated calls.
         """
         mode = self.meta[key]['mode']
-        if mode == 'finite':
+        if mode == 'finite' or mode == 'calibration':
             if nested_name is None:
                 setname = 'test_'+str(self.test_count)
             else:
@@ -236,14 +240,12 @@ class AcquisitionData():
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + stim_data + ','
         if mode == 'finite':
             setname = 'test_'+str(self.test_count)
-            if setname in self.datasets.keys():
-                self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
-            else:
-                # there is no test_; append to group e.g. calibration
-                self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'] + stim_data + ','
+            self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
         elif mode =='continuous':
             setnum = self.meta[key]['set_counter']
             self.datasets[key+'_set'+str(setnum)].attrs['stim'] = self.datasets[key+'_set'+str(setnum)].attrs['stim'] + stim_data + ','
+        elif mode == 'calibration':
+            self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'] + stim_data + ','
 
 def increment(index, dims, data_shape):
     data_shape = data_shape

@@ -52,7 +52,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                         step = -1*param['step']
                     else:
                         step = param['step']
-                    item = len(np.arange(param['start'], param['stop'], step))
+                    item = len(np.arange(param['start'], param['stop'], step)) + 1
                 else:
                     item = 0
             return item

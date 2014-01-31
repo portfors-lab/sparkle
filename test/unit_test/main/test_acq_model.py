@@ -249,6 +249,7 @@ class TestAcquisitionModel():
         tc = acqmodel.calibration_stimulus
         ntraces = tc.traceCount()
         nreps = tc.repCount()
+        # tc.autoParameters()
         # use tuning curve defaults?
         t = acqmodel.run_calibration(0.25)
         t.join()
@@ -259,10 +260,12 @@ class TestAcquisitionModel():
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         peaks = hfile['calibration']['fft_peaks']
         stim = json.loads(hfile['calibration'].attrs['stim'])
+        cal_vector = hfile['calibration']['calibration_intensities']
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
         assert_equal(peaks.shape,(ntraces,nreps))
+        assert cal_vector.shape == (11,)
 
         hfile.close()
 
