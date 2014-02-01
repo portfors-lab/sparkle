@@ -30,6 +30,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.stimid = uuid.uuid1()
 
         self.editor = None
+        self.reorder = None
 
     def setSamplerate(self, fs):
         self._samplerate = fs
@@ -208,7 +209,16 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     return True
         return False
 
-    def expandFucntion(self, func):
+    def autoParamRanges(self):
+        """Return the expanded auto parameters, individually"""
+        params = self._auto_params.allData()
+        steps = []
+        for p in params:
+            # inclusive range
+            steps.append(np.append(np.arange(p['start'], p['stop'], p['step']),p['stop']))
+        return steps
+        
+    def expandFucntion(self):
         # initilize array to hold all varied parameters
         params = self._auto_params.allData()
         steps = []
@@ -230,6 +240,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # go through list of modifing parameters, update this stimulus,
         # and then save current state to list
         stim_list = []
+        doc_list = []
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
                 comp_inds = self._auto_params.selection(param)
@@ -238,7 +249,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
-            stim_list.append(func())
+            stim_list.append(self.signal())
+            doc_list.append(self.doc())
 
         # now reset the components to start value
         for ip, param in enumerate(params):
@@ -247,23 +259,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 component = self.data(index, QtCore.Qt.UserRole)
                 component.set(param['parameter'], varylist[0][ip])
 
-        return stim_list
+        if self.reorder:
+            order = self.reorder(doc_list)
+            stim_list = [stim_list[i] for i in order]
+            doc_list = [doc_list[i] for i in order]
+
+        return stim_list, doc_list
+
+    def setReorderFunc(self, func):
+        self.reorder = func
 
     def expandedStim(self):
         """
         Apply the autoparameters to this stimulus and return a list of
-        the resulting stimuli
+        the resulting stimuli, and a complimentary list of doc dictionaries
         """
-        stim_list = self.expandFucntion(self.signal)
-        return stim_list
-
-    def expandedDoc(self):
-        """
-        dictionary representation of exactly what was presented. 
-        Contains only JSON compatable types
-        """
-        doc_list = self.expandFucntion(self.doc)
-        return doc_list
+        return self.expandFucntion()
 
     def templateDoc(self):
         """
@@ -309,7 +320,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 doc_list.append(info)
 
         return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
-
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
 
     def stimType(self):

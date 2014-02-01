@@ -32,6 +32,7 @@ class AcquisitionModel():
         self.datafile = None
         self.savefolder = None
         self.savename = None
+        self.calname = 'calibration'
         self.saveall = True
         self.set_name = 'explore_0'
         self.group_name = 'segment_0'
@@ -92,6 +93,9 @@ class AcquisitionModel():
         """
         self.savefolder = savefolder
         self.savename = savename
+
+    def set_calibration_file_name(self, savename):
+        self.calname = savename
 
     def set_params(self, **kwargs):
 
@@ -239,7 +243,7 @@ class AcquisitionModel():
         stimuli = self.protocol_model.stimulusList()
 
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
-                                           args=(self.finite_player, stimuli),
+                                           args=(self.finite_player, stimuli, self.datafile),
                                            kwargs={'initialize_test':self.init_test, 
                                            'process_response':self.process_response})
 
@@ -247,15 +251,15 @@ class AcquisitionModel():
 
         return self.acq_thread
 
-    def _protocol_worker(self, player, stimuli, initialize_test=None, process_response=None):
+    def _protocol_worker(self, player, stimuli, datafile, initialize_test=None, 
+                         process_response=None):
         try:
             for itest, test in enumerate(stimuli):
                 # pull out signal from stim model
-                traces = test.expandedStim()
-                doc  = test.expandedDoc()
-                nreps = test.repCount()
                 if initialize_test:
                     initialize_test(test)
+                traces, doc = test.expandedStim()
+                nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
                 for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
 
@@ -278,7 +282,7 @@ class AcquisitionModel():
 
                         player.reset()
                     # always save protocol response
-                    self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                    datafile.append_trace_info(self.current_dataset_name, trace_doc)
 
                     player.stop()
         except Broken:
@@ -294,11 +298,12 @@ class AcquisitionModel():
                                 mode='finite')
 
     def init_calibration(self, test):
-        self.datafile.init_group(self.current_dataset_name)
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+        test.setReorderFunc(self.reorder_calibration_traces)
+        self.calfile.init_group(self.current_dataset_name)
+        self.calfile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(test.traceCount(), test.repCount()),
                                 nested_name='fft_peaks')
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+        self.calfile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(test.traceCount(), test.repCount()),
                                 nested_name='vmax')
 
@@ -357,7 +362,7 @@ class AcquisitionModel():
     def save_data(self, data):
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
-        info = self.stimulus.expandedDoc()[0]
+        info = self.stimulus.doc()
         info['samplerate_ad'] = self.finite_player.aisr
         self.datafile.append_trace_info(self.current_dataset_name, info)
 
@@ -400,7 +405,7 @@ class AcquisitionModel():
         
         stimuli = self.protocol_model.stimulusList()
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
-                                           args=(self.chart_player, stimuli))
+                                           args=(self.chart_player, stimuli, self.datafile))
 
         self.acq_thread.start()
         return self.acq_thread
@@ -419,24 +424,33 @@ class AcquisitionModel():
         self.interval = interval
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
+
+        if self.savefolder is None or self.savename is None:
+            print "You must first set a save folder and filename"
+        fname = create_unique_path(self.savefolder, self.calname)
+        print 'calibration file name', fname
+        self.calfile = AcquisitionData(fname)
+
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
-                                           args=(self.finite_player, [self.calibration_stimulus]),
+                                           args=(self.finite_player, [self.calibration_stimulus],
+                                            self.calfile),
                                            kwargs={'initialize_test':self.init_calibration, 
                                            'process_response':self.process_caltone})
 
         self.acq_thread.start()
-        return self.acq_thread
+        return self.acq_thread, fname
 
     def process_caltone(self, recorded_tone, trace_info, irep):
         freq, spectrum = calc_spectrum(recorded_tone, self.finite_player.aisr)
 
         f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
         db = trace_info['components'][0]['intensity']
+        print 'f', f, 'db', db
         if db == self.caldb:
             self.calibration_frequencies.append(f)
             self.calibration_indexes.append(self.trace_counter)
         self.trace_counter +=1
-
+        
         spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
         if len(spec_peak_at_f) != 1:
@@ -447,13 +461,13 @@ class AcquisitionModel():
 
         vmax = np.amax(abs(recorded_tone))
 
-        self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
+        self.calfile.append(self.current_dataset_name, spec_peak_at_f, 
                              nested_name='fft_peaks')
-        self.datafile.append(self.current_dataset_name, np.array([vmax]), 
+        self.calfile.append(self.current_dataset_name, np.array([vmax]), 
                              nested_name='vmax')
 
         self.signals.response_collected.emit(self.aitimes, recorded_tone)
-        self.signals.calibration_response_collected.emit(spectrum, freq, spec_peak_at_f[0], vmax)
+        self.signals.calibration_response_collected.emit((f, db), spectrum, freq, spec_peak_at_f[0], vmax)
 
     def process_calibration(self):
         """processes the data gathered in a calibration run (does not work if multiple
@@ -463,8 +477,8 @@ class AcquisitionModel():
 
         vfunc = np.vectorize(calc_db)
 
-        peaks = self.datafile.get('fft_peaks')
-        vmaxes = self.datafile.get('vmax')
+        peaks = abs(self.calfile.get('fft_peaks'))
+        vmaxes = abs(self.calfile.get('vmax'))
 
         print 'calibration frequencies', self.calibration_frequencies
         cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
@@ -472,20 +486,33 @@ class AcquisitionModel():
         cal_peak = peaks[cal_index]
         cal_vmax = vmaxes[cal_index]
 
-        print 'vfunc inputs', vmaxes, self.caldb, cal_peak
-        resultant_dB = vfunc(vmaxes, self.caldb, cal_peak)
+        print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
+        resultant_dB = vfunc(vmaxes, self.caldb, cal_vmax)
         print 'results', resultant_dB
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
-        self.datafile.init_data(dataset_name, mode='calibration',
+        self.calfile.init_data(dataset_name, mode='calibration',
                                 dims=calibration_vector.shape,
                                 nested_name='calibration_intensities')
-        self.datafile.append(dataset_name, calibration_vector,
+        self.calfile.append(dataset_name, calibration_vector,
                              nested_name='calibration_intensities')
 
         relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
                          'calibration_voltage': self.calv}
-        self.datafile.set_metadata(dataset_name+'/'+'calibration_intensities',
+        self.calfile.set_metadata(u'calibration_intensities',
                                    relevant_info)
+        self.calfile.close()
         return resultant_dB
+
+    def reorder_calibration_traces(self, doclist):
+        # Pick out the calibration frequency and put it first
+        order = range(len(doclist))
+        for i, trace in enumerate(doclist):
+            if trace['components'][0]['frequency'] == self.calf and trace['components'][0]['intensity'] == self.caldb:
+                order.pop(i)
+                order.insert(0,i)
+                return order
+        else:
+            #did not find calibration frequency, raise Error
+            raise Exception('calibraiton frequency not found in stimulus')

@@ -52,12 +52,14 @@ class AcquisitionData():
         
     def init_group(self, key):
         """create a high level group"""
-        self.groups[key] = self.hdf5.create_group(key)
         if key == 'calibration':
+            # calibration in it's own file, so the file will be the group
+            self.groups[key] = self.hdf5
             self.meta[key] = {'mode': 'calibration'}
-            self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 
+            self.set_metadata('', {'start': time.strftime('%H:%M:%S'), 
                               'mode':'calibration', 'stim': '[ '})
         else:
+            self.groups[key] = self.hdf5.create_group(key)
             self.meta[key] = {'mode': 'finite'}
 
     def init_data(self, key, dims=None, mode='finite', nested_name=None):
@@ -228,8 +230,15 @@ class AcquisitionData():
     def set_metadata(self, key, attrdict):
         # key is an iterable of group keys (str), with the last
         # string being the attribute name
-        for attr, val in attrdict.iteritems():
-            self.hdf5[key].attrs[attr] = val
+        print 'metadata key', key
+        print 'all keys', self.hdf5.keys()
+        if key == '':
+             for attr, val in attrdict.iteritems():
+                self.hdf5.attrs[attr] = val
+        else:
+            for attr, val in attrdict.iteritems():
+                self.hdf5[key].attrs[attr] = val
+        
 
     def append_trace_info(self, key, stim_data):
         # append data to json list?

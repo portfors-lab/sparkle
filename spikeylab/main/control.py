@@ -11,8 +11,9 @@ from spikeylab.dialogs.saving_dlg import SavingDialog
 from spikeylab.dialogs.scale_dlg import ScaleDialog
 from spikeylab.dialogs.specgram_dlg import SpecDialog
 from spikeylab.main.acqmodel import AcquisitionModel
-from spikeylab.tools.audiotools import spectrogram, calc_spectrum
+from spikeylab.tools.audiotools import spectrogram, calc_spectrum, calc_db
 from spikeylab.plotting.custom_plots import SpecWidget
+from spikeylab.plotting.plotz import LiveCalPlot
 
 from controlwindow import ControlWindow
 
@@ -50,6 +51,11 @@ class MainWindow(ControlWindow):
         self.scrollplot = ChartWidget()
 
         self.apply_calibration = False
+        self.calval = None
+        self.calf = 20000
+        self.caldb = 100
+        self.calv = 0.1
+
         self.display = None
 
         self.live_lock = QtCore.QMutex()
@@ -60,6 +66,7 @@ class MainWindow(ControlWindow):
         self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
 
         self.acqmodel.signals.response_collected.connect(self.display_response)
+        self.acqmodel.signals.calibration_response_collected.connect(self.display_calibration_response)
         self.acqmodel.signals.spikes_found.connect(self.display_raster)
         self.acqmodel.signals.trace_finished.connect(self.trace_done)
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
@@ -179,7 +186,7 @@ class MainWindow(ControlWindow):
 
     def on_group_done(self):
         if self.active_operation == 'calibration':
-            results = acqmodel.process_calibration()
+            results = self.acqmodel.process_calibration()
         self.on_stop()
 
     def run_chart(self):
@@ -228,6 +235,10 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.setEnabled(False)
         self.active_operation = 'calibration'
 
+        frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
+        self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
+        self.ui.psth_dock.setWidget(self.livecurve)
+
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
 
@@ -238,20 +249,26 @@ class MainWindow(ControlWindow):
         # print "display reponse"
         self.ui.display.update_spiketrace(times, response)
 
-    def display_calibration_response(self, spectrum, freqs, spec_peak, vmax):
+    def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
         # display fft here
-        self.ui.aiv_lbl.setText(str(vmax))
-        self.ui.fftf_lbl.setText(str(spec_peak))
+        f, db = fdb
+        self.ui.calibration_widget.ui.aiv_lbl.setText(str(vmax))
+        self.ui.calibration_widget.ui.fftf_lbl.setText(str(spec_peak))
+        self.ui.calibration_widget.ui.flabel.setText(str(f))
+        self.ui.calibration_widget.ui.dblabel.setText(str(db))
+        if f == self.calf and db == self.caldb:
+            # this should always be the first trace actually
+            self.calval = vmax
         try:
-            times = np.arange(len(data))/sr
-            self.display.draw_line(1,0, times, data)
-            self.display.draw_line(2,1, freq, spectrum)
-            if self.current_operation == 1:
-                resultdb = calc_db(vmax, self.caldb, self.calval)
-                self.livecurve.set_point(f,db,resultdb)
+            # times = np.arange(len(data))/sr
+            # self.display.draw_line(1,0, times, data)
+            # self.display.draw_line(2,1, freq, spectrum)
+
+            resultdb = calc_db(vmax, self.caldb, self.calval)
+            self.livecurve.set_point(f,db,resultdb)
         except:
             print u"WARNING : Problem drawing to calibration plot"
-
+            raise
     def display_raster(self, bins, repnum):
         # convert to times for raster
         binsz = float(self.ui.binsz_spnbx.value())*self.tscale
@@ -260,7 +277,6 @@ class MainWindow(ControlWindow):
         self.ui.psth.append_data(bins, repnum)
             
     def display_stim(self, signal, fs):
-        print "display stim"
         freq, spectrum = calc_spectrum(signal, fs)
         timevals = np.arange(len(signal)).astype(float)/fs
         self.ui.display.update_signal(timevals, signal)

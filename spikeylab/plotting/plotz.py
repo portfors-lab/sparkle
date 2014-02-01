@@ -440,6 +440,7 @@ class LiveCalPlot(BasePlot):
     def __init__(self, freqs, intensities, parent=None):
         BasePlot.__init__(self, (1,1), parent)
  
+        print 'recieved', freqs, intensities
         for idb in intensities:
             dummydata = np.empty((len(freqs),1))
             dummydata[:] = np.NAN
@@ -451,9 +452,11 @@ class LiveCalPlot(BasePlot):
 
         self.frequencies = freqs
         self.intensities = intensities
-        self.axs[0].set_ylim(50,100)
+        self.axs[0].set_ylim(50,110)
+        self.axs[0].set_xlim(freqs[0],freqs[-1])
 
     def set_point(self, f, db, value):
+        print 'setting point', f, db, value
         idb = self.intensities.index(db)
         l = self.axs[0].lines[idb].get_ydata()
         l[self.frequencies.index(f)] = value

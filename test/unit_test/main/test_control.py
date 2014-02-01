@@ -1,7 +1,7 @@
 from spikeylab.main.control import MainWindow
 
 import sys 
-import time
+import time, os
 from PyQt4.QtGui import QApplication 
 from PyQt4.QtTest import QTest 
 from PyQt4.QtCore import Qt
@@ -26,7 +26,7 @@ class TestSpikey():
         self.form.ui.explore_stim_type_cmbbx.setCurrentIndex(tone_idx)
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
-        assert self.form.ui.running_label.text() == "RUNNING"
+        assert self.form.ui.running_label.text() == "RECORDING"
         time.sleep(1)
         QTest.mouseClick(self.form.ui.stop_btn, Qt.LeftButton)
         assert self.form.ui.running_label.text() == "OFF"
@@ -42,9 +42,23 @@ class TestSpikey():
         # We are going to cheat and set the vocal file directly
         self.form.exvocal.current_wav_file = sample.samplewav()
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
-        assert self.form.ui.running_label.text() == "RUNNING"
+        assert self.form.ui.running_label.text() == "RECORDING"
         time.sleep(1)
         QTest.mouseClick(self.form.ui.stop_btn, Qt.LeftButton)
         assert self.form.ui.running_label.text() == "OFF"
         time.sleep(1) #gives program a chance to stash data
+
+    def test_calibration_defaults(self):
+        self.form.ui.tab_group.setCurrentIndex(2)
+        self.form.ui.aisr_spnbx.setValue(400) # should be kHz
+        self.form.ui.reprate_spnbx.setValue(4)
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+
+        timeout = 30
+        start = time.time()
+        while self.form.ui.running_label.text() == "RECORDING" and (time.time()-start) < timeout:
+            time.sleep(1)
+            QApplication.processEvents()
+            
+        assert self.form.ui.running_label.text() == "OFF"
 

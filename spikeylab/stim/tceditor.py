@@ -53,7 +53,7 @@ class CCFactory():
         it with a default tuning curve
         """
         tone = PureTone()
-        tone.setDuration(1.0)
+        tone.setDuration(0.1)
         stim.insertComponent(tone)
 
         tuning_curve = stim.autoParams()

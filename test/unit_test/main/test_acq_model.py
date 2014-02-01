@@ -251,16 +251,16 @@ class TestAcquisitionModel():
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
-        t = acqmodel.run_calibration(0.25)
+        t, calname = acqmodel.run_calibration(0.25)
         t.join()
         acqmodel.process_calibration()
         acqmodel.close_data()
 
         # now check saved data
-        hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        peaks = hfile['calibration']['fft_peaks']
-        stim = json.loads(hfile['calibration'].attrs['stim'])
-        cal_vector = hfile['calibration']['calibration_intensities']
+        hfile = h5py.File(calname, 'r')
+        peaks = hfile['fft_peaks']
+        stim = json.loads(hfile.attrs['stim'])
+        cal_vector = hfile['calibration_intensities']
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
