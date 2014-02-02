@@ -49,6 +49,11 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.hashIsDirty = True
         self.calculateRects()
 
+    def indexXY(self, index):
+        """Return the top left coordinates of the item for the given index"""
+        rect = self.visualRect(index)
+        return rect.x(), rect.y()
+
     def indexAt(self, point):
         # Transform the view coordinates into contents widget coordinates.
         wx = point.x() + self.horizontalScrollBar().value()

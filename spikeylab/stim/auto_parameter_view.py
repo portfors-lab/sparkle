@@ -67,6 +67,15 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
             self.model().setData(index, param)
 
         event.accept()
+        
+    def indexXY(self, index):
+        """Return the top left coordinates of the row for the given index"""
+        row = index.row()
+        if row == -1:
+            row = self.model().rowCount()
+        y = self.rowHeight(0)*row
+        return 0, y
+
 
 
 class ComboboxDelegate(QtGui.QStyledItemDelegate):

@@ -16,6 +16,9 @@ class AbstractDragView():
     def cursor(self, index):
         raise NotImplementedError
 
+    def indexXY(self, index):
+        raise NotImplementedError
+
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
             index = self.indexAt(event.pos())
@@ -40,7 +43,9 @@ class AbstractDragView():
             
             drag.setPixmap(pixmap)
 
-            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+            x, y = self.indexXY(index)
+            drag.setHotSpot(QtCore.QPoint(event.x()-x, event.y()-y))
+            # drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
             drag.setPixmap(pixmap)
 
             self.original_pos = index

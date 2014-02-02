@@ -165,7 +165,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         if row == -1:
             row = self.model().rowCount()
         row_height = self.rowHeight(0)
-        y = (row_height*row)
+        y = row_height*row
         x = self.width()
         return QtCore.QLine(0,y,x,y)
 
@@ -176,6 +176,13 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             self.stim_editor = selected.showEditor()
             self.stim_editor.show()
 
+    def indexXY(self, index):
+        """Return the top left coordinates of the row for the given index"""
+        row = index.row()
+        if row == -1:
+            row = self.model().rowCount()
+        y = self.rowHeight(0)*row
+        return 0, y
 
 
 if __name__ == '__main__':
