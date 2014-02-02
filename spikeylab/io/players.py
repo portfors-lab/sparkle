@@ -97,7 +97,8 @@ class PlayerBase():
 
     def set_calibration(self, db_boost_array, frequencies):
         # use supplied array of intensity adjustment to adjust tone output
-        if db_boost_array.shape != frequencies.shape:
+        if db_boost_array is not None and frequencies is not None and \
+                            db_boost_array.shape != frequencies.shape:
             print u"ERROR: calibration array and frequency array must have same dimensions"
             return
 
@@ -108,16 +109,18 @@ class PlayerBase():
 
     def set_stim(self, signal, sr, attenuation=0):
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
+        if self.calibration_vector is not None and self.calibration_frequencies is not None:
+            # calibration magic happens here!
+            signal_fft = calc_spectrum(signal, sr)
+            
+
         self.tone_lock.acquire()
         self.stim = signal
         self.sr = sr
         self.atten = attenuation
-        # dur = float(len(signal))/sr
-        # self.aitime = dur
-        # timevals = np.arange(npts).astype(float)/samplerate
+
         self.tone_lock.release()
 
-        # return timevals
 
     def get_samplerate(self):
         return self.sr

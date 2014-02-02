@@ -185,11 +185,9 @@ class MainWindow(ControlWindow):
         self.ui.running_label.setPalette(RED)
 
     def on_group_done(self, halted):
-        print 'group finished', self.active_operation
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
-            print 'save', save, 'halted', halted
             results = self.acqmodel.process_calibration(save)
         self.on_stop()
 
@@ -250,7 +248,7 @@ class MainWindow(ControlWindow):
         interval = (1/reprate)*1000
 
         self.on_update()
-        self.acqmodel.run_calibration(interval)
+        self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
 
     def display_response(self, times, response):
         # print "display reponse"

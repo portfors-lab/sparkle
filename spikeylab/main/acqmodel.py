@@ -71,6 +71,9 @@ class AcquisitionModel():
             raise
         self.calibration_vector, self.calibration_freqs = cal
         self.update_reference_voltage()
+        # set the calibration for the player objects
+        self.finite_player.set_calibration(self.calibration_vector, self.calibration_freqs)
+        self.chart_player.set_calibration(self.calibration_vector, self.calibration_freqs)
 
     def create_data_file(self):
         # find first available file name
@@ -303,7 +306,6 @@ class AcquisitionModel():
             # save some abortion message
             player.stop()
 
-        print 'emitting group finished'
         self.signals.group_finished.emit(self._halt)
 
     def init_test(self, test):
@@ -425,7 +427,7 @@ class AcquisitionModel():
         self.acq_thread.start()
         return self.acq_thread
 
-    def run_calibration(self, interval):
+    def run_calibration(self, interval, apply_cal):
         self._halt = False
         self.current_dataset_name = 'calibration'
         self.calibration_frequencies = []
@@ -438,6 +440,8 @@ class AcquisitionModel():
         self.interval = interval
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
+        if not apply_cal:
+            self.finite_player.set_calibration(None, None)
 
         if self.savefolder is None or self.savename is None:
             print "You must first set a save folder and filename"
@@ -494,15 +498,15 @@ class AcquisitionModel():
         peaks = abs(self.calfile.get('fft_peaks'))
         vmaxes = abs(self.calfile.get('vmax'))
 
-        print 'calibration frequencies', self.calibration_frequencies
+        # print 'calibration frequencies', self.calibration_frequencies
         cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
 
         cal_peak = peaks[cal_index]
         cal_vmax = vmaxes[cal_index]
 
-        print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
+        # print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
         resultant_dB = vfunc(vmaxes, self.caldb, cal_vmax)
-        print 'results', resultant_dB
+        # print 'results', resultant_dB
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
