@@ -286,13 +286,13 @@ class AcquisitionModel():
                         if self._halt:
                             raise Broken
                         response = player.run()
+                        if process_response:
+                            process_response(response, trace_doc, irep)
                         if irep == 0:
                             # do this after collection so plots match details
                             self.signals.stim_generated.emit(signal, test.samplerate())
                             self.signals.current_trace.emit(itest,itrace,trace_doc)
                         self.signals.current_rep.emit(irep)
-                        if process_response:
-                            process_response(response, trace_doc, irep)
 
                         player.reset()
                     # always save protocol response
@@ -303,7 +303,8 @@ class AcquisitionModel():
             # save some abortion message
             player.stop()
 
-        self.signals.group_finished.emit()
+        print 'emitting group finished'
+        self.signals.group_finished.emit(self._halt)
 
     def init_test(self, test):
         recording_length = self.aitimes.shape[0]
@@ -458,7 +459,7 @@ class AcquisitionModel():
 
         f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
         db = trace_info['components'][0]['intensity']
-        print 'f', f, 'db', db
+        # print 'f', f, 'db', db
         if db == self.caldb:
             self.calibration_frequencies.append(f)
             self.calibration_indexes.append(self.trace_counter)
@@ -482,7 +483,7 @@ class AcquisitionModel():
         self.signals.response_collected.emit(self.aitimes, recorded_tone)
         self.signals.calibration_response_collected.emit((f, db), spectrum, freq, spec_peak_at_f[0], vmax)
 
-    def process_calibration(self):
+    def process_calibration(self, save=True):
         """processes the data gathered in a calibration run (does not work if multiple
             calibrations), returns resultant dB"""
         print 'process the calibration'
@@ -505,19 +506,25 @@ class AcquisitionModel():
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
-        self.calfile.init_data(dataset_name, mode='calibration',
-                                dims=calibration_vector.shape,
-                                nested_name='calibration_intensities')
-        self.calfile.append(dataset_name, calibration_vector,
-                             nested_name='calibration_intensities')
-
-        relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
-                         'calibration_voltage': self.calv}
-        self.calfile.set_metadata(u'calibration_intensities',
-                                   relevant_info)
         fname = self.calfile.filename
-        self.calfile.close()
-        self.set_calibration(fname)
+        if save:
+            self.calfile.init_data(dataset_name, mode='calibration',
+                                    dims=calibration_vector.shape,
+                                    nested_name='calibration_intensities')
+            self.calfile.append(dataset_name, calibration_vector,
+                                 nested_name='calibration_intensities')
+
+            relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
+                             'calibration_voltage': self.calv}
+            self.calfile.set_metadata(u'calibration_intensities',
+                                       relevant_info)
+            self.calfile.close()
+            self.set_calibration(fname)
+            self.signals.calibration_file_changed.emit(fname)
+        else:
+            # delete the data saved to file thus far.
+            self.calfile.close()
+            os.remove(fname)
         return resultant_dB
 
     def reorder_calibration_traces(self, doclist):

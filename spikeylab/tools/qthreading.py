@@ -35,7 +35,8 @@ class ProtocolSignals(BaseSignals):
     stim_generated = QtCore.pyqtSignal(numpy.ndarray, int)
     threshold_updated = QtCore.pyqtSignal(float)
     trace_finished = QtCore.pyqtSignal(int, float, float, float)
-    group_finished = QtCore.pyqtSignal()
+    group_finished = QtCore.pyqtSignal(bool)
+    calibration_file_changed = QtCore.pyqtSignal(str)
 
 class TestSignals(QtCore.QObject):
     update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)

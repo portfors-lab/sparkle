@@ -461,7 +461,8 @@ class FFTPlotter(HasTraits):
         plot.padding_top = 5
 
         plot.tools.append(PanTool(plot))
-        plot.overlays.append(RectZoomTool(plot, always_on=False, always_on_modifier='control'))
+        plot.overlays.append(RectZoomTool(plot, always_on=False, always_on_modifier='control', 
+                                          axis='value', zoom_factor=1.1))
 
         return plot
 

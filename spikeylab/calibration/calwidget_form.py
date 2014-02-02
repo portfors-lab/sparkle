@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Fri Jan 31 17:42:31 2014
+# Created: Sun Feb 02 11:10:29 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -145,6 +145,8 @@ class Ui_CalibrationWidget(object):
         self.verticalLayout.addWidget(self.calgroup)
 
         self.retranslateUi(CalibrationWidget)
+        QtCore.QObject.connect(self.savecal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWidget.xor_applycal)
+        QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWidget.xor_savecal)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWidget)
 
     def retranslateUi(self, CalibrationWidget):
@@ -166,6 +168,6 @@ class Ui_CalibrationWidget(object):
         self.label4.setText(_translate("CalibrationWidget", "db SPL :", None))
         self.db_lbl.setText(_translate("CalibrationWidget", "0", None))
         self.savecal_ckbx.setText(_translate("CalibrationWidget", "Save calibration", None))
-        self.applycal_ckbx.setText(_translate("CalibrationWidget", "Apply calibration", None))
+        self.applycal_ckbx.setText(_translate("CalibrationWidget", "Test calibration", None))
 
 from spikeylab.stim.tceditor import TuningCurveEditor

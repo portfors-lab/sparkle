@@ -72,6 +72,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.current_rep.connect(self.report_rep)
         self.acqmodel.signals.group_finished.connect(self.on_group_done)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
+        self.acqmodel.signals.calibration_file_changed.connect(self.update_calfile)
 
         self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
         
@@ -172,6 +173,8 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.setText('Start')
         self.ui.start_btn.clicked.disconnect()
         self.ui.start_btn.clicked.connect(self.on_start)
+        self.ui.stop_btn.clicked.disconnect()
+        self.ui.stop_btn.clicked.connect(self.on_stop)
 
     def on_stop_chart(self):
         self.acqmodel.stop_chart()
@@ -181,9 +184,13 @@ class MainWindow(ControlWindow):
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
 
-    def on_group_done(self):
+    def on_group_done(self, halted):
+        print 'group finished', self.active_operation
         if self.active_operation == 'calibration':
-            results = self.acqmodel.process_calibration()
+            #maybe don't call this at all if save is false?
+            save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
+            print 'save', save, 'halted', halted
+            results = self.acqmodel.process_calibration(save)
         self.on_stop()
 
     def run_chart(self):
@@ -231,6 +238,8 @@ class MainWindow(ControlWindow):
     def run_calibration(self):
         self.ui.start_btn.setEnabled(False)
         self.active_operation = 'calibration'
+        self.ui.stop_btn.clicked.disconnect()
+        self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
         self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
@@ -250,6 +259,7 @@ class MainWindow(ControlWindow):
     def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
         # display fft here
         f, db = fdb
+        print 'response f', f, 'db', db
         self.ui.calibration_widget.ui.aiv_lbl.setText(str(vmax))
         self.ui.calibration_widget.ui.fftf_lbl.setText(str(spec_peak))
         self.ui.calibration_widget.ui.flabel.setText(str(f))
@@ -274,6 +284,7 @@ class MainWindow(ControlWindow):
         self.ui.psth.append_data(bins, repnum)
             
     def display_stim(self, signal, fs):
+        print 'stim'
         freq, spectrum = calc_spectrum(signal, fs)
         if self.active_operation == 'calibration':
             self.calibration_display.update_out_fft(freq, spectrum)
@@ -336,6 +347,10 @@ class MainWindow(ControlWindow):
             argdict = dlg.values()
             SpecWidget().set_spec_args(**argdict)
             self.spec_args = argdict
+
+    def update_calfile(self, filename):
+        self.calvals['calfile'] = filename
+        self.calvals['use_calfile'] = True
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """

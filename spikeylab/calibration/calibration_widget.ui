@@ -241,7 +241,7 @@
       <item>
        <widget class="QCheckBox" name="applycal_ckbx">
         <property name="text">
-         <string>Apply calibration</string>
+         <string>Test calibration</string>
         </property>
        </widget>
       </item>
@@ -259,5 +259,42 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>savecal_ckbx</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CalibrationWidget</receiver>
+   <slot>xor_applycal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applycal_ckbx</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CalibrationWidget</receiver>
+   <slot>xor_savecal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>311</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>542</x>
+     <y>306</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>xor_applycal()</slot>
+  <slot>xor_savecal()</slot>
+ </slots>
 </ui>

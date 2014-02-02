@@ -80,7 +80,8 @@ class PlayerBase():
             try:
                 self.attenuator.SetAtten(self.atten)
             except:
-                print "ERROR: attenuation not set!"
+                # print "ERROR: attenuation not set!"
+                pass
                 # raise
 
             self.ngenerated +=1

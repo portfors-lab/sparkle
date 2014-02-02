@@ -15,3 +15,10 @@ class CalibrationWidget(QtGui.QWidget):
         self.stim_model = model
         self.ui.curve_widget.setStimulusModel(model)
 
+    def xor_applycal(self,checked):
+        if checked:
+            self.ui.applycal_ckbx.setChecked(False)
+
+    def xor_savecal(self,checked):
+        if checked:
+            self.ui.savecal_ckbx.setChecked(False)
