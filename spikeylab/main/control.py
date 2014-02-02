@@ -10,6 +10,7 @@ from spikeylab.config.info import caldata_filename, calfreq_filename
 from spikeylab.dialogs.saving_dlg import SavingDialog 
 from spikeylab.dialogs.scale_dlg import ScaleDialog
 from spikeylab.dialogs.specgram_dlg import SpecDialog
+from spikeylab.dialogs.calibration_dlg import CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, calc_db
 from spikeylab.plotting.custom_plots import SpecWidget
@@ -51,12 +52,7 @@ class MainWindow(ControlWindow):
         self.scrollplot = ChartWidget()
 
         self.apply_calibration = False
-        self.calval = None
-        self.calf = 20000
-        self.caldb = 100
-        self.calv = 0.1
-
-        self.display = None
+        self.calpeak = None
 
         self.live_lock = QtCore.QMutex()
 
@@ -106,6 +102,7 @@ class MainWindow(ControlWindow):
                 self.acqmodel.set_save_params(self.savefolder, self.savename)
                 self.acqmodel.create_data_file()
             self.ui.plot_dock.setWidget(self.ui.display)
+            self.ui.psth_dock.setWidget(self.ui.psth_container)
             self.ui.running_label.setText(u"RECORDING")
             self.ui.running_label.setPalette(GREEN)
 
@@ -238,6 +235,7 @@ class MainWindow(ControlWindow):
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
         self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
         self.ui.psth_dock.setWidget(self.livecurve)
+        self.ui.plot_dock.setWidget(self.calibration_display)
 
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
@@ -256,19 +254,18 @@ class MainWindow(ControlWindow):
         self.ui.calibration_widget.ui.fftf_lbl.setText(str(spec_peak))
         self.ui.calibration_widget.ui.flabel.setText(str(f))
         self.ui.calibration_widget.ui.dblabel.setText(str(db))
-        if f == self.calf and db == self.caldb:
+        if f == self.calvals['calf'] and db == self.calvals['caldb']:
             # this should always be the first trace actually
-            self.calval = vmax
+            self.calpeak = vmax
         try:
-            # times = np.arange(len(data))/sr
-            # self.display.draw_line(1,0, times, data)
-            # self.display.draw_line(2,1, freq, spectrum)
+            self.calibration_display.update_in_fft(freqs, spectrum)
 
-            resultdb = calc_db(vmax, self.caldb, self.calval)
+            resultdb = calc_db(vmax, self.calvals['caldb'], self.calpeak)
             self.livecurve.set_point(f,db,resultdb)
         except:
             print u"WARNING : Problem drawing to calibration plot"
             raise
+
     def display_raster(self, bins, repnum):
         # convert to times for raster
         binsz = float(self.ui.binsz_spnbx.value())*self.tscale
@@ -278,9 +275,13 @@ class MainWindow(ControlWindow):
             
     def display_stim(self, signal, fs):
         freq, spectrum = calc_spectrum(signal, fs)
-        timevals = np.arange(len(signal)).astype(float)/fs
-        self.ui.display.update_signal(timevals, signal)
-        self.ui.display.update_fft(freq, spectrum)
+        if self.active_operation == 'calibration':
+            self.calibration_display.update_out_fft(freq, spectrum)
+            self.ui.calibration_widget.ui.avo_lbl.setText(str(np.amax(signal)))
+        else:
+            timevals = np.arange(len(signal)).astype(float)/fs
+            self.ui.display.update_signal(timevals, signal)
+            self.ui.display.update_fft(freq, spectrum)
 
     def report_progress(self, itest, itrace, stim_info):
         self.ui.test_num.setText(str(itest))
@@ -314,7 +315,13 @@ class MainWindow(ControlWindow):
             self.saveformat = saveformat
 
     def launch_calibration_dlg(self):
-        pass
+        dlg = CalibrationDialog(default_vals = self.calvals)
+        if dlg.exec_():
+            values = dlg.values()
+            self.acqmodel.set_params(**values)
+            if values['use_calfile']:
+                self.acqmodel.set_calibration(values['calfile'])
+            self.calvals = values
 
     def launch_scale_dlg(self):
         field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}

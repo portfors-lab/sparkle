@@ -9,7 +9,7 @@ from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak,
 from spikeylab.tools import spikestats
 from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.tools.util import increment_title, create_unique_path
-from spikeylab.data.dataobjects import AcquisitionData
+from spikeylab.data.dataobjects import AcquisitionData, load_calibration_file
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.main.protocol_model import ProtocolTabelModel
@@ -39,6 +39,7 @@ class AcquisitionModel():
         self.chart_name = 'chart_0'
         self.caldb = 100
         self.calv = 0.1
+        self.calf = 20000
 
         self.protocol_model = ProtocolTabelModel()
         # stimulus for explore function
@@ -46,26 +47,30 @@ class AcquisitionModel():
         self.calibration_stimulus = StimulusModel()
         CCFactory.init_stim(self.calibration_stimulus)
         self.signals.samplerateChanged = self.stimulus.samplerateChanged
+        self.update_reference_voltage()
 
         stimuli_types = get_stimuli_models()
         self.explore_stimuli = [x() for x in stimuli_types if x.explore]
 
         self.binsz = 0.005
 
+    def update_reference_voltage(self):
+        self.stimulus.setReferenceVoltage(self.caldb, self.calv)
+        self.calibration_stimulus.setReferenceVoltage(self.caldb, self.calv)
+        self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
     def stimuli_list(self):
         return self.explore_stimuli
 
     def set_calibration(self, cal_fname):
-        print "FIX ME"
+        # maybe don't set caldb and calval
         try:
-            caldata = mightyload(cal_fname)
-            calibration_vector = caldata['intensities']
-            calibration_freqs = caldata['frequencies']
+            cal = load_calibration_file(cal_fname)
         except:
             print "Error: unable to load calibration data from file: ", cal_fname
-        # calibration_vector = np.load(os.path.join(caldata_filename()))
-        # calibration_freqs = np.load(os.path.join(calfreq_filename()))
+            raise
+        self.calibration_vector, self.calibration_freqs = cal
+        self.update_reference_voltage()
 
     def create_data_file(self):
         # find first available file name
@@ -95,6 +100,7 @@ class AcquisitionModel():
         self.savename = savename
 
     def set_calibration_file_name(self, savename):
+        """Filename for which to save calibrations to"""
         self.calname = savename
 
     def set_params(self, **kwargs):
@@ -116,6 +122,14 @@ class AcquisitionModel():
             self.binsz = kwargs['binsz']
         if 'savechart' in kwargs:
             self.saveall = kwargs['savechart']
+        if 'caldb' in kwargs:
+            self.caldb = kwargs['caldb']
+        if 'calv' in kwargs:
+            self.calv = kwargs['calv']
+        if 'calf' in kwargs:
+            self.calf = kwargs['calf']
+        if 'caldb' in kwargs or 'calv' in kwargs:
+            self.update_reference_voltage()
 
     def clear_explore_stimulus(self):
         self.stimulus.clearComponents()
@@ -413,7 +427,6 @@ class AcquisitionModel():
     def run_calibration(self, interval):
         self._halt = False
         self.current_dataset_name = 'calibration'
-        self.calf = 20000
         self.calibration_frequencies = []
         self.calibration_indexes = []
         self.trace_counter = 0 # don't like this!!!
@@ -502,7 +515,9 @@ class AcquisitionModel():
                          'calibration_voltage': self.calv}
         self.calfile.set_metadata(u'calibration_intensities',
                                    relevant_info)
+        fname = self.calfile.filename
         self.calfile.close()
+        self.set_calibration(fname)
         return resultant_dB
 
     def reorder_calibration_traces(self, doclist):

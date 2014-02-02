@@ -73,6 +73,16 @@ class BaseWidget(QtGui.QWidget):
     def sizeHint(self):
         return QtCore.QSize(500, 300)
 
+class SimpleTraceWidget(BaseWidget):
+    def _create_plotter(self):
+        return LinePlotter()
+
+    def contextMenuRequested(self, point):
+        menu = QtGui.QMenu()
+        axis_action = menu.addAction("reset axis limits")
+        axis_action.triggered.connect(self.traits.reset_lims)
+        menu.exec_(self.mapToGlobal(point))
+
 class FFTWidget(BaseWidget):
     def _create_plotter(self):
         self.setToolTip('FFT of stimulus signal')
@@ -387,10 +397,52 @@ class SpikePlotter(HasTraits):
     def _raster_ymin_changed(self):
         self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
 
+class LinePlotter(HasTraits):
+    plot = Instance(OverlayPlotContainer)
+    tscale = 0.001
+
+    def _plot_default(self):
+        self.line_data = ArrayPlotData(times=[], y=[])
+        plot = Plot(self.fft_data)
+        plot.plot(('times', 'y'), type='line')
+
+        plot.x_axis.title = 'Time (ms)'
+        plot.y_axis.title = 'voltage (mV)'
+
+        self.default_tick_formatter = trace_plot.x_axis.tick_label_formatter
+        plot.x_axis.tick_label_formatter = self._time_ticks
+
+        plot.tools.append(PanTool(plot, constrain=True, constrain_direction='y'))
+        plot.tools.append(ZoomTool(plot, axis='value', zoom_factor=1.1))
+
+        return plot
+
+    def update_data(self, key, value):
+        self.line_data.set_data(key, value)
+
+    def reset_lims(self):
+        xdata = self.trace_data.get_data('times')
+        self.set_xlim((xdata[0],xdata[-1]))
+        ydata = self.trace_data.get_data('y')
+        self.set_ylim((ydata.min(), ydata.max()))
+
+    def set_tscale(self, scale):
+        self.tscale = scale
+        if self.tscale == 0.001:
+            self.trace_plot.x_axis.title = 'Time (ms)'
+        elif self.tscale == 1:
+            self.trace_plot.x_axis.title = 'Time (s)'
+        else:
+            raise Exception(u"Invalid time scale")
+
+    def _time_ticks(self, num):
+        num = num/self.tscale
+        return self.default_tick_formatter(num)
 
 class FFTPlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     fscale = 1000
+    freq_title = 'Frequency (kHz)'
     def _plot_default(self):
         self.fft_data = ArrayPlotData(freq=[], fft=[])
         plot = Plot(self.fft_data)
@@ -398,7 +450,7 @@ class FFTPlotter(HasTraits):
         plot.orientation = 'v'
 
         plot.x_axis.title = 'Intensity'
-        plot.y_axis.title = 'Frequency (kHz)'
+        plot.y_axis.title = self.freq_title
 
         self.default_tick_formatter = plot.y_axis.tick_label_formatter
         plot.y_axis.tick_label_formatter = self._freq_ticks
@@ -428,11 +480,28 @@ class FFTPlotter(HasTraits):
     def set_fscale(self, scale):
         self.fscale = scale
         if self.fscale == 1000:
-            self.plot.y_axis.title = u'Frequency (kHz)'
+            self.freq_title = u'Frequency (kHz)'
         elif self.fscale == 1:
-            self.plot.y_axis.title = u'Frequency (Hz)'
+            self.freq_title = u'Frequency (Hz)'
         else:
             raise Exception(u"Invalid frequency scale")
+        if self.plot.orientation == 'v':
+            self.plot.y_axis.title = self.freq_title
+        else:
+            self.plot.x_axis.title = self.freq_title
+
+    def set_orientation(self, orientation):
+        self.plot.orientation = orientation
+        if orientation == 'h':
+            self.plot.x_axis.title = self.freq_title
+            self.plot.y_axis.title = 'Intensity'
+            self.plot.x_axis.tick_label_formatter = self._freq_ticks
+            self.plot.y_axis.tick_label_formatter = self.default_tick_formatter
+        elif orientation == 'v':
+            self.plot.x_axis.title = 'Intensity'
+            self.plot.y_axis.title = self.freq_title
+            self.plot.y_axis.tick_label_formatter = self._freq_ticks
+            self.plot.x_axis.tick_label_formatter = self.default_tick_formatter
 
     def _freq_ticks(self, num):
         num = num/self.fscale

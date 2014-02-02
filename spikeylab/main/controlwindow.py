@@ -8,6 +8,7 @@ from maincontrol_form import Ui_ControlWindow
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.plotting.custom_plots import SpecWidget
+from spikeylab.plotting.calibration_display import CalibrationDisplay
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
@@ -16,6 +17,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
+        self.calibration_display = CalibrationDisplay()
         # make a list of which widgets should be updated when scales are changed
         self.time_inputs = [self.ui.windowsz_spnbx, self.ui.binsz_spnbx]
         self.frequency_inputs = [self.ui.aisr_spnbx, self.ui.aosr_spnbx]
@@ -101,6 +103,7 @@ class ControlWindow(QtGui.QMainWindow):
             AbstractStimulusComponent().update_fscale(self.fscale)
 
             self.ui.display.set_fscale(self.fscale)
+            self.calibration_display.set_fscale(self.fscale)
 
             if self.fscale == 1000:
                 for field in self.frequency_inputs:
@@ -150,6 +153,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
         savedict['specargs'] = self.spec_args
+        savedict['calvals'] = self.calvals
 
         # parameter settings
         for stim in self.explore_stimuli:
@@ -187,7 +191,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':'jet'})
         SpecWidget().set_spec_args(**self.spec_args)
-
+        self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 'calv':0.1,'calfile':'', 'use_calfile':False})
+        self.acqmodel.set_params(**self.calvals)
+        if self.calvals['use_calfile']:
+            self.acqmodel.set_calibration(self.calvals['calfile'])
         tscale = inputsdict.get('tscale', 0.001)
         fscale = inputsdict.get('fscale', 1000)
 

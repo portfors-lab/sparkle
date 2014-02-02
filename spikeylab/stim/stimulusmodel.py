@@ -24,13 +24,19 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self._auto_params = AutoParameterModel(self)
 
         # reference for what voltage == what intensity
-        self.calv = 0.1
-        self.caldb = 100
+        self.calv = None
+        self.caldb = None
 
         self.stimid = uuid.uuid1()
 
         self.editor = None
         self.reorder = None
+
+    def setReferenceVoltage(self, caldb, calv):
+        # make sure these are python types, so json encoding doesn't get throw
+        # error later
+        self.caldb = int(caldb)
+        self.calv = float(calv)
 
     def setSamplerate(self, fs):
         self._samplerate = fs
@@ -292,7 +298,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # track_signal = np.zeros((nsamples,))
             track_list = []
             for component in track:
-                track_list.append(component.signal(self._samplerate, atten))
+                track_list.append(component.signal(self._samplerate, atten, self.caldb, self.calv))
             if len(track_list) > 0:   
                 track_signals.append(np.hstack(track_list))
 

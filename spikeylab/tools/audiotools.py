@@ -56,7 +56,7 @@ def get_fft_peak(spectrum, freq, atfrequency=None):
         spec_peak = spectrum[freq==f]
     return spec_peak, f
 
-def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1, adjustdb=0):
+def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     # create portable tone generator class that allows the 
     # ability to generate tones that modifyable on-the-fly
     npts = dur * samplerate

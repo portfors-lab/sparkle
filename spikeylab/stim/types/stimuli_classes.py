@@ -57,8 +57,8 @@ class PureTone(Tone):
         painter.fillRect(rect.x()+5, rect.y()+35, rect.width()-10, 20, QtCore.Qt.black)
         painter.drawText(rect.x()+5, rect.y()+80,  freq+ " "+self._labels[1])
 
-    def signal(self, fs, atten):
-        tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs)[0]
+    def signal(self, fs, atten, caldb, calv):
+        tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
         return tone
 
     def stateDict(self):
@@ -158,7 +158,7 @@ class Vocalization(AbstractStimulusComponent):
         editor.setComponent(self)
         return editor
 
-    def signal(self, fs, atten):
+    def signal(self, fs, atten, caldb, calv):
         try:
             sr, wavdata = wv.read(self._filename)
         except:
@@ -170,10 +170,8 @@ class Vocalization(AbstractStimulusComponent):
         # normalize to calibration
         wavdata = wavdata.astype(float)
         print "DANGER vocal wav files Hard-coded calibration 100db 0.1V"
-        caldB = 100
-        v_at_caldB = 0.1
         max_amp = np.amax(wavdata)
-        amp = (10 ** ((self._intensity+atten-caldB)/20)*v_at_caldB)
+        amp = (10 ** ((self._intensity+atten-caldb)/20)*calv)
         wavdata = ((wavdata/max_amp)*amp)
         return wavdata
 

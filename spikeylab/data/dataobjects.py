@@ -22,6 +22,7 @@ class AcquisitionData():
     def __init__(self, filename, user='unknown'):
         # check that filename ends with '.hdf5', appending if necessary
         self.hdf5 = h5py.File(filename, 'w')
+        self.filename = filename
         self.groups = {}
         self.datasets = {}
         self.meta = {}
@@ -280,6 +281,17 @@ def increment(index, dims, data_shape):
         index[inc_index:] = [0]*len(index[inc_index:])
         inc_index -=1
     return index
+
+def load_calibration_file(filename):
+    print 'calibration filename', filename
+    calfile = h5py.File(filename, 'r')
+    cal_vector = calfile['calibration_intensities'].value
+    calset = calfile['calibration_intensities']
+    frequencies = calset.attrs['frequencies']
+    caldb = calset.attrs['calibration_dB']
+    calv = calset.attrs['calibration_voltage']
+    calfile.close()
+    return (cal_vector, frequencies)
 
 def repack(h5file):
     """

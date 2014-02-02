@@ -18,6 +18,14 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.tests = {}
         self.headers = ['Test type', 'Reps', 'Length', 'Total', 'Generation rate']
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
+        self.caldb = None
+        self.calv = None
+
+    def setReferenceVoltage(self, caldb, calv):
+        self.caldb = caldb
+        self.calv = calv
+        for test in self.tests.values():
+            test.setReferenceVoltage(caldb, calv)
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
