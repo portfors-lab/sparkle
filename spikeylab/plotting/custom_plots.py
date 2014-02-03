@@ -517,7 +517,7 @@ class ImagePlotter(HasTraits):
         self.img_data = ArrayPlotData()
         self.img_data.set_data('imagedata', np.zeros((5,5)))
         plot = Plot(self.img_data)
-        p = plot.img_plot('imagedata', name="spectrogram", colormap=default_colormaps.winter)
+        p = plot.img_plot('imagedata', name="spectrogram", colormap=default_colormaps.jet)
 
         self.default_tick_formatter = plot.y_axis.tick_label_formatter
         plot.y_axis.tick_label_formatter = self._freq_ticks
