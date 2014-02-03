@@ -10,7 +10,7 @@ class TestDAQTasks():
         self.data = []
         self.sr = 1000000 # 1000000 is max for PCI-6259
 
-    def test_syncfinite(self):
+    def test_sync_finite(self):
         u"""
         Test basic operation of DAQ and drivers
         """
@@ -64,7 +64,7 @@ class TestDAQTasks():
         aot.start()
         ait.start()
 
-        acqtime = 6 #seconds 
+        acqtime = 2 #seconds 
         time.sleep(acqtime)
 
         aot.stop()
@@ -72,7 +72,8 @@ class TestDAQTasks():
         print('no. data points acquired: ', len(self.data), 'expected', acqtime*self.sr)
         print type(self.data[0])
 
-        assert len(self.data) == acqtime*self.sr
+        expected = acqtime*self.sr
+        assert expected*0.9 <= len(self.data) <= expected*1.1
 
     def test_asynch_continuous_finite(self):
         ainpts = 1000

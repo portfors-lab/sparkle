@@ -134,7 +134,7 @@ class TestChacoPlots():
         fig.set_sr(acq_rate)
         for i in range(1,5):
             y = self.data_func(i)
-            fig.append_data(y)
+            fig.append_data(y,y)
             QApplication.processEvents()
             time.sleep(PAUSE)
         fig.close()
