@@ -5,10 +5,11 @@
 
 Welcome to spikeylab's documentation!
 =====================================
+This doc is very drafty!!!
 
 User Guide
 =================
-:doc:`Instructions for use <guide>`
+:doc:`Instructions for use <guide/index>`
 
 Programming Reference
 =====================
