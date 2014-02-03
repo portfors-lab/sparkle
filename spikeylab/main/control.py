@@ -73,6 +73,8 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.group_finished.connect(self.on_group_done)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
         self.acqmodel.signals.calibration_file_changed.connect(self.update_calfile)
+        self.acqmodel.signals.tuning_curve_started.connect(self.spawn_tuning_curve)
+        self.acqmodel.signals.tuning_curve_response.connect(self.display_tuning_curve)
 
         self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
         
@@ -274,6 +276,15 @@ class MainWindow(ControlWindow):
             print u"WARNING : Problem drawing to calibration plot"
             raise
 
+    def spawn_tuning_curve(self, frequencies, intensities):
+        self.livecurve = LiveCalPlot(frequencies, intensities)
+        self.livecurve.axs[0].set_ylim(0,30)
+        # self.livecurve.ylim_auto(self.livecurve.axs)
+        self.livecurve.show()
+
+    def display_tuning_curve(self, f, db, spike_count):
+        self.livecurve.set_point(f, db, spike_count)
+
     def display_raster(self, bins, repnum):
         # convert to times for raster
         binsz = float(self.ui.binsz_spnbx.value())*self.tscale
@@ -388,6 +399,9 @@ class MainWindow(ControlWindow):
             self.ui.start_chart_btn.show()
         else:
             raise Exception('unknown acquistion mode '+mode)
+
+    def save_explore_toggled(self, save):
+        self.save_explore = save
 
     def show_display(self):
         self.ui.plot_dock.setVisible(True)

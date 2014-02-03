@@ -11,7 +11,7 @@ class AbstractStimulusComponent(object):
     _start_time = None
     _duration = .01 # in seconds
     _intensity = 20 # in dB SPL
-    _risefall = 0
+    _risefall = 0.003
     _scales = [0.001, 1000] # time, frequency scaling factors
     _labels = ['ms', 'kHz']
     def __init__(self):

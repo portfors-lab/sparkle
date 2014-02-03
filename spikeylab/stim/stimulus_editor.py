@@ -77,6 +77,7 @@ if __name__ == "__main__":
     tone0.setDuration(0.02)
     tone1 = PureTone()
     tone1.setDuration(0.040)
+    tone1.setFrequency(25000)
     tone2 = PureTone()
     tone2.setDuration(0.010)
 
@@ -95,6 +96,7 @@ if __name__ == "__main__":
     silence0.setDuration(0.025)
 
     stim = StimulusModel()
+    stim.setReferenceVoltage(100, 0.1)
     stim.insertComponent(tone2)
     stim.insertComponent(tone1)
     # stim.insertComponent(tone0)
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     # stim.insertComponent(tone5, (1,0))
     stim.insertComponent(vocal0, (1,0))
 
-    stim.insertComponent(tone3, (2,0))
+    stim.insertComponent(tone3, (1,0))
     # stim.insertComponent(silence0, (2,0))
 
     editor = StimulusEditor()

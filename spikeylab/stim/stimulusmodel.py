@@ -50,8 +50,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
-        print self.calibration_vector
-        print self.calibration_frequencies
 
     def setSamplerate(self, fs):
         self._samplerate = fs
@@ -344,8 +342,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
                         info[key] = np.asscalar(value)
                 doc_list.append(info)
 
+        if self.editor is not None:
+            testtype = self.editor.name
+        else:
+            testtype = None
         return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
-                'calv': self.calv, 'caldb':self.caldb, 'components': doc_list}
+                'calv': self.calv, 'caldb':self.caldb, 'components': doc_list,
+                'testtype': testtype}
 
     def stimType(self):
         return self.editor.name

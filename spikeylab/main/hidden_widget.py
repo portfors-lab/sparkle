@@ -6,8 +6,8 @@ class WidgetHider(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
 
         self.title = QtGui.QLabel(content.windowTitle())
-        self.hide_icon = arrowup()
-        self.show_icon = arrowdown()
+        self.hide_icon = arrowdown()
+        self.show_icon = arrowup()
         self.hide_btn = QtGui.QPushButton('',self)
         self.hide_btn.setIcon(self.show_icon)
         self.hide_btn.setFlat(True)

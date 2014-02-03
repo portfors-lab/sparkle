@@ -15,7 +15,7 @@ from spikeylab.stim.types import get_stimuli_models
 from spikeylab.main.protocol_model import ProtocolTabelModel
 from spikeylab.stim.tceditor import CCFactory
 
-SAVE_EXPLORE = True
+SAVE_EXPLORE = False
 
 class Broken(Exception): pass
 
@@ -236,7 +236,8 @@ class AcquisitionModel():
                 raise
 
         self.finite_player.stop()
-        self.datafile.trim(self.current_dataset_name)
+        if SAVE_EXPLORE:
+            self.datafile.trim(self.current_dataset_name)
 
     def set_explore_samplerate(self, fs):
         print 'setting generation rate', fs
@@ -319,6 +320,10 @@ class AcquisitionModel():
         self.datafile.init_data(self.current_dataset_name, 
                                 dims=(test.traceCount(), test.repCount(), recording_length),
                                 mode='finite')
+        # check for special condition -- replace this with a generic
+        if test.editor is not None and test.editor.name == "Tuning Curve":
+            frequencies, intensities =  test.autoParamRanges()
+            self.signals.tuning_curve_started.emit(list(frequencies), list(intensities))
 
 
     def init_calibration(self, test):
@@ -364,7 +369,11 @@ class AcquisitionModel():
             avg_latency = sum(spike_latencies)/len(spike_latencies)
             avg_rate = sum(spike_rates)/len(spike_rates)
             self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
-    
+            if trace_info['testtype'] == 'Tuning Curve':
+                f = trace_info['components'][0]['frequency']
+                db = trace_info['components'][0]['intensity']
+                self.signals.tuning_curve_response.emit(f, db, avg_count)
+
         self.spike_counts = spike_counts
         self.spike_latencies = spike_latencies
         self.spike_rates = spike_rates

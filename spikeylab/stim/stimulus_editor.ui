@@ -84,6 +84,13 @@
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Components:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="ComponentTemplateTable" name="template_box" native="true"/>
        </item>
        <item>
@@ -122,9 +129,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="autoparam_btn">
+        <widget class="QPushButton" name="preview_btn">
          <property name="text">
-          <string>Automatic parameter manipulation</string>
+          <string>Preview Spectrogram</string>
          </property>
         </widget>
        </item>
@@ -185,13 +192,6 @@
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="preview_btn">
-         <property name="text">
-          <string>Preview Spectrogram</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="ok_btn">
          <property name="text">
           <string>Ok</string>
@@ -239,8 +239,8 @@
    <slot>setRepCount(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1007</x>
-     <y>556</y>
+     <x>899</x>
+     <y>355</y>
     </hint>
     <hint type="destinationlabel">
      <x>892</x>
@@ -255,28 +255,12 @@
    <slot>setModelSamplerate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1007</x>
-     <y>530</y>
+     <x>899</x>
+     <y>329</y>
     </hint>
     <hint type="destinationlabel">
      <x>1048</x>
      <y>515</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>preview_btn</sender>
-   <signal>clicked()</signal>
-   <receiver>StimulusEditor</receiver>
-   <slot>preview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>901</x>
-     <y>576</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1053</x>
-     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -287,12 +271,28 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>929</x>
-     <y>609</y>
+     <x>923</x>
+     <y>385</y>
     </hint>
     <hint type="destinationlabel">
      <x>1052</x>
      <y>585</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preview_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>preview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>733</x>
+     <y>292</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>642</x>
+     <y>-6</y>
     </hint>
    </hints>
   </connection>

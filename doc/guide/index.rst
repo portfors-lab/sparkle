@@ -1,6 +1,6 @@
-=========================================
+===============================================
 Sonic Sparkle High-Five Data Acquisition System
-=========================================
+================================================
 
 SSHF is an electrophysiology data acqusition and auditory stimulus assembly interface.
 
