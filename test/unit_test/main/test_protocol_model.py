@@ -12,6 +12,7 @@ from PyQt4 import QtCore, QtGui, QtTest
 class TestProtocolModel():
     def test_insert_emtpy_stim(self):
         model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
         stim = StimulusModel()
         model.insertNewTest(stim,0)        
 
@@ -20,6 +21,7 @@ class TestProtocolModel():
 
     def test_insert_remove_stim(self):
         model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
         stim = StimulusModel()
         component = PureTone()
         stim.insertComponent(component, (0,0))
@@ -41,6 +43,7 @@ class TestProtocolModel():
     def test_edit_model(self):
 
         model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
         stim = StimulusModel()
         component = PureTone()
         stim.insertComponent(component, (0,0))
@@ -63,6 +66,7 @@ class TestProtocolView():
     def test_drop_new_stim(self):
         view = ProtocolView()
         model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
         view.setModel(model)
         builder_label = FactoryLabel(BuilderFactory)
         
@@ -79,6 +83,7 @@ class TestProtocolView():
     def test_drop_prev_stim(self):
         view = ProtocolView()
         model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
         view.setModel(model)
         stim = StimulusModel()
         model.insertNewTest(stim, 0)

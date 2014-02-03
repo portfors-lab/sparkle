@@ -20,12 +20,20 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
         self.caldb = None
         self.calv = None
+        self.calibration_vector = None
+        self.calibration_frequencies = None
 
     def setReferenceVoltage(self, caldb, calv):
         self.caldb = caldb
         self.calv = calv
         for test in self.tests.values():
             test.setReferenceVoltage(caldb, calv)
+
+    def setCalibration(self, db_boost_array, frequencies):
+        self.calibration_vector = db_boost_array
+        self.calibration_frequencies = frequencies
+        for test in self.tests.values():
+            test.set_calibration(db_boost_array, frequencies)
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
@@ -100,7 +108,8 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         """Creates inserts a new test into list"""
 
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
-
+        stim.setReferenceVoltage(self.caldb, self.calv)
+        stim.setCalibration(self.calibration_vector, self.calibration_frequencies)
         # cannot serialize Qt objects, so must use a proxy list
         self.test_order.insert(position, stim.stimid)
         self.tests[stim.stimid] = stim

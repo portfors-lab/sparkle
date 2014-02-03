@@ -404,9 +404,13 @@ class MainWindow(ControlWindow):
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
 
-
 if __name__ == "__main__":
+    import sip
+    sip.setapi('QVariant', 2)
+    sip.setapi('QString', 2)
+    sip.setdestroyonexit(0)
     app = QtGui.QApplication(sys.argv)
     myapp = MainWindow("controlinputs.json")
+    app.setActiveWindow(myapp)
     myapp.show()
     sys.exit(app.exec_())

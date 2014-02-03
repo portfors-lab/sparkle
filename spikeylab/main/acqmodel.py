@@ -75,8 +75,9 @@ class AcquisitionModel():
             self.calibration_vector, self.calibration_freqs = cal
         self.update_reference_voltage()
         # set the calibration for the player objects
-        self.stimulus.set_calibration(self.calibration_vector, self.calibration_freqs)
-        self.calibration_stimulus.set_calibration(self.calibration_vector, self.calibration_freqs)
+        self.stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
+        self.calibration_stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
+        self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs)
 
     def create_data_file(self):
         # find first available file name
@@ -315,12 +316,10 @@ class AcquisitionModel():
 
     def init_test(self, test):
         recording_length = self.aitimes.shape[0]
-        test.set_calibration(self.calibration_vector, self.calibration_freqs)
         self.datafile.init_data(self.current_dataset_name, 
                                 dims=(test.traceCount(), test.repCount(), recording_length),
                                 mode='finite')
-    def init_chart_test(self, test):
-        test.set_calibration(self.calibration_vector, self.calibration_freqs)
+
 
     def init_calibration(self, test):
         test.setReorderFunc(self.reorder_calibration_traces)
@@ -430,8 +429,7 @@ class AcquisitionModel():
         
         stimuli = self.protocol_model.stimulusList()
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
-                                           args=(self.chart_player, stimuli, self.datafile),
-                                           kwargs={'initialize_test':self.init_chart_test})
+                                           args=(self.chart_player, stimuli, self.datafile))
 
         self.acq_thread.start()
         return self.acq_thread
@@ -449,8 +447,11 @@ class AcquisitionModel():
         self.interval = interval
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
-        if not apply_cal:
-            self.calibration_stimulus.set_calibration(None, None)
+        if apply_cal:
+            self.calibration_stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
+        else:
+            self.calibration_stimulus.setCalibration(None, None)
+
 
         if self.savefolder is None or self.savename is None:
             print "You must first set a save folder and filename"
@@ -500,7 +501,6 @@ class AcquisitionModel():
         """processes the data gathered in a calibration run (does not work if multiple
             calibrations), returns resultant dB"""
         print 'process the calibration'
-        self.calibration_stimulus.set_calibration(self.calibration_vector, self.calibration_freqs)
         dataset_name = 'calibration'
 
         vfunc = np.vectorize(calc_db)

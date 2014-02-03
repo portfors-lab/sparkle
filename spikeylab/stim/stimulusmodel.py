@@ -41,7 +41,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.caldb = int(caldb)
         self.calv = float(calv)
 
-    def set_calibration(self, db_boost_array, frequencies):
+    def setCalibration(self, db_boost_array, frequencies):
         # use supplied array of intensity adjustment to adjust tone output
         if db_boost_array is not None and frequencies is not None and \
                             db_boost_array.shape != frequencies.shape:
