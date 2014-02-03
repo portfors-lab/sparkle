@@ -85,29 +85,23 @@ class TestStimModel():
         model = StimulusModel()
         component = PureTone()
         model.insertComponent(component, (0,0))
+        model.setReferenceVoltage(100, 0.1)
 
-        signals = model.expandedStim()
+        signals, doc = model.expandedStim()
         assert len(signals) == 1
         assert_equal(signals[0][0].shape[0], component.duration()*model.samplerate())
+        assert len(doc) == 1
+        assert doc[0]['samplerate_da'] == model.samplerate()
 
     def test_expanded_stim_with_auto(self):
         model = StimulusModel()
         component = PureTone()
         model.insertComponent(component, (0,0))       
-
+        model.setReferenceVoltage(100, 0.1)
         nsteps = self.add_auto_param(model)        
 
-        signals = model.expandedStim()
+        signals, doc = model.expandedStim()
         assert len(signals) == nsteps
-
-    def test_expanded_doc(self):
-        model = StimulusModel()
-        component = PureTone()
-        model.insertComponent(component, (0,0))
-
-        nsteps = self.add_auto_param(model)
-
-        doc = model.expandedDoc()
         assert len(doc) == nsteps
         assert doc[0]['samplerate_da'] == model.samplerate()
 
@@ -121,11 +115,11 @@ class TestStimModel():
         parameter_model.insertRows(0,1)
         auto_parameter = parameter_model.data(parameter_model.index(0,0))
         auto_parameter['start'] = start
-        auto_parameter['delta'] = step
+        auto_parameter['step'] = step
         auto_parameter['stop'] = stop
         parameter_model.setData(parameter_model.index(0,0), auto_parameter)
 
-        return len(range(start,stop,step))
+        return len(range(start,stop,step)) + 1
 
 
         

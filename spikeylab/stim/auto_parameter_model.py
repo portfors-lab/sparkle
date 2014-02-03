@@ -219,6 +219,9 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def setStimModel(self, model):
         self._stimmodel = model
 
+    def stimModel(self):
+        return self._stimmodel
+
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction
 

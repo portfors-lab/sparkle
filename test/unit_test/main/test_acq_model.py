@@ -8,10 +8,11 @@ from nose.tools import assert_in, assert_equal
 
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.stim.tceditor import TCFactory
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QThread, QTimer
+from PyQt4.QtCore import QThread, QTimer, Qt
 
 import test.sample as sample
 
@@ -37,6 +38,38 @@ class TestAcquisitionModel():
         acq_rate = 50000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
 
+        #insert some stimuli
+        gen_rate = 500000
+
+        tone0 = PureTone()
+        tone0.setDuration(0.02)
+        stim0 = StimulusModel()
+        stim0.insertComponent(tone0)
+        stim0.setSamplerate(gen_rate)
+        acqmodel.protocol_model.insertNewTest(stim0,0)
+
+        t = acqmodel.run_protocol(0.25)
+        t.join()
+
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_0']['test_0']
+        stim = json.loads(test.attrs['stim'])
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], gen_rate)
+        assert_equal(test.shape,(1,1,winsz*acq_rate))
+
+        hfile.close()
+
+    def test_tone_protocol_uncalibrated(self):
+        """Test a protocol with a single tone stimulus"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        acqmodel.set_calibration(None)
         #insert some stimuli
         gen_rate = 500000
 
@@ -90,6 +123,89 @@ class TestAcquisitionModel():
         assert_equal(test.shape,(1,1,winsz*acq_rate))
 
         hfile.close()
+
+    def test_auto_parameter_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+
+        component = PureTone()
+        stim_model = StimulusModel()
+        stim_model.insertComponent(component, (0,0))
+        auto_model = stim_model.autoParams()
+        auto_model.insertRows(0, 1)
+        
+        selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim_model.index(0,0))
+
+        values = ['frequency', 0, 100, 10]
+        for i, value in enumerate(values):
+            auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+
+        acqmodel.protocol_model.insertNewTest(stim_model,0)
+
+        t = acqmodel.run_protocol(0.25)
+        t.join()
+
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_0']['test_0']
+        stims = json.loads(test.attrs['stim'])
+
+        freqs = []
+        for stim in stims:
+            freqs.append(stim['components'][0]['frequency'])
+
+        assert freqs == sorted(freqs)
+        assert_equal(stims[0]['samplerate_da'], stim_model.samplerate())
+        assert_equal(test.shape,(11,1,winsz*acq_rate))
+
+        hfile.close()
+
+    def test_auto_parameter_protocol_randomize(self):
+        from spikeylab.stim.auto_parameters_editor import random_order
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+
+        component = PureTone()
+        stim_model = StimulusModel()
+        stim_model.insertComponent(component, (0,0))
+        stim_model.reorder = random_order
+        auto_model = stim_model.autoParams()
+        auto_model.insertRows(0, 1)
+        
+        selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim_model.index(0,0))
+
+        values = ['frequency', 0, 100, 10]
+        for i, value in enumerate(values):
+            auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+
+        acqmodel.protocol_model.insertNewTest(stim_model,0)
+
+        t = acqmodel.run_protocol(0.25)
+        t.join()
+
+        acqmodel.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_0']['test_0']
+        stims = json.loads(test.attrs['stim'])
+        #get a list of the freqency order
+        freqs = []
+        for stim in stims:
+            freqs.append(stim['components'][0]['frequency'])
+
+        assert freqs != sorted(freqs)
+        assert_equal(stims[0]['samplerate_da'], stim_model.samplerate())
+        assert_equal(test.shape,(11,1,winsz*acq_rate))
+
+        hfile.close()
+
 
     def test_tone_explore(self):
         """Run search operation with tone stimulus"""
@@ -251,7 +367,7 @@ class TestAcquisitionModel():
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
-        t, calname = acqmodel.run_calibration(0.25)
+        t, calname = acqmodel.run_calibration(0.25, False)
         t.join()
         acqmodel.process_calibration()
         acqmodel.close_data()
@@ -274,6 +390,7 @@ class TestAcquisitionModel():
 
         acqmodel.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
                             acqtime=winsz, aisr=acq_rate)
+        acqmodel.set_calibration(sample.calibration_filename())
 
         acqmodel.set_save_params(self.tempfolder, 'testdata')
         fname = acqmodel.create_data_file()

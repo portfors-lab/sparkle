@@ -48,6 +48,7 @@ class AcquisitionModel():
         CCFactory.init_stim(self.calibration_stimulus)
         self.signals.samplerateChanged = self.stimulus.samplerateChanged
         self.update_reference_voltage()
+        self.set_calibration(None)
 
         stimuli_types = get_stimuli_models()
         self.explore_stimuli = [x() for x in stimuli_types if x.explore]
@@ -63,17 +64,19 @@ class AcquisitionModel():
         return self.explore_stimuli
 
     def set_calibration(self, cal_fname):
-        # maybe don't set caldb and calval
-        try:
-            cal = load_calibration_file(cal_fname)
-        except:
-            print "Error: unable to load calibration data from file: ", cal_fname
-            raise
-        self.calibration_vector, self.calibration_freqs = cal
+        if cal_fname is None:
+            self.calibration_vector, self.calibration_freqs = None, None
+        else:    
+            try:
+                cal = load_calibration_file(cal_fname)
+            except:
+                print "Error: unable to load calibration data from file: ", cal_fname
+                raise
+            self.calibration_vector, self.calibration_freqs = cal
         self.update_reference_voltage()
         # set the calibration for the player objects
-        self.finite_player.set_calibration(self.calibration_vector, self.calibration_freqs)
-        self.chart_player.set_calibration(self.calibration_vector, self.calibration_freqs)
+        self.stimulus.set_calibration(self.calibration_vector, self.calibration_freqs)
+        self.calibration_stimulus.set_calibration(self.calibration_vector, self.calibration_freqs)
 
     def create_data_file(self):
         # find first available file name
@@ -273,6 +276,8 @@ class AcquisitionModel():
         try:
             for itest, test in enumerate(stimuli):
                 # pull out signal from stim model
+                test.setReferenceVoltage(self.caldb, self.calv)
+
                 if initialize_test:
                     initialize_test(test)
                 traces, doc = test.expandedStim()
@@ -310,9 +315,12 @@ class AcquisitionModel():
 
     def init_test(self, test):
         recording_length = self.aitimes.shape[0]
+        test.set_calibration(self.calibration_vector, self.calibration_freqs)
         self.datafile.init_data(self.current_dataset_name, 
                                 dims=(test.traceCount(), test.repCount(), recording_length),
                                 mode='finite')
+    def init_chart_test(self, test):
+        test.set_calibration(self.calibration_vector, self.calibration_freqs)
 
     def init_calibration(self, test):
         test.setReorderFunc(self.reorder_calibration_traces)
@@ -422,7 +430,8 @@ class AcquisitionModel():
         
         stimuli = self.protocol_model.stimulusList()
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
-                                           args=(self.chart_player, stimuli, self.datafile))
+                                           args=(self.chart_player, stimuli, self.datafile),
+                                           kwargs={'initialize_test':self.init_chart_test})
 
         self.acq_thread.start()
         return self.acq_thread
@@ -441,7 +450,7 @@ class AcquisitionModel():
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
         if not apply_cal:
-            self.finite_player.set_calibration(None, None)
+            self.calibration_stimulus.set_calibration(None, None)
 
         if self.savefolder is None or self.savename is None:
             print "You must first set a save folder and filename"
@@ -491,6 +500,7 @@ class AcquisitionModel():
         """processes the data gathered in a calibration run (does not work if multiple
             calibrations), returns resultant dB"""
         print 'process the calibration'
+        self.calibration_stimulus.set_calibration(self.calibration_vector, self.calibration_freqs)
         dataset_name = 'calibration'
 
         vfunc = np.vectorize(calc_db)

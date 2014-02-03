@@ -257,7 +257,7 @@ class MainWindow(ControlWindow):
     def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
         # display fft here
         f, db = fdb
-        print 'response f', f, 'db', db
+        # print 'response f', f, 'db', db
         self.ui.calibration_widget.ui.aiv_lbl.setText(str(vmax))
         self.ui.calibration_widget.ui.fftf_lbl.setText(str(spec_peak))
         self.ui.calibration_widget.ui.flabel.setText(str(f))
@@ -282,7 +282,6 @@ class MainWindow(ControlWindow):
         self.ui.psth.append_data(bins, repnum)
             
     def display_stim(self, signal, fs):
-        print 'stim'
         freq, spectrum = calc_spectrum(signal, fs)
         if self.active_operation == 'calibration':
             self.calibration_display.update_out_fft(freq, spectrum)

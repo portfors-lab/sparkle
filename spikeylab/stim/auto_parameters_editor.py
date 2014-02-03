@@ -2,6 +2,8 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
+import random
+
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.drag_label import FactoryLabel
@@ -28,10 +30,14 @@ class Parametizer(QtGui.QWidget):
         
         self.trash_lbl = TrashWidget(self)
         
+        self.randomize_ckbx = QtGui.QCheckBox("Randomize order")
+        self.randomize_ckbx.toggled.connect(self.randomToggle)
+
         btn_layout.addWidget(add_lbl)
-        btn_layout.addWidget(separator)
         btn_layout.addWidget(self.trash_lbl)
-        btn_layout.addWidget(QtGui.QLabel())
+        btn_layout.addWidget(separator)
+        # btn_layout.addWidget(QtGui.QLabel())
+        btn_layout.addWidget(self.randomize_ckbx)
 
         self.param_list = AutoParameterTableView()
         self.param_list.installEventFilter(self.trash_lbl)
@@ -40,11 +46,19 @@ class Parametizer(QtGui.QWidget):
             self.param_model = stimulusview.model().autoParams()
             self.param_model.setStimView(stimulusview)
             self.param_list.setModel(self.param_model)
+            # this may mislead/clobber other orderings if present on model
+            self.randomize_ckbx.setChecked(bool(stimulusview.model().reorder))
 
         layout.addWidget(self.param_list)
         layout.addLayout(btn_layout)
         self.setLayout(layout)
         self.setWindowTitle('Auto Parameters')
+
+    def randomToggle(self, randomize):
+        if randomize:
+            self.param_model.stimModel().reorder = random_order
+        else:
+            self.param_model.stimModel().reorder = None
 
     def setParameterList(self, paramlist):
         self.param_model.setParameterList(paramlist)
@@ -53,6 +67,7 @@ class Parametizer(QtGui.QWidget):
         self.param_model = view.model().autoParams()
         self.param_model.setStimView(view)
         self.param_list.setModel(self.param_model)
+        self.randomize_ckbx.setChecked(bool(view.model().reorder))
 
     def sizeHint(self):
         return QtCore.QSize(560,200)
@@ -74,6 +89,11 @@ class HidableParameterEditor(WidgetHider):
 
     def sizeHint(self):
         return QtCore.QSize(560,40)
+
+def random_order(listofthings):
+    order = range(len(listofthings))
+    random.shuffle(order)
+    return order
 
 if __name__ == '__main__':
     import sys

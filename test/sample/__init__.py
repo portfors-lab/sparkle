@@ -8,3 +8,6 @@ def sampleimage():
 
 def samplewav():
     return os.path.join(sampledir(), 'sample_syl.wav')
+
+def calibration_filename():
+    return os.path.join(sampledir(), 'calibration.hdf5')

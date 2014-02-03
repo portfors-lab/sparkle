@@ -2,6 +2,7 @@ import numpy as np
 import uuid
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+from spikeylab.tools.audiotools import calc_spectrum
 
 from PyQt4 import QtGui, QtCore
 
@@ -26,6 +27,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # reference for what voltage == what intensity
         self.calv = None
         self.caldb = None
+        self.calibration_vector = None
+        self.calibration_frequencies = None
 
         self.stimid = uuid.uuid1()
 
@@ -37,6 +40,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # error later
         self.caldb = int(caldb)
         self.calv = float(calv)
+
+    def set_calibration(self, db_boost_array, frequencies):
+        # use supplied array of intensity adjustment to adjust tone output
+        if db_boost_array is not None and frequencies is not None and \
+                            db_boost_array.shape != frequencies.shape:
+            print u"ERROR: calibration array and frequency array must have same dimensions"
+            return
+
+        self.calibration_vector = db_boost_array
+        self.calibration_frequencies = frequencies
+        print self.calibration_vector
+        print self.calibration_frequencies
 
     def setSamplerate(self, fs):
         self._samplerate = fs
@@ -291,8 +306,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
         """Return the current stimulus in signal representation"""
         track_signals = []
         max_db = max([comp.intensity() for t in self._segments for comp in t])
-        caldb = 100
-        atten = caldb - max_db
+        # everything is maxed up from 100 dB and attenuated from there
+        atten = 100 - max_db
         for track in self._segments:
             # nsamples = sum([comp.duration() for comp in track])*self.samplerate
             # track_signal = np.zeros((nsamples,))
@@ -307,6 +322,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         total_signal = np.zeros((full_len,))
         for track in track_signals:
             total_signal[0:len(track)] += track
+
+        if self.calibration_vector is not None and self.calibration_frequencies is not None:
+            # calibration magic happens here!
+            signal_fft = calc_spectrum(total_signal, self._samplerate)
 
         return total_signal, atten
 

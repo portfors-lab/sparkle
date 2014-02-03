@@ -202,7 +202,6 @@ class AcquisitionData():
         if self.meta[key]['mode'] not in ['continuous']:
             print "consolidation not supported for mode: ", self.meta[key]['mode']
             return
-        print 'metadata for ', key, self.meta[key]
         setnum = self.meta[key]['set_counter']
         current_index = self.meta[key]['cursor']
         total_samples = (self.chunk_size * setnum) + current_index
@@ -231,8 +230,6 @@ class AcquisitionData():
     def set_metadata(self, key, attrdict):
         # key is an iterable of group keys (str), with the last
         # string being the attribute name
-        print 'metadata key', key
-        print 'all keys', self.hdf5.keys()
         if key == '':
              for attr, val in attrdict.iteritems():
                 self.hdf5.attrs[attr] = val
