@@ -97,10 +97,7 @@ class MainWindow(ControlWindow):
         # set plot axis to appropriate limits
         # first time set up data file
         if not self.verify_inputs():
-            print 'fix inputs and try again!'
             return
-
-        print 'all good'
 
         if self.current_mode == 'windowed':
             if self.acqmodel.datafile is None:

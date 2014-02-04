@@ -56,3 +56,11 @@ Online display of spike detection histogram. Note that the metrics below the plo
 Data Files
 ==========
 Recorded data is saved to data files in HDF5 format. Each protcol list is a group, and under the groups are tests, which are number sequentially, with numbers continuing across groups. Each test is a dataset with the dimensions no. of traces x no. of repetitions x samples. Stimulus data is saved as an attribute of each dataset and is a json list of dictionarys, with each entry providing enough information to be able to recreate the stimulus. There will be a better description here in the future.
+
+Names
+=====
+Considering the following Names for the Program
+* ADA : Auditory Data Acqusition (Also the name of first programmer Ada Lovelace)
+* SONIC : Spiffy Otologic Neuron Investigation Companion
+* Neuroread
+* Sonic Sparkle High-Five

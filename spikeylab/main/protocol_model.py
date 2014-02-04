@@ -124,7 +124,6 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def verify(self, window_size=None):
         """Verify that this protocol model is valid. Return 0 if sucessful,
         a failure message otherwise"""
-        print 'protocol row count', self.rowCount()
         if self.rowCount() == 0:
             return "Protocol must have at least one test"
         if self.caldb is None or self.calv is None:
