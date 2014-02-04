@@ -60,7 +60,13 @@ Recorded data is saved to data files in HDF5 format. Each protcol list is a grou
 Names
 =====
 Considering the following Names for the Program
+
 * ADA : Auditory Data Acqusition (Also the name of first programmer Ada Lovelace)
+
 * SONIC : Spiffy Otologic Neuron Investigation Companion
+
 * Neuroread
+
 * Sonic Sparkle High-Five
+
+* Spikeylab

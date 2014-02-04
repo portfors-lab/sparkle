@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Feb 03 00:35:20 2014
+# Created: Tue Feb 04 09:19:27 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -103,7 +103,7 @@ class Ui_ControlWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.ex_nreps_spnbx.setFont(font)
-        self.ex_nreps_spnbx.setMinimum(0)
+        self.ex_nreps_spnbx.setMinimum(1)
         self.ex_nreps_spnbx.setMaximum(100)
         self.ex_nreps_spnbx.setProperty("value", 5)
         self.ex_nreps_spnbx.setObjectName(_fromUtf8("ex_nreps_spnbx"))
@@ -476,7 +476,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tab_group.setCurrentIndex(0)
+        self.tab_group.setCurrentIndex(1)
         self.parameter_stack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
@@ -490,7 +490,7 @@ class Ui_ControlWindow(object):
 
     def retranslateUi(self, ControlWindow):
         ControlWindow.setWindowTitle(_translate("ControlWindow", "MainWindow", None))
-        self.label_3.setText(_translate("ControlWindow", "Neruone Control", None))
+        self.label_3.setText(_translate("ControlWindow", "SSHF", None))
         self.running_label.setText(_translate("ControlWindow", "OFF", None))
         self.label_4.setText(_translate("ControlWindow", "History:", None))
         __sortingEnabled = self.listWidget_2.isSortingEnabled()
