@@ -73,6 +73,10 @@ class Parametizer(QtGui.QWidget):
         return QtCore.QSize(560,200)
 
     def showEvent(self, event):
+        selected = self.param_list.selectedIndexes()
+        if len(selected) > 0:
+            print 'selected indexes', selected[0].row()
+            self.param_model.updateSelectionModel(selected[0])
         self.param_model.stimView().setMode(1)
     def hideEvent(self, event):
         self.param_model.stimView().setMode(0)

@@ -13,6 +13,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
 
         self.setItemDelegateForColumn(0,ComboboxDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(100,100,255))
