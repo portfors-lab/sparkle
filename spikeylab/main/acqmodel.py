@@ -1,8 +1,6 @@
 import os, time
 import threading
-import json
 import numpy as np
-import scipy.io.wavfile as wv
 
 from spikeylab.io.players import FinitePlayer, ContinuousPlayer
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db

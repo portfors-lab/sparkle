@@ -11,7 +11,6 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.stim.tceditor import TCFactory
-from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import Qt
 
 import test.sample as sample
@@ -19,7 +18,6 @@ import test.sample as sample
 class TestAcquisitionModel():
 
     def setUp(self):
-        self.app = QApplication(sys.argv)
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         self.done = True
 
@@ -32,7 +30,6 @@ class TestAcquisitionModel():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
-        self.app.exit(0)
 
     def test_tone_protocol(self):
         """Test a protocol with a single tone stimulus"""

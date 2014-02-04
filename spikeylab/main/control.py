@@ -1,20 +1,19 @@
+import spikeylab
+
 import sys, os
 import scipy.io.wavfile as wv
+import numpy as np
 
-from spikeylab.plotting.custom_plots import ChartWidget
 from PyQt4 import QtCore, QtGui
 
-from spikeylab.io.daq_tasks import *
+from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
-from spikeylab.config.info import caldata_filename, calfreq_filename
-from spikeylab.dialogs.saving_dlg import SavingDialog 
-from spikeylab.dialogs.scale_dlg import ScaleDialog
-from spikeylab.dialogs.specgram_dlg import SpecDialog
-from spikeylab.dialogs.calibration_dlg import CalibrationDialog
+from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
-from spikeylab.tools.audiotools import spectrogram, calc_spectrum, calc_db
+from spikeylab.tools.audiotools import calc_spectrum, calc_db
 from spikeylab.plotting.custom_plots import SpecWidget
 from spikeylab.plotting.plotz import LiveCalPlot
+from spikeylab.plotting.custom_plots import ChartWidget
 
 from controlwindow import ControlWindow
 
@@ -422,10 +421,6 @@ class MainWindow(ControlWindow):
         super(MainWindow, self).closeEvent(event)
 
 if __name__ == "__main__":
-    import sip
-    sip.setapi('QVariant', 2)
-    sip.setapi('QString', 2)
-    sip.setdestroyonexit(0)
     app = QtGui.QApplication(sys.argv)
     myapp = MainWindow("controlinputs.json")
     app.setActiveWindow(myapp)

@@ -15,18 +15,10 @@ class GenericThread(QtCore.QThread):
         self.function(*self.args,**self.kwargs)
         return
 
-class BaseSignals(QtCore.QObject):
+class ProtocolSignals(QtCore.QObject):
     curve_finished = QtCore.pyqtSignal()
     ncollected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
     warning = QtCore.pyqtSignal(str)
-
-class CalibrationSignals(BaseSignals):
-    stim_generated = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
-    spectrum_analyzed = QtCore.pyqtSignal(int, int, numpy.ndarray, numpy.ndarray, numpy.ndarray)
-    read_collected = QtCore.pyqtSignal(int, int, numpy.ndarray)
-    ncollected = QtCore.pyqtSignal(list)
-
-class ProtocolSignals(BaseSignals):
     response_collected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
     calibration_response_collected = QtCore.pyqtSignal(tuple, numpy.ndarray, numpy.ndarray, float, float)
     current_trace = QtCore.pyqtSignal(int, int, dict)

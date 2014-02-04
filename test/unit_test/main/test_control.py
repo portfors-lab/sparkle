@@ -15,7 +15,6 @@ import test.sample as sample
 
 class TestSpikey():
     def setUp(self):
-        self.app = QApplication(sys.argv) 
         self.form = MainWindow()
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         self.form.savefolder = self.tempfolder

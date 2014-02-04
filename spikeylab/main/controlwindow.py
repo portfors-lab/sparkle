@@ -2,13 +2,13 @@ import os
 import json
 from PyQt4 import QtCore, QtGui
 
-from spikeylab.main.window_accessories import MaximizableTitleBar
 import spikeylab.tools.systools as systools
-from maincontrol_form import Ui_ControlWindow
+from spikeylab.main.window_accessories import MaximizableTitleBar
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.plotting.custom_plots import SpecWidget
 from spikeylab.plotting.calibration_display import CalibrationDisplay
+from maincontrol_form import Ui_ControlWindow
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
