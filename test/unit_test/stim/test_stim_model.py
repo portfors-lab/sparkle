@@ -5,6 +5,7 @@ from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from PyQt4 import QtCore
 
+
 class TestStimModel():
     def test_insert_data(self):
         model = StimulusModel()
@@ -104,6 +105,122 @@ class TestStimModel():
         assert len(signals) == nsteps
         assert len(doc) == nsteps
         assert doc[0]['samplerate_da'] == model.samplerate()
+
+    def test_verify_no_components(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        assert model.verify()
+
+    def test_verify_no_ref_voltage(self):
+        model = StimulusModel()
+        component = PureTone()
+        model.insertComponent(component, (0,0))
+        
+        assert model.verify()
+
+    def test_verify_short_duration(self):
+
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        component = PureTone()
+        component.setDuration(0.003)
+        component.setRisefall(0.002)
+        model.insertComponent(component, (0,0))
+        
+        invalid = model.verify()
+        print 'msg', invalid
+        assert invalid
+
+    def test_verify_long_duration(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        component = PureTone()
+        component.setDuration(0.3)
+        model.insertComponent(component, (0,0))
+        
+        assert model.verify(window_size=0.2)
+
+
+    def test_verify_success(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        component = PureTone()
+        model.insertComponent(component, (0,0))
+        
+        assert model.verify() == 0
+
+    def test_verify_success_with_autoparameters(self):
+        component = PureTone()
+        component.setRisefall(0.003)
+        stim_model = StimulusModel()
+        stim_model.setReferenceVoltage(100, 0.1)
+        stim_model.insertComponent(component, (0,0))
+
+        ap_model = stim_model.autoParams()
+        ap_model.insertRows(0, 1)
+        
+        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim_model.index(0,0))
+
+        # default value is in ms
+        values = ['duration', 20, 8, 1]
+
+        details = component.auto_details()
+        multiplier = details[values[0]]['multiplier']
+        unit0 = details[values[0]]['label']
+        print 'multiplier', multiplier, unit0
+
+        for i, value in enumerate(values):
+            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+
+        invalid = stim_model.verify(window_size=0.1)
+        print 'msg', invalid
+        assert invalid == 0
+
+    def test_verify_parameter_conflict(self):
+        """When a combination of paramters in auto-parameters causes
+        a conflict"""
+        component = PureTone()
+        component.setRisefall(0.005)
+        stim_model = StimulusModel()
+        stim_model.setReferenceVoltage(100, 0.1)
+        stim_model.insertComponent(component, (0,0))
+
+        ap_model = stim_model.autoParams()
+        ap_model.insertRows(0, 1)
+        
+        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim_model.index(0,0))
+
+        values = ['duration', 20, 4, 1]
+        for i, value in enumerate(values):
+            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+
+        invalid = stim_model.verify()
+        print 'msg', invalid
+        assert invalid
+
+    def test_verify_with_long_auto_parameter(self):
+        component = PureTone()
+        stim_model = StimulusModel()
+        stim_model.setReferenceVoltage(100, 0.1)
+        stim_model.insertComponent(component, (0,0))
+
+        ap_model = stim_model.autoParams()
+        ap_model.insertRows(0, 1)
+        
+        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim_model.index(0,0))
+
+        # default value is in ms
+        values = ['duration', 50, 200, 25]
+
+        for i, value in enumerate(values):
+            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+
+        invalid = stim_model.verify(window_size=0.1)
+        print 'msg', invalid
+        assert invalid
 
     def add_auto_param(self, model):
         # adds an autoparameter to the given model

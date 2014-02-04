@@ -98,8 +98,11 @@ class MainWindow(ControlWindow):
         # set plot axis to appropriate limits
         # first time set up data file
         if not self.verify_inputs():
+            print 'fix inputs and try again!'
             return
-        
+
+        print 'all good'
+
         if self.current_mode == 'windowed':
             if self.acqmodel.datafile is None:
                 self.acqmodel.set_save_params(self.savefolder, self.savename)
@@ -129,6 +132,8 @@ class MainWindow(ControlWindow):
         self.ui.start_chart_btn.setEnabled(False)
 
     def on_update(self):
+        if not self.verify_inputs():
+            return
         aochan = self.ui.aochan_box.currentText()
         aichan = self.ui.aichan_box.currentText()
         acq_rate = self.ui.aisr_spnbx.value()*self.fscale
@@ -150,11 +155,9 @@ class MainWindow(ControlWindow):
             gen_rate = self.ui.aosr_spnbx.value()*self.fscale
             self.acqmodel.set_explore_samplerate(gen_rate)
             self.acqmodel.set_params(nreps=nreps)
-            # each widget should be in charge of putting its own stimulus together
-            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            stim_widget = self.ui.parameter_stack.widget(stim_index)
-            stim_widget.saveToObject()
+            
             # have model sort all signals stuff out?
+            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             signal = self.acqmodel.set_stim_by_index(stim_index)
             freq, spectrum = calc_spectrum(signal, gen_rate)
             timevals = np.arange(len(signal)).astype(float)/gen_rate

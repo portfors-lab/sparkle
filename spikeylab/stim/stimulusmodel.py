@@ -205,6 +205,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 step = -1*p['step']
             else:
                 step = p['step']
+            if step == 0:
+                return 0
             ntraces = ntraces*(len(np.arange(p['start'], p['stop'], step)) + 1)
         return ntraces
 
@@ -219,7 +221,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return self._nreps
 
     def setRepCount(self, count):
-        self._nreps = count
+        if count > 0:
+            self._nreps = count
 
     def contains(self, stimtype):
         for track in self._segments:
@@ -234,18 +237,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
         steps = []
         for p in params:
             # inclusive range
-            steps.append(np.append(np.arange(p['start'], p['stop'], p['step']),p['stop']))
+            if p['step'] > 0:
+                if p['start'] > p['stop']:
+                    step = -1*p['step']
+                else:
+                    step = p['step']
+            steps.append(np.append(np.arange(p['start'], p['stop'], step),p['stop']))
         return steps
         
-    def expandFucntion(self):
+    def expandFunction(self, func):
         # initilize array to hold all varied parameters
-        params = self._auto_params.allData()
-        steps = []
+        steps = self.autoParamRanges()
         ntraces = 1
-        for p in params:
-            # inclusive range
-            steps.append(np.append(np.arange(p['start'], p['stop'], p['step']),p['stop']))
-            ntraces = ntraces*len(steps[-1])
+        for p in steps:
+            ntraces = ntraces*len(p)
+
+        params = self._auto_params.allData()
 
         varylist = [[None for x in range(len(params))] for y in range(ntraces)]
         x = 1
@@ -259,7 +266,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # go through list of modifing parameters, update this stimulus,
         # and then save current state to list
         stim_list = []
-        doc_list = []
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
                 comp_inds = self._auto_params.selection(param)
@@ -268,8 +274,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
-            stim_list.append(self.signal())
-            doc_list.append(self.doc())
+            stim_list.append(func())
 
         # now reset the components to start value
         for ip, param in enumerate(params):
@@ -278,12 +283,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 component = self.data(index, QtCore.Qt.UserRole)
                 component.set(param['parameter'], varylist[0][ip])
 
-        if self.reorder:
-            order = self.reorder(doc_list)
-            stim_list = [stim_list[i] for i in order]
-            doc_list = [doc_list[i] for i in order]
 
-        return stim_list, doc_list
+        return stim_list
 
     def setReorderFunc(self, func):
         self.reorder = func
@@ -293,12 +294,28 @@ class StimulusModel(QtCore.QAbstractItemModel):
         Apply the autoparameters to this stimulus and return a list of
         the resulting stimuli, and a complimentary list of doc dictionaries
         """
-        return self.expandFucntion()
+        signals = self.expandFunction(self.signal)
+        docs = self.expandFunction(self.doc)
+
+        if self.reorder:
+            order = self.reorder(docs)
+            signals = [signals[i] for i in order]
+            docs = [docs[i] for i in order]
+
+        return signals, docs
 
     def templateDoc(self):
         """
         JSON/YAML/XML template to recreate this stimulus in another session
         """
+
+    def duration(self):
+        durs = []
+        for track in self._segments:
+            durs.append(sum([comp.duration() for comp in track]))
+            
+        return max(durs)
+
 
     def signal(self):
         """Return the current stimulus in signal representation"""
@@ -363,3 +380,31 @@ class StimulusModel(QtCore.QAbstractItemModel):
             return editor
         else:
             print 'Erm, no editor available :('
+
+    def verify_components(self):
+        components = [comp for track in self._segments for comp in track]
+        for comp in components:
+            msg = comp.verify()
+            if msg:
+                return msg
+        return 0
+
+    def verify(self, window_size=None):
+        msg = self._auto_params.verify()
+        if msg:
+            return msg
+        if self.traceCount() == 0:
+            return "Test is empty"
+        results = self.expandFunction(self.verify_components)
+        if window_size is not None:
+            durations = self.expandFunction(self.duration)
+            # ranges are linear, so we only need to test first and last
+            if durations[0] > window_size or durations[-1] > window_size:
+                return "Stimulus duration exceeds window duration"
+        msg = [x for x in results if x]
+        if len(msg) > 0:
+            return msg[0]
+        if self.caldb is None or self.calv is None:
+            return "Test reference voltage not set"
+        # flatten list of components
+        return 0

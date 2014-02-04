@@ -56,11 +56,16 @@ class AbstractStimulusComponent(object):
     def signal(self, fs, atten):
         raise NotImplementedError
 
+    def verify(self, **kwargs):
+        if self._risefall > self._duration/2:
+            return "Rise and fall times exceed component duration"
+        return 0
+
     def auto_details(self):
         """A list of the parameter names that are available to
         be set using auto-paramter manipulation. Subclasses should
         reimplement and add to this list"""
-        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':1},
+        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0.001, 'max':1},
                 'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':100}, 
                 'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 

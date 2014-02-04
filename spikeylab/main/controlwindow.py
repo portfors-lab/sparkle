@@ -47,23 +47,32 @@ class ControlWindow(QtGui.QMainWindow):
     def verify_inputs(self):
         allgood = True
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            if self.ui.explore_stim_type_cmbbx.currentText() == 'Vocalization':
-                pass
-            elif self.ui.explore_stim_type_cmbbx.currentText() == 'Tone':
-                extone = self.ui.parameter_stack.widget_for_name('Tone')
-                if extone.durationValue() > self.ui.windowsz_spnbx.value():
-                    QtGui.QMessageBox.warning(self, "Invalid Input",
+            # each widget should be in charge of putting its own stimulus together
+            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
+            stim_widget = self.ui.parameter_stack.widget(stim_index)
+            stim_widget.saveToObject()
+            selected_stim = self.explore_stimuli[stim_index]
+            failmsg = selected_stim.verify(samplerate=self.ui.aosr_spnbx.value()*self.fscale)
+            if failmsg:
+                allgood = False
+                QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
+            if selected_stim.duration() > self.ui.windowsz_spnbx.value()*self.tscale:
+                allgood=False
+                QtGui.QMessageBox.warning(self, "Invalid Input",
                         "Window size must equal or exceed stimulus length")
-                    allgood = False
-                if extone.freq_spnbx.value() > (self.ui.aosr_spnbx.value()/2):
-                    QtGui.QMessageBox.warning(self, "Invalid Input",
-                        "Generation sample rate must be at least twice the stimulus frequency")
-                    allgood=False
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_tc':
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
+            failure = self.acqmodel.protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
+            if failure:
+                allgood=False
+                QtGui.QMessageBox.warning(self, "Invalid Input", failure)
+        elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
+            failure = self.acqmodel.calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
+            if failure:
+                allgood=False
+                QtGui.QMessageBox.warning(self, "Invalid Input", failure)
+        if self.current_mode == 'windowed':
             pass
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_chart':
-            pass
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_experiment':
+        else:
             pass
         return allgood
 
@@ -83,11 +92,13 @@ class ControlWindow(QtGui.QMainWindow):
                     if not setup:
                         field.setValue(field.value()/0.001)
                     field.setDecimals(0)
+                    field.setMinimum(1)
                 for lbl in self.time_labels:
                     lbl.setText(u'ms')
             elif self.tscale == 1:
                 for field in self.time_inputs:
                     field.setDecimals(3)
+                    field.setMinimum(0.001)
                     if not setup:
                         field.setValue(field.value()*0.001)
                     field.setMaximum(3)
@@ -108,6 +119,7 @@ class ControlWindow(QtGui.QMainWindow):
             if self.fscale == 1000:
                 for field in self.frequency_inputs:
                     field.setDecimals(3)
+                    field.setMinimum(0.001)
                     if not setup:
                         field.setValue(field.value()/1000)
                     field.setMaximum(500)
@@ -120,6 +132,7 @@ class ControlWindow(QtGui.QMainWindow):
                     if not setup:
                         field.setValue(field.value()*1000)
                     field.setDecimals(0)
+                    field.setMinimum(1)
                 for lbl in self.frequency_labels:
                     lbl.setText(u'Hz')
             else:

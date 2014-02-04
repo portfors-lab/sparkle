@@ -48,9 +48,13 @@ class TestUnitChanges():
         control.ui.aosr_spnbx.setValue(fs0/1000)
         control.ui.aisr_spnbx.setValue(fs1/1000)
 
+        assert control.ui.aosr_spnbx.value() == fs0/1000 
+        assert control.ui.aisr_spnbx.value() == fs1/1000
+
         control.update_unit_labels(control.tscale, 1)
         control.update_unit_labels(control.tscale, 1000)
 
+        print 'spin boxes', control.ui.aisr_spnbx.value(), fs1/1000
         assert control.ui.aosr_spnbx.value() == fs0/1000 
         assert control.ui.aisr_spnbx.value() == fs1/1000
 

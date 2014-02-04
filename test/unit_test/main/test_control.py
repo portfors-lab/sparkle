@@ -149,3 +149,9 @@ class TestSpikey():
         files = glob.glob(self.tempfolder + os.sep + 'calibration*.hdf5')
         print 'files', files
         assert len(files) == 0
+
+    def test_verify_no_tests(self):
+        self.form.ui.tab_group.setCurrentIndex(1)
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+
+        # how do I acknowldge and dismiss dialog?

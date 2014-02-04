@@ -76,6 +76,12 @@ class PureTone(Tone):
         details['frequency'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000}
         return details
 
+    def verify(self, **kwargs):
+        if 'samplerate' in kwargs:
+            if kwargs['samplerate']/2 < self._frequency:
+                return "Generation sample rate must be at least twice the stimulus frequency"
+        return super(PureTone, self).verify(**kwargs)
+
 class FMSweep(Tone):
     name = "fmsweep"
     start_frequency = None
@@ -174,6 +180,11 @@ class Vocalization(AbstractStimulusComponent):
         amp = (10 ** ((self._intensity+atten-caldb)/20)*calv)
         wavdata = ((wavdata/max_amp)*amp)
         return wavdata
+
+    def verify(self, **kwargs):
+        if self._filename is None:
+            return "Vocalization stimulus without a specified file"
+        return 0
 
 class Noise(AbstractStimulusComponent):
     name = "noise"

@@ -558,6 +558,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>dur_spnbx</sender>
+   <signal>editingFinished()</signal>
+   <receiver>TuningCurveEditor</receiver>
+   <slot>setStimDuration()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>176</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>risefall_spnbx</sender>
+   <signal>editingFinished()</signal>
+   <receiver>TuningCurveEditor</receiver>
+   <slot>setStimRisefall()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setStimDuration()</slot>

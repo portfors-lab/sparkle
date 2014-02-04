@@ -59,6 +59,22 @@ class TestProtocolModel():
         assert model.data(model.index(0,2), role=QtCore.Qt.DisplayRole) == 1
         assert model.data(model.index(0,3), role=QtCore.Qt.DisplayRole) == newreps
 
+    def test_verify_no_tests(self):
+        model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
+
+        assert model.verify()
+
+    def test_verify_success(self):
+        model = ProtocolTabelModel()
+        model.setReferenceVoltage(100, 0.1)
+        stim = StimulusModel()
+        component = PureTone()
+        stim.insertComponent(component, (0,0))
+        model.insertNewTest(stim,0)
+
+        assert model.verify() == 0
+
 class TestProtocolView():
     def setUp(self):
         pass

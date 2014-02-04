@@ -152,8 +152,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         if lower <= value <= upper:
             return True
         else:
-            print 'value out of bounds'
-            print 'lower', lower, 'upper', upper, 'value', value
+            # print 'value out of bounds:'
+            # print 'lower', lower, 'upper', upper, 'value', value
             return False
 
     def setParameterList(self, paramlist):
@@ -253,3 +253,17 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             editable_sets.append(set(comp.auto_details().keys()))
         editable_paramters = set.intersection(*editable_sets)
         return list(editable_paramters)
+
+    def verify(self):
+        for param in self._parameters:
+            if param['parameter'] == '':
+                return "Auto-parameter type undefined"
+            if param['step'] == 0:
+                return "Auto-parameter step size of 0 not allowed"
+            if abs(param['stop'] - param['start']) < param['step']:
+                return "Auto-parameter step size larger than range"
+            if not self.checkLimits(param['start'], param):
+                return "Auto-parameter start value invalid"
+            if not self.checkLimits(param['stop'], param):
+                return "Auto-parameter stop value invalid"
+        return 0
