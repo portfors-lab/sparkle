@@ -14,6 +14,10 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         self.setItemDelegateForColumn(0,ComboboxDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
 
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(100,100,255))
+        self.setPalette(palette)
+
     def edit(self, index, trigger, event):
         "Sets editing widget for selected list item"
         self.model().updateSelectionModel(index)
