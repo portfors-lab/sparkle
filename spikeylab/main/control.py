@@ -11,7 +11,8 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db
-from spikeylab.plotting.custom_plots import SpecWidget
+# from spikeylab.plotting.custom_plots import SpecWidget
+from spikeylab.plotting.mpl_spec_widget import SpecWidget
 from spikeylab.plotting.plotz import LiveCalPlot
 from spikeylab.plotting.custom_plots import ChartWidget
 

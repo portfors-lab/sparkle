@@ -10,22 +10,30 @@ import spikeylab.tools.audiotools as audiotools
 
 class SpecWidget(QtGui.QWidget):
     specgram_args = {u'nfft':512, u'window':u'hanning', u'overlap':90}
-    cmap = 'jet'
+    img_args = {'cmap':'jet'}
+    fscale = 1000
+    tscale = 0.001
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self,parent)
 
         fig = Figure()
         self.canvas = FigureCanvas(fig)
+        fig.patch.set_color('0.95')
+
         self.canvas.setParent(self)
 
         self.ax = fig.add_subplot(1,1,1)
+        self.position = [50.0, 10.0]
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.canvas)
+        # vbox.setContentsMargins(0,0,0,0)
 
         self.setWindowTitle("Spectrogram")
 
         self.setLayout(vbox)
+
+        self.img = self.ax.imshow(np.zeros((5,5)))
 
     def update_data(self, signal, fs):
         spec, f, bins, fs = audiotools.spectrogram((fs, signal), **self.specgram_args)
@@ -34,7 +42,7 @@ class SpecWidget(QtGui.QWidget):
     def update_image(self, imgdata, xaxis=None, yaxis=None):
         imgdata = np.flipud(imgdata)
         extent = 0, np.amax(xaxis), yaxis[0], yaxis[-1]
-        self.img = self.ax.imshow(imgdata, cmap=self.cmap, extent=extent)
+        self.img = self.ax.imshow(imgdata, cmap=self.img_args['cmap'], extent=extent)
         self.ax.axis('tight')
         self.canvas.draw()
 
@@ -48,9 +56,21 @@ class SpecWidget(QtGui.QWidget):
         for key, value in kwargs.items():
             if key == 'colormap':
                 self.img.set_cmap(value)
-                self.cmap = cmap
+                self.img_args['cmap'] = value
             else:
                 self.specgram_args[key] = value
+
+    def set_xlim(self, lims):
+        self.ax.set_xlim(*lims)
+        self.canvas.draw()
+
+    def resizeEvent(self, event):
+        width = event.size().width()
+        height = event.size().height()
+        relx = self.position[0]/width
+        rely = self.position[1]/height
+        # print 'width', width, 'height', height, 'relxy', relx, rely
+        self.ax.set_position([relx, rely, 1.0-relx, 1.0-rely])
 
 if __name__ == '__main__':
     import sys

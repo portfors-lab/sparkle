@@ -1,6 +1,7 @@
 from PyQt4 import QtGui
 from specgramform import Ui_SpecDialog
 from enthought.chaco import default_colormaps
+from matplotlib import cm
 
 class SpecDialog(QtGui.QDialog):
     def __init__(self, parent=None, default_vals=None):
@@ -8,7 +9,8 @@ class SpecDialog(QtGui.QDialog):
         self.ui = Ui_SpecDialog()
         self.ui.setupUi(self)
 
-        colormaps = default_colormaps.color_map_name_dict.keys()
+        # colormaps = default_colormaps.color_map_name_dict.keys()
+        colormaps = [m for m in cm.datad if not m.endswith("_r")]
         self.ui.colormap_cmbx.addItems(colormaps)
 
         if default_vals is not None:
