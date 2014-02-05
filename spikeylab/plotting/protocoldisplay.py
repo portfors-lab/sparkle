@@ -4,8 +4,8 @@ import numpy as np
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from spikeylab.plotting.custom_plots import TraceWidget, FFTWidget
-from spikeylab.plotting.mpl_spec_widget import SpecWidget
+from spikeylab.plotting.custom_plots import TraceWidget, FFTWidget, SpecWidget
+# from spikeylab.plotting.mpl_spec_widget import SpecWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -16,9 +16,9 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot = FFTWidget(self)
         self.spiketrace_plot = TraceWidget(self)
         self.spec_plot = SpecWidget(self)
-        self.spec_plot.ax.set_xticks([])
+        # self.spec_plot.ax.set_xticks([])
 
-        # print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
+        print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
@@ -48,8 +48,6 @@ class ProtocolDisplay(QtGui.QWidget):
     def update_spec(self, *args, **kwargs):
         # self.spec_plot.update_data(*args, **kwargs)
         self.spec_plot.from_file(*args, **kwargs)
-        print 'setting limits'
-        # self.spec_plot.set_xlim(self.spiketrace_plot.get_xlim())
 
     def set_spec_args(self, *args, **kwargs):
         self.spec_plot.set_spec_args(*args, **kwargs)
@@ -93,7 +91,7 @@ class ProtocolDisplay(QtGui.QWidget):
 
     def set_fscale(self, scale):
         self.fft_plot.traits.set_fscale(scale)
-        # self.spec_plot.traits.set_fscale(scale)
+        self.spec_plot.traits.set_fscale(scale)
 
 if __name__ == "__main__":
     import random, time, os

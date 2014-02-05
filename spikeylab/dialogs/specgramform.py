@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\specgram_dlg.ui'
 #
-# Created: Wed Jan 22 15:37:38 2014
+# Created: Wed Feb 05 09:14:51 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,6 +49,7 @@ class Ui_SpecDialog(object):
         self.window_cmbx.addItem(_fromUtf8(""))
         self.window_cmbx.addItem(_fromUtf8(""))
         self.window_cmbx.addItem(_fromUtf8(""))
+        self.window_cmbx.addItem(_fromUtf8(""))
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.window_cmbx)
         self.label_3 = QtGui.QLabel(SpecDialog)
         self.label_3.setObjectName(_fromUtf8("label_3"))
@@ -82,6 +83,7 @@ class Ui_SpecDialog(object):
         self.window_cmbx.setItemText(1, _translate("SpecDialog", "Hamming", None))
         self.window_cmbx.setItemText(2, _translate("SpecDialog", "Blackman", None))
         self.window_cmbx.setItemText(3, _translate("SpecDialog", "Bartlett", None))
+        self.window_cmbx.setItemText(4, _translate("SpecDialog", "none", None))
         self.label_3.setText(_translate("SpecDialog", "% overlap", None))
         self.label_4.setText(_translate("SpecDialog", "Colormap", None))
 

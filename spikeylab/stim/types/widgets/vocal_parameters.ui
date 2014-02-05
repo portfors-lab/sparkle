@@ -77,7 +77,7 @@
   <customwidget>
    <class>SpecWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.plotting.mpl_spec_widget</header>
+   <header>spikeylab.plotting.custom_plots</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

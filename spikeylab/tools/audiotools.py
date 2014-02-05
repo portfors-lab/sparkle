@@ -113,20 +113,19 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
     if window == 'hanning':
         winfnc = mlab.window_hanning
     elif window == 'hamming':
-        winfnc = np.hamming
+        winfnc = np.hamming(nfft)
     elif window == 'blackman':
-        winfnc = np.blackman
+        winfnc = np.blackman(nfft)
     elif window == 'bartlett':
-        winfnc = np.bartlett
-    elif window == None:
+        winfnc = np.bartlett(nfft)
+    elif window == None or window == 'none':
         winfnc = mlab.window_none
 
     noverlap = int(nfft*(float(overlap)/100))
 
-
     Pxx, freqs, bins = mlab.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=noverlap,
                                      pad_to=nfft*2, window=winfnc, detrend=mlab.detrend_none,
-                                     sides='default', scale_by_freq=None)
+                                     sides='default', scale_by_freq=True)
 
     # convert to db scale for display
     spec = 10. * np.log10(Pxx)

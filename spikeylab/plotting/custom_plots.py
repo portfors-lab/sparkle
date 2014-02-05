@@ -155,14 +155,13 @@ class SpecWidget(BaseWidget):
         return dur
 
     def update_data(self, signal, fs):
-        spec, f, bins, fs = audiotools.spectrogram((fs, signal), **self.specgram_args)
+        spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgram_args)
         self.traits.update_data(spec, xaxis=bins, yaxis=f)
 
     def set_spec_args(self, **kwargs):
         for key, value in kwargs.items():
             if key == 'colormap':
-                # self.traits.set_colormap(value)
-                pass
+                self.traits.set_colormap(value)
             else:
                 self.specgram_args[key] = value
 
@@ -511,12 +510,12 @@ class ImagePlotter(HasTraits):
     plot = Instance(OverlayPlotContainer)
     fscale = 1000
     tscale = 0.001
-
+    img_args = {'cmap': default_colormaps.jet}
     def _plot_default(self):
         self.img_data = ArrayPlotData()
         self.img_data.set_data('imagedata', np.zeros((5,5)))
         plot = Plot(self.img_data)
-        p = plot.img_plot('imagedata', name="spectrogram", colormap=default_colormaps.jet)
+        p = plot.img_plot('imagedata', name="spectrogram", colormap=self.img_args['cmap'])
 
         self.default_tick_formatter = plot.y_axis.tick_label_formatter
         plot.y_axis.tick_label_formatter = self._freq_ticks
@@ -534,8 +533,8 @@ class ImagePlotter(HasTraits):
     def update_data(self, imgdata, xaxis=None, yaxis=None):
         self.img_data.set_data('imagedata',imgdata)
         if xaxis is not None and yaxis is not None:
-            self.plot.components[0].index.set_data(xaxis, yaxis)
-        self.plot.components[0].request_redraw()
+            self.cimage.index.set_data(xaxis, yaxis)
+        self.cimage.request_redraw()
 
     def set_xlim(self, lim):
         self.plot.range2d.x_range.low = lim[0]
@@ -543,12 +542,9 @@ class ImagePlotter(HasTraits):
 
     def set_colormap(self, cmap_name):
         cmap = default_colormaps.color_map_name_dict[cmap_name]
-        print cmap
-        print self.plot.components[0].__dict__['value_mapper'].name
+        self.img_args['cmap'] = cmap
         self.cimage.value_mapper = cmap(self.cimage.color_mapper.range)
-        # self.cimage.__dict__['value_mapper'] = cmap(self.cimage.color_mapper.range)
-        # self.cimage.color_mapper = None
-        # print 'new name', self.plot.components[0].color_mapper.name
+        self.cimage.request_redraw()
 
     def set_title(self, title):
         # make space for a title

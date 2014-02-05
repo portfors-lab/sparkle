@@ -9,8 +9,8 @@ class SpecDialog(QtGui.QDialog):
         self.ui = Ui_SpecDialog()
         self.ui.setupUi(self)
 
-        # colormaps = default_colormaps.color_map_name_dict.keys()
-        colormaps = [m for m in cm.datad if not m.endswith("_r")]
+        colormaps = default_colormaps.color_map_name_dict.keys()
+        # colormaps = [m for m in cm.datad if not m.endswith("_r")]
         self.ui.colormap_cmbx.addItems(colormaps)
 
         if default_vals is not None:

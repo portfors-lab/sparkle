@@ -355,6 +355,7 @@ class MainWindow(ControlWindow):
             argdict = dlg.values()
             self.ui.display.set_spec_args(**argdict)
             self.exvocal.set_spec_args(**argdict)
+            QtGui.QApplication.processEvents()
             self.spec_args = argdict
 
     def update_calfile(self, filename):
