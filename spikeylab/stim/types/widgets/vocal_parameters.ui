@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Vocalization</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -77,7 +77,7 @@
   <customwidget>
    <class>SpecWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.plotting.custom_plots</header>
+   <header>spikeylab.plotting.mpl_spec_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

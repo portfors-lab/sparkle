@@ -203,7 +203,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':'jet'})
-        SpecWidget().set_spec_args(**self.spec_args)
+        self.ui.display.set_spec_args(**self.spec_args)        
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 'calv':0.1,'calfile':'', 'use_calfile':False})
         self.acqmodel.set_params(**self.calvals)
         if self.calvals['use_calfile']:

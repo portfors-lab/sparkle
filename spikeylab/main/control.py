@@ -353,7 +353,8 @@ class MainWindow(ControlWindow):
         dlg = SpecDialog(default_vals=self.spec_args)
         if dlg.exec_():
             argdict = dlg.values()
-            SpecWidget().set_spec_args(**argdict)
+            self.ui.display.set_spec_args(**argdict)
+            self.exvocal.set_spec_args(**argdict)
             self.spec_args = argdict
 
     def update_calfile(self, filename):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
-# Created: Wed Jan 22 12:31:19 2014
+# Created: Tue Feb 04 21:45:11 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,8 +73,8 @@ class Ui_VocalParameterWidget(object):
         QtCore.QMetaObject.connectSlotsByName(VocalParameterWidget)
 
     def retranslateUi(self, VocalParameterWidget):
-        VocalParameterWidget.setWindowTitle(_translate("VocalParameterWidget", "Form", None))
+        VocalParameterWidget.setWindowTitle(_translate("VocalParameterWidget", "Vocalization", None))
         self.wavrootdir_btn.setText(_translate("VocalParameterWidget", "change", None))
 
-from spikeylab.plotting.custom_plots import SpecWidget
 from spikeylab.stim.common_parameters import CommonParameterWidget
+from spikeylab.plotting.mpl_spec_widget import SpecWidget

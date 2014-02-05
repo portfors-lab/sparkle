@@ -24,6 +24,7 @@ class SpecWidget(QtGui.QWidget):
 
         self.ax = fig.add_subplot(1,1,1)
         self.position = [50.0, 10.0]
+        self.img = None
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.canvas)
@@ -32,8 +33,6 @@ class SpecWidget(QtGui.QWidget):
         self.setWindowTitle("Spectrogram")
 
         self.setLayout(vbox)
-
-        self.img = self.ax.imshow(np.zeros((5,5)))
 
     def update_data(self, signal, fs):
         spec, f, bins, fs = audiotools.spectrogram((fs, signal), **self.specgram_args)
@@ -55,8 +54,10 @@ class SpecWidget(QtGui.QWidget):
     def set_spec_args(self, **kwargs):
         for key, value in kwargs.items():
             if key == 'colormap':
-                self.img.set_cmap(value)
                 self.img_args['cmap'] = value
+                if self.img is not None:
+                    self.img.set_cmap(value)
+                    self.canvas.draw()
             else:
                 self.specgram_args[key] = value
 

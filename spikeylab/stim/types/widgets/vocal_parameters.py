@@ -89,5 +89,5 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     def setContentFocus(self):
         pass
 
-    def setSpecgramArgs(self, argsdict):
-        self._specgram_inputs = argsdict
+    def set_spec_args(self, *args, **kwargs):
+        self.spec_preview.set_spec_args(*args, **kwargs)

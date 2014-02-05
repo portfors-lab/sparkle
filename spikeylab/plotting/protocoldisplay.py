@@ -51,6 +51,9 @@ class ProtocolDisplay(QtGui.QWidget):
         print 'setting limits'
         # self.spec_plot.set_xlim(self.spiketrace_plot.get_xlim())
 
+    def set_spec_args(self, *args, **kwargs):
+        self.spec_plot.set_spec_args(*args, **kwargs)
+
     def update_fft(self, *args, **kwargs):
         self.fft_plot.update_data(*args, **kwargs)
 

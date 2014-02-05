@@ -1,6 +1,4 @@
 import sys
-from enthought.etsconfig.etsconfig import ETSConfig
-ETSConfig.toolkit = "qt4"
 
 from traits.api import HasTraits, Instance, List, Int, Tuple, Float, Trait, Class, Property
 from traitsui.api import View, Item
@@ -163,7 +161,8 @@ class SpecWidget(BaseWidget):
     def set_spec_args(self, **kwargs):
         for key, value in kwargs.items():
             if key == 'colormap':
-                self.traits.set_colormap(value)
+                # self.traits.set_colormap(value)
+                pass
             else:
                 self.specgram_args[key] = value
 
