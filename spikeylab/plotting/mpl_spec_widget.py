@@ -30,7 +30,7 @@ class SpecWidget(QtGui.QWidget):
         vbox.addWidget(self.canvas)
         # vbox.setContentsMargins(0,0,0,0)
 
-        self.setWindowTitle("Spectrogram")
+        self.setWindowTitle("Spectrogram Preview")
 
         self.setLayout(vbox)
 
@@ -65,13 +65,13 @@ class SpecWidget(QtGui.QWidget):
         self.ax.set_xlim(*lims)
         self.canvas.draw()
 
-    def resizeEvent(self, event):
-        width = event.size().width()
-        height = event.size().height()
-        relx = self.position[0]/width
-        rely = self.position[1]/height
-        # print 'width', width, 'height', height, 'relxy', relx, rely
-        self.ax.set_position([relx, rely, 1.0-relx, 1.0-rely])
+    # def resizeEvent(self, event):
+    #     width = event.size().width()
+    #     height = event.size().height()
+    #     relx = self.position[0]/width
+    #     rely = self.position[1]/height
+    #     # print 'width', width, 'height', height, 'relxy', relx, rely
+    #     self.ax.set_position([relx, rely, 1.0-relx, 1.0-rely])
 
 if __name__ == '__main__':
     import sys
