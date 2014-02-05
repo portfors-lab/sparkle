@@ -1,5 +1,7 @@
 from nose.tools import raises, assert_equal
 
+import numpy as np
+
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
@@ -105,6 +107,57 @@ class TestStimModel():
         assert len(signals) == nsteps
         assert len(doc) == nsteps
         assert doc[0]['samplerate_da'] == model.samplerate()
+
+    def test_signal_eq_caldb(self):
+        caldb = 100
+        calv = 0.1
+        model = StimulusModel()
+        component0 = PureTone()
+        component1 = PureTone()
+        component0.setIntensity(caldb)
+        component1.setIntensity(80)
+        model.insertComponent(component0, (0,0))
+        model.insertComponent(component1, (0,0))
+        model.setReferenceVoltage(caldb, calv)
+
+        signal, atten = model.signal()
+        assert atten == 0
+        # rounding errors (or rather how python stores numbers) make this necessary
+        assert round(np.amax(signal),3) == calv
+
+    def test_signal_lt_caldb(self):
+        caldb = 100
+        calv = 0.1
+        model = StimulusModel()
+        component0 = PureTone()
+        component1 = PureTone()
+        component0.setIntensity(caldb-10)
+        component1.setIntensity(80)
+        model.insertComponent(component0, (0,0))
+        model.insertComponent(component1, (0,0))
+        model.setReferenceVoltage(caldb, calv)
+
+        signal, atten = model.signal()
+        assert atten == 10
+        assert round(np.amax(signal),3) == calv
+
+    def test_signal_gt_caldb(self):
+        caldb = 100
+        calv = 0.1
+        mod = 10
+        model = StimulusModel()
+        component0 = PureTone()
+        component1 = PureTone()
+        component0.setIntensity(caldb+mod)
+        component1.setIntensity(80)
+        model.insertComponent(component0, (0,0))
+        model.insertComponent(component1, (0,0))
+        model.setReferenceVoltage(caldb, calv)
+
+        signal, atten = model.signal()
+        assert atten == 0
+        print 'recieved', np.amax(signal), 'expected', calv*(10 **(mod/20.))
+        assert round(np.amax(signal),3) == round(calv*(10 **(mod/20.)),3)
 
     def test_verify_no_components(self):
         model = StimulusModel()

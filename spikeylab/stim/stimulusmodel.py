@@ -323,11 +323,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
         """Return the current stimulus in signal representation"""
         track_signals = []
         max_db = max([comp.intensity() for t in self._segments for comp in t])
-        # everything is maxed up from 100 dB and attenuated from there
-        atten = 100 - max_db
+        # everything is maxed up to calibration dB and attenuated from there
+        atten = self.caldb - max_db
+        if atten < 0:
+            atten = 0
+        # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten
         for track in self._segments:
-            # nsamples = sum([comp.duration() for comp in track])*self.samplerate
-            # track_signal = np.zeros((nsamples,))
             track_list = []
             for component in track:
                 track_list.append(component.signal(fs=self._samplerate, 

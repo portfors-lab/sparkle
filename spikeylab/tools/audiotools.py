@@ -11,13 +11,13 @@ VERBOSE = False
 DBFACTOR = 20
 OUTPUT_MINIMUM = 0.01
 
-def calc_db(peak, caldB, cal_peak):
-    u"""20*log10(peak/cal_peak) + caldB"""
+def calc_db(peak, caldb, cal_peak):
+    u"""20*log10(peak/cal_peak) + caldb"""
     try:
-        pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldB
+        pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldb
     except ZeroDivisionError:
         print u'attempted division by zero:'
-        print u'peak {}, caldb {}, calpeak {}'.format(peak, caldB, cal_peak)
+        print u'peak {}, caldb {}, calpeak {}'.format(peak, caldb, cal_peak)
         pbdB = np.nan
     return pbdB
 
@@ -57,19 +57,31 @@ def get_fft_peak(spectrum, freq, atfrequency=None):
     return spec_peak, f
 
 def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
-    # create portable tone generator class that allows the 
-    # ability to generate tones that modifyable on-the-fly
+    """
+    Produce a pure tone signal 
+
+    :param freq: Frequency of the tone to be produced (Hz)
+    :type freq: int
+    :param db: Intensity of the tone in dB SPL
+    :type db: int
+    :param dur: duration (seconds)
+    :type dur: float
+    :param risefall: linear rise fall of (seconds)
+    :type risefall: float
+    :param samplerate: generation frequency of tone (Hz)
+    :type samplerate: int
+    :param caldb: Reference intensity (dB SPL). Together with calv, provides a reference point for what intensity equals what output voltage level
+    :type caldb: int
+    :param calv: Reference voltage (V). Together with calv, provides a reference point for what intensity equals what output voltage level
+    :type calv: float
+    """
     npts = dur * samplerate
     try:
-        atten = 0
-
-        v_at_caldB = calv
-        caldB = caldb
-        amp = (10 ** ((db-caldB)/DBFACTOR)*v_at_caldB)
+        amp = (10 ** ((db-caldb)/DBFACTOR)*calv)
 
         if VERBOSE:
             print("current dB: {}, attenuation: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, atten, freq/1000, amp))
-            print("cal dB: {}, V at cal dB: {}".format(caldB, v_at_caldB))
+            print("cal dB: {}, V at cal dB: {}".format(caldb, calv))
 
         rf_npts = risefall * samplerate
         #print('amp {}, freq {}, npts {}, rf_npts {}'
@@ -94,7 +106,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
         timevals = np.arange(npts)/samplerate
         raise
 
-    return tone, timevals, atten
+    return tone, timevals
 
 
 def spectrogram(source, nfft=512, overlap=90, window='hanning'):

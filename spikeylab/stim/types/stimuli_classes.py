@@ -175,7 +175,6 @@ class Vocalization(AbstractStimulusComponent):
             raise Exception("specified samplerate does not match wav stimulus")
         # normalize to calibration
         wavdata = wavdata.astype(float)
-        print "DANGER vocal wav files Hard-coded calibration 100db 0.1V"
         max_amp = np.amax(wavdata)
         amp = (10 ** ((self._intensity+atten-caldb)/20)*calv)
         wavdata = ((wavdata/max_amp)*amp)
