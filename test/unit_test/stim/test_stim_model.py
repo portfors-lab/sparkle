@@ -222,6 +222,29 @@ class TestStimModel():
         print 'msg', invalid
         assert invalid
 
+    def test_verify_with_bad_frequency_auto_parameter(self):
+        component = PureTone()
+        stim_model = StimulusModel()
+        stim_model.setReferenceVoltage(100, 0.1)
+        stim_model.insertComponent(component, (0,0))
+        stim_model.setSamplerate(375000)
+
+        ap_model = stim_model.autoParams()
+        ap_model.insertRows(0, 1)
+        
+        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(stim_model.index(0,0))
+
+        # default value is in kHz
+        values = ['frequency', 50, 200, 25]
+        for i, value in enumerate(values):
+            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+
+        invalid = stim_model.verify(window_size=0.1)
+        print 'msg', invalid
+        assert invalid
+        assert stim_model.contains_pval('frequency', 75000)
+
     def add_auto_param(self, model):
         # adds an autoparameter to the given model
         start = 0

@@ -552,6 +552,7 @@ class AcquisitionModel():
         # Pick out the calibration frequency and put it first
         order = range(len(doclist))
         for i, trace in enumerate(doclist):
+            print trace['components'][0]['frequency'],
             if trace['components'][0]['frequency'] == self.calf and trace['components'][0]['intensity'] == self.caldb:
                 order.pop(i)
                 order.insert(0,i)

@@ -231,9 +231,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     return True
         return False
 
-    def autoParamRanges(self):
+    def autoParamRanges(self, params=None):
         """Return the expanded auto parameters, individually"""
-        params = self._auto_params.allData()
+        if params is None:
+            params = self._auto_params.allData()
+
         steps = []
         for p in params:
             # inclusive range
@@ -243,16 +245,17 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 else:
                     step = p['step']
             steps.append(np.append(np.arange(p['start'], p['stop'], step),p['stop']))
+
         return steps
         
-    def expandFunction(self, func):
+    def expandFunction(self, func, args=[]):
         # initilize array to hold all varied parameters
-        steps = self.autoParamRanges()
+        params = self._auto_params.allData()
+
+        steps = self.autoParamRanges(params)
         ntraces = 1
         for p in steps:
             ntraces = ntraces*len(p)
-
-        params = self._auto_params.allData()
 
         varylist = [[None for x in range(len(params))] for y in range(ntraces)]
         x = 1
@@ -274,7 +277,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
-            stim_list.append(func())
+            stim_list.append(func(*args))
 
         # now reset the components to start value
         for ip, param in enumerate(params):
@@ -315,7 +318,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             durs.append(sum([comp.duration() for comp in track]))
             
         return max(durs)
-
 
     def signal(self):
         """Return the current stimulus in signal representation"""
@@ -384,10 +386,30 @@ class StimulusModel(QtCore.QAbstractItemModel):
         else:
             print 'Erm, no editor available :('
 
-    def verify_components(self):
+    def contains_pval(self, param_name, value):
+        """Returns true is the given value is in the auto parameters"""
+        params = self._auto_params.allData()
+        steps = self.autoParamRanges(params)
+        pnames = [p['parameter'] for p in params]
+        if param_name in pnames:
+            pidx = pnames.index(param_name)
+            return value in steps[pidx]
+        else:
+            return False
+
+    def verify_expanded(self, samplerate):
+        results = self.expandFunction(self.verify_components, args=(samplerate,))
+        msg = [x for x in results if x]
+        if len(msg) > 0:
+            return msg[0]
+        else:
+            return 0
+
+    def verify_components(self, samplerate):
+        # flatten list of components
         components = [comp for track in self._segments for comp in track]
         for comp in components:
-            msg = comp.verify()
+            msg = comp.verify(samplerate=samplerate)
             if msg:
                 return msg
         return 0
@@ -398,16 +420,14 @@ class StimulusModel(QtCore.QAbstractItemModel):
             return msg
         if self.traceCount() == 0:
             return "Test is empty"
-        results = self.expandFunction(self.verify_components)
         if window_size is not None:
             durations = self.expandFunction(self.duration)
             # ranges are linear, so we only need to test first and last
             if durations[0] > window_size or durations[-1] > window_size:
                 return "Stimulus duration exceeds window duration"
-        msg = [x for x in results if x]
-        if len(msg) > 0:
-            return msg[0]
+        msg = self.verify_expanded(self.samplerate())
+        if msg:
+            return msg
         if self.caldb is None or self.calv is None:
             return "Test reference voltage not set"
-        # flatten list of components
         return 0
