@@ -8,7 +8,8 @@ from stimeditor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
-from spikeylab.plotting.custom_plots import SpecWidget
+# from spikeylab.plotting.custom_plots import SpecWidget
+from spikeylab.plotting.mpl_spec_widget import SpecWidget
 from matplotlib import mlab
 
 class BuilderFactory():
@@ -52,10 +53,16 @@ class StimulusEditor(AbstractEditorWidget):
     def preview(self):
         stim_signal, atten = self.ui.trackview.model().signal()
         # import matplotlib.pyplot as plt
+        # nfft = 512
+        # Pxx, freqs, bins, im = plt.specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
+        #                       pad_to=nfft*2)
+        # # print fig, spec
+        # plt.imshow(Pxx)
+        # plt.show()
 
         fig = SpecWidget()
         fig.update_data(stim_signal, self.ui.trackview.model().samplerate())
-        fig.set_title('Stimulus Preview')
+        # fig.set_title('Stimulus Preview')
         fig.show()
         self.asdkjfasdfk = fig
 

@@ -328,7 +328,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # track_signal = np.zeros((nsamples,))
             track_list = []
             for component in track:
-                track_list.append(component.signal(self._samplerate, atten, self.caldb, self.calv))
+                track_list.append(component.signal(fs=self._samplerate, 
+                                                   atten=atten, 
+                                                   caldb=self.caldb, 
+                                                   calv=self.calv))
             if len(track_list) > 0:   
                 track_signals.append(np.hstack(track_list))
 

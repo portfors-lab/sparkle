@@ -201,7 +201,8 @@ class Silence(AbstractStimulusComponent):
         editor.setComponent(self)
         return editor
 
-    def signal(self, fs, atten):
+    def signal(self, *args, **kwargs):
+        fs = kwargs['fs']
         return np.zeros((self._duration*fs,))
 
 class Modulation(AbstractStimulusComponent):

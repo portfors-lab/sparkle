@@ -53,7 +53,9 @@ class AbstractStimulusComponent(object):
     def showEditor(self):
         raise NotImplementedError
 
-    def signal(self, fs, atten):
+    def signal(self, **kwargs):
+        """kwargs must include: fs and optionally include 
+        atten, caldb, calv depending on stimulus type"""
         raise NotImplementedError
 
     def verify(self, **kwargs):

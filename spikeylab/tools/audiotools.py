@@ -123,8 +123,10 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
 
     noverlap = int(nfft*(float(overlap)/100))
 
+
     Pxx, freqs, bins = mlab.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=noverlap,
-                                     pad_to=nfft*2, window=winfnc)
+                                     pad_to=nfft*2, window=winfnc, detrend=mlab.detrend_none,
+                                     sides='default', scale_by_freq=None)
 
     # convert to db scale for display
     spec = 10. * np.log10(Pxx)
