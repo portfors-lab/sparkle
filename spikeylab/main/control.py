@@ -94,16 +94,24 @@ class MainWindow(ControlWindow):
         self.ui.plot_dock.setVisible(True)
         self.ui.psth_dock.setVisible(True)
 
+        self.ui.stop_btn.setEnabled(False)
+
     def on_start(self):
         # set plot axis to appropriate limits
         # first time set up data file
         if not self.verify_inputs():
             return
 
+        # disable the components we don't want changed amid generation
+        self.ui.aochan_box.setEnabled(False)
+        reprate = self.ui.reprate_spnbx.setEnabled(False)
+        self.ui.stop_btn.setEnabled(True)
+
         if self.current_mode == 'windowed':
             if self.acqmodel.datafile is None:
                 self.acqmodel.set_save_params(self.savefolder, self.savename)
                 self.acqmodel.create_data_file()
+            self.ui.aichan_box.setEnabled(False)
             self.ui.plot_dock.setWidget(self.ui.display)
             self.ui.psth_dock.setWidget(self.ui.psth_container)
             self.ui.running_label.setText(u"RECORDING")
@@ -171,12 +179,17 @@ class MainWindow(ControlWindow):
             self.live_lock.unlock()
             self.ui.running_label.setText(u"OFF")
             self.ui.running_label.setPalette(RED)
+            self.ui.aichan_box.setEnabled(True)
         self.ui.start_btn.setEnabled(True)
         self.ui.start_btn.setText('Start')
         self.ui.start_btn.clicked.disconnect()
         self.ui.start_btn.clicked.connect(self.on_start)
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.on_stop)
+
+        self.ui.aochan_box.setEnabled(True)
+        reprate = self.ui.reprate_spnbx.setEnabled(True)
+        self.ui.stop_btn.setEnabled(False)
 
     def on_stop_chart(self):
         self.acqmodel.stop_chart()
