@@ -31,7 +31,7 @@ class TestStimuliTypes():
         for stimulus in self.stimuli:
             msg = stimulus.verify(samplerate=fs)
             assert msg == 0
-
+            
     def test_editor(self):
         for stimulus in self.stimuli:
             editor = stimulus.showEditor()
@@ -49,7 +49,7 @@ class TestStimuliTypes():
             assert_equal(state, stimulus.stateDict())
 
     def test_auto_details(self):        
-        mandatory_attrs = ['duration', 'intensity', 'risefall']
+        mandatory_attrs = ['intensity', 'risefall']
         for stimulus in self.stimuli:
             details = stimulus.auto_details()
             for attr in mandatory_attrs:

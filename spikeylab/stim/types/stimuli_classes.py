@@ -181,6 +181,11 @@ class Vocalization(AbstractStimulusComponent):
         wavdata = ((wavdata/max_amp)*amp)
         return wavdata
 
+    def auto_details(self):
+        details = super(Vocalization, self).auto_details()
+        del details['duration']
+        return details
+
     def verify(self, **kwargs):
         if self._filename is None:
             return "Vocalization stimulus without a specified file"
