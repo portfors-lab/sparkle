@@ -347,7 +347,7 @@ class MainWindow(ControlWindow):
             self.saveformat = saveformat
 
     def launch_calibration_dlg(self):
-        dlg = CalibrationDialog(default_vals = self.calvals)
+        dlg = CalibrationDialog(default_vals = self.calvals, fscale=self.fscale)
         if dlg.exec_():
             values = dlg.values()
             self.acqmodel.set_params(**values)
