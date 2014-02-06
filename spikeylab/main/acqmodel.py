@@ -53,6 +53,8 @@ class AcquisitionModel():
 
         self.binsz = 0.005
 
+        self.player_lock = threading.Lock()
+
     def update_reference_voltage(self):
         self.stimulus.setReferenceVoltage(self.caldb, self.calv)
         self.calibration_stimulus.setReferenceVoltage(self.caldb, self.calv)
@@ -110,17 +112,23 @@ class AcquisitionModel():
 
     def set_params(self, **kwargs):
 
+        # this will acquire the lock unecessarily in some cases...
+        self.player_lock.acquire()
         if 'acqtime' in kwargs:
             self.finite_player.set_aidur(kwargs['acqtime'])
         if 'aisr' in kwargs:
             self.finite_player.set_aisr(kwargs['aisr'])
             self.chart_player.set_aisr(kwargs['aisr'])
+        if 'aisr' in kwargs or 'acqtime' in kwargs:
+            t = kwargs.get('acqtime', self.finite_player.get_aidur())
+            npoints = t*float(kwargs.get('aisr', self.finite_player.get_aisr()))
+            self.aitimes = np.linspace(0, t, npoints)
+        self.player_lock.release()
+        
         if 'aochan' in kwargs:
             self.aochan = kwargs['aochan']
         if 'aichan' in kwargs:
             self.aichan = kwargs['aichan']
-        if 'aisr' in kwargs and 'acqtime' in kwargs:
-            self.aitimes = np.linspace(0, kwargs['acqtime'], kwargs['acqtime']*float(kwargs['aisr']))
         if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
         if 'binsz' in kwargs:
@@ -191,13 +199,14 @@ class AcquisitionModel():
         spike_latencies = []
         spike_rates = []
         irep = 0
+        times = self.aitimes
         while not self._halt:
             # print 'explore worker'
             try:
                 self.interval_wait()
 
                 response = self.finite_player.run()
-                self.signals.response_collected.emit(self.aitimes, response)
+                self.signals.response_collected.emit(times, response)
 
                 # process response; calculate spike times
                 spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)
@@ -212,7 +221,11 @@ class AcquisitionModel():
                 if len(response_bins) > 0:
                     self.signals.spikes_found.emit(response_bins, irep)
 
+                #lock it so we don't get a times mismatch
+                self.player_lock.acquire()
                 self.finite_player.reset()
+                times = self.aitimes
+                self.player_lock.release()
 
                 if SAVE_EXPLORE:
                     # save response data

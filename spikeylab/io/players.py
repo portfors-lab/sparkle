@@ -112,6 +112,12 @@ class PlayerBase():
     def get_caldb(self):
         return self.caldb
 
+    def get_aidur(self):
+        return self.aitime
+
+    def get_aisr(self):
+        return self.aisr
+
     def set_aisr(self, aisr):
         self.aisr = aisr
 
