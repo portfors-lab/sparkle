@@ -261,6 +261,7 @@ class AcquisitionModel():
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
         stimuli = self.protocol_model.stimulusList()
+        self.trace_counter = 0
 
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
                                            args=(self.finite_player, stimuli, self.datafile),
@@ -321,8 +322,9 @@ class AcquisitionModel():
         # check for special condition -- replace this with a generic
         if test.editor is not None and test.editor.name == "Tuning Curve":
             frequencies, intensities =  test.autoParamRanges()
-            self.signals.tuning_curve_started.emit(list(frequencies), list(intensities))
-
+            self.signals.tuning_curve_started.emit(list(frequencies), list(intensities), 'tuning')
+        elif test.traceCount() > 1:
+            self.signals.tuning_curve_started.emit(range(test.traceCount()), [0], 'generic')
 
     def init_calibration(self, test):
         test.setReorderFunc(self.reorder_calibration_traces)
@@ -371,6 +373,9 @@ class AcquisitionModel():
                 f = trace_info['components'][0]['frequency']
                 db = trace_info['components'][0]['intensity']
                 self.signals.tuning_curve_response.emit(f, db, avg_count)
+            else:
+                self.signals.tuning_curve_response.emit(self.trace_counter, 0, avg_count)
+            self.trace_counter +=1
 
         self.spike_counts = spike_counts
         self.spike_latencies = spike_latencies

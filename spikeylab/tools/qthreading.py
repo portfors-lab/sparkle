@@ -29,7 +29,7 @@ class ProtocolSignals(QtCore.QObject):
     trace_finished = QtCore.pyqtSignal(int, float, float, float)
     group_finished = QtCore.pyqtSignal(bool)
     calibration_file_changed = QtCore.pyqtSignal(str)
-    tuning_curve_started = QtCore.pyqtSignal(list, list)
+    tuning_curve_started = QtCore.pyqtSignal(list, list, str)
     tuning_curve_response = QtCore.pyqtSignal(int, int, float)
 
 class TestSignals(QtCore.QObject):

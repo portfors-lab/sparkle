@@ -437,30 +437,43 @@ class AnimatedWindow(BasePlot):
             super().keyPressEvent(event)
 
 class LiveCalPlot(BasePlot):
-    def __init__(self, freqs, intensities, parent=None):
+    def __init__(self, xpoints, ypoints, parent=None):
         BasePlot.__init__(self, (1,1), parent)
  
-        for idb in intensities:
-            dummydata = np.empty((len(freqs),1))
+        for idb in ypoints:
+            dummydata = np.empty((len(xpoints),1))
             dummydata[:] = np.NAN
-            self.axs[0].plot(freqs,dummydata)
+            self.axs[0].plot(xpoints,dummydata)
 
-        self.setWindowTitle("Calibration Curve")
-        self.axs[0].set_xlabel("Frequency (Hz)")
-        self.axs[0].set_ylabel("Recorded dB")
-
-        self.frequencies = freqs
-        self.intensities = intensities
+        self.frequencies = xpoints
+        self.ypoints = ypoints
         self.axs[0].set_ylim(50,110)
-        self.axs[0].set_xlim(freqs[0],freqs[-1])
+        self.axs[0].set_xlim(xpoints[0],xpoints[-1])
 
-    def set_point(self, f, db, value):
-        idb = self.intensities.index(db)
+    def set_point(self, x, y, value):
+        idb = self.ypoints.index(y)
         l = self.axs[0].lines[idb].get_ydata()
-        l[self.frequencies.index(f)] = value
+        l[self.frequencies.index(x)] = value
         self.axs[0].lines[idb].set_ydata(l)
 
         self.canvas.draw()
+
+    def set_labels(self, name):
+        if name == "calibration":
+            self.setWindowTitle("Calibration Curve")
+            self.axs[0].set_title("Calibration Curve")
+            self.axs[0].set_xlabel("Frequency (Hz)")
+            self.axs[0].set_ylabel("Recorded dB")
+        elif name == "tuning":
+            self.setWindowTitle("Tuning Curve")
+            self.axs[0].set_title("Tuning Curve")
+            self.axs[0].set_xlabel("Frequency (Hz)")
+            self.axs[0].set_ylabel("Spike Count (mean)")
+        else:
+            self.setWindowTitle("Spike Counts")
+            self.axs[0].set_title("Spike Counts")
+            self.axs[0].set_xlabel("Test Number")
+            self.axs[0].set_ylabel("Spike Count (mean)")
 
 class ScrollingPlot(BasePlot):
     def __init__(self, nsubplots, deltax, callback=None,parent=None, window=1):

@@ -106,6 +106,7 @@ class MainWindow(ControlWindow):
         self.ui.aochan_box.setEnabled(False)
         reprate = self.ui.reprate_spnbx.setEnabled(False)
         self.ui.stop_btn.setEnabled(True)
+        self.plot_progress = False
 
         if self.current_mode == 'windowed':
             if self.acqmodel.datafile is None:
@@ -156,7 +157,6 @@ class MainWindow(ControlWindow):
         self.ui.display.set_xlimits((0,winsz))
         # for now, clear spec if not vocalization
         if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) != 'vocalization':
-            print 'clearing for stim', self.ui.explore_stim_type_cmbbx.currentText().lower()
             self.ui.display.update_spec(None)
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.clear_explore_stimulus()
@@ -260,6 +260,7 @@ class MainWindow(ControlWindow):
 
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
         self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
+        self.livecurve.set_labels('calibration')
         self.ui.psth_dock.setWidget(self.livecurve)
         self.ui.plot_dock.setWidget(self.calibration_display)
 
@@ -293,14 +294,15 @@ class MainWindow(ControlWindow):
             print u"WARNING : Problem drawing to calibration plot"
             raise
 
-    def spawn_tuning_curve(self, frequencies, intensities):
+    def spawn_tuning_curve(self, frequencies, intensities, plot_type):
         self.livecurve = LiveCalPlot(frequencies, intensities)
-        self.livecurve.axs[0].set_ylim(0,30)
-        # self.livecurve.ylim_auto(self.livecurve.axs)
+        self.livecurve.set_labels(plot_type)
         self.livecurve.show()
+        self.plot_progress = True
 
     def display_tuning_curve(self, f, db, spike_count):
-        self.livecurve.set_point(f, db, spike_count)
+        if self.plot_progress:
+            self.livecurve.set_point(f, db, spike_count)
 
     def display_raster(self, bins, repnum):
         # convert to times for raster
