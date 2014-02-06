@@ -297,7 +297,8 @@ class MainWindow(ControlWindow):
     def spawn_tuning_curve(self, frequencies, intensities, plot_type):
         self.livecurve = LiveCalPlot(frequencies, intensities)
         self.livecurve.set_labels(plot_type)
-        self.livecurve.show()
+        # self.livecurve.show()
+        self.ui.progress_dock.setWidget(self.livecurve)
         self.plot_progress = True
 
     def display_tuning_curve(self, f, db, spike_count):
@@ -433,6 +434,9 @@ class MainWindow(ControlWindow):
 
     def set_status_msg(self, status):
         self.statusBar().showMessage(status)
+
+    def show_progress(self):
+        self.ui.progress_dock.setVisible(True)
 
     def closeEvent(self,event):
         # stop any tasks that may be running

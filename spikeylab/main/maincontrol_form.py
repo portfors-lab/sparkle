@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Feb 04 09:19:27 2014
+# Created: Wed Feb 05 17:23:17 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -454,6 +454,12 @@ class Ui_ControlWindow(object):
         self.verticalLayout_10.addWidget(self.psth_container)
         self.psth_dock.setWidget(self.dockWidgetContents_2)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.psth_dock)
+        self.progress_dock = QtGui.QDockWidget(ControlWindow)
+        self.progress_dock.setObjectName(_fromUtf8("progress_dock"))
+        self.dockWidgetContents_3 = QtGui.QWidget()
+        self.dockWidgetContents_3.setObjectName(_fromUtf8("dockWidgetContents_3"))
+        self.progress_dock.setWidget(self.dockWidgetContents_3)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.progress_dock)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -466,12 +472,15 @@ class Ui_ControlWindow(object):
         self.actionShow_PSTH.setObjectName(_fromUtf8("actionShow_PSTH"))
         self.actionSpectrogram_Parameters = QtGui.QAction(ControlWindow)
         self.actionSpectrogram_Parameters.setObjectName(_fromUtf8("actionSpectrogram_Parameters"))
+        self.actionShow_Progress = QtGui.QAction(ControlWindow)
+        self.actionShow_Progress.setObjectName(_fromUtf8("actionShow_Progress"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
         self.menuOptions.addAction(self.actionSpectrogram_Parameters)
         self.menuView.addAction(self.actionShow_Data_display)
         self.menuView.addAction(self.actionShow_PSTH)
+        self.menuView.addAction(self.actionShow_Progress)
         self.menubar.addAction(self.menuOptions.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
 
@@ -486,6 +495,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.explore_stim_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.parameter_stack.setCurrentIndex)
         QtCore.QObject.connect(self.actionSpectrogram_Parameters, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_specgram_dlg)
         QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.mode_toggled)
+        QtCore.QObject.connect(self.actionShow_Progress, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_progress)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -556,6 +566,7 @@ class Ui_ControlWindow(object):
         self.actionShow_Data_display.setText(_translate("ControlWindow", "Show Data Display", None))
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
         self.actionSpectrogram_Parameters.setText(_translate("ControlWindow", "Spectrogram Parameters...", None))
+        self.actionShow_Progress.setText(_translate("ControlWindow", "Show Progress", None))
 
 from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox
