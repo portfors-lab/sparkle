@@ -158,6 +158,9 @@ class SpecWidget(BaseWidget):
         spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgram_args)
         self.traits.update_data(spec, xaxis=bins, yaxis=f)
 
+    def clear(self):
+        self.traits.update_data([[0]])
+
     def set_spec_args(self, **kwargs):
         for key, value in kwargs.items():
             if key == 'colormap':

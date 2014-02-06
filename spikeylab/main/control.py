@@ -154,6 +154,10 @@ class MainWindow(ControlWindow):
                                  binsz=binsz)
 
         self.ui.display.set_xlimits((0,winsz))
+        # for now, clear spec if not vocalization
+        if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) != 'vocalization':
+            print 'clearing for stim', self.ui.explore_stim_type_cmbbx.currentText().lower()
+            self.ui.display.update_spec(None)
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.clear_explore_stimulus()
             nreps = self.ui.ex_nreps_spnbx.value()
@@ -394,6 +398,7 @@ class MainWindow(ControlWindow):
             winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
 
             self.ui.display.set_xlimits((0,winsz))
+        self.on_update()
 
     def update_thresh(self, thresh):
         self.ui.thresh_spnbx.setValue(thresh)

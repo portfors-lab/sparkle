@@ -47,7 +47,10 @@ class ProtocolDisplay(QtGui.QWidget):
 
     def update_spec(self, *args, **kwargs):
         # self.spec_plot.update_data(*args, **kwargs)
-        self.spec_plot.from_file(*args, **kwargs)
+        if args[0] == None:
+            self.spec_plot.clear()
+        else:
+            self.spec_plot.from_file(*args, **kwargs)
 
     def set_spec_args(self, *args, **kwargs):
         self.spec_plot.set_spec_args(*args, **kwargs)
