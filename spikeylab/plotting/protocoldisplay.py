@@ -4,7 +4,8 @@ import numpy as np
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from spikeylab.plotting.custom_plots import TraceWidget, FFTWidget, SpecWidget
+from spikeylab.plotting.custom_plots import FFTWidget, SpecWidget
+from spikeylab.plotting.pyqtgraph_widgets import TraceWidget
 # from spikeylab.plotting.mpl_spec_widget import SpecWidget
 
 from PyQt4 import QtGui, QtCore
@@ -18,7 +19,7 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spec_plot = SpecWidget(self)
         # self.spec_plot.ax.set_xticks([])
 
-        print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
+        # print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
@@ -59,12 +60,14 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot.update_data(*args, **kwargs)
 
     def update_spiketrace(self, xdata, ydata):
-        self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='response')
-        self.spiketrace_plot.update_data(ydata, datakey='response', axeskey='response')
+        # self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='response')
+        # self.spiketrace_plot.update_data(ydata, datakey='response', axeskey='response')
+        self.spiketrace_plot.update_data(axeskey='response', x=xdata, y=ydata)
 
     def clear_raster(self):
-        self.spiketrace_plot.clear_data("response", "spikes")
-        self.spiketrace_plot.clear_data("response", "bins")
+        # self.spiketrace_plot.clear_data("response", "spikes")
+        # self.spiketrace_plot.clear_data("response", "bins")
+        self.spiketrace_plot.clear_data('raster')
 
     def add_raster_points(self, xdata, repnum):
         """Add a list (or numpy array) of points to raster plot, 
@@ -72,12 +75,14 @@ class ProtocolDisplay(QtGui.QWidget):
            xdata: bin centers
            ydata: rep number """
         ydata = np.ones_like(xdata)*repnum
-        self.spiketrace_plot.append_data(xdata, "response", 'bins')
-        self.spiketrace_plot.append_data(ydata, "response", 'spikes')
+        # self.spiketrace_plot.append_data(xdata, "response", 'bins')
+        # self.spiketrace_plot.append_data(ydata, "response", 'spikes')
+        self.spiketrace_plot.append_data('raster', xdata, ydata)
 
     def update_signal(self, xdata, ydata):
-        self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='stim')
-        self.spiketrace_plot.update_data(ydata, datakey='signal', axeskey='stim')
+        # self.spiketrace_plot.update_data(xdata, datakey='times', axeskey='stim')
+        # self.spiketrace_plot.update_data(ydata, datakey='signal', axeskey='stim')
+        self.spiketrace_plot.update_data(axeskey='stim', x=xdata, y=ydata)
 
     def set_xlimits(self, lims):
         self.spiketrace_plot.set_xlim(lims)
@@ -90,7 +95,8 @@ class ProtocolDisplay(QtGui.QWidget):
         return QtCore.QSize(500,300)
 
     def set_tscale(self, scale):
-        self.spiketrace_plot.traits.set_tscale(scale)
+        # self.spiketrace_plot.traits.set_tscale(scale)
+        self.spiketrace_plot.set_tscale(scale)
 
     def set_fscale(self, scale):
         self.fft_plot.traits.set_fscale(scale)
@@ -112,7 +118,8 @@ if __name__ == "__main__":
     sylpath = sample.samplewav()
     spec, f, bins, fs = audiotools.spectrogram(sylpath)
 
-    plot.update_spec(spec, xaxis=bins, yaxis=f)
+    # plot.update_spec(spec, xaxis=bins, yaxis=f)
+    plot.update_spec(sylpath)
 
     sr, wavdata = wv.read(sylpath)
     freqs, fft = audiotools.calc_spectrum(wavdata,sr)
@@ -152,7 +159,7 @@ if __name__ == "__main__":
     plot.add_raster_points(dummy_bins, dummy_data)
 
     print 'spec range', plot.spec_plot.traits.plot.range2d.x_range
-    print 'spiketrace range', plot.spiketrace_plot.traits.trace_plot.range2d.x_range
+    # print 'spiketrace range', plot.spiketrace_plot.traits.trace_plot.range2d.x_range
 
     # coerce x ranges to match
     plot.set_xlimits([0, resp_times[-1]])

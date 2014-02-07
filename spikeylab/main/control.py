@@ -3,6 +3,7 @@ import spikeylab
 import sys, os
 import scipy.io.wavfile as wv
 import numpy as np
+import threading
 
 from PyQt4 import QtCore, QtGui
 
@@ -15,6 +16,7 @@ from spikeylab.tools.audiotools import calc_spectrum, calc_db
 from spikeylab.plotting.mpl_spec_widget import SpecWidget
 from spikeylab.plotting.plotz import LiveCalPlot
 from spikeylab.plotting.custom_plots import ChartWidget
+from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 
 from controlwindow import ControlWindow
 
@@ -56,8 +58,9 @@ class MainWindow(ControlWindow):
 
         self.live_lock = QtCore.QMutex()
 
-        self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
+        # self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         
+
         self.ui.protocolView.setModel(self.acqmodel.protocol_model)
         self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
 
@@ -271,8 +274,37 @@ class MainWindow(ControlWindow):
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
 
     def display_response(self, times, response):
-        # print "display reponse"
+        if len(times) != len(response):
+            print "WARNING: times and response not equal"
         self.ui.display.update_spiketrace(times, response)
+
+        # print "display reponse"
+        # draw_thread = threading.Thread(target=self.ui.display.update_spiketrace,
+        #                                args=(times, response))
+        # draw_thread.start()
+
+        # draw_thread = QtCore.QThread()
+        # draw_thread = Thread()
+        # draw_worker = GenericObject(self.ui.display.update_spiketrace,
+        #                             args=(times, response))
+        # # draw_worker = GenericObject(self.test_function)
+        # # draw_worker = SimpleObject()
+        # draw_worker.moveToThread(draw_thread)
+        # # draw_worker.error.connect(self.handle_thread_error)
+        # draw_thread.started.connect(draw_worker.process)
+        # # draw_worker.finished.connect(draw_thread.quit)
+        # # draw_worker.finished.connect(draw_worker.deleteLater)
+        # # draw_thread.finished.connect(draw_thread.deleteLater)
+        # # draw_worker.finished.connect(draw_thread.deleteLater)
+        # # draw_thread.finished.connect(draw_worker.deleteLater)
+        # draw_thread.start()
+        # draw_thread.wait()
+
+    def handle_thread_error(self, msg):
+        print 'thread error:', msg
+
+    def test_function(self):
+        print 'hello from thread'
 
     def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
         # display fft here

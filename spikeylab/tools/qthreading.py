@@ -15,6 +15,47 @@ class GenericThread(QtCore.QThread):
         self.function(*self.args,**self.kwargs)
         return
 
+class GenericObject(QtCore.QObject):
+    finished = QtCore.pyqtSignal()
+    error = QtCore.pyqtSignal(str)
+    def __init__(self, function, *args, **kwargs):
+        QtCore.QObject.__init__(self)
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+
+    def process(self):
+        try:
+            self.function(*self.args,**self.kwargs)
+        except:
+            self.error.emit("There was an error :(")
+        self.finished.emit()
+        
+class Thread(QtCore.QThread):
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
+
+     # this class is solely needed for these two methods, there
+     # appears to be a bug in PyQt 4.6 that requires you to
+     # explicitly call run and start from the subclass in order
+     # to get the thread to actually start an event loop
+
+    def start(self):
+        QtCore.QThread.start(self)
+
+    def run(self):
+        QtCore.QThread.run(self)
+
+class SimpleObject(QtCore.QObject):
+    finished = QtCore.pyqtSignal()
+    error = QtCore.pyqtSignal(str)
+    def process(self):
+        try:
+            print "Hello its me!"
+        except:
+            self.error.emit("There was an error :(")
+        self.finished.emit()
+
 class ProtocolSignals(QtCore.QObject):
     curve_finished = QtCore.pyqtSignal()
     ncollected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
