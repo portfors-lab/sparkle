@@ -19,6 +19,7 @@ class TraceWidget(pg.PlotWidget):
     raster_ymax = 1
     raster_yslots = np.linspace(raster_ymin, raster_ymax, nreps)
     threshold_updated = QtCore.pyqtSignal(float)
+
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
@@ -108,7 +109,6 @@ class TraceWidget(pg.PlotWidget):
         if dlg.exec_():
             bounds = dlg.get_values()
             self.set_raster_bounds(bounds)
-            print bounds
 
     def get_raster_bounds(self):
         return (self.raster_ymin, self.raster_ymax)
@@ -153,11 +153,12 @@ class TraceWidget(pg.PlotWidget):
 
 class SpecWidget(pg.PlotWidget):
     specgram_args = {u'nfft':512, u'window':u'hanning', u'overlap':90}
-    img_args = {'cmap':'jet'}
+    img_args = {'lut':None, 'state':None, 'levels':None}
     reset_image_scale = True
     img_scale = (1.,1.)
     tscale = 1. # s
     fscale = 1000
+    colormap_changed = QtCore.pyqtSignal(object)
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
 
@@ -165,7 +166,6 @@ class SpecWidget(pg.PlotWidget):
         self.addItem(self.img)
 
         self.setMouseEnabled(x=False,y=True)
-        self.sigScaleChanged.connect(self.scale_change)
 
         yaxis = self.getPlotItem().getAxis('left')
         self.tickStrings = yaxis.tickStrings
@@ -174,6 +174,10 @@ class SpecWidget(pg.PlotWidget):
         xaxis = self.getPlotItem().getAxis('bottom')
         self.timeTickStrings = xaxis.tickStrings
         xaxis.tickStrings = self.time_tick_strings
+
+        cmap_action = QtGui.QAction("edit colormap", None)
+        self.scene().contextMenu.append(cmap_action) #should use function for this?
+        cmap_action.triggered.connect(self.edit_colormap)
 
     def from_file(self, fname):
         spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgram_args)
@@ -189,6 +193,8 @@ class SpecWidget(pg.PlotWidget):
             self.reset_scale()        
             self.img.scale(xscale, yscale)
             self.img_scale = (xscale, yscale)
+        self.image_array = imgdata
+        self.update_colormap()
 
     def reset_scale(self):
         self.img.scale(1./self.img_scale[0], 1./self.img_scale[1])
@@ -201,15 +207,15 @@ class SpecWidget(pg.PlotWidget):
     def set_spec_args(self, **kwargs):
         for key, value in kwargs.items():
             if key == 'colormap':
-                self.img_args['cmap'] = value
+                self.img_args['lut'] = value['lut']
+                self.img_args['levels'] = value['levels']
+                self.img_args['state'] = value['state']
+                self.update_colormap()
             else:
                 self.specgram_args[key] = value
 
     def set_xlim(self, lim):
         self.setXRange(*lim, padding=0)
-
-    def scale_change(self, obj):
-        print 'scale change', obj
 
     def clear(self):
         pass
@@ -242,6 +248,35 @@ class SpecWidget(pg.PlotWidget):
         ticks = self.timeTickStrings(vales, scale, spacing)
         ticks = [str(float(x)/self.tscale) for x in ticks]
         return ticks
+
+    def edit_colormap(self):
+        self.editor = pg.ImageView()
+        self.editor.setImage(self.image_array)
+        if self.img_args['state'] is not None:
+            self.editor.getHistogramWidget().item.gradient.restoreState(self.img_args['state'])
+            self.editor.getHistogramWidget().item.setLevels(*self.img_args['levels'])
+        
+        self.editor.closeEvent = self.editor_close
+        self.editor.show()
+
+    def editor_close(self, event):
+        lut = self.editor.getHistogramWidget().item.getLookupTable(n=512, alpha=True)
+        state = self.editor.getHistogramWidget().item.gradient.saveState()
+        levels = self.editor.getHistogramWidget().item.getLevels()
+        self.img.setLookupTable(lut)
+        self.img.setLevels(levels)
+        self.img_args['lut'] = lut
+        self.img_args['state'] = state
+        self.img_args['levels'] = levels
+        self.colormap_changed.emit(self.img_args)
+
+    def update_colormap(self):
+        if self.img_args['lut'] is not None:
+            self.img.setLookupTable(self.img_args['lut'])
+            self.img.setLevels(self.img_args['levels'])
+
+    def get_colormap(self):
+        return self.img_args
 
 class FFTWidget(pg.PlotWidget):
     fscale = 1000

@@ -13,6 +13,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         # grey out parameters determined by file, not to be altered by user
         self.common.dur_spnbx.setEnabled(False)
         self.common.risefall_spnbx.setEnabled(False)
+        # self.colormap_changed = self.ui.spec_preview.colormap_changed
 
     def setComponent(self, component):
         self.common.setFields(component)
@@ -91,3 +92,6 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def set_spec_args(self, *args, **kwargs):
         self.spec_preview.set_spec_args(*args, **kwargs)
+
+    def update_colormap(self):
+        self.spec_preview.update_colormap()

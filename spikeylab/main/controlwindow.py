@@ -3,6 +3,7 @@ import json
 from PyQt4 import QtCore, QtGui
 
 import spikeylab.tools.systools as systools
+from spikeylab.tools.util import convert2native
 from spikeylab.main.window_accessories import MaximizableTitleBar
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
@@ -175,7 +176,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['aosr'] = self.ui.aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
-        savedict['specargs'] = self.spec_args
+        savedict['specargs'] = convert2native(self.spec_args)
         savedict['calvals'] = self.calvals
 
         # parameter settings
@@ -212,7 +213,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.reprate_spnbx.setValue(inputsdict.get('reprate', 1))
         self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
-        self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':'jet'})
+        self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
         self.ui.display.set_spec_args(**self.spec_args)        
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 'calv':0.1,'calfile':'', 'use_calfile':False})
         self.acqmodel.set_params(**self.calvals)

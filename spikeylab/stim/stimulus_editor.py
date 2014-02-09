@@ -9,7 +9,9 @@ from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 
 # from spikeylab.plotting.custom_plots import SpecWidget
-from spikeylab.plotting.mpl_spec_widget import SpecWidget
+# from spikeylab.plotting.mpl_spec_widget import SpecWidget
+from spikeylab.plotting.pyqtgraph_widgets import SpecWidget
+
 from matplotlib import mlab
 
 class StimulusEditor(AbstractEditorWidget):

@@ -17,9 +17,6 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot = FFTWidget(self)
         self.spiketrace_plot = TraceWidget(self)
         self.spec_plot = SpecWidget(self)
-        # self.spec_plot.ax.set_xticks([])
-
-        # print self.spec_plot.traits.plot.range2d.x_range.default_state, self.spec_plot.traits.plot.range2d.x_range.low_setting
 
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
@@ -48,6 +45,7 @@ class ProtocolDisplay(QtGui.QWidget):
 
         #relay threshold signal
         self.threshold_updated = self.spiketrace_plot.threshold_updated
+        self.colormap_changed = self.spec_plot.colormap_changed
 
     def update_spec(self, *args, **kwargs):
         # self.spec_plot.update_data(*args, **kwargs)

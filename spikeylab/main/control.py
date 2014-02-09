@@ -60,6 +60,7 @@ class MainWindow(ControlWindow):
 
         # self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
         self.ui.display.threshold_updated.connect(self.update_thresh)
+        self.ui.display.colormap_changed.connect(self.relay_cmap_change)
 
         self.ui.protocolView.setModel(self.acqmodel.protocol_model)
         self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
@@ -433,6 +434,10 @@ class MainWindow(ControlWindow):
 
             self.ui.display.set_xlimits((0,winsz))
         self.on_update()
+
+    def relay_cmap_change(self, cmap):
+        self.exvocal.update_colormap()
+        self.spec_args['colormap'] = cmap
 
     def update_thresh(self, thresh):
         self.ui.thresh_spnbx.setValue(thresh)
