@@ -46,6 +46,9 @@ class ProtocolDisplay(QtGui.QWidget):
         layout.addWidget(splitterse)
         self.setLayout(layout)
 
+        #relay threshold signal
+        self.threshold_updated = self.spiketrace_plot.threshold_updated
+
     def update_spec(self, *args, **kwargs):
         # self.spec_plot.update_data(*args, **kwargs)
         if args[0] == None:

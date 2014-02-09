@@ -59,7 +59,7 @@ class MainWindow(ControlWindow):
         self.live_lock = QtCore.QMutex()
 
         # self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
-        
+        self.ui.display.threshold_updated.connect(self.update_thresh)
 
         self.ui.protocolView.setModel(self.acqmodel.protocol_model)
         self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
@@ -280,7 +280,6 @@ class MainWindow(ControlWindow):
 
         # print "display reponse"
         # draw_thread = threading.Thread(target=self.ui.display.update_spiketrace,
-        #                                args=(times, response))
         # draw_thread.start()
 
         # draw_thread = QtCore.QThread()

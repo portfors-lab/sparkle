@@ -18,13 +18,13 @@ class TraceWidget(pg.PlotWidget):
     raster_ymin = 0.5
     raster_ymax = 1
     raster_yslots = np.linspace(raster_ymin, raster_ymax, nreps)
+    threshold_updated = QtCore.pyqtSignal(float)
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
         # self.pw = pg.PlotWidget(name='trace')
         self.trace_plot = self.plot(pen='k')
         self.raster_plot = self.plot(pen=None, symbol='s', symbolPen=None, symbolSize=4, symbolBrush='k')
-        self.thresh_line = self.plot(pen='r')
         self.stim_plot = self.plot(pen='b')
 
         self.sigRangeChanged.connect(self.range_change)
@@ -55,6 +55,10 @@ class TraceWidget(pg.PlotWidget):
         self.timeTickStrings = xaxis.tickStrings
         xaxis.tickStrings = self.time_tick_strings
 
+        self.thresh_line = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
+        self.addItem(self.thresh_line)
+        self.thresh_line.sigPositionChangeFinished.connect(self.update_thresh)
+
     def update_data(self, axeskey, x, y):
         if axeskey == 'stim':
             self.stim_plot.setData(x,y)
@@ -63,9 +67,6 @@ class TraceWidget(pg.PlotWidget):
             self.range_change(self, ranges)
         if axeskey == 'response':
             self.trace_plot.setData(x,y)
-            if x is not None:
-                # Consider changing to calling this explicitly on window size change
-                self._update_threshold_anchor()
 
     def append_data(self, axeskey, bins, ypoints):
         if axeskey == 'raster':
@@ -92,19 +93,7 @@ class TraceWidget(pg.PlotWidget):
         return y[0]
 
     def set_threshold(self, threshold):
-        x, y = self.trace_plot.getData()
-        if x is not None:
-            trace_lims = [x[0], x[-1]]
-        else:
-            trace_lims = [0, 0]    
-        self.thresh_line.setData(x=trace_lims, y=[threshold, threshold])
-
-    def _update_threshold_anchor(self):
-        x, y = self.trace_plot.getData()
-        if x is not None:
-            a, threshold = self.thresh_line.getData()
-            trace_lims = [x[0], x[-1]]
-            self.thresh_line.setData(x=trace_lims, y=threshold)
+        self.thresh_line.setValue(threshold) 
 
     def set_nreps(self, nreps):
         self.nreps = nreps
@@ -158,6 +147,9 @@ class TraceWidget(pg.PlotWidget):
         ticks = self.timeTickStrings(vales, scale, spacing)
         ticks = [str(float(x)/self.tscale) for x in ticks]
         return ticks
+
+    def update_thresh(self):
+        self.threshold_updated.emit(self.thresh_line.value())
 
 class SpecWidget(pg.PlotWidget):
     specgram_args = {u'nfft':512, u'window':u'hanning', u'overlap':90}
