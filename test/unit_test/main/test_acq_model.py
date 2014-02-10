@@ -10,7 +10,7 @@ from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
-from spikeylab.stim.tceditor import TCFactory
+from spikeylab.stim.factory import TCFactory
 from PyQt4.QtCore import Qt
 
 import test.sample as sample

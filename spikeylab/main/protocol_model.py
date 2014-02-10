@@ -4,7 +4,8 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.main.drag_label import FactoryLabel
+# from spikeylab.main.drag_label import DragLabel
+from spikeylab.stim.factory import StimFactory
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.main.abstract_drag_view import AbstractDragView
 
@@ -155,14 +156,14 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         item = self.dropAssist(event)
         location = self.rowAt(event.pos().y())
 
-        if isinstance(event.source(), FactoryLabel):
+        if isinstance(item, StimFactory):
             factory = item
             # create new stimulus then!
             stim = StimulusModel()
             factory.init_stim(stim)
             stim.setEditor(factory.editor())
             self.model().insertNewTest(stim, location)
-        else:
+        elif event.source() == self:
             selected_id = item
             self.model().insertTest(selected_id, location)
 

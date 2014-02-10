@@ -11,7 +11,7 @@ from spikeylab.data.dataobjects import AcquisitionData, load_calibration_file
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.main.protocol_model import ProtocolTabelModel
-from spikeylab.stim.tceditor import CCFactory
+from spikeylab.stim.factory import CCFactory
 
 SAVE_EXPLORE = False
 

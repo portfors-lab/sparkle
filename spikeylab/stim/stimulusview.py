@@ -6,8 +6,10 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.stim.component_label import ComponentTemplateLabel
+from spikeylab.main.drag_label import DragLabel
+
 from spikeylab.main.abstract_drag_view import AbstractDragView
+from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 
 ROW_HEIGHT = 100
 ROW_SPACE = 25
@@ -264,14 +266,15 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
 
     def dropEvent(self, event):
-        if isinstance(event.source(), self.__class__) or isinstance(event.source(), ComponentTemplateLabel):
-            component = self.dropAssist(event)
+        component = self.dropAssist(event)
+        # if isinstance(event.source(), self.__class__) or isinstance(event.source(), DragLabel):
+        if isinstance(component, AbstractStimulusComponent):
 
             location = self.splitAt(event.pos())
 
             self.model().insertComponent(component, location)
 
-            if isinstance(event.source(), ComponentTemplateLabel):
+            if isinstance(event.source(), DragLabel):
                 index = self.model().index(location[0], location[1])
                 self.edit(index)
 

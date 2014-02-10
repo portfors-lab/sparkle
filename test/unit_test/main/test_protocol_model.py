@@ -5,8 +5,8 @@ from nose.tools import assert_equal
 from spikeylab.main.protocol_model import ProtocolTabelModel, ProtocolView
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone
-from spikeylab.stim.stimulus_editor import BuilderFactory
-from spikeylab.main.drag_label import FactoryLabel
+from spikeylab.stim.factory import BuilderFactory
+from spikeylab.main.drag_label import DragLabel
 from PyQt4 import QtCore, QtGui, QtTest
 
 class TestProtocolModel():
@@ -84,7 +84,7 @@ class TestProtocolView():
         model = ProtocolTabelModel()
         model.setReferenceVoltage(100, 0.1)
         view.setModel(model)
-        builder_label = FactoryLabel(BuilderFactory)
+        builder_label = DragLabel(BuilderFactory)
         
         mimeData = QtCore.QMimeData()
         mimeData.setData("application/x-protocol", cPickle.dumps(BuilderFactory()))
@@ -111,6 +111,9 @@ class TestProtocolView():
         drop = QtGui.QDropEvent(QtCore.QPoint(), QtCore.Qt.MoveAction,
                                 mimeData, QtCore.Qt.RightButton, 
                                 QtCore.Qt.NoModifier)
+
+        # hack to set the source without creating QDrag
+        drop.source = lambda: view
         view.dropEvent(drop)
 
         assert model.rowCount() == 1

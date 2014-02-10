@@ -2,16 +2,17 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-from PyQt4 import QtGui, QtCore
-
 import cPickle
 
+from PyQt4 import QtGui, QtCore
 
-class FactoryLabel(QtGui.QLabel):
+
+class DragLabel(QtGui.QLabel):
     def __init__(self, factoryclass, parent=None):
-        super(FactoryLabel, self).__init__(parent)
-        self.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.StyledPanel)
+        super(DragLabel, self).__init__(parent)
+        self.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.Panel)
         self.setClass(factoryclass)
+        self.setFixedSize(QtCore.QSize(100,25))
 
     def setClass(self, factoryclass):
         """Constructor for the component type this label is to represent"""
@@ -19,31 +20,33 @@ class FactoryLabel(QtGui.QLabel):
         self.setText(str(factoryclass.name))
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            # create a new component with default values
-            factory = self.factoryclass()
+        # create a new component with default values
+        factory = self.factoryclass()
 
-            mimeData = QtCore.QMimeData()
+        mimeData = QtCore.QMimeData()
+        try:
+            mimeData.setData("application/x-protocol", factory.serialize())
+        except:
             mimeData.setData("application/x-protocol", cPickle.dumps(factory))
 
-            drag = QtGui.QDrag(self)
-            drag.setMimeData(mimeData)
+        drag = QtGui.QDrag(self)
+        drag.setMimeData(mimeData)
 
-            pixmap = QtGui.QPixmap()
-            pixmap = pixmap.grabWidget(self, self.frameRect())
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, self.frameRect())
 
-            # below makes the pixmap half transparent
-            # painter = QtGui.QPainter(pixmap)
-            # painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-            # painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-            # painter.end()
+        # below makes the pixmap half transparent
+        # painter = QtGui.QPainter(pixmap)
+        # painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+        # painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+        # painter.end()
 
-            drag.setPixmap(pixmap)
+        drag.setPixmap(pixmap)
 
-            drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-            drag.setPixmap(pixmap)
+        drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+        drag.setPixmap(pixmap)
 
-            result = drag.start(QtCore.Qt.MoveAction)
+        result = drag.start(QtCore.Qt.MoveAction)
 
 
 if __name__ == '__main__':
