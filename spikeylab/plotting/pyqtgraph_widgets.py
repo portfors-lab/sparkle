@@ -193,7 +193,7 @@ class SpecWidget(pg.PlotWidget):
             self.reset_scale()        
             self.img.scale(xscale, yscale)
             self.img_scale = (xscale, yscale)
-        self.image_array = imgdata
+        self.image_array = np.fliplr(imgdata)
         self.update_colormap()
 
     def reset_scale(self):
@@ -217,8 +217,8 @@ class SpecWidget(pg.PlotWidget):
     def set_xlim(self, lim):
         self.setXRange(*lim, padding=0)
 
-    def clear(self):
-        pass
+    def clear_img(self):
+        self.img.setImage(np.array([[0]]))
 
     def set_fscale(self, scale):
         self.fscale = scale

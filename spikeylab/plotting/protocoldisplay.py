@@ -4,9 +4,7 @@ import numpy as np
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-# from spikeylab.plotting.custom_plots import SpecWidget,
 from spikeylab.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
-# from spikeylab.plotting.mpl_spec_widget import SpecWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -48,9 +46,8 @@ class ProtocolDisplay(QtGui.QWidget):
         self.colormap_changed = self.spec_plot.colormap_changed
 
     def update_spec(self, *args, **kwargs):
-        # self.spec_plot.update_data(*args, **kwargs)
         if args[0] == None:
-            self.spec_plot.clear()
+            self.spec_plot.clear_img()
         else:
             self.spec_plot.from_file(*args, **kwargs)
 

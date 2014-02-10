@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\specgram_dlg.ui'
 #
-# Created: Wed Feb 05 09:14:51 2014
+# Created: Sun Feb 09 15:43:00 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,10 +26,11 @@ except AttributeError:
 class Ui_SpecDialog(object):
     def setupUi(self, SpecDialog):
         SpecDialog.setObjectName(_fromUtf8("SpecDialog"))
-        SpecDialog.resize(362, 162)
+        SpecDialog.resize(362, 121)
         self.verticalLayout = QtGui.QVBoxLayout(SpecDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.formLayout = QtGui.QFormLayout()
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.label = QtGui.QLabel(SpecDialog)
         self.label.setObjectName(_fromUtf8("label"))
@@ -57,12 +58,6 @@ class Ui_SpecDialog(object):
         self.overlap_spnbx = QtGui.QSpinBox(SpecDialog)
         self.overlap_spnbx.setObjectName(_fromUtf8("overlap_spnbx"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.overlap_spnbx)
-        self.colormap_cmbx = QtGui.QComboBox(SpecDialog)
-        self.colormap_cmbx.setObjectName(_fromUtf8("colormap_cmbx"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.colormap_cmbx)
-        self.label_4 = QtGui.QLabel(SpecDialog)
-        self.label_4.setObjectName(_fromUtf8("label_4"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_4)
         self.verticalLayout.addLayout(self.formLayout)
         self.buttonBox = QtGui.QDialogButtonBox(SpecDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -85,5 +80,4 @@ class Ui_SpecDialog(object):
         self.window_cmbx.setItemText(3, _translate("SpecDialog", "Bartlett", None))
         self.window_cmbx.setItemText(4, _translate("SpecDialog", "none", None))
         self.label_3.setText(_translate("SpecDialog", "% overlap", None))
-        self.label_4.setText(_translate("SpecDialog", "Colormap", None))
 
