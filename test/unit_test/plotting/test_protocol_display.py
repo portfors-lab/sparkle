@@ -11,12 +11,20 @@ import numpy as np
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay
 from test.sample import samplewav
 
-PAUSE = 3
+PAUSE = 0
 
+app = None
+def setUp():
+    global app
+    app = QApplication(sys.argv)
+
+def tearDown():
+    global app
+    app.exit(0)
+    
 class TestProtocolDisplay():
 
     def setUp(self):
-        self.app = QApplication(sys.argv)
         self.t = np.arange(200)
 
     def data_func(self, f):
@@ -50,3 +58,5 @@ class TestProtocolDisplay():
         display.clear_raster()
 
         time.sleep(PAUSE)
+
+        display.close()

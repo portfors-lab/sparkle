@@ -5,8 +5,17 @@ import numpy as np
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
+# get an error accessing class names if there is not a qapp running
+app = None
+def setUp():
+    global app
+    app = QtGui.QApplication([])
+
+def tearDown():
+    global app
+    app.exit(0)
 
 class TestStimModel():
     def test_insert_data(self):

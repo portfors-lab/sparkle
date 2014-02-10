@@ -4,6 +4,15 @@ from spikeylab.main.control import MainWindow
 
 from PyQt4.QtGui import QApplication
 
+app = None
+def setUp():
+    global app
+    app = QApplication([])
+
+def tearDown():
+    global app
+    app.exit(0)
+
 class TestUnitChanges():
 
     def setUp(self):
@@ -17,7 +26,6 @@ class TestUnitChanges():
 
     def test_freq_khz(self):
         """Assumes default scale of khz"""
-        app = QApplication([''])
         control = MainWindow(self.tempfile)
         control.show()
 
@@ -38,7 +46,6 @@ class TestUnitChanges():
         control.close()
 
     def test_freq_hz(self):
-        app = QApplication([''])
         control = MainWindow(self.tempfile)
         control.show()
 
@@ -62,7 +69,6 @@ class TestUnitChanges():
 
     def test_time_ms(self):
         """Assumes default scale of ms"""
-        app = QApplication([''])
         control = MainWindow(self.tempfile)
         control.show()
 
@@ -84,7 +90,6 @@ class TestUnitChanges():
 
     def test_time_s(self):
         """Assumes default scale of ms"""
-        app = QApplication([''])
         control = MainWindow(self.tempfile)
         control.show()
 

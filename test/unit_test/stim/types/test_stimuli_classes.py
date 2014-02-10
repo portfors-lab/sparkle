@@ -3,6 +3,8 @@ import test.sample as sample
 
 from nose.tools import assert_equal
 
+from PyQt4.QtGui import QApplication
+
 class TestStimuliTypes():
 
     def setUp(self):
@@ -33,9 +35,11 @@ class TestStimuliTypes():
             assert msg == 0
             
     def test_editor(self):
+        app = QApplication([])
         for stimulus in self.stimuli:
             editor = stimulus.showEditor()
             assert editor is not None
+        app.exit(0)
 
     def test_state_change(self):
         # test that the minimum states update

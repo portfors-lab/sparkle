@@ -10,13 +10,21 @@ from PyQt4.QtGui import QApplication
 import spikeylab.tools.audiotools as audiotools
 import test.sample as sample
 
-PAUSE = 0.5
+PAUSE = 0
+
+app = None
+def setUp():
+    global app
+    app = QApplication(sys.argv)
+
+def tearDown():
+    global app
+    app.exit(0)
 
 class TestChacoPlots():
     """ Run through plotting data, and make sure no errors occur"""
 
     def setUp(self):
-        self.app = QApplication(sys.argv)
         self.t = np.arange(200)
 
     def data_func(self, f):

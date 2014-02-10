@@ -8,8 +8,16 @@ sip.setapi('QVariant', 2)
 from PyQt4 import QtCore, QtGui
 from spikeylab.plotting.plotz import ScrollingPlot
 
+app = None
+def setUp():
+    global app
+    app = QtGui.QApplication(sys.argv)
+
+def tearDown():
+    global app
+    app.exit(0)
+
 def test_scrollplot_mpl():
-    app = QtGui.QApplication(['sometext'])
     fig = ScrollingPlot(1, 0.01)
     fig.show()
 
@@ -23,3 +31,4 @@ def test_scrollplot_mpl():
         QtGui.QApplication.processEvents()
         #time.sleep(0.01)
 
+    fig.close()
