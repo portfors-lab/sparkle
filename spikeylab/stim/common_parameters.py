@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from common_parametersform import Ui_ParameterWidget
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
@@ -6,6 +6,7 @@ from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
     """ Widget that accepts input for parameters that all stimuli
      types have in common"""
+    valueChanged = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
@@ -15,6 +16,10 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
         self.tunit_fields.append(self.dur_spnbx)
         self.tunit_fields.append(self.risefall_spnbx)
         self.setTScale(self.scales[0], setup=True)
+        # relay editing signals
+        self.db_spnbx.valueChanged.connect(self.valueChanged.emit)
+        self.dur_spnbx.valueChanged.connect(self.valueChanged.emit)
+        self.risefall_spnbx.valueChanged.connect(self.valueChanged.emit)
 
     def intensityValue(self):
         return self.db_spnbx.value()

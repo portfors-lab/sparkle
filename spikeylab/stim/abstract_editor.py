@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 class AbstractEditorWidget(QtGui.QWidget):
     scales = [0.001, 1000] # time, frequency scaling factors
@@ -6,6 +6,7 @@ class AbstractEditorWidget(QtGui.QWidget):
     tunit_labels = []
     funit_fields = []
     tunit_fields = []
+    valueChanged = QtCore.pyqtSignal()
     def setFScale(self, fscale, setup=False):
         """
         Updates the frequency unit labels, and stores unit to

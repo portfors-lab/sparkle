@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from numpy import floor
 
 from incrementer_form import Ui_IncrementInput
@@ -8,6 +8,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     numtype = float
     minimum = 0
     maximum = 200000
+    valueChanged = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
@@ -21,6 +22,8 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.down10.setIcon(arrowdown())
         self.down5.setIcon(arrowdown())
         self.down1.setIcon(arrowdown())
+        # this will emit on partial values -- not what I want ideally
+        self.value_lnedt.textChanged.connect(self.valueChanged.emit)
 
     def increment1(self):
         self.incrementn(1)

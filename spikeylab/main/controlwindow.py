@@ -32,7 +32,9 @@ class ControlWindow(QtGui.QMainWindow):
         # hack so that original values use correct multiplications
         # AbstractEditorWidget().
         for stim in self.explore_stimuli:
-            self.ui.parameter_stack.addWidget(stim.showEditor())
+            editor = stim.showEditor()
+            editor.valueChanged.connect(self.on_update)
+            self.ui.parameter_stack.addWidget(editor)
             self.ui.explore_stim_type_cmbbx.addItem(stim.name)
 
         try:

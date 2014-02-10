@@ -4,7 +4,6 @@ from tone_parameters_form import Ui_ToneParameterWidget
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 
 class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
-
     def __init__(self, parent=None):
         super(ToneParameterWidget, self).__init__(parent)
         self.setupUi(self)
@@ -12,6 +11,9 @@ class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
         self.funit_labels.append(self.funit_lbl)
         self.funit_fields.append(self.freq_spnbx)
         self.setFScale(self.scales[1], setup=True)
+
+        self.common.valueChanged.connect(self.valueChanged.emit)
+        self.freq_spnbx.valueChanged.connect(self.valueChanged.emit)
 
     def setComponent(self, component):
         self.common.setFields(component)

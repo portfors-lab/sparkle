@@ -251,7 +251,7 @@ class AcquisitionModel():
             self.datafile.trim(self.current_dataset_name)
 
     def set_explore_samplerate(self, fs):
-        print 'setting generation rate', fs
+        # print 'setting generation rate', fs
         if not self.stimulus.contains('Vocalization'):
             self.stimulus.setSamplerate(fs)
         else:

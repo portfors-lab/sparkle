@@ -394,7 +394,7 @@ class MainWindow(ControlWindow):
 
         self.ui.display.update_fft(freq, spectrum)
         t = np.linspace(0,(float(len(wavdata))/sr), len(wavdata))
-        print 'stim time lims', t[0], t[-1]
+        # print 'stim time lims', t[0], t[-1]
         self.ui.display.update_signal(t, wavdata)
 
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':

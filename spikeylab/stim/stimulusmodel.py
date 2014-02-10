@@ -185,7 +185,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 raise Exception("Wav files with different sample rates in same stimulus")
             if value.samplerate() is not None:
                 self._samplerate = value.samplerate()
-                print 'emitting samplerate change', value.samplerate()
+                # print 'emitting samplerate change', value.samplerate()
                 self.samplerateChanged.emit(value.samplerate())
 
 
