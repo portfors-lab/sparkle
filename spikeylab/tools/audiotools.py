@@ -139,7 +139,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
                                      pad_to=nfft*2, window=winfnc, detrend=mlab.detrend_none,
                                      sides='default', scale_by_freq=True)
 
-    convert to db scale for display
+    # convert to db scale for display
     spec = 10. * np.log10(Pxx)
     # spec = np.nan_to_num(spec)
     # remove -inf values from spec array

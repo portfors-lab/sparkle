@@ -12,18 +12,74 @@ pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 pg.setConfigOptions(useWeave=False)
 
-class TraceWidget(pg.PlotWidget):
+class BasePlot(pg.PlotWidget):
+    fscale = 1000
     tscale = 1. # s
+    def __init__(self, parent=None):
+        super(BasePlot, self).__init__(parent)
+
+        # print 'scene', self.scene().contextMenu[0].text()
+        # # self.scene().contextMenu = []
+        # print 'items', 
+        for act in self.getPlotItem().ctrlMenu.actions():
+            # print act.text()
+            if act.text() != 'Grid':
+                self.getPlotItem().ctrlMenu.removeAction(act)
+        # print '-'*20
+        # for act in self.getPlotItem().vb.menu.actions():
+        #     print act.text()
+        # print '-'*20
+        # because of pyqtgraph internals, we can't just remove this action from menu
+        self.fake_action = QtGui.QAction("", None)
+        self.fake_action.setVisible(False)
+        self.fake_action.setCheckable(True)
+        self.getPlotItem().vb.menu.leftMenu = self.fake_action
+        self.getPlotItem().vb.menu.mouseModes = [self.fake_action]
+
+    def set_tscale(self, scale):
+        self.tscale = scale
+        xlim = self.viewRange()[0]
+        if self.tscale == 0.001:
+            self.time_label = 'Time (ms)'
+        elif self.tscale == 1:
+            self.time_label = 'Time (s)'
+        else:
+            raise Exception(u"Invalid time scale")
+
+    def set_fscale(self, scale):
+        self.fscale = scale
+        if self.fscale == 1000:
+            self.freq_title = u'Frequency (kHz)'
+        elif self.fscale == 1:
+            self.freq_title = u'Frequency (Hz)'
+        else:
+            raise Exception(u"Invalid frequency scale")
+
+    def time_tick_strings(self, vales, scale, spacing):
+        ticks = self.timeTickStrings(vales, scale, spacing)
+        ticks = [str(float(x)/self.tscale) for x in ticks]
+        return ticks
+
+    def tick_strings(self, vales, scale, spacing):
+        ticks = self.tickStrings(vales, scale, spacing)
+        ticks = [str(float(x)/self.fscale) for x in ticks]
+        return ticks
+
+    def set_xlim(self, lim):
+        self.setXRange(*lim, padding=0)
+
+    def set_ylim(self, lim):
+        self.setYRange(*lim)
+
+class TraceWidget(BasePlot):
     nreps = 20
     raster_ymin = 0.5
     raster_ymax = 1
     raster_yslots = np.linspace(raster_ymin, raster_ymax, nreps)
     threshold_updated = QtCore.pyqtSignal(float)
-
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
-        # self.pw = pg.PlotWidget(name='trace')
         self.trace_plot = self.plot(pen='k')
         self.raster_plot = self.plot(pen=None, symbol='s', symbolPen=None, symbolSize=4, symbolBrush='k')
         self.stim_plot = self.plot(pen='b')
@@ -33,22 +89,7 @@ class TraceWidget(pg.PlotWidget):
         self.disableAutoRange()
         self.setMouseEnabled(x=False,y=True)
 
-        # print 'scene', self.scene().contextMenu[0].text()
-        # # self.scene().contextMenu = []
-        # print 'items', 
-        # for act in self.getPlotItem().ctrlMenu.actions():
-        #     print act.text()
-        # print '-'*20
-        # for act in self.getPlotItem().vb.menu.actions():
-        #     print act.text()
-        # print '-'*20
-        # because of pyqtgraph internals, we can't just remove action from menu
-        self.fake_action = QtGui.QAction("", None)
-        self.getPlotItem().vb.menu.leftMenu = self.fake_action
-        self.fake_action.setCheckable(True)
-        self.getPlotItem().vb.menu.mouseModes = [self.fake_action]
-
-        raster_bounds_action = QtGui.QAction("edit raster bounds", None)
+        raster_bounds_action = QtGui.QAction("Edit raster bounds", None)
         self.scene().contextMenu.append(raster_bounds_action) #should use function for this?
         raster_bounds_action.triggered.connect(self.ask_raster_bounds)
 
@@ -81,13 +122,6 @@ class TraceWidget(pg.PlotWidget):
     def clear_data(self, axeskey):
         # if axeskey == 'response':
         self.raster_plot.clear()
-
-    def set_xlim(self, lim):
-        lim = (lim[0], lim[1])
-        self.setXRange(*lim, padding=0)
-
-    def set_ylim(self, lim):
-        self.setYRange(*lim)
 
     def get_threshold(self):
         x, y = self.tresh_line.getData()
@@ -133,31 +167,14 @@ class TraceWidget(pg.PlotWidget):
                 stim_y = stim_y + (ranges[1][1] - (stim_height*1.1 + (stim_height*0.2)))
                 self.stim_plot.setData(stim_x, stim_y)
 
-    def set_tscale(self, scale):
-        self.tscale = scale
-        xlim = self.viewRange()[0]
-        if self.tscale == 0.001:
-            self.time_label = 'Time (ms)'
-        elif self.tscale == 1:
-            self.time_label = 'Time (s)'
-        else:
-            raise Exception(u"Invalid time scale")
-
-    def time_tick_strings(self, vales, scale, spacing):
-        ticks = self.timeTickStrings(vales, scale, spacing)
-        ticks = [str(float(x)/self.tscale) for x in ticks]
-        return ticks
-
     def update_thresh(self):
         self.threshold_updated.emit(self.thresh_line.value())
 
-class SpecWidget(pg.PlotWidget):
+class SpecWidget(BasePlot):
     specgram_args = {u'nfft':512, u'window':u'hanning', u'overlap':90}
     img_args = {'lut':None, 'state':None, 'levels':None}
     reset_image_scale = True
     img_scale = (1.,1.)
-    tscale = 1. # s
-    fscale = 1000
     colormap_changed = QtCore.pyqtSignal(object)
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
@@ -175,7 +192,7 @@ class SpecWidget(pg.PlotWidget):
         self.timeTickStrings = xaxis.tickStrings
         xaxis.tickStrings = self.time_tick_strings
 
-        cmap_action = QtGui.QAction("edit colormap", None)
+        cmap_action = QtGui.QAction("Edit colormap", None)
         self.scene().contextMenu.append(cmap_action) #should use function for this?
         cmap_action.triggered.connect(self.edit_colormap)
 
@@ -214,40 +231,8 @@ class SpecWidget(pg.PlotWidget):
             else:
                 self.specgram_args[key] = value
 
-    def set_xlim(self, lim):
-        self.setXRange(*lim, padding=0)
-
     def clear_img(self):
         self.img.setImage(np.array([[0]]))
-
-    def set_fscale(self, scale):
-        self.fscale = scale
-        if self.fscale == 1000:
-            self.freq_title = u'Frequency (kHz)'
-        elif self.fscale == 1:
-            self.freq_title = u'Frequency (Hz)'
-        else:
-            raise Exception(u"Invalid frequency scale")
-
-    def set_tscale(self, scale):
-        self.tscale = scale
-        xlim = self.viewRange()[0]
-        if self.tscale == 0.001:
-            self.time_label = 'Time (ms)'
-        elif self.tscale == 1:
-            self.time_label = 'Time (s)'
-        else:
-            raise Exception(u"Invalid time scale")
-
-    def tick_strings(self, vales, scale, spacing):
-        ticks = self.tickStrings(vales, scale, spacing)
-        ticks = [str(float(x)/self.fscale) for x in ticks]
-        return ticks
-
-    def time_tick_strings(self, vales, scale, spacing):
-        ticks = self.timeTickStrings(vales, scale, spacing)
-        ticks = [str(float(x)/self.tscale) for x in ticks]
-        return ticks
 
     def edit_colormap(self):
         self.editor = pg.ImageView()
@@ -278,9 +263,7 @@ class SpecWidget(pg.PlotWidget):
     def get_colormap(self):
         return self.img_args
 
-class FFTWidget(pg.PlotWidget):
-    fscale = 1000
-    freq_label = 'Frequency (kHz)'
+class FFTWidget(BasePlot):
     def __init__(self, parent=None, rotation=90):
         super(FFTWidget, self).__init__(parent)
         
@@ -293,17 +276,3 @@ class FFTWidget(pg.PlotWidget):
 
     def update_data(self, index_data, value_data):
         self.fft_plot.setData(index_data, value_data)
-
-    def set_fscale(self, scale):
-        self.fscale = scale
-        if self.fscale == 1000:
-            self.freq_title = u'Frequency (kHz)'
-        elif self.fscale == 1:
-            self.freq_title = u'Frequency (Hz)'
-        else:
-            raise Exception(u"Invalid frequency scale")
-
-    def tick_strings(self, vales, scale, spacing):
-        ticks = self.tickStrings(vales, scale, spacing)
-        ticks = [str(float(x)/self.fscale) for x in ticks]
-        return ticks
