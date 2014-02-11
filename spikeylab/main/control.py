@@ -228,7 +228,8 @@ class MainWindow(ControlWindow):
         self.scrollplot.append_data(stim_data, response_data)
 
     def update_generation_rate(self, fs):
-        self.ui.aosr_spnbx.setValue(fs*self.tscale)
+        print 'setting spinbox', fs/self.fscale
+        self.ui.aosr_spnbx.setValue(fs/self.fscale)
 
     def run_explore(self):
         self.ui.start_btn.setText('Update')

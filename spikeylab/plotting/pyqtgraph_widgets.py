@@ -5,7 +5,7 @@ import numpy as np
 from spikeylab.dialogs.raster_bounds_dlg import RasterBoundsDialog
 import spikeylab.tools.audiotools as audiotools
 
-STIM_HEIGHT = 0.10
+STIM_HEIGHT = 0.05
 
 ## Switch to using white background and black foreground
 pg.setConfigOption('background', 'w')
@@ -40,18 +40,18 @@ class BasePlot(pg.PlotWidget):
         self.tscale = scale
         xlim = self.viewRange()[0]
         if self.tscale == 0.001:
-            self.time_label = 'Time (ms)'
+            self.setLabel('bottom', 'Time (ms)')
         elif self.tscale == 1:
-            self.time_label = 'Time (s)'
+            self.setLabel('bottom', 'Time (s)')
         else:
             raise Exception(u"Invalid time scale")
 
     def set_fscale(self, scale):
         self.fscale = scale
         if self.fscale == 1000:
-            self.freq_title = u'Frequency (kHz)'
+            self.setLabel('left', 'Frequency (kHz)')
         elif self.fscale == 1:
-            self.freq_title = u'Frequency (Hz)'
+            self.setLabel('left', u'Frequency (Hz)')
         else:
             raise Exception(u"Invalid frequency scale")
 
@@ -70,6 +70,9 @@ class BasePlot(pg.PlotWidget):
 
     def set_ylim(self, lim):
         self.setYRange(*lim)
+
+    def set_title(self, title):
+        self.getPlotItem().setTitle(title)
 
 class TraceWidget(BasePlot):
     nreps = 20
@@ -100,6 +103,8 @@ class TraceWidget(BasePlot):
         self.thresh_line = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.thresh_line)
         self.thresh_line.sigPositionChangeFinished.connect(self.update_thresh)
+        self.setLabel('left', 'potential', units='V')
+        self.setLabel('bottom', 'Time (s)')
 
     def update_data(self, axeskey, x, y):
         if axeskey == 'stim':
@@ -195,6 +200,8 @@ class SpecWidget(BasePlot):
         cmap_action = QtGui.QAction("Edit colormap", None)
         self.scene().contextMenu.append(cmap_action) #should use function for this?
         cmap_action.triggered.connect(self.edit_colormap)
+
+        self.setLabel('bottom', 'Time (s)')
 
     def from_file(self, fname):
         spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgram_args)

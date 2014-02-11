@@ -16,6 +16,10 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot = TraceWidget(self)
         self.spec_plot = SpecWidget(self)
 
+        self.fft_plot.setToolTip('Stimulus Spectrum')
+        self.spiketrace_plot.setToolTip('Spike Trace')
+        self.spec_plot.setToolTip('Stimulus Spectrogram')
+
         # self.signal_plot.setMinimumHeight(100)
         self.spec_plot.setMinimumHeight(100)
         self.spiketrace_plot.setMinimumWidth(100)
