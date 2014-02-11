@@ -4,7 +4,7 @@ import numpy as np
 from enthought.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = "qt4"
 
-from spikeylab.plotting.custom_plots import FFTWidget
+from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -12,16 +12,10 @@ class CalibrationDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.out_fft = FFTWidget(self)
-        self.in_fft = FFTWidget(self)
-        self.out_fft.traits.set_orientation('h')
-        self.in_fft.traits.set_orientation('h')
-        self.out_fft.traits.plot.title = "Output Tone FFT"
-        self.in_fft.traits.plot.title = "Input Tone FFT"
-        self.in_fft.traits.plot.padding_top = 50
-        self.out_fft.traits.plot.padding_top = 50
-        self.in_fft.traits.plot.padding_left = 60
-        self.out_fft.traits.plot.padding_left = 60
+        self.out_fft = FFTWidget(self, rotation=0)
+        self.in_fft = FFTWidget(self, rotation=0)
+        self.out_fft.set_title("Output Tone FFT (To Speaker)")
+        self.in_fft.set_title("Input Tone FFT (From Microphone)")
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
@@ -40,5 +34,5 @@ class CalibrationDisplay(QtGui.QWidget):
         self.in_fft.update_data(*args, **kwargs)
 
     def set_fscale(self, scale):
-        self.out_fft.traits.set_fscale(scale)
-        self.in_fft.traits.set_fscale(scale)
+        self.out_fft.set_fscale(scale)
+        self.in_fft.set_fscale(scale)
