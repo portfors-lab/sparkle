@@ -36,11 +36,11 @@ def calc_spectrum(signal,rate):
     npts = len(signal)
 
     freq = np.arange(npts)/(npts/rate)
-    freq = freq[:(npts/2)] #single sided
+    freq = freq[:(npts/2)+1] #single sided
     #print('freq len ', len(freq))
 
     sp = np.fft.fft(signal)/npts
-    sp = sp[:(npts/2)]
+    sp = sp[:(npts/2)+1]
     #print('sp len ', len(sp))
 
     return freq, sp.real
