@@ -23,16 +23,19 @@ class BasePlot(pg.PlotWidget):
             # print act.text()
             if act.text() != 'Grid':
                 self.getPlotItem().ctrlMenu.removeAction(act)
-        # print '-'*20
-        # for act in self.getPlotItem().vb.menu.actions():
-        #     print act.text()
-        # print '-'*20
+        print '-'*20
+        for act in self.getPlotItem().vb.menu.actions():
+            print act.text()
+        print '-'*20
         # because of pyqtgraph internals, we can't just remove this action from menu
         self.fake_action = QtGui.QAction("", None)
         self.fake_action.setVisible(False)
         self.fake_action.setCheckable(True)
         self.getPlotItem().vb.menu.leftMenu = self.fake_action
         self.getPlotItem().vb.menu.mouseModes = [self.fake_action]
+
+        self.plotItem.vb.menu.viewAll.triggered.disconnect()
+        self.plotItem.vb.menu.viewAll.triggered.connect(self.auto_range)
 
     def set_tscale(self, scale):
         pass
@@ -48,6 +51,9 @@ class BasePlot(pg.PlotWidget):
 
     def set_title(self, title):
         self.getPlotItem().setTitle(title)
+
+    def auto_range(self):
+        self.plotItem.vb.autoRange(padding=0)
 
 class TraceWidget(BasePlot):
     nreps = 20
