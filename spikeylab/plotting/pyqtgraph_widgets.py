@@ -23,10 +23,10 @@ class BasePlot(pg.PlotWidget):
             # print act.text()
             if act.text() != 'Grid':
                 self.getPlotItem().ctrlMenu.removeAction(act)
-        print '-'*20
-        for act in self.getPlotItem().vb.menu.actions():
-            print act.text()
-        print '-'*20
+        # print '-'*20
+        # for act in self.getPlotItem().vb.menu.actions():
+        #     print act.text()
+        # print '-'*20
         # because of pyqtgraph internals, we can't just remove this action from menu
         self.fake_action = QtGui.QAction("", None)
         self.fake_action.setVisible(False)

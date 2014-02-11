@@ -45,7 +45,7 @@ class TestDAQTasks():
 
             tolerance = max(amp*0.1, 0.005) #noise floor
 
-            assert np.allclose(stim,response,rtol=0,atol=tolerance)
+            assert np.allclose(stim[10:],response[10:],rtol=0,atol=tolerance)
 
     def test_sync_continuous(self):
 

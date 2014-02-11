@@ -17,7 +17,6 @@ class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
 
     def setComponent(self, component):
         self.common.setFields(component)
-        print 'current scales', self.scales[1]
         self.freq_spnbx.setValue(component.frequency()/self.scales[1])
         self._component = component
 
