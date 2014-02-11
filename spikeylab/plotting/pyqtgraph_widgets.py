@@ -13,8 +13,6 @@ pg.setConfigOption('foreground', 'k')
 pg.setConfigOptions(useWeave=False)
 
 class BasePlot(pg.PlotWidget):
-    fscale = 1000
-    tscale = 1. # s
     def __init__(self, parent=None):
         super(BasePlot, self).__init__(parent)
 
@@ -37,33 +35,10 @@ class BasePlot(pg.PlotWidget):
         self.getPlotItem().vb.menu.mouseModes = [self.fake_action]
 
     def set_tscale(self, scale):
-        self.tscale = scale
-        xlim = self.viewRange()[0]
-        if self.tscale == 0.001:
-            self.setLabel('bottom', 'Time (ms)')
-        elif self.tscale == 1:
-            self.setLabel('bottom', 'Time (s)')
-        else:
-            raise Exception(u"Invalid time scale")
+        pass
 
     def set_fscale(self, scale):
-        self.fscale = scale
-        if self.fscale == 1000:
-            self.setLabel('left', 'Frequency (kHz)')
-        elif self.fscale == 1:
-            self.setLabel('left', u'Frequency (Hz)')
-        else:
-            raise Exception(u"Invalid frequency scale")
-
-    def time_tick_strings(self, vales, scale, spacing):
-        ticks = self.timeTickStrings(vales, scale, spacing)
-        ticks = [str(float(x)/self.tscale) for x in ticks]
-        return ticks
-
-    def tick_strings(self, vales, scale, spacing):
-        ticks = self.tickStrings(vales, scale, spacing)
-        ticks = [str(float(x)/self.fscale) for x in ticks]
-        return ticks
+        pass
 
     def set_xlim(self, lim):
         self.setXRange(*lim, padding=0)
@@ -96,15 +71,11 @@ class TraceWidget(BasePlot):
         self.scene().contextMenu.append(raster_bounds_action) #should use function for this?
         raster_bounds_action.triggered.connect(self.ask_raster_bounds)
 
-        xaxis = self.getPlotItem().getAxis('bottom')
-        self.timeTickStrings = xaxis.tickStrings
-        xaxis.tickStrings = self.time_tick_strings
-
         self.thresh_line = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.thresh_line)
         self.thresh_line.sigPositionChangeFinished.connect(self.update_thresh)
         self.setLabel('left', 'potential', units='V')
-        self.setLabel('bottom', 'Time (s)')
+        self.setLabel('bottom', 'Time', units='s')
 
     def update_data(self, axeskey, x, y):
         if axeskey == 'stim':
@@ -189,19 +160,12 @@ class SpecWidget(BasePlot):
 
         self.setMouseEnabled(x=False,y=True)
 
-        yaxis = self.getPlotItem().getAxis('left')
-        self.tickStrings = yaxis.tickStrings
-        yaxis.tickStrings = self.tick_strings
-
-        xaxis = self.getPlotItem().getAxis('bottom')
-        self.timeTickStrings = xaxis.tickStrings
-        xaxis.tickStrings = self.time_tick_strings
-
         cmap_action = QtGui.QAction("Edit colormap", None)
         self.scene().contextMenu.append(cmap_action) #should use function for this?
         cmap_action.triggered.connect(self.edit_colormap)
 
-        self.setLabel('bottom', 'Time (s)')
+        self.setLabel('bottom', 'Time', units='s')
+        self.setLabel('left', 'Frequency', units='Hz')
 
     def from_file(self, fname):
         spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgram_args)
@@ -277,9 +241,8 @@ class FFTWidget(BasePlot):
         self.fft_plot = self.plot(pen='k')
         self.fft_plot.rotate(rotation)
 
-        xaxis = self.getPlotItem().getAxis('left')
-        self.tickStrings = xaxis.tickStrings
-        xaxis.tickStrings = self.tick_strings
+
+        self.setLabel('left', 'Frequency', units='Hz')
 
     def update_data(self, index_data, value_data):
         self.fft_plot.setData(index_data, value_data)
