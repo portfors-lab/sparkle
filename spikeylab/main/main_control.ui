@@ -70,13 +70,33 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
           <string>Explore</string>
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>History:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="listWidget_2">
+              <item>
+               <property name="text">
+                <string>Coming soon</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
@@ -113,26 +133,6 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
-            <item>
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>History:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QListWidget" name="listWidget_2">
-              <item>
-               <property name="text">
-                <string>Coming soon</string>
-               </property>
-              </item>
-             </widget>
-            </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_7">
               <item row="1" column="0">
@@ -165,18 +165,6 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Gen. Sample rate</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="2">
                <widget class="QLabel" name="funit_lbl">
                 <property name="text">
@@ -206,6 +194,18 @@
                 </property>
                 <property name="text">
                  <string>Save Explore Recording</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Gen. Sample rate</string>
                 </property>
                </widget>
               </item>

@@ -83,7 +83,8 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.tuning_curve_response.connect(self.display_tuning_curve)
 
         self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
-        
+        self.ui.binsz_spnbx.editingFinished.connect(self.on_update)
+
         self.active_operation = None
 
         # update GUI to reflect loaded values
@@ -110,6 +111,7 @@ class MainWindow(ControlWindow):
 
         # disable the components we don't want changed amid generation
         self.ui.aochan_box.setEnabled(False)
+        self.ui.aisr_spnbx.setEnabled(False)
         reprate = self.ui.reprate_spnbx.setEnabled(False)
         self.ui.stop_btn.setEnabled(True)
         self.plot_progress = False
@@ -159,7 +161,8 @@ class MainWindow(ControlWindow):
         self.acqmodel.set_params(aochan=aochan, aichan=aichan,
                                  acqtime=winsz, aisr=acq_rate,
                                  binsz=binsz)
-
+        self.binsz = binsz
+        
         self.ui.display.set_xlimits((0,winsz))
         # for now, clear spec if not vocalization
         if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) != 'vocalization':
@@ -197,6 +200,7 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.on_stop)
 
+        self.ui.aisr_spnbx.setEnabled(True)
         self.ui.aochan_box.setEnabled(True)
         reprate = self.ui.reprate_spnbx.setEnabled(True)
         self.ui.stop_btn.setEnabled(False)
@@ -328,11 +332,13 @@ class MainWindow(ControlWindow):
     def display_raster(self, bins, repnum):
         # convert to times for raster
         if repnum == 0:
+            self.ui.psth.clear_data()
             self.ui.display.clear_raster()
-        binsz = float(self.ui.binsz_spnbx.value())*self.tscale
-        bin_times = (np.array(bins)*binsz)+(binsz/2)
-        self.ui.display.add_raster_points(bin_times, repnum)
-        self.ui.psth.append_data(bins, repnum)
+        if len(bins) > 0:
+            binsz = self.binsz
+            bin_times = (np.array(bins)*binsz)+(binsz/2)
+            self.ui.display.add_raster_points(bin_times, repnum)
+            self.ui.psth.append_data(bins, repnum)
             
     def display_stim(self, signal, fs):
         freq, spectrum = calc_spectrum(signal, fs)
@@ -359,7 +365,6 @@ class MainWindow(ControlWindow):
         self.ui.rep_num.setText(str(irep))
 
     def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
-        self.ui.psth.clear_data()
         self.ui.spike_total_lbl.setText(str(total_spikes))
         self.ui.spike_avg_lbl.setText(str(avg_count))
         self.ui.spike_latency_lbl.setText(str(avg_latency*1000))

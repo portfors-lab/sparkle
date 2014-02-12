@@ -68,7 +68,7 @@ class AbstractStimulusComponent(object):
         be set using auto-paramter manipulation. Subclasses should
         reimplement and add to this list"""
         return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0.001, 'max':1},
-                'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':100}, 
+                'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':110}, 
                 'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 
     def stateDict(self):

@@ -219,8 +219,7 @@ class AcquisitionModel():
                 spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-                if len(response_bins) > 0:
-                    self.signals.spikes_found.emit(response_bins, self.irep)
+                self.signals.spikes_found.emit(response_bins, self.irep)
 
                 #lock it so we don't get a times mismatch
                 self.player_lock.acquire()
@@ -372,8 +371,7 @@ class AcquisitionModel():
         spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
 
         response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-        if len(response_bins) > 0:
-            self.signals.spikes_found.emit(response_bins, irep)
+        self.signals.spikes_found.emit(response_bins, irep)
 
         self.datafile.append(self.current_dataset_name, response)
 
