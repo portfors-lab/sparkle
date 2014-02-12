@@ -1,13 +1,19 @@
 import os
 from PyQt4 import QtGui, QtCore
 
-class MaximizableTitleBar(QtGui.QWidget):
+class MaximizableTitleBar(QtGui.QFrame):
     """ Title bar widget to be used with QDockWidget. Adds maximize
         functionality for floating widget """
     def __init__(self, dock):
-        QtGui.QWidget.__init__(self, dock)
+        QtGui.QFrame.__init__(self, dock)
         thisfolder = os.path.dirname(os.path.realpath(__file__))
         self.dock = dock
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.Background, QtGui.QColor(240,245,255))
+        self.setAutoFillBackground(True)
+        self.setPalette(palette)
+        self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Sunken)
+
         self.float_icon = QtGui.QIcon.fromTheme('view-fullscreen', QtGui.QIcon(os.path.join(thisfolder,'float_window.png')))
         self.close_icon = QtGui.QIcon.fromTheme('window-close', QtGui.QIcon(os.path.join(thisfolder,'close_window.png')))
         self.restore_icon = QtGui.QIcon(os.path.join(thisfolder,'restore_window.png'))
