@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Sun Feb 02 11:10:29 2014
+# Created: Tue Feb 11 15:22:04 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,6 +73,9 @@ class Ui_CalibrationWidget(object):
         self.label2.setObjectName(_fromUtf8("label2"))
         self.gridLayout.addWidget(self.label2, 1, 3, 1, 1)
         self.fftpeak_lbl = QtGui.QLabel(CalibrationWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.fftpeak_lbl.setFont(font)
         self.fftpeak_lbl.setObjectName(_fromUtf8("fftpeak_lbl"))
         self.gridLayout.addWidget(self.fftpeak_lbl, 1, 4, 1, 1)
         self.label_10 = QtGui.QLabel(CalibrationWidget)
@@ -87,6 +90,9 @@ class Ui_CalibrationWidget(object):
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.gridLayout.addWidget(self.label_10, 0, 0, 1, 1)
         self.label_6 = QtGui.QLabel(CalibrationWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_6.setFont(font)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout.addWidget(self.label_6, 3, 4, 1, 1)
         self.label3 = QtGui.QLabel(CalibrationWidget)
@@ -96,9 +102,15 @@ class Ui_CalibrationWidget(object):
         self.label3.setObjectName(_fromUtf8("label3"))
         self.gridLayout.addWidget(self.label3, 2, 3, 1, 1)
         self.fftf_lbl = QtGui.QLabel(CalibrationWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.fftf_lbl.setFont(font)
         self.fftf_lbl.setObjectName(_fromUtf8("fftf_lbl"))
         self.gridLayout.addWidget(self.fftf_lbl, 2, 4, 1, 1)
         self.avo_lbl = QtGui.QLabel(CalibrationWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.avo_lbl.setFont(font)
         self.avo_lbl.setObjectName(_fromUtf8("avo_lbl"))
         self.gridLayout.addWidget(self.avo_lbl, 1, 1, 1, 1)
         self.label1 = QtGui.QLabel(CalibrationWidget)
@@ -108,6 +120,9 @@ class Ui_CalibrationWidget(object):
         self.label1.setObjectName(_fromUtf8("label1"))
         self.gridLayout.addWidget(self.label1, 2, 0, 1, 1)
         self.aiv_lbl = QtGui.QLabel(CalibrationWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.aiv_lbl.setFont(font)
         self.aiv_lbl.setObjectName(_fromUtf8("aiv_lbl"))
         self.gridLayout.addWidget(self.aiv_lbl, 2, 1, 1, 1)
         self.label4 = QtGui.QLabel(CalibrationWidget)
@@ -117,6 +132,9 @@ class Ui_CalibrationWidget(object):
         self.label4.setObjectName(_fromUtf8("label4"))
         self.gridLayout.addWidget(self.label4, 3, 0, 1, 1)
         self.db_lbl = QtGui.QLabel(CalibrationWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.db_lbl.setFont(font)
         self.db_lbl.setObjectName(_fromUtf8("db_lbl"))
         self.gridLayout.addWidget(self.db_lbl, 3, 1, 1, 1)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

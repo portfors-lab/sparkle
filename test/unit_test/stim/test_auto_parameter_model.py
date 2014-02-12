@@ -192,8 +192,8 @@ class TestAutoParameterModel():
         component = PureTone()
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
-        model.setData(model.index(0,2), 0.1, QtCore.Qt.EditRole)
-        model.setData(model.index(0,3), 0.01, QtCore.Qt.EditRole)
+        model.setData(model.index(0,2), 10, QtCore.Qt.EditRole)
+        model.setData(model.index(0,3), 1, QtCore.Qt.EditRole)
 
         assert model.verify()
 
@@ -201,11 +201,19 @@ class TestAutoParameterModel():
         component = PureTone()
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
-        model.setData(model.index(0,1), 0.01, QtCore.Qt.EditRole)
-        model.setData(model.index(0,3), 0.01, QtCore.Qt.EditRole)
+        model.setData(model.index(0,1), 10, QtCore.Qt.EditRole)
+        model.setData(model.index(0,3), 10, QtCore.Qt.EditRole)
 
         assert model.verify()
 
+    def test_verify_start_stop_equal_ok(self):
+        component = PureTone()
+        model = self.create_model(component)
+        values = ['intensity', 100, 100, 0]
+        for i, value in enumerate(values):
+            model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
+
+        assert model.verify() == 0
 
     def create_model(self, component):
         stim_model = StimulusModel()

@@ -16,6 +16,10 @@ class CalibrationDisplay(QtGui.QWidget):
         self.in_fft = FFTWidget(self, rotation=0)
         self.out_fft.set_title("Output Tone FFT (To Speaker)")
         self.in_fft.set_title("Input Tone FFT (From Microphone)")
+        self.out_fft.setLabel('bottom', 'Frequency', units='Hz')
+        self.out_fft.setLabel('left', '', units='')
+        self.in_fft.setLabel('bottom', 'Frequency', units='Hz')
+        self.in_fft.setLabel('left', '', units='')
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 

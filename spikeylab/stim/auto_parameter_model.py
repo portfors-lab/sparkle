@@ -258,7 +258,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         for param in self._parameters:
             if param['parameter'] == '':
                 return "Auto-parameter type undefined"
-            if param['step'] == 0:
+            if param['step'] == 0 and param['start'] != param['stop']:
                 return "Auto-parameter step size of 0 not allowed"
             if abs(param['stop'] - param['start']) < param['step']:
                 return "Auto-parameter step size larger than range"

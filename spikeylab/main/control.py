@@ -11,7 +11,7 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
-from spikeylab.tools.audiotools import calc_spectrum, calc_db
+from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
 # from spikeylab.plotting.custom_plots import SpecWidget
 from spikeylab.plotting.mpl_spec_widget import SpecWidget
 from spikeylab.plotting.plotz import LiveCalPlot
@@ -24,6 +24,8 @@ RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
 GREEN = QtGui.QPalette()
 GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
+BLACK = QtGui.QPalette()
+BLACK.setColor(QtGui.QPalette.Foreground,QtCore.Qt.black)
 
 DEVNAME = "PCI-6259"
 
@@ -279,27 +281,6 @@ class MainWindow(ControlWindow):
             print "WARNING: times and response not equal"
         self.ui.display.update_spiketrace(times, response)
 
-        # print "display reponse"
-        # draw_thread = threading.Thread(target=self.ui.display.update_spiketrace,
-        # draw_thread.start()
-
-        # draw_thread = QtCore.QThread()
-        # draw_thread = Thread()
-        # draw_worker = GenericObject(self.ui.display.update_spiketrace,
-        #                             args=(times, response))
-        # # draw_worker = GenericObject(self.test_function)
-        # # draw_worker = SimpleObject()
-        # draw_worker.moveToThread(draw_thread)
-        # # draw_worker.error.connect(self.handle_thread_error)
-        # draw_thread.started.connect(draw_worker.process)
-        # # draw_worker.finished.connect(draw_thread.quit)
-        # # draw_worker.finished.connect(draw_worker.deleteLater)
-        # # draw_thread.finished.connect(draw_thread.deleteLater)
-        # # draw_worker.finished.connect(draw_thread.deleteLater)
-        # # draw_thread.finished.connect(draw_worker.deleteLater)
-        # draw_thread.start()
-        # draw_thread.wait()
-
     def handle_thread_error(self, msg):
         print 'thread error:', msg
 
@@ -310,10 +291,17 @@ class MainWindow(ControlWindow):
         # display fft here
         f, db = fdb
         # print 'response f', f, 'db', db
-        self.ui.calibration_widget.ui.aiv_lbl.setText(str(vmax))
-        self.ui.calibration_widget.ui.fftf_lbl.setText(str(spec_peak))
-        self.ui.calibration_widget.ui.flabel.setText(str(f))
-        self.ui.calibration_widget.ui.dblabel.setText(str(db))
+        spec_max, max_freq = get_fft_peak(spectrum, freqs)
+        if spec_max != spec_peak:
+            self.ui.calibration_widget.ui.fftf_lbl.setPalette(RED)
+        else:
+            self.ui.calibration_widget.ui.fftf_lbl.setPalette(BLACK)
+
+        self.ui.calibration_widget.ui.aiv_lbl.setNum(vmax)
+        self.ui.calibration_widget.ui.fftpeak_lbl.setNum(spec_max)
+        self.ui.calibration_widget.ui.fftf_lbl.setNum(spec_peak)
+        self.ui.calibration_widget.ui.flabel.setNum(f)
+        self.ui.calibration_widget.ui.dblabel.setNum(db)
         if f == self.calvals['calf'] and db == self.calvals['caldb']:
             # this should always be the first trace actually
             self.calpeak = vmax

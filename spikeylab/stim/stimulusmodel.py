@@ -206,7 +206,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
             else:
                 step = p['step']
             if step == 0:
-                return 0
+                if p['start'] == p['stop']:
+                    step = 1
+                else:
+                    return 0
             ntraces = ntraces*(len(np.arange(p['start'], p['stop'], step)) + 1)
         return ntraces
 
