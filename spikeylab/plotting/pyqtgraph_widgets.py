@@ -114,6 +114,7 @@ class TraceWidget(BasePlot):
 
     def set_nreps(self, nreps):
         self.nreps = nreps
+        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
 
     def set_raster_bounds(self,lims):
         self.raster_ymin = lims[0]

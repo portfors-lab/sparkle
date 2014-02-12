@@ -327,6 +327,8 @@ class MainWindow(ControlWindow):
 
     def display_raster(self, bins, repnum):
         # convert to times for raster
+        if repnum == 0:
+            self.ui.display.clear_raster()
         binsz = float(self.ui.binsz_spnbx.value())*self.tscale
         bin_times = (np.array(bins)*binsz)+(binsz/2)
         self.ui.display.add_raster_points(bin_times, repnum)
@@ -357,7 +359,6 @@ class MainWindow(ControlWindow):
         self.ui.rep_num.setText(str(irep))
 
     def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
-        self.ui.display.clear_raster()
         self.ui.psth.clear_data()
         self.ui.spike_total_lbl.setText(str(total_spikes))
         self.ui.spike_avg_lbl.setText(str(avg_count))

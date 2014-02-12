@@ -14,6 +14,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.common.dur_spnbx.setEnabled(False)
         self.common.risefall_spnbx.setEnabled(False)
         # self.colormap_changed = self.ui.spec_preview.colormap_changed
+        self.common.valueChanged.connect(self.valueChanged.emit)
 
     def setComponent(self, component):
         self.common.setFields(component)

@@ -131,6 +131,7 @@ class AcquisitionModel():
             self.aichan = kwargs['aichan']
         if 'nreps' in kwargs:
             self.nreps = kwargs['nreps']
+            self.irep = 0
         if 'binsz' in kwargs:
             self.binsz = kwargs['binsz']
         if 'savechart' in kwargs:
@@ -198,7 +199,7 @@ class AcquisitionModel():
         spike_counts = []
         spike_latencies = []
         spike_rates = []
-        irep = 0
+        self.irep = 0
         times = self.aitimes
         while not self._halt:
             # print 'explore worker'
@@ -219,7 +220,7 @@ class AcquisitionModel():
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
                 if len(response_bins) > 0:
-                    self.signals.spikes_found.emit(response_bins, irep)
+                    self.signals.spikes_found.emit(response_bins, self.irep)
 
                 #lock it so we don't get a times mismatch
                 self.player_lock.acquire()
@@ -231,13 +232,13 @@ class AcquisitionModel():
                     # save response data
                     self.save_data(response)
 
-                irep +=1
-                if irep == self.nreps:
+                self.irep +=1
+                if self.irep == self.nreps:
                     total_spikes = float(sum(spike_counts))
                     avg_count = total_spikes/len(spike_counts)
                     avg_latency = sum(spike_latencies)/len(spike_latencies)
                     avg_rate = sum(spike_rates)/len(spike_rates)
-                    irep = 0
+                    self.irep = 0
                     self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
                     spike_counts = []
                     spike_latencies = []
@@ -504,7 +505,7 @@ class AcquisitionModel():
             self.calibration_indexes.append(self.trace_counter)
         self.trace_counter +=1
         
-        spec_max, max_freq = get_fft_peak(spectrum, freq)
+        # spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
         if len(spec_peak_at_f) != 1:
             print u"COULD NOT FIND TARGET FREQUENCY ",f
