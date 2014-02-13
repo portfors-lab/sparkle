@@ -200,8 +200,6 @@ class MainWindow(ControlWindow):
         self.ui.start_btn.setText('Start')
         self.ui.start_btn.clicked.disconnect()
         self.ui.start_btn.clicked.connect(self.on_start)
-        self.ui.stop_btn.clicked.disconnect()
-        self.ui.stop_btn.clicked.connect(self.on_stop)
 
         self.ui.aisr_spnbx.setEnabled(True)
         self.ui.aochan_box.setEnabled(True)
@@ -268,8 +266,6 @@ class MainWindow(ControlWindow):
     def run_calibration(self):
         self.ui.start_btn.setEnabled(False)
         self.active_operation = 'calibration'
-        self.ui.stop_btn.clicked.disconnect()
-        self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
         self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
