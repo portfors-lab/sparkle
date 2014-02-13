@@ -82,10 +82,13 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.tuning_curve_started.connect(self.spawn_tuning_curve)
         self.acqmodel.signals.tuning_curve_response.connect(self.display_tuning_curve)
 
-        self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
-        self.ui.binsz_spnbx.editingFinished.connect(self.on_update)
-        self.ui.windowsz_spnbx.editingFinished.connect(self.set_calibration_duration)
-        self.ui.aisr_spnbx.editingFinished.connect(self.on_update)
+        self.ui.thresh_spnbx.valueChanged.connect(self.set_plot_thresh)        
+        self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
+        self.ui.binsz_spnbx.setKeyboardTracking(False)
+        self.ui.windowsz_spnbx.setKeyboardTracking(False)
+        self.ui.ex_nreps_spnbx.setKeyboardTracking(False)
+        self.ui.aosr_spnbx.setKeyboardTracking(False)
+        self.ui.thresh_spnbx.setKeyboardTracking(False)
 
         self.active_operation = None
 
@@ -105,6 +108,27 @@ class MainWindow(ControlWindow):
         self.ui.psth_dock.setVisible(True)
 
         self.ui.stop_btn.setEnabled(False)
+
+    def connect_updatable(self, connect):
+        if connect:
+            print 'connecting update signals'
+            self.ui.start_btn.clicked.disconnect()
+            self.ui.start_btn.clicked.connect(self.on_update)
+            self.ui.binsz_spnbx.valueChanged.connect(self.on_update)
+            self.ui.windowsz_spnbx.valueChanged.connect(self.on_update)
+            self.ui.ex_nreps_spnbx.valueChanged.connect(self.on_update)
+            self.ui.aosr_spnbx.valueChanged.connect(self.on_update)
+        else:
+            try:
+                self.ui.ex_nreps_spnbx.valueChanged.disconnect()
+                self.ui.aosr_spnbx.valueChanged.disconnect()
+                self.ui.binsz_spnbx.valueChanged.disconnect()
+                self.ui.windowsz_spnbx.valueChanged.disconnect()
+                self.ui.start_btn.clicked.disconnect()
+                self.ui.start_btn.clicked.connect(self.on_start)
+            except TypeError:
+                # disconnected already disconnected signals throws TypeError
+                pass
 
     def on_start(self):
         # set plot axis to appropriate limits
@@ -198,8 +222,8 @@ class MainWindow(ControlWindow):
             self.ui.aichan_box.setEnabled(True)
         self.ui.start_btn.setEnabled(True)
         self.ui.start_btn.setText('Start')
-        self.ui.start_btn.clicked.disconnect()
-        self.ui.start_btn.clicked.connect(self.on_start)
+        
+        self.connect_updatable(False)
 
         self.ui.aisr_spnbx.setEnabled(True)
         self.ui.aochan_box.setEnabled(True)
@@ -239,9 +263,9 @@ class MainWindow(ControlWindow):
 
     def run_explore(self):
         self.ui.start_btn.setText('Update')
-        self.ui.start_btn.clicked.disconnect()
-        self.ui.start_btn.clicked.connect(self.on_update)
-        # make this an enum!!!!
+        
+        self.connect_updatable(True)
+
         self.active_operation = 'explore'
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
