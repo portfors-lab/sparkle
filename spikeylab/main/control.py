@@ -250,6 +250,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.run_explore(interval)
 
     def run_protocol(self):
+        self.ui.display.update_spec(None)
 
         self.ui.start_btn.setEnabled(False)
         self.active_operation = 'protocol'
