@@ -32,7 +32,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
         for test in self.tests.values():
-            test.set_calibration(db_boost_array, frequencies)
+            test.setCalibration(db_boost_array, frequencies)
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:

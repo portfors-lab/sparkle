@@ -79,6 +79,9 @@ class AcquisitionModel():
         self.calibration_stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
         self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs)
 
+    def set_calibration_duration(self, dur):
+        self.calibration_stimulus.data(self.calibration_stimulus.index(0,0)).setDuration(dur)
+
     def create_data_file(self):
         # find first available file name
         if self.savefolder is None or self.savename is None:

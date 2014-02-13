@@ -9,11 +9,15 @@ class CalibrationWidget(QtGui.QWidget):
         self.ui = Ui_CalibrationWidget()
         self.ui.setupUi(self)
         self.ui.curve_widget.ui.ok_btn.hide()
+        self.ui.curve_widget.ui.dur_spnbx.setEnabled(False)
 
     def setCurveModel(self, model):
         """sets the StimulusModel for this calibration curve"""
         self.stim_model = model
         self.ui.curve_widget.setStimulusModel(model)
+
+    def set_duration(self, dur):
+        self.ui.curve_widget.ui.dur_spnbx.setValue(dur)
 
     def xor_applycal(self,checked):
         if checked:

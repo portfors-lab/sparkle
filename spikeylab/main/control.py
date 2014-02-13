@@ -84,11 +84,14 @@ class MainWindow(ControlWindow):
 
         self.ui.thresh_spnbx.editingFinished.connect(self.set_plot_thresh)        
         self.ui.binsz_spnbx.editingFinished.connect(self.on_update)
+        self.ui.windowsz_spnbx.editingFinished.connect(self.set_calibration_duration)
+        self.ui.aisr_spnbx.editingFinished.connect(self.on_update)
 
         self.active_operation = None
 
         # update GUI to reflect loaded values
         self.set_plot_thresh()
+        self.set_calibration_duration()
 
         # set up wav file directory finder paths
         self.exvocal = self.ui.parameter_stack.widget_for_name("Vocalization")
@@ -162,7 +165,7 @@ class MainWindow(ControlWindow):
                                  acqtime=winsz, aisr=acq_rate,
                                  binsz=binsz)
         self.binsz = binsz
-        
+
         self.ui.display.set_xlimits((0,winsz))
         # for now, clear spec if not vocalization
         if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) != 'vocalization':
@@ -432,6 +435,12 @@ class MainWindow(ControlWindow):
     def relay_cmap_change(self, cmap):
         self.exvocal.update_colormap()
         self.spec_args['colormap'] = cmap
+
+    def set_calibration_duration(self):
+        winsz = float(self.ui.windowsz_spnbx.value())
+        # I shouldn't have to do both of these...
+        self.acqmodel.set_calibration_duration(winsz*self.tscale)
+        self.ui.calibration_widget.set_duration(winsz)
 
     def update_thresh(self, thresh):
         self.ui.thresh_spnbx.setValue(thresh)
