@@ -52,6 +52,7 @@ class TestSpikey():
 
         # not really a great check
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
+        print 'files', files
         assert len(files) == 1
 
     def test_vocal_explore(self):
@@ -76,7 +77,6 @@ class TestSpikey():
 
     def test_save_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.aisr_spnbx.setValue(400) # should be kHz
         self.form.ui.reprate_spnbx.setValue(4)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
@@ -98,15 +98,15 @@ class TestSpikey():
         peaks = hfile['fft_peaks']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
+        print 'attr keys:', hfile.attrs.keys()
 
         # make sure displayed counts jive with saved file
-        aosr = self.form.ui.calibration_widget.ui.curve_widget.ui.aosr_spnbx.value()*self.form.fscale
         nfreqs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.freq_nsteps_lbl.text())
         ndbs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.db_nsteps_lbl.text())
         ntraces = nfreqs*ndbs
         nreps = self.form.ui.calibration_widget.ui.curve_widget.ui.nreps_spnbx.value()
         assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], aosr)
+        assert_equal(stim[0]['samplerate_da'], hfile.attrs['samplerate_ad'])
         assert_equal(peaks.shape,(ntraces,nreps))
         assert cal_vector.shape == (nfreqs,) 
 

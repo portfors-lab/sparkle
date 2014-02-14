@@ -39,7 +39,6 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         self.ui.dur_spnbx.setValue(tone.duration()/info['duration']['multiplier'])
         self.ui.nreps_spnbx.setValue(self.stim_model.repCount())
         self.ui.risefall_spnbx.setValue(tone.risefall()/info['risefall']['multiplier'])
-        self.ui.aosr_spnbx.setValue(self.stim_model.samplerate()/self.scales[1])
         self.tone = tone
 
     def submit(self):
@@ -64,9 +63,6 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         info = self.tone.auto_details()
         self.tone.setRisefall(rf*info['risefall']['multiplier'])
 
-    def setStimSamplerate(self):
-        fs = self.ui.aosr_spnbx.value()
-        self.stim_model.setSamplerate(fs*self.scales[1])
 
 
 if __name__ == "__main__":

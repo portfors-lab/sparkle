@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Mon Feb 03 16:03:18 2014
+# Created: Thu Feb 13 14:45:10 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -192,22 +192,6 @@ class Ui_TuningCurveEditor(object):
         self.label_31.setFont(font)
         self.label_31.setObjectName(_fromUtf8("label_31"))
         self.gridLayout_3.addWidget(self.label_31, 1, 3, 1, 1)
-        self.aosr_spnbx = SmartSpinBox(TuningCurveEditor)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.aosr_spnbx.setFont(font)
-        self.aosr_spnbx.setMaximum(1000000.0)
-        self.aosr_spnbx.setObjectName(_fromUtf8("aosr_spnbx"))
-        self.gridLayout_3.addWidget(self.aosr_spnbx, 1, 1, 1, 1)
-        self.label = QtGui.QLabel(TuningCurveEditor)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label.setFont(font)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout_3.addWidget(self.label, 1, 0, 1, 1)
-        self.funit_lbl_1 = QtGui.QLabel(TuningCurveEditor)
-        self.funit_lbl_1.setObjectName(_fromUtf8("funit_lbl_1"))
-        self.gridLayout_3.addWidget(self.funit_lbl_1, 1, 2, 1, 1)
         self.dur_spnbx = SmartSpinBox(TuningCurveEditor)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -240,7 +224,6 @@ class Ui_TuningCurveEditor(object):
         QtCore.QObject.connect(self.db_stop_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.freq_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.db_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
-        QtCore.QObject.connect(self.aosr_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimSamplerate)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimDuration)
         QtCore.QObject.connect(self.risefall_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimRisefall)
         QtCore.QMetaObject.connectSlotsByName(TuningCurveEditor)
@@ -262,8 +245,6 @@ class Ui_TuningCurveEditor(object):
         self.tunit_lbl_4.setText(_translate("TuningCurveEditor", "ms", None))
         self.tunit_lbl_3.setText(_translate("TuningCurveEditor", "ms", None))
         self.label_31.setText(_translate("TuningCurveEditor", "Reps", None))
-        self.label.setText(_translate("TuningCurveEditor", "Generation rate", None))
-        self.funit_lbl_1.setText(_translate("TuningCurveEditor", "kHz", None))
         self.ok_btn.setText(_translate("TuningCurveEditor", "Ok", None))
 
 from spikeylab.stim.smart_spinbox import SmartSpinBox

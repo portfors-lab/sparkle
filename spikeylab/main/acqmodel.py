@@ -52,6 +52,7 @@ class AcquisitionModel():
         self.explore_stimuli = [x() for x in stimuli_types if x.explore]
 
         self.binsz = 0.005
+        self.current_genrate = self.stimulus.samplerate()
 
         self.player_lock = threading.Lock()
 
@@ -156,6 +157,7 @@ class AcquisitionModel():
         if self.stimulus.columnCount() > 0:
             self.stimulus.clearComponents()
         self.stimulus.insertComponent(self.explore_stimuli[index])
+        self.current_genrate = self.stimulus.samplerate()
         signal, atten = self.stimulus.signal()
         self.finite_player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         return signal
@@ -485,7 +487,8 @@ class AcquisitionModel():
         fname = create_unique_path(self.savefolder, self.calname)
         print 'calibration file name', fname
         self.calfile = AcquisitionData(fname)
-
+        info = {'samplerate_ad': self.finite_player.aisr}
+        self.calfile.set_metadata('', info)
         self.acq_thread = threading.Thread(target=self._protocol_worker, 
                                            args=(self.finite_player, [self.calibration_stimulus],
                                             self.calfile),

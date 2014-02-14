@@ -325,37 +325,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="SmartSpinBox" name="aosr_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="maximum">
-        <double>1000000.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Generation rate</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QLabel" name="funit_lbl_1">
-       <property name="text">
-        <string>kHz</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="1">
       <widget class="SmartSpinBox" name="dur_spnbx">
        <property name="font">
@@ -539,22 +508,6 @@
     <hint type="destinationlabel">
      <x>299</x>
      <y>142</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>aosr_spnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>setStimSamplerate()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>149</x>
-     <y>236</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>113</x>
-     <y>245</y>
     </hint>
    </hints>
   </connection>

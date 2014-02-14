@@ -165,7 +165,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['filelistdir'] = self.exvocal.getListRoot()
         savedict['threshold'] = self.ui.thresh_spnbx.value()
         savedict['binsz'] = self.ui.binsz_spnbx.value()
-        savedict['aisr'] = self.ui.aisr_spnbx.value()
+        savedict['aisr'] = self.stashed_aisr
         savedict['tscale'] = self.tscale
         savedict['fscale'] = self.fscale
         savedict['savefolder'] = self.savefolder
@@ -173,7 +173,6 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['saveformat'] = self.saveformat
         savedict['ex_nreps'] = self.ui.ex_nreps_spnbx.value()
         savedict['reprate'] = self.ui.reprate_spnbx.value()
-        savedict['aosr'] = self.ui.aosr_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
         savedict['specargs'] = convert2native(self.spec_args)
@@ -203,7 +202,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.wavrootdir = inputsdict.get('wavrootdir', os.path.expanduser('~'))
         self.filelistdir = inputsdict.get('filelistdir', self.wavrootdir)
         self.ui.thresh_spnbx.setValue(inputsdict.get('threshold', 0.5))
-        self.ui.aisr_spnbx.setValue(inputsdict.get('aisr', 100))
+        self.stashed_aisr = inputsdict.get('aisr', 100)
+        self.ui.aisr_spnbx.setValue(self.stashed_aisr)
         self.ui.windowsz_spnbx.setValue(inputsdict.get('windowsz', 100))
         self.ui.binsz_spnbx.setValue(inputsdict.get('binsz', 5))        
         self.savefolder = inputsdict.get('savefolder', homefolder)
@@ -211,7 +211,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.ex_nreps_spnbx.setValue(inputsdict.get('ex_nreps', 5))
         self.ui.reprate_spnbx.setValue(inputsdict.get('reprate', 1))
-        self.ui.aosr_spnbx.setValue(inputsdict.get('aosr', 100))
         self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
         self.ui.display.set_spec_args(**self.spec_args)        
@@ -233,6 +232,7 @@ class ControlWindow(QtGui.QMainWindow):
             except KeyError:
                 print 'Unable to load saved inputs for', stim.__class__
 
+        self.ui.aosr_spnbx.setValue(self.acqmodel.stimulus.samplerate())
 
     def closeEvent(self, event):
         self.save_inputs(self.inputs_filename)

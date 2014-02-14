@@ -47,7 +47,7 @@
          <x>0</x>
          <y>0</y>
          <width>643</width>
-         <height>384</height>
+         <height>374</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -138,13 +138,9 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="1">
-          <widget class="QSpinBox" name="aosr_spnbx">
-           <property name="maximum">
-            <number>500</number>
-           </property>
-          </widget>
+          <widget class="QSpinBox" name="nreps_spnbx"/>
          </item>
-         <item row="1" column="0">
+         <item row="0" column="0">
           <widget class="QLabel" name="label_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -163,29 +159,6 @@
            </property>
            <property name="wordWrap">
             <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QSpinBox" name="nreps_spnbx"/>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Samplerate</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_4">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>kHz</string>
            </property>
           </widget>
          </item>
@@ -245,22 +218,6 @@
     <hint type="destinationlabel">
      <x>892</x>
      <y>636</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>aosr_spnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>StimulusEditor</receiver>
-   <slot>setModelSamplerate()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>899</x>
-     <y>329</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1048</x>
-     <y>515</y>
     </hint>
    </hints>
   </connection>

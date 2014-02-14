@@ -87,7 +87,6 @@ class MainWindow(ControlWindow):
         self.ui.binsz_spnbx.setKeyboardTracking(False)
         self.ui.windowsz_spnbx.setKeyboardTracking(False)
         self.ui.ex_nreps_spnbx.setKeyboardTracking(False)
-        self.ui.aosr_spnbx.setKeyboardTracking(False)
         self.ui.thresh_spnbx.setKeyboardTracking(False)
 
         self.active_operation = None
@@ -111,23 +110,20 @@ class MainWindow(ControlWindow):
 
     def connect_updatable(self, connect):
         if connect:
-            print 'connecting update signals'
             self.ui.start_btn.clicked.disconnect()
             self.ui.start_btn.clicked.connect(self.on_update)
             self.ui.binsz_spnbx.valueChanged.connect(self.on_update)
             self.ui.windowsz_spnbx.valueChanged.connect(self.on_update)
             self.ui.ex_nreps_spnbx.valueChanged.connect(self.on_update)
-            self.ui.aosr_spnbx.valueChanged.connect(self.on_update)
         else:
             try:
                 self.ui.ex_nreps_spnbx.valueChanged.disconnect()
-                self.ui.aosr_spnbx.valueChanged.disconnect()
                 self.ui.binsz_spnbx.valueChanged.disconnect()
                 self.ui.windowsz_spnbx.valueChanged.disconnect()
                 self.ui.start_btn.clicked.disconnect()
                 self.ui.start_btn.clicked.connect(self.on_start)
             except TypeError:
-                # disconnected already disconnected signals throws TypeError
+                # disconnecting already disconnected signals throws TypeError
                 pass
 
     def on_start(self):
@@ -177,7 +173,8 @@ class MainWindow(ControlWindow):
             return
         aochan = self.ui.aochan_box.currentText()
         aichan = self.ui.aichan_box.currentText()
-        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+        self.stashed_aisr = self.ui.aisr_spnbx.value()
+        acq_rate = self.stashed_aisr*self.fscale
 
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
         binsz = float(self.ui.binsz_spnbx.value())*self.tscale
@@ -197,13 +194,14 @@ class MainWindow(ControlWindow):
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.acqmodel.clear_explore_stimulus()
             nreps = self.ui.ex_nreps_spnbx.value()
-            gen_rate = self.ui.aosr_spnbx.value()*self.fscale
-            self.acqmodel.set_explore_samplerate(gen_rate)
+
             self.acqmodel.set_params(nreps=nreps)
             
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             signal = self.acqmodel.set_stim_by_index(stim_index)
+            gen_rate = self.acqmodel.current_genrate
+            self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
             freq, spectrum = calc_spectrum(signal, gen_rate)
             timevals = np.arange(len(signal)).astype(float)/gen_rate
             self.ui.display.set_nreps(nreps)
@@ -222,7 +220,9 @@ class MainWindow(ControlWindow):
             self.ui.aichan_box.setEnabled(True)
         self.ui.start_btn.setEnabled(True)
         self.ui.start_btn.setText('Start')
-        
+        self.ui.stop_btn.clicked.disconnect()
+        self.ui.stop_btn.clicked.connect(self.on_stop)
+
         self.connect_updatable(False)
 
         self.ui.aisr_spnbx.setEnabled(True)
@@ -291,6 +291,9 @@ class MainWindow(ControlWindow):
     def run_calibration(self):
         self.ui.start_btn.setEnabled(False)
         self.active_operation = 'calibration'
+
+        self.ui.stop_btn.clicked.disconnect()
+        self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
         self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
@@ -471,6 +474,15 @@ class MainWindow(ControlWindow):
         thresh = self.ui.thresh_spnbx.value()
         self.ui.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
+
+    def tab_changed(self, tab_index):
+        if self.ui.tab_group.tabText(tab_index).lower() == 'calibration':
+            self.stashed_aisr = self.ui.aisr_spnbx.value()
+            self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_stimulus.samplerate())
+            self.ui.aisr_spnbx.setEnabled(False)
+        else:
+            self.ui.aisr_spnbx.setEnabled(True)
+            self.ui.aisr_spnbx.setValue(self.stashed_aisr)
 
     def mode_toggled(self, mode):
         self.current_mode = mode.lower()

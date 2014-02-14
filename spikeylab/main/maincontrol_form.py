@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Feb 12 10:56:48 2014
+# Created: Thu Feb 13 15:45:58 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -111,14 +111,6 @@ class Ui_ControlWindow(object):
         self.funit_lbl = QtGui.QLabel(self.tab_explore)
         self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
         self.gridLayout_7.addWidget(self.funit_lbl, 0, 2, 1, 1)
-        self.aosr_spnbx = SmartSpinBox(self.tab_explore)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.aosr_spnbx.setFont(font)
-        self.aosr_spnbx.setDecimals(3)
-        self.aosr_spnbx.setMaximum(500000.0)
-        self.aosr_spnbx.setObjectName(_fromUtf8("aosr_spnbx"))
-        self.gridLayout_7.addWidget(self.aosr_spnbx, 0, 1, 1, 1)
         self.save_explore_ckbx = QtGui.QCheckBox(self.tab_explore)
         self.save_explore_ckbx.setEnabled(False)
         self.save_explore_ckbx.setObjectName(_fromUtf8("save_explore_ckbx"))
@@ -129,6 +121,12 @@ class Ui_ControlWindow(object):
         self.label_6.setFont(font)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout_7.addWidget(self.label_6, 0, 0, 1, 1)
+        self.aosr_spnbx = SmartSpinBox(self.tab_explore)
+        self.aosr_spnbx.setEnabled(False)
+        self.aosr_spnbx.setToolTip(_fromUtf8(""))
+        self.aosr_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.aosr_spnbx.setObjectName(_fromUtf8("aosr_spnbx"))
+        self.gridLayout_7.addWidget(self.aosr_spnbx, 0, 1, 1, 1)
         self.verticalLayout_9.addLayout(self.gridLayout_7)
         self.horizontalLayout_7.addLayout(self.verticalLayout_9)
         self.tab_group.addTab(self.tab_explore, _fromUtf8(""))
@@ -496,6 +494,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionSpectrogram_Parameters, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_specgram_dlg)
         QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.mode_toggled)
         QtCore.QObject.connect(self.actionShow_Progress, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_progress)
+        QtCore.QObject.connect(self.tab_group, QtCore.SIGNAL(_fromUtf8("currentChanged(int)")), ControlWindow.tab_changed)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):

@@ -6,6 +6,7 @@ from spikeylab.tools.audiotools import calc_spectrum
 
 from PyQt4 import QtGui, QtCore
 
+DEFAULT_SAMPLERATE = 500000
 
 class StimulusModel(QtCore.QAbstractItemModel):
     """
@@ -17,7 +18,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self._nreps = 1 # reps of each unique stimulus
         self._nloops = 1 # reps of entire expanded list of autoparams
-        self._samplerate = 400000
 
         # 2D array of simulus components track number x component number
         self._segments = [[]]
@@ -52,10 +52,24 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.calibration_frequencies = frequencies
 
     def setSamplerate(self, fs):
-        self._samplerate = fs
+        print 'attempting to set samplerate on fixed rate stimulus'
 
     def samplerate(self):
-        return self._samplerate
+        rates = []
+        for track in self._segments:
+            for component in track:
+                # special case, where component is a wav file:
+                # it will set the master samplerate to match its own
+                if component.__class__.__name__ == 'Vocalization':
+                    if component.samplerate() is not None:
+                        rates.append(component.samplerate())
+
+        if len(set(rates)) > 1:
+            raise Exception("Wav files with different sample rates in same stimulus")
+        elif len(set(rates)) == 1:
+            return rates[0]
+        else:
+            return DEFAULT_SAMPLERATE
 
     def setAutoParams(self, params):
         self._auto_params = params
@@ -172,22 +186,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self._segments[index.row()][index.column()] = value
 
         if value.__class__.__name__ == 'Vocalization':
-            rates = []
-            for track in self._segments:
-                for component in track:
-                    # special case, where component is a wav file:
-                    # it will set the master samplerate to match its own
-                    if component.__class__.__name__ == 'Vocalization':
-                        if component.samplerate() is not None:
-                            rates.append(component.samplerate())
-
-            if len(set(rates)) > 1:
-                raise Exception("Wav files with different sample rates in same stimulus")
             if value.samplerate() is not None:
-                self._samplerate = value.samplerate()
                 # print 'emitting samplerate change', value.samplerate()
                 self.samplerateChanged.emit(value.samplerate())
-
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
@@ -324,6 +325,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def signal(self):
         """Return the current stimulus in signal representation"""
+        samplerate = self.samplerate()
         track_signals = []
         max_db = max([comp.intensity() for t in self._segments for comp in t])
         # everything is maxed up to calibration dB and attenuated from there
@@ -334,7 +336,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for track in self._segments:
             track_list = []
             for component in track:
-                track_list.append(component.signal(fs=self._samplerate, 
+                track_list.append(component.signal(fs=samplerate, 
                                                    atten=atten, 
                                                    caldb=self.caldb, 
                                                    calv=self.calv))
@@ -349,11 +351,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         if self.calibration_vector is not None and self.calibration_frequencies is not None:
             # calibration magic happens here!
-            signal_fft = calc_spectrum(total_signal, self._samplerate)
+            signal_fft = calc_spectrum(total_signal, samplerate)
 
         return total_signal, atten
 
     def doc(self):
+        samplerate = self.samplerate()
         doc_list = []
         for track in self._segments:
             start_time = 0
@@ -372,7 +375,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             testtype = self.editor.name
         else:
             testtype = None
-        return {'samplerate_da':self._samplerate, 'reps': self._nreps, 
+        return {'samplerate_da':samplerate, 'reps': self._nreps, 
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list,
                 'testtype': testtype}
 

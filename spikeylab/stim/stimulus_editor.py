@@ -15,7 +15,7 @@ from spikeylab.plotting.pyqtgraph_widgets import SpecWidget
 from matplotlib import mlab
 
 class StimulusEditor(AbstractEditorWidget):
-    name = 'Rawr!'
+    name = 'Custom'
     def __init__(self, parent=None):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()
@@ -25,24 +25,13 @@ class StimulusEditor(AbstractEditorWidget):
     
     def setStimulusModel(self, model):
         self.ui.trackview.setModel(model)
-        self.ui.aosr_spnbx.setValue(model.samplerate()/self.scales[1])
         self.ui.nreps_spnbx.setValue(model.repCount())
-        model.samplerateChanged.connect(self.updateSamplerate)
         # parametizer grabs model from view
         self.ui.parametizer.setStimulusView(self.ui.trackview)
 
     def setRepCount(self, count):
         print 'set rep count'
         self.ui.trackview.model().setRepCount(count)
-
-    def updateSamplerate(self, fs):
-        # still need to handle units?!
-        print 'updating to', fs/self.scales[1]
-        self.ui.aosr_spnbx.setValue(fs/self.scales[1])
-
-    def setModelSamplerate(self):
-        fs = self.ui.aosr_spnbx.value()
-        self.ui.trackview.model().setSamplerate(fs*self.scales[1])
 
     def preview(self):
         stim_signal, atten = self.ui.trackview.model().signal()

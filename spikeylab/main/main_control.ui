@@ -172,21 +172,6 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="SmartSpinBox" name="aosr_spnbx">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>3</number>
-                </property>
-                <property name="maximum">
-                 <double>500000.000000000000000</double>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="0" colspan="2">
                <widget class="QCheckBox" name="save_explore_ckbx">
                 <property name="enabled">
@@ -206,6 +191,19 @@
                 </property>
                 <property name="text">
                  <string>Gen. Sample rate</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="SmartSpinBox" name="aosr_spnbx">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string extracomment="You can't change this"/>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::NoButtons</enum>
                 </property>
                </widget>
               </item>
@@ -1019,12 +1017,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>136</x>
+     <x>370</x>
      <y>116</y>
     </hint>
     <hint type="destinationlabel">
-     <x>199</x>
-     <y>167</y>
+     <x>432</x>
+     <y>282</y>
     </hint>
    </hints>
   </connection>
@@ -1076,6 +1074,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>tab_group</sender>
+   <signal>currentChanged(int)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>tab_changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>29</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1094,5 +1108,6 @@
   <slot>mode_toggled(QString)</slot>
   <slot>save_explore_toggled(bool)</slot>
   <slot>show_progress()</slot>
+  <slot>tab_changed(int)</slot>
  </slots>
 </ui>
