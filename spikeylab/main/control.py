@@ -97,7 +97,6 @@ class MainWindow(ControlWindow):
 
         # set up wav file directory finder paths
         self.exvocal = self.ui.parameter_stack.widget_for_name("Vocalization")
-        self.exvocal.setRootDirs(self.wavrootdir, self.filelistdir)
         self.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
 
         # always start in windowed mode

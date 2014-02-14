@@ -113,8 +113,13 @@ class Vocalization(AbstractStimulusComponent):
     def stateDict(self):
         state = super(Vocalization, self).stateDict()
         state['file'] = self._filename
-
+        state['browsedir'] = self._browsedir
         return state
+
+    def loadState(self, state):
+        super(Vocalization,self).loadState(state)
+        self._browsedir = state['browsedir']
+        self._filename = state['file']
 
     def setFile(self, fname):
         if fname is not None:
