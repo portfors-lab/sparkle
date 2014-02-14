@@ -26,6 +26,8 @@ class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
         self._component.setDuration(self.common.durationValue())
         self._component.setRisefall(self.common.risefallValue())
 
+        self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
+
     def intensityValue(self):
         return self.common.intensityValue()
 

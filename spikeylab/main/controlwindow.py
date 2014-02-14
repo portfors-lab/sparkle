@@ -7,6 +7,7 @@ from spikeylab.tools.util import convert2native
 from spikeylab.main.window_accessories import MaximizableTitleBar
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.stimulusview import StimulusView
 from spikeylab.plotting.custom_plots import SpecWidget
 from spikeylab.plotting.calibration_display import CalibrationDisplay
 from maincontrol_form import Ui_ControlWindow
@@ -30,11 +31,15 @@ class ControlWindow(QtGui.QMainWindow):
         self.load_inputs(inputs_filename)
         self.inputs_filename = inputs_filename
 
-        # hack so that original values use correct multiplications
-        # AbstractEditorWidget().
+        # keep a reference to a dummy stimulus view, to be able to update
+        # default attributes in stimulus builder from explore components
+        self.dummyview = StimulusView()
         for stim in self.explore_stimuli:
             editor = stim.showEditor()
             editor.valueChanged.connect(self.on_update)
+            editor.attributes_saved.connect(self.dummyview.update_defaults)
+            # intial from saved values
+            self.dummyview.update_defaults(stim.__class__.__name__, stim.stateDict())
             self.ui.parameter_stack.addWidget(editor)
             self.ui.explore_stim_type_cmbbx.addItem(stim.name)
 

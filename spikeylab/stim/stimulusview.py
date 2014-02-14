@@ -24,8 +24,8 @@ AUTOPARAMMODE = 1
 class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     """View for building/editing stimulus components"""
     hashIsDirty = False
-    _rects = [[]]
     _height = ROW_HEIGHT
+    _component_defaults = {}
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
         AbstractDragView.__init__(self)
@@ -42,6 +42,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
         self.mode = BUILDMODE
+        self._rects = [[]]
 
     def setModel(self, model):
         super(StimulusView, self).setModel(model)
@@ -276,6 +277,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
             if isinstance(event.source(), DragLabel):
                 index = self.model().index(location[0], location[1])
+                if component.__class__.__name__ in self._component_defaults:
+                    component.loadState(self._component_defaults[component.__class__.__name__])
                 self.edit(index)
 
             self.hashIsDirty = True
@@ -305,6 +308,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         return region
 
+    def update_defaults(self, sender, state):
+        self._component_defaults[sender] = state
 
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
@@ -330,6 +335,10 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         else:
             print 'delegate data type', type(component)
             raise Exception('UnknownDelegateType')
+
+        # connect editor to update defaults
+        view = parent.parentWidget()
+        editor.attributes_saved.connect(view.update_defaults)
 
         return editor
 

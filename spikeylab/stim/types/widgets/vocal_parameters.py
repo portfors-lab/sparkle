@@ -63,10 +63,9 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     def saveToObject(self):
         self._component.setIntensity(self.common.intensityValue())
         self._component.setFile(self.current_wav_file)
-        # self._component.setDuration(self.common.durationValue())
-        # self._component.setSamplerate(self.common.samplerateValue())
-
         self._component.setBrowseDir(self.dirmodel.rootPath())
+
+        self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def component(self):
         return self._component

@@ -1,6 +1,8 @@
 from PyQt4 import QtGui
             
-class SilenceParameterWidget(QtGui.QWidget):
+from spikeylab.stim.abstract_parameters import AbstractParameterWidget
+            
+class SilenceParameterWidget(AbstractParameterWidget):
     include_in_stack = False
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)

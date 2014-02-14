@@ -37,7 +37,7 @@ class AbstractStimulusComponent(object):
 
     def set(self, param, value):
         setattr(self, '_'+param, value)
-
+        
     def paint(self, painter, rect, palette):
         painter.save()
 
