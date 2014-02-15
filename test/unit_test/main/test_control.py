@@ -1,15 +1,20 @@
 from spikeylab.main.control import MainWindow
+from spikeylab.stim.factory import BuilderFactory, TCFactory
+from spikeylab.stim.auto_parameter_view import AddLabel
+from spikeylab.main.drag_label import DragLabel
+from spikeylab.stim.types.stimuli_classes import PureTone
 
 import sys 
 import time, os, glob
 import json
+import cPickle
 
 import h5py
 from nose.tools import assert_in, assert_equal
 
-from PyQt4.QtGui import QApplication 
+from PyQt4.QtGui import QApplication, QDropEvent 
 from PyQt4.QtTest import QTest 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QMimeData, QPoint
 
 import test.sample as sample
 
@@ -98,7 +103,6 @@ class TestSpikey():
         peaks = hfile['fft_peaks']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
-        print 'attr keys:', hfile.attrs.keys()
 
         # make sure displayed counts jive with saved file
         nfreqs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.freq_nsteps_lbl.text())
@@ -114,7 +118,6 @@ class TestSpikey():
 
     def test_no_save_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.aisr_spnbx.setValue(400) # should be kHz
         self.form.ui.reprate_spnbx.setValue(4)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(False)
         original_calfile = self.form.calvals['calfile'] #may be None
@@ -138,7 +141,6 @@ class TestSpikey():
 
     def test_abort_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.aisr_spnbx.setValue(400) # should be kHz
         self.form.ui.reprate_spnbx.setValue(4)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
         original_calfile = self.form.calvals['calfile'] #may be None
@@ -157,6 +159,132 @@ class TestSpikey():
         files = glob.glob(self.tempfolder + os.sep + 'calibration*.hdf5')
         print 'files', files
         assert len(files) == 0
+
+    def test_tuning_curve(self):
+        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.reprate_spnbx.setValue(4)
+
+        factory = TCFactory()
+        self.add_stim(factory)
+
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+        assert self.form.ui.running_label.text() == "RECORDING"
+
+        timeout = 30
+        start = time.time()
+        while self.form.ui.running_label.text() == "RECORDING" and (time.time()-start) < timeout:
+            time.sleep(1)
+            QApplication.processEvents()
+            
+        assert self.form.ui.running_label.text() == "OFF"
+
+    def test_tone_protocol(self):
+        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.reprate_spnbx.setValue(4)
+
+        # can't do drag in drop in QTest :/
+        factory = BuilderFactory()
+        
+        self.add_stim(factory)
+        assert self.form.acqmodel.protocol_model.rowCount() == 1
+
+        tone = PureTone()
+        self.insert_component(tone)        
+        # press enter to accept tone paramters -- how can I get the editor widget for components????????
+        # QTest.keyPress(self.form.ui.protocolView.stim_editor.ui.trackview)
+        # self.form.ui.protocolView.stim_editor.ui.trackview.closeEditor()
+        
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.ok_btn, Qt.LeftButton)
+
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+        assert self.form.ui.running_label.text() == "RECORDING"
+
+        timeout = 30
+        start = time.time()
+        while self.form.ui.running_label.text() == "RECORDING" and (time.time()-start) < timeout:
+            time.sleep(1)
+            QApplication.processEvents()
+            
+        assert self.form.ui.running_label.text() == "OFF"
+
+    def test_tone_protocol_with_autoparameter(self):
+        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.reprate_spnbx.setValue(4)
+
+        # can't do drag in drop in QTest :/
+        factory = BuilderFactory()
+        
+        self.add_stim(factory)
+        assert self.form.acqmodel.protocol_model.rowCount() == 1
+
+        tone = PureTone()
+        self.insert_component(tone)
+
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.parametizer.hide_btn, Qt.LeftButton)
+
+        add_label = AddLabel()
+        mimeData = QMimeData()
+        mimeData.setData("application/x-protocol", cPickle.dumps(add_label))
+        drop = QDropEvent(QPoint(), Qt.MoveAction, mimeData, Qt.RightButton, 
+                          Qt.NoModifier)
+
+        self.form.ui.protocolView.stim_editor.ui.parametizer.parametizer.param_list.dropEvent(drop)
+
+        stim = self.form.acqmodel.protocol_model.data(self.form.acqmodel.protocol_model.index(0,0), Qt.UserRole)
+        auto_params = stim.autoParams()
+        assert auto_params.rowCount() == 1
+
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.parametizer.parametizer.param_list.viewport(), 
+                         Qt.LeftButton, Qt.NoModifier, QPoint(10,10))
+
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.trackview.viewport(), 
+                         Qt.LeftButton, Qt.NoModifier, QPoint(10,10))
+
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.parametizer.parametizer.param_list.viewport(), 
+                         Qt.LeftButton, Qt.NoModifier, QPoint(10,10))
+        # cheat
+        values = ['frequency', 0, 100, 10]
+        for i, value in enumerate(values):
+            auto_params.setData(auto_params.index(0,i), value, Qt.EditRole)
+
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.ok_btn, Qt.LeftButton)
+
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+        assert self.form.ui.running_label.text() == "RECORDING"
+
+        timeout = 30
+        start = time.time()
+        while self.form.ui.running_label.text() == "RECORDING" and (time.time()-start) < timeout:
+            time.sleep(1)
+            QApplication.processEvents()
+            
+        assert self.form.ui.running_label.text() == "OFF"
+
+    def add_stim(self, factory):
+        mimeData = QMimeData()
+        mimeData.setData("application/x-protocol", cPickle.dumps(factory))
+        drop = QDropEvent(QPoint(), Qt.MoveAction,
+                                mimeData, Qt.RightButton, 
+                                Qt.NoModifier)
+        drop.source = lambda: self.form.ui.stimulus_choices
+
+        self.form.ui.protocolView.dropEvent(drop)
+
+    def insert_component(self, comp):
+        QTest.mouseDClick(self.form.ui.protocolView.viewport(), Qt.LeftButton, 
+                          Qt.NoModifier)
+
+        assert hasattr(self.form.ui.protocolView, 'stim_editor')
+        # now drop a component into stimulus
+        mimeData = QMimeData()
+        mimeData.setData("application/x-protocol", cPickle.dumps(comp))
+        drop = QDropEvent(QPoint(20,20), Qt.MoveAction,
+                                mimeData, Qt.RightButton, 
+                                Qt.NoModifier)
+
+        drop.source = lambda: DragLabel(BuilderFactory)
+        self.form.ui.protocolView.stim_editor.ui.trackview.dropEvent(drop)
+
 
     # def test_verify_no_tests(self):
     #     self.form.ui.tab_group.setCurrentIndex(1)
