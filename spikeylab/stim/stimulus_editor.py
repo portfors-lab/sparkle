@@ -2,6 +2,9 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
+import os
+import json
+
 from PyQt4 import QtGui
 
 from stimeditor_form import Ui_StimulusEditor
@@ -21,6 +24,7 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui = Ui_StimulusEditor()
         self.ui.setupUi(self)
         self.ui.trackview.installEventFilter(self.ui.template_box.trash())
+        self.save_folder = os.path.expanduser('~')
         # self.setWindowModality(2) # application modal
     
     def setStimulusModel(self, model):
@@ -30,7 +34,6 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.parametizer.setStimulusView(self.ui.trackview)
 
     def setRepCount(self, count):
-        print 'set rep count'
         self.ui.trackview.model().setRepCount(count)
 
     def preview(self):
@@ -56,6 +59,15 @@ class StimulusEditor(AbstractEditorWidget):
         print 'stim list', len(stim_list)
         print 'stim doc', stim_doc
         return stim_signal_list
+
+    def saveStimulus(self):
+        fname = QtGui.QFileDialog.getSaveFileName(self, u"Save Stimulus Setup to File", 
+                                    self.save_folder, "Stimulus Settings (*.json)")
+
+        template = self.ui.trackview.model().templateDoc()
+        with open(fname, 'w') as jf:
+            json.dump(template, jf)
+
 
 if __name__ == "__main__":
     import sys, os

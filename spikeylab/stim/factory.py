@@ -1,3 +1,6 @@
+import os
+import json
+
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.stim.stimulus_editor import StimulusEditor
@@ -45,11 +48,11 @@ class TCFactory(StimFactory):
         selection_model.select(stim.index(0,0))
 
         tuning_curve.setData(tuning_curve.index(0,0), 'frequency', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,1), 0, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,1), 1, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(0,2), 100, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(0,3), 10, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,1), 0, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(1,1), 10, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)
 
@@ -84,3 +87,19 @@ class CCFactory(StimFactory):
         tuning_curve.setData(tuning_curve.index(1,1), 90, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)
+
+class TemplateFactory(StimFactory):
+    name = 'Saved'
+    save_folder = os.path.expanduser('~')
+    _editor = None
+    def editor(self):
+        return self._editor
+
+    def init_stim(self, stim):
+        # load saved settings into stimulus
+        fname = QtGui.QFileDialog.getOpenFileName(None, u"Load Stimulus from File", 
+                                    self.save_folder, "Stimulus Settings (*.json)")
+        with open(fname, 'r') as jf:
+            state = json.load(jf)
+        stim.loadFromTemplate(state, stim)
+        self._editor = stim.editor

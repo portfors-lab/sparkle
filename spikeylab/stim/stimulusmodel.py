@@ -317,8 +317,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return doc
 
     @staticmethod
-    def loadFromTemplate(template):
-        stim = StimulusModel()
+    def loadFromTemplate(template, stim=None):
+        if stim is None:
+            stim = StimulusModel()
         stim.setRepCount(template['reps'])
         # don't set calibration details - this should be the same application wide
         stim.setEditor(get_stimulus_editor(template['testtype']))

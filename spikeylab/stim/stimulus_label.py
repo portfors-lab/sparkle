@@ -7,8 +7,7 @@ from PyQt4 import QtGui, QtCore
 import cPickle
 
 from spikeylab.main.drag_label import DragLabel
-from spikeylab.stim.factory import BuilderFactory
-from spikeylab.stim.factory import TCFactory
+from spikeylab.stim.factory import BuilderFactory, TCFactory, TemplateFactory
 from spikeylab.main.trashcan import TrashWidget
 
 class StimulusLabelTable(QtGui.QWidget):
@@ -19,11 +18,13 @@ class StimulusLabelTable(QtGui.QWidget):
 
         builder_lbl = DragLabel(BuilderFactory)
         tc_lbl = DragLabel(TCFactory)
+        template_lbl = DragLabel(TemplateFactory)
         self.trash_lbl = TrashWidget()
 
         layout.addWidget(builder_lbl, 0,0)
         layout.addWidget(tc_lbl,0,1)
-        layout.addWidget(self.trash_lbl, 0,2)
+        layout.addWidget(template_lbl,0,2)
+        layout.addWidget(self.trash_lbl, 0,3)
 
         self.setLayout(layout)
 

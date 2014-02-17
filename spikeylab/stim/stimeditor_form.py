@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Thu Feb 13 13:45:34 2014
+# Created: Mon Feb 17 13:49:28 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,7 +47,7 @@ class Ui_StimulusEditor(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 374))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 377))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setMargin(0)
@@ -92,9 +92,6 @@ class Ui_StimulusEditor(object):
         self.listView.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.listView.setObjectName(_fromUtf8("listView"))
         self.verticalLayout.addWidget(self.listView)
-        self.preview_btn = QtGui.QPushButton(self.frame)
-        self.preview_btn.setObjectName(_fromUtf8("preview_btn"))
-        self.verticalLayout.addWidget(self.preview_btn)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.nreps_spnbx = QtGui.QSpinBox(self.frame)
@@ -112,6 +109,12 @@ class Ui_StimulusEditor(object):
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
+        self.preview_btn = QtGui.QPushButton(self.frame)
+        self.preview_btn.setObjectName(_fromUtf8("preview_btn"))
+        self.verticalLayout.addWidget(self.preview_btn)
+        self.save_btn = QtGui.QPushButton(self.frame)
+        self.save_btn.setObjectName(_fromUtf8("save_btn"))
+        self.verticalLayout.addWidget(self.save_btn)
         self.ok_btn = QtGui.QPushButton(self.frame)
         self.ok_btn.setObjectName(_fromUtf8("ok_btn"))
         self.verticalLayout.addWidget(self.ok_btn)
@@ -124,14 +127,16 @@ class Ui_StimulusEditor(object):
         QtCore.QObject.connect(self.nreps_spnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), StimulusEditor.setRepCount)
         QtCore.QObject.connect(self.ok_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.close)
         QtCore.QObject.connect(self.preview_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.preview)
+        QtCore.QObject.connect(self.save_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.saveStimulus)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):
         StimulusEditor.setWindowTitle(_translate("StimulusEditor", "Form", None))
         self.label_5.setText(_translate("StimulusEditor", "Components:", None))
         self.label.setText(_translate("StimulusEditor", "Info:", None))
-        self.preview_btn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
+        self.preview_btn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
+        self.save_btn.setText(_translate("StimulusEditor", "Save As...", None))
         self.ok_btn.setText(_translate("StimulusEditor", "Ok", None))
 
 from spikeylab.stim.auto_parameters_editor import HidableParameterEditor

@@ -47,7 +47,7 @@
          <x>0</x>
          <y>0</y>
          <width>643</width>
-         <height>374</height>
+         <height>377</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -129,13 +129,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="preview_btn">
-         <property name="text">
-          <string>Preview Spectrogram</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="1">
           <widget class="QSpinBox" name="nreps_spnbx"/>
@@ -163,6 +156,20 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="preview_btn">
+         <property name="text">
+          <string>Preview Spectrogram</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="save_btn">
+         <property name="text">
+          <string>Save As...</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="ok_btn">
@@ -212,8 +219,8 @@
    <slot>setRepCount(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>899</x>
-     <y>355</y>
+     <x>922</x>
+     <y>290</y>
     </hint>
     <hint type="destinationlabel">
      <x>892</x>
@@ -229,7 +236,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>923</x>
-     <y>385</y>
+     <y>378</y>
     </hint>
     <hint type="destinationlabel">
      <x>1052</x>
@@ -244,12 +251,28 @@
    <slot>preview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>733</x>
-     <y>292</y>
+     <x>923</x>
+     <y>320</y>
     </hint>
     <hint type="destinationlabel">
      <x>642</x>
      <y>-6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>StimulusEditor</receiver>
+   <slot>saveStimulus()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>868</x>
+     <y>337</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>942</x>
+     <y>353</y>
     </hint>
    </hints>
   </connection>
@@ -260,5 +283,6 @@
   <slot>setRepCount(int)</slot>
   <slot>setModelSamplerate()</slot>
   <slot>preview()</slot>
+  <slot>saveStimulus()</slot>
  </slots>
 </ui>

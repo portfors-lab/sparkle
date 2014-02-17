@@ -274,7 +274,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     @staticmethod
     def loadFromTemplate(template, stim_model):
         auto_model = stim_model.autoParams() # or create and set new
-        for param in template:
+        for param in reversed(template):
             index = auto_model.index(0,0)
             auto_model.insertRows(0,1)
             # cheat and steal id, so we can set param directly

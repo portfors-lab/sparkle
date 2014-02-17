@@ -6,6 +6,7 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.stimulus_editor import StimulusEditor
+from spikeylab.stim.factory import TCFactory, CCFactory
 from spikeylab.stim.reorder import order_function
 
 from PyQt4 import QtCore, QtGui
@@ -254,11 +255,61 @@ class TestStimModel():
 
         assert clone.repCount() == model.repCount()
 
-    def test_tuning_curve_template(self):
-        pass
+    def test_template_tuning_curve(self):
+        model = StimulusModel()
+        tcf = TCFactory()
+        tcf.init_stim(model)
+        model.setReferenceVoltage(100, 0.1)
+        model.setRepCount(7)
+        model.setEditor(tcf.editor())
+
+        template = model.templateDoc()
+
+        clone = StimulusModel.loadFromTemplate(template)
+        clone.setReferenceVoltage(100, 0.1)
+
+        signals0, docs0 = model.expandedStim()
+        signals1, docs1 = clone.expandedStim()
+
+        assert clone.stimid != model.stimid
+        assert len(signals0) == len(signals1)
+        assert clone.editor.name == model.editor.name
+        assert clone.repCount() == model.repCount()
+        for i in range(len(signals0)):
+            print 'comparing signal', i
+            signal0, atten0 = signals0[i]
+            signal1, atten1 = signals1[i]
+            np.testing.assert_array_equal(signal0, signal1)
+            assert atten0 == atten1
+            assert_equal(docs0[i], docs1[i])
 
     def test_calibration_template(self):
-        pass
+        model = StimulusModel()
+        ccf = CCFactory()
+        ccf.init_stim(model)
+        model.setReferenceVoltage(100, 0.1)
+        model.setRepCount(7)
+        model.setEditor(ccf.editor())
+
+        template = model.templateDoc()
+
+        clone = StimulusModel.loadFromTemplate(template)
+        clone.setReferenceVoltage(100, 0.1)
+
+        signals0, docs0 = model.expandedStim()
+        signals1, docs1 = clone.expandedStim()
+
+        assert clone.stimid != model.stimid
+        assert len(signals0) == len(signals1)
+        assert clone.editor.name == model.editor.name
+        assert clone.repCount() == model.repCount()
+        for i in range(len(signals0)):
+            print 'comparing signal', i
+            signal0, atten0 = signals0[i]
+            signal1, atten1 = signals1[i]
+            np.testing.assert_array_equal(signal0, signal1)
+            assert atten0 == atten1
+            assert_equal(docs0[i], docs1[i])
 
     def test_verify_no_components(self):
         model = StimulusModel()
