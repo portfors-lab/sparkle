@@ -2,8 +2,6 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-import random
-
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.drag_label import DragLabel
@@ -11,6 +9,7 @@ from spikeylab.stim.auto_parameter_view import AutoParameterTableView, AddLabel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.main.trashcan import TrashWidget
 from spikeylab.main.hidden_widget import WidgetHider
+from spikeylab.stim.reorder import order_function
 
 
 class Parametizer(QtGui.QWidget):
@@ -45,7 +44,7 @@ class Parametizer(QtGui.QWidget):
             self.param_model.setStimView(stimulusview)
             self.param_list.setModel(self.param_model)
             # this may mislead/clobber other orderings if present on model
-            self.randomize_ckbx.setChecked(bool(stimulusview.model().reorder))
+            self.randomize_ckbx.setChecked(bool(stimulusview.model().reorder_name == 'random'))
 
         layout.addWidget(self.param_list)
         layout.addLayout(btn_layout)
@@ -54,7 +53,7 @@ class Parametizer(QtGui.QWidget):
 
     def randomToggle(self, randomize):
         if randomize:
-            self.param_model.stimModel().reorder = random_order
+            self.param_model.stimModel().setReorderFunc(order_function('random'), 'random')
         else:
             self.param_model.stimModel().reorder = None
 
@@ -92,10 +91,6 @@ class HidableParameterEditor(WidgetHider):
     def sizeHint(self):
         return QtCore.QSize(560,40)
 
-def random_order(listofthings):
-    order = range(len(listofthings))
-    random.shuffle(order)
-    return order
 
 if __name__ == '__main__':
     import sys

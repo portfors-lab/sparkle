@@ -254,6 +254,41 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         editable_paramters = set.intersection(*editable_sets)
         return list(editable_paramters)
 
+    def doc(self):
+        """
+        JSON doc for recreating this model
+        """
+        d = []
+        for param in self._parameters:
+            jp = param.copy()
+            indexes = self.selection(param)
+            # convert indexes into JSON serializable format
+            jindexes = []
+            for index in indexes:
+                jindexes.append((index.row(), index.column()))
+            jp['selection'] = jindexes
+            d.append(jp)
+
+        return d
+
+    @staticmethod
+    def loadFromTemplate(template, stim_model):
+        auto_model = stim_model.autoParams() # or create and set new
+        for param in template:
+            index = auto_model.index(0,0)
+            auto_model.insertRows(0,1)
+            # cheat and steal id, so we can set param directly
+            paramid = auto_model._parameters[0]['paramid']
+            param['paramid'] = paramid
+            selection_tuples = param.pop('selection')
+            auto_model.setData(index, param)
+            # set the selected components
+            selection_model = auto_model.data(index, auto_model.SelectionModelRole)
+            for selected in selection_tuples:
+                selection_model.select(stim_model.index(*selected))
+
+        return True
+
     def verify(self):
         for param in self._parameters:
             if param['parameter'] == '':

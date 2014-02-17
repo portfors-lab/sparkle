@@ -10,6 +10,7 @@ from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
+from spikeylab.stim.reorder import random_order
 from spikeylab.stim.factory import TCFactory
 from PyQt4.QtCore import Qt
 
@@ -164,7 +165,6 @@ class TestAcquisitionModel():
         hfile.close()
 
     def test_auto_parameter_protocol_randomize(self):
-        from spikeylab.stim.auto_parameters_editor import random_order
         winsz = 0.2 #seconds
         acq_rate = 50000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)

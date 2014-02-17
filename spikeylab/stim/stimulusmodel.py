@@ -3,6 +3,9 @@ import uuid
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import calc_spectrum
+from spikeylab.stim.types import get_stimuli_models
+from spikeylab.stim import get_stimulus_editor
+from spikeylab.stim.reorder import order_function
 
 from PyQt4 import QtGui, QtCore
 
@@ -34,6 +37,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         self.editor = None
         self.reorder = None
+        self.reorder_name = None
 
     def setReferenceVoltage(self, caldb, calv):
         # make sure these are python types, so json encoding doesn't get throw
@@ -116,16 +120,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def index(self, row, col, parent=QtCore.QModelIndex()):
         # need to convert row, col to correct element, however still have heirarchy?
-        if parent.isValid():
-            print 'valid parent', parent.row(), parent.col()
-            print 'Still trying to use tree!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            prow = self._segments.index(parent.internalPointer())
-            return self.createIndex(prow, row, self._segments[prow][row])
+
+        if row < len(self._segments) and col < len(self._segments[row]):
+            return self.createIndex(row, col, self._segments[row][col])
         else:
-            if row < len(self._segments) and col < len(self._segments[row]):
-                return self.createIndex(row, col, self._segments[row][col])
-            else:
-                return QtCore.QModelIndex()
+            return QtCore.QModelIndex()
 
     def parentForRow(self, row):
         # get the whole row
@@ -138,11 +137,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             return self.createIndex(index.row(), -1, self._segments[index.row()])
 
     def insertComponent(self, comp, rowcol=(0,0)):
-        # parent = self.parentForRow(rowcol[0])
-        # convert to index or done already?
-        # self.beginInsertRows(parent, rowcol[1], rowcol[1])
-        # parent.internalPointer().insert(rowcol[1], comp)
-        # self.endInsertRows()
         self._segments[rowcol[0]].insert(rowcol[1], None)
         self.setData(self.index(rowcol[0],rowcol[1]), comp)
 
@@ -293,8 +287,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         return stim_list
 
-    def setReorderFunc(self, func):
+    def setReorderFunc(self, func, name=None):
         self.reorder = func
+        self.reorder_name = name
 
     def expandedStim(self):
         """
@@ -315,6 +310,28 @@ class StimulusModel(QtCore.QAbstractItemModel):
         """
         JSON/YAML/XML template to recreate this stimulus in another session
         """
+        doc = self.doc(False)
+        auto_parameter_doc = self._auto_params.doc()
+        doc['autoparameters'] = auto_parameter_doc
+        doc['reorder'] = self.reorder_name
+        return doc
+
+    @staticmethod
+    def loadFromTemplate(template):
+        stim = StimulusModel()
+        stim.setRepCount(template['reps'])
+        # don't set calibration details - this should be the same application wide
+        stim.setEditor(get_stimulus_editor(template['testtype']))
+        component_classes = get_stimuli_models()
+        for comp_doc in template['components']:
+            comp = get_component(comp_doc['stim_type'], component_classes)
+            comp.loadState(comp_doc) # ignore extra dict entries
+            stim.insertComponent(comp, comp_doc['index'])
+
+        AutoParameterModel.loadFromTemplate(template['autoparameters'], stim)
+        stim.setReorderFunc(order_function(template['reorder']), template['reorder'])
+
+        return stim
 
     def duration(self):
         durs = []
@@ -355,15 +372,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         return total_signal, atten
 
-    def doc(self):
+    def doc(self, starttime=True):
         samplerate = self.samplerate()
         doc_list = []
-        for track in self._segments:
+        for row, track in enumerate(self._segments):
             start_time = 0
-            for component in track:
+            for col, component in enumerate(track):
                 info = component.stateDict()
                 info['stim_type'] = component.name
-                info['start_s'] = start_time
+                if starttime:
+                    info['start_s'] = start_time
+                else:
+                    info['index'] = (row, col)
                 start_time += info['duration']
                 # must convert any numpy types to python types to be json serializable
                 for key, value in info.items():
@@ -438,3 +458,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if self.caldb is None or self.calv is None:
             return "Test reference voltage not set"
         return 0
+
+def get_component(comp_name, class_list):
+    for comp_class in class_list:
+        if comp_class.name == comp_name:
+            return comp_class()
+    else:
+        return None

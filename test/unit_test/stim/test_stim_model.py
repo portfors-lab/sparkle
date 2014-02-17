@@ -3,9 +3,14 @@ from nose.tools import raises, assert_equal
 import numpy as np
 
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+from spikeylab.stim.stimulus_editor import StimulusEditor
+from spikeylab.stim.reorder import order_function
+
 from PyQt4 import QtCore, QtGui
+
+import test.sample as sample
 
 # get an error accessing class names if there is not a qapp running
 app = None
@@ -167,6 +172,93 @@ class TestStimModel():
         assert atten == 0
         print 'recieved', np.amax(signal), 'expected', calv*(10 **(mod/20.))
         assert round(np.amax(signal),3) == round(calv*(10 **(mod/20.)),3)
+
+    def test_template_no_auto_params(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        model.setRepCount(7)
+        component = PureTone()
+        component.setIntensity(34)
+        model.insertComponent(component, (0,0))
+        vocal = Vocalization()
+        vocal.setFile(sample.samplewav())
+        model.insertComponent(component, (1,0))
+
+        template = model.templateDoc()
+
+        clone = StimulusModel.loadFromTemplate(template)
+        clone.setReferenceVoltage(100, 0.1)
+
+        signal0, atten0 = clone.signal()
+        signal1, atten1 = model.signal()
+
+        assert clone.stimid != model.stimid
+        np.testing.assert_array_equal(signal0, signal1)
+        assert atten0 == atten1
+        assert clone.repCount() == model.repCount()
+
+    def test_template_with_auto_params(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        model.setRepCount(7)
+        component = PureTone()
+        component.setIntensity(34)
+        model.insertComponent(component, (0,0)) 
+        nsteps = self.add_auto_param(model) 
+        model.setEditor(StimulusEditor)
+
+        template = model.templateDoc()
+
+        clone = StimulusModel.loadFromTemplate(template)
+        clone.setReferenceVoltage(100, 0.1)
+
+        signals0, docs0 = model.expandedStim()
+        signals1, docs1 = clone.expandedStim()
+
+        assert clone.stimid != model.stimid
+        assert len(signals0) == len(signals1)
+        assert clone.editor.name == model.editor.name
+        for i in range(len(signals0)):
+            signal0, atten0 = signals0[i]
+            signal1, atten1 = signals1[i]
+            np.testing.assert_array_equal(signal0, signal1)
+            assert atten0 == atten1
+            assert_equal(docs0[i], docs1[i])
+
+        assert clone.repCount() == model.repCount()
+
+    def test_template_with_auto_params_randomized(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        model.setRepCount(7)
+        component = PureTone()
+        component.setIntensity(34)
+        model.insertComponent(component, (0,0)) 
+        nsteps = self.add_auto_param(model) 
+        model.setEditor(StimulusEditor)
+        model.setReorderFunc(order_function('random'), 'random')
+
+        template = model.templateDoc()
+
+        clone = StimulusModel.loadFromTemplate(template)
+        clone.setReferenceVoltage(100, 0.1)
+
+        signals0, docs0 = model.expandedStim()
+        signals1, docs1 = clone.expandedStim()
+
+        assert clone.stimid != model.stimid
+        assert len(signals0) == len(signals1)
+        assert clone.editor.name == model.editor.name
+        assert clone.reorder_name == model.reorder_name
+        # how to check if signal sets are the same?
+
+        assert clone.repCount() == model.repCount()
+
+    def test_tuning_curve_template(self):
+        pass
+
+    def test_calibration_template(self):
+        pass
 
     def test_verify_no_components(self):
         model = StimulusModel()

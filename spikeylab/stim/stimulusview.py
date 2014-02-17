@@ -268,7 +268,6 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
     def dropEvent(self, event):
         component = self.dropAssist(event)
-        # if isinstance(event.source(), self.__class__) or isinstance(event.source(), DragLabel):
         if isinstance(component, AbstractStimulusComponent):
 
             location = self.splitAt(event.pos())
