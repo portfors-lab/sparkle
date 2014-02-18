@@ -180,6 +180,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
         savedict['specargs'] = convert2native(self.spec_args)
         savedict['calvals'] = self.calvals
+        savedict['calparams'] = self.acqmodel.calibration_stimulus.templateDoc()
 
         # parameter settings
         for stim in self.explore_stimuli:
@@ -225,6 +226,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.tscale = 0
         self.fscale = 0
         self.update_unit_labels(tscale, fscale, setup=True)
+
+        if 'calparams' in inputsdict:
+            print 'loading saved calibration settings'
+            self.acqmodel.calibration_stimulus.loadFromTemplate(inputsdict['calparams'], self.acqmodel.calibration_stimulus)
 
         for stim in self.explore_stimuli:
             try:
