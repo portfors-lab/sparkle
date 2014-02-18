@@ -214,6 +214,9 @@ class SpecWidget(BasePlot):
 
     def edit_colormap(self):
         self.editor = pg.ImageView()
+        # remove the ROI and Norm buttons
+        self.editor.ui.roiBtn.setVisible(False)
+        self.editor.ui.normBtn.setVisible(False)
         self.editor.setImage(self.image_array)
         if self.img_args['state'] is not None:
             self.editor.getHistogramWidget().item.gradient.restoreState(self.img_args['state'])
