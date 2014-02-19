@@ -251,8 +251,47 @@ class FFTWidget(BasePlot):
         self.fft_plot = self.plot(pen='k')
         self.fft_plot.rotate(rotation)
 
-
         self.setLabel('left', 'Frequency', units='Hz')
 
     def update_data(self, index_data, value_data):
         self.fft_plot.setData(index_data, value_data)
+
+class ProgressWidget(BasePlot):
+    def __init__(self, xpoints, ypoints, parent=None):
+        super(ProgressWidget, self).__init__(parent)
+        self.lines = []
+        for iline in range(len(ypoints)):
+            # give each line a different color
+            self.lines.append(self.plot(pen=pg.intColor(iline, hues=len(ypoints))))
+
+        self.set_xlim((xpoints[0], xpoints[-1]))
+        self.xpoints = xpoints
+        self.ypoints = ypoints
+
+    def set_point(self, x, y, value):
+        yindex = self.ypoints.index(y)
+        xdata, ydata = self.lines[yindex].getData()
+        if ydata is None:
+            xdata = [x]
+            ydata = [value]
+        else:
+            xdata = np.append(xdata, x)
+            ydata = np.append(ydata, value)
+        self.lines[yindex].setData(xdata, ydata)
+
+    def set_labels(self, name):
+        if name == "calibration":
+            self.setWindowTitle("Calibration Curve")
+            self.set_title("Calibration Curve")
+            self.setLabel('bottom', "Frequency", units='Hz')
+            self.setLabel('left', 'Recorded Intensity (dB SPL)')
+        elif name == "tuning":
+            self.setWindowTitle("Tuning Curve")
+            self.set_title("Tuning Curve")
+            self.setLabel('bottom', "Frequency", units="Hz")
+            self.setLabel('left', "Spike Count (mean)")
+        else:
+            self.setWindowTitle("Spike Counts")
+            self.set_title("Spike Counts")
+            self.setLabel('bottom', "Test Number")
+            self.setLabel('left', "Spike Count (mean)")

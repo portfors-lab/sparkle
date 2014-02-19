@@ -166,6 +166,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def clearComponents(self):
         self._segments = [[]]
+        # also clear auto parameters
+        self._auto_params.clearParameters()
 
     def indexByComponent(self, component):
         """return a QModelIndex for the given component, or None if
@@ -254,7 +256,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         ntraces = 1
         for p in steps:
             ntraces = ntraces*len(p)
-
         varylist = [[None for x in range(len(params))] for y in range(ntraces)]
         x = 1
         for iset, step_set in enumerate(steps):

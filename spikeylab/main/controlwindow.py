@@ -230,6 +230,7 @@ class ControlWindow(QtGui.QMainWindow):
 
         if 'calparams' in inputsdict:
             print 'loading saved calibration settings'
+            self.acqmodel.calibration_stimulus.clearComponents()
             self.acqmodel.calibration_stimulus.loadFromTemplate(inputsdict['calparams'], self.acqmodel.calibration_stimulus)
 
         for stim in self.explore_stimuli:

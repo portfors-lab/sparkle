@@ -286,7 +286,6 @@ class TestSpikey():
         while self.form.ui.stop_btn.isEnabled() and (time.time()-start) < timeout:
             time.sleep(1)
             QApplication.processEvents()
-        print 'loop conditions', self.form.ui.stop_btn.isEnabled(), (time.time()-start)
 
         assert self.form.ui.running_label.text() == "RECORDING"
         assert not self.form.ui.stop_btn.isEnabled()

@@ -12,9 +12,7 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
-# from spikeylab.plotting.custom_plots import SpecWidget
-from spikeylab.plotting.mpl_spec_widget import SpecWidget
-from spikeylab.plotting.plotz import LiveCalPlot
+from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.plotting.custom_plots import ChartWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 
@@ -300,7 +298,7 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
-        self.livecurve = LiveCalPlot(list(frequencies), list(intensities))
+        self.livecurve = ProgressWidget(list(frequencies), list(intensities))
         self.livecurve.set_labels('calibration')
         self.ui.psth_dock.setWidget(self.livecurve)
         self.ui.plot_dock.setWidget(self.calibration_display)
@@ -344,8 +342,9 @@ class MainWindow(ControlWindow):
             raise
 
     def spawn_tuning_curve(self, frequencies, intensities, plot_type):
-        self.livecurve = LiveCalPlot(frequencies, intensities)
+        self.livecurve = ProgressWidget(frequencies, intensities)
         self.livecurve.set_labels(plot_type)
+
         # self.livecurve.show()
         self.ui.progress_dock.setWidget(self.livecurve)
         self.plot_progress = True

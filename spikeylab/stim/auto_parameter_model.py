@@ -29,6 +29,12 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent=QtCore.QModelIndex()):
         return 5
 
+    def clearParameters(self):
+        self.beginRemoveRows(QtCore.QModelIndex(), 0, self.rowCount())
+        self._parameters = []
+        self._selectionmap = {}
+        self.endRemoveRows()
+
     def data(self, index, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             col = index.column()

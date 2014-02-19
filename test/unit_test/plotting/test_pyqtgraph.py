@@ -4,7 +4,7 @@ sip.setapi('QString', 2)
 sip.setdestroyonexit(0)
 
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, \
-        TraceWidget, SpecWidget
+        TraceWidget, SpecWidget, ProgressWidget
 
 import sys, os, time
 import inspect
@@ -15,7 +15,7 @@ from PyQt4.QtGui import QApplication
 import spikeylab.tools.audiotools as audiotools
 import test.sample as sample
 
-PAUSE = 0.5
+PAUSE = 0.0
 
 app = None
 def setUp():
@@ -113,4 +113,17 @@ class TestPyqtgraphPlots():
             QApplication.processEvents()
             time.sleep(PAUSE)
             
+        fig.close()
+
+    def test_progress_widget(self):
+        xs = range(10)
+        ys = range(3)
+        fig = ProgressWidget(xs, ys)
+        fig.show()
+        for y in ys:
+            for x in xs:
+                fig.set_point(x, y, y*2)
+                QApplication.processEvents()
+                time.sleep(PAUSE/4)
+
         fig.close()
