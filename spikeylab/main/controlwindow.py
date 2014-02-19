@@ -178,7 +178,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['reprate'] = self.ui.reprate_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
-        savedict['specargs'] = convert2native(self.spec_args)
+        savedict['specargs'] = self.spec_args
         savedict['calvals'] = self.calvals
         savedict['calparams'] = self.acqmodel.calibration_stimulus.templateDoc()
 
@@ -188,6 +188,7 @@ class ControlWindow(QtGui.QMainWindow):
             editor.saveToObject()
             savedict[stim.name] = stim.stateDict()
 
+        savedict = convert2native(savedict)
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 

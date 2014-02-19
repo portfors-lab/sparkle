@@ -8,7 +8,6 @@ import win32com.client
 from multiprocessing import Process
 
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
-from spikeylab.config.info import caldata_filename, calfreq_filename
 from spikeylab.tools.qthreading import ProtocolSignals
 
 SAVE_OUTPUT = False

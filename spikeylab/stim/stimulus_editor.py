@@ -2,20 +2,10 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-import os
-import json
-
-from PyQt4 import QtGui
-
 from stimeditor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
-
-# from spikeylab.plotting.custom_plots import SpecWidget
-# from spikeylab.plotting.mpl_spec_widget import SpecWidget
 from spikeylab.plotting.pyqtgraph_widgets import SpecWidget
-
-from matplotlib import mlab
 
 class StimulusEditor(AbstractEditorWidget):
     name = 'Custom'
@@ -24,7 +14,6 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui = Ui_StimulusEditor()
         self.ui.setupUi(self)
         self.ui.trackview.installEventFilter(self.ui.template_box.trash())
-        self.save_folder = os.path.expanduser('~')
         # self.setWindowModality(2) # application modal
     
     def setStimulusModel(self, model):
@@ -38,39 +27,20 @@ class StimulusEditor(AbstractEditorWidget):
 
     def preview(self):
         stim_signal, atten = self.ui.trackview.model().signal()
-        # import matplotlib.pyplot as plt
-        # nfft = 512
-        # Pxx, freqs, bins, im = plt.specgram(stim_signal, NFFT=nfft, Fs=375000, noverlap=int(nfft*0.9),
-        #                       pad_to=nfft*2)
-        # # print fig, spec
-        # plt.imshow(Pxx)
-        # plt.show()
 
         fig = SpecWidget()
         fig.update_data(stim_signal, self.ui.trackview.model().samplerate())
-        # fig.set_title('Stimulus Preview')
+        fig.set_title('Stimulus Preview')
         fig.show()
-        self.asdkjfasdfk = fig
+        self.preview_fig = fig
 
-    def signal(self):
-        
-        stim_signal_list = self.ui.trackview.model().expandedStim()
-        stim_doc = self.ui.trackview.model().expandedDoc()
-        print 'stim list', len(stim_list)
-        print 'stim doc', stim_doc
-        return stim_signal_list
-
-    def saveStimulus(self):
-        fname = QtGui.QFileDialog.getSaveFileName(self, u"Save Stimulus Setup to File", 
-                                    self.save_folder, "Stimulus Settings (*.json)")
-
-        template = self.ui.trackview.model().templateDoc()
-        with open(fname, 'w') as jf:
-            json.dump(template, jf)
+    def model(self):
+        return self.ui.trackview.model()
 
 
 if __name__ == "__main__":
     import sys, os
+    from PyQt4 import QtGui
     from spikeylab.stim.stimulusmodel import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)

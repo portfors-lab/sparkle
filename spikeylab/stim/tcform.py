@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Thu Feb 13 14:45:10 2014
+# Created: Tue Feb 18 13:34:23 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -210,6 +210,9 @@ class Ui_TuningCurveEditor(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
+        self.save_btn = QtGui.QPushButton(TuningCurveEditor)
+        self.save_btn.setObjectName(_fromUtf8("save_btn"))
+        self.horizontalLayout.addWidget(self.save_btn)
         self.ok_btn = QtGui.QPushButton(TuningCurveEditor)
         self.ok_btn.setObjectName(_fromUtf8("ok_btn"))
         self.horizontalLayout.addWidget(self.ok_btn)
@@ -226,6 +229,7 @@ class Ui_TuningCurveEditor(object):
         QtCore.QObject.connect(self.db_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimDuration)
         QtCore.QObject.connect(self.risefall_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimRisefall)
+        QtCore.QObject.connect(self.save_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), TuningCurveEditor.saveStimulus)
         QtCore.QMetaObject.connectSlotsByName(TuningCurveEditor)
 
     def retranslateUi(self, TuningCurveEditor):
@@ -245,6 +249,7 @@ class Ui_TuningCurveEditor(object):
         self.tunit_lbl_4.setText(_translate("TuningCurveEditor", "ms", None))
         self.tunit_lbl_3.setText(_translate("TuningCurveEditor", "ms", None))
         self.label_31.setText(_translate("TuningCurveEditor", "Reps", None))
+        self.save_btn.setText(_translate("TuningCurveEditor", "Save As...", None))
         self.ok_btn.setText(_translate("TuningCurveEditor", "Ok", None))
 
 from spikeylab.stim.smart_spinbox import SmartSpinBox

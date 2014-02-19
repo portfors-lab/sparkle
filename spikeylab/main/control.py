@@ -106,6 +106,7 @@ class MainWindow(ControlWindow):
         self.ui.psth_dock.setVisible(True)
 
         self.ui.stop_btn.setEnabled(False)
+        self.ui.stop_chart_btn.setEnabled(False)
 
     def connect_updatable(self, connect):
         if connect:
@@ -166,6 +167,8 @@ class MainWindow(ControlWindow):
         self.ui.running_label.setText(u"RECORDING")
         self.ui.running_label.setPalette(GREEN)
         self.ui.start_chart_btn.setEnabled(False)
+        self.ui.aichan_box.setEnabled(False)
+        self.ui.stop_chart_btn.setEnabled(True)
 
     def on_update(self):
         if not self.verify_inputs():
@@ -236,6 +239,8 @@ class MainWindow(ControlWindow):
         self.live_lock.unlock()
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
+        self.ui.aichan_box.setEnabled(True)
+        self.ui.stop_chart_btn.setEnabled(False)
 
     def on_group_done(self, halted):
         if self.active_operation == 'calibration':
@@ -310,12 +315,6 @@ class MainWindow(ControlWindow):
         if len(times) != len(response):
             print "WARNING: times and response not equal"
         self.ui.display.update_spiketrace(times, response)
-
-    def handle_thread_error(self, msg):
-        print 'thread error:', msg
-
-    def test_function(self):
-        print 'hello from thread'
 
     def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
         # display fft here

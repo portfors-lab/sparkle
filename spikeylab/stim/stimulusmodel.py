@@ -42,8 +42,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def setReferenceVoltage(self, caldb, calv):
         # make sure these are python types, so json encoding doesn't get throw
         # error later
-        self.caldb = int(caldb)
-        self.calv = float(calv)
+        self.caldb = caldb
+        self.calv = calv
 
     def setCalibration(self, db_boost_array, frequencies):
         # use supplied array of intensity adjustment to adjust tone output
@@ -386,10 +386,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 else:
                     info['index'] = (row, col)
                 start_time += info['duration']
-                # must convert any numpy types to python types to be json serializable
-                for key, value in info.items():
-                    if type(value).__module__ == 'numpy':
-                        info[key] = np.asscalar(value)
+
                 doc_list.append(info)
 
         if self.editor is not None:
@@ -401,7 +398,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 'testtype': testtype}
 
     def stimType(self):
-        return self.editor.name
+        if self.editor is not None:
+            return self.editor.name
 
     def setEditor(self, editor):
         self.editor = editor

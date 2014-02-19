@@ -5,6 +5,7 @@ import json
 import os
 
 from spikeylab.tools.exceptions import DataIndexError
+from spikeylab.tools.util import convert2native
 
 class AcquisitionData():
     """
@@ -241,7 +242,7 @@ class AcquisitionData():
     def append_trace_info(self, key, stim_data):
         # append data to json list?
         if not isinstance(stim_data, basestring):
-            stim_data = json.dumps(stim_data)
+            stim_data = json.dumps(convert2native(stim_data))
         mode = self.meta[key]['mode']
         if mode == 'open':
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + stim_data + ','

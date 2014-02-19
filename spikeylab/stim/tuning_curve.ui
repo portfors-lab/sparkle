@@ -364,6 +364,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="save_btn">
+       <property name="text">
+        <string>Save As...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="ok_btn">
        <property name="text">
         <string>Ok</string>
@@ -543,6 +550,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>save_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>TuningCurveEditor</receiver>
+   <slot>saveStimulus()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>461</x>
+     <y>267</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>479</x>
+     <y>279</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setStimDuration()</slot>
@@ -550,5 +573,6 @@
   <slot>setStimRisefall()</slot>
   <slot>submit()</slot>
   <slot>setStimSamplerate()</slot>
+  <slot>saveStimulus()</slot>
  </slots>
 </ui>

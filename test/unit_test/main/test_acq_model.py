@@ -129,9 +129,11 @@ class TestAcquisitionModel():
         acq_rate = 50000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
 
+        nreps = 3
         component = PureTone()
         stim_model = StimulusModel()
         stim_model.insertComponent(component, (0,0))
+        stim_model.setRepCount(nreps)
         auto_model = stim_model.autoParams()
         auto_model.insertRows(0, 1)
         
@@ -160,7 +162,7 @@ class TestAcquisitionModel():
 
         assert freqs == sorted(freqs)
         assert_equal(stims[0]['samplerate_da'], stim_model.samplerate())
-        assert_equal(test.shape,(11,1,winsz*acq_rate))
+        assert_equal(test.shape,(11,nreps,winsz*acq_rate))
 
         hfile.close()
 
@@ -224,16 +226,8 @@ class TestAcquisitionModel():
         t.join()
         acqmodel.close_data()
 
-        # now check saved data
-        # hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        # test = hfile['explore_0']
-        # stim = json.loads(test.attrs['stim'])
+        # should check that it did not save data!
 
-        # assert_in('components', stim[0])
-        # assert_equal(stim[0]['samplerate_da'], acqmodel.stimulus.samplerate())
-        # assert_equal(test.shape[1], winsz*acq_rate)
-
-        # hfile.close()
 
     def test_vocal_explore(self):
         """Run search operation with vocal wav stimulus"""
@@ -256,16 +250,39 @@ class TestAcquisitionModel():
         t.join()
         acqmodel.close_data()
 
+    def test_tone_vocal_explore_save(self):
+        """Run search operation with tone and vocal stimulus, and save results"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)        
+
+        acqmodel.set_params(nreps=2, saveexplore=True)
+        stim_names = acqmodel.explore_stim_names()
+        acqmodel.set_stim_by_index(stim_names.index('Pure Tone'))
+        t = acqmodel.run_explore(0.25)
+
+        time.sleep(1)
+
+        acqmodel.explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
+        acqmodel.set_stim_by_index(stim_names.index('Vocalization'))
+
+        time.sleep(1)
+
+        acqmodel.halt()
+
+        t.join()
+        acqmodel.close_data()
+
         # now check saved data
-        # hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        # test = hfile['explore_0']
-        # stim = json.loads(test.attrs['stim'])
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['explore_0']
+        stim = json.loads(test.attrs['stim'])
 
-        # assert_in('components', stim[0])
-        # assert_equal(stim[0]['samplerate_da'], acqmodel.stimulus.samplerate())
-        # assert_equal(test.shape[1], winsz*acq_rate)
+        assert_in('components', stim[0])
+        assert_equal(stim[-1]['samplerate_da'], acqmodel.stimulus.samplerate())
+        assert_equal(test.shape[1], winsz*acq_rate)
 
-        # hfile.close()
+        hfile.close()
 
     def test_tuning_curve(self):
         winsz = 0.2 #seconds

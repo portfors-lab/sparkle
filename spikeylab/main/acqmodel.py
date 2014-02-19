@@ -13,8 +13,6 @@ from spikeylab.stim.types import get_stimuli_models
 from spikeylab.main.protocol_model import ProtocolTabelModel
 from spikeylab.stim.factory import CCFactory
 
-SAVE_EXPLORE = False
-
 class Broken(Exception): pass
 
 class AcquisitionModel():
@@ -31,7 +29,8 @@ class AcquisitionModel():
         self.savefolder = None
         self.savename = None
         self.calname = 'calibration'
-        self.saveall = True
+        self.save_chart = True
+        self.save_explore = False
         self.set_name = 'explore_0'
         self.group_name = 'segment_0'
         self.chart_name = 'chart_0'
@@ -139,7 +138,9 @@ class AcquisitionModel():
         if 'binsz' in kwargs:
             self.binsz = kwargs['binsz']
         if 'savechart' in kwargs:
-            self.saveall = kwargs['savechart']
+            self.save_chart = kwargs['savechart']
+        if 'saveexplore' in kwargs:
+            self.save_explore = kwargs['saveexplore']
         if 'caldb' in kwargs:
             self.caldb = kwargs['caldb']
         if 'calv' in kwargs:
@@ -177,7 +178,7 @@ class AcquisitionModel():
         self._halt = False
         
         # TODO: some error checking to make sure valid paramenters are set
-        if SAVE_EXPLORE:
+        if self.save_explore:
             # initize data set
             self.current_dataset_name = self.set_name
             self.datafile.init_data(self.current_dataset_name, self.aitimes.shape, mode='open')
@@ -232,7 +233,7 @@ class AcquisitionModel():
                 times = self.aitimes
                 self.player_lock.release()
 
-                if SAVE_EXPLORE:
+                if self.save_explore:
                     # save response data
                     self.save_data(response)
 
@@ -252,15 +253,8 @@ class AcquisitionModel():
                 raise
 
         self.finite_player.stop()
-        if SAVE_EXPLORE:
+        if self.save_explore:
             self.datafile.trim(self.current_dataset_name)
-
-    def set_explore_samplerate(self, fs):
-        # print 'setting generation rate', fs
-        if not self.stimulus.contains('Vocalization'):
-            self.stimulus.setSamplerate(fs)
-        else:
-            print 'ERROR: cannot set samplerate on stimulus containing vocal file'
 
     def run_protocol(self, interval):
         self._halt = False
@@ -303,7 +297,6 @@ class AcquisitionModel():
                 nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
                 for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
-
                     signal, atten = trace
                     player.set_stim(signal, test.samplerate(), atten)
 
@@ -445,7 +438,7 @@ class AcquisitionModel():
         response = data[0,:]
         stim_recording = data[1,:]
         self.signals.ncollected.emit(stim_recording, response)
-        if self.saveall:
+        if self.save_chart:
             self.datafile.append(self.current_dataset_name, response)
 
     def run_chart_protocol(self, interval):

@@ -183,7 +183,7 @@ class TestStimModel():
         model.insertComponent(component, (0,0))
         vocal = Vocalization()
         vocal.setFile(sample.samplewav())
-        model.insertComponent(component, (1,0))
+        model.insertComponent(vocal, (1,0))
 
         template = model.templateDoc()
 

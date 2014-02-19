@@ -181,7 +181,7 @@ class TestSpikey():
     def test_tone_protocol(self):
         self.form.ui.tab_group.setCurrentIndex(1)
         self.form.ui.reprate_spnbx.setValue(4)
-
+        self.form.update_thresh(0.05) # get some spikes into raster
         # can't do drag in drop in QTest :/
         factory = BuilderFactory()
         
@@ -221,6 +221,7 @@ class TestSpikey():
         self.insert_component(tone)
 
         QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.parametizer.hide_btn, Qt.LeftButton)
+        QApplication.processEvents()
 
         add_label = AddLabel()
         mimeData = QMimeData()
@@ -246,6 +247,8 @@ class TestSpikey():
         values = ['frequency', 0, 100, 10]
         for i, value in enumerate(values):
             auto_params.setData(auto_params.index(0,i), value, Qt.EditRole)
+        
+        QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.parametizer.hide_btn, Qt.LeftButton)
 
         QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.ok_btn, Qt.LeftButton)
 
@@ -258,6 +261,38 @@ class TestSpikey():
             time.sleep(1)
             QApplication.processEvents()
             
+        assert self.form.ui.running_label.text() == "OFF"
+
+    def test_chart(self):
+        """ Test chart recording, playing a tuning curve protocol """
+        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.reprate_spnbx.setValue(4)
+
+        factory = TCFactory()
+        self.add_stim(factory)
+
+        self.form.ui.mode_cmbx.setCurrentIndex(1)
+        assert self.form.current_mode == 'chart'
+
+        QTest.mouseClick(self.form.ui.start_chart_btn, Qt.LeftButton)
+        assert self.form.ui.running_label.text() == "RECORDING"
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+        QApplication.processEvents()
+
+        assert self.form.ui.stop_btn.isEnabled()
+
+        timeout = 30
+        start = time.time()
+        while self.form.ui.stop_btn.isEnabled() and (time.time()-start) < timeout:
+            time.sleep(1)
+            QApplication.processEvents()
+        print 'loop conditions', self.form.ui.stop_btn.isEnabled(), (time.time()-start)
+
+        assert self.form.ui.running_label.text() == "RECORDING"
+        assert not self.form.ui.stop_btn.isEnabled()
+            
+        QTest.mouseClick(self.form.ui.stop_chart_btn, Qt.LeftButton)
+
         assert self.form.ui.running_label.text() == "OFF"
 
     def add_stim(self, factory):
@@ -282,7 +317,7 @@ class TestSpikey():
                                 mimeData, Qt.RightButton, 
                                 Qt.NoModifier)
 
-        drop.source = lambda: DragLabel(BuilderFactory)
+        drop.source = lambda: DragLabel(comp)
         self.form.ui.protocolView.stim_editor.ui.trackview.dropEvent(drop)
 
 

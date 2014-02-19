@@ -1,3 +1,6 @@
+import os
+import json
+
 from PyQt4 import QtGui, QtCore
 
 class AbstractEditorWidget(QtGui.QWidget):
@@ -7,6 +10,8 @@ class AbstractEditorWidget(QtGui.QWidget):
     funit_fields = []
     tunit_fields = []
     valueChanged = QtCore.pyqtSignal()
+    save_folder = os.path.expanduser('~')
+
     def setFScale(self, fscale, setup=False):
         """
         Updates the frequency unit labels, and stores unit to
@@ -63,3 +68,23 @@ class AbstractEditorWidget(QtGui.QWidget):
                     field.setValue(field.value()*(oldscale/tscale))
                 except:
                     pass
+
+    def saveStimulus(self):
+        # manually instead of static function for testing purposes
+        self.dialog = QtGui.QFileDialog(self, u"Save Stimulus Setup to File", 
+                                    self.save_folder, "Stimulus Settings (*.json)")
+        self.dialog.setLabelText(QtGui.QFileDialog.Accept, 'Save')
+
+        if self.dialog.exec_():
+            fname = self.dialog.selectedFiles()[0]
+
+        if fname is not None:
+            if not fname.endswith('.json'):
+                fname = fname + '.json'
+            template = self.model().templateDoc()
+            with open(fname, 'w') as jf:
+                json.dump(template, jf)
+
+    def model(self):
+        """Return the model for which this editor is acting on """
+        raise NotImplementedError

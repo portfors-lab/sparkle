@@ -206,7 +206,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         return 0, y
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     
     import sys, os
     from spikeylab.stim.stimulusmodel import StimulusModel

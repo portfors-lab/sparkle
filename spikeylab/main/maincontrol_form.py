@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Thu Feb 13 15:45:58 2014
+# Created: Tue Feb 18 15:58:37 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -320,11 +320,11 @@ class Ui_ControlWindow(object):
         self.label_17 = QtGui.QLabel(self.centralwidget)
         self.label_17.setObjectName(_fromUtf8("label_17"))
         self.horizontalLayout_6.addWidget(self.label_17)
-        self.comboBox = QtGui.QComboBox(self.centralwidget)
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.horizontalLayout_6.addWidget(self.comboBox)
+        self.mode_cmbx = QtGui.QComboBox(self.centralwidget)
+        self.mode_cmbx.setObjectName(_fromUtf8("mode_cmbx"))
+        self.mode_cmbx.addItem(_fromUtf8(""))
+        self.mode_cmbx.addItem(_fromUtf8(""))
+        self.horizontalLayout_6.addWidget(self.mode_cmbx)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem2)
@@ -492,7 +492,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionShow_PSTH, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_psth)
         QtCore.QObject.connect(self.explore_stim_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.parameter_stack.setCurrentIndex)
         QtCore.QObject.connect(self.actionSpectrogram_Parameters, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_specgram_dlg)
-        QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.mode_toggled)
+        QtCore.QObject.connect(self.mode_cmbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.mode_toggled)
         QtCore.QObject.connect(self.actionShow_Progress, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_progress)
         QtCore.QObject.connect(self.tab_group, QtCore.SIGNAL(_fromUtf8("currentChanged(int)")), ControlWindow.tab_changed)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
@@ -538,8 +538,8 @@ class Ui_ControlWindow(object):
         self.label_35.setText(_translate("ControlWindow", "Rep rate", None))
         self.label_36.setText(_translate("ControlWindow", "reps/s", None))
         self.label_17.setText(_translate("ControlWindow", "Mode", None))
-        self.comboBox.setItemText(0, _translate("ControlWindow", "Windowed", None))
-        self.comboBox.setItemText(1, _translate("ControlWindow", "Chart", None))
+        self.mode_cmbx.setItemText(0, _translate("ControlWindow", "Windowed", None))
+        self.mode_cmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
         self.start_chart_btn.setText(_translate("ControlWindow", "Start Chart", None))
         self.stop_chart_btn.setText(_translate("ControlWindow", "Stop Chart", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))

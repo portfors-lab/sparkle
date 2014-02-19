@@ -63,7 +63,8 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         info = self.tone.auto_details()
         self.tone.setRisefall(rf*info['risefall']['multiplier'])
 
-
+    def model(self):
+        return self.stim_model
 
 if __name__ == "__main__":
     import sys
