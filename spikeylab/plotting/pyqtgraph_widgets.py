@@ -327,3 +327,75 @@ class PSTHWidget(BasePlot):
         for b in bins:
             self._counts[b] += 1
         self.histo.setOpts(height=self._counts)
+
+class ChartWidget(BasePlot):
+    def __init__(self, parent=None):
+        super(ChartWidget, self).__init__(parent)
+        self.trace_plot = self.plot(pen='k')
+        self.stim_plot = self.plot(pen='b')
+
+        self.disableAutoRange()
+        self.setMouseEnabled(x=False,y=True)
+
+    def set_sr(self, sr):
+        self._deltax = (1/float(sr))
+
+    def set_windowsize(self, winsz):
+        self._windowsize = winsz
+        # set range here then?
+        x0 = self.getPlotItem().viewRange()[0][0]
+        self.set_xlim((x0, x0+winsz))
+
+    def clear_data(self):
+        self.trace_plot.setData(None)
+        self.stim_plot.setData(None)
+        self.set_xlim((0, self._windowsize))
+
+    def append_data(self, stim, data):
+        npoints_to_add = len(data)
+        xdata, ydata = self.trace_plot.getData()
+        xstim, stimdata = self.stim_plot.getData()
+        if xdata is None:
+            last_time = 0
+            xdata = []
+            ydata = []
+            stimdata = []
+        else:
+            last_time = xdata[-1]
+
+        # print 'last_time', last_time, 'deltax', self.deltax, 'npoints_to_add', npoints_to_add
+        # x_to_append = np.arange(last_time+self._deltax, 
+        #                         last_time+self._deltax+(self._deltax*npoints_to_add),
+        #                         self._deltax)
+        x_to_append = np.linspace(last_time+self._deltax, 
+                                  last_time+self._deltax+(self._deltax*npoints_to_add), 
+                                  npoints_to_add)
+        # print 'lens', len(x_to_append), len(data), len(stim), last_time, npoints_to_add
+        # assert len(x_to_append) == len(data)
+        # assert len(x_to_append) == len(stim)
+        # print 'deltax', x_to_append[1] - x_to_append[0], self._deltax
+        # assert (x_to_append[1] - x_to_append[0]) == self._deltax
+
+        stimdata = np.append(stimdata, stim)
+
+        xdata = np.append(xdata, x_to_append)
+        ydata = np.append(ydata, data) 
+
+        # remove data that has gone off screen
+        xlim = self.getPlotItem().viewRange()[0]
+        removex, = np.where(xdata < xlim[0])
+
+        xdata = np.delete(xdata, removex)
+        ydata = np.delete(ydata, removex)
+        stimdata = np.delete(stimdata, removex)
+
+        # assuming that samplerates must be the same
+        self.trace_plot.setData(xdata, ydata)
+        self.stim_plot.setData(xdata, stimdata)
+
+        # now scroll axis limits
+        if xlim[1] < xdata[-1]:
+            xlim[1] += self._deltax*npoints_to_add
+            xlim[0] += self._deltax*npoints_to_add
+            self.set_xlim(xlim)
+

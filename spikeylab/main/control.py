@@ -12,8 +12,7 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
-from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
-from spikeylab.plotting.custom_plots import ChartWidget
+from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget, ChartWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 
 from controlwindow import ControlWindow
@@ -166,7 +165,9 @@ class MainWindow(ControlWindow):
         self.ui.running_label.setPalette(GREEN)
         self.ui.start_chart_btn.setEnabled(False)
         self.ui.aichan_box.setEnabled(False)
+        self.ui.aisr_spnbx.setEnabled(False)
         self.ui.stop_chart_btn.setEnabled(True)
+        self.ui.windowsz_spnbx.valueChanged.connect(self.update_scolling_windowsize)
 
     def on_update(self):
         if not self.verify_inputs():
@@ -218,12 +219,12 @@ class MainWindow(ControlWindow):
             self.ui.running_label.setText(u"OFF")
             self.ui.running_label.setPalette(RED)
             self.ui.aichan_box.setEnabled(True)
+            self.connect_updatable(False)
         self.ui.start_btn.setEnabled(True)
         self.ui.start_btn.setText('Start')
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.on_stop)
 
-        self.connect_updatable(False)
 
         self.ui.aisr_spnbx.setEnabled(True)
         self.ui.aochan_box.setEnabled(True)
@@ -238,7 +239,9 @@ class MainWindow(ControlWindow):
         self.ui.running_label.setText(u"OFF")
         self.ui.running_label.setPalette(RED)
         self.ui.aichan_box.setEnabled(True)
+        self.ui.aisr_spnbx.setEnabled(True)
         self.ui.stop_chart_btn.setEnabled(False)
+        self.ui.windowsz_spnbx.valueChanged.disconnect()
 
     def on_group_done(self, halted):
         if self.active_operation == 'calibration':
@@ -256,6 +259,10 @@ class MainWindow(ControlWindow):
 
         self.active_operation = 'chart'
         self.acqmodel.start_chart()
+
+    def update_scolling_windowsize(self):
+        winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
+        self.scrollplot.set_windowsize(winsz)
 
     def update_chart(self, stim_data, response_data):
         self.scrollplot.append_data(stim_data, response_data)

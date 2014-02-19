@@ -4,7 +4,7 @@ sip.setapi('QString', 2)
 sip.setdestroyonexit(0)
 
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, \
-        TraceWidget, SpecWidget, ProgressWidget, PSTHWidget
+        TraceWidget, SpecWidget, ProgressWidget, PSTHWidget, ChartWidget
 
 import sys, os, time
 import inspect
@@ -15,7 +15,7 @@ from PyQt4.QtGui import QApplication
 import spikeylab.tools.audiotools as audiotools
 import test.sample as sample
 
-PAUSE = 0.0
+PAUSE = 1.0
 
 app = None
 def setUp():
@@ -147,4 +147,19 @@ class TestPyqtgraphPlots():
 
         fig.clear_data()
 
+        fig.close()
+
+    def test_chart_widget(self):
+        fig = ChartWidget()
+        fig.setWindowTitle(inspect.stack()[0][3])
+        fig.show()
+        winsz = 0.01 #seconds
+        acq_rate = 50000 #Hz
+        fig.set_windowsize(winsz)
+        fig.set_sr(acq_rate)
+        for i in range(1,5):
+            y = self.data_func(i)
+            fig.append_data(y,y)
+            QApplication.processEvents()
+            time.sleep(PAUSE)
         fig.close()
