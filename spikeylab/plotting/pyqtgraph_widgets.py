@@ -295,3 +295,35 @@ class ProgressWidget(BasePlot):
             self.set_title("Spike Counts")
             self.setLabel('bottom', "Test Number")
             self.setLabel('left', "Spike Count (mean)")
+
+class PSTHWidget(BasePlot):
+    _bins = np.arange(5)
+    _counts = np.zeros((5,))
+    def __init__(self, parent=None):
+        super(PSTHWidget, self).__init__(parent)
+        self.histo = pg.BarGraphItem(x=self._bins, height=self._counts, width=0.5)
+        self.addItem(self.histo)
+        self.setLabel('bottom', 'Time Bins', units='s')
+        self.setLabel('left', 'Spike Counts')
+        self.setMouseEnabled(x=False,y=True)
+        self.set_xlim((0, 0.25))
+
+    def set_bins(self, bins):
+        """Set the bin centers (x values)"""
+        self._bins = bins
+        self._counts = np.zeros_like(self._bins)
+        bar_width = bins[0]*1.5
+        self.histo.setOpts(x=bins, height=self._counts, width=bar_width)
+        self.set_xlim((0, bins[-1]))
+
+    def clear_data(self):
+        """Clear all histograms (keep bins)"""
+        self._counts = np.zeros_like(self._bins)
+        self.histo.setOpts(height=self._counts)
+
+    def append_data(self, bins, repnum=None):
+        """Increase the values at bins (indexes)"""
+        # self._counts[bins] +=1 # ignores dulplicates
+        for b in bins:
+            self._counts[b] += 1
+        self.histo.setOpts(height=self._counts)

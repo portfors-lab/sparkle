@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Feb 18 15:58:37 2014
+# Created: Wed Feb 19 10:06:52 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -570,7 +570,7 @@ class Ui_ControlWindow(object):
 from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox
 from spikeylab.calibration.calibration_widget import CalibrationWidget
-from spikeylab.plotting.custom_plots import PSTHWidget
-from spikeylab.plotting.protocoldisplay import ProtocolDisplay
-from spikeylab.main.protocol_model import ProtocolView
+from spikeylab.plotting.pyqtgraph_widgets import PSTHWidget
 from spikeylab.stim.stimulus_label import StimulusLabelTable
+from spikeylab.main.protocol_model import ProtocolView
+from spikeylab.plotting.protocoldisplay import ProtocolDisplay

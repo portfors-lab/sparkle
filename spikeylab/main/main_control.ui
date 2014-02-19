@@ -901,7 +901,7 @@
   <customwidget>
    <class>PSTHWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.plotting.custom_plots</header>
+   <header>spikeylab.plotting.pyqtgraph_widgets</header>
    <container>1</container>
   </customwidget>
   <customwidget>

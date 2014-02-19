@@ -4,7 +4,7 @@ sip.setapi('QString', 2)
 sip.setdestroyonexit(0)
 
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, \
-        TraceWidget, SpecWidget, ProgressWidget
+        TraceWidget, SpecWidget, ProgressWidget, PSTHWidget
 
 import sys, os, time
 import inspect
@@ -125,5 +125,26 @@ class TestPyqtgraphPlots():
                 fig.set_point(x, y, y*2)
                 QApplication.processEvents()
                 time.sleep(PAUSE/4)
+
+        fig.close()
+
+    def test_psth_widget(self):
+        fig = PSTHWidget()
+        fig.setWindowTitle(inspect.stack()[0][3])
+        fig.show()
+
+        dummy_data = [0, 1, 1, 1, 3, 4, 4,9,9,9,9,9, 7]
+        fig.set_bins(range(max(dummy_data)+1))
+        fig.append_data(dummy_data)
+        QApplication.processEvents()
+        time.sleep(PAUSE)
+
+        for i in range(3):
+            fig.append_data([3, 3, 4, 5])
+
+            QApplication.processEvents()
+            time.sleep(PAUSE)
+
+        fig.clear_data()
 
         fig.close()
