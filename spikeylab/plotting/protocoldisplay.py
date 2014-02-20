@@ -20,7 +20,7 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.setToolTip('Spike Trace')
         self.spec_plot.setToolTip('Stimulus Spectrogram')
 
-        # self.signal_plot.setMinimumHeight(100)
+        self.spec_plot.setXLink(self.spiketrace_plot)
         self.spec_plot.setMinimumHeight(100)
         self.spiketrace_plot.setMinimumWidth(100)
         self.spiketrace_plot.setMinimumHeight(100)
@@ -48,6 +48,10 @@ class ProtocolDisplay(QtGui.QWidget):
         #relay threshold signal
         self.threshold_updated = self.spiketrace_plot.threshold_updated
         self.colormap_changed = self.spec_plot.colormap_changed
+
+        # for the purposes of splitter not updating contents...
+        self.splittersw = splittersw
+        self.badbadbad = 0
 
     def update_spec(self, *args, **kwargs):
         if args[0] == None:
@@ -80,7 +84,16 @@ class ProtocolDisplay(QtGui.QWidget):
 
     def set_xlimits(self, lims):
         self.spiketrace_plot.set_xlim(lims)
-        self.spec_plot.set_xlim(lims)
+        # ridiculous...
+        sizes = self.splittersw.sizes()
+        if self.badbadbad:
+            sizes[0] +=1
+            sizes[1] -=1
+        else:
+            sizes[0] -=1
+            sizes[1] +=1
+        self.badbadbad = not self.badbadbad
+        self.splittersw.setSizes(sizes)
 
     def set_nreps(self, nreps):
         self.spiketrace_plot.set_nreps(nreps)
@@ -152,8 +165,6 @@ if __name__ == "__main__":
     dummy_bins = bin_centers[1:-2:2]
     plot.add_raster_points(dummy_bins, dummy_data)
 
-    print 'spec range', plot.spec_plot.traits.plot.range2d.x_range
-    # print 'spiketrace range', plot.spiketrace_plot.traits.trace_plot.range2d.x_range
 
     # coerce x ranges to match
     plot.set_xlimits([0, resp_times[-1]])
