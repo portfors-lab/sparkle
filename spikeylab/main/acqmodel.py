@@ -574,4 +574,4 @@ class AcquisitionModel():
                 return order
         else:
             #did not find calibration frequency, raise Error
-            raise Exception('calibraiton frequency not found in stimulus')
+            raise Exception('calibraiton frequency and intensity not found in stimulus')

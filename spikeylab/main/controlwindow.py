@@ -90,6 +90,9 @@ class ControlWindow(QtGui.QMainWindow):
                 if not self.acqmodel.calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
                     QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
                     return False
+                if not self.acqmodel.calibration_stimulus.contains_pval('intensity', self.calvals['caldb']):
+                    QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference intensity")
+                    return False
         return True
 
     def update_unit_labels(self, tscale, fscale, setup=False):
