@@ -149,7 +149,6 @@ class MainWindow(ControlWindow):
                 self.acqmodel.create_data_file()
             self.ui.aichan_box.setEnabled(False)
             self.ui.plot_dock.setWidget(self.ui.display)
-            self.ui.psth_dock.setWidget(self.ui.psth_container)
             self.ui.running_label.setText(u"RECORDING")
             self.ui.running_label.setPalette(GREEN)
 
@@ -317,7 +316,7 @@ class MainWindow(ControlWindow):
         frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
         self.livecurve = ProgressWidget(list(frequencies), list(intensities))
         self.livecurve.set_labels('calibration')
-        self.ui.psth_dock.setWidget(self.livecurve)
+        self.ui.progress_dock.setWidget(self.livecurve)
         self.ui.plot_dock.setWidget(self.calibration_display)
 
         reprate = self.ui.reprate_spnbx.value()

@@ -229,7 +229,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.update_unit_labels(tscale, fscale, setup=True)
 
         if 'calparams' in inputsdict:
-            print 'loading saved calibration settings'
             self.acqmodel.calibration_stimulus.clearComponents()
             self.acqmodel.calibration_stimulus.loadFromTemplate(inputsdict['calparams'], self.acqmodel.calibration_stimulus)
 
