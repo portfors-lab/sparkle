@@ -80,7 +80,7 @@ class TraceWidget(BasePlot):
         self.thresh_line = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.thresh_line)
         self.thresh_line.sigPositionChangeFinished.connect(self.update_thresh)
-        self.setLabel('left', 'potential', units='V')
+        self.setLabel('left', 'Potential', units='V')
         self.setLabel('bottom', 'Time', units='s')
 
     def update_data(self, axeskey, x, y):
@@ -328,11 +328,51 @@ class PSTHWidget(BasePlot):
             self._counts[b] += 1
         self.histo.setOpts(height=self._counts)
 
-class ChartWidget(BasePlot):
+class ChartWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(ChartWidget, self).__init__(parent)
-        self.trace_plot = self.plot(pen='k')
-        self.stim_plot = self.plot(pen='b')
+        self.trace_plot = ScrollingWidget()
+        self.stim_plot = ScrollingWidget(pencolor='b')
+
+        self.trace_plot.set_title('Brain Recording')
+        self.stim_plot.set_title('Stimulus Recording')
+        self.trace_plot.setLabel('left', 'Potential', units='V')
+        self.stim_plot.setLabel('left', ' ') # makes yaxis line up
+        self.trace_plot.setLabel('bottom', 'Time', units='s')
+        self.stim_plot.hideAxis('bottom')
+        self.stim_plot.setXLink('Brain Recording')
+
+        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+
+        splitter.setContentsMargins(0,0,0,0)
+        splitter.addWidget(self.stim_plot)
+        splitter.addWidget(self.trace_plot)
+
+        layout = QtGui.QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.addWidget(splitter)
+        self.setLayout(layout)
+
+    def set_sr(self, sr):
+        self.trace_plot.set_sr(sr)
+        self.stim_plot.set_sr(sr)
+
+    def set_windowsize(self, winsz):
+        self.trace_plot.set_windowsize(winsz)
+        self.stim_plot.set_windowsize(winsz)
+
+    def clear_data(self):
+        self.trace_plot.clear_data()
+        self.stim_plot.clear_data()
+
+    def append_data(self, stim, data):
+        self.trace_plot.append_data(data)
+        self.stim_plot.append_data(stim)
+
+class ScrollingWidget(BasePlot):
+    def __init__(self, pencolor='k', parent=None):
+        super(ScrollingWidget, self).__init__(parent)
+        self.scroll_plot = self.plot(pen=pencolor)
 
         self.disableAutoRange()
         self.setMouseEnabled(x=False,y=True)
@@ -347,19 +387,16 @@ class ChartWidget(BasePlot):
         self.set_xlim((x0, x0+winsz))
 
     def clear_data(self):
-        self.trace_plot.setData(None)
-        self.stim_plot.setData(None)
+        self.scroll_plot.setData(None)
         self.set_xlim((0, self._windowsize))
 
-    def append_data(self, stim, data):
+    def append_data(self, data):
         npoints_to_add = len(data)
-        xdata, ydata = self.trace_plot.getData()
-        xstim, stimdata = self.stim_plot.getData()
+        xdata, ydata = self.scroll_plot.getData()
         if xdata is None:
             last_time = 0
             xdata = []
             ydata = []
-            stimdata = []
         else:
             last_time = xdata[-1]
 
@@ -376,8 +413,6 @@ class ChartWidget(BasePlot):
         # print 'deltax', x_to_append[1] - x_to_append[0], self._deltax
         # assert (x_to_append[1] - x_to_append[0]) == self._deltax
 
-        stimdata = np.append(stimdata, stim)
-
         xdata = np.append(xdata, x_to_append)
         ydata = np.append(ydata, data) 
 
@@ -387,11 +422,9 @@ class ChartWidget(BasePlot):
 
         xdata = np.delete(xdata, removex)
         ydata = np.delete(ydata, removex)
-        stimdata = np.delete(stimdata, removex)
 
         # assuming that samplerates must be the same
-        self.trace_plot.setData(xdata, ydata)
-        self.stim_plot.setData(xdata, stimdata)
+        self.scroll_plot.setData(xdata, ydata)
 
         # now scroll axis limits
         if xlim[1] < xdata[-1]:

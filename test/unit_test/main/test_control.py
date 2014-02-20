@@ -82,7 +82,7 @@ class TestSpikey():
 
     def test_save_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
 
@@ -118,7 +118,7 @@ class TestSpikey():
 
     def test_no_save_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(False)
         original_calfile = self.form.calvals['calfile'] #may be None
 
@@ -141,7 +141,7 @@ class TestSpikey():
 
     def test_abort_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
         original_calfile = self.form.calvals['calfile'] #may be None
 
@@ -162,7 +162,7 @@ class TestSpikey():
 
     def test_tuning_curve(self):
         self.form.ui.tab_group.setCurrentIndex(1)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
 
         factory = TCFactory()
         self.add_stim(factory)
@@ -180,7 +180,7 @@ class TestSpikey():
 
     def test_tone_protocol(self):
         self.form.ui.tab_group.setCurrentIndex(1)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
         self.form.update_thresh(0.05) # get some spikes into raster
         # can't do drag in drop in QTest :/
         factory = BuilderFactory()
@@ -209,7 +209,7 @@ class TestSpikey():
 
     def test_tone_protocol_with_autoparameter(self):
         self.form.ui.tab_group.setCurrentIndex(1)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
 
         # can't do drag in drop in QTest :/
         factory = BuilderFactory()
@@ -266,7 +266,7 @@ class TestSpikey():
     def test_chart(self):
         """ Test chart recording, playing a tuning curve protocol """
         self.form.ui.tab_group.setCurrentIndex(1)
-        self.form.ui.reprate_spnbx.setValue(4)
+        self.form.ui.reprate_spnbx.setValue(10)
 
         factory = TCFactory()
         self.add_stim(factory)

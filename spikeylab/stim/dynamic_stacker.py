@@ -7,6 +7,12 @@ class DynamicStackedWidget(QtGui.QStackedWidget):
             if self.widget(iwidget).name() == name:
                 return self.widget(iwidget)
 
+    def widgets(self):
+        w = []
+        for i in range(self.count()):
+            w.append(self.widget(i))
+        return w
+
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)

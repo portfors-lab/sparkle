@@ -15,7 +15,7 @@ from PyQt4.QtGui import QApplication
 import spikeylab.tools.audiotools as audiotools
 import test.sample as sample
 
-PAUSE = 1.0
+PAUSE = 0.0
 
 app = None
 def setUp():

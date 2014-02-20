@@ -98,6 +98,7 @@ class MainWindow(ControlWindow):
 
         # always start in windowed mode
         self.mode_toggled('Windowed')
+        self.prev_tab = self.ui.tab_group.tabText(self.ui.tab_group.currentIndex()).lower()
         # always show plots on load
         self.ui.plot_dock.setVisible(True)
         self.ui.psth_dock.setVisible(True)
@@ -112,13 +113,19 @@ class MainWindow(ControlWindow):
             self.ui.binsz_spnbx.valueChanged.connect(self.on_update)
             self.ui.windowsz_spnbx.valueChanged.connect(self.on_update)
             self.ui.ex_nreps_spnbx.valueChanged.connect(self.on_update)
+            for editor in self.ui.parameter_stack.widgets():
+                editor.valueChanged.connect(self.on_update)
         else:
             try:
                 self.ui.ex_nreps_spnbx.valueChanged.disconnect()
                 self.ui.binsz_spnbx.valueChanged.disconnect()
                 self.ui.windowsz_spnbx.valueChanged.disconnect()
+                # this should always remain connected 
+                self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
                 self.ui.start_btn.clicked.disconnect()
                 self.ui.start_btn.clicked.connect(self.on_start)
+                for editor in self.ui.parameter_stack.widgets():
+                    editor.valueChanged.disconnect()
             except TypeError:
                 # disconnecting already disconnected signals throws TypeError
                 pass
@@ -126,7 +133,7 @@ class MainWindow(ControlWindow):
     def on_start(self):
         # set plot axis to appropriate limits
         # first time set up data file
-        if not self.verify_inputs():
+        if not self.verify_inputs('windowed'):
             return
 
         # disable the components we don't want changed amid generation
@@ -156,6 +163,9 @@ class MainWindow(ControlWindow):
             raise Exception("unrecognized tab selection")
 
     def on_start_chart(self):
+        if not self.verify_inputs('chart'):
+            return
+
         if self.acqmodel.datafile is None:
             self.acqmodel.set_save_params(self.savefolder, self.savename)
             self.acqmodel.create_data_file()
@@ -170,12 +180,11 @@ class MainWindow(ControlWindow):
         self.ui.windowsz_spnbx.valueChanged.connect(self.update_scolling_windowsize)
 
     def on_update(self):
-        if not self.verify_inputs():
+        if not self.verify_inputs(self.active_operation):
             return
         aochan = self.ui.aochan_box.currentText()
         aichan = self.ui.aichan_box.currentText()
-        self.stashed_aisr = self.ui.aisr_spnbx.value()
-        acq_rate = self.stashed_aisr*self.fscale
+        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
 
         winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
         binsz = float(self.ui.binsz_spnbx.value())*self.tscale
@@ -242,6 +251,7 @@ class MainWindow(ControlWindow):
         self.ui.aisr_spnbx.setEnabled(True)
         self.ui.stop_chart_btn.setEnabled(False)
         self.ui.windowsz_spnbx.valueChanged.disconnect()
+        self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
 
     def on_group_done(self, halted):
         if self.active_operation == 'calibration':
@@ -257,7 +267,7 @@ class MainWindow(ControlWindow):
         self.scrollplot.set_sr(acq_rate)
         self.ui.plot_dock.setWidget(self.scrollplot)
 
-        self.active_operation = 'chart'
+        # self.active_operation = 'chart'
         self.acqmodel.start_chart()
 
     def update_scolling_windowsize(self):
@@ -484,9 +494,10 @@ class MainWindow(ControlWindow):
             self.stashed_aisr = self.ui.aisr_spnbx.value()
             self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_stimulus.samplerate())
             self.ui.aisr_spnbx.setEnabled(False)
-        else:
+        elif self.prev_tab == 'calibration':
             self.ui.aisr_spnbx.setEnabled(True)
             self.ui.aisr_spnbx.setValue(self.stashed_aisr)
+        self.prev_tab = self.ui.tab_group.tabText(tab_index).lower()
 
     def mode_toggled(self, mode):
         self.current_mode = mode.lower()

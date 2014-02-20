@@ -48,7 +48,7 @@ class TestAcquisitionModel():
         stim0.setSamplerate(gen_rate)
         acqmodel.protocol_model.insertNewTest(stim0,0)
 
-        t = acqmodel.run_protocol(0.25)
+        t = acqmodel.run_protocol(0.1)
         t.join()
 
         acqmodel.close_data()
@@ -80,7 +80,7 @@ class TestAcquisitionModel():
         stim0.setSamplerate(gen_rate)
         acqmodel.protocol_model.insertNewTest(stim0,0)
 
-        t = acqmodel.run_protocol(0.25)
+        t = acqmodel.run_protocol(0.1)
         t.join()
 
         acqmodel.close_data()
@@ -108,7 +108,7 @@ class TestAcquisitionModel():
         stim0.insertComponent(vocal0)
         acqmodel.protocol_model.insertNewTest(stim0,0)
 
-        t = acqmodel.run_protocol(0.25)
+        t = acqmodel.run_protocol(0.1)
         t.join()
 
         acqmodel.close_data()
@@ -146,7 +146,7 @@ class TestAcquisitionModel():
 
         acqmodel.protocol_model.insertNewTest(stim_model,0)
 
-        t = acqmodel.run_protocol(0.25)
+        t = acqmodel.run_protocol(0.1)
         t.join()
 
         acqmodel.close_data()
@@ -187,7 +187,7 @@ class TestAcquisitionModel():
 
         acqmodel.protocol_model.insertNewTest(stim_model,0)
 
-        t = acqmodel.run_protocol(0.25)
+        t = acqmodel.run_protocol(0.1)
         t.join()
 
         acqmodel.close_data()
@@ -296,7 +296,7 @@ class TestAcquisitionModel():
 
         acqmodel.protocol_model.insertNewTest(tc,0)
 
-        t = acqmodel.run_protocol(0.25)
+        t = acqmodel.run_protocol(0.1)
         t.join()
 
         acqmodel.close_data()
@@ -338,7 +338,7 @@ class TestAcquisitionModel():
         self.done = True
 
     def test_chart_tone_protocol(self):
-        winsz = 0.2 #seconds
+        winsz = 0.1 #seconds
         acq_rate = 50000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
         acqmodel.set_params(savechart=True)
@@ -347,14 +347,14 @@ class TestAcquisitionModel():
         gen_rate = 500000
 
         tone0 = PureTone()
-        tone0.setDuration(0.2)
+        tone0.setDuration(winsz)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
         stim0.setSamplerate(gen_rate)
         acqmodel.protocol_model.insertNewTest(stim0,0)
 
         acqmodel.start_chart()
-        t = acqmodel.run_chart_protocol(0.25)
+        t = acqmodel.run_chart_protocol(0.15)
         t.join()
 
         acqmodel.stop_chart()
@@ -374,7 +374,7 @@ class TestAcquisitionModel():
         hfile.close()
 
     def test_calibration_protocol(self):
-        winsz = 0.2 #seconds
+        winsz = 0.1 #seconds
         acq_rate = 500000
         acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
 
@@ -383,7 +383,7 @@ class TestAcquisitionModel():
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
-        t, calname = acqmodel.run_calibration(0.25, False)
+        t, calname = acqmodel.run_calibration(0.1, False)
         t.join()
         acqmodel.process_calibration()
         acqmodel.close_data()

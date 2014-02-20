@@ -36,7 +36,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.dummyview = StimulusView()
         for stim in self.explore_stimuli:
             editor = stim.showEditor()
-            editor.valueChanged.connect(self.on_update)
             editor.attributes_saved.connect(self.dummyview.update_defaults)
             # intial from saved values
             self.dummyview.update_defaults(stim.__class__.__name__, stim.stateDict())
@@ -52,44 +51,45 @@ class ControlWindow(QtGui.QMainWindow):
         except Exception as e:
             print e
 
-    def verify_inputs(self):
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            # each widget should be in charge of putting its own stimulus together
-            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            stim_widget = self.ui.parameter_stack.widget(stim_index)
-            stim_widget.saveToObject()
-            selected_stim = self.explore_stimuli[stim_index]
-            failmsg = selected_stim.verify(samplerate=self.ui.aosr_spnbx.value()*self.fscale)
-            if failmsg:
-                QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
+    def verify_inputs(self, mode):
+        if mode == 'chart':
+            if self.ui.aisr_spnbx.value()*self.fscale > 100000:
+                QtGui.QMessageBox.warning(self, "Invalid Input", "Recording samplerate cannot exceed 100kHz for chart acquisition")
                 return False
-            if selected_stim.duration() > self.ui.windowsz_spnbx.value()*self.tscale:
-                QtGui.QMessageBox.warning(self, "Invalid Input",
-                        "Window size must equal or exceed stimulus length")
-                return False
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
-            failure = self.acqmodel.protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
-            if failure:
-                QtGui.QMessageBox.warning(self, "Invalid Input", failure)
-                return False
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-            failmsg = self.acqmodel.calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
-            if failmsg:
-                QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
-                return False
-            # also check that the recording samplerate is high enough in this case
-            failmsg = self.acqmodel.calibration_stimulus.verify_expanded(samplerate=self.ui.aisr_spnbx.value()*self.fscale)
-            if failmsg:
-                failmsg = failmsg.replace('Generation', 'Recording')
-                QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
-                return False
-            if not self.acqmodel.calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
-                QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
-                return False
-        if self.current_mode == 'windowed':
-            pass
-        else:
-            pass
+        elif mode is not None:
+            if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
+                # each widget should be in charge of putting its own stimulus together
+                stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
+                stim_widget = self.ui.parameter_stack.widget(stim_index)
+                stim_widget.saveToObject()
+                selected_stim = self.explore_stimuli[stim_index]
+                failmsg = selected_stim.verify(samplerate=self.ui.aosr_spnbx.value()*self.fscale)
+                if failmsg:
+                    QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
+                    return False
+                if selected_stim.duration() > self.ui.windowsz_spnbx.value()*self.tscale:
+                    QtGui.QMessageBox.warning(self, "Invalid Input",
+                            "Window size must equal or exceed stimulus length")
+                    return False
+            elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
+                failure = self.acqmodel.protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
+                if failure:
+                    QtGui.QMessageBox.warning(self, "Invalid Input", failure)
+                    return False
+            elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
+                failmsg = self.acqmodel.calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
+                if failmsg:
+                    QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
+                    return False
+                # also check that the recording samplerate is high enough in this case
+                failmsg = self.acqmodel.calibration_stimulus.verify_expanded(samplerate=self.ui.aisr_spnbx.value()*self.fscale)
+                if failmsg:
+                    failmsg = failmsg.replace('Generation', 'Recording')
+                    QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
+                    return False
+                if not self.acqmodel.calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
+                    QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
+                    return False
         return True
 
     def update_unit_labels(self, tscale, fscale, setup=False):
