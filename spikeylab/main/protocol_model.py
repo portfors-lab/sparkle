@@ -105,7 +105,8 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
     def insertNewTest(self, stim, position):
         """Creates inserts a new test into list"""
-
+        if position == -1:
+            position = self.rowCount()
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
         stim.setReferenceVoltage(self.caldb, self.calv)
         stim.setCalibration(self.calibration_vector, self.calibration_frequencies)
