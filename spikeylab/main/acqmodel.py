@@ -155,13 +155,9 @@ class AcquisitionModel():
         if 'caldb' in kwargs or 'calv' in kwargs:
             self.update_reference_voltage()
 
-    def clear_explore_stimulus(self):
-        self.stimulus.clearComponents()
-
     def set_stim_by_index(self, index):
         # remove any current components
-        if self.stimulus.columnCount() > 0:
-            self.stimulus.clearComponents()
+        self.stimulus.clearComponents()
         self.stimulus.insertComponent(self.explore_stimuli[index])
         self.current_genrate = self.stimulus.samplerate()
         signal, atten = self.stimulus.signal()

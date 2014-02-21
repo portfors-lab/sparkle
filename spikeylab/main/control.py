@@ -97,6 +97,7 @@ class MainWindow(ControlWindow):
         # set up wav file directory finder paths
         self.exvocal = self.ui.parameter_stack.widget_for_name("Vocalization")
         self.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
+        self.selected_wav_file = self.exvocal.current_wav_file
 
         # always start in windowed mode
         self.mode_toggled('Windowed')
@@ -208,11 +209,17 @@ class MainWindow(ControlWindow):
         self.binsz = binsz
 
         self.ui.display.set_xlimits((0,winsz))
-        # for now, clear spec if not vocalization
-        if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) != 'vocalization':
+        # update or clear spec
+        if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) == 'vocalization':
+            # don't update file - revert to last double clicked
+            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
+            stim_widget = self.ui.parameter_stack.widget(stim_index)
+            if stim_widget.current_wav_file != self.selected_wav_file:
+                stim_widget.component().setFile(self.selected_wav_file)
+            self.ui.display.show_spec(self.selected_wav_file)
+        else:
             self.ui.display.update_spec(None)
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            self.acqmodel.clear_explore_stimulus()
             nreps = self.ui.ex_nreps_spnbx.value()
 
             self.acqmodel.set_params(nreps=nreps)
@@ -478,6 +485,7 @@ class MainWindow(ControlWindow):
             winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
 
             self.ui.display.set_xlimits((0,winsz))
+        self.selected_wav_file = spath
         self.on_update()
 
     def relay_cmap_change(self, cmap):

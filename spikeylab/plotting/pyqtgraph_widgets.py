@@ -210,7 +210,11 @@ class SpecWidget(BasePlot):
                 self.specgram_args[key] = value
 
     def clear_img(self):
-        self.img.setImage(np.array([[0]]))
+        self.img.image = None
+        # self.img.setImage(np.array([[0]]))
+
+    def has_img(self):
+        return self.img.image is not None
 
     def edit_colormap(self):
         self.editor = pg.ImageView()

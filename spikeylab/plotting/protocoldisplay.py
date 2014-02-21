@@ -59,6 +59,11 @@ class ProtocolDisplay(QtGui.QWidget):
         else:
             self.spec_plot.from_file(*args, **kwargs)
 
+    def show_spec(self, fname):
+        """ Draw image if none present """
+        if not self.spec_plot.has_img() and fname is not None:
+            self.spec_plot.from_file(fname)
+
     def set_spec_args(self, *args, **kwargs):
         self.spec_plot.set_spec_args(*args, **kwargs)
 
