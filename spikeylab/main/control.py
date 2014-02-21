@@ -16,7 +16,6 @@ from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget, ChartWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
-from spikeylab.main.uihandler import TextEditHandler
 
 from controlwindow import ControlWindow
 
