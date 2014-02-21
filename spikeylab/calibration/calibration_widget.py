@@ -9,6 +9,7 @@ class CalibrationWidget(QtGui.QWidget):
         self.ui = Ui_CalibrationWidget()
         self.ui.setupUi(self)
         self.ui.curve_widget.ui.ok_btn.hide()
+        self.ui.curve_widget.ui.save_btn.hide()
         self.ui.curve_widget.ui.dur_spnbx.setEnabled(False)
 
     def setCurveModel(self, model):
