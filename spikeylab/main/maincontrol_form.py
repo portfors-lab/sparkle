@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Feb 19 10:06:52 2014
+# Created: Thu Feb 20 17:25:42 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -458,6 +458,18 @@ class Ui_ControlWindow(object):
         self.dockWidgetContents_3.setObjectName(_fromUtf8("dockWidgetContents_3"))
         self.progress_dock.setWidget(self.dockWidgetContents_3)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.progress_dock)
+        self.log_dock = QtGui.QDockWidget(ControlWindow)
+        self.log_dock.setObjectName(_fromUtf8("log_dock"))
+        self.dockWidgetContents_4 = QtGui.QWidget()
+        self.dockWidgetContents_4.setObjectName(_fromUtf8("dockWidgetContents_4"))
+        self.verticalLayout_7 = QtGui.QVBoxLayout(self.dockWidgetContents_4)
+        self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
+        self.log_txedt = QtGui.QPlainTextEdit(self.dockWidgetContents_4)
+        self.log_txedt.setReadOnly(True)
+        self.log_txedt.setObjectName(_fromUtf8("log_txedt"))
+        self.verticalLayout_7.addWidget(self.log_txedt)
+        self.log_dock.setWidget(self.dockWidgetContents_4)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.log_dock)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -472,6 +484,8 @@ class Ui_ControlWindow(object):
         self.actionSpectrogram_Parameters.setObjectName(_fromUtf8("actionSpectrogram_Parameters"))
         self.actionShow_Progress = QtGui.QAction(ControlWindow)
         self.actionShow_Progress.setObjectName(_fromUtf8("actionShow_Progress"))
+        self.actionShow_Log = QtGui.QAction(ControlWindow)
+        self.actionShow_Log.setObjectName(_fromUtf8("actionShow_Log"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
@@ -479,6 +493,7 @@ class Ui_ControlWindow(object):
         self.menuView.addAction(self.actionShow_Data_display)
         self.menuView.addAction(self.actionShow_PSTH)
         self.menuView.addAction(self.actionShow_Progress)
+        self.menuView.addAction(self.actionShow_Log)
         self.menubar.addAction(self.menuOptions.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
 
@@ -495,6 +510,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.mode_cmbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.mode_toggled)
         QtCore.QObject.connect(self.actionShow_Progress, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_progress)
         QtCore.QObject.connect(self.tab_group, QtCore.SIGNAL(_fromUtf8("currentChanged(int)")), ControlWindow.tab_changed)
+        QtCore.QObject.connect(self.actionShow_Log, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_log)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -559,6 +575,7 @@ class Ui_ControlWindow(object):
         self.spike_rate_lbl.setText(_translate("ControlWindow", "0", None))
         self.spike_avg_lbl.setText(_translate("ControlWindow", "0", None))
         self.spike_total_lbl.setText(_translate("ControlWindow", "0", None))
+        self.log_dock.setWindowTitle(_translate("ControlWindow", "Log", None))
         self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
@@ -566,6 +583,7 @@ class Ui_ControlWindow(object):
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
         self.actionSpectrogram_Parameters.setText(_translate("ControlWindow", "Spectrogram Parameters...", None))
         self.actionShow_Progress.setText(_translate("ControlWindow", "Show Progress", None))
+        self.actionShow_Log.setText(_translate("ControlWindow", "Show Log", None))
 
 from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox

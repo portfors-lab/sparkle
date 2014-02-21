@@ -6,6 +6,7 @@
 inputs.cfg
 calibration_dbdata.npy
 calibration_frq.npy
+*.log
 
 # os autogen files?
 __*__

@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from PyQt4 import QtCore, QtGui
 
 import spikeylab.tools.systools as systools
@@ -251,5 +252,6 @@ class ControlWindow(QtGui.QMainWindow):
         settings = QtCore.QSettings("audiolab")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
-        print 'All user settings saved'
-        # settings.setValue("psth_dock/state", self.ui.psth.saveGeometry())
+        logger = logging.getLogger('main')
+        logger.info('All user settings saved')
+

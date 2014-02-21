@@ -4,6 +4,8 @@ import sys, os
 import scipy.io.wavfile as wv
 import numpy as np
 import threading
+import logging
+import time
 
 from PyQt4 import QtCore, QtGui
 
@@ -14,6 +16,7 @@ from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget, ChartWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
+from spikeylab.main.uihandler import TextEditHandler
 
 from controlwindow import ControlWindow
 
@@ -105,6 +108,15 @@ class MainWindow(ControlWindow):
 
         self.ui.stop_btn.setEnabled(False)
         self.ui.stop_chart_btn.setEnabled(False)
+
+        logger = logging.getLogger('main')
+        handlers = logger.handlers
+        # dig out the UI handler to assign text edit ... a better way?
+        for h in handlers:
+            if h.get_name() == 'ui':
+                h.set_widget(self.ui.log_txedt)
+                break
+        logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
 
     def connect_updatable(self, connect):
         if connect:
@@ -523,6 +535,9 @@ class MainWindow(ControlWindow):
 
     def show_progress(self):
         self.ui.progress_dock.setVisible(True)
+
+    def show_log(self):
+        self.ui.log_dock.setVisible(True)
 
     def closeEvent(self,event):
         # stop any tasks that may be running

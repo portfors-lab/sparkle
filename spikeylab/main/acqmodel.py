@@ -1,6 +1,7 @@
 import os, time
 import threading
 import numpy as np
+import logging
 
 from spikeylab.io.players import FinitePlayer, ContinuousPlayer
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
@@ -88,6 +89,10 @@ class AcquisitionModel():
             print "You must first set a save folder and filename"
         fname = create_unique_path(self.savefolder, self.savename)
         self.datafile = AcquisitionData(fname)
+
+        logger = logging.getLogger('main')
+        logger.info('Opened datafile: {}'.format(fname))
+
         return fname
 
     def set_threshold(self, threshold):
@@ -478,7 +483,9 @@ class AcquisitionModel():
         if self.savefolder is None or self.savename is None:
             print "You must first set a save folder and filename"
         fname = create_unique_path(self.savefolder, self.calname)
-        print 'calibration file name', fname
+        logger = logging.getLogger('main')
+        logger.info('calibration file name %s' % fname)
+
         self.calfile = AcquisitionData(fname)
         info = {'samplerate_ad': self.finite_player.aisr}
         self.calfile.set_metadata('', info)

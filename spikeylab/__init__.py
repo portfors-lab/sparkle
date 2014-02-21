@@ -4,6 +4,6 @@ sip.setapi('QString', 2)
 sip.setdestroyonexit(0)
 
 print 'intializing spikey'
-# import spikeylab.io
-# import spikeylab.plotting
-# import spikeylab.tools
+from spikeylab.main.log import init_logging
+init_logging()
+
