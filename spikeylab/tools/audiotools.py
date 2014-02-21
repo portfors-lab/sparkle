@@ -119,9 +119,11 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
         wavdata = wavdata.astype(float)
     else:
         sr, wavdata = source
+        
+    # normalize
+    wavdata = wavdata/np.max(abs(wavdata))
     duration = len(wavdata)/sr
-    # mx = np.amax(wavdata)
-    # wavdata = wavdata/mx
+
     if window == 'hanning':
         winfnc = mlab.window_hanning
     elif window == 'hamming':
@@ -141,9 +143,5 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
 
     # convert to db scale for display
     spec = 10. * np.log10(Pxx)
-    # spec = np.nan_to_num(spec)
-    # remove -inf values from spec array
-    spec[np.isneginf(spec)] = np.nan
-    spec[np.isnan(spec)] = np.nanmin(spec)
 
     return spec, freqs, bins, duration
