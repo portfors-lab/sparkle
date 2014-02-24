@@ -2,7 +2,7 @@ from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.abstract_drag_view import AbstractDragView
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
-
+from spikeylab.stim.smart_spinbox import SmartSpinBox
 
 class AddLabel(object):
     name = "Add"
@@ -14,6 +14,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         QtGui.QTableView.__init__(self)
         AbstractDragView.__init__(self)
 
+        self.setItemDelegate(SmartDelegate())
         self.setItemDelegateForColumn(0,ComboboxDelegate())
         self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -114,3 +115,7 @@ class ComboboxDelegate(QtGui.QStyledItemDelegate):
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
+
+class SmartDelegate(QtGui.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        return SmartSpinBox(parent)

@@ -133,7 +133,6 @@ class TestAutoParameterModel():
         assert values[3]*multiplier == model.data(model.index(0,3), QtCore.Qt.EditRole)
         assert nsteps0 == model.data(model.index(0,4), QtCore.Qt.EditRole)
 
-
     def test_update_stim_model_start_value(self):
         component = PureTone()
         model = self.create_model(component)
@@ -148,6 +147,31 @@ class TestAutoParameterModel():
         model.setData(model.index(0,1), value, QtCore.Qt.EditRole)
 
         assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
+
+    def test_change_param_type(self):
+        component = PureTone()
+        model = self.create_model(component)
+
+        values = ['duration', 8, 100, 10]
+        for i, value in enumerate(values):
+            model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
+
+        # check that values are stored correctly inside model
+        p = model.data(model.index(0,0))
+        mult = model.getDetail(model.index(0,0), 'multiplier')
+        for i, value in enumerate(values[1:]):
+            assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value*mult
+
+        values[0] = 'frequency'
+        model.setData(model.index(0,0), 'frequency', QtCore.Qt.EditRole)
+        for i, value in enumerate(values):
+            assert model.data(model.index(0,i), QtCore.Qt.EditRole) == value
+
+        # check that values are stored correctly inside model
+        p = model.data(model.index(0,0))
+        mult = model.getDetail(model.index(0,0), 'multiplier')
+        for i, value in enumerate(values[1:]):
+            assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value*mult
 
     def test_verify_success(self):
         component = PureTone()

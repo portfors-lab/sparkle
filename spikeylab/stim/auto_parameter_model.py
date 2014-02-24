@@ -49,11 +49,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 multiplier = self.getDetail(index, 'multiplier')
                 if multiplier is not None:
                     # return integers for whole numbers, floats otherwise
-                    val = float(item)/multiplier
-                    if val - np.floor(val) > 0.0:
-                        return val
-                    else:
-                        return int(val)
+                    return float(item)/multiplier
             elif col == 4:
                 if param['step'] > 0:
                     if param['start'] > param['stop']:
@@ -100,9 +96,16 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:
             param = self._parameters[index.row()]
             if index.column() == 0 :
+                old_multiplier = self.getDetail(index, 'multiplier')
                 param[self.headers[index.column()]] = value
-                # should I reset the start, stop and step values here?
-                # at least go through and multiply by new multiplier?
+                # keep the displayed values the same, so multiply to ajust
+                # real underlying value
+                new_multiplier = float(self.getDetail(index, 'multiplier'))
+                if old_multiplier is not None and old_multiplier != new_multiplier:
+                    for col in range(1,4):
+                        i = self.index(index.row(), col)
+                        self.setData(i, self.data(i, QtCore.Qt.EditRole)*(new_multiplier/old_multiplier), QtCore.Qt.EditRole)
+
             elif 1 <= index.column() <= 3:
                 # check that start and stop values are within limits
                 # specified by component type
@@ -162,7 +165,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         else:
             # print 'value out of bounds:'
             # print 'lower', lower, 'upper', upper, 'value', value
-            return False
+            return False 
 
     def setParameterList(self, paramlist):
         self._parameters = paramlist
@@ -218,9 +221,6 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
         else:
             print 'flags: index invalid'
-            return QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | \
-                   QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
-                   QtCore.Qt.ItemIsEditable
 
     def setStimView(self, stimview):
         self._stimview = stimview
