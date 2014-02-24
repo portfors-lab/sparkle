@@ -1,6 +1,5 @@
 from PyQt4 import QtGui, QtCore
 
-from auto_parameter_form import Ui_AutoParamWidget
 from spikeylab.main.abstract_drag_view import AbstractDragView
 from spikeylab.stim.selectionmodel import ComponentSelectionModel
 
@@ -10,6 +9,7 @@ class AddLabel(object):
         
 class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     """List View which holds parameter widgets"""
+    hintRequested = QtCore.pyqtSignal(str)
     def __init__(self):
         QtGui.QTableView.__init__(self)
         AbstractDragView.__init__(self)
@@ -72,6 +72,14 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
             self.model().insertRows(index.row(),1)
             if event.source() == self:
                 self.model().setData(index, param)
+            else:
+                self.hintRequested.emit('Select Components in view to modify')
+                row = index.row()
+                # select rows doesn't work with -ve indexes
+                if row == -1:
+                    row = self.model().rowCount() - 1
+                self.selectRow(row)
+                self.model().updateSelectionModel(index)
 
         event.accept()
         

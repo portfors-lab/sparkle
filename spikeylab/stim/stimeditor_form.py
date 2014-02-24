@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Mon Feb 17 13:49:28 2014
+# Created: Mon Feb 24 12:49:41 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,27 +74,29 @@ class Ui_StimulusEditor(object):
         self.template_box = ComponentTemplateTable(self.frame)
         self.template_box.setObjectName(_fromUtf8("template_box"))
         self.verticalLayout.addWidget(self.template_box)
-        self.label = QtGui.QLabel(self.frame)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        self.hint_txedt = QtGui.QTextEdit(self.frame)
+        self.hint_txedt.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.verticalLayout.addWidget(self.label)
-        self.listView = QtGui.QListView(self.frame)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.listView.sizePolicy().hasHeightForWidth())
-        self.listView.setSizePolicy(sizePolicy)
-        self.listView.setMinimumSize(QtCore.QSize(50, 0))
-        self.listView.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.listView.setObjectName(_fromUtf8("listView"))
-        self.verticalLayout.addWidget(self.listView)
+        sizePolicy.setHeightForWidth(self.hint_txedt.sizePolicy().hasHeightForWidth())
+        self.hint_txedt.setSizePolicy(sizePolicy)
+        self.hint_txedt.setMinimumSize(QtCore.QSize(0, 60))
+        self.hint_txedt.setMaximumSize(QtCore.QSize(16777215, 100))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.hint_txedt.setFont(font)
+        self.hint_txedt.setFrameShape(QtGui.QFrame.Panel)
+        self.hint_txedt.setObjectName(_fromUtf8("hint_txedt"))
+        self.verticalLayout.addWidget(self.hint_txedt)
+        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.nreps_spnbx = QtGui.QSpinBox(self.frame)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.nreps_spnbx.setFont(font)
         self.nreps_spnbx.setObjectName(_fromUtf8("nreps_spnbx"))
         self.gridLayout_3.addWidget(self.nreps_spnbx, 0, 1, 1, 1)
         self.label_2 = QtGui.QLabel(self.frame)
@@ -103,6 +105,9 @@ class Ui_StimulusEditor(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
         self.label_2.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label_2.setFont(font)
         self.label_2.setFrameShape(QtGui.QFrame.NoFrame)
         self.label_2.setFrameShadow(QtGui.QFrame.Plain)
         self.label_2.setWordWrap(False)
@@ -132,8 +137,13 @@ class Ui_StimulusEditor(object):
 
     def retranslateUi(self, StimulusEditor):
         StimulusEditor.setWindowTitle(_translate("StimulusEditor", "Form", None))
+        self.trackview.setToolTip(_translate("StimulusEditor", "Stimulus View", None))
         self.label_5.setText(_translate("StimulusEditor", "Components:", None))
-        self.label.setText(_translate("StimulusEditor", "Info:", None))
+        self.hint_txedt.setHtml(_translate("StimulusEditor", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Drag Components onto view to Add. Double click to edit; right drag to move.</p></body></html>", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
         self.preview_btn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
         self.save_btn.setText(_translate("StimulusEditor", "Save As...", None))

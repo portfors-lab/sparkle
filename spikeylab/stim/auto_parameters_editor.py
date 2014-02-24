@@ -13,6 +13,7 @@ from spikeylab.stim.reorder import order_function
 
 
 class Parametizer(QtGui.QWidget):
+    hintRequested = QtCore.pyqtSignal(str)
     def __init__(self, stimulusview=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -33,18 +34,14 @@ class Parametizer(QtGui.QWidget):
         btn_layout.addWidget(add_lbl)
         btn_layout.addWidget(self.trash_lbl)
         btn_layout.addWidget(separator)
-        # btn_layout.addWidget(QtGui.QLabel())
         btn_layout.addWidget(self.randomize_ckbx)
 
         self.param_list = AutoParameterTableView()
         self.param_list.installEventFilter(self.trash_lbl)
+        self.param_list.hintRequested.connect(self.hintRequested)
 
         if stimulusview is not None:
-            self.param_model = stimulusview.model().autoParams()
-            self.param_model.setStimView(stimulusview)
-            self.param_list.setModel(self.param_model)
-            # this may mislead/clobber other orderings if present on model
-            self.randomize_ckbx.setChecked(bool(stimulusview.model().reorder_name == 'random'))
+            self.setStimulusView(stimulusview)
 
         layout.addWidget(self.param_list)
         layout.addLayout(btn_layout)
@@ -66,27 +63,45 @@ class Parametizer(QtGui.QWidget):
         self.param_list.setModel(self.param_model)
         self.randomize_ckbx.setChecked(bool(view.model().reorder))
 
+        self.param_model.emptied.connect(self.table_emptied)
+        self.param_model.hintRequested.connect(self.hintRequested)
+
+    def table_emptied(self, empty):
+        self.param_model.stimView().setEnabled(not empty)
+        if empty:
+            self.param_model.stimView().setSelectionModel(QtGui.QItemSelectionModel(self.param_model.stimView().model()))
+
+
     def sizeHint(self):
         return QtCore.QSize(560,200)
 
     def showEvent(self, event):
         selected = self.param_list.selectedIndexes()
         if len(selected) > 0:
-            print 'selected indexes', selected[0].row()
             self.param_model.updateSelectionModel(selected[0])
+            self.hintRequested.emit('Select parameter to edit. \
+                Parameter must have selected components in order to edit fields')
+        else:
+            self.param_model.stimView().setEnabled(False)
+            self.hintRequested.emit('Drag to add parameter first')
         self.param_model.stimView().setMode(1)
+
     def hideEvent(self, event):
         self.param_model.stimView().setMode(0)
+        self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; right drag to move.')
+
     def closeEvent(self, event):
         self.param_model.stimView().setMode(0)
+
 
 class HidableParameterEditor(WidgetHider):
     def __init__(self, parent=None):
         self.parametizer = Parametizer()
         WidgetHider.__init__(self, self.parametizer, parent=parent)
 
-    def setStimulusView(self, view):
-        self.parametizer.setStimulusView(view)
+        # wrap methods from parametizer
+        for m in ['setStimulusView', 'hintRequested']:
+            setattr(self, m, getattr(self.parametizer, m))
 
     def sizeHint(self):
         return QtCore.QSize(560,40)

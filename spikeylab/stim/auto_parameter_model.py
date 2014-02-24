@@ -10,6 +10,8 @@ ERRCELL = QtGui.QColor('firebrick')
 class AutoParameterModel(QtCore.QAbstractTableModel):
     SelectionModelRole = 34
     _paramid = 0
+    emptied = QtCore.pyqtSignal(bool)
+    hintRequested = QtCore.pyqtSignal(str)
     def __init__(self, stimulus=None):
         super(AutoParameterModel, self).__init__()
         self._parameters = []
@@ -178,9 +180,12 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                             }
             self._parameters.insert(position, defaultparam)
             self._selectionmap[self._paramid] = ComponentSelectionModel(self._stimmodel)
+            self._selectionmap[self._paramid].hintRequested.connect(self.hintRequested)
             self._paramid +=1
 
         self.endInsertRows()
+        if self.rowCount() == 1:
+            self.emptied.emit(False)
         return True
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
@@ -190,6 +195,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             # cannot purge selection model, or else we have no way of 
             # recovering it when reordering
         self.endRemoveRows()
+        if self.rowCount() == 0:
+            self.emptied.emit(True)
         return True
 
     def removeItem(self, index):

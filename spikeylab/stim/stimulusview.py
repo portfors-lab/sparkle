@@ -213,7 +213,6 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         painter.fillRect(viewrect, QtCore.Qt.blue)
         painter.restore()
 
-
         if self.dragline is not None:
             pen = QtGui.QPen(QtCore.Qt.red)
             painter.setPen(pen)
@@ -242,9 +241,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         else:
             # select and de-select components
             index = self.indexAt(event.pos())
-            if not index.isValid():
-                return
-            self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
+            if index.isValid():
+                self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
 
     def cursor(self, pos):
         index = self.splitAt(pos)

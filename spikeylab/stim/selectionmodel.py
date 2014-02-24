@@ -2,6 +2,7 @@ from PyQt4 import QtGui, QtCore
 
 class ComponentSelectionModel(QtGui.QItemSelectionModel):
     """Stores items in the selection model by object, not by position"""
+    hintRequested = QtCore.pyqtSignal(str)
     def __init__(self, model):
         QtGui.QItemSelectionModel.__init__(self, model)
         self._selected_components = []
@@ -13,9 +14,12 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
             if component in self._selected_components:
                 self._selected_components.remove(component)
                 self.selectionChanged.emit(self.selection(), QtGui.QItemSelection(index, index))
+                if len(self._selected_components) == 0:
+                    self.hintRequested.emit('Select Components in view to modify')
             else:
                 self._selected_components.append(component)
                 self.selectionChanged.emit(self.selection(), QtGui.QItemSelection())
+                self.hintRequested.emit('Select more components, or click again to toggle inclusion. To edit parameter type or bounds, select parameter field in table')
         else:
             raise Exception("Selection command not supported")
 

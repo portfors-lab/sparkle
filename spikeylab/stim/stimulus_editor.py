@@ -21,6 +21,7 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.nreps_spnbx.setValue(model.repCount())
         # parametizer grabs model from view
         self.ui.parametizer.setStimulusView(self.ui.trackview)
+        self.ui.parametizer.hintRequested.connect(self.setHint)
 
     def setRepCount(self, count):
         self.ui.trackview.model().setRepCount(count)
@@ -37,6 +38,8 @@ class StimulusEditor(AbstractEditorWidget):
     def model(self):
         return self.ui.trackview.model()
 
+    def setHint(self, message):
+        self.ui.hint_txedt.setText(message)
 
 if __name__ == "__main__":
     import sys, os
