@@ -2,6 +2,8 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
+from PyQt4 import QtGui
+
 from stimeditor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
@@ -40,6 +42,15 @@ class StimulusEditor(AbstractEditorWidget):
 
     def setHint(self, message):
         self.ui.hint_txedt.setText(message)
+
+    def closeEvent(self, event):
+        msg = self.ui.trackview.model().verify()
+        if msg:
+            answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
+                                'Problem: {}. Do you want to deal with this?'.format(msg),
+                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if answer == QtGui.QMessageBox.Yes:
+                event.ignore()
 
 if __name__ == "__main__":
     import sys, os

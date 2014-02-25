@@ -291,6 +291,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         if mode == BUILDMODE:
             self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
             self.setSelectionModel(QtGui.QItemSelectionModel(self.model()))
+            self.setEnabled(True)
         else:
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 

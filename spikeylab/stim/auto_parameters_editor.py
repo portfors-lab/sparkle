@@ -67,6 +67,7 @@ class Parametizer(QtGui.QWidget):
         self.param_model.hintRequested.connect(self.hintRequested)
 
     def table_emptied(self, empty):
+        print 'table empty', empty
         self.param_model.stimView().setEnabled(not empty)
         if empty:
             self.param_model.stimView().setSelectionModel(QtGui.QItemSelectionModel(self.param_model.stimView().model()))
@@ -81,6 +82,10 @@ class Parametizer(QtGui.QWidget):
             self.param_model.updateSelectionModel(selected[0])
             self.hintRequested.emit('Select parameter to edit. \
                 Parameter must have selected components in order to edit fields')
+        elif self.param_model.rowCount() > 0:
+            # just select first item
+            self.param_list.selectRow(0)
+            self.param_model.updateSelectionModel(self.param_model.index(0,0))
         else:
             self.param_model.stimView().setEnabled(False)
             self.hintRequested.emit('Drag to add parameter first')

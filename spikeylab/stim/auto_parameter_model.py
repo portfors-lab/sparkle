@@ -64,30 +64,35 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             if 1 <= index.column() <= 3:
                 label = self.getDetail(index, 'label')
                 return label
-        elif role == QtCore.Qt.BackgroundRole:
+        elif role == QtCore.Qt.ForegroundRole:
             # color the background red for bad values
-            col = index.column()
-            param = self._parameters[index.row()]
-            if param['parameter'] == '':
-                return None
-            if col == 1:
-                # I don't want to do this every time maybe...
-                ok = self.checkLimits(param['start'], param)
-                if not ok:
-                    return QtGui.QBrush(ERRCELL)
-            if col == 2:
-                ok = self.checkLimits(param['stop'], param)
-                if not ok:
-                    return QtGui.QBrush(ERRCELL)
-            if col == 4:
-                nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
-                if nsteps == 0 :
-                    return QtGui.QBrush(ERRCELL)
+            if not self.check_valid_cell(index):
+                return QtGui.QBrush(ERRCELL)
+        elif role == QtCore.Qt.FontRole:
+            # color the background red for bad values
+            if not self.check_valid_cell(index):
+                f = QtGui.QFont()
+                f.setWeight(QtGui.QFont.Bold)
+                return f
 
         elif role == QtCore.Qt.UserRole or role == AbstractDragView.DragRole:  #return the whole python object
             return self._parameters[index.row()]
         elif role == self.SelectionModelRole:
             return self._selectionmap[self._parameters[index.row()]['paramid']]
+
+    def check_valid_cell(self, index):
+        col = index.column()
+        param = self._parameters[index.row()]
+        if param['parameter'] == '':
+            return False
+        if col == 1:
+            return self.checkLimits(param['start'], param)
+        if col == 2:
+            return self.checkLimits(param['stop'], param)
+        if col == 4:
+            nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
+            return nsteps != 0
+        return True
 
     def allData(self):
         return self._parameters
@@ -100,7 +105,11 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 param[self.headers[index.column()]] = value
                 # keep the displayed values the same, so multiply to ajust
                 # real underlying value
-                new_multiplier = float(self.getDetail(index, 'multiplier'))
+                try:
+                    new_multiplier = float(self.getDetail(index, 'multiplier'))
+                except:
+                    print index.row(), index.column(), param['parameter'], 'new_multiplier', self.getDetail(index, 'multiplier')
+
                 if old_multiplier is not None and old_multiplier != new_multiplier:
                     for col in range(1,4):
                         i = self.index(index.row(), col)
@@ -138,6 +147,9 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         # all components must match
         matching_details = []
         for comp in comps:
+            if not param_type in comp.auto_details():
+                self.hintRequested.emit('INCOMPATABLE COMPONENTS FOR PARAMETER TYPE {}'.format(param_type))
+                return None
             details = comp.auto_details()[param_type]
             matching_details.append(details[detail])
         matching_details = set(matching_details)
@@ -155,9 +167,12 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         maxs = []
         for comp in comps:
             # get the limit details for the currently selected parameter type
-            details = comp.auto_details()[param['parameter']]
-            mins.append(details['min'])
-            maxs.append(details['max'])
+            try:
+                details = comp.auto_details()[param['parameter']]
+                mins.append(details['min'])
+                maxs.append(details['max'])
+            except KeyError:
+                return False
         lower = max(mins)
         upper = min(maxs)
         if lower <= value <= upper:
