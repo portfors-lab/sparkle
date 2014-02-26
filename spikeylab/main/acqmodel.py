@@ -358,6 +358,7 @@ class AcquisitionModel():
             spike_latencies = self.spike_latencies
             spike_rates = self.spike_rates
 
+
         self.signals.response_collected.emit(self.aitimes, response)
 
         # process response; calculate spike times
@@ -500,10 +501,11 @@ class AcquisitionModel():
         f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
         db = trace_info['components'][0]['intensity']
         # print 'f', f, 'db', db
-        if db == self.caldb:
-            self.calibration_frequencies.append(f)
-            self.calibration_indexes.append(self.trace_counter)
-        self.trace_counter +=1
+        if irep == 0:
+            if db == self.caldb:
+                self.calibration_frequencies.append(f)
+                self.calibration_indexes.append(self.trace_counter)
+            self.trace_counter +=1
         
         # spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
@@ -531,8 +533,8 @@ class AcquisitionModel():
 
         vfunc = np.vectorize(calc_db)
 
-        peaks = abs(self.calfile.get('fft_peaks'))
-        vmaxes = abs(self.calfile.get('vmax'))
+        peaks = np.mean(abs(self.calfile.get('fft_peaks')), axis=1)
+        vmaxes = np.mean(abs(self.calfile.get('vmax')), axis=1)
 
         # print 'calibration frequencies', self.calibration_frequencies
         cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
@@ -544,6 +546,8 @@ class AcquisitionModel():
         resultant_dB = vfunc(vmaxes, self.caldb, cal_vmax)
         # print 'results', resultant_dB
 
+        print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
+        print 'resultant_dB', resultant_dB
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
         fname = self.calfile.filename

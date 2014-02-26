@@ -181,7 +181,7 @@ class Vocalization(AbstractStimulusComponent):
         # normalize to calibration
         wavdata = wavdata.astype(float)
         max_amp = np.amax(wavdata)
-        amp = (10 ** ((self._intensity+atten-caldb)/20)*calv)
+        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
         wavdata = ((wavdata/max_amp)*amp)
         return wavdata
 
