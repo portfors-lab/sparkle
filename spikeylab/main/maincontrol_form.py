@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Thu Feb 20 17:25:42 2014
+# Created: Wed Feb 26 12:00:30 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -360,7 +360,7 @@ class Ui_ControlWindow(object):
         self.statusbar = QtGui.QStatusBar(ControlWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         ControlWindow.setStatusBar(self.statusbar)
-        self.plot_dock = QtGui.QDockWidget(ControlWindow)
+        self.plot_dock = PlotDockWidget(ControlWindow)
         self.plot_dock.setObjectName(_fromUtf8("plot_dock"))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
@@ -384,14 +384,6 @@ class Ui_ControlWindow(object):
         self.verticalLayout_6.setSpacing(0)
         self.verticalLayout_6.setMargin(0)
         self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
-        self.label_18 = QtGui.QLabel(self.psth_container)
-        self.label_18.setMaximumSize(QtCore.QSize(16777215, 20))
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.label_18.setFont(font)
-        self.label_18.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_18.setObjectName(_fromUtf8("label_18"))
-        self.verticalLayout_6.addWidget(self.label_18)
         self.psth = PSTHWidget(self.psth_container)
         self.psth.setObjectName(_fromUtf8("psth"))
         self.verticalLayout_6.addWidget(self.psth)
@@ -562,7 +554,8 @@ class Ui_ControlWindow(object):
         self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))
         self.menuView.setTitle(_translate("ControlWindow", "View", None))
-        self.label_18.setText(_translate("ControlWindow", "PSTH", None))
+        self.plot_dock.setWindowTitle(_translate("ControlWindow", "Data Display", None))
+        self.psth_dock.setWindowTitle(_translate("ControlWindow", "PSTH", None))
         self.label_11.setToolTip(_translate("ControlWindow", "Total no. of spikes over repetitions", None))
         self.label_11.setText(_translate("ControlWindow", "Total :", None))
         self.label_16.setToolTip(_translate("ControlWindow", "Mean no. of spikes per unique stimulus", None))
@@ -575,6 +568,7 @@ class Ui_ControlWindow(object):
         self.spike_rate_lbl.setText(_translate("ControlWindow", "0", None))
         self.spike_avg_lbl.setText(_translate("ControlWindow", "0", None))
         self.spike_total_lbl.setText(_translate("ControlWindow", "0", None))
+        self.progress_dock.setWindowTitle(_translate("ControlWindow", "Progress", None))
         self.log_dock.setWindowTitle(_translate("ControlWindow", "Log", None))
         self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
@@ -591,4 +585,5 @@ from spikeylab.calibration.calibration_widget import CalibrationWidget
 from spikeylab.plotting.pyqtgraph_widgets import PSTHWidget
 from spikeylab.stim.stimulus_label import StimulusLabelTable
 from spikeylab.main.protocol_model import ProtocolView
+from spikeylab.main.plotdock import PlotDockWidget
 from spikeylab.plotting.protocoldisplay import ProtocolDisplay

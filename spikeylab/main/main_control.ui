@@ -666,7 +666,10 @@
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="plot_dock">
+  <widget class="PlotDockWidget" name="plot_dock">
+   <property name="windowTitle">
+    <string>Data Display</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
@@ -682,6 +685,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="psth_dock">
+   <property name="windowTitle">
+    <string>PSTH</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
@@ -693,27 +699,6 @@
         <property name="spacing">
          <number>0</number>
         </property>
-        <item>
-         <widget class="QLabel" name="label_18">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>PSTH</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
         <item>
          <widget class="PSTHWidget" name="psth" native="true"/>
         </item>
@@ -846,6 +831,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="progress_dock">
+   <property name="windowTitle">
+    <string>Progress</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
@@ -950,6 +938,12 @@
    <class>CalibrationWidget</class>
    <extends>QWidget</extends>
    <header>spikeylab.calibration.calibration_widget</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlotDockWidget</class>
+   <extends>QDockWidget</extends>
+   <header>spikeylab.main.plotdock</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

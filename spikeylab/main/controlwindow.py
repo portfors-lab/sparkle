@@ -5,12 +5,10 @@ from PyQt4 import QtCore, QtGui
 
 import spikeylab.tools.systools as systools
 from spikeylab.tools.util import convert2native
-from spikeylab.main.window_accessories import MaximizableTitleBar
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.stimulusview import StimulusView
 from spikeylab.plotting.custom_plots import SpecWidget
-from spikeylab.plotting.calibration_display import CalibrationDisplay
 from maincontrol_form import Ui_ControlWindow
 
 class ControlWindow(QtGui.QMainWindow):
@@ -20,7 +18,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
-        self.calibration_display = CalibrationDisplay()
+        # temporary before I fix other references...
+        self.calibration_display = self.ui.plot_dock.displays['calibration']
         # make a list of which widgets should be updated when scales are changed
         self.time_inputs = [self.ui.windowsz_spnbx, self.ui.binsz_spnbx]
         self.frequency_inputs = [self.ui.aisr_spnbx, self.ui.aosr_spnbx]
@@ -28,7 +27,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.frequency_labels = [self.ui.funit_lbl, self.ui.funit_lbl_2]
 
         self.ui.protocolView.installEventFilter(self.ui.stimulus_choices.trash())
-        self.ui.plot_dock.setTitleBarWidget(MaximizableTitleBar(self.ui.plot_dock))
         self.load_inputs(inputs_filename)
         self.inputs_filename = inputs_filename
 
