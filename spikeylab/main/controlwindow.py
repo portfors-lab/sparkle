@@ -18,8 +18,11 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
 
-        # temporary before I fix other references...
         self.calibration_display = self.ui.plot_dock.displays['calibration']
+        self.extended_display = self.ui.plot_dock.displays['calexp']
+        self.scrollplot = self.ui.plot_dock.displays['chart']
+        self.display = self.ui.plot_dock.displays['standard']
+        self.ui.plot_dock.switch_display('standard')
         # make a list of which widgets should be updated when scales are changed
         self.time_inputs = [self.ui.windowsz_spnbx, self.ui.binsz_spnbx]
         self.frequency_inputs = [self.ui.aisr_spnbx, self.ui.aosr_spnbx]
@@ -102,7 +105,7 @@ class ControlWindow(QtGui.QMainWindow):
             AbstractEditorWidget().setTScale(self.tscale, setup=setup)
             AbstractStimulusComponent().update_tscale(self.tscale)
 
-            self.ui.display.set_tscale(self.tscale)
+            self.display.set_tscale(self.tscale)
             
             if self.tscale == 0.001:
                 for field in self.time_inputs:
@@ -131,7 +134,7 @@ class ControlWindow(QtGui.QMainWindow):
             AbstractEditorWidget().setFScale(self.fscale, setup=setup)
             AbstractStimulusComponent().update_fscale(self.fscale)
 
-            self.ui.display.set_fscale(self.fscale)
+            self.display.set_fscale(self.fscale)
             self.calibration_display.set_fscale(self.fscale)
 
             if self.fscale == 1000:
@@ -170,7 +173,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict = {}
         savedict['threshold'] = self.ui.thresh_spnbx.value()
         savedict['binsz'] = self.ui.binsz_spnbx.value()
-        savedict['aisr'] = self.stashed_aisr
+        savedict['aisr'] = self.ui.aisr_spnbx.value()
         savedict['tscale'] = self.tscale
         savedict['fscale'] = self.fscale
         savedict['savefolder'] = self.savefolder
@@ -179,7 +182,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['ex_nreps'] = self.ui.ex_nreps_spnbx.value()
         savedict['reprate'] = self.ui.reprate_spnbx.value()
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
-        savedict['raster_bounds'] = self.ui.display.spiketrace_plot.get_raster_bounds()
+        savedict['raster_bounds'] = self.display.spiketrace_plot.get_raster_bounds()
         savedict['specargs'] = self.spec_args
         savedict['calvals'] = self.calvals
         savedict['calparams'] = self.acqmodel.calibration_stimulus.templateDoc()
@@ -216,9 +219,9 @@ class ControlWindow(QtGui.QMainWindow):
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.ex_nreps_spnbx.setValue(inputsdict.get('ex_nreps', 5))
         self.ui.reprate_spnbx.setValue(inputsdict.get('reprate', 1))
-        self.ui.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
+        self.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
-        self.ui.display.set_spec_args(**self.spec_args)        
+        self.display.set_spec_args(**self.spec_args)        
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 'calv':0.1,'calfile':'', 'use_calfile':False})
         self.acqmodel.set_params(**self.calvals)
         if self.calvals['use_calfile']:

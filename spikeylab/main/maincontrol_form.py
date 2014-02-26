@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Feb 26 12:00:30 2014
+# Created: Wed Feb 26 15:26:55 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -367,9 +367,6 @@ class Ui_ControlWindow(object):
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout_4.setMargin(0)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.display = ProtocolDisplay(self.dockWidgetContents)
-        self.display.setObjectName(_fromUtf8("display"))
-        self.verticalLayout_4.addWidget(self.display)
         self.plot_dock.setWidget(self.dockWidgetContents)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.plot_dock)
         self.psth_dock = QtGui.QDockWidget(ControlWindow)
@@ -583,7 +580,6 @@ from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox
 from spikeylab.calibration.calibration_widget import CalibrationWidget
 from spikeylab.plotting.pyqtgraph_widgets import PSTHWidget
-from spikeylab.stim.stimulus_label import StimulusLabelTable
 from spikeylab.main.protocol_model import ProtocolView
 from spikeylab.main.plotdock import PlotDockWidget
-from spikeylab.plotting.protocoldisplay import ProtocolDisplay
+from spikeylab.stim.stimulus_label import StimulusLabelTable

@@ -14,7 +14,7 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
-from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget, ChartWidget
+from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 
 from controlwindow import ControlWindow
@@ -52,16 +52,14 @@ class MainWindow(ControlWindow):
 
         self.ui.running_label.setPalette(RED)
 
-        self.scrollplot = ChartWidget()
-
         self.apply_calibration = False
         self.calpeak = None
 
         self.live_lock = QtCore.QMutex()
 
-        # self.ui.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
-        self.ui.display.threshold_updated.connect(self.update_thresh)
-        self.ui.display.colormap_changed.connect(self.relay_cmap_change)
+        # self.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
+        self.display.threshold_updated.connect(self.update_thresh)
+        self.display.colormap_changed.connect(self.relay_cmap_change)
 
         self.ui.protocolView.setModel(self.acqmodel.protocol_model)
         self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
@@ -160,7 +158,9 @@ class MainWindow(ControlWindow):
                 self.acqmodel.set_save_params(self.savefolder, self.savename)
                 self.acqmodel.create_data_file()
             self.ui.aichan_box.setEnabled(False)
-            self.ui.plot_dock.setWidget(self.ui.display)
+            # FIX ME:
+            if self.ui.plot_dock.current() == 'calibration':
+                self.ui.plot_dock.switch_display('standard')
             self.ui.running_label.setText(u"RECORDING")
             self.ui.running_label.setPalette(GREEN)
 
@@ -208,7 +208,7 @@ class MainWindow(ControlWindow):
                                  binsz=binsz)
         self.binsz = binsz
 
-        self.ui.display.set_xlimits((0,winsz))
+        self.display.set_xlimits((0,winsz))
         # update or clear spec
         if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) == 'vocalization':
             # don't update file - revert to last double clicked
@@ -216,9 +216,9 @@ class MainWindow(ControlWindow):
             stim_widget = self.ui.parameter_stack.widget(stim_index)
             if stim_widget.current_wav_file != self.selected_wav_file:
                 stim_widget.component().setFile(self.selected_wav_file)
-            self.ui.display.show_spec(self.selected_wav_file)
+            self.display.show_spec(self.selected_wav_file)
         else:
-            self.ui.display.update_spec(None)
+            self.display.update_spec(None)
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             nreps = self.ui.ex_nreps_spnbx.value()
 
@@ -229,11 +229,8 @@ class MainWindow(ControlWindow):
             signal = self.acqmodel.set_stim_by_index(stim_index)
             gen_rate = self.acqmodel.current_genrate
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
-            freq, spectrum = calc_spectrum(signal, gen_rate)
-            timevals = np.arange(len(signal)).astype(float)/gen_rate
-            self.ui.display.set_nreps(nreps)
-            self.ui.display.update_fft(freq, spectrum)
-            self.ui.display.update_signal(timevals, signal)
+            self.display_stim(signal, gen_rate)
+            self.display.set_nreps(nreps)
         if self.current_mode == 'chart':
             return winsz, acq_rate
             
@@ -282,7 +279,7 @@ class MainWindow(ControlWindow):
         # change plot to scrolling plot
         self.scrollplot.set_windowsize(winsz)
         self.scrollplot.set_sr(acq_rate)
-        self.ui.plot_dock.setWidget(self.scrollplot)
+        self.ui.plot_dock.switch_display('chart')
 
         # self.active_operation = 'chart'
         self.acqmodel.start_chart()
@@ -310,7 +307,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.run_explore(interval)
 
     def run_protocol(self):
-        self.ui.display.update_spec(None)
+        self.display.update_spec(None)
 
         self.ui.start_btn.setEnabled(False)
         self.active_operation = 'protocol'
@@ -335,7 +332,7 @@ class MainWindow(ControlWindow):
         self.livecurve = ProgressWidget(list(frequencies), list(intensities))
         self.livecurve.set_labels('calibration')
         self.ui.progress_dock.setWidget(self.livecurve)
-        self.ui.plot_dock.setWidget(self.calibration_display)
+        self.ui.plot_dock.switch_display('calibration')
 
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
@@ -346,7 +343,14 @@ class MainWindow(ControlWindow):
     def display_response(self, times, response):
         if len(times) != len(response):
             print "WARNING: times and response not equal"
-        self.ui.display.update_spiketrace(times, response)
+        if self.ui.plot_dock.current() == 'standard':
+            self.display.update_spiketrace(times, response)
+        elif self.ui.plot_dock.current() == 'calexp':
+            sr = self.ui.aisr_spnbx.value()*self.fscale
+            freq, spectrum = calc_spectrum(response, sr)
+            self.extended_display.update_signal(times, response, plot='response')
+            self.extended_display.update_fft(freq, spectrum, plot='response')
+            self.extended_display.update_spec(response, sr, plot='response')
 
     def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
         # display fft here
@@ -391,11 +395,11 @@ class MainWindow(ControlWindow):
         # convert to times for raster
         if repnum == 0:
             self.ui.psth.clear_data()
-            self.ui.display.clear_raster()
+            self.display.clear_raster()
         if len(bins) > 0:
             binsz = self.binsz
             bin_times = (np.array(bins)*binsz)+(binsz/2)
-            self.ui.display.add_raster_points(bin_times, repnum)
+            self.display.add_raster_points(bin_times, repnum)
             self.ui.psth.append_data(bins, repnum)
             
     def display_stim(self, signal, fs):
@@ -405,8 +409,13 @@ class MainWindow(ControlWindow):
             self.ui.calibration_widget.ui.avo_lbl.setText(str(np.amax(signal)))
         else:
             timevals = np.arange(len(signal)).astype(float)/fs
-            self.ui.display.update_signal(timevals, signal)
-            self.ui.display.update_fft(freq, spectrum)
+            if self.ui.plot_dock.current() == 'standard':
+                self.display.update_signal(timevals, signal)
+                self.display.update_fft(freq, spectrum)
+            elif self.ui.plot_dock.current() == 'calexp':
+                self.extended_display.update_signal(timevals, signal, plot='stim')
+                self.extended_display.update_fft(freq, spectrum, plot='stim')
+                self.extended_display.update_spec(signal, fs, plot='stim')
 
     def report_progress(self, itest, itrace, stim_info):
         self.ui.test_num.setText(str(itest))
@@ -457,7 +466,7 @@ class MainWindow(ControlWindow):
         dlg = SpecDialog(default_vals=self.spec_args)
         if dlg.exec_():
             argdict = dlg.values()
-            self.ui.display.set_spec_args(**argdict)
+            self.display.set_spec_args(**argdict)
             self.exvocal.set_spec_args(**argdict)
             QtGui.QApplication.processEvents()
             self.spec_args = argdict
@@ -471,20 +480,14 @@ class MainWindow(ControlWindow):
         # display spectrogram of file
         spath = self.exvocal.current_wav_file
 
-        self.ui.display.update_spec(spath)
+        self.display.update_spec(spath)
         sr, wavdata = wv.read(spath)
-
-        freq, spectrum = calc_spectrum(wavdata,sr)
-
-        self.ui.display.update_fft(freq, spectrum)
-        t = np.linspace(0,(float(len(wavdata))/sr), len(wavdata))
-        # print 'stim time lims', t[0], t[-1]
-        self.ui.display.update_signal(t, wavdata)
+        self.display_stim(wavdata, sr)
 
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
 
-            self.ui.display.set_xlimits((0,winsz))
+            self.display.set_xlimits((0,winsz))
         self.selected_wav_file = spath
         self.on_update()
 
@@ -504,7 +507,7 @@ class MainWindow(ControlWindow):
 
     def set_plot_thresh(self):
         thresh = self.ui.thresh_spnbx.value()
-        self.ui.display.spiketrace_plot.set_threshold(thresh)
+        self.display.spiketrace_plot.set_threshold(thresh)
         self.acqmodel.set_threshold(thresh)
 
     def tab_changed(self, tab_index):
