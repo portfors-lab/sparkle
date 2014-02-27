@@ -214,6 +214,22 @@ class AcquisitionModel():
                 self.interval_wait()
 
                 response = self.finite_player.run()
+
+                # low-pass the response
+                # spectrum = np.fft.rfft(response)
+                # npts = len(response)
+                # freq = np.arange(npts)/(npts/self.finite_player.aisr)
+                # freq = freq[:(npts/2)+1] #single sided
+
+                # print 'freq', freq[0], freq[-1]
+                # print len(spectrum), len(freq)
+                # cutoff = 60000
+                # spectrum[freq<cutoff] = 0
+                # cutoff = 95000
+                # spectrum[freq>cutoff] = 0
+                # # print spectrum[0]
+                # response = np.fft.irfft(spectrum)
+                
                 self.signals.response_collected.emit(times, response)
 
                 # process response; calculate spike times
@@ -506,6 +522,7 @@ class AcquisitionModel():
                 self.calibration_frequencies.append(f)
                 self.calibration_indexes.append(self.trace_counter)
             self.trace_counter +=1
+            self.peak_avg = []
         
         # spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
@@ -517,6 +534,7 @@ class AcquisitionModel():
 
         vmax = np.amax(abs(recorded_tone))
 
+
         self.calfile.append(self.current_dataset_name, spec_peak_at_f, 
                              nested_name='fft_peaks')
         self.calfile.append(self.current_dataset_name, np.array([vmax]), 
@@ -524,6 +542,16 @@ class AcquisitionModel():
 
         self.signals.response_collected.emit(self.aitimes, recorded_tone)
         self.signals.calibration_response_collected.emit((f, db), spectrum, freq, spec_peak_at_f[0], vmax)
+        
+        # calculate resultant dB and emit
+        self.peak_avg.append(vmax)
+        if irep == self.nreps-1:
+            mean_peak = np.mean(self.peak_avg)
+            if f == self.calf and db == self.caldb:
+                # this really needs to happend first
+                self.calpeak = mean_peak
+            resultdb = calc_db(vmax, self.caldb, self.calpeak)
+            self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):
         """processes the data gathered in a calibration run (does not work if multiple

@@ -368,11 +368,29 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for track in track_signals:
             total_signal[0:len(track)] += track
 
-        if self.calibration_vector is not None and self.calibration_frequencies is not None:
-            # calibration magic happens here!
-            signal_fft = calc_spectrum(total_signal, samplerate)
+        signal = self.apply_calibration(total_signal, samplerate)
 
         return total_signal, atten
+
+    def apply_calibration(self, signal, fs):
+        if self.calibration_vector is not None and self.calibration_frequencies is not None:
+            # calibration magic happens here!
+            padded_npts = 0.1*fs
+            padded_signal = np.zeros(padded_npts)
+            padded_signal[:len(signal)] = signal
+            signal_fft = calc_spectrum(padded_signal, fs)
+            freq = np.arange(padded_npts)/(padded_npts/fs)
+            print 'npts', padded_npts, 'freq', freq
+            # find matching frequencies
+            print "WARNING: current caldB must match recorded calibration dB"
+            for index, calf in enumerate(self.calibration_frequencies):
+                # print freq[freq == calf]
+                boost = self.caldb - self.calibration_vector[index]
+                print 'calf', calf, 'calval', boost
+                
+            # print len(matched), 'matches out of', len(freq)
+        else:
+            return signal
 
     def doc(self, starttime=True):
         samplerate = self.samplerate()

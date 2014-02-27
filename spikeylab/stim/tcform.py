@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Tue Feb 18 13:34:23 2014
+# Created: Wed Feb 26 16:48:33 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,14 +39,6 @@ class Ui_TuningCurveEditor(object):
         self.db_stop_spnbx.setProperty("value", 110)
         self.db_stop_spnbx.setObjectName(_fromUtf8("db_stop_spnbx"))
         self.gridLayout_2.addWidget(self.db_stop_spnbx, 2, 2, 1, 1)
-        self.freq_step_spnbx = QtGui.QSpinBox(TuningCurveEditor)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.freq_step_spnbx.setFont(font)
-        self.freq_step_spnbx.setMaximum(100)
-        self.freq_step_spnbx.setProperty("value", 1)
-        self.freq_step_spnbx.setObjectName(_fromUtf8("freq_step_spnbx"))
-        self.gridLayout_2.addWidget(self.freq_step_spnbx, 1, 3, 1, 1)
         self.freq_stop_spnbx = QtGui.QSpinBox(TuningCurveEditor)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -80,14 +72,6 @@ class Ui_TuningCurveEditor(object):
         self.freq_start_spnbx.setProperty("value", 5)
         self.freq_start_spnbx.setObjectName(_fromUtf8("freq_start_spnbx"))
         self.gridLayout_2.addWidget(self.freq_start_spnbx, 1, 1, 1, 1)
-        self.db_step_spnbx = QtGui.QSpinBox(TuningCurveEditor)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.db_step_spnbx.setFont(font)
-        self.db_step_spnbx.setMaximum(110)
-        self.db_step_spnbx.setProperty("value", 5)
-        self.db_step_spnbx.setObjectName(_fromUtf8("db_step_spnbx"))
-        self.gridLayout_2.addWidget(self.db_step_spnbx, 2, 3, 1, 1)
         self.db_start_spnbx = QtGui.QSpinBox(TuningCurveEditor)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -141,6 +125,18 @@ class Ui_TuningCurveEditor(object):
         self.freq_nsteps_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.freq_nsteps_lbl.setObjectName(_fromUtf8("freq_nsteps_lbl"))
         self.gridLayout_2.addWidget(self.freq_nsteps_lbl, 1, 5, 1, 1)
+        self.db_step_spnbx = SmartSpinBox(TuningCurveEditor)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.db_step_spnbx.setFont(font)
+        self.db_step_spnbx.setObjectName(_fromUtf8("db_step_spnbx"))
+        self.gridLayout_2.addWidget(self.db_step_spnbx, 2, 3, 1, 1)
+        self.freq_step_spnbx = SmartSpinBox(TuningCurveEditor)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.freq_step_spnbx.setFont(font)
+        self.freq_step_spnbx.setObjectName(_fromUtf8("freq_step_spnbx"))
+        self.gridLayout_2.addWidget(self.freq_step_spnbx, 1, 3, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_2)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
@@ -225,8 +221,6 @@ class Ui_TuningCurveEditor(object):
         QtCore.QObject.connect(self.db_start_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.freq_stop_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.db_stop_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
-        QtCore.QObject.connect(self.freq_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
-        QtCore.QObject.connect(self.db_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimDuration)
         QtCore.QObject.connect(self.risefall_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimRisefall)
         QtCore.QObject.connect(self.save_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), TuningCurveEditor.saveStimulus)

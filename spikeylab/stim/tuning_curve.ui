@@ -31,21 +31,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="QSpinBox" name="freq_step_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="2">
       <widget class="QSpinBox" name="freq_stop_spnbx">
        <property name="font">
@@ -99,21 +84,6 @@
        </property>
        <property name="singleStep">
         <number>5</number>
-       </property>
-       <property name="value">
-        <number>5</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="3">
-      <widget class="QSpinBox" name="db_step_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="maximum">
-        <number>110</number>
        </property>
        <property name="value">
         <number>5</number>
@@ -232,6 +202,24 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="SmartSpinBox" name="db_step_spnbx">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="SmartSpinBox" name="freq_step_spnbx">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
        </property>
       </widget>
      </item>
@@ -478,38 +466,6 @@
    <hints>
     <hint type="sourcelabel">
      <x>355</x>
-     <y>78</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>142</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>freq_step_spnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>submit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>498</x>
-     <y>50</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>142</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>db_step_spnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>submit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>498</x>
      <y>78</y>
     </hint>
     <hint type="destinationlabel">

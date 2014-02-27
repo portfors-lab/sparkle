@@ -20,6 +20,8 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.setToolTip('Spike Trace')
         self.spec_plot.setToolTip('Stimulus Spectrogram')
 
+        self.fft_plot.set_title("Stimulus FFT")
+
         self.spec_plot.setXLink(self.spiketrace_plot)
         self.spec_plot.setMinimumHeight(100)
         self.spiketrace_plot.setMinimumWidth(100)
@@ -28,7 +30,6 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fft_plot.setMinimumHeight(100)
 
         splittersw = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitternw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
         splittersw.addWidget(self.spec_plot)

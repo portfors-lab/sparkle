@@ -66,6 +66,7 @@ class MainWindow(ControlWindow):
 
         self.acqmodel.signals.response_collected.connect(self.display_response)
         self.acqmodel.signals.calibration_response_collected.connect(self.display_calibration_response)
+        self.acqmodel.signals.average_response.connect(self.display_db_result)
         self.acqmodel.signals.spikes_found.connect(self.display_raster)
         self.acqmodel.signals.trace_finished.connect(self.trace_done)
         self.acqmodel.signals.stim_generated.connect(self.display_stim)
@@ -367,13 +368,10 @@ class MainWindow(ControlWindow):
         self.ui.calibration_widget.ui.fftf_lbl.setNum(spec_peak)
         self.ui.calibration_widget.ui.flabel.setNum(f)
         self.ui.calibration_widget.ui.dblabel.setNum(db)
-        if f == self.calvals['calf'] and db == self.calvals['caldb']:
-            # this should always be the first trace actually
-            self.calpeak = vmax
-        try:
-            self.calibration_display.update_in_fft(freqs, spectrum)
+        self.calibration_display.update_in_fft(freqs, spectrum)
 
-            resultdb = calc_db(vmax, self.calvals['caldb'], self.calpeak)
+    def display_db_result(self, f, db, resultdb):
+        try:
             self.livecurve.set_point(f,db,resultdb)
         except:
             print u"WARNING : Problem drawing to calibration plot"
