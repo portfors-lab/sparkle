@@ -6,12 +6,12 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.stim_fft_plot = FFTWidget(self)
-        self.response_fft_plot = FFTWidget(self)
+        self.stim_fft_plot = FFTWidget(self, rotation=0)
+        self.response_fft_plot = FFTWidget(self, rotation=0)
 
         self.stim_fft_plot.set_title("Stimulus FFT")
         self.response_fft_plot.set_title("Response FFT")
-        self.response_fft_plot.setYLink(self.stim_fft_plot)
+        self.response_fft_plot.setXLink(self.stim_fft_plot)
 
         self.stim_signal_plot = FFTWidget(rotation=0)
         self.response_signal_plot = FFTWidget(rotation=0)
@@ -32,24 +32,30 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         self.stim_spec_plot.set_title("Stim Spectrogram")
 
         splitter_signal = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter_fft = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        container = QtGui.QWidget()
+        splitter_fft = QtGui.QSplitter(QtCore.Qt.Vertical)
+        container_spec = QtGui.QWidget()
+        container_signal = QtGui.QWidget()
         layout_spec = QtGui.QHBoxLayout()
         layout_spec.setContentsMargins(0,0,0,0)
+        layout_signal = QtGui.QHBoxLayout()
+        layout_signal.setContentsMargins(0,0,0,0)
 
-        splitter_signal.addWidget(self.stim_signal_plot)
-        splitter_signal.addWidget(self.response_signal_plot)
+        # splitter_signal.addWidget(self.stim_signal_plot)
+        # splitter_signal.addWidget(self.response_signal_plot)
+        layout_signal.addWidget(self.stim_signal_plot)
+        layout_signal.addWidget(self.response_signal_plot)
+        container_signal.setLayout(layout_signal)
         splitter_fft.addWidget(self.stim_fft_plot)
         splitter_fft.addWidget(self.response_fft_plot)
         layout_spec.addWidget(self.stim_spec_plot)
         layout_spec.addWidget(self.response_spec_plot)
-        container.setLayout(layout_spec)
+        container_spec.setLayout(layout_spec)
 
         splitter_left = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter_main = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        splitter_main = QtGui.QSplitter(QtCore.Qt.Vertical)
 
-        splitter_left.addWidget(container)
-        splitter_left.addWidget(splitter_signal)
+        splitter_left.addWidget(container_spec)
+        splitter_left.addWidget(container_signal)
         splitter_main.addWidget(splitter_left)
         splitter_main.addWidget(splitter_fft)
 
@@ -57,6 +63,12 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         layout.setContentsMargins(0,0,0,0)
         layout.addWidget(splitter_main)
         self.setLayout(layout)
+
+        # splitter_fft.setSizes()
+        print 'windowsize', 
+        height = self.size().height()
+        splitter_left.setSizes([height*0.3, height*0.1])
+        splitter_main.setSizes([height*0.4, height*0.6])
 
         self.colormap_changed = self.stim_spec_plot.colormap_changed
         self.colormap_changed = self.response_spec_plot.colormap_changed

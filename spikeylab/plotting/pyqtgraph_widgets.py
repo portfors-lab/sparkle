@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
 
+from spikeylab.plotting.viewbox import SpikeyViewBox
 from spikeylab.dialogs.raster_bounds_dlg import RasterBoundsDialog
 import spikeylab.tools.audiotools as audiotools
 
@@ -14,7 +15,7 @@ pg.setConfigOptions(useWeave=False)
 
 class BasePlot(pg.PlotWidget):
     def __init__(self, parent=None):
-        super(BasePlot, self).__init__(parent)
+        super(BasePlot, self).__init__(parent, viewBox=SpikeyViewBox())
 
         # print 'scene', self.scene().contextMenu[0].text()
         # # self.scene().contextMenu = []
@@ -27,15 +28,6 @@ class BasePlot(pg.PlotWidget):
         # for act in self.getPlotItem().vb.menu.actions():
         #     print act.text()
         # print '-'*20
-        # because of pyqtgraph internals, we can't just remove this action from menu
-        self.fake_action = QtGui.QAction("", None)
-        self.fake_action.setVisible(False)
-        self.fake_action.setCheckable(True)
-        self.getPlotItem().vb.menu.leftMenu = self.fake_action
-        self.getPlotItem().vb.menu.mouseModes = [self.fake_action]
-
-        self.plotItem.vb.menu.viewAll.triggered.disconnect()
-        self.plotItem.vb.menu.viewAll.triggered.connect(self.auto_range)
 
     def set_tscale(self, scale):
         pass
@@ -52,8 +44,6 @@ class BasePlot(pg.PlotWidget):
     def set_title(self, title):
         self.getPlotItem().setTitle(title)
 
-    def auto_range(self):
-        self.plotItem.vb.autoRange(padding=0)
 
 class TraceWidget(BasePlot):
     nreps = 20
@@ -254,8 +244,15 @@ class FFTWidget(BasePlot):
         
         self.fft_plot = self.plot(pen='k')
         self.fft_plot.rotate(rotation)
+        self.getPlotItem().vb.custom_mouse = True
 
-        self.setLabel('left', 'Frequency', units='Hz')
+        if rotation == 90:
+            self.setLabel('left', 'Frequency', units='Hz')
+            self.setMouseEnabled(x=False,y=True)
+
+        elif rotation == 0:
+            self.setLabel('bottom', 'Frequency', units='Hz')
+            self.setMouseEnabled(x=True,y=False)
 
     def update_data(self, index_data, value_data):
         self.fft_plot.setData(index_data, value_data)
