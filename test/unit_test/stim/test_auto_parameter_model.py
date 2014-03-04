@@ -3,9 +3,11 @@ from nose.tools import assert_in
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
-from spikeylab.stim.types.stimuli_classes import PureTone
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 
 from PyQt4 import QtCore
+
+import test.sample as sample
 
 class TestAutoParameterModel():
     def setUp(self):
@@ -238,6 +240,21 @@ class TestAutoParameterModel():
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
         assert model.verify() == 0
+
+    def test_verify_incompatable_paramter(self):
+        component = PureTone()
+        model = self.create_model(component)
+        values = ['frequency', 5, 10, 2]
+        for i, value in enumerate(values):
+            model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
+
+        vcomponent = Vocalization()
+        vcomponent.setFile(sample.samplewav())
+        model.stimModel().insertComponent(vcomponent, (1,0))
+        selection_model = model.data(model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+        selection_model.select(model.stimModel().index(1,0))
+
+        assert 'frequency not present' in model.verify()
 
     def create_model(self, component):
         stim_model = StimulusModel()
