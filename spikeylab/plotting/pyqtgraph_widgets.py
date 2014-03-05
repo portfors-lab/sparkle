@@ -244,7 +244,7 @@ class FFTWidget(BasePlot):
         
         self.fft_plot = self.plot(pen='k')
         self.fft_plot.rotate(rotation)
-        self.getPlotItem().vb.custom_mouse = True
+        self.getPlotItem().vb.set_custom_mouse()
 
         if rotation == 90:
             self.setLabel('left', 'Frequency', units='Hz')
@@ -308,6 +308,9 @@ class PSTHWidget(BasePlot):
         self.setLabel('left', 'Spike Counts')
         self.setMouseEnabled(x=False,y=True)
         self.set_xlim((0, 0.25))
+        self.set_ylim((0, 10))
+
+        self.getPlotItem().vb.set_zero_wheel()
 
     def set_bins(self, bins):
         """Set the bin centers (x values)"""

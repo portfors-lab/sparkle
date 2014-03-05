@@ -1,6 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 from pyqtgraph.Point import Point
+import pyqtgraph.functions as fn
 
 import numpy as np
 
@@ -18,10 +19,20 @@ class SpikeyViewBox(pg.ViewBox):
         self.menu.viewAll.triggered.disconnect()
         self.menu.viewAll.triggered.connect(self.auto_range)
 
-        self.custom_mouse = False
+        self._custom_mouse = False
+        self._zero_wheel = False
+
+    def set_custom_mouse(self):
+        self._custom_mouse = True
+
+    def set_zero_wheel(self):
+        self._zero_wheel = True
+        # want padding in this case
+        self.menu.viewAll.triggered.disconnect()
+        self.menu.viewAll.triggered.connect(self.autoRange)
 
     def mouseDragEvent(self, ev, axis=None):
-        if self.custom_mouse and ev.button() == QtCore.Qt.LeftButton:
+        if self._custom_mouse and ev.button() == QtCore.Qt.LeftButton:
             ev.accept()  ## we accept all buttons
 
             # directly copy-pasted from ViewBox for ViewBox.RectMode
@@ -45,3 +56,8 @@ class SpikeyViewBox(pg.ViewBox):
 
     def auto_range(self):
         self.autoRange(padding=0)
+
+    def wheelEvent(self, ev, axis=None):
+        if self._zero_wheel:
+            ev.pos = lambda : self.mapViewToScene(QtCore.QPoint(0,0))
+        super(SpikeyViewBox, self).wheelEvent(ev, axis)
