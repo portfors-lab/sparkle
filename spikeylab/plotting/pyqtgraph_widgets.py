@@ -57,6 +57,8 @@ class TraceWidget(BasePlot):
         self.trace_plot = self.plot(pen='k')
         self.raster_plot = self.plot(pen=None, symbol='s', symbolPen=None, symbolSize=4, symbolBrush='k')
         self.stim_plot = self.plot(pen='b')
+        self.stim_plot.curve.setToolTip("Stimulus Signal")
+        self.trace_plot.curve.setToolTip("Spike Trace")
 
         self.sigRangeChanged.connect(self.range_change)
 

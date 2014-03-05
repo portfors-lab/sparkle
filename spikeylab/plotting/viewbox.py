@@ -55,9 +55,9 @@ class SpikeyViewBox(pg.ViewBox):
 
 
     def auto_range(self):
-        self.autoRange(padding=0)
+        return self.autoRange(padding=0)
 
     def wheelEvent(self, ev, axis=None):
         if self._zero_wheel:
             ev.pos = lambda : self.mapViewToScene(QtCore.QPoint(0,0))
-        super(SpikeyViewBox, self).wheelEvent(ev, axis)
+        return super(SpikeyViewBox, self).wheelEvent(ev, axis)

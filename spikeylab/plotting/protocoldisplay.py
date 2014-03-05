@@ -20,7 +20,9 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.setToolTip('Spike Trace')
         self.spec_plot.setToolTip('Stimulus Spectrogram')
 
-        self.fft_plot.set_title("Stimulus FFT")
+        # self.fft_plot.set_title("Stimulus FFT")
+        # self.spiketrace_plot.set_title("Response Trace")
+        # self.spec_plot.set_title("Stimulus Spectrogram")
 
         self.spec_plot.setXLink(self.spiketrace_plot)
         self.spec_plot.setMinimumHeight(100)
