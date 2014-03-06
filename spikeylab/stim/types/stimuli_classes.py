@@ -11,24 +11,11 @@ from spikeylab.stim.types.widgets import tone_parameters, silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
 
-# from matplotlib.cm import get_cmap
-# from enthought.chaco import default_colormaps
-# from chaco.api import DataRange1D
-
-# generator = default_colormaps.color_map_name_dict['jet']
-# cmap = generator(DataRange1D())
-# cmap = np.array(cmap.color_bands)
-# cmap = cmap[:,0:3]
-# COLORTABLE=[]
-# for i in range(256): 
-#     row = cmap[i,:]*255
-#     COLORTABLE.append(QtGui.qRgb(*row))
-
 from pyqtgraph import GradientEditorItem
 
 
 COLORTABLE=[]
-for i in range(256): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
+for i in reversed(range(256)): COLORTABLE.append(QtGui.qRgb(i,i,i))
 
 class Tone(AbstractStimulusComponent):
     foo = None
@@ -146,11 +133,6 @@ class Vocalization(AbstractStimulusComponent):
     def paint(self, painter, rect, palette):
 
         if self._filename is not None:
-            # lut = GradientEditorItem().getLookupTable(nPts=256, alpha=True)
-            
-            # COLORTABLE=[]
-            # for i in range(256): COLORTABLE.append(QtGui.qRgba(*lut[i]))
-
             spec, f, bins, fs = spectrogram(self._filename)
             spec = spec.T
             spec = abs(np.fliplr(spec))
