@@ -11,18 +11,24 @@ from spikeylab.stim.types.widgets import tone_parameters, silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
 
-from matplotlib.cm import get_cmap
-from enthought.chaco import default_colormaps
-from chaco.api import DataRange1D
+# from matplotlib.cm import get_cmap
+# from enthought.chaco import default_colormaps
+# from chaco.api import DataRange1D
 
-generator = default_colormaps.color_map_name_dict['jet']
-cmap = generator(DataRange1D())
-cmap = np.array(cmap.color_bands)
-cmap = cmap[:,0:3]
+# generator = default_colormaps.color_map_name_dict['jet']
+# cmap = generator(DataRange1D())
+# cmap = np.array(cmap.color_bands)
+# cmap = cmap[:,0:3]
+# COLORTABLE=[]
+# for i in range(256): 
+#     row = cmap[i,:]*255
+#     COLORTABLE.append(QtGui.qRgb(*row))
+
+from pyqtgraph import GradientEditorItem
+
+
 COLORTABLE=[]
-for i in range(256): 
-    row = cmap[i,:]*255
-    COLORTABLE.append(QtGui.qRgb(*row))
+for i in range(256): COLORTABLE.append(QtGui.qRgb(i/4,i,i/2))
 
 class Tone(AbstractStimulusComponent):
     foo = None
@@ -140,16 +146,24 @@ class Vocalization(AbstractStimulusComponent):
     def paint(self, painter, rect, palette):
 
         if self._filename is not None:
+            # lut = GradientEditorItem().getLookupTable(nPts=256, alpha=True)
             
-            spec, f, bins, fs = spectrogram(self._filename)
-            spec_max = np.amax(spec)
-            scaled = spec/(spec_max/255)
-            scaled = np.require(scaled, np.uint8, 'C')
-            data = scaled.data[::-1]
+            # COLORTABLE=[]
+            # for i in range(256): COLORTABLE.append(QtGui.qRgba(*lut[i]))
 
-            image = QtGui.QImage(data, len(bins), len(f), QtGui.QImage.Format_Indexed8)
-            image.setColorTable(COLORTABLE)
-            # image = image.mirrored(True,False)
+            spec, f, bins, fs = spectrogram(self._filename)
+            spec = spec.T
+            spec = abs(np.fliplr(spec))
+            spec_max = np.amax(spec)
+            # print np.amax(scaled), np.amin(scaled), scaled.shape, spec_max
+            scaled = np.around(spec/(spec_max/255)).astype(int)
+
+            width, height = scaled.shape
+            image = QtGui.QImage(width, height, QtGui.QImage.Format_RGB32)
+            for x in xrange(width):
+                for y in xrange(height):
+                    image.setPixel(x,y, COLORTABLE[scaled[x,y]])
+
             pixmap = QtGui.QPixmap.fromImage(image)
             painter.drawPixmap(rect.x(), rect.y(), rect.width(), rect.height(), pixmap)
         else:
