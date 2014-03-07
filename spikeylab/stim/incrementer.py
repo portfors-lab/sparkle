@@ -23,7 +23,8 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.down5.setIcon(arrowdown())
         self.down1.setIcon(arrowdown())
         # this will emit on partial values -- not what I want ideally
-        self.value_lnedt.textChanged.connect(self.valueChanged.emit)
+        self.value_lnedt.editingFinished.connect(self.checkInput)
+        self.value_lnedt.editingFinished.connect(self.valueChanged.emit)
 
     def increment1(self):
         self.incrementn(1)
@@ -48,6 +49,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         if self.minimum <= (val + n) <= self.maximum:
             val += n
             self.setValue(val)
+        self.valueChanged.emit()
 
     def value(self):
         return self.numtype(self.value_lnedt.text())
@@ -58,6 +60,10 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
             self.value_lnedt.setText(str(val))
         else:
             self.value_lnedt.setText(str(int(val)))
+
+    def checkInput(self):
+        if self.value_lnedt.text() == '':
+            self.setValue(0)
 
     def paintEvent(self, event):
         o = QtGui.QStyleOption()
