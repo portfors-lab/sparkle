@@ -32,7 +32,7 @@ class SpikeyViewBox(pg.ViewBox):
         self.menu.viewAll.triggered.connect(self.autoRange)
 
     def mouseDragEvent(self, ev, axis=None):
-        if self._custom_mouse and ev.button() == QtCore.Qt.LeftButton:
+        if self._custom_mouse and ev.button() == QtCore.Qt.RightButton:
             ev.accept()  ## we accept all buttons
 
             # directly copy-pasted from ViewBox for ViewBox.RectMode
@@ -51,13 +51,27 @@ class SpikeyViewBox(pg.ViewBox):
                 ## update shape of scale box
                 self.updateScaleBox(ev.buttonDownPos(), ev.pos())
         else:
+            state = None
+            # ctrl reverses mouse operation axis
+            if ev.modifiers() == QtCore.Qt.ControlModifier:
+                state = self.mouseEnabled()
+                self.setMouseEnabled(not state[0], not state[1])
             super(SpikeyViewBox, self).mouseDragEvent(ev, axis)
-
+            if state is not None:
+                self.setMouseEnabled(*state)
 
     def auto_range(self):
         return self.autoRange(padding=0)
 
     def wheelEvent(self, ev, axis=None):
+        state = None
+        # ctrl reverses mouse operation axis
+        if ev.modifiers() == QtCore.Qt.ControlModifier:
+            state = self.mouseEnabled()
+            self.setMouseEnabled(not state[0], not state[1])
         if self._zero_wheel:
             ev.pos = lambda : self.mapViewToScene(QtCore.QPoint(0,0))
-        return super(SpikeyViewBox, self).wheelEvent(ev, axis)
+        super(SpikeyViewBox, self).wheelEvent(ev, axis)
+        if state is not None:
+            self.setMouseEnabled(*state)
+
