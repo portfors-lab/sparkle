@@ -117,6 +117,11 @@ class MainWindow(ControlWindow):
                 break
         logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
 
+
+        self.set_as_calpeak = False
+        self.calpeak = None
+        self.transfer = None
+
     def connect_updatable(self, connect):
         if connect:
             self.ui.start_btn.clicked.disconnect()
@@ -227,7 +232,8 @@ class MainWindow(ControlWindow):
             
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            signal = self.acqmodel.set_stim_by_index(stim_index)
+            signal = self.acqmodel.set_stim_by_index(stim_index, self.transfer)
+            # print 'stim signal', len(signal)
             gen_rate = self.acqmodel.current_genrate
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
             self.display_stim(signal, gen_rate)
@@ -341,14 +347,67 @@ class MainWindow(ControlWindow):
         self.on_update()
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
 
+    def grab_cal(self):
+        self.set_as_calpeak = True
+        self.peaks = []
+        self.cal_signals = []
+        self.grab_count = 0
+        self.on_start()
+
     def display_response(self, times, response):
+        # print 'response signal', len(response)
         if len(times) != len(response):
             print "WARNING: times and response not equal"
         if self.ui.plot_dock.current() == 'standard':
             self.display.update_spiketrace(times, response)
         elif self.ui.plot_dock.current() == 'calexp':
+                
+            rms = np.sqrt(np.mean(pow(response,2)))
+            # vmax = np.amax(response) - np.mean(response) 
+            vmax = rms*1.414
+            # print 'abs max', vmax, 'rms', rms, 'cheat', vmax*0.707
+            masterdb = 94 + (20.*np.log10(rms/(0.004)))
+            masterdb2 = 94 + (20.*np.log10(vmax/(0.004)))
+            self.ui.dblevel_lbl.setNum(masterdb)
+            self.ui.dblevel_lbl2.setNum(masterdb2)
             sr = self.ui.aisr_spnbx.value()*self.fscale
-            freq, spectrum = calc_spectrum(response, sr)
+            freq, signal_fft = calc_spectrum(response, sr)
+            if self.set_as_calpeak:
+                signal_fft[0] = 0
+                peak, f = get_fft_peak(signal_fft, freq)
+                print 'peak', peak, 'at', f
+                self.peaks.append(peak)    
+                self.cal_signals.append(response)
+                self.grab_count += 1
+                if self.grab_count == 5:
+                    self.calpeak = np.mean(self.peaks)
+                    print 'mean peak', self.calpeak
+                    self.set_as_calpeak = False
+                    xh = np.mean(self.cal_signals, axis=0)
+                    xh = xh/np.amax(xh) # normalize
+                    XH = np.fft.fft(xh)
+                    self.on_stop()
+                    x, atten = self.acqmodel.current_stim()
+                    x = x/np.amax(x)
+                    X = np.fft.fft(x)
+                    H = XH/X
+                    self.transfer = H
+                    print 'transfer', len(H)
+                spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/peak))
+
+            else:
+                if self.calpeak is not None:
+                    # fft in dB SPL
+                    spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/self.calpeak))
+
+                else:
+                    spectrum = signal_fft
+            self.ui.dblevel_lbl3.setNum(np.amax(spectrum))
+            # spectrum[0] = 0
+            # r = np.real(signal_fft)
+            # i = np.imag(signal_fft)
+            # mag_spectrum = r*r+i*i
+            # db_spectrum = 94 + (20.*np.log10(signal_fft))
             self.extended_display.update_signal(times, response, plot='response')
             self.extended_display.update_fft(freq, spectrum, plot='response')
             self.extended_display.update_spec(response, sr, plot='response')
@@ -357,8 +416,9 @@ class MainWindow(ControlWindow):
         # display fft here
         f, db = fdb
         # print 'response f', f, 'db', db
-        spec_max, max_freq = get_fft_peak(spectrum, freqs)
+        spec_max, max_freq = get_fft_peak(spectrum[1:], freqs)
         if spec_max != spec_peak:
+            print 'max freq', max_freq, 'current', f
             self.ui.calibration_widget.ui.fftf_lbl.setPalette(RED)
         else:
             self.ui.calibration_widget.ui.fftf_lbl.setPalette(BLACK)

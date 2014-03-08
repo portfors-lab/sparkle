@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Feb 26 15:26:55 2014
+# Created: Thu Mar 06 11:21:09 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -72,6 +72,24 @@ class Ui_ControlWindow(object):
         item = QtGui.QListWidgetItem()
         self.listWidget_2.addItem(item)
         self.verticalLayout_8.addWidget(self.listWidget_2)
+        self.gridLayout_3 = QtGui.QGridLayout()
+        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        self.dblevel_lbl = QtGui.QLabel(self.tab_explore)
+        self.dblevel_lbl.setObjectName(_fromUtf8("dblevel_lbl"))
+        self.gridLayout_3.addWidget(self.dblevel_lbl, 0, 1, 1, 1)
+        self.label_18 = QtGui.QLabel(self.tab_explore)
+        self.label_18.setObjectName(_fromUtf8("label_18"))
+        self.gridLayout_3.addWidget(self.label_18, 0, 0, 1, 1)
+        self.dblevel_lbl2 = QtGui.QLabel(self.tab_explore)
+        self.dblevel_lbl2.setObjectName(_fromUtf8("dblevel_lbl2"))
+        self.gridLayout_3.addWidget(self.dblevel_lbl2, 1, 1, 1, 1)
+        self.dblevel_lbl3 = QtGui.QLabel(self.tab_explore)
+        self.dblevel_lbl3.setObjectName(_fromUtf8("dblevel_lbl3"))
+        self.gridLayout_3.addWidget(self.dblevel_lbl3, 2, 1, 1, 1)
+        self.label_19 = QtGui.QLabel(self.tab_explore)
+        self.label_19.setObjectName(_fromUtf8("label_19"))
+        self.gridLayout_3.addWidget(self.label_19, 2, 0, 1, 1)
+        self.verticalLayout_8.addLayout(self.gridLayout_3)
         self.horizontalLayout_7.addLayout(self.verticalLayout_8)
         self.verticalLayout_9 = QtGui.QVBoxLayout()
         self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
@@ -328,6 +346,9 @@ class Ui_ControlWindow(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem2)
+        self.grab_cal_btn = QtGui.QPushButton(self.centralwidget)
+        self.grab_cal_btn.setObjectName(_fromUtf8("grab_cal_btn"))
+        self.verticalLayout_2.addWidget(self.grab_cal_btn)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
         self.start_chart_btn = QtGui.QPushButton(self.centralwidget)
@@ -500,6 +521,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionShow_Progress, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_progress)
         QtCore.QObject.connect(self.tab_group, QtCore.SIGNAL(_fromUtf8("currentChanged(int)")), ControlWindow.tab_changed)
         QtCore.QObject.connect(self.actionShow_Log, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_log)
+        QtCore.QObject.connect(self.grab_cal_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.grab_cal)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -512,6 +534,11 @@ class Ui_ControlWindow(object):
         item = self.listWidget_2.item(0)
         item.setText(_translate("ControlWindow", "Coming soon", None))
         self.listWidget_2.setSortingEnabled(__sortingEnabled)
+        self.dblevel_lbl.setText(_translate("ControlWindow", "0", None))
+        self.label_18.setText(_translate("ControlWindow", "dB SPL level:", None))
+        self.dblevel_lbl2.setText(_translate("ControlWindow", "0", None))
+        self.dblevel_lbl3.setText(_translate("ControlWindow", "0", None))
+        self.label_19.setText(_translate("ControlWindow", "FFT peak", None))
         self.label_39.setText(_translate("ControlWindow", "Reps", None))
         self.funit_lbl.setText(_translate("ControlWindow", "kHz", None))
         self.save_explore_ckbx.setText(_translate("ControlWindow", "Save Explore Recording", None))
@@ -545,6 +572,7 @@ class Ui_ControlWindow(object):
         self.label_17.setText(_translate("ControlWindow", "Mode", None))
         self.mode_cmbx.setItemText(0, _translate("ControlWindow", "Windowed", None))
         self.mode_cmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
+        self.grab_cal_btn.setText(_translate("ControlWindow", "Grab as cal", None))
         self.start_chart_btn.setText(_translate("ControlWindow", "Start Chart", None))
         self.stop_chart_btn.setText(_translate("ControlWindow", "Stop Chart", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))

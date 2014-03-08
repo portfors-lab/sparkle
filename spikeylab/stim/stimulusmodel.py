@@ -375,20 +375,27 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def apply_calibration(self, signal, fs):
         if self.calibration_vector is not None and self.calibration_frequencies is not None:
             # calibration magic happens here!
-            padded_npts = 0.1*fs
-            padded_signal = np.zeros(padded_npts)
-            padded_signal[:len(signal)] = signal
-            signal_fft = calc_spectrum(padded_signal, fs)
-            freq = np.arange(padded_npts)/(padded_npts/fs)
-            print 'npts', padded_npts, 'freq', freq
-            # find matching frequencies
-            print "WARNING: current caldB must match recorded calibration dB"
-            for index, calf in enumerate(self.calibration_frequencies):
-                # print freq[freq == calf]
-                boost = self.caldb - self.calibration_vector[index]
-                print 'calf', calf, 'calval', boost
+            # padded_npts = 0.1*fs
+            # padded_signal = np.zeros(padded_npts)
+            # padded_signal[:len(signal)] = signal
+            # signal_fft = calc_spectrum(padded_signal, fs)
+            # r = np.real(signal_fft)
+            # i = np.imag(signal_fft)
+            # mag_spectrum = r*r+i*i
+            # db_spectrum = 10*np.log10(mag_spectrum)
+            # freq = np.arange(padded_npts)/(padded_npts/fs)
+            # print 'npts', padded_npts, 'freq', freq
+            # # find matching frequencies
+            # print "WARNING: current caldB must match recorded calibration dB"
+            # for index, calf in enumerate(self.calibration_frequencies):
+            #     # print freq[freq == calf]
+            #     boostdb = self.caldb - self.calibration_vector[index]
+            #     # boostv = (10 ** (float(boostdb-self.caldb)/20)*self.calv)
+            #     # print 'calf', calf, 'boostdB', boostdb, 'boostv', boostv
+
                 
             # print len(matched), 'matches out of', len(freq)
+            return signal
         else:
             return signal
 
