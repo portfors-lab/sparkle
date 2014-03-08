@@ -532,8 +532,8 @@ class AcquisitionModel():
             spec_peak_at_f = np.array([-1])
             # self._halt = True
 
-        vmax = np.amax(abs(recorded_tone))
-
+        # vmax = np.amax(abs(recorded_tone))
+        vmax = np.sqrt(np.mean(pow(recorded_tone,2)))*1.414 #rms
 
         self.calfile.append(self.current_dataset_name, spec_peak_at_f, 
                              nested_name='fft_peaks')
