@@ -191,8 +191,26 @@ class Vocalization(AbstractStimulusComponent):
             return "Vocalization stimulus without a specified file"
         return 0
 
-class Noise(AbstractStimulusComponent):
-    name = "noise"
+class WhiteNoise(AbstractStimulusComponent):
+    name = "White Noise"
+    explore = True
+
+    def signal(self, fs, atten, caldb, calv):
+        print 'recalculating noise'
+        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
+        npts = self._duration*fs
+        signal = np.random.normal(0, 1.0, (npts,))
+        signal = ((signal/np.amax(signal))*amp)
+        return signal
+
+    def paint(self, painter, rect, palette):
+        mid = rect.y() + (rect.height()/2)
+        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
+
+    def showEditor(self):
+        editor = silence_parameters.NoiseParameterWidget()
+        editor.setComponent(self)
+        return editor
 
 class Silence(AbstractStimulusComponent):
     name = "silence"
