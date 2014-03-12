@@ -33,7 +33,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # reference for what voltage == what intensity
         self.calv = None
         self.caldb = None
-        self.calibration_vector = None
+        self.calibration_attenuations = None
         self.calibration_frequencies = None
 
         self.stimid = uuid.uuid1()
@@ -55,7 +55,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             print u"ERROR: calibration array and frequency array must have same dimensions"
             return
 
-        self.calibration_vector = db_boost_array
+        self.calibration_attenuations = db_boost_array
         self.calibration_frequencies = frequencies
 
     def setSamplerate(self, fs):
@@ -376,68 +376,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return total_signal, atten
 
     def apply_calibration(self, signal, fs):
-        if self.calibration_vector is not None and self.calibration_frequencies is None :
-            # calibration magic happens here!
-
-            print 'applying transfer vector'
-            original = signal
+        if self.calibration_attenuations is not None and self.calibration_frequencies is not None :
+            print 'interpolated calibration'#, self.calibration_frequencies
             X = np.fft.rfft(signal)
-            frange = [50000, 100000]
-            npts = len(signal)
-            fs = self.samplerate()
-            f = np.arange(npts/2+1)/(float(npts)/fs)
-            f0 = np.where(f==frange[0])[0]
-            f1 = np.where(f==frange[1])[0]
-            # f2 = npts - f1
-            # f3 = npts - f0
-            print 'point values', X[f0], X[f1],# X[f2], X[f3], np.real(X[1:(npts/2)]).shape, np.real((X[(npts/2)+1:])[::-1]).shape
-            # X[:f0] = X[:f0]*0
-            # fq = np.arange(npts)/(float(npts)/fs)
-            # X[f1:] = X[f1:]*0
-            # print 'x symmetrical', np.all(np.real(X[1:(npts/2)]) == np.real((X[(npts/2)+1:])[::-1]))
-            # print 'h symmetrical', np.real(self.calibration_vector[1:(npts/2)]) == np.real((self.calibration_vector[(npts/2)+1:])[::-1])
-            XdeconvH = X.copy()
-            XdeconvH[f0:f1].real /= self.calibration_vector[f0:f1]
-            # XdeconvH[f2:f3] = X[f2:f3]/self.calibration_vector[f2:f3]
-            # how do I get real values back from ifft??????
-            print 'X shape', X.shape, f0, f1#, f2, f3
-            # print 'xdivh symmetrical', np.real(XdeconvH[1:npts/2]) == np.real((XdeconvH[(npts/2)+1:])[::-1])
-            # signal = np.fft.ifft(XdeconvH)
-            adjusted_signal = np.fft.irfft(XdeconvH)
-
-
-            plt.figure()
-            plt.subplot(211)
-            plt.plot(np.real(X))
-            plt.subplot(212)
-            plt.plot(np.imag(X))
-            fig = plt.figure()
-            plt.subplot(211)
-            plt.plot(f, np.real(XdeconvH))
-            plt.subplot(212)
-            plt.plot(f, np.imag(XdeconvH))
-            plt.title("adjusted")
-            plt.show()
-
-            return adjusted_signal
-
-        elif self.calibration_vector is not None and self.calibration_frequencies is not None :
-            print 'interpolated calibration', self.calibration_frequencies
-            X = np.fft.rfft(signal)
-            frange = [5000, 100000]
+            frange = [5000, 100000] # this should be settable by user
             npts = len(signal)
             fs = self.samplerate()
             f = np.arange(npts/2+1)/(float(npts)/fs)
             f0 = (np.abs(f-frange[0])).argmin()
             f1 = (np.abs(f-frange[1])).argmin()
 
-            cal_func = interp1d(self.calibration_frequencies, self.calibration_vector)
+            cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
             frange = f[f0:f1]
             H = cal_func(frange)
-            # convert to voltage scalar
-            # change calibration  vector to attenuation, and remove 100 - H
-            H = 10**((100 - H).astype(float)/20)
-            # print H.shape, X.shape
+            # convert to voltage scalars
+            H = 10**((H).astype(float)/20)
+
             Xadjusted = X.copy()
             Xadjusted[f0:f1] *= H
 

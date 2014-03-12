@@ -1,39 +1,18 @@
 import threading
 import Queue
-import os
-import pickle
-import re
-import datetime
 import win32com.client
-from multiprocessing import Process
 
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
-from spikeylab.tools.qthreading import ProtocolSignals
 
-SAVE_OUTPUT = False
 PRINT_WARNINGS = False
 VERBOSE = True
-SAVE_NOISE = False
 MAXV = 2 # 3V output max
-
-FFT_FNAME = u'_ffttraces'
-PEAKS_FNAME =  u'_fftpeaks'
-DB_FNAME = u'_resultdb'
-INDEX_FNAME = u'_index'
-DATA_FNAME = u'_rawdata'
-NOISE_FNAME = u'_noise'
-OUTPUT_FNAME = u'_outtones'
-
 
 class PlayerBase():
     """Holds state information for current acquisition/generation task"""
-    def __init__(self, dbv=(100,0.1)):
+    def __init__(self):
 
         self.stim = []
-        self.caldb = dbv[0]
-        self.calv = dbv[1]
-        self.calf = None
-        self.calibration_vector = None
 
         self.ngenerated = 0
         self.nacquired = 0
@@ -85,8 +64,6 @@ class PlayerBase():
 
             self.ngenerated +=1
 
-            if SAVE_OUTPUT:
-                self.played_tones.append(self.stim[:])
         except:
             print u'ERROR! TERMINATE!'
             self.tone_lock.release()
@@ -114,9 +91,6 @@ class PlayerBase():
     def get_samplerate(self):
         return self.sr
 
-    def get_caldb(self):
-        return self.caldb
-
     def get_aidur(self):
         return self.aitime
 
@@ -129,12 +103,6 @@ class PlayerBase():
     def set_aidur(self,dur):
         self.aitime = dur
 
-    def set_caldb(self, caldb):
-        self.caldb = caldb
-
-    def set_calv(self, calv):
-        self.calv
-
     def set_aochan(self, aochan):
         self.aochan = aochan
 
@@ -143,8 +111,8 @@ class PlayerBase():
 
 class FinitePlayer(PlayerBase):
     """For finite generation/acquisition tasks"""
-    def __init__(self, dbv=(100,0.1)):
-        PlayerBase.__init__(self, dbv)
+    def __init__(self):
+        PlayerBase.__init__(self)
 
     def start(self):
         """Write output buffer and settings to device"""
@@ -219,8 +187,8 @@ class FinitePlayer(PlayerBase):
 
 class ContinuousPlayer(PlayerBase):
     """This is a continuous player for a chart acquitision operation"""
-    def __init__(self, dbv=(100,0.1)):
-        PlayerBase.__init__(self, dbv)
+    def __init__(self):
+        PlayerBase.__init__(self)
         self.on_read = lambda x: x # placeholder
 
     def start_continuous(self, aichans, update_hz=10):

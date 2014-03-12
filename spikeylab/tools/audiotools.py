@@ -11,10 +11,10 @@ VERBOSE = False
 DBFACTOR = 20
 OUTPUT_MINIMUM = 0.01
 
-def calc_db(peak, caldb, cal_peak):
-    u"""20*log10(peak/cal_peak) + caldb"""
+def calc_db(peak, cal_peak):
+    u""" converts voltage difference into deicbels : 20*log10(peak/cal_peak)"""
     try:
-        pbdB = DBFACTOR * np.log10(peak/cal_peak) + caldb
+        pbdB = DBFACTOR * np.log10(peak/cal_peak)
     except ZeroDivisionError:
         print u'attempted division by zero:'
         print u'peak {}, caldb {}, calpeak {}'.format(peak, caldb, cal_peak)

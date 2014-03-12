@@ -217,21 +217,6 @@ class AcquisitionModel():
                 self.interval_wait()
 
                 response = self.finite_player.run()
-
-                # low-pass the response
-                # spectrum = np.fft.rfft(response)
-                # npts = len(response)
-                # freq = np.arange(npts)/(npts/self.finite_player.aisr)
-                # freq = freq[:(npts/2)+1] #single sided
-
-                # print 'freq', freq[0], freq[-1]
-                # print len(spectrum), len(freq)
-                # cutoff = 60000
-                # spectrum[freq<cutoff] = 0
-                # cutoff = 95000
-                # spectrum[freq>cutoff] = 0
-                # # print spectrum[0]
-                # response = np.fft.irfft(spectrum)
                 
                 self.signals.response_collected.emit(times, response)
 
@@ -553,7 +538,7 @@ class AcquisitionModel():
             if f == self.calf and db == self.caldb:
                 # this really needs to happend first
                 self.calpeak = mean_peak
-            resultdb = calc_db(vmax, self.caldb, self.calpeak)
+            resultdb = calc_db(vmax, self.calpeak) + self.caldb
             self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):
@@ -574,7 +559,7 @@ class AcquisitionModel():
         cal_vmax = vmaxes[cal_index]
 
         # print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
-        resultant_dB = vfunc(vmaxes, self.caldb, cal_vmax)
+        resultant_dB = vfunc(vmaxes, cal_vmax) * -1 #db attenuation
         # print 'results', resultant_dB
 
         print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
@@ -596,10 +581,12 @@ class AcquisitionModel():
             self.calfile.close()
             self.set_calibration(fname)
             self.signals.calibration_file_changed.emit(fname)
+            print 'finished calibration :))))))))'
         else:
             # delete the data saved to file thus far.
             self.calfile.close()
             os.remove(fname)
+            print 'calibration aborted'
         return resultant_dB
 
     def reorder_calibration_traces(self, doclist):

@@ -118,8 +118,6 @@ class MainWindow(ControlWindow):
                 break
         logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
 
-
-        self.set_as_calpeak = False
         self.calpeak = None
 
     def connect_updatable(self, connect):
@@ -347,13 +345,6 @@ class MainWindow(ControlWindow):
         self.on_update()
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
 
-    def grab_cal(self):
-        self.set_as_calpeak = True
-        self.peaks = []
-        self.cal_signals = []
-        self.grab_count = 0
-        self.on_start()
-
     def display_response(self, times, response):
         # print 'response signal', len(response)
         if len(times) != len(response):
@@ -372,51 +363,12 @@ class MainWindow(ControlWindow):
             self.ui.dblevel_lbl2.setNum(masterdb2)
             sr = self.ui.aisr_spnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
-            if self.set_as_calpeak:
-                signal_fft[0] = 0
-                peak, f = get_fft_peak(signal_fft, freq)
-                print 'peak', peak, 'at', f
-                self.peaks.append(peak)    
-                self.cal_signals.append(response)
-                self.grab_count += 1
-                if self.grab_count == 5:
-                    self.on_stop()
-                    self.calpeak = np.mean(self.peaks)
-                    print 'mean peak', self.calpeak
-                    self.set_as_calpeak = False
-                    xh = np.mean(self.cal_signals, axis=0)
-                    xh = xh/np.amax(xh) # normalize
-                    XH = np.fft.rfft(xh)
-                    x, atten = self.acqmodel.current_stim()
-                    x = x/np.amax(x)
-                    X = np.fft.rfft(x)
-                    XHmag = np.sqrt(np.real(XH)**2 + np.imag(XH)**2)
-                    Xmag = np.sqrt(np.real(X)**2 + np.imag(X)**2)
-                    # H = XHmag/Xmag
-                    # H = XH/X
-                    H = XH.real/X.real
-                    # self.transfer = H
-                    self.acqmodel.stimulus.setCalibration(H,np.arange(len(H)))
-                    self.hfig = FFTWidget(rotation=0)
-                    self.hfig.set_title("H")
-                    npts = len(H)
-                    fq = np.arange(npts)/(float(npts*2)/sr)
-                    self.hfig.update_data(fq, H)
-                    self.hfig.show()
+            if False:
                 spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/peak))
-
             else:
-                if self.calpeak is not None:
-                    # fft in dB SPL
-                    spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/self.calpeak))
-                else:
-                    spectrum = signal_fft
+                spectrum = signal_fft
             self.ui.dblevel_lbl3.setNum(np.amax(spectrum))
             # spectrum[0] = 0
-            # r = np.real(signal_fft)
-            # i = np.imag(signal_fft)
-            # mag_spectrum = r*r+i*i
-            # db_spectrum = 94 + (20.*np.log10(signal_fft))
             self.extended_display.update_signal(times, response, plot='response')
             self.extended_display.update_fft(freq, spectrum, plot='response')
             self.extended_display.update_spec(response, sr, plot='response')
