@@ -13,7 +13,7 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
 from spikeylab.main.acqmodel import AcquisitionModel
-from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
+from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
@@ -471,7 +471,7 @@ class MainWindow(ControlWindow):
             values = dlg.values()
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
-                self.acqmodel.set_calibration(values['calfile'])
+                self.acqmodel.set_calibration(values['calfile'], values['frange'])
             else:
                 self.acqmodel.set_calibration(None)
             self.calvals = values

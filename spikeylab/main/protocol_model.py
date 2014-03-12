@@ -28,11 +28,12 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         for test in self.tests.values():
             test.setReferenceVoltage(caldb, calv)
 
-    def setCalibration(self, db_boost_array, frequencies):
+    def setCalibration(self, db_boost_array, frequencies, frange):
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
+        self.calibration_frange = frange
         for test in self.tests.values():
-            test.setCalibration(db_boost_array, frequencies)
+            test.setCalibration(db_boost_array, frequencies, frange)
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
@@ -109,7 +110,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             position = self.rowCount()
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
         stim.setReferenceVoltage(self.caldb, self.calv)
-        stim.setCalibration(self.calibration_vector, self.calibration_frequencies)
+        stim.setCalibration(self.calibration_vector, self.calibration_frequencies, self.calibration_frange)
         # cannot serialize Qt objects, so must use a proxy list
         self.test_order.insert(position, stim.stimid)
         self.tests[stim.stimid] = stim

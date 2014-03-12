@@ -48,7 +48,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.caldb = caldb
         self.calv = calv
 
-    def setCalibration(self, db_boost_array, frequencies):
+    def setCalibration(self, db_boost_array, frequencies, frange):
         # use supplied array of intensity adjustment to adjust tone output
         if db_boost_array is not None and frequencies is not None and \
                             db_boost_array.shape != frequencies.shape:
@@ -57,6 +57,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         self.calibration_attenuations = db_boost_array
         self.calibration_frequencies = frequencies
+        self.calibration_frange = frange
 
     def setSamplerate(self, fs):
         print 'attempting to set samplerate on fixed rate stimulus'
@@ -379,7 +380,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if self.calibration_attenuations is not None and self.calibration_frequencies is not None :
             print 'interpolated calibration'#, self.calibration_frequencies
             X = np.fft.rfft(signal)
-            frange = [5000, 100000] # this should be settable by user
+            frange = self.calibration_frange
             npts = len(signal)
             fs = self.samplerate()
             f = np.arange(npts/2+1)/(float(npts)/fs)

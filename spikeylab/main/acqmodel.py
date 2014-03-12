@@ -64,9 +64,10 @@ class AcquisitionModel():
     def stimuli_list(self):
         return self.explore_stimuli
 
-    def set_calibration(self, cal_fname):
+    def set_calibration(self, cal_fname, frange=None):
+        print 'setting frange', frange
         if cal_fname is None:
-            self.calibration_vector, self.calibration_freqs = None, None
+            self.calibration_vector, self.calibration_freqs, self.calibration_frange = None, None, None
         else:    
             try:
                 cal = load_calibration_file(cal_fname)
@@ -74,11 +75,11 @@ class AcquisitionModel():
                 print "Error: unable to load calibration data from file: ", cal_fname
                 raise
             self.calibration_vector, self.calibration_freqs = cal
+            self.calibration_frange = frange
         self.update_reference_voltage()
         # set the calibration for the player objects
-        self.stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
-        self.calibration_stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
-        self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs)
+        self.stimulus.setCalibration(self.calibration_vector, self.calibration_freqs, frange)
+        self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, frange)
 
     def set_calibration_duration(self, dur):
         self.calibration_stimulus.data(self.calibration_stimulus.index(0,0)).setDuration(dur)
@@ -154,6 +155,9 @@ class AcquisitionModel():
             self.calf = kwargs['calf']
         if 'caldb' in kwargs or 'calv' in kwargs:
             self.update_reference_voltage()
+        if 'maxv' in kwargs:
+            self.finite_player.set_maxv(kwargs['maxv'])
+            self.chart_player.set_maxv(kwargs['maxv'])
 
     def set_stim_by_index(self, index):
         # remove any current components
@@ -476,9 +480,9 @@ class AcquisitionModel():
         self.finite_player.set_aochan(self.aochan)
         self.finite_player.set_aichan(self.aichan)
         if apply_cal:
-            self.calibration_stimulus.setCalibration(self.calibration_vector, self.calibration_freqs)
+            self.calibration_stimulus.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
         else:
-            self.calibration_stimulus.setCalibration(None, None)
+            self.calibration_stimulus.setCalibration(None, None, None)
 
 
         if self.savefolder is None or self.savename is None:

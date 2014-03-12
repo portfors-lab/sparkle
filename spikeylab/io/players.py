@@ -6,7 +6,6 @@ from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
 
 PRINT_WARNINGS = False
 VERBOSE = True
-MAXV = 2 # 3V output max
 
 class PlayerBase():
     """Holds state information for current acquisition/generation task"""
@@ -24,6 +23,8 @@ class PlayerBase():
 
         self.aitask = None
         self.aotask = None
+
+        self.maxv = 2 #Volts
 
         # establish connection to the attenuator
         try:
@@ -76,8 +77,8 @@ class PlayerBase():
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
         
         # in the interest of not blowing out the speakers I am going to set this to 5?
-        if max(abs(signal)) > MAXV:
-            print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM({}V), RECALULATING".format(max(abs(signal)), MAXV))
+        if max(abs(signal)) > self.maxv:
+            print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM({}V), RECALULATING".format(max(abs(signal)), self.maxv))
             signal = signal/max(abs(signal))
 
         self.tone_lock.acquire()
@@ -108,6 +109,9 @@ class PlayerBase():
 
     def set_aichan(self, aichan):
         self.aichan = aichan
+
+    def set_maxv(self, v):
+        self.maxv = v
 
 class FinitePlayer(PlayerBase):
     """For finite generation/acquisition tasks"""
