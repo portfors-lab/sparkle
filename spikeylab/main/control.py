@@ -16,6 +16,7 @@ from spikeylab.main.acqmodel import AcquisitionModel
 from spikeylab.tools.audiotools import calc_spectrum, calc_db, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
+from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 
 from controlwindow import ControlWindow
 
@@ -120,7 +121,6 @@ class MainWindow(ControlWindow):
 
         self.set_as_calpeak = False
         self.calpeak = None
-        self.transfer = None
 
     def connect_updatable(self, connect):
         if connect:
@@ -232,7 +232,7 @@ class MainWindow(ControlWindow):
             
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            signal = self.acqmodel.set_stim_by_index(stim_index, self.transfer)
+            signal = self.acqmodel.set_stim_by_index(stim_index)
             # print 'stim signal', len(signal)
             gen_rate = self.acqmodel.current_genrate
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
@@ -380,26 +380,35 @@ class MainWindow(ControlWindow):
                 self.cal_signals.append(response)
                 self.grab_count += 1
                 if self.grab_count == 5:
+                    self.on_stop()
                     self.calpeak = np.mean(self.peaks)
                     print 'mean peak', self.calpeak
                     self.set_as_calpeak = False
                     xh = np.mean(self.cal_signals, axis=0)
                     xh = xh/np.amax(xh) # normalize
-                    XH = np.fft.fft(xh)
-                    self.on_stop()
+                    XH = np.fft.rfft(xh)
                     x, atten = self.acqmodel.current_stim()
                     x = x/np.amax(x)
-                    X = np.fft.fft(x)
-                    H = XH/X
-                    self.transfer = H
-                    print 'transfer', len(H)
+                    X = np.fft.rfft(x)
+                    XHmag = np.sqrt(np.real(XH)**2 + np.imag(XH)**2)
+                    Xmag = np.sqrt(np.real(X)**2 + np.imag(X)**2)
+                    # H = XHmag/Xmag
+                    # H = XH/X
+                    H = XH.real/X.real
+                    # self.transfer = H
+                    self.acqmodel.stimulus.setCalibration(H,np.arange(len(H)))
+                    self.hfig = FFTWidget(rotation=0)
+                    self.hfig.set_title("H")
+                    npts = len(H)
+                    fq = np.arange(npts)/(float(npts*2)/sr)
+                    self.hfig.update_data(fq, H)
+                    self.hfig.show()
                 spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/peak))
 
             else:
                 if self.calpeak is not None:
                     # fft in dB SPL
                     spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/self.calpeak))
-
                 else:
                     spectrum = signal_fft
             self.ui.dblevel_lbl3.setNum(np.amax(spectrum))
@@ -511,6 +520,8 @@ class MainWindow(ControlWindow):
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
                 self.acqmodel.set_calibration(values['calfile'])
+            else:
+                self.acqmodel.set_calibration(None)
             self.calvals = values
 
     def launch_scale_dlg(self):

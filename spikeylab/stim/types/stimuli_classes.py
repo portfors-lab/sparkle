@@ -2,6 +2,7 @@ import os
 import wave
 
 import scipy.io.wavfile as wv
+from scipy.signal import chirp
 import numpy as np
 
 from PyQt4 import QtGui, QtCore
@@ -76,9 +77,27 @@ class PureTone(Tone):
         return super(PureTone, self).verify(**kwargs)
 
 class FMSweep(Tone):
-    name = "fmsweep"
-    start_frequency = None
-    stop_frequency = None
+    name = "FM Sweep"
+    _start_f = 5000
+    _stop_f = 1e5
+    explore = True
+
+    def signal(self, fs, atten, caldb, calv):
+        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
+        npts = self._duration*fs
+        t = np.arange(npts).astype(float)/fs
+        signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
+        signal = ((signal/np.amax(signal))*amp)
+        return signal
+
+    def paint(self, painter, rect, palette):
+        mid = rect.y() + (rect.height()/2)
+        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
+
+    def showEditor(self):
+        editor = silence_parameters.NoiseParameterWidget()
+        editor.setComponent(self)
+        return editor
 
 class Vocalization(AbstractStimulusComponent):
     name = "Vocalization"
@@ -194,12 +213,14 @@ class Vocalization(AbstractStimulusComponent):
 class WhiteNoise(AbstractStimulusComponent):
     name = "White Noise"
     explore = True
+    # keeps signal same to subsequent signal calls, but limit size
+    _noise = np.random.normal(0, 1.0, (5e5,))
+    transfer = None
 
     def signal(self, fs, atten, caldb, calv):
-        print 'recalculating noise'
         amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
         npts = self._duration*fs
-        signal = np.random.normal(0, 1.0, (npts,))
+        signal = self._noise[:npts]
         signal = ((signal/np.amax(signal))*amp)
         return signal
 
@@ -211,6 +232,9 @@ class WhiteNoise(AbstractStimulusComponent):
         editor = silence_parameters.NoiseParameterWidget()
         editor.setComponent(self)
         return editor
+
+    def setTransfer(self, H):
+        self.transfer = H
 
 class Silence(AbstractStimulusComponent):
     name = "silence"

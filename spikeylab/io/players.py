@@ -14,6 +14,7 @@ SAVE_OUTPUT = False
 PRINT_WARNINGS = False
 VERBOSE = True
 SAVE_NOISE = False
+MAXV = 2 # 3V output max
 
 FFT_FNAME = u'_ffttraces'
 PEAKS_FNAME =  u'_fftpeaks'
@@ -97,6 +98,11 @@ class PlayerBase():
     def set_stim(self, signal, sr, attenuation=0):
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
         
+        # in the interest of not blowing out the speakers I am going to set this to 5?
+        if max(abs(signal)) > MAXV:
+            print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM({}V), RECALULATING".format(max(abs(signal)), MAXV))
+            signal = signal/max(abs(signal))
+
         self.tone_lock.acquire()
         self.stim = signal
         self.sr = sr

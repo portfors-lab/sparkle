@@ -35,12 +35,10 @@ def calc_spectrum(signal,rate):
     #signal = padded_signal
     npts = len(signal)
 
-    freq = np.arange(npts)/(npts/rate)
-    freq = freq[:(npts/2)+1] #single sided
+    freq = np.arange(npts/2+1)/(npts/rate)
     #print('freq len ', len(freq))
 
-    sp = np.fft.fft(signal)/npts
-    sp = sp[:(npts/2)+1]
+    sp = np.fft.rfft(signal)/npts
     #print('sp len ', len(sp))
 
     return freq, abs(sp.real)
@@ -95,10 +93,6 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
         
         timevals = np.arange(npts)/samplerate
 
-        # in the interest of not blowing out the speakers I am going to set this to 5?
-        if np.amax(abs(tone)) > 5:
-            print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM, RECALULATING".format(np.amax(abs(tone))))
-            tone = tone/np.amax(abs(tone))
 
     except:
         print("WARNING: Unable to produce tone")

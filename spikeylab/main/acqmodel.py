@@ -155,28 +155,13 @@ class AcquisitionModel():
         if 'caldb' in kwargs or 'calv' in kwargs:
             self.update_reference_voltage()
 
-    def set_stim_by_index(self, index, transfunc=None):
+    def set_stim_by_index(self, index):
         # remove any current components
         self.stimulus.clearComponents()
         self.stimulus.insertComponent(self.explore_stimuli[index])
         self.current_genrate = self.stimulus.samplerate()
         signal, atten = self.stimulus.signal()
-        if transfunc is not None:
-            amp = np.amax(signal)
-            X = np.fft.fft(signal/amp)
-            npts = len(X)
-            freq = np.arange(npts)/(float(npts)/self.stimulus.samplerate())
-            idx0 = np.where(freq == 5000)[0]
-            idx1 = np.where(freq == 90000)[0]
-            print 'idx', idx0, idx1
-            X[:idx0] = 0
-            X[idx1:] = 0
-            Xdeconv = X/transfunc
-            signal1 = np.real(np.fft.ifft(Xdeconv))
-            signal1 = signal1*amp
-        else:
-            signal1 = signal
-        self.finite_player.set_stim(signal1, self.stimulus.samplerate(), attenuation=atten)
+        self.finite_player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         return signal
 
     def current_stim(self):
