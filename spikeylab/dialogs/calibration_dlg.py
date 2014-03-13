@@ -14,7 +14,6 @@ class CalibrationDialog(QtGui.QDialog):
             self.ui.calfile_radio.setChecked(default_vals['use_calfile'])
             self.ui.frange_low_spnbx.setValue(default_vals['frange'][0]/fscale)
             self.ui.frange_high_spnbx.setValue(default_vals['frange'][1]/fscale)
-            self.ui.maxv_spnbx.setValue(default_vals['maxv'])
         self.fscale = fscale
 
     def browseFiles(self):
@@ -31,5 +30,4 @@ class CalibrationDialog(QtGui.QDialog):
         results['calv'] = self.ui.calv_spnbx.value()
         results['calf'] = self.ui.calf_spnbx.value()*self.fscale
         results['frange'] = (self.ui.frange_low_spnbx.value()*self.fscale, self.ui.frange_high_spnbx.value()*self.fscale)
-        results['maxv'] = self.ui.maxv_spnbx.value()
         return results

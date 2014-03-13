@@ -75,43 +75,10 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="7" column="2">
-      <widget class="QLabel" name="label_7">
+     <item row="4" column="2">
+      <widget class="QLabel" name="funit_lbl">
        <property name="text">
-        <string>V</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="QFrame" name="frame">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::HLine</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QDoubleSpinBox" name="maxv_spnbx">
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::NoButtons</enum>
-       </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="maximum">
-        <double>10.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Max. DAC ouput voltage</string>
+        <string>kHz</string>
        </property>
       </widget>
      </item>
@@ -128,24 +95,26 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QLabel" name="label_5">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="toolTip">
+        <string>Maximum voltage output</string>
+       </property>
        <property name="text">
-        <string>V</string>
+        <string>Reference DAC voltage</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="2">
-      <widget class="QLabel" name="funit_lbl">
-       <property name="text">
-        <string>kHz</string>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="caldb_spnbx">
+       <property name="toolTip">
+        <string>Maximum intensity</string>
        </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="SmartSpinBox" name="calf_spnbx">
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
        <property name="maximum">
-        <double>200000.000000000000000</double>
+        <number>110</number>
        </property>
       </widget>
      </item>
@@ -156,32 +125,35 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="1">
+      <widget class="SmartSpinBox" name="calf_spnbx">
+       <property name="maximum">
+        <double>200000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>V</string>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label">
+       <property name="toolTip">
+        <string>Maximum intensity</string>
+       </property>
        <property name="text">
         <string>Reference intensity</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="caldb_spnbx">
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::NoButtons</enum>
-       </property>
-       <property name="maximum">
-        <number>110</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Reference DAC voltage</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <widget class="QDoubleSpinBox" name="calv_spnbx">
+       <property name="toolTip">
+        <string>Maximum voltage output</string>
+       </property>
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::NoButtons</enum>
        </property>
@@ -197,6 +169,13 @@
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Calibration frequency range</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="funit_lbl_2">
+       <property name="text">
+        <string>kHz</string>
        </property>
       </widget>
      </item>
@@ -226,13 +205,6 @@
         </widget>
        </item>
       </layout>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="funit_lbl_2">
-       <property name="text">
-        <string>kHz</string>
-       </property>
-      </widget>
      </item>
      <item row="1" column="0" colspan="2">
       <widget class="QFrame" name="frame_2">

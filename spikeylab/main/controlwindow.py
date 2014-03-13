@@ -223,7 +223,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
         self.display.set_spec_args(**self.spec_args)        
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 
-                                      'calv':0.1, 'calfile':'', 'maxv': 2,
+                                      'calv':0.1, 'calfile':'', 
                                       'use_calfile':False, 'frange':(5000, 5e5)})
         self.acqmodel.set_params(**self.calvals)
         if self.calvals['use_calfile']:

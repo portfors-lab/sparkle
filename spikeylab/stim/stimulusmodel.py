@@ -50,10 +50,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def setCalibration(self, db_boost_array, frequencies, frange):
         # use supplied array of intensity adjustment to adjust tone output
-        if db_boost_array is not None and frequencies is not None and \
-                            db_boost_array.shape != frequencies.shape:
-            print u"ERROR: calibration array and frequency array must have same dimensions"
-            return
+        if db_boost_array is not None and frequencies is not None:
+            if db_boost_array.shape != frequencies.shape:
+                print u"ERROR: calibration array and frequency array must have same dimensions"
+                return
+            if frange is None:
+                frange = (frequencies[0], frequencies[-1])
 
         self.calibration_attenuations = db_boost_array
         self.calibration_frequencies = frequencies
@@ -301,8 +303,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
         Apply the autoparameters to this stimulus and return a list of
         the resulting stimuli, and a complimentary list of doc dictionaries
         """
+        # 3 loops now -- could be done in one...
         signals = self.expandFunction(self.signal)
         docs = self.expandFunction(self.doc)
+
+        for s, d in zip(signals, docs):
+            d['overloaded attenuation'] = s[2]
+
+        # remove the undesired attenuation argument
+        signals = [sig[0:2] for sig in signals]
 
         if self.reorder:
             order = self.reorder(docs)
@@ -354,14 +363,14 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # everything is maxed up to calibration dB and attenuated from there
         atten = self.caldb - max_db
         if atten < 0:
-            atten = 0
+            raise Exception("Stimulus intensity over maxium")
         # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten
         for track in self._segments:
             track_list = []
             for component in track:
                 track_list.append(component.signal(fs=samplerate, 
-                                                   atten=atten, 
-                                                   caldb=self.caldb, 
+                                                   atten=0, 
+                                                   caldb=max_db, 
                                                    calv=self.calv))
             if len(track_list) > 0:   
                 track_signals.append(np.hstack(track_list))
@@ -374,11 +383,29 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         total_signal = self.apply_calibration(total_signal, samplerate)
 
-        return total_signal, atten
+        undesired_attenuation = 0
+        if max(abs(total_signal)) > self.calv:
+            peak = max(abs(total_signal))
+            before_rms = np.sqrt(np.mean(pow(total_signal,2)))
+            # scale stim down to outputable max
+            total_signal = (total_signal/peak)*self.calv
+            after_rms = np.sqrt(np.mean(pow(total_signal,2)))
+            attenuated = 20 * np.log10(before_rms/after_rms)
+            if attenuated <= atten:
+                atten = atten - attenuated
+            else:
+                undesired_attenuation = attenuated - atten
+                atten = 0
+                # log this, at least to console!
+                print("WARNING: STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
+                    UNDESRIED ATTENUATION {:.2f}dB".format(peak, self.calv, undesired_attenuation))
+
+        return total_signal, atten, undesired_attenuation
 
     def apply_calibration(self, signal, fs):
         if self.calibration_attenuations is not None and self.calibration_frequencies is not None :
-            print 'interpolated calibration'#, self.calibration_frequencies
+            # print 'interpolated calibration'#, self.calibration_frequencies
+            
             X = np.fft.rfft(signal)
             frange = self.calibration_frange
             npts = len(signal)
@@ -392,24 +419,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
             H = cal_func(frange)
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)
-
             Xadjusted = X.copy()
             Xadjusted[f0:f1] *= H
 
             adjusted_signal = np.fft.irfft(Xadjusted)
-
-            # plt.figure()
-            # plt.subplot(211)
-            # plt.plot(f, np.real(X))
-            # plt.subplot(212)
-            # plt.plot(frange, H)
-            # fig = plt.figure()
-            # plt.subplot(211)
-            # plt.plot(f, np.real(Xadjusted))
-            # plt.subplot(212)
-            # plt.plot(f, np.imag(Xadjusted))
-            # plt.title("adjusted")
-            # plt.show()
 
             return adjusted_signal
         else:

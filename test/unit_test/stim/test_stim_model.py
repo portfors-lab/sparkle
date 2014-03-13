@@ -135,7 +135,7 @@ class TestStimModel():
         model.insertComponent(component1, (0,0))
         model.setReferenceVoltage(caldb, calv)
 
-        signal, atten = model.signal()
+        signal, atten, ovld = model.signal()
         assert atten == 0
         # rounding errors (or rather how python stores numbers) make this necessary
         assert round(np.amax(signal),3) == calv
@@ -152,10 +152,11 @@ class TestStimModel():
         model.insertComponent(component1, (0,0))
         model.setReferenceVoltage(caldb, calv)
 
-        signal, atten = model.signal()
+        signal, atten, ovld = model.signal()
         assert atten == 10
         assert round(np.amax(signal),3) == calv
 
+    @raises(Exception)
     def test_signal_gt_caldb(self):
         caldb = 100
         calv = 0.1
@@ -169,10 +170,25 @@ class TestStimModel():
         model.insertComponent(component1, (0,0))
         model.setReferenceVoltage(caldb, calv)
 
-        signal, atten = model.signal()
+        signal, atten, ovld = model.signal()
+
+    def test_signal_overload_voltage(self):
+        caldb = 100
+        calv = 0.1
+        model = StimulusModel()
+        component0 = PureTone()
+        component1 = PureTone()
+        component0.setIntensity(caldb)
+        component1.setIntensity(caldb)
+        model.insertComponent(component0, (0,0))
+        model.insertComponent(component1, (1,0))
+        model.setReferenceVoltage(caldb, calv)
+
+        signal, atten, ovld = model.signal()
         assert atten == 0
-        print 'recieved', np.amax(signal), 'expected', calv*(10 **(mod/20.))
-        assert round(np.amax(signal),3) == round(calv*(10 **(mod/20.)),3)
+        assert round(np.amax(signal),3) == calv
+        # do math to make this more accurate
+        assert ovld > 0
 
     def test_template_no_auto_params(self):
         model = StimulusModel()
@@ -190,8 +206,8 @@ class TestStimModel():
         clone = StimulusModel.loadFromTemplate(template)
         clone.setReferenceVoltage(100, 0.1)
 
-        signal0, atten0 = clone.signal()
-        signal1, atten1 = model.signal()
+        signal0, atten0, ovld = clone.signal()
+        signal1, atten1, ovld = model.signal()
 
         assert clone.stimid != model.stimid
         np.testing.assert_array_equal(signal0, signal1)

@@ -21,6 +21,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.calv = None
         self.calibration_vector = None
         self.calibration_frequencies = None
+        self.calibration_frange = None
 
     def setReferenceVoltage(self, caldb, calv):
         self.caldb = caldb

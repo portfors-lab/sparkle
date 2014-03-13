@@ -88,6 +88,11 @@ class FMSweep(Tone):
         t = np.arange(npts).astype(float)/fs
         signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
         signal = ((signal/np.amax(signal))*amp)
+
+        if self._risefall > 0:
+            rf_npts = self._risefall * fs
+            signal[:rf_npts] = signal[:rf_npts] * np.linspace(0,1,rf_npts)
+            signal[-rf_npts:] = signal[-rf_npts:] * np.linspace(1,0,rf_npts)
         return signal
 
     def paint(self, painter, rect, palette):

@@ -29,7 +29,7 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.trackview.model().setRepCount(count)
 
     def preview(self):
-        stim_signal, atten = self.ui.trackview.model().signal()
+        stim_signal, atten, ovld = self.ui.trackview.model().signal()
 
         fig = SpecWidget()
         fig.update_data(stim_signal, self.ui.trackview.model().samplerate())

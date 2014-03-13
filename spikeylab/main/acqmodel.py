@@ -155,16 +155,13 @@ class AcquisitionModel():
             self.calf = kwargs['calf']
         if 'caldb' in kwargs or 'calv' in kwargs:
             self.update_reference_voltage()
-        if 'maxv' in kwargs:
-            self.finite_player.set_maxv(kwargs['maxv'])
-            self.chart_player.set_maxv(kwargs['maxv'])
 
     def set_stim_by_index(self, index):
         # remove any current components
         self.stimulus.clearComponents()
         self.stimulus.insertComponent(self.explore_stimuli[index])
         self.current_genrate = self.stimulus.samplerate()
-        signal, atten = self.stimulus.signal()
+        signal, atten, overload = self.stimulus.signal()
         self.finite_player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         return signal
 
@@ -568,6 +565,9 @@ class AcquisitionModel():
 
         print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
         print 'resultant_dB', resultant_dB
+
+        print 'The maximum dB SPL is', max(resultant_dB)
+
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
         fname = self.calfile.filename
