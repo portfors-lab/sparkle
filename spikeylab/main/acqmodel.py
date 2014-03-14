@@ -19,7 +19,6 @@ class Broken(Exception): pass
 class AcquisitionModel():
     """Holds state information for an experimental session"""
     def __init__(self, threshold=None):
-        self.signals = {}
         self.threshold = threshold
         self.signals = ProtocolSignals()
         self.finite_player = FinitePlayer()
