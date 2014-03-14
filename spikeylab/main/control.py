@@ -282,7 +282,7 @@ class MainWindow(ControlWindow):
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
-            results = self.acqmodel.process_calibration(save)
+            results, calname = self.acqmodel.process_calibration(save)
         self.on_stop()
 
     def run_chart(self):
@@ -328,7 +328,17 @@ class MainWindow(ControlWindow):
         
         self.on_update()
         if self.current_mode == 'windowed':
-            self.acqmodel.run_protocol(interval)
+            overload = self.acqmodel.setup_protocol(interval)
+            if np.any(np.array(overload) > 0):
+                answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
+                                'Stimuli in test list are over the maximum allowable voltage output. They will be rescaled with a maximum undesired attenuation of {:.2f}dB.\n \
+                                Do you want to continue?'.format(np.amax(overload)),
+                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+                if answer == QtGui.QMessageBox.No:
+                    self.on_stop()
+                    return
+
+            self.acqmodel.run_protocol()
         else:
             self.acqmodel.run_chart_protocol(interval)
 

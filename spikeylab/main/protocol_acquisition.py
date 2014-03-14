@@ -18,7 +18,7 @@ class Experimenter(AbstractAcquisitionModel):
     def update_reference_voltage(self):
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
-    def run(self, interval):
+    def setup(self, interval):
         setname = self._initialize_run()
 
         self._halt = False
@@ -34,6 +34,13 @@ class Experimenter(AbstractAcquisitionModel):
 
         self.acq_thread = threading.Thread(target=self._worker, 
                                            args=(stimuli,))
+
+        # go through and get any overloads, this is not efficient since
+        # I am going to be calculating the signals again later, so stash?
+        undesired_attenuations = [stim.expandedStim()[2] for stim in stimuli]
+        return undesired_attenuations
+
+    def run(self):
         self.acq_thread.start()
 
         return self.acq_thread
@@ -49,7 +56,7 @@ class Experimenter(AbstractAcquisitionModel):
                 test.setReferenceVoltage(self.caldb, self.calv)
                 self._initialize_test(test)
 
-                traces, doc = test.expandedStim()
+                traces, doc, ov = test.expandedStim()
                 nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
                 for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):

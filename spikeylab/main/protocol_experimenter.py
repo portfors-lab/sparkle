@@ -10,7 +10,7 @@ class ProtocolExperimenter(Experimenter):
         Experimenter.__init__(self, signals)
 
         save_data = True
-        self.group_name = 'group_0'
+        self.group_name = 'segment_0'
         self.player = FinitePlayer()
 
     def _initialize_run(self):

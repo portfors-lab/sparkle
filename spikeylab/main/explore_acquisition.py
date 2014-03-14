@@ -45,7 +45,7 @@ class Explorer(AbstractAcquisitionModel):
 
     def stim_names(self):
         stim_names = []
-        for stim in self.explore_stimuli:
+        for stim in self._explore_stimuli:
             stim_names.append(stim.name)
         return stim_names
 
@@ -111,7 +111,7 @@ class Explorer(AbstractAcquisitionModel):
 
                 if self.save_data:
                     # save response data
-                    self.save_data(response)
+                    self.save_to_file(response)
 
                 self.irep +=1
                 if self.irep == self.nreps:
@@ -132,7 +132,7 @@ class Explorer(AbstractAcquisitionModel):
         if self.save_data:
             self.datafile.trim(self.current_dataset_name)
 
-    def save_data(self, data):
+    def save_to_file(self, data):
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
         info = self.stimulus.doc()

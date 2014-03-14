@@ -3,7 +3,7 @@ from nose.tools import raises, assert_equal
 import numpy as np
 
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, USE_RMS
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.factory import TCFactory, CCFactory
@@ -105,7 +105,7 @@ class TestStimModel():
         model.insertComponent(component, (0,0))
         model.setReferenceVoltage(100, 0.1)
 
-        signals, doc = model.expandedStim()
+        signals, doc, ovld = model.expandedStim()
         assert len(signals) == 1
         assert_equal(signals[0][0].shape[0], component.duration()*model.samplerate())
         assert len(doc) == 1
@@ -118,7 +118,7 @@ class TestStimModel():
         model.setReferenceVoltage(100, 0.1)
         nsteps = self.add_auto_param(model)        
 
-        signals, doc = model.expandedStim()
+        signals, doc, ovld = model.expandedStim()
         assert len(signals) == nsteps
         assert len(doc) == nsteps
         assert doc[0]['samplerate_da'] == model.samplerate()
@@ -153,7 +153,11 @@ class TestStimModel():
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
-        assert atten == 10
+        print 'atten', atten
+        if USE_RMS:
+            assert round(atten) == 7
+        else:
+            assert atten == 10
         assert round(np.amax(signal),3) == calv
 
     @raises(Exception)
@@ -229,8 +233,8 @@ class TestStimModel():
         clone = StimulusModel.loadFromTemplate(template)
         clone.setReferenceVoltage(100, 0.1)
 
-        signals0, docs0 = model.expandedStim()
-        signals1, docs1 = clone.expandedStim()
+        signals0, docs0, ovld = model.expandedStim()
+        signals1, docs1, ovld = clone.expandedStim()
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
@@ -260,8 +264,8 @@ class TestStimModel():
         clone = StimulusModel.loadFromTemplate(template)
         clone.setReferenceVoltage(100, 0.1)
 
-        signals0, docs0 = model.expandedStim()
-        signals1, docs1 = clone.expandedStim()
+        signals0, docs0, ovld = model.expandedStim()
+        signals1, docs1, ovld = clone.expandedStim()
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
@@ -284,8 +288,8 @@ class TestStimModel():
         clone = StimulusModel.loadFromTemplate(template)
         clone.setReferenceVoltage(100, 0.1)
 
-        signals0, docs0 = model.expandedStim()
-        signals1, docs1 = clone.expandedStim()
+        signals0, docs0, ovld = model.expandedStim()
+        signals1, docs1, ovld = clone.expandedStim()
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
@@ -312,8 +316,8 @@ class TestStimModel():
         clone = StimulusModel.loadFromTemplate(template)
         clone.setReferenceVoltage(100, 0.1)
 
-        signals0, docs0 = model.expandedStim()
-        signals1, docs1 = clone.expandedStim()
+        signals0, docs0, ovld = model.expandedStim()
+        signals1, docs1, ovld = clone.expandedStim()
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)

@@ -6,7 +6,7 @@ import threading, Queue
 import h5py
 from nose.tools import assert_in, assert_equal
 
-from spikeylab.main.acqmodel import AcquisitionModel
+from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
@@ -36,7 +36,7 @@ class TestAcquisitionModel():
         """Test a protocol with a single tone stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
 
         #insert some stimuli
         gen_rate = 500000
@@ -46,12 +46,13 @@ class TestAcquisitionModel():
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
         stim0.setSamplerate(gen_rate)
-        acqmodel.protocol_model.insertNewTest(stim0,0)
+        manager.protocol_model().insertNewTest(stim0,0)
 
-        t = acqmodel.run_protocol(0.1)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
         t.join()
 
-        acqmodel.close_data()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -68,8 +69,8 @@ class TestAcquisitionModel():
         """Test a protocol with a single tone stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
-        acqmodel.set_calibration(None)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set_calibration(None)
         #insert some stimuli
         gen_rate = 500000
 
@@ -78,12 +79,13 @@ class TestAcquisitionModel():
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
         stim0.setSamplerate(gen_rate)
-        acqmodel.protocol_model.insertNewTest(stim0,0)
+        manager.protocol_model().insertNewTest(stim0,0)
 
-        t = acqmodel.run_protocol(0.1)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
         t.join()
 
-        acqmodel.close_data()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -100,18 +102,19 @@ class TestAcquisitionModel():
         """Run protocol with single vocal wav stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
 
         vocal0 = Vocalization()
         vocal0.setFile(sample.samplewav())
         stim0 = StimulusModel()
         stim0.insertComponent(vocal0)
-        acqmodel.protocol_model.insertNewTest(stim0,0)
+        manager.protocol_model().insertNewTest(stim0,0)
 
-        t = acqmodel.run_protocol(0.1)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
         t.join()
 
-        acqmodel.close_data()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -127,7 +130,7 @@ class TestAcquisitionModel():
     def test_auto_parameter_protocol(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
 
         nreps = 3
         component = PureTone()
@@ -144,18 +147,17 @@ class TestAcquisitionModel():
         for i, value in enumerate(values):
             auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
 
-        acqmodel.protocol_model.insertNewTest(stim_model,0)
+        manager.protocol_model().insertNewTest(stim_model,0)
 
-        t = acqmodel.run_protocol(0.1)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
         t.join()
 
-        acqmodel.close_data()
-
+        manager.close_data()
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_0']['test_0']
         stims = json.loads(test.attrs['stim'])
-
         freqs = []
         for stim in stims:
             freqs.append(stim['components'][0]['frequency'])
@@ -169,7 +171,7 @@ class TestAcquisitionModel():
     def test_auto_parameter_protocol_randomize(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
 
         component = PureTone()
         stim_model = StimulusModel()
@@ -185,13 +187,12 @@ class TestAcquisitionModel():
         for i, value in enumerate(values):
             auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
 
-        acqmodel.protocol_model.insertNewTest(stim_model,0)
-
-        t = acqmodel.run_protocol(0.1)
+        manager.protocol_model().insertNewTest(stim_model,0)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
         t.join()
 
-        acqmodel.close_data()
-
+        manager.close_data()
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_0']['test_0']
@@ -212,19 +213,19 @@ class TestAcquisitionModel():
         """Run search operation with tone stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
-        acqmodel.set_params(nreps=2)
-        stim_names = acqmodel.explore_stim_names()
-        acqmodel.set_stim_by_index(stim_names.index('Pure Tone'))
-        t = acqmodel.run_explore(0.25)
+        manager.set_params(nreps=2)
+        stim_names = manager.explore_stim_names()
+        manager.set_stim_by_index(stim_names.index('Pure Tone'))
+        t = manager.run_explore(0.25)
 
         time.sleep(1)
 
-        acqmodel.halt()
+        manager.halt()
 
         t.join()
-        acqmodel.close_data()
+        manager.close_data()
 
         # should check that it did not save data!
 
@@ -233,53 +234,56 @@ class TestAcquisitionModel():
         """Run search operation with vocal wav stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
-        acqmodel.set_params(nreps=2)
-        stim_names = acqmodel.explore_stim_names()
+        manager.set_params(nreps=2)
+        stim_names = manager.explore_stim_names()
 
-        acqmodel.explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
-        acqmodel.set_stim_by_index(stim_names.index('Vocalization'))
+        # cheat - private access
+        manager.explorer._explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
+        manager.set_stim_by_index(stim_names.index('Vocalization'))
         
-        t = acqmodel.run_explore(0.25)
+        t = manager.run_explore(0.25)
 
         time.sleep(1)
 
-        acqmodel.halt()
+        manager.halt()
 
         t.join()
-        acqmodel.close_data()
+        manager.close_data()
 
     def test_tone_vocal_explore_save(self):
         """Run search operation with tone and vocal stimulus, and save results"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
-        acqmodel.set_params(nreps=2, saveexplore=True)
-        stim_names = acqmodel.explore_stim_names()
-        acqmodel.set_stim_by_index(stim_names.index('Pure Tone'))
-        t = acqmodel.run_explore(0.25)
-
-        time.sleep(1)
-
-        acqmodel.explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
-        acqmodel.set_stim_by_index(stim_names.index('Vocalization'))
+        manager.set_params(nreps=2, save=True)
+        stim_names = manager.explore_stim_names()
+        manager.set_stim_by_index(stim_names.index('Pure Tone'))
+        t = manager.run_explore(0.25)
 
         time.sleep(1)
 
-        acqmodel.halt()
+        # cheat to set vocal file :(
+        manager.explorer._explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
+        manager.set_stim_by_index(stim_names.index('Vocalization'))
+
+        time.sleep(1)
+
+        manager.halt()
 
         t.join()
-        acqmodel.close_data()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        print hfile.keys()
         test = hfile['explore_0']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
-        assert_equal(stim[-1]['samplerate_da'], acqmodel.stimulus.samplerate())
+        assert_equal(stim[-1]['samplerate_da'], manager.explore_genrate())
         assert_equal(test.shape[1], winsz*acq_rate)
 
         hfile.close()
@@ -287,19 +291,20 @@ class TestAcquisitionModel():
     def test_tuning_curve(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
 
         tc = StimulusModel()
         TCFactory().init_stim(tc)
         nreps = tc.repCount()
         ntraces = tc.traceCount()
 
-        acqmodel.protocol_model.insertNewTest(tc,0)
+        manager.protocol_model().insertNewTest(tc,0)
 
-        t = acqmodel.run_protocol(0.1)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
         t.join()
 
-        acqmodel.close_data()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -313,18 +318,18 @@ class TestAcquisitionModel():
         hfile.close()
 
     def test_chart_no_stim(self):
-        winsz = 1.0 # this is actually ignored by acqmodel in this case
+        winsz = 1.0 # this is actually ignored by manager in this case
         acq_rate = 100000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
-        acqmodel.set_params(savechart=True)
-        acqmodel.start_chart()
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set_params(savechart=True)
+        manager.start_chart()
         self.done = False
-        self.timer = threading.Timer(1.0, self.stopchart, args=(acqmodel, fname))
+        self.timer = threading.Timer(1.0, self.stopchart, args=(manager, fname))
         self.timer.start()
 
-    def stopchart(self, acqmodel, fname):
-        acqmodel.stop_chart()
-        acqmodel.close_data()
+    def stopchart(self, manager, fname):
+        manager.stop_chart()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -340,8 +345,8 @@ class TestAcquisitionModel():
     def test_chart_tone_protocol(self):
         winsz = 0.1 #seconds
         acq_rate = 50000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
-        acqmodel.set_params(savechart=True)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set_params(savechart=True)
 
         #insert some stimuli
         gen_rate = 500000
@@ -351,14 +356,14 @@ class TestAcquisitionModel():
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
         stim0.setSamplerate(gen_rate)
-        acqmodel.protocol_model.insertNewTest(stim0,0)
+        manager.protocol_model().insertNewTest(stim0,0)
 
-        acqmodel.start_chart()
-        t = acqmodel.run_chart_protocol(0.15)
+        manager.start_chart()
+        t = manager.run_chart_protocol(0.15)
         t.join()
 
-        acqmodel.stop_chart()
-        acqmodel.close_data()
+        manager.stop_chart()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -376,17 +381,17 @@ class TestAcquisitionModel():
     def test_calibration_protocol(self):
         winsz = 0.1 #seconds
         acq_rate = 500000
-        acqmodel, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        tc = acqmodel.calibration_stimulus
+        tc = manager.calibration_stimulus()
         ntraces = tc.traceCount()
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
-        t, calname = acqmodel.run_calibration(0.1, False)
+        t = manager.run_calibration(0.1, False)
         t.join()
-        acqmodel.process_calibration()
-        acqmodel.close_data()
+        results, calname = manager.process_calibration()
+        manager.close_data()
 
         # now check saved data
         hfile = h5py.File(calname, 'r')
@@ -402,13 +407,13 @@ class TestAcquisitionModel():
         hfile.close()
 
     def create_acqmodel(self, winsz, acq_rate):
-        acqmodel = AcquisitionModel()
+        manager = AcquisitionManager()
 
-        acqmodel.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
+        manager.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
                             acqtime=winsz, aisr=acq_rate)
-        acqmodel.set_calibration(sample.calibration_filename())
+        manager.set_calibration(sample.calibration_filename())
 
-        acqmodel.set_save_params(self.tempfolder, 'testdata')
-        fname = acqmodel.create_data_file()
+        manager.set_save_params(self.tempfolder, 'testdata')
+        fname = manager.create_data_file()
 
-        return acqmodel, fname
+        return manager, fname

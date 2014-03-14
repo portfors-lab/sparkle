@@ -107,12 +107,16 @@ class AcquisitionManager():
     def run_explore(self, interval):
         return self.explorer.run(interval)
 
-    def run_protocol(self, interval):
-        return self.protocoler.run(interval)
+    def setup_protocol(self, interval):
+        return self.protocoler.setup(interval)
+
+    def run_protocol(self):
+        return self.protocoler.run()
 
     def run_calibration(self, interval, applycal):
         self.calibrator.apply_calibration(applycal)
-        return self.calibrator.run(interval)
+        self.calibrator.setup(interval)
+        return self.calibrator.run()
 
     def start_chart(self):
         self.charter.start_chart()
@@ -121,13 +125,14 @@ class AcquisitionManager():
         self.charter.stop_chart()
 
     def run_chart_protocol(self, interval):
-        return self.charter.run(interval)
+        self.charter.setup(interval)
+        return self.charter.run()
 
     def process_calibration(self, save=True):
         results, fname = self.calibrator.process_calibration(save)
         if save:
             self.set_calibration(fname)
-        return results
+        return results, fname
 
     def halt(self):
         """Halt any/all running operations"""
@@ -138,6 +143,7 @@ class AcquisitionManager():
 
     def close_data(self):
         if self.datafile is not None:
+            print 'closing datafile'
             self.datafile.close()
 
     def protocol_model(self):

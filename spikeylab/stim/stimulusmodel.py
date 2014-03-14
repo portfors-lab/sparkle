@@ -307,9 +307,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         signals = self.expandFunction(self.signal)
         docs = self.expandFunction(self.doc)
 
+        overloads = []
         for s, d in zip(signals, docs):
             d['overloaded attenuation'] = s[2]
-
+            overloads.append(s[2])
         # remove the undesired attenuation argument
         signals = [sig[0:2] for sig in signals]
 
@@ -318,7 +319,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             signals = [signals[i] for i in order]
             docs = [docs[i] for i in order]
 
-        return signals, docs
+        return signals, docs, overloads
 
     def templateDoc(self):
         """
