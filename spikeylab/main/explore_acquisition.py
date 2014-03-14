@@ -8,39 +8,34 @@ from spikeylab.main.abstract_acquisition import AbstractAcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.util import increment_title
 from spikeylab.tools import spikestats
+from spikeylab.stim.types import get_stimuli_models
 
 class Explorer(AbstractAcquisitionModel):
-    def __init__(self):
-        super(Explorer, self).__init__()
+    def __init__(self, signals):
+        self.stimulus = StimulusModel()
+
+        AbstractAcquisitionModel.__init__(self, signals)
 
         self.player = FinitePlayer()
         self.save_data = False
         self.set_name = 'explore_0'
 
-        self.stimulus = StimulusModel()
-
         stimuli_types = get_stimuli_models()
         self._explore_stimuli = [x() for x in stimuli_types if x.explore]
-
-        self.current_genrate = self.stimulus.samplerate()
 
     def stimuli_list(self):
         return self._explore_stimuli
 
     def set_calibration(self, attenuations, freqs, frange):
-        self.stimulus.set_calibration(attenuations, freqs, frange)
+        self.stimulus.setCalibration(attenuations, freqs, frange)
 
     def update_reference_voltage(self):
         self.stimulus.setReferenceVoltage(self.caldb, self.calv)
 
-    def set_params(self, **kwargs):
-        super(Explorer, self).set_params(**kwargs)
-
     def set_stim_by_index(self, index):
         # remove any current components
         self.stimulus.clearComponents()
-        self.stimulus.insertComponent(self.explore_stimuli[index])
-        self.current_genrate = self.stimulus.samplerate()
+        self.stimulus.insertComponent(self._explore_stimuli[index])
         signal, atten, overload = self.stimulus.signal()
         self.player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         return signal
@@ -58,7 +53,7 @@ class Explorer(AbstractAcquisitionModel):
         self._halt = False
         
         # TODO: some error checking to make sure valid paramenters are set
-        if self.save_explore:
+        if self.save_data:
             # initize data set
             self.current_dataset_name = self.set_name
             self.datafile.init_data(self.current_dataset_name, self.aitimes.shape, mode='open')
@@ -97,13 +92,13 @@ class Explorer(AbstractAcquisitionModel):
                 self.signals.response_collected.emit(times, response)
 
                 # process response; calculate spike times
-                spike_times = spikestats.spike_times(response, self.threshold, self.finite_player.aisr)
+                spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
                 spike_counts.append(len(spike_times))
                 if len(spike_times) > 0:
                     spike_latencies.append(spike_times[0])
                 else:
                     spike_latencies.append(np.nan)
-                spike_rates.append(spikestats.firing_rate(spike_times, self.finite_player.aitime))
+                spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
                 self.signals.spikes_found.emit(response_bins, self.irep)
@@ -141,5 +136,5 @@ class Explorer(AbstractAcquisitionModel):
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
         info = self.stimulus.doc()
-        info['samplerate_ad'] = self.finite_player.aisr
+        info['samplerate_ad'] = self.player.aisr
         self.datafile.append_trace_info(self.current_dataset_name, info)

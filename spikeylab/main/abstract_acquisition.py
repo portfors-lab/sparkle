@@ -3,13 +3,11 @@ import threading
 
 import numpy as np
 
-from spikeylab.tools.qthreading import ProtocolSignals
-
 class AbstractAcquisitionModel():
     """Holds state information for an experimental session"""
-    def __init__(self):
-        self.threshold = threshold
-        self.signals = ProtocolSignals()
+    def __init__(self, signals):
+        self.signals = signals
+        self.threshold = None
 
         self.player = None
 
@@ -22,7 +20,7 @@ class AbstractAcquisitionModel():
         self.binsz = 0.005
 
         self.update_reference_voltage()
-        self.set_calibration(None)
+        self.set_calibration(None, None, None)
 
         self.player_lock = threading.Lock()
 
@@ -101,3 +99,21 @@ class AbstractAcquisitionModel():
         info = self.stimulus.doc()
         info['samplerate_ad'] = self.player.aisr
         self.datafile.append_trace_info(setname, info)
+
+
+    # def setup_relay(self, foriegn_signal):
+    #     self.signals.response_collected.connect(foriegn_signal.response_collected.emit)
+    #     self.signals.calibration_response_collected.connect(foriegn_signal.calibration_response_collected.emit)
+    #     self.signals.average_response.connect(foriegn_signal.average_response.emit)
+    #     self.signals.spikes_found.connect(foriegn_signal.spikes_found.emit)
+    #     self.signals.trace_finished.connect(foriegn_signal.trace_finished.emit)
+    #     self.signals.stim_generated.connect(foriegn_signal.stim_generated.emit)
+    #     self.signals.warning.connect(foriegn_signal.warning.emit)
+    #     self.signals.ncollected.connect(foriegn_signal.ncollected.emit)
+    #     self.signals.current_trace.connect(foriegn_signal.current_trace.emit)
+    #     self.signals.current_rep.connect(foriegn_signal.current_rep.emit)
+    #     self.signals.group_finished.connect(foriegn_signal.group_finished.emit)
+    #     self.signals.samplerateChanged.connect(foriegn_signal.samplerateChanged.emit)
+    #     self.signals.calibration_file_changed.connect(foriegn_signal.calibration_file_changed.emit)
+    #     self.signals.tuning_curve_started.connect(foriegn_signal.tuning_curve_started.emit)
+    #     self.signals.tuning_curve_response.connect(foriegn_signal.tuning_curve_response.emit)

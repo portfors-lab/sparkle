@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
-from spikeylab.main.acqmodel import AcquisitionModel
+from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
@@ -33,7 +33,7 @@ class MainWindow(ControlWindow):
     def __init__(self, inputs_filename=''):
         # set up model and stimlui first, 
         # as saved configuration relies on this
-        self.acqmodel = AcquisitionModel()
+        self.acqmodel = AcquisitionManager()
         
         # get stimuli editor widgets
         self.explore_stimuli = self.acqmodel.stimuli_list()
@@ -62,8 +62,8 @@ class MainWindow(ControlWindow):
         self.display.threshold_updated.connect(self.update_thresh)
         self.display.colormap_changed.connect(self.relay_cmap_change)
 
-        self.ui.protocolView.setModel(self.acqmodel.protocol_model)
-        self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus)
+        self.ui.protocolView.setModel(self.acqmodel.protocol_model())
+        self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus())
 
         self.acqmodel.signals.response_collected.connect(self.display_response)
         self.acqmodel.signals.calibration_response_collected.connect(self.display_calibration_response)
@@ -232,7 +232,7 @@ class MainWindow(ControlWindow):
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             signal = self.acqmodel.set_stim_by_index(stim_index)
             # print 'stim signal', len(signal)
-            gen_rate = self.acqmodel.current_genrate
+            gen_rate = self.acqmodel.explore_genrate()
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
             self.display_stim(signal, gen_rate)
             self.display.set_nreps(nreps)
@@ -333,7 +333,7 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
-        frequencies, intensities = self.acqmodel.calibration_stimulus.autoParamRanges()
+        frequencies, intensities = self.acqmodel.calibration_range()
         self.livecurve = ProgressWidget(list(frequencies), list(intensities))
         self.livecurve.set_labels('calibration')
         self.ui.progress_dock.setWidget(self.livecurve)
@@ -534,7 +534,7 @@ class MainWindow(ControlWindow):
     def tab_changed(self, tab_index):
         if self.ui.tab_group.tabText(tab_index).lower() == 'calibration':
             self.stashed_aisr = self.ui.aisr_spnbx.value()
-            self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_stimulus.samplerate())
+            self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_genrate())
             self.ui.aisr_spnbx.setEnabled(False)
         elif self.prev_tab == 'calibration':
             self.ui.aisr_spnbx.setEnabled(True)

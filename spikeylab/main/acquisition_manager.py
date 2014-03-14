@@ -2,7 +2,11 @@ import logging
 
 from spikeylab.tools.util import create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData, load_calibration_file
-
+from spikeylab.tools.qthreading import ProtocolSignals
+from spikeylab.main.explore_acquisition import Explorer
+from spikeylab.main.protocol_experimenter import ProtocolExperimenter
+from spikeylab.main.chart_experimenter import ChartExperimenter
+from spikeylab.main.calibration_experimenter import CalibrationExperimenter
 
 class AcquisitionManager():
     def __init__(self):
@@ -11,10 +15,16 @@ class AcquisitionManager():
         self.savefolder = None
         self.savename = None
 
-        self.explorer = Explorer()
-        self.protocoler =  ProtocolExperimenter()
-        self.calibrator = CalibrationExperimenter()
-        self.charter = ChartExperimenter()
+        self.signals = ProtocolSignals()
+
+        self.explorer = Explorer(self.signals)
+        self.protocoler =  ProtocolExperimenter(self.signals)
+        self.calibrator = CalibrationExperimenter(self.signals)
+        self.charter = ChartExperimenter(self.signals)
+        # charter should share protocol model with windowed
+        self.charter.protocol_model = self.protocoler.protocol_model
+
+        self.signals.samplerateChanged = self.explorer.stimulus.samplerateChanged
 
     def stimuli_list(self):
         return self.explorer.stimuli_list()
@@ -44,9 +54,9 @@ class AcquisitionManager():
         fname = create_unique_path(self.savefolder, self.savename)
         self.datafile = AcquisitionData(fname)
 
-        self.explorer.set_params('datafile'=self.datafile)
-        self.protocoler.set_params('datafile'=self.datafile)
-        self.charter.set_params('datafile'=self.datafile)
+        self.explorer.set_params(datafile=self.datafile)
+        self.protocoler.set_params(datafile=self.datafile)
+        self.charter.set_params(datafile=self.datafile)
 
         logger = logging.getLogger('main')
         logger.info('Opened datafile: {}'.format(fname))
@@ -73,10 +83,11 @@ class AcquisitionManager():
         """
         self.savefolder = savefolder
         self.savename = savename
+        self.calibrator.set_save_params(folder=self.savefolder)
 
     def set_calibration_file_name(self, savename):
         """Filename for which to save calibrations to"""
-        self.calibrator.set_save_params(self.savefolder, savename)
+        self.calibrator.set_save_params(folder=self.savefolder, name=savename)
 
     def set_params(self, **kwargs):
         self.explorer.set_params(**kwargs)
@@ -100,8 +111,17 @@ class AcquisitionManager():
         return self.protocoler.run(interval)
 
     def run_calibration(self, interval, applycal):
-        self.calibrator.applycal(applycal)
+        self.calibrator.apply_calibration(applycal)
         return self.calibrator.run(interval)
+
+    def start_chart(self):
+        self.charter.start_chart()
+
+    def stop_chart(self):
+        self.charter.stop_chart()
+
+    def run_chart_protocol(self, interval):
+        return self.charter.run(interval)
 
     def process_calibration(self, save=True):
         results, fname = self.calibrator.process_calibration(save)
@@ -109,6 +129,35 @@ class AcquisitionManager():
             self.set_calibration(fname)
         return results
 
+    def halt(self):
+        """Halt any/all running operations"""
+        self.explorer.halt()
+        self.protocoler.halt()
+        self.calibrator.halt()
+        self.charter.halt()
+
     def close_data(self):
         if self.datafile is not None:
             self.datafile.close()
+
+    def protocol_model(self):
+        return self.protocoler.protocol_model
+
+    def calibration_stimulus(self):
+        return self.calibrator.stimulus
+
+    def explore_genrate(self):
+        return self.explorer.stimulus.samplerate()
+
+    def calibration_genrate(self):
+        return self.calibrator.stimulus.samplerate()
+
+    def calibration_range(self):
+        return self.calibrator.stimulus.autoParamRanges()
+
+    def calibration_template(self):
+        return self.calibrator.stimulus.templateDoc()
+
+    def load_calibration_template(self, template):
+        self.calibrator.stimulus.clearComponents()
+        self.calibrator.stimulus.loadFromTemplate(template, self.calibrator.stimulus)

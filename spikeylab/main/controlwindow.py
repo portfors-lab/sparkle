@@ -74,25 +74,27 @@ class ControlWindow(QtGui.QMainWindow):
                             "Window size must equal or exceed stimulus length")
                     return False
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
-                failure = self.acqmodel.protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
+                protocol_model = self.acqmodel.protocol_model()
+                failure = protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
                 if failure:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failure)
                     return False
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-                failmsg = self.acqmodel.calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
+                calibration_stimulus = self.acqmodel.calibration_stimulus()
+                failmsg = calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
                 # also check that the recording samplerate is high enough in this case
-                failmsg = self.acqmodel.calibration_stimulus.verify_expanded(samplerate=self.ui.aisr_spnbx.value()*self.fscale)
+                failmsg = calibration_stimulus.verify_expanded(samplerate=self.ui.aisr_spnbx.value()*self.fscale)
                 if failmsg:
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
-                if not self.acqmodel.calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
+                if not calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
                     QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
                     return False
-                if not self.acqmodel.calibration_stimulus.contains_pval('intensity', self.calvals['caldb']):
+                if not calibration_stimulus.contains_pval('intensity', self.calvals['caldb']):
                     QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference intensity")
                     return False
         return True
@@ -185,7 +187,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['raster_bounds'] = self.display.spiketrace_plot.get_raster_bounds()
         savedict['specargs'] = self.spec_args
         savedict['calvals'] = self.calvals
-        savedict['calparams'] = self.acqmodel.calibration_stimulus.templateDoc()
+        savedict['calparams'] = self.acqmodel.calibration_template()
 
         # parameter settings
         for stim in self.explore_stimuli:
@@ -236,8 +238,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.update_unit_labels(tscale, fscale, setup=True)
 
         if 'calparams' in inputsdict:
-            self.acqmodel.calibration_stimulus.clearComponents()
-            self.acqmodel.calibration_stimulus.loadFromTemplate(inputsdict['calparams'], self.acqmodel.calibration_stimulus)
+            self.acqmodel.load_calibration_template(inputsdict['calparams'])
 
         for stim in self.explore_stimuli:
             try:
@@ -246,7 +247,7 @@ class ControlWindow(QtGui.QMainWindow):
             except KeyError:
                 print 'Unable to load saved inputs for', stim.__class__
 
-        self.ui.aosr_spnbx.setValue(self.acqmodel.stimulus.samplerate())
+        self.ui.aosr_spnbx.setValue(self.acqmodel.explore_genrate())
 
     def closeEvent(self, event):
         self.save_inputs(self.inputs_filename)

@@ -1,3 +1,4 @@
+import os
 import logging
 import numpy as np
 
@@ -5,24 +6,27 @@ from spikeylab.tools.util import create_unique_path
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.factory import CCFactory
 from spikeylab.io.players import FinitePlayer
+from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
+from spikeylab.data.dataobjects import AcquisitionData
 
 class CalibrationExperimenter(Experimenter):
-    def __init__(self):
-        super(CalibrationExperimenter, self).__init__()
+    def __init__(self, signals):
+        Experimenter.__init__(self, signals)
 
         self.savefolder = None
-        self.savename = None
+        self.savename = 'calibration'
 
         self.player = FinitePlayer()
 
-        calibration_stimulus = self.protocol_model.data(self.protocol_model.index(0,0))
-        CCFactory.init_stim(calibration_stimulus)
+        self.stimulus = StimulusModel()
+        CCFactory.init_stim(self.stimulus)
+        self.protocol_model.insertNewTest(self.stimulus, 0)
 
         save_data = True
         self.group_name = 'group_0'
 
-    def set_save_params(self, savefolder, savename):
+    def set_save_params(self, folder=None, name=None):
         """Folder and filename where raw experiment data will be saved to
 
         :param savefolder: folder for experiment data
@@ -30,8 +34,10 @@ class CalibrationExperimenter(Experimenter):
         :param samename: filename template, without extention for individal experiment files
         :type savename: str
         """
-        self.savefolder = savefolder
-        self.savename = savename
+        if folder is not None:
+            self.savefolder = folder
+        if name is not None:
+            self.savename = name
 
     def stash_calibration(self, attenuations, freqs, frange):
         self.calibration_vector = attenuations
@@ -42,7 +48,7 @@ class CalibrationExperimenter(Experimenter):
         self.apply_cal = apply_cal
 
     def set_duration(self, dur):
-        self.protocol_model.data(self.protocol_model.index(0,0)).data(self.calibration_stimulus.index(0,0)).setDuration(dur)
+        self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
 
     def _initialize_run(self):
         self.current_dataset_name = 'calibration'
@@ -79,7 +85,7 @@ class CalibrationExperimenter(Experimenter):
                                 nested_name='vmax')
 
     def _process_response(self, response, trace_info, irep):
-        freq, spectrum = calc_spectrum(recorded_tone, self.player.aisr)
+        freq, spectrum = calc_spectrum(response, self.player.aisr)
 
         f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
         db = trace_info['components'][0]['intensity']
@@ -99,15 +105,15 @@ class CalibrationExperimenter(Experimenter):
             spec_peak_at_f = np.array([-1])
             # self._halt = True
 
-        # vmax = np.amax(abs(recorded_tone))
-        vmax = np.sqrt(np.mean(pow(recorded_tone,2)))*1.414 #rms
+        # vmax = np.amax(abs(response))
+        vmax = np.sqrt(np.mean(pow(response,2)))*1.414 #rms
 
         self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
                              nested_name='fft_peaks')
         self.datafile.append(self.current_dataset_name, np.array([vmax]), 
                              nested_name='vmax')
 
-        self.signals.response_collected.emit(self.aitimes, recorded_tone)
+        self.signals.response_collected.emit(self.aitimes, response)
         self.signals.calibration_response_collected.emit((f, db), spectrum, freq, spec_peak_at_f[0], vmax)
         
         # calculate resultant dB and emit

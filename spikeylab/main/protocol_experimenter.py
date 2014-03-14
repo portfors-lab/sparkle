@@ -3,17 +3,17 @@ import numpy as np
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.tools import spikestats
 from spikeylab.tools.util import increment_title
+from spikeylab.io.players import FinitePlayer
 
 class ProtocolExperimenter(Experimenter):
-    def __init__(self):
-        super(ProtocolExperimenter, self).__init__()
+    def __init__(self, signals):
+        Experimenter.__init__(self, signals)
 
         save_data = True
         self.group_name = 'group_0'
         self.player = FinitePlayer()
 
-    def _intialize_run(self):
-
+    def _initialize_run(self):
         self.current_dataset_name = self.group_name
         self.datafile.init_group(self.current_dataset_name)
         self.group_name = increment_title(self.group_name)
@@ -23,7 +23,6 @@ class ProtocolExperimenter(Experimenter):
 
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
-
 
     def _initialize_test(self, test):
         recording_length = self.aitimes.shape[0]

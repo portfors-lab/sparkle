@@ -3,15 +3,15 @@ from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.tools.util import increment_title
 
 class ChartExperimenter(Experimenter):
-    def __init__(self):
-        super(ChartExperimenter, self).__init__()
+    def __init__(self, signals):
+        Experimenter.__init__(self, signals)
 
         self.chart_name = 'chart_0'
         save_data = False
         self.player = ContinuousPlayer()
         self.player.set_read_function(self.emit_ncollected)
 
-    def _intialize_run(self):
+    def _initialize_run(self):
         self.player.set_aochan(self.aochan)
 
     def start_chart(self):
@@ -38,5 +38,5 @@ class ChartExperimenter(Experimenter):
     def _initialize_test(self, test):
         pass
 
-    def _process_response(self, response):
+    def _process_response(self, response, trace_info, irep):
         pass

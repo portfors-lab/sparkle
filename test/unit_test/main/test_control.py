@@ -186,7 +186,7 @@ class TestSpikey():
         factory = BuilderFactory()
         
         self.add_stim(factory)
-        assert self.form.acqmodel.protocol_model.rowCount() == 1
+        assert self.form.acqmodel.protocol_model().rowCount() == 1
 
         tone = PureTone()
         self.insert_component(tone)        
@@ -215,7 +215,7 @@ class TestSpikey():
         factory = BuilderFactory()
         
         self.add_stim(factory)
-        assert self.form.acqmodel.protocol_model.rowCount() == 1
+        assert self.form.acqmodel.protocol_model().rowCount() == 1
 
         tone = PureTone()
         self.insert_component(tone)
@@ -231,7 +231,7 @@ class TestSpikey():
 
         self.form.ui.protocolView.stim_editor.ui.parametizer.parametizer.param_list.dropEvent(drop)
 
-        stim = self.form.acqmodel.protocol_model.data(self.form.acqmodel.protocol_model.index(0,0), Qt.UserRole)
+        stim = self.form.acqmodel.protocol_model().data(self.form.acqmodel.protocol_model().index(0,0), Qt.UserRole)
         auto_params = stim.autoParams()
         assert auto_params.rowCount() == 1
 

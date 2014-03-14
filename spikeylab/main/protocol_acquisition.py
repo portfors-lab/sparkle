@@ -7,21 +7,18 @@ from spikeylab.main.protocol_model import ProtocolTabelModel
 class Broken(Exception): pass
 
 class Experimenter(AbstractAcquisitionModel):
-    def __init__(self):
-        super(Experimenter, self).__init__()
-
+    def __init__(self, signals):
         self.protocol_model = ProtocolTabelModel()
 
-        # connect/relay signals!!!!!
+        AbstractAcquisitionModel.__init__(self, signals)
 
     def set_calibration(self, attenuations, freqs, frange):
-        self.protocol_model.set_calibration(attenuations, freqs, frange)
+        self.protocol_model.setCalibration(attenuations, freqs, frange)
         
     def update_reference_voltage(self):
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
     def run(self, interval):
-
         setname = self._initialize_run()
 
         self._halt = False
@@ -36,9 +33,7 @@ class Experimenter(AbstractAcquisitionModel):
         self.trace_counter = 0
 
         self.acq_thread = threading.Thread(target=self._worker, 
-                                           args=(stimuli,),
-                                           kwargs={'initialize_test':self.init_test, 
-                                           'process_response':self.process_response})
+                                           args=(stimuli,))
         self.acq_thread.start()
 
         return self.acq_thread
@@ -52,7 +47,7 @@ class Experimenter(AbstractAcquisitionModel):
             for itest, test in enumerate(stimuli):
                 # pull out signal from stim model
                 test.setReferenceVoltage(self.caldb, self.calv)
-                self.initialize_test(test)
+                self._initialize_test(test)
 
                 traces, doc = test.expandedStim()
                 nreps = test.repCount()
@@ -67,7 +62,7 @@ class Experimenter(AbstractAcquisitionModel):
                         if self._halt:
                             raise Broken
                         response = self.player.run()
-                        self.process_response(response, trace_doc, irep)
+                        self._process_response(response, trace_doc, irep)
                         if irep == 0:
                             # do this after collection so plots match details
                             self.signals.stim_generated.emit(signal, test.samplerate())
