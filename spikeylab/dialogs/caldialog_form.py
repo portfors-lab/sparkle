@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Fri Mar 14 00:28:11 2014
+# Created: Fri Mar 14 07:21:50 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,6 +26,7 @@ except AttributeError:
 class Ui_CalibrationDialog(object):
     def setupUi(self, CalibrationDialog):
         CalibrationDialog.setObjectName(_fromUtf8("CalibrationDialog"))
+        CalibrationDialog.setEnabled(True)
         CalibrationDialog.resize(359, 303)
         self.verticalLayout_2 = QtGui.QVBoxLayout(CalibrationDialog)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
@@ -80,6 +81,11 @@ class Ui_CalibrationDialog(object):
         self.funit_lbl_2.setEnabled(False)
         self.funit_lbl_2.setObjectName(_fromUtf8("funit_lbl_2"))
         self.horizontalLayout_2.addWidget(self.funit_lbl_2)
+        self.pushButton = QtGui.QPushButton(self.groupBox)
+        self.pushButton.setEnabled(False)
+        self.pushButton.setMinimumSize(QtCore.QSize(20, 0))
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.horizontalLayout_2.addWidget(self.pushButton)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addWidget(self.groupBox)
         self.gridLayout = QtGui.QGridLayout()
@@ -135,6 +141,8 @@ class Ui_CalibrationDialog(object):
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frange_low_spnbx.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frange_high_spnbx.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.funit_lbl_2.setDisabled)
+        QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.pushButton.setDisabled)
+        QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.maxRange)
         QtCore.QMetaObject.connectSlotsByName(CalibrationDialog)
 
     def retranslateUi(self, CalibrationDialog):
@@ -145,6 +153,8 @@ class Ui_CalibrationDialog(object):
         self.browse_btn.setText(_translate("CalibrationDialog", "...", None))
         self.label_8.setText(_translate("CalibrationDialog", "Calibration frequency range", None))
         self.funit_lbl_2.setText(_translate("CalibrationDialog", "kHz", None))
+        self.pushButton.setToolTip(_translate("CalibrationDialog", "file max range", None))
+        self.pushButton.setText(_translate("CalibrationDialog", "<>", None))
         self.label.setToolTip(_translate("CalibrationDialog", "Maximum intensity", None))
         self.label.setText(_translate("CalibrationDialog", "Reference intensity", None))
         self.label_5.setText(_translate("CalibrationDialog", "V", None))

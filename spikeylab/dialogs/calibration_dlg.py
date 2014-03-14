@@ -24,6 +24,14 @@ class CalibrationDialog(QtGui.QDialog):
         if calfile is not None:
             self.ui.calfile_lnedt.setText(calfile)
 
+    def maxRange(self):
+        try:
+            x, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+            self.ui.frange_low_spnbx.setValue(freqs[0]/self.fscale)
+            self.ui.frange_high_spnbx.setValue(freqs[-1]/self.fscale)
+        except IOError:
+            QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
+
     def values(self):
         results = {}
         results['use_calfile'] = self.ui.calfile_radio.isChecked()
@@ -38,7 +46,11 @@ class CalibrationDialog(QtGui.QDialog):
         if self.ui.calfile_radio.isChecked() and self.ui.calfile_lnedt.text() == '':
             self.ui.none_radio.setChecked(True)
         if self.ui.calfile_radio.isChecked():
-            x, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+            try:
+                x, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+            except IOError:
+                QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
+                return
             if self.ui.frange_low_spnbx.value()*self.fscale < freqs[0] or \
                 self.ui.frange_high_spnbx.value()*self.fscale > freqs[-1]:
                 QtGui.QMessageBox.warning(self, "Invalid Frequency Range", 

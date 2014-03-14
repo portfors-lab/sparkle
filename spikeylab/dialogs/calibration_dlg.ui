@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>CalibrationDialog</class>
  <widget class="QDialog" name="CalibrationDialog">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -118,6 +121,25 @@
           </property>
           <property name="text">
            <string>kHz</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>file max range</string>
+          </property>
+          <property name="text">
+           <string>&lt;&gt;</string>
           </property>
          </widget>
         </item>
@@ -385,9 +407,42 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>none_radio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pushButton</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>122</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CalibrationDialog</receiver>
+   <slot>maxRange()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>330</x>
+     <y>145</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>browseFiles()</slot>
   <slot>conditional_accept()</slot>
+  <slot>maxRange()</slot>
  </slots>
 </ui>
