@@ -38,7 +38,7 @@ class Explorer(AbstractAcquisitionModel):
         self.stimulus.insertComponent(self._explore_stimuli[index])
         signal, atten, overload = self.stimulus.signal()
         self.player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
-        return signal
+        return signal, overload
 
     def current_signal(self):
         return self.stimulus.signal()

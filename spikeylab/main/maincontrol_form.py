@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Mar 12 14:40:26 2014
+# Created: Fri Mar 14 09:28:52 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(1089, 685)
+        ControlWindow.resize(1230, 743)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -72,6 +72,18 @@ class Ui_ControlWindow(object):
         item = QtGui.QListWidgetItem()
         self.listWidget_2.addItem(item)
         self.verticalLayout_8.addWidget(self.listWidget_2)
+        self.gridLayout_6 = QtGui.QGridLayout()
+        self.gridLayout_6.setObjectName(_fromUtf8("gridLayout_6"))
+        self.label_20 = QtGui.QLabel(self.tab_explore)
+        self.label_20.setObjectName(_fromUtf8("label_20"))
+        self.gridLayout_6.addWidget(self.label_20, 0, 0, 1, 1)
+        self.over_atten_lbl = QtGui.QLabel(self.tab_explore)
+        self.over_atten_lbl.setObjectName(_fromUtf8("over_atten_lbl"))
+        self.gridLayout_6.addWidget(self.over_atten_lbl, 0, 1, 1, 1)
+        self.label_23 = QtGui.QLabel(self.tab_explore)
+        self.label_23.setObjectName(_fromUtf8("label_23"))
+        self.gridLayout_6.addWidget(self.label_23, 0, 2, 1, 1)
+        self.verticalLayout_8.addLayout(self.gridLayout_6)
         self.horizontalLayout_7.addLayout(self.verticalLayout_8)
         self.verticalLayout_9 = QtGui.QVBoxLayout()
         self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
@@ -350,7 +362,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1089, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1230, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -530,6 +542,9 @@ class Ui_ControlWindow(object):
         item = self.listWidget_2.item(0)
         item.setText(_translate("ControlWindow", "Coming soon", None))
         self.listWidget_2.setSortingEnabled(__sortingEnabled)
+        self.label_20.setText(_translate("ControlWindow", "Undesired Attenuation:", None))
+        self.over_atten_lbl.setText(_translate("ControlWindow", "0", None))
+        self.label_23.setText(_translate("ControlWindow", "dB", None))
         self.label_39.setText(_translate("ControlWindow", "Reps", None))
         self.funit_lbl.setText(_translate("ControlWindow", "kHz", None))
         self.save_explore_ckbx.setText(_translate("ControlWindow", "Save Explore Recording", None))

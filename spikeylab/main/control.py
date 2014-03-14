@@ -230,8 +230,14 @@ class MainWindow(ControlWindow):
             
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            signal = self.acqmodel.set_stim_by_index(stim_index)
+            signal, ovld = self.acqmodel.set_stim_by_index(stim_index)
             # print 'stim signal', len(signal)
+            self.ui.over_atten_lbl.setNum(ovld)
+            if ovld > 0:
+                self.ui.over_atten_lbl.setPalette(RED)
+            else:
+                self.ui.over_atten_lbl.setPalette(BLACK)
+
             gen_rate = self.acqmodel.explore_genrate()
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
             self.display_stim(signal, gen_rate)
