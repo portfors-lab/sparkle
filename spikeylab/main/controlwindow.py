@@ -8,7 +8,6 @@ from spikeylab.tools.util import convert2native
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.stimulusview import StimulusView
-from spikeylab.plotting.custom_plots import SpecWidget
 from maincontrol_form import Ui_ControlWindow
 
 class ControlWindow(QtGui.QMainWindow):

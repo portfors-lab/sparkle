@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Fri Mar 14 07:21:50 2014
+# Created: Fri Mar 14 13:34:32 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -57,6 +57,15 @@ class Ui_CalibrationDialog(object):
         self.browse_btn.setMaximumSize(QtCore.QSize(25, 16777215))
         self.browse_btn.setObjectName(_fromUtf8("browse_btn"))
         self.horizontalLayout.addWidget(self.browse_btn)
+        self.pushButton_2 = QtGui.QPushButton(self.groupBox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
+        self.pushButton_2.setSizePolicy(sizePolicy)
+        self.pushButton_2.setMaximumSize(QtCore.QSize(25, 16777215))
+        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
+        self.horizontalLayout.addWidget(self.pushButton_2)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
@@ -143,6 +152,7 @@ class Ui_CalibrationDialog(object):
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.funit_lbl_2.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.pushButton.setDisabled)
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.maxRange)
+        QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.plotCurve)
         QtCore.QMetaObject.connectSlotsByName(CalibrationDialog)
 
     def retranslateUi(self, CalibrationDialog):
@@ -151,6 +161,7 @@ class Ui_CalibrationDialog(object):
         self.none_radio.setText(_translate("CalibrationDialog", "None", None))
         self.calfile_radio.setText(_translate("CalibrationDialog", "Use saved calibration", None))
         self.browse_btn.setText(_translate("CalibrationDialog", "...", None))
+        self.pushButton_2.setText(_translate("CalibrationDialog", "P", None))
         self.label_8.setText(_translate("CalibrationDialog", "Calibration frequency range", None))
         self.funit_lbl_2.setText(_translate("CalibrationDialog", "kHz", None))
         self.pushButton.setToolTip(_translate("CalibrationDialog", "file max range", None))

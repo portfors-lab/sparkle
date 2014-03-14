@@ -138,7 +138,10 @@ class TestStimModel():
         signal, atten, ovld = model.signal()
         assert atten == 0
         # rounding errors (or rather how python stores numbers) make this necessary
-        assert round(np.amax(signal),3) == calv
+        if USE_RMS:
+            assert round(np.amax(signal),4) == calv*1.414
+        else:
+            assert round(np.amax(signal),3) == calv
 
     def test_signal_lt_caldb(self):
         caldb = 100
@@ -153,12 +156,11 @@ class TestStimModel():
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
-        print 'atten', atten
+        assert atten == 10
         if USE_RMS:
-            assert round(atten) == 7
+            assert round(np.amax(signal),4) == calv*1.414
         else:
-            assert atten == 10
-        assert round(np.amax(signal),3) == calv
+            assert round(np.amax(signal),3) == calv
 
     @raises(Exception)
     def test_signal_gt_caldb(self):
@@ -190,7 +192,10 @@ class TestStimModel():
 
         signal, atten, ovld = model.signal()
         assert atten == 0
-        assert round(np.amax(signal),3) == calv
+        if USE_RMS:
+            assert round(np.amax(signal),4) == calv*1.414
+        else:
+            assert round(np.amax(signal),3) == calv
         # do math to make this more accurate
         assert ovld > 0
 

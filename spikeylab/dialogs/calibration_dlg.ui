@@ -71,6 +71,25 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>P</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -322,7 +341,7 @@
      <y>43</y>
     </hint>
     <hint type="destinationlabel">
-     <x>338</x>
+     <x>307</x>
      <y>101</y>
     </hint>
    </hints>
@@ -334,7 +353,7 @@
    <slot>browseFiles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>338</x>
+     <x>307</x>
      <y>101</y>
     </hint>
     <hint type="destinationlabel">
@@ -439,10 +458,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>CalibrationDialog</receiver>
+   <slot>plotCurve()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>330</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>358</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>browseFiles()</slot>
   <slot>conditional_accept()</slot>
   <slot>maxRange()</slot>
+  <slot>plotCurve()</slot>
  </slots>
 </ui>

@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 from caldialog_form import Ui_CalibrationDialog
 from spikeylab.data.dataobjects import load_calibration_file
+from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 class CalibrationDialog(QtGui.QDialog):
     def __init__(self, fscale, default_vals=None):
@@ -31,6 +32,17 @@ class CalibrationDialog(QtGui.QDialog):
             self.ui.frange_high_spnbx.setValue(freqs[-1]/self.fscale)
         except IOError:
             QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
+
+    def plotCurve(self):
+        try:
+            attenuations, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+            self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
+            self.pw.setWindowFlags(QtCore.Qt.Window)
+            self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
+            self.pw.show()
+        except IOError:
+            QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
+
 
     def values(self):
         results = {}

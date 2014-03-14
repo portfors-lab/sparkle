@@ -3,7 +3,7 @@ import pyqtgraph as pg
 import numpy as np
 
 from spikeylab.plotting.viewbox import SpikeyViewBox
-from spikeylab.dialogs.raster_bounds_dlg import RasterBoundsDialog
+from spikeylab.plotting.raster_bounds_dlg import RasterBoundsDialog
 import spikeylab.tools.audiotools as audiotools
 
 STIM_HEIGHT = 0.05
@@ -258,6 +258,20 @@ class FFTWidget(BasePlot):
 
     def update_data(self, index_data, value_data):
         self.fft_plot.setData(index_data, value_data)
+
+class SimplePlotWidget(BasePlot):
+    def __init__(self, xpoints, ypoints, parent=None):
+        super(SimplePlotWidget, self).__init__(parent)
+
+        self.pdi = self.plot(xpoints, ypoints)
+
+    def set_labels(self, xlabel=None, ylabel=None, title=None):
+        if xlabel is not None:
+            self.setLabel('left', xlabel)
+        if ylabel is not None:
+            self.setLabel('bottom', ylabel)
+        if title is not None:
+            self.set_title(title)
 
 class ProgressWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
