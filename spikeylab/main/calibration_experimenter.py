@@ -10,6 +10,8 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
 from spikeylab.data.dataobjects import AcquisitionData
 
+USE_FFT = True
+
 class CalibrationExperimenter(Experimenter):
     def __init__(self, signals):
         Experimenter.__init__(self, signals)
@@ -104,6 +106,7 @@ class CalibrationExperimenter(Experimenter):
             print 'target', f, 'freqs', freq
             spec_peak_at_f = np.array([-1])
             # self._halt = True
+        peak_fft = spec_peak_at_f[0]
 
         # vmax = np.amax(abs(response))
         vmax = np.sqrt(np.mean(pow(response,2)))*1.414 #rms
@@ -114,16 +117,20 @@ class CalibrationExperimenter(Experimenter):
                              nested_name='vmax')
 
         self.signals.response_collected.emit(self.aitimes, response)
-        self.signals.calibration_response_collected.emit((f, db), spectrum, freq, spec_peak_at_f[0], vmax)
+        self.signals.calibration_response_collected.emit((f, db), spectrum, freq, peak_fft, vmax)
         
         # calculate resultant dB and emit
-        self.peak_avg.append(vmax)
+        if USE_FFT:
+            self.peak_avg.append(peak_fft)
+        else:
+            self.peak_avg.append(vmax)
         if irep == self.nreps-1:
             mean_peak = np.mean(self.peak_avg)
             if f == self.calf and db == self.caldb:
                 # this really needs to happend first
                 self.calpeak = mean_peak
             resultdb = calc_db(vmax, self.calpeak) + self.caldb
+            resultdb = calc_db(peak_fft, self.calpeak) + self.caldb
             self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):
@@ -144,7 +151,10 @@ class CalibrationExperimenter(Experimenter):
         cal_vmax = vmaxes[cal_index]
 
         # print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
-        resultant_dB = vfunc(vmaxes, cal_vmax) * -1 #db attenuation
+        if USE_FFT:
+            resultant_dB = vfunc(vmaxes, cal_peak) * -1 #db attenuation
+        else:
+            resultant_dB = vfunc(vmaxes, cal_vmax) * -1 #db attenuation
         # print 'results', resultant_dB
 
         print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
