@@ -16,7 +16,6 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
 
         self.setItemDelegate(SmartDelegate())
         self.setItemDelegateForColumn(0,ComboboxDelegate())
-        self.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked | QtGui.QAbstractItemView.SelectedClicked)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
         palette = self.palette()
@@ -25,12 +24,13 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
 
     def edit(self, index, trigger, event):
         "Sets editing widget for selected list item"
-        self.model().updateSelectionModel(index)
+        if index.isValid():
+            self.model().updateSelectionModel(index)
         return super(AutoParameterTableView, self).edit(index, trigger, event)
 
     def grabImage(self, index):
         # grab an image of the cell we are moving
-            # assume all rows same height
+        # assume all rows same height
         row_height = self.rowHeight(0)
         # -5 becuase it a a little off
         y = (row_height*index.row()) + row_height - 5
@@ -43,8 +43,9 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             index = self.indexAt(event.pos())
-            self.selectRow(index.row())
-            self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
+            if index.isValid():
+                self.selectRow(index.row())
+                self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
         else:
             super(AutoParameterTableView, self).mousePressEvent(event)
 
