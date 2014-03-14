@@ -411,12 +411,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
             npts = len(signal)
             fs = self.samplerate()
             f = np.arange(npts/2+1)/(float(npts)/fs)
-            f0 = (np.abs(f-frange[0])).argmin()
-            f1 = (np.abs(f-frange[1])).argmin()
+            # closest frequencies in range
+            f0 = np.where(f-frange[0] >= 0)[0][0]
+            f1 = np.where(f-frange[-1] <= 0)[0][-1]
 
             cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
-            frange = f[f0:f1]
-            H = cal_func(frange)
+            interp_freqs = f[f0:f1]
+            H = cal_func(interp_freqs)
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)
             Xadjusted = X.copy()
