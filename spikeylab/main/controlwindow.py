@@ -226,7 +226,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.display.set_spec_args(**self.spec_args)        
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 
                                       'calv':0.1, 'calfile':'', 
-                                      'use_calfile':False, 'frange':(5000, 5e5)})
+                                      'use_calfile':False, 'frange':(5000, 1e5)})
         self.acqmodel.set_params(**self.calvals)
         if self.calvals['use_calfile']:
             self.acqmodel.set_calibration(self.calvals['calfile'], self.calvals['frange'])
