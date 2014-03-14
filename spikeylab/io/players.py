@@ -24,7 +24,7 @@ class PlayerBase():
         self.aitask = None
         self.aotask = None
 
-        self.maxv = 2 #Volts
+        self.maxv = 5 #Volts
 
         # establish connection to the attenuator
         try:
@@ -111,6 +111,7 @@ class PlayerBase():
         self.aichan = aichan
 
     def set_maxv(self, v):
+        return
         self.maxv = v
 
 class FinitePlayer(PlayerBase):

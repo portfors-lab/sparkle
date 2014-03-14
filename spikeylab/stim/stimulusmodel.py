@@ -13,6 +13,7 @@ from PyQt4 import QtGui, QtCore
 import matplotlib.pyplot as plt
 
 DEFAULT_SAMPLERATE = 500000
+USE_RMS = True # WARNING THIS MUST MATCH FLAG IN STIMULI
 
 class StimulusModel(QtCore.QAbstractItemModel):
     """
@@ -311,6 +312,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for s, d in zip(signals, docs):
             d['overloaded attenuation'] = s[2]
             overloads.append(s[2])
+
         # remove the undesired attenuation argument
         signals = [sig[0:2] for sig in signals]
 
@@ -385,11 +387,16 @@ class StimulusModel(QtCore.QAbstractItemModel):
         total_signal = self.apply_calibration(total_signal, samplerate)
 
         undesired_attenuation = 0
-        if max(abs(total_signal)) > self.calv:
+        if USE_RMS:
+            maxv = self.calv*1.414 # peak value for sine wave rms
+        else:
+            maxv = self.calv
+
+        if max(abs(total_signal)) > maxv:
             peak = max(abs(total_signal))
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             # scale stim down to outputable max
-            total_signal = (total_signal/peak)*self.calv
+            total_signal = (total_signal/peak)*maxv
             after_rms = np.sqrt(np.mean(pow(total_signal,2)))
             attenuated = 20 * np.log10(before_rms/after_rms)
             if attenuated <= atten:

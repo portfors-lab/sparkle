@@ -393,7 +393,8 @@ class MainWindow(ControlWindow):
         # display fft here
         f, db = fdb
         # print 'response f', f, 'db', db
-        spec_max, max_freq = get_fft_peak(spectrum[1:], freqs)
+        spectrum[0] = 0
+        spec_max, max_freq = get_fft_peak(spectrum, freqs)
         if spec_max != spec_peak:
             print 'max freq', max_freq, 'current', f
             self.ui.calibration_widget.ui.fftf_lbl.setPalette(RED)
