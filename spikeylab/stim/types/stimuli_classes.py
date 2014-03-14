@@ -14,6 +14,7 @@ from spikeylab.tools.audiotools import spectrogram, make_tone
 
 from pyqtgraph import GradientEditorItem
 
+USE_RMS = True
 
 COLORTABLE=[]
 for i in reversed(range(256)): COLORTABLE.append(QtGui.qRgb(i,i,i))
@@ -53,6 +54,8 @@ class PureTone(Tone):
 
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
+        if USE_RMS:
+            tone = tone*1.414
         return tone
 
     def stateDict(self):
@@ -88,6 +91,8 @@ class FMSweep(Tone):
         t = np.arange(npts).astype(float)/fs
         signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
         signal = ((signal/np.amax(signal))*amp)
+        if USE_RMS:
+            signal = signal*1.414
 
         if self._risefall > 0:
             rf_npts = self._risefall * fs
@@ -200,9 +205,13 @@ class Vocalization(AbstractStimulusComponent):
             raise Exception("specified samplerate does not match wav stimulus")
         # normalize to calibration
         wavdata = wavdata.astype(float)
-        max_amp = np.amax(wavdata)
+        if USE_RMS:
+            amp_scale = np.sqrt(np.mean(pow(wavdata,2)))
+        else:
+            amp_scale = np.amax(wavdata)
         amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
-        wavdata = ((wavdata/max_amp)*amp)
+        wavdata = ((wavdata/amp_scale)*amp)
+        rms = np.sqrt(np.mean(pow(wavdata,2)))
         return wavdata
 
     def auto_details(self):
@@ -227,6 +236,8 @@ class WhiteNoise(AbstractStimulusComponent):
         npts = self._duration*fs
         signal = self._noise[:npts]
         signal = ((signal/np.amax(signal))*amp)
+        if USE_RMS:
+            signal = signal*1.414
         return signal
 
     def paint(self, painter, rect, palette):
