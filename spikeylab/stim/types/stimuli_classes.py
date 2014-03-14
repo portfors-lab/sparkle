@@ -210,9 +210,15 @@ class Vocalization(AbstractStimulusComponent):
         else:
             amp_scale = np.amax(wavdata)
         amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
-        wavdata = ((wavdata/amp_scale)*amp)
-        rms = np.sqrt(np.mean(pow(wavdata,2)))
-        return wavdata
+        signal = ((wavdata/amp_scale)*amp)
+        rms = np.sqrt(np.mean(pow(signal,2)))
+
+        if self._risefall > 0:
+            rf_npts = self._risefall * fs
+            signal[:rf_npts] = signal[:rf_npts] * np.linspace(0,1,rf_npts)
+            signal[-rf_npts:] = signal[-rf_npts:] * np.linspace(1,0,rf_npts)
+
+        return signal
 
     def auto_details(self):
         details = super(Vocalization, self).auto_details()
