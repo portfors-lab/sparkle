@@ -87,8 +87,10 @@ class TraceWidget(BasePlot):
     def append_data(self, axeskey, bins, ypoints):
         if axeskey == 'raster':
             x, y = self.raster_plot.getData()
+            # don't plot overlapping points
+            bins = np.unique(bins)
             # adjust repetition number to response scale
-            ypoints = np.ones_like(ypoints)*self.raster_yslots[ypoints[0]]
+            ypoints = np.ones_like(bins)*self.raster_yslots[ypoints[0]]
             x = np.append(x, bins)
             y = np.append(y, ypoints)
             self.raster_plot.setData(x, y)

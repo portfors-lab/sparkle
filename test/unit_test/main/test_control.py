@@ -116,10 +116,13 @@ class TestSpikey():
 
         hfile.close()
 
-    def test_no_save_calibration(self):
+    def test_apply_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
         self.form.ui.reprate_spnbx.setValue(10)
-        self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(False)
+        self.form.ui.calibration_widget.ui.applycal_ckbx.setChecked(True)
+        
+        self.form.acqmodel.set_calibration(sample.calibration_filename())
+        
         original_calfile = self.form.calvals['calfile'] #may be None
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)

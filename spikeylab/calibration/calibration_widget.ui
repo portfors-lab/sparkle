@@ -262,14 +262,17 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QCheckBox" name="savecal_ckbx">
+       <widget class="QRadioButton" name="savecal_ckbx">
         <property name="text">
          <string>Save calibration</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="applycal_ckbx">
+       <widget class="QRadioButton" name="applycal_ckbx">
         <property name="text">
          <string>Test calibration</string>
         </property>
@@ -289,40 +292,7 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>savecal_ckbx</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>CalibrationWidget</receiver>
-   <slot>xor_applycal()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>66</x>
-     <y>310</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>2</x>
-     <y>322</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>applycal_ckbx</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>CalibrationWidget</receiver>
-   <slot>xor_savecal()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>291</x>
-     <y>311</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>542</x>
-     <y>306</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>xor_applycal()</slot>
   <slot>xor_savecal()</slot>

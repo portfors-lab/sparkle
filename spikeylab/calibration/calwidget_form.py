@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Tue Feb 11 15:22:04 2014
+# Created: Fri Mar 14 16:35:28 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -154,17 +154,16 @@ class Ui_CalibrationWidget(object):
         self.calgroup.setObjectName(_fromUtf8("calgroup"))
         self.horizontalLayout_4 = QtGui.QHBoxLayout(self.calgroup)
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
-        self.savecal_ckbx = QtGui.QCheckBox(self.calgroup)
+        self.savecal_ckbx = QtGui.QRadioButton(self.calgroup)
+        self.savecal_ckbx.setChecked(True)
         self.savecal_ckbx.setObjectName(_fromUtf8("savecal_ckbx"))
         self.horizontalLayout_4.addWidget(self.savecal_ckbx)
-        self.applycal_ckbx = QtGui.QCheckBox(self.calgroup)
+        self.applycal_ckbx = QtGui.QRadioButton(self.calgroup)
         self.applycal_ckbx.setObjectName(_fromUtf8("applycal_ckbx"))
         self.horizontalLayout_4.addWidget(self.applycal_ckbx)
         self.verticalLayout.addWidget(self.calgroup)
 
         self.retranslateUi(CalibrationWidget)
-        QtCore.QObject.connect(self.savecal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWidget.xor_applycal)
-        QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), CalibrationWidget.xor_savecal)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWidget)
 
     def retranslateUi(self, CalibrationWidget):

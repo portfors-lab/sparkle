@@ -19,11 +19,3 @@ class CalibrationWidget(QtGui.QWidget):
 
     def set_duration(self, dur):
         self.ui.curve_widget.ui.dur_spnbx.setValue(dur)
-
-    def xor_applycal(self,checked):
-        if checked:
-            self.ui.applycal_ckbx.setChecked(False)
-
-    def xor_savecal(self,checked):
-        if checked:
-            self.ui.savecal_ckbx.setChecked(False)
