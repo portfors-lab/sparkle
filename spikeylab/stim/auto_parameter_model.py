@@ -57,6 +57,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                     else:
                         step = param['step']
                     item = len(np.arange(param['start'], param['stop'], step)) + 1
+                elif param['start'] == param['stop']:
+                    item = 1
                 else:
                     item = 0
             return item
