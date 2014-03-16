@@ -95,7 +95,41 @@ class TestAcquisitionModel():
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], gen_rate)
         assert_equal(test.shape,(1,1,winsz*acq_rate))
+        assert stim[0]['overloaded_attenuation'] == 0
 
+        hfile.close()
+
+    def test_tone_protocol_over_voltage(self):
+        """Test a protocol with a single tone stimulus"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        #insert some stimuli
+        gen_rate = 500000
+
+        tone0 = PureTone()
+        tone0.setDuration(0.02)
+        tone0.setIntensity(manager.protocoler.caldb)
+        stim0 = StimulusModel()
+        stim0.insertComponent(tone0)
+        stim0.setSamplerate(gen_rate)
+        manager.protocol_model().insertNewTest(stim0,0)
+
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_0']['test_0']
+        stim = json.loads(test.attrs['stim'])
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], gen_rate)
+        assert_equal(test.shape,(1,1,winsz*acq_rate))
+        assert stim[0]['overloaded_attenuation'] > 0
         hfile.close()
 
     def test_vocal_protocol(self):
@@ -373,8 +407,8 @@ class TestAcquisitionModel():
         print 'stim', stim
         # assert_in('components', stim[0])
         # assert_equal(stim[0]['samplerate_da'], gen_rate)
-        assert_equal(test.shape,(winsz*acq_rate,))
         assert len(test.shape) == 1
+        assert test.shape[0] >= winsz*acq_rate
         
         hfile.close()
 

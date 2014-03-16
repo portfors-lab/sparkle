@@ -310,7 +310,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         overloads = []
         for s, d in zip(signals, docs):
-            d['overloaded attenuation'] = s[2]
+            d['overloaded_attenuation'] = s[2]
             overloads.append(s[2])
 
         # remove the undesired attenuation argument
