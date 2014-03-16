@@ -45,6 +45,9 @@ class NoiseParameterWidget(AbstractParameterWidget):
         self.setLayout(layout)
         self.setWindowTitle("Silence")
 
+        self.db_spnbx.valueChanged.connect(self.valueChanged.emit)
+        self.dur_spnbx.editingFinished.connect(self.valueChanged.emit)
+
     def setComponent(self, component):
         self.dur_spnbx.setValue(component.duration()/self.scales[0])
         self.db_spnbx.setValue(component.intensity())
@@ -53,6 +56,7 @@ class NoiseParameterWidget(AbstractParameterWidget):
     def saveToObject(self):
         self._component.setDuration(self.dur_spnbx.value()*self.scales[0])
         self._component.setIntensity(self.db_spnbx.value())
+        self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def component(self):
         return self._component
