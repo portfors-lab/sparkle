@@ -5,6 +5,7 @@ import numpy as np
 from spikeylab.tools.util import create_unique_path
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.factory import CCFactory
+from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
@@ -24,6 +25,12 @@ class CalibrationExperimenter(Experimenter):
         self.stimulus = StimulusModel()
         CCFactory.init_stim(self.stimulus)
         self.protocol_model.insertNewTest(self.stimulus, 0)
+
+        # add in a tone at the calibration frequency and intensity
+        control_stim = StimulusModel()
+        self.control_tone = PureTone()
+        control_stim.insertComponent(self.control_tone)
+        self.protocol_model.insertNewTest(control_stim, 0)
 
         save_data = True
         self.group_name = 'group_0'
@@ -64,6 +71,13 @@ class CalibrationExperimenter(Experimenter):
         logger.info('calibration file name %s' % fname)
 
         self.datafile = AcquisitionData(fname)
+        self.datafile.init_group(self.current_dataset_name)
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
+                                nested_name='fft_peaks')
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
+                                nested_name='vmax')
 
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata('', info)
@@ -71,20 +85,21 @@ class CalibrationExperimenter(Experimenter):
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
 
+        self.control_tone.setDuration(self.stimulus.data(self.stimulus.index(0,0)).duration())
+        self.control_tone.setRisefall(self.stimulus.data(self.stimulus.index(0,0)).risefall())
+        self.control_tone.setFrequency(self.calf)
+        self.control_tone.setIntensity(self.caldb)
+        self.calpeak = None
+        self.trace_counter = -1 # initialize to -1 instead of 0
+
         if self.apply_cal:
             self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
         else:
             self.protocol_model.setCalibration(None, None, None)
 
     def _initialize_test(self, test):
-        test.setReorderFunc(self.reorder_traces)
-        self.datafile.init_group(self.current_dataset_name)
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
-                                dims=(test.traceCount(), test.repCount()),
-                                nested_name='fft_peaks')
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
-                                dims=(test.traceCount(), test.repCount()),
-                                nested_name='vmax')
+        self.peak_avg = []
+        return
 
     def _process_response(self, response, trace_info, irep):
         freq, spectrum = calc_spectrum(response, self.player.aisr)
@@ -92,12 +107,6 @@ class CalibrationExperimenter(Experimenter):
         f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
         db = trace_info['components'][0]['intensity']
         # print 'f', f, 'db', db
-        if irep == 0:
-            if db == self.caldb:
-                self.calibration_frequencies.append(f)
-                self.calibration_indexes.append(self.trace_counter)
-            self.trace_counter +=1
-            self.peak_avg = []
         
         # spec_max, max_freq = get_fft_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
@@ -111,13 +120,22 @@ class CalibrationExperimenter(Experimenter):
         # vmax = np.amax(abs(response))
         vmax = np.sqrt(np.mean(pow(response,2)))*1.414 #rms
 
-        self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
-                             nested_name='fft_peaks')
-        self.datafile.append(self.current_dataset_name, np.array([vmax]), 
-                             nested_name='vmax')
+        if self.trace_counter >= 0:
+            if irep == 0:
+                if db == self.caldb:
+                    self.calibration_frequencies.append(f)
+                    self.calibration_indexes.append(self.trace_counter)
+                self.trace_counter +=1
+                self.peak_avg = []
 
-        self.signals.response_collected.emit(self.aitimes, response)
-        self.signals.calibration_response_collected.emit((f, db), spectrum, freq, peak_fft, vmax)
+            self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
+                                 nested_name='fft_peaks')
+            self.datafile.append(self.current_dataset_name, np.array([vmax]), 
+                                 nested_name='vmax')
+            self.datafile.append_trace_info(self.current_dataset_name, trace_info)
+
+            self.signals.response_collected.emit(self.aitimes, response)
+            self.signals.calibration_response_collected.emit((f, db), spectrum, freq, peak_fft, vmax)
         
         # calculate resultant dB and emit
         if USE_FFT:
@@ -126,12 +144,14 @@ class CalibrationExperimenter(Experimenter):
             self.peak_avg.append(vmax)
         if irep == self.nreps-1:
             mean_peak = np.mean(self.peak_avg)
-            if f == self.calf and db == self.caldb:
-                # this really needs to happend first
+            if f == self.calf and db == self.caldb and self.trace_counter == -1:
+                # this always is the first trace
                 self.calpeak = mean_peak
-            resultdb = calc_db(vmax, self.calpeak) + self.caldb
-            resultdb = calc_db(peak_fft, self.calpeak) + self.caldb
-            self.signals.average_response.emit(f, db, resultdb)
+                self.trace_counter +=1
+            else:
+                resultdb = calc_db(vmax, self.calpeak) + self.caldb
+                resultdb = calc_db(peak_fft, self.calpeak) + self.caldb
+                self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):
         """processes the data gathered in a calibration run (does not work if multiple
@@ -145,16 +165,13 @@ class CalibrationExperimenter(Experimenter):
         vmaxes = np.mean(abs(self.datafile.get('vmax')), axis=1)
 
         # print 'calibration frequencies', self.calibration_frequencies
-        cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
-
-        cal_peak = peaks[cal_index]
-        cal_vmax = vmaxes[cal_index]
+        # cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
+        # cal_peak = peaks[cal_index]
+        # cal_vmax = vmaxes[cal_index]
 
         # print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
-        if USE_FFT:
-            resultant_dB = vfunc(vmaxes, cal_peak) * -1 #db attenuation
-        else:
-            resultant_dB = vfunc(vmaxes, cal_vmax) * -1 #db attenuation
+
+        resultant_dB = vfunc(vmaxes, self.calpeak) * -1 #db attenuation
         # print 'results', resultant_dB
 
         print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
@@ -178,22 +195,10 @@ class CalibrationExperimenter(Experimenter):
                                        relevant_info)
             self.datafile.close()
             self.signals.calibration_file_changed.emit(fname)
-            print 'finished calibration :))))))))'
+            print 'finished calibration :)'
         else:
             # delete the data saved to file thus far.
             self.datafile.close()
             os.remove(fname)
-            print 'calibration aborted'
+            print 'calibration not saved'
         return resultant_dB, fname
-
-    def reorder_traces(self, doclist):
-        # Pick out the calibration frequency and put it first
-        order = range(len(doclist))
-        for i, trace in enumerate(doclist):
-            if trace['components'][0]['frequency'] == self.calf and trace['components'][0]['intensity'] == self.caldb:
-                order.pop(i)
-                order.insert(0,i)
-                return order
-        else:
-            #did not find calibration frequency, raise Error
-            raise Exception('calibration frequency and intensity not found in stimulus')

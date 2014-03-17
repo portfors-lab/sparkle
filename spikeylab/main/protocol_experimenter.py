@@ -61,6 +61,7 @@ class ProtocolExperimenter(Experimenter):
         self.signals.spikes_found.emit(response_bins, irep)
 
         self.datafile.append(self.current_dataset_name, response)
+        self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
         if irep == self.nreps-1:
             total_spikes = float(sum(spike_counts))

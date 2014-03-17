@@ -19,10 +19,11 @@ class Experimenter(AbstractAcquisitionModel):
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
     def setup(self, interval):
-        setname = self._initialize_run()
+        self.trace_counter = 0
 
         self._halt = False
 
+        setname = self._initialize_run()
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
         self.start_time = time.time()
@@ -30,7 +31,6 @@ class Experimenter(AbstractAcquisitionModel):
         self.interval = interval
 
         stimuli = self.protocol_model.stimulusList()
-        self.trace_counter = 0
 
         self.acq_thread = threading.Thread(target=self._worker, 
                                            args=(stimuli,))
@@ -78,7 +78,6 @@ class Experimenter(AbstractAcquisitionModel):
 
                         self.player.reset()
                     # always save protocol response
-                    self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
 
                     self.player.stop()
         except Broken:

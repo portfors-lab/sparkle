@@ -39,4 +39,4 @@ class ChartExperimenter(Experimenter):
         pass
 
     def _process_response(self, response, trace_info, irep):
-        pass
+        self.datafile.append_trace_info(self.current_dataset_name, trace_info)

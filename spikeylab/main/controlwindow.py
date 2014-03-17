@@ -90,12 +90,13 @@ class ControlWindow(QtGui.QMainWindow):
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
-                if not calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
-                    QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
-                    return False
-                if not calibration_stimulus.contains_pval('intensity', self.calvals['caldb']):
-                    QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference intensity")
-                    return False
+                if self.ui.calibration_widget.ui.savecal_ckbx.isChecked():
+                    if not calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
+                        QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
+                        return False
+                    if not calibration_stimulus.contains_pval('intensity', self.calvals['caldb']):
+                        QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference intensity")
+                        return False
         return True
 
     def update_unit_labels(self, tscale, fscale, setup=False):
