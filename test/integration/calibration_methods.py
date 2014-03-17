@@ -10,7 +10,7 @@ def calc_db(peak, calpeak):
     pbdB = 20 * np.log10(peak/calpeak)
     return pbdB
 
-def calc_error(predicted, recorded, frange):
+def calc_error(predicted, recorded, frange, title=None):
     npts = len(predicted)
     f = np.arange(npts/2+1)/(float(npts)/fs)
     f0 = (np.abs(f-frange[0])).argmin()
@@ -26,20 +26,23 @@ def calc_error(predicted, recorded, frange):
     recorded_roi = recorded_spectrum[f0:f1]
 
     # normalize for ROI
-    predicted_roi = predicted_roi/np.amax(predicted_roi)
-    recorded_roi = recorded_roi/np.amax(recorded_roi)
+    predicted_roi = abs(predicted_roi/np.amax(predicted_roi))
+    recorded_roi = abs(recorded_roi/np.amax(recorded_roi))
 
-    # plt.figure()
-    # plt.subplot(211)
-    # plt.plot(f[f0:f1], predicted_roi.real)
-    # plt.title("predicted")
-    # plt.subplot(212)
-    # plt.title("recorded")
-    # plt.plot(f[f0:f1], recorded_roi.real)
-
-    mse = (np.sum(recorded_roi.real - predicted_roi.real)**2)/npts
+    mse = (np.sum((recorded_roi.real - predicted_roi.real)**2))/npts
     mae = abs(np.mean(recorded_roi.real - predicted_roi.real))
-    return mse, np.sqrt(mse), mae
+    mse2 = np.sqrt(mse)
+
+    plt.figure()
+    plt.suptitle('{} {:.4f}'.format(title, mse2))
+    plt.subplot(211)
+    plt.plot(f[f0:f1], predicted_roi.real)
+    plt.title("predicted")
+    plt.subplot(212)
+    plt.title("recorded")
+    plt.plot(f[f0:f1], recorded_roi.real)
+
+    return mse, mse2, mae
 
 def apply_calibration(sig, fs, frange, calfqs, calvals):
     X = np.fft.rfft(sig)
@@ -122,7 +125,11 @@ for tf in tone_frequencies:
     
     spectrum = np.fft.rfft(mean_response)
     freqs = np.arange(npts/2+1)/(float(npts)/fs)
-    fftpeaks.append(spectrum[freqs == tf][0].real)
+    ftp = spectrum[freqs == tf][0]
+    mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+    # print 'fft peak at', tf, mag
+
+    fftpeaks.append(mag)
 print
 
 print 'calibration curve finished'
@@ -165,7 +172,9 @@ for tf in tone_frequencies:
     mean_response = record(calibrated_tone)
     spectrum = np.fft.rfft(mean_response)
     freqs = np.arange(npts/2+1)/(float(npts)/fs)
-    testpeaks2.append(spectrum[freqs == tf][0].real)
+    ftp = spectrum[freqs == tf][0]
+    mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+    testpeaks2.append(mag)
 print
 
 print 'test curves finished'
@@ -233,16 +242,16 @@ plt.specgram(mean_vfcal, NFFT=512, Fs=fs)
 # normalize results
 print 'calculating error...'
 
-ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, mean_control, frange)
-tcal_err, tcal_err_sr, tcal_mae = calc_error(wn_signal, mean_tcal, frange)
-tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(wn_signal, mean_tcal2, frange)
-vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(wn_signal, mean_vfcal, frange)
+ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, mean_control, frange, 'noise control')
+tcal_err, tcal_err_sr, tcal_mae = calc_error(wn_signal, mean_tcal, frange, 'noise vmax')
+tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(wn_signal, mean_tcal2, frange, 'noise fft mag')
+vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(wn_signal, mean_vfcal, frange, 'noise VF')
 
 print '='*50
-print 'noise control NMSE              {:.3f}, {:.3f}, {:.3f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
-print 'noise calibrated NMSE vmax      {:.3f}, {:.3f}, {:.3f}'.format(tcal_err, tcal_err_sr, tcal_mae)
-print 'noise calibrated NMSE fft peaks {:.3f}, {:.3f}, {:.3f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
-print 'noise calibrated NMSE vf        {:.3f}, {:.3f}, {:.3f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
+print 'noise control NMSE              {:.4f}, {:.4f}, {:.4f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
+print 'noise calibrated NMSE vmax      {:.4f}, {:.4f}, {:.4f}'.format(tcal_err, tcal_err_sr, tcal_mae)
+print 'noise calibrated NMSE fft peaks {:.4f}, {:.4f}, {:.4f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
+print 'noise calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
 print '='*50
 
 chirp = FMSweep()
@@ -288,16 +297,16 @@ plt.subplot(155)
 plt.title('vf recording')
 plt.specgram(mean_vfcal_chirp, NFFT=512, Fs=fs)
 
-ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, mean_control_chirp, frange)
-tcal_err, tcal_err_sr, tcal_mae = calc_error(chirp_signal, mean_tcal_chirp, frange)
-tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(chirp_signal, mean_tcal_chirp2, frange)
-vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(chirp_signal, mean_vfcal_chirp, frange)
+ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, mean_control_chirp, frange, 'chirp control')
+tcal_err, tcal_err_sr, tcal_mae = calc_error(chirp_signal, mean_tcal_chirp, frange, 'chirp vmax')
+tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(chirp_signal, mean_tcal_chirp2, frange, 'chirp fft mag')
+vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(chirp_signal, mean_vfcal_chirp, frange, 'chirp VF')
 
 print '='*50
-print 'chirp control NMSE              {:.3f}, {:.3f}, {:.3f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
-print 'chirp calibrated NMSE vmax      {:.3f}, {:.3f}, {:.3f}'.format(tcal_err, tcal_err_sr, tcal_mae)
-print 'chirp calibrated NMSE fft peaks {:.3f}, {:.3f}, {:.3f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
-print 'chirp calibrated NMSE vf        {:.3f}, {:.3f}, {:.3f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
+print 'chirp control NMSE              {:.4f}, {:.4f}, {:.4f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
+print 'chirp calibrated NMSE vmax      {:.4f}, {:.4f}, {:.4f}'.format(tcal_err, tcal_err_sr, tcal_mae)
+print 'chirp calibrated NMSE fft peaks {:.4f}, {:.4f}, {:.4f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
+print 'chirp calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
 print '='*50            
 
 plt.show()
