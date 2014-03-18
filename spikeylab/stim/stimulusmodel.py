@@ -251,7 +251,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
                     step = -1*p['step']
                 else:
                     step = p['step']
-            steps.append(np.append(np.arange(p['start'], p['stop'], step),p['stop']))
+                steps.append(np.append(np.arange(p['start'], p['stop'], step),p['stop']))
+            else:
+                assert p['start'] == p['stop']
+                steps.append([p['start']])
 
         return steps
         
