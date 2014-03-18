@@ -7,15 +7,24 @@ from PyQt4 import QtGui, QtCore
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.tcform import Ui_TuningCurveEditor
 
+RED = QtGui.QPalette()
+RED.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtCore.Qt.red)
+BLACK = QtGui.QPalette()
+BLACK.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text,QtCore.Qt.black)
+
 class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
     name = 'Tuning Curve' # name that show up in protocol list
     def __init__(self, parent=None):
         super(TuningCurveEditor, self).__init__(parent)
         self.ui = Ui_TuningCurveEditor()
         self.ui.setupUi(self)
-        #hack using two mappers set to different rows
+        # using two mappers set to different rows at same time
         self.fmapper = QtGui.QDataWidgetMapper(self)
         self.dbmapper = QtGui.QDataWidgetMapper(self)
+
+        # can't get mapper to map color
+        self.ui.freq_nsteps_lbl.textChanged.connect(self.update_text_color)
+        self.ui.db_nsteps_lbl.textChanged.connect(self.update_text_color)
 
     def setStimulusModel(self, model):
         self.stim_model = model
@@ -65,6 +74,13 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
 
     def model(self):
         return self.stim_model
+
+    def update_text_color(self, txt):
+        w = self.sender()
+        if int(txt) == 0:
+            w.setPalette(RED)
+        else:
+            w.setPalette(BLACK)
 
 if __name__ == "__main__":
     import sys

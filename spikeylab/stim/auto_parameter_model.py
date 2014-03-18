@@ -52,7 +52,9 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                     return float(item)/multiplier
             elif col == 4:
                 if param['step'] > 0:
-                    if param['start'] > param['stop']:
+                    if abs(param['start'] - param['stop']) < param['step']:
+                        return 0
+                    elif param['start'] > param['stop']:
                         step = -1*param['step']
                     else:
                         step = param['step']
