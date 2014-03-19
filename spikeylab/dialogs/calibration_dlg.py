@@ -32,6 +32,9 @@ class CalibrationDialog(QtGui.QDialog):
             self.ui.frange_high_spnbx.setValue(freqs[-1]/self.fscale)
         except IOError:
             QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
+        except KeyError:
+            QtGui.QMessageBox.warning(self, "File Data Error", "Unable to find data in file")
+           
 
     def plotCurve(self):
         try:
@@ -42,7 +45,9 @@ class CalibrationDialog(QtGui.QDialog):
             self.pw.show()
         except IOError:
             QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
-
+        except KeyError:
+            QtGui.QMessageBox.warning(self, "File Data Error", "Unable to find data in file")
+           
 
     def values(self):
         results = {}
