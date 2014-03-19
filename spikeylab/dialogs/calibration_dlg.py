@@ -18,6 +18,7 @@ class CalibrationDialog(QtGui.QDialog):
             self.ui.frange_low_spnbx.setValue(default_vals['frange'][0]/fscale)
             self.ui.frange_high_spnbx.setValue(default_vals['frange'][1]/fscale)
         self.fscale = fscale
+        self.pw = None
 
     def browseFiles(self):
         calfile = QtGui.QFileDialog.getOpenFileName(self, u"Select calibration file", 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Fri Mar 14 13:34:32 2014
+# Created: Wed Mar 19 13:10:08 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -57,15 +57,15 @@ class Ui_CalibrationDialog(object):
         self.browse_btn.setMaximumSize(QtCore.QSize(25, 16777215))
         self.browse_btn.setObjectName(_fromUtf8("browse_btn"))
         self.horizontalLayout.addWidget(self.browse_btn)
-        self.pushButton_2 = QtGui.QPushButton(self.groupBox)
+        self.plot_btn = QtGui.QPushButton(self.groupBox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
-        self.pushButton_2.setSizePolicy(sizePolicy)
-        self.pushButton_2.setMaximumSize(QtCore.QSize(25, 16777215))
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.horizontalLayout.addWidget(self.pushButton_2)
+        sizePolicy.setHeightForWidth(self.plot_btn.sizePolicy().hasHeightForWidth())
+        self.plot_btn.setSizePolicy(sizePolicy)
+        self.plot_btn.setMaximumSize(QtCore.QSize(25, 16777215))
+        self.plot_btn.setObjectName(_fromUtf8("plot_btn"))
+        self.horizontalLayout.addWidget(self.plot_btn)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
@@ -90,11 +90,11 @@ class Ui_CalibrationDialog(object):
         self.funit_lbl_2.setEnabled(False)
         self.funit_lbl_2.setObjectName(_fromUtf8("funit_lbl_2"))
         self.horizontalLayout_2.addWidget(self.funit_lbl_2)
-        self.pushButton = QtGui.QPushButton(self.groupBox)
-        self.pushButton.setEnabled(False)
-        self.pushButton.setMinimumSize(QtCore.QSize(20, 0))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.horizontalLayout_2.addWidget(self.pushButton)
+        self.range_btn = QtGui.QPushButton(self.groupBox)
+        self.range_btn.setEnabled(False)
+        self.range_btn.setMinimumSize(QtCore.QSize(20, 0))
+        self.range_btn.setObjectName(_fromUtf8("range_btn"))
+        self.horizontalLayout_2.addWidget(self.range_btn)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addWidget(self.groupBox)
         self.gridLayout = QtGui.QGridLayout()
@@ -150,9 +150,9 @@ class Ui_CalibrationDialog(object):
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frange_low_spnbx.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frange_high_spnbx.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.funit_lbl_2.setDisabled)
-        QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.pushButton.setDisabled)
-        QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.maxRange)
-        QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.plotCurve)
+        QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.range_btn.setDisabled)
+        QtCore.QObject.connect(self.range_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.maxRange)
+        QtCore.QObject.connect(self.plot_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.plotCurve)
         QtCore.QMetaObject.connectSlotsByName(CalibrationDialog)
 
     def retranslateUi(self, CalibrationDialog):
@@ -161,11 +161,11 @@ class Ui_CalibrationDialog(object):
         self.none_radio.setText(_translate("CalibrationDialog", "None", None))
         self.calfile_radio.setText(_translate("CalibrationDialog", "Use saved calibration", None))
         self.browse_btn.setText(_translate("CalibrationDialog", "...", None))
-        self.pushButton_2.setText(_translate("CalibrationDialog", "P", None))
+        self.plot_btn.setText(_translate("CalibrationDialog", "P", None))
         self.label_8.setText(_translate("CalibrationDialog", "Calibration frequency range", None))
         self.funit_lbl_2.setText(_translate("CalibrationDialog", "kHz", None))
-        self.pushButton.setToolTip(_translate("CalibrationDialog", "file max range", None))
-        self.pushButton.setText(_translate("CalibrationDialog", "<>", None))
+        self.range_btn.setToolTip(_translate("CalibrationDialog", "file max range", None))
+        self.range_btn.setText(_translate("CalibrationDialog", "<>", None))
         self.label.setToolTip(_translate("CalibrationDialog", "Maximum intensity", None))
         self.label.setText(_translate("CalibrationDialog", "Reference intensity", None))
         self.label_5.setText(_translate("CalibrationDialog", "V", None))
