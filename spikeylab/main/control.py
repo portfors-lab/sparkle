@@ -410,6 +410,7 @@ class MainWindow(ControlWindow):
 
     def display_db_result(self, f, db, resultdb):
         try:
+            self.ui.calibration_widget.ui.db_lbl.setNum(resultdb)
             self.livecurve.set_point(f,db,resultdb)
         except:
             print u"WARNING : Problem drawing to calibration plot"
@@ -488,7 +489,7 @@ class MainWindow(ControlWindow):
             values = dlg.values()
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
-                self.acqmodel.set_calibration(values['calfile'], values['frange'])
+                self.acqmodel.set_calibration(values['calfile'], values['calf'], values['frange'])
             else:
                 self.acqmodel.set_calibration(None)
             self.calvals = values

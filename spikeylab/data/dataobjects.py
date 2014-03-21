@@ -280,12 +280,18 @@ def increment(index, dims, data_shape):
         inc_index -=1
     return index
 
-def load_calibration_file(filename):
+def load_calibration_file(filename, reffreq):
     print 'calibration filename', filename
     calfile = h5py.File(filename, 'r')
     cal_vector = calfile['calibration_intensities'].value
     calset = calfile['calibration_intensities']
     frequencies = calset.attrs['frequencies']
+    # adjust to current ref frequency (should be zero if same as calibration)
+    offset = cal_vector[frequencies == reffreq]
+    print 'frequencies', frequencies
+    print 'calvector', cal_vector
+    print 'calfile frequency', calset.attrs['calibration_frequency'], 'current frequency', reffreq, 'offset', offset
+    cal_vector -= offset
     caldb = calset.attrs['calibration_dB']
     calv = calset.attrs['calibration_voltage']
     calfile.close()

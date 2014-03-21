@@ -11,7 +11,7 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
 from spikeylab.data.dataobjects import AcquisitionData
 
-USE_FFT = True
+USE_FFT = False
 
 class CalibrationExperimenter(Experimenter):
     def __init__(self, signals):
@@ -87,6 +87,7 @@ class CalibrationExperimenter(Experimenter):
 
         self.control_tone.setDuration(self.stimulus.data(self.stimulus.index(0,0)).duration())
         self.control_tone.setRisefall(self.stimulus.data(self.stimulus.index(0,0)).risefall())
+        print 'setting calibration frequency', self.calf
         self.control_tone.setFrequency(self.calf)
         self.control_tone.setIntensity(self.caldb)
         self.calpeak = None
@@ -149,8 +150,7 @@ class CalibrationExperimenter(Experimenter):
                 self.calpeak = mean_peak
                 self.trace_counter +=1
             else:
-                resultdb = calc_db(vmax, self.calpeak) + self.caldb
-                resultdb = calc_db(peak_fft, self.calpeak) + self.caldb
+                resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
                 self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):
@@ -161,8 +161,10 @@ class CalibrationExperimenter(Experimenter):
 
         vfunc = np.vectorize(calc_db)
 
-        peaks = np.mean(abs(self.datafile.get('fft_peaks')), axis=1)
-        vmaxes = np.mean(abs(self.datafile.get('vmax')), axis=1)
+        if USE_FFT:
+            peaks = np.mean(abs(self.datafile.get('fft_peaks')), axis=1)
+        else:
+            peaks = np.mean(abs(self.datafile.get('vmax')), axis=1)
 
         # print 'calibration frequencies', self.calibration_frequencies
         # cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]
@@ -171,13 +173,13 @@ class CalibrationExperimenter(Experimenter):
 
         # print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
 
-        resultant_dB = vfunc(vmaxes, self.calpeak) * -1 #db attenuation
+        resultant_dB = vfunc(peaks, self.calpeak) * -1 #db attenuation
         # print 'results', resultant_dB
 
         print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
         print 'resultant_dB', resultant_dB
 
-        print 'The maximum dB SPL is', max(resultant_dB)
+        print 'The maximum dB SPL is', self.caldb - max(resultant_dB)
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
@@ -190,7 +192,7 @@ class CalibrationExperimenter(Experimenter):
                                  nested_name='calibration_intensities')
 
             relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
-                             'calibration_voltage': self.calv}
+                             'calibration_voltage': self.calv, 'calibration_frequency': self.calf}
             self.datafile.set_metadata(u'calibration_intensities',
                                        relevant_info)
             self.datafile.close()
@@ -201,4 +203,4 @@ class CalibrationExperimenter(Experimenter):
             self.datafile.close()
             os.remove(fname)
             print 'calibration not saved'
-        return resultant_dB, fname
+        return resultant_dB, fname, self.calf

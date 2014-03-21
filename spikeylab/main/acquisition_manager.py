@@ -29,12 +29,12 @@ class AcquisitionManager():
     def stimuli_list(self):
         return self.explorer.stimuli_list()
 
-    def set_calibration(self, cal_fname, frange=None):
+    def set_calibration(self, cal_fname, calf=None, frange=None):
         if cal_fname is None:
             calibration_vector, calibration_freqs, frange = None, None, None
         else:    
             try:
-                cal = load_calibration_file(cal_fname)
+                cal = load_calibration_file(cal_fname, calf)
             except:
                 print "Error: unable to load calibration data from file: ", cal_fname
                 raise
@@ -129,9 +129,9 @@ class AcquisitionManager():
         return self.charter.run()
 
     def process_calibration(self, save=True):
-        results, fname = self.calibrator.process_calibration(save)
+        results, fname, freq = self.calibrator.process_calibration(save)
         if save:
-            self.set_calibration(fname)
+            self.set_calibration(fname, freq)
         return results, fname
 
     def halt(self):

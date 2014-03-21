@@ -229,7 +229,7 @@ class ControlWindow(QtGui.QMainWindow):
                                       'use_calfile':False, 'frange':(5000, 1e5)})
         self.acqmodel.set_params(**self.calvals)
         if self.calvals['use_calfile']:
-            self.acqmodel.set_calibration(self.calvals['calfile'], self.calvals['frange'])
+            self.acqmodel.set_calibration(self.calvals['calfile'], self.calvals['calf'], self.calvals['frange'])
         tscale = inputsdict.get('tscale', 0.001)
         fscale = inputsdict.get('fscale', 1000)
 

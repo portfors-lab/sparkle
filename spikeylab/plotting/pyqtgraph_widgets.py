@@ -269,9 +269,9 @@ class SimplePlotWidget(BasePlot):
 
     def set_labels(self, xlabel=None, ylabel=None, title=None):
         if xlabel is not None:
-            self.setLabel('left', xlabel)
+            self.setLabel('bottom', xlabel)
         if ylabel is not None:
-            self.setLabel('bottom', ylabel)
+            self.setLabel('left', ylabel)
         if title is not None:
             self.set_title(title)
 

@@ -28,7 +28,7 @@ class CalibrationDialog(QtGui.QDialog):
 
     def maxRange(self):
         try:
-            x, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+            x, freqs = load_calibration_file(self.ui.calfile_lnedt.text(), self.ui.calf_spnbx.value()*self.fscale)
             self.ui.frange_low_spnbx.setValue(freqs[0]/self.fscale)
             self.ui.frange_high_spnbx.setValue(freqs[-1]/self.fscale)
         except IOError:
@@ -39,7 +39,7 @@ class CalibrationDialog(QtGui.QDialog):
 
     def plotCurve(self):
         try:
-            attenuations, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+            attenuations, freqs = load_calibration_file(self.ui.calfile_lnedt.text(), self.ui.calf_spnbx.value()*self.fscale)
             self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
             self.pw.setWindowFlags(QtCore.Qt.Window)
             self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
@@ -65,7 +65,7 @@ class CalibrationDialog(QtGui.QDialog):
             self.ui.none_radio.setChecked(True)
         if self.ui.calfile_radio.isChecked():
             try:
-                x, freqs = load_calibration_file(self.ui.calfile_lnedt.text())
+                x, freqs = load_calibration_file(self.ui.calfile_lnedt.text(), self.ui.frange_high_spnbx.value()*self.fscale)
             except IOError:
                 QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
                 return
