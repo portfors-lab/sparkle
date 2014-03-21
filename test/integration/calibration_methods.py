@@ -63,7 +63,11 @@ def apply_calibration(sig, fs, frange, calfqs, calvals):
     signal_calibrated = np.fft.irfft(Xadjusted)
     return signal_calibrated
 
-def vf_calibration(sig, resp):
+def vf_calibration(sig, resp, fs, frange):
+    npts = len(sig)
+    f0 = np.ceil(frange[0]/(float(fs)/npts))
+    f1 = np.floor(frange[1]/(float(fs)/npts))
+
     xh = resp
     xh = xh/np.amax(xh) # normalize
     XH = np.fft.rfft(xh)
@@ -71,11 +75,22 @@ def vf_calibration(sig, resp):
     x = sig
     x = x/np.amax(x) # normalize
     X = np.fft.rfft(x)
-    XHmag = np.sqrt(np.real(XH)**2 + np.imag(XH)**2)
-    Xmag = np.sqrt(np.real(X)**2 + np.imag(X)**2)
+
+    XHmag = np.sqrt(XH.real**2 + XH.imag**2)
+    XHmagdB = 20 * np.log10(XHmag)
+    Xmag = np.sqrt(X.real**2 + X.imag**2)
+    XmagdB = 20 * np.log10(Xmag)
 
     H = Xmag/XHmag
-    return np.fft.irfft(X/H)
+    HdB = XHmagdB - XmagdB
+    HdB[:f0] = 0
+    HdB[f1:] = 0
+    print 'HdB', HdB[f0]
+    # convert to voltage scalars
+    H1 = 10**((HdB).astype(float)/20)
+    print 'H1', H1[f0]
+    # return np.fft.irfft(X/H)
+    return np.fft.irfft(X*H)
 
 def record(sig):
     reps = []
@@ -90,8 +105,8 @@ def record(sig):
     return np.mean(reps, axis=0)
 
 # method 1 Tone Curve
-tone_frequencies = range(5000, 110000, 2000)
-# tone_frequencies = [5000, 50000, 100000]
+# tone_frequencies = range(5000, 110000, 2000)
+tone_frequencies = [5000, 50000, 100000]
 nreps = 5
 refv = 0.1 # Volts
 refdb = 100 # dB SPL
@@ -207,7 +222,7 @@ mean_tcal2 = record(wn_signal_calibrated2)
 
 print 'calibrating vf noise...'
 
-wn_signal_calibrated3 = vf_calibration(wn_signal, mean_control)
+wn_signal_calibrated3 = vf_calibration(wn_signal, mean_control, fs, frange)
 mean_vfcal = record(wn_signal_calibrated3)
 
 print 'plotting results...'
@@ -277,7 +292,7 @@ mean_tcal_chirp2 = record(chirp_signal_calibrated2)
 
 print 'calibrating vf chirp...'
 
-chirp_signal_calibrated3 = vf_calibration(chirp_signal, mean_control_chirp)
+chirp_signal_calibrated3 = vf_calibration(chirp_signal, mean_control_chirp, fs, frange)
 mean_vfcal_chirp = record(chirp_signal_calibrated3)
 
 plt.figure()
