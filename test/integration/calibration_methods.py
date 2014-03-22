@@ -6,6 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
+TONE_CAL = False
+NOISE_CAL = True
+
 def calc_db(peak, calpeak):
     pbdB = 20 * np.log10(peak/calpeak)
     return pbdB
@@ -63,7 +66,11 @@ def apply_calibration(sig, fs, frange, calfqs, calvals):
     signal_calibrated = np.fft.irfft(Xadjusted)
     return signal_calibrated
 
-def vf_calibration(sig, resp, fs, frange):
+def bb_calibration(sig, resp, fs, frange):
+    # remove dc offset from recorded response (orignal shouldn't have one)
+    dc = np.mean(resp)
+    resp = resp - dc
+
     npts = len(sig)
     f0 = np.ceil(frange[0]/(float(fs)/npts))
     f1 = np.floor(frange[1]/(float(fs)/npts))
@@ -77,20 +84,37 @@ def vf_calibration(sig, resp, fs, frange):
     X = np.fft.rfft(x)
 
     XHmag = np.sqrt(XH.real**2 + XH.imag**2)
-    XHmagdB = 20 * np.log10(XHmag)
     Xmag = np.sqrt(X.real**2 + X.imag**2)
+    H = XHmag/Xmag
+    H[:f0] = 1
+    H[f1:] = 1
+    impluse_response = np.fft.irfft(1/H)
+
+    # also convert to dB and subtract
+    XHmagdB = 20 * np.log10(XHmag)
     XmagdB = 20 * np.log10(Xmag)
 
-    H = Xmag/XHmag
-    HdB = XHmagdB - XmagdB
-    HdB[:f0] = 0
-    HdB[f1:] = 0
-    print 'HdB', HdB[f0]
+    diffdB = XmagdB - XHmagdB
+    diffdB[:f0] = 0
+    diffdB[f1:] = 0
+    print 'diffdB', diffdB[f0]
+    plt.figure()
+    plt.plot(diffdB)
+    plt.title("diffdB")
     # convert to voltage scalars
-    H1 = 10**((HdB).astype(float)/20)
-    print 'H1', H1[f0]
-    # return np.fft.irfft(X/H)
-    return np.fft.irfft(X*H)
+    H1 = 10**((diffdB).astype(float)/20)
+    print 'H1', H1[f0-1], H1[f0]
+
+    adjusted = X.copy()
+    adjusted /= H
+    return np.fft.irfft(adjusted)
+
+    # multiplication in frequency domain == convolution in time domain...
+    y = np.convolve(x, impluse_response)
+    print 'len x, imp, y', len(x), len(impluse_response), len(y)
+    # return y 
+
+    # return np.fft.irfft(X*H1)
 
 def record(sig):
     reps = []
@@ -105,14 +129,15 @@ def record(sig):
     return np.mean(reps, axis=0)
 
 # method 1 Tone Curve
-# tone_frequencies = range(5000, 110000, 2000)
-tone_frequencies = [5000, 50000, 100000]
 nreps = 5
 refv = 0.1 # Volts
 refdb = 100 # dB SPL
 calf = 5000
 dur = 0.2 #seconds (window and stim)
 fs = 5e5
+tone_frequencies = range(5000, 110000, 2000)
+# tone_frequencies = [5000, 50000, 100000]
+frange = [5000, 100000] # range to apply calibration to
 
 player = FinitePlayer()
 player.set_aochan(u"PCI-6259/ao0")
@@ -125,77 +150,91 @@ tone.setDuration(dur)
 tone.setRisefall(0.003)
 tone.setIntensity(refdb)
 
-calpeaks = []
-fftpeaks = []
-print 'gathering calibration curve...'
-npts = dur*fs
-for tf in tone_frequencies:
-    sys.stdout.write('.') # print without spaces
-    reps = []
-    tone.setFrequency(tf)
-    tone_signal = tone.signal(fs, 0, refdb, refv)
-    mean_response = record(tone_signal)
-    vmax = np.sqrt(np.mean(pow(mean_response,2)))*1.414 #rms
-    calpeaks.append(vmax)
-    
-    spectrum = np.fft.rfft(mean_response)
-    freqs = np.arange(npts/2+1)/(float(npts)/fs)
-    ftp = spectrum[freqs == tf][0]
-    mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
-    # print 'fft peak at', tf, mag
+if not TONE_CAL and not NOISE_CAL:
+    print 'Must choose at lease one calibration type'
+    sys.exit()
 
-    fftpeaks.append(mag)
-print
+if TONE_CAL:
+    calpeaks = []
+    fftpeaks = []
+    print 'gathering calibration curve...'
+    npts = dur*fs
+    for tf in tone_frequencies:
+        sys.stdout.write('.') # print without spaces
+        reps = []
+        tone.setFrequency(tf)
+        tone_signal = tone.signal(fs, 0, refdb, refv)
+        mean_response = record(tone_signal)
+        vmax = np.sqrt(np.mean(pow(mean_response,2)))*1.414 #rms
+        calpeaks.append(vmax)
+        
+        spectrum = np.fft.rfft(mean_response)
+        freqs = np.arange(npts/2+1)/(float(npts)/fs)
+        ftp = spectrum[freqs == tf][0]
+        mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+        # print 'fft peak at', tf, mag
 
-print 'calibration curve finished'
-cal_peak = calpeaks[tone_frequencies.index(calf)]
-cal_peak2 = fftpeaks[tone_frequencies.index(calf)]
+        fftpeaks.append(mag)
+    print
 
-vfunc = np.vectorize(calc_db)
-calcurve_db = vfunc(calpeaks, cal_peak) * -1
-calcurve_db2 = vfunc(fftpeaks, cal_peak2) * -1
+    print 'calibration curve finished'
+    cal_peak = calpeaks[tone_frequencies.index(calf)]
+    cal_peak2 = fftpeaks[tone_frequencies.index(calf)]
 
-# test calibration ----------------------------------------
-frange = [5000, 100000] # range to apply calibration to
+    vfunc = np.vectorize(calc_db)
+    calcurve_db = vfunc(calpeaks, cal_peak) * -1
+    calcurve_db2 = vfunc(fftpeaks, cal_peak2) * -1
 
-# tone curve test
-testpeaks = []
-print 'testing calibration curve vmax...'
-for tf in tone_frequencies:
-    sys.stdout.write('.') # print without spaces
-    reps = []
-    tone.setFrequency(tf)
-    calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
-                            fs, frange, tone_frequencies, calcurve_db)
+    # test calibration ----------------------------------------
 
-    mean_response = record(calibrated_tone)
-    vmax = np.sqrt(np.mean(pow(mean_response,2)))*1.414 #rms
-    testpeaks.append(vmax)
-print
-test_peak = testpeaks[tone_frequencies.index(calf)]
+    # tone curve test
+    testpeaks = []
+    print 'testing calibration curve vmax...'
+    for tf in tone_frequencies:
+        sys.stdout.write('.') # print without spaces
+        reps = []
+        tone.setFrequency(tf)
+        calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+                                fs, frange, tone_frequencies, calcurve_db)
 
-testcurve_db = vfunc(testpeaks, test_peak) * -1
+        mean_response = record(calibrated_tone)
+        vmax = np.sqrt(np.mean(pow(mean_response,2)))*1.414 #rms
+        testpeaks.append(vmax)
+    print
+    test_peak = testpeaks[tone_frequencies.index(calf)]
 
-testpeaks2 = []
-print 'testing calibration curve fft peak...'
-for tf in tone_frequencies:
-    sys.stdout.write('.') # print without spaces
-    reps = []
-    tone.setFrequency(tf)
-    calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
-                            fs, frange, tone_frequencies, calcurve_db2)
-    mean_response = record(calibrated_tone)
-    spectrum = np.fft.rfft(mean_response)
-    freqs = np.arange(npts/2+1)/(float(npts)/fs)
-    ftp = spectrum[freqs == tf][0]
-    mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
-    testpeaks2.append(mag)
-print
+    testcurve_db = vfunc(testpeaks, test_peak) * -1
 
-print 'test curves finished'
-test_peak2 = testpeaks2[tone_frequencies.index(calf)]
+    testpeaks2 = []
+    print 'testing calibration curve fft peak...'
+    for tf in tone_frequencies:
+        sys.stdout.write('.') # print without spaces
+        reps = []
+        tone.setFrequency(tf)
+        calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+                                fs, frange, tone_frequencies, calcurve_db2)
+        mean_response = record(calibrated_tone)
+        spectrum = np.fft.rfft(mean_response)
+        freqs = np.arange(npts/2+1)/(float(npts)/fs)
+        ftp = spectrum[freqs == tf][0]
+        mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+        testpeaks2.append(mag)
+    print
 
-testcurve_db2 = vfunc(testpeaks2, test_peak2) * -1
+    print 'test curves finished'
+    test_peak2 = testpeaks2[tone_frequencies.index(calf)]
+
+    testcurve_db2 = vfunc(testpeaks2, test_peak2) * -1
+
+    print 'plotting results...'
+    plt.figure()
+    plt.subplot(111)
+    plt.plot(tone_frequencies, calcurve_db, label='vmax before')
+    plt.plot(tone_frequencies, calcurve_db2, label='fft before')
+    plt.title("Calibration curve (attenuation dB)")
+    plt.plot(tone_frequencies, testcurve_db, label='vmax after')
+    plt.plot(tone_frequencies, testcurve_db2, label='fft after')
+    plt.legend()
 
 ##################################
 # white noise test
@@ -209,64 +248,66 @@ print 'control noise...'
 
 mean_control = record(wn_signal)
 
-# tone calibrated noise vmax peak
-print 'calibrating noise vmax...'
+if TONE_CAL:
+    # tone calibrated noise vmax peak
+    print 'calibrating noise vmax...'
 
-wn_signal_calibrated = apply_calibration(wn_signal, fs, frange, tone_frequencies, calcurve_db)
-mean_tcal = record(wn_signal_calibrated)
+    wn_signal_calibrated = apply_calibration(wn_signal, fs, frange, tone_frequencies, calcurve_db)
+    mean_tcal = record(wn_signal_calibrated)
 
-print 'calibrating noise fft...'
+    print 'calibrating noise fft...'
 
-wn_signal_calibrated2 = apply_calibration(wn_signal, fs, frange, tone_frequencies, calcurve_db2)
-mean_tcal2 = record(wn_signal_calibrated2)
+    wn_signal_calibrated2 = apply_calibration(wn_signal, fs, frange, tone_frequencies, calcurve_db2)
+    mean_tcal2 = record(wn_signal_calibrated2)
 
-print 'calibrating vf noise...'
+if NOISE_CAL:
+    print 'calibrating vf noise...'
 
-wn_signal_calibrated3 = vf_calibration(wn_signal, mean_control, fs, frange)
-mean_vfcal = record(wn_signal_calibrated3)
+    wn_signal_calibrated3 = bb_calibration(wn_signal, mean_control, fs, frange)
+    mean_vfcal = record(wn_signal_calibrated3)
 
-print 'plotting results...'
-plt.figure()
-plt.subplot(111)
-plt.plot(tone_frequencies, calcurve_db, label='vmax before')
-plt.plot(tone_frequencies, calcurve_db2, label='fft before')
-plt.title("Calibration curve (attenuation dB)")
-plt.plot(tone_frequencies, testcurve_db, label='vmax after')
-plt.plot(tone_frequencies, testcurve_db2, label='fft after')
-plt.legend()
+
+# Report results ------------------
+nsubplots = 2
+if TONE_CAL:
+    nsubplots += 2
+if NOISE_CAL:
+    nsubplots += 1
 
 fig = plt.figure()
-plt.subplot(151)
+plt.subplot(1, nsubplots, 1)
 plt.title('original signal')
 plt.specgram(wn_signal, NFFT=512, Fs=fs)
-plt.subplot(152)
+plt.subplot(1, nsubplots, 2)
 plt.title('control recording')
 plt.specgram(mean_control, NFFT=512, Fs=fs)
-plt.subplot(153)
-plt.title('vmax tcal')
-plt.specgram(mean_tcal, NFFT=512, Fs=fs)
 
-plt.subplot(154)
-plt.title('fft tcal')
-plt.specgram(mean_tcal2, NFFT=512, Fs=fs)
-
-plt.subplot(155)
-plt.title('vf cal')
-plt.specgram(mean_vfcal, NFFT=512, Fs=fs)
-
-# normalize results
-print 'calculating error...'
+iplot = 3
+if TONE_CAL:
+    plt.subplot(1, nsubplots, iplot)
+    plt.title('vmax tcal')
+    plt.specgram(mean_tcal, NFFT=512, Fs=fs)
+    iplot += 1
+    plt.subplot(1, nsubplots, iplot)
+    plt.title('fft tcal')
+    plt.specgram(mean_tcal2, NFFT=512, Fs=fs)
+    iplot += 1
+if NOISE_CAL:
+    plt.subplot(1, nsubplots, iplot)
+    plt.title('vf cal')
+    plt.specgram(mean_vfcal, NFFT=512, Fs=fs)
 
 ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, mean_control, frange, 'noise control')
-tcal_err, tcal_err_sr, tcal_mae = calc_error(wn_signal, mean_tcal, frange, 'noise vmax')
-tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(wn_signal, mean_tcal2, frange, 'noise fft mag')
-vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(wn_signal, mean_vfcal, frange, 'noise VF')
-
 print '='*50
 print 'noise control NMSE              {:.4f}, {:.4f}, {:.4f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
-print 'noise calibrated NMSE vmax      {:.4f}, {:.4f}, {:.4f}'.format(tcal_err, tcal_err_sr, tcal_mae)
-print 'noise calibrated NMSE fft peaks {:.4f}, {:.4f}, {:.4f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
-print 'noise calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
+if TONE_CAL:
+    tcal_err, tcal_err_sr, tcal_mae = calc_error(wn_signal, mean_tcal, frange, 'noise vmax')
+    tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(wn_signal, mean_tcal2, frange, 'noise fft mag')
+    print 'noise calibrated NMSE vmax      {:.4f}, {:.4f}, {:.4f}'.format(tcal_err, tcal_err_sr, tcal_mae)
+    print 'noise calibrated NMSE fft peaks {:.4f}, {:.4f}, {:.4f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
+if NOISE_CAL:
+    vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(wn_signal, mean_vfcal, frange, 'noise VF')
+    print 'noise calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)    
 print '='*50
 
 chirp = FMSweep()
@@ -279,49 +320,58 @@ print 'control chirp...'
 
 mean_control_chirp = record(chirp_signal)
 
-# tone calibrated noise
-print 'calibrating chirp...'
+if TONE_CAL:
+    # tone calibrated noise
+    print 'calibrating chirp...'
 
-chirp_signal_calibrated = apply_calibration(chirp_signal, fs, frange, tone_frequencies, calcurve_db)
-mean_tcal_chirp = record(chirp_signal_calibrated)
+    chirp_signal_calibrated = apply_calibration(chirp_signal, fs, frange, tone_frequencies, calcurve_db)
+    mean_tcal_chirp = record(chirp_signal_calibrated)
 
-print 'fft peak calibrated chrip...'
+    print 'fft peak calibrated chrip...'
 
-chirp_signal_calibrated2 = apply_calibration(chirp_signal, fs, frange, tone_frequencies, calcurve_db2)
-mean_tcal_chirp2 = record(chirp_signal_calibrated2)
+    chirp_signal_calibrated2 = apply_calibration(chirp_signal, fs, frange, tone_frequencies, calcurve_db2)
+    mean_tcal_chirp2 = record(chirp_signal_calibrated2)
 
-print 'calibrating vf chirp...'
+if NOISE_CAL:
+    print 'calibrating vf chirp...'
 
-chirp_signal_calibrated3 = vf_calibration(chirp_signal, mean_control_chirp, fs, frange)
-mean_vfcal_chirp = record(chirp_signal_calibrated3)
+    chirp_signal_calibrated3 = bb_calibration(chirp_signal, mean_control_chirp, fs, frange)
+    mean_vfcal_chirp = record(chirp_signal_calibrated3)
 
 plt.figure()
-plt.subplot(151)
+plt.subplot(1, nsubplots, 1)
 plt.title('original signal')
 plt.specgram(chirp_signal, NFFT=512, Fs=fs)
-plt.subplot(152)
+plt.subplot(1, nsubplots, 2)
 plt.title('control recording')
 plt.specgram(mean_control_chirp, NFFT=512, Fs=fs)
-plt.subplot(153)
-plt.title('tcal vmax recording')
-plt.specgram(mean_tcal_chirp, NFFT=512, Fs=fs)
-plt.subplot(154)
-plt.title('tcal fft recording')
-plt.specgram(mean_tcal_chirp2, NFFT=512, Fs=fs)
-plt.subplot(155)
-plt.title('vf recording')
-plt.specgram(mean_vfcal_chirp, NFFT=512, Fs=fs)
+
+iplot = 3
+if TONE_CAL:
+    plt.subplot(1, nsubplots, iplot)
+    plt.title('tcal vmax recording')
+    plt.specgram(mean_tcal_chirp, NFFT=512, Fs=fs)
+    iplot += 1
+    plt.subplot(1, nsubplots, iplot)
+    plt.title('tcal fft recording')
+    plt.specgram(mean_tcal_chirp2, NFFT=512, Fs=fs)
+    iplot += 1
+if NOISE_CAL:
+    plt.subplot(1, nsubplots, iplot)
+    plt.title('vf recording')
+    plt.specgram(mean_vfcal_chirp, NFFT=512, Fs=fs)
 
 ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, mean_control_chirp, frange, 'chirp control')
-tcal_err, tcal_err_sr, tcal_mae = calc_error(chirp_signal, mean_tcal_chirp, frange, 'chirp vmax')
-tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(chirp_signal, mean_tcal_chirp2, frange, 'chirp fft mag')
-vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(chirp_signal, mean_vfcal_chirp, frange, 'chirp VF')
-
 print '='*50
 print 'chirp control NMSE              {:.4f}, {:.4f}, {:.4f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
-print 'chirp calibrated NMSE vmax      {:.4f}, {:.4f}, {:.4f}'.format(tcal_err, tcal_err_sr, tcal_mae)
-print 'chirp calibrated NMSE fft peaks {:.4f}, {:.4f}, {:.4f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
-print 'chirp calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
+if TONE_CAL:
+    tcal_err, tcal_err_sr, tcal_mae = calc_error(chirp_signal, mean_tcal_chirp, frange, 'chirp vmax')
+    tcal_err2, tcal_err_sr2, tcal_mae2 = calc_error(chirp_signal, mean_tcal_chirp2, frange, 'chirp fft mag')
+    print 'chirp calibrated NMSE vmax      {:.4f}, {:.4f}, {:.4f}'.format(tcal_err, tcal_err_sr, tcal_mae)
+    print 'chirp calibrated NMSE fft peaks {:.4f}, {:.4f}, {:.4f}'.format(tcal_err2, tcal_err_sr2, tcal_mae2)
+if NOISE_CAL:
+    vfcal_err, vfcal_err_sr, vfcal_mae = calc_error(chirp_signal, mean_vfcal_chirp, frange, 'chirp VF')
+    print 'chirp calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)
 print '='*50            
 
 plt.show()
