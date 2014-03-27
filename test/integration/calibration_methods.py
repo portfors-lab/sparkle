@@ -166,7 +166,7 @@ def bb_cal_curve(sig, resp, fs, frange):
     YmagdB = 20 * np.log10(Ymag)
     XmagdB = 20 * np.log10(Xmag)
 
-    diffdB = YmagdB - XmagdB
+    diffdB = XmagdB - YmagdB
 
     # restrict to desired frequencies and smooth
     # this should probably be done on the other side,
@@ -174,7 +174,7 @@ def bb_cal_curve(sig, resp, fs, frange):
     # diffdB[:f0] = 0
     # diffdB[f1:] = 0
     diffdB = smooth(diffdB)
-    diffdB = -1*diffdB
+    # diffdB = -1*diffdB
 
     fq = np.arange(npts/2+1)/(float(npts)/fs)
 
@@ -243,7 +243,7 @@ refdb = 100 # dB SPL
 calf = 15000
 dur = 0.2 #seconds (window and stim)
 fs = 5e5
-tone_frequencies = range(5000, 110000, 5000)
+tone_frequencies = range(5000, 110000, 1000)
 # tone_frequencies = [5000, 50000, 100000]
 frange = [5000, 100000] # range to apply calibration to
 npts = dur*fs
@@ -371,10 +371,10 @@ if NOISE_CAL:
     # adjusted tuning curves from noise and chirp calibration procedure
     noise_curve_db, noise_frequencies = bb_cal_curve(wn_signal, mean_control_noise, fs, frange)
     # adjust according to calf
-    calf_idx = int(frange[0]/(float(fs)/npts))
-    noise_curve_db -= noise_curve_db[calf_idx]
+    noise_curve_db -= noise_curve_db[noise_frequencies == calf]
     chirp_curve_db, chirp_frequencies = bb_cal_curve(chirp_signal, mean_control_chirp, fs, frange)
-    chirp_curve_db -= chirp_curve_db[calf_idx]
+    print 'calf val', chirp_curve_db[chirp_frequencies == calf]
+    chirp_curve_db -= chirp_curve_db[chirp_frequencies == calf]
 
     freqs = np.arange(npts/2+1)/(float(npts)/fs)
     testpeaks3 = []
