@@ -3,7 +3,7 @@ import uuid
 from scipy.interpolate import interp1d
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.tools.audiotools import calc_spectrum
+from spikeylab.tools.audiotools import calc_spectrum, smooth
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
@@ -409,30 +409,35 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 atten = 0
                 # log this, at least to console!
                 print("WARNING: STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
-                    UNDESRIED ATTENUATION {:.2f}dB".format(peak, self.calv, undesired_attenuation))
+                    UNDESIRED ATTENUATION {:.2f}dB".format(peak, self.calv, undesired_attenuation))
 
         return total_signal, atten, undesired_attenuation
 
     def apply_calibration(self, signal, fs):
         if self.calibration_attenuations is not None and self.calibration_frequencies is not None :
             # print 'interpolated calibration'#, self.calibration_frequencies
+            npts = len(signal)
+            frange = self.calibration_frange
+            fs = self.samplerate()
             
             X = np.fft.rfft(signal)
-            frange = self.calibration_frange
-            npts = len(signal)
-            fs = self.samplerate()
             f = np.arange(npts/2+1)/(float(npts)/fs)
             # closest frequencies in range
-            f0 = np.where(f-frange[0] >= 0)[0][0]
-            f1 = np.where(f-frange[-1] <= 0)[0][-1]
+            # f0 = np.where(f-frange[0] >= 0)[0][0]
+            # f1 = np.where(f-frange[-1] <= 0)[0][-1]
+            f0 = (np.abs(f-frange[0])).argmin()
+            f1 = (np.abs(f-frange[1])).argmin()
 
             cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
             interp_freqs = f[f0:f1]
-            H = cal_func(interp_freqs)
+            Hroi = cal_func(interp_freqs)
+            H = np.zeros((npts/2+1,))
+            H[f0:f1] = Hroi
+            H = smooth(H)
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)
-            Xadjusted = X.copy()
-            Xadjusted[f0:f1] *= H
+
+            Xadjusted = X*H
 
             adjusted_signal = np.fft.irfft(Xadjusted)
 

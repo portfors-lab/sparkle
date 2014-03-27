@@ -139,3 +139,60 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
     spec = 10. * np.log10(Pxx)
 
     return spec, freqs, bins, duration
+
+def smooth(x, window_len=99, window='kaiser'):
+    """smooth the data using a window with requested size.
+    
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal 
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+    
+    input:
+        x: the input signal 
+        window_len: the dimension of the smoothing window; should be an odd integer
+
+    output:
+        the smoothed signal
+        
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+    
+    see also: 
+    
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+
+    Based from Scipy Cookbook
+    """
+
+    if x.ndim != 1:
+        raise ValueError, "smooth only accepts 1 dimension arrays."
+
+    if x.size < window_len:
+        raise ValueError, "Input vector needs to be bigger than window size."
+
+
+    if window_len < 3:
+        return x
+    if window_len % 2 == 0:
+        print 'adding one to window'
+        window_len +=1
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'kaiser']:
+        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+
+    s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+    if window == 'flat': #moving average
+        w = np.ones(window_len,'d')
+    elif window == 'kaiser':
+        w = np.kaiser(window_len,4)
+    else:
+        w = eval('np.'+window+'(window_len)')
+
+    y = np.convolve(w/w.sum(),s,mode='valid')
+    return y[window_len/2-1:len(y)-window_len/2]
