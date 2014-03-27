@@ -5,9 +5,66 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+from scipy.signal import convolve, fftconvolve
 
-TONE_CAL = False
+TONE_CAL = True
 NOISE_CAL = True
+
+def smooth(x,window_len=99):
+    """smooth the data using a window with requested size.
+    
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal 
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+    
+    input:
+        x: the input signal 
+        window_len: the dimension of the smoothing window; should be an odd integer
+
+    output:
+        the smoothed signal
+        
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+    
+    see also: 
+    
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+ 
+    TODO: the window parameter could be the window itself if an array instead of a string
+    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
+    """
+
+    if x.ndim != 1:
+        raise ValueError, "smooth only accepts 1 dimension arrays."
+
+    if x.size < window_len:
+        raise ValueError, "Input vector needs to be bigger than window size."
+
+
+    if window_len<3:
+        return x
+
+
+    # if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+    #     raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+
+    s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+    #print(len(s))
+    # if window == 'flat': #moving average
+    #     w=np.ones(window_len,'d')
+    # else:
+        # w=eval('np.'+window+'(window_len)')
+
+    w = np.kaiser(window_len,4)
+    y=np.convolve(w/w.sum(),s,mode='valid')
+    return y[window_len/2:len(y)-window_len/2]
 
 def calc_db(peak, calpeak):
     pbdB = 20 * np.log10(peak/calpeak)
@@ -75,46 +132,75 @@ def bb_calibration(sig, resp, fs, frange):
     f0 = np.ceil(frange[0]/(float(fs)/npts))
     f1 = np.floor(frange[1]/(float(fs)/npts))
 
-    xh = resp
-    xh = xh/np.amax(xh) # normalize
-    XH = np.fft.rfft(xh)
+    y = resp
+    # y = y/np.amax(y) # normalize
+    Y = np.fft.rfft(y)
 
     x = sig
-    x = x/np.amax(x) # normalize
+    # x = x/np.amax(x) # normalize
     X = np.fft.rfft(x)
 
-    XHmag = np.sqrt(XH.real**2 + XH.imag**2)
+    Ymag = np.sqrt(Y.real**2 + Y.imag**2)
     Xmag = np.sqrt(X.real**2 + X.imag**2)
-    H = XHmag/Xmag
-    H[:f0] = 1
-    H[f1:] = 1
-    impluse_response = np.fft.irfft(1/H)
+    # zeros = Xmag == 0
+    # Xmag[zeros] = 1
+    # print 'zeros found', Xmag[Xmag ==0]
+    # Hmag = Ymag/Xmag
+    # Xmag[zeros] = 0
+    Hmag = np.where(Xmag == 0, 0, Ymag/Xmag)
+    Hmag[:f0] = 1
+    Hmag[f1:] = 1
+
+    # H = Y/X
+    # still issues warning because all of Y/X is executed to selected answers from
+    H = np.where(X.real!=0, Y/X, 1)
+
+    # impluse_response = np.fft.irfft(1/Hmag)
+
+    #rectangular form
+    # reH = (Y.real*X.real + Y.imag*X.imag)/(X.real**2 + X.imag**2)
+    # imH = (Y.imag*X.real + Y.real*X.imag)/(X.real**2 + X.imag**2)
+
 
     # also convert to dB and subtract
-    XHmagdB = 20 * np.log10(XHmag)
+    YmagdB = 20 * np.log10(Ymag)
     XmagdB = 20 * np.log10(Xmag)
 
-    diffdB = XmagdB - XHmagdB
+    diffdB = YmagdB - XmagdB 
+    # diffdB = (20 * np.log10(H))
+
+    plt.figure()
+    f = np.arange(npts/2+1)/(float(npts)/fs)
+    plt.plot(f[f0:f1],(diffdB[f0:f1]).real)
+    plt.title("diffdB")
+
+    # restrict to desired frequencies and smooth
     diffdB[:f0] = 0
     diffdB[f1:] = 0
+    diffdB = smooth(diffdB)
+
+    plt.plot(f[f0:f1],(diffdB[f0:f1]).real)
     print 'diffdB', diffdB[f0]
-    plt.figure()
-    plt.plot(diffdB)
-    plt.title("diffdB")
     # convert to voltage scalars
     H1 = 10**((diffdB).astype(float)/20)
-    print 'H1', H1[f0-1], H1[f0]
 
-    adjusted = X.copy()
-    adjusted /= H
-    return np.fft.irfft(adjusted)
+    # adjusted = X.copy()
+    # adjusted /= Hmag
+    # return np.fft.irfft(adjusted)
+
+    # rectangular form
+    # reA = (X.real*reH + X.imag*imH)/(reH**2 + imH**2)
+    # imA = (X.imag*reH + X.real*imH)/(reH**2 + imH**2)
+    # adjusted = reA + imA
+    # return np.fft.irfft(adjusted)
 
     # multiplication in frequency domain == convolution in time domain...
-    y = np.convolve(x, impluse_response)
-    print 'len x, imp, y', len(x), len(impluse_response), len(y)
+    # y = fftconvolve(x, impluse_response)
+    # y = x*impluse_response
+    # print 'len x, imp, y', len(x), len(impluse_response), len(y)
     # return y 
 
-    # return np.fft.irfft(X*H1)
+    return np.fft.irfft(X/H1)
 
 def record(sig):
     reps = []
@@ -135,7 +221,7 @@ refdb = 100 # dB SPL
 calf = 5000
 dur = 0.2 #seconds (window and stim)
 fs = 5e5
-tone_frequencies = range(5000, 110000, 2000)
+tone_frequencies = range(5000, 110000, 500)
 # tone_frequencies = [5000, 50000, 100000]
 frange = [5000, 100000] # range to apply calibration to
 
@@ -337,6 +423,13 @@ if NOISE_CAL:
 
     chirp_signal_calibrated3 = bb_calibration(chirp_signal, mean_control_chirp, fs, frange)
     mean_vfcal_chirp = record(chirp_signal_calibrated3)
+
+# plt.figure()
+# plt.specgram(chirp_signal_calibrated2, NFFT=512, Fs=fs)
+# plt.title('fft peak cal signal')
+plt.figure()
+plt.title('vf cal signal')
+plt.specgram(chirp_signal_calibrated3, NFFT=512, Fs=fs)
 
 plt.figure()
 plt.subplot(1, nsubplots, 1)
