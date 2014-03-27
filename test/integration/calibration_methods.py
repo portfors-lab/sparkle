@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.signal import convolve, fftconvolve
 
-TONE_CAL = True
+TONE_CAL = False
 NOISE_CAL = True
 
 def smooth(x,window_len=99):
@@ -112,18 +112,35 @@ def apply_calibration(sig, fs, frange, calfqs, calvals):
     f0 = (np.abs(f-frange[0])).argmin()
     f1 = (np.abs(f-frange[1])).argmin()
 
+    # plt.figure()
+    # plt.plot(calfqs,calvals)
+    # plt.title('cal apply inputs')
+
     cal_func = interp1d(calfqs, calvals)
     frange = f[f0:f1]
-    H = cal_func(frange)
+    Hroi = cal_func(frange)
+    H = np.zeros((npts/2+1,))
+    H[f0:f1] = Hroi
+    # plt.figure()
+    # plt.plot(f,H)
+    # plt.title('H apply cal pre-smoothing')
+    H = smooth(H)
+    # plt.figure()
+    # plt.plot(f,H)
+    # plt.title('H apply cal')
+    # plt.show()
     # convert to voltage scalars
     H = 10**((H).astype(float)/20)
-    Xadjusted = X.copy()
-    Xadjusted[f0:f1] *= H
+    # Xadjusted = X.copy()
+    # Xadjusted[f0:f1] *= H
+    # Xadjusted = smooth(Xadjusted)
+    Xadjusted = X*H
 
     signal_calibrated = np.fft.irfft(Xadjusted)
     return signal_calibrated
 
-def bb_calibration(sig, resp, fs, frange):
+def bb_cal_curve(sig, resp, fs, frange):
+    """Given original signal and recording, generates a dB attenuation curve"""
     # remove dc offset from recorded response (orignal shouldn't have one)
     dc = np.mean(resp)
     resp = resp - dc
@@ -139,68 +156,73 @@ def bb_calibration(sig, resp, fs, frange):
     x = sig
     # x = x/np.amax(x) # normalize
     X = np.fft.rfft(x)
+    
+    # H = np.where(X.real!=0, Y/X, 1)
+    # diffdB = 20 * np.log10(H)
 
+    Ymag = np.sqrt(Y.real**2 + Y.imag**2)
+    Xmag = np.sqrt(X.real**2 + X.imag**2)
+
+    YmagdB = 20 * np.log10(Ymag)
+    XmagdB = 20 * np.log10(Xmag)
+
+    diffdB = YmagdB - XmagdB
+
+    # restrict to desired frequencies and smooth
+    # this should probably be done on the other side,
+    # before it gets applied.
+    # diffdB[:f0] = 0
+    # diffdB[f1:] = 0
+    diffdB = smooth(diffdB)
+    diffdB = -1*diffdB
+
+    fq = np.arange(npts/2+1)/(float(npts)/fs)
+
+    return diffdB[f0:f1], fq[f0:f1]
+
+def bb_calibration(sig, resp, fs, frange):
+    """Given original signal and recording, spits out a calibrated signal"""
+    # remove dc offset from recorded response (synthesized orignal shouldn't have one)
+    dc = np.mean(resp)
+    resp = resp - dc
+
+    npts = len(sig)
+    f0 = np.ceil(frange[0]/(float(fs)/npts))
+    f1 = np.floor(frange[1]/(float(fs)/npts))
+
+    y = resp
+    # y = y/np.amax(y) # normalize
+    Y = np.fft.rfft(y)
+
+    x = sig
+    # x = x/np.amax(x) # normalize
+    X = np.fft.rfft(x)
+
+    # can use magnitude too...
+    """
     Ymag = np.sqrt(Y.real**2 + Y.imag**2)
     Xmag = np.sqrt(X.real**2 + X.imag**2)
     # zeros = Xmag == 0
     # Xmag[zeros] = 1
-    # print 'zeros found', Xmag[Xmag ==0]
     # Hmag = Ymag/Xmag
     # Xmag[zeros] = 0
     Hmag = np.where(Xmag == 0, 0, Ymag/Xmag)
     Hmag[:f0] = 1
     Hmag[f1:] = 1
+    # Hmag = smooth(Hmag)
+    """
 
-    # H = Y/X
+    H = Y/X
+
     # still issues warning because all of Y/X is executed to selected answers from
-    H = np.where(X.real!=0, Y/X, 1)
+    # H = np.where(X.real!=0, Y/X, 1)
+    H[:f0].real = 1
+    H[f1:].real = 1
+    H = smooth(H)
 
-    # impluse_response = np.fft.irfft(1/Hmag)
+    A = X / H
 
-    #rectangular form
-    # reH = (Y.real*X.real + Y.imag*X.imag)/(X.real**2 + X.imag**2)
-    # imH = (Y.imag*X.real + Y.real*X.imag)/(X.real**2 + X.imag**2)
-
-
-    # also convert to dB and subtract
-    YmagdB = 20 * np.log10(Ymag)
-    XmagdB = 20 * np.log10(Xmag)
-
-    diffdB = YmagdB - XmagdB 
-    # diffdB = (20 * np.log10(H))
-
-    plt.figure()
-    f = np.arange(npts/2+1)/(float(npts)/fs)
-    plt.plot(f[f0:f1],(diffdB[f0:f1]).real)
-    plt.title("diffdB")
-
-    # restrict to desired frequencies and smooth
-    diffdB[:f0] = 0
-    diffdB[f1:] = 0
-    diffdB = smooth(diffdB)
-
-    plt.plot(f[f0:f1],(diffdB[f0:f1]).real)
-    print 'diffdB', diffdB[f0]
-    # convert to voltage scalars
-    H1 = 10**((diffdB).astype(float)/20)
-
-    # adjusted = X.copy()
-    # adjusted /= Hmag
-    # return np.fft.irfft(adjusted)
-
-    # rectangular form
-    # reA = (X.real*reH + X.imag*imH)/(reH**2 + imH**2)
-    # imA = (X.imag*reH + X.real*imH)/(reH**2 + imH**2)
-    # adjusted = reA + imA
-    # return np.fft.irfft(adjusted)
-
-    # multiplication in frequency domain == convolution in time domain...
-    # y = fftconvolve(x, impluse_response)
-    # y = x*impluse_response
-    # print 'len x, imp, y', len(x), len(impluse_response), len(y)
-    # return y 
-
-    return np.fft.irfft(X/H1)
+    return np.fft.irfft(A)
 
 def record(sig):
     reps = []
@@ -218,12 +240,13 @@ def record(sig):
 nreps = 5
 refv = 0.1 # Volts
 refdb = 100 # dB SPL
-calf = 5000
+calf = 15000
 dur = 0.2 #seconds (window and stim)
 fs = 5e5
-tone_frequencies = range(5000, 110000, 500)
+tone_frequencies = range(5000, 110000, 5000)
 # tone_frequencies = [5000, 50000, 100000]
 frange = [5000, 100000] # range to apply calibration to
+npts = dur*fs
 
 player = FinitePlayer()
 player.set_aochan(u"PCI-6259/ao0")
@@ -240,11 +263,12 @@ if not TONE_CAL and not NOISE_CAL:
     print 'Must choose at lease one calibration type'
     sys.exit()
 
+vfunc = np.vectorize(calc_db)
+
 if TONE_CAL:
     calpeaks = []
     fftpeaks = []
     print 'gathering calibration curve...'
-    npts = dur*fs
     for tf in tone_frequencies:
         sys.stdout.write('.') # print without spaces
         reps = []
@@ -267,7 +291,6 @@ if TONE_CAL:
     cal_peak = calpeaks[tone_frequencies.index(calf)]
     cal_peak2 = fftpeaks[tone_frequencies.index(calf)]
 
-    vfunc = np.vectorize(calc_db)
     calcurve_db = vfunc(calpeaks, cal_peak) * -1
     calcurve_db2 = vfunc(fftpeaks, cal_peak2) * -1
 
@@ -290,6 +313,7 @@ if TONE_CAL:
     test_peak = testpeaks[tone_frequencies.index(calf)]
 
     testcurve_db = vfunc(testpeaks, test_peak) * -1
+    freqs = np.arange(npts/2+1)/(float(npts)/fs)
 
     testpeaks2 = []
     print 'testing calibration curve fft peak...'
@@ -301,7 +325,6 @@ if TONE_CAL:
                                 fs, frange, tone_frequencies, calcurve_db2)
         mean_response = record(calibrated_tone)
         spectrum = np.fft.rfft(mean_response)
-        freqs = np.arange(npts/2+1)/(float(npts)/fs)
         ftp = spectrum[freqs == tf][0]
         mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
         testpeaks2.append(mag)
@@ -332,7 +355,71 @@ wn_signal = wn.signal(fs, 0, refdb, refv)
 # control stim, witout calibration
 print 'control noise...'
 
-mean_control = record(wn_signal)
+mean_control_noise = record(wn_signal)
+
+chirp = FMSweep()
+chirp.setDuration(dur)
+chirp.setIntensity(refdb)
+chirp_signal = chirp.signal(fs, 0, refdb, refv)
+
+# control stim, witout calibration
+print 'control chirp...'
+
+mean_control_chirp = record(chirp_signal)
+
+if NOISE_CAL:
+    # adjusted tuning curves from noise and chirp calibration procedure
+    noise_curve_db, noise_frequencies = bb_cal_curve(wn_signal, mean_control_noise, fs, frange)
+    # adjust according to calf
+    calf_idx = int(frange[0]/(float(fs)/npts))
+    noise_curve_db -= noise_curve_db[calf_idx]
+    chirp_curve_db, chirp_frequencies = bb_cal_curve(chirp_signal, mean_control_chirp, fs, frange)
+    chirp_curve_db -= chirp_curve_db[calf_idx]
+
+    freqs = np.arange(npts/2+1)/(float(npts)/fs)
+    testpeaks3 = []
+    print 'testing calibration curve noise...'
+    for tf in tone_frequencies:
+        sys.stdout.write('.') # print without spaces
+        reps = []
+        tone.setFrequency(tf)
+        calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+                                fs, frange, noise_frequencies, noise_curve_db)
+        mean_response = record(calibrated_tone)
+        spectrum = np.fft.rfft(mean_response)
+        ftp = spectrum[freqs == tf][0]
+        mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+        testpeaks3.append(mag)
+    print
+
+    print 'test curves finished'
+    test_peak3 = testpeaks3[tone_frequencies.index(calf)]
+    testcurve_db3 = vfunc(testpeaks3, test_peak3) * -1
+
+    testpeaks4 = []
+    print 'testing calibration curve chirp...'
+    for tf in tone_frequencies:
+        sys.stdout.write('.') # print without spaces
+        reps = []
+        tone.setFrequency(tf)
+        calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+                                fs, frange, chirp_frequencies, chirp_curve_db)
+        mean_response = record(calibrated_tone)
+        spectrum = np.fft.rfft(mean_response)
+        ftp = spectrum[freqs == tf][0]
+        mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+        testpeaks4.append(mag)
+    print
+
+    print 'test curves finished'
+    test_peak4 = testpeaks4[tone_frequencies.index(calf)]
+    testcurve_db4 = vfunc(testpeaks4, test_peak4) * -1
+
+    plt.plot(noise_frequencies, noise_curve_db, label='noise before')
+    plt.plot(chirp_frequencies, chirp_curve_db, label='chirp before')
+    plt.plot(tone_frequencies, testcurve_db3, label='noise after')
+    plt.plot(tone_frequencies, testcurve_db4, label='chirp after')
+    plt.legend()
 
 if TONE_CAL:
     # tone calibrated noise vmax peak
@@ -349,7 +436,8 @@ if TONE_CAL:
 if NOISE_CAL:
     print 'calibrating vf noise...'
 
-    wn_signal_calibrated3 = bb_calibration(wn_signal, mean_control, fs, frange)
+    # wn_signal_calibrated3 = bb_calibration(wn_signal, mean_control_noise, fs, frange)
+    wn_signal_calibrated3 = apply_calibration(wn_signal, fs, frange, noise_frequencies, noise_curve_db)
     mean_vfcal = record(wn_signal_calibrated3)
 
 
@@ -366,7 +454,7 @@ plt.title('original signal')
 plt.specgram(wn_signal, NFFT=512, Fs=fs)
 plt.subplot(1, nsubplots, 2)
 plt.title('control recording')
-plt.specgram(mean_control, NFFT=512, Fs=fs)
+plt.specgram(mean_control_noise, NFFT=512, Fs=fs)
 
 iplot = 3
 if TONE_CAL:
@@ -383,7 +471,7 @@ if NOISE_CAL:
     plt.title('vf cal')
     plt.specgram(mean_vfcal, NFFT=512, Fs=fs)
 
-ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, mean_control, frange, 'noise control')
+ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, mean_control_noise, frange, 'noise control')
 print '='*50
 print 'noise control NMSE              {:.4f}, {:.4f}, {:.4f}'.format(ctrl_err, ctrl_err_sr, ctrl_mae)
 if TONE_CAL:
@@ -396,15 +484,7 @@ if NOISE_CAL:
     print 'noise calibrated NMSE vf        {:.4f}, {:.4f}, {:.4f}'.format(vfcal_err, vfcal_err_sr, vfcal_mae)    
 print '='*50
 
-chirp = FMSweep()
-chirp.setDuration(dur)
-chirp.setIntensity(refdb)
-chirp_signal = chirp.signal(fs, 0, refdb, refv)
 
-# control stim, witout calibration
-print 'control chirp...'
-
-mean_control_chirp = record(chirp_signal)
 
 if TONE_CAL:
     # tone calibrated noise
@@ -421,7 +501,8 @@ if TONE_CAL:
 if NOISE_CAL:
     print 'calibrating vf chirp...'
 
-    chirp_signal_calibrated3 = bb_calibration(chirp_signal, mean_control_chirp, fs, frange)
+    # chirp_signal_calibrated3 = bb_calibration(chirp_signal, mean_control_chirp, fs, frange)
+    chirp_signal_calibrated3 = apply_calibration(chirp_signal, fs, frange, chirp_frequencies, chirp_curve_db)
     mean_vfcal_chirp = record(chirp_signal_calibrated3)
 
 # plt.figure()

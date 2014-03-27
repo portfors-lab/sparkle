@@ -391,7 +391,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         undesired_attenuation = 0
         if USE_RMS:
-            maxv = self.calv*1.414 # peak value for sine wave rms
+            maxv = self.calv*1.414213562373 # peak value for sine wave rms
         else:
             maxv = self.calv
 

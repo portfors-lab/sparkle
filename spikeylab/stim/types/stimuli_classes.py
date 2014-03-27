@@ -55,7 +55,7 @@ class PureTone(Tone):
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
         if USE_RMS:
-            tone = tone*1.414
+            tone = tone*1.414213562373
         return tone
 
     def stateDict(self):
@@ -92,7 +92,7 @@ class FMSweep(Tone):
         signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
         signal = ((signal/np.amax(signal))*amp)
         if USE_RMS:
-            signal = signal*1.414
+            signal = signal*1.414213562373
 
         if self._risefall > 0:
             rf_npts = self._risefall * fs
@@ -211,7 +211,6 @@ class Vocalization(AbstractStimulusComponent):
             amp_scale = np.amax(wavdata)
         amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
         signal = ((wavdata/amp_scale)*amp)
-        rms = np.sqrt(np.mean(pow(signal,2)))
 
         if self._risefall > 0:
             rf_npts = self._risefall * fs
@@ -233,17 +232,39 @@ class Vocalization(AbstractStimulusComponent):
 class WhiteNoise(AbstractStimulusComponent):
     name = "White Noise"
     explore = True
-    # keeps signal same to subsequent signal calls, but limit size
+    # keeps signal same to subsequent signal() calls
     _noise = np.random.normal(0, 1.0, (5e5,))
+    _phase = np.random.uniform(0.0, 2.0*np.pi,size=5e5)
     transfer = None
+    _start_f = float(5000)
+    _stop_f = float(1e5)
 
     def signal(self, fs, atten, caldb, calv):
-        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
         npts = self._duration*fs
+
+        # based on Brandon's code:
+        # nFreqPts = 1+npts/2        
+        # mag = np.zeros(shape=(nFreqPts,),dtype=np.float32)
+        # f0 = np.ceil(self._start_f/(float(fs)/npts))
+        # f1 = np.floor(self._stop_f/(float(fs)/npts))
+        # mag[f0:f1] = 1.0
+        # phase = self._phase[:nFreqPts]
+        # spec = np.empty(shape=(nFreqPts,),dtype=np.complex64)
+        # spec.real = mag * np.cos(phase)
+        # spec.imag = mag * np.sin(phase)
+        # spec[0] = 0 # DC
+        # signal = np.empty(shape=(npts,),dtype=np.float32) # needs to be 32-bit float
+        # signal = np.fft.irfft(spec)
+
         signal = self._noise[:npts]
-        signal = ((signal/np.amax(signal))*amp)
+        
+        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
         if USE_RMS:
-            signal = signal*1.414
+            amp_scale = np.sqrt(np.mean(pow(signal,2)))
+        else:
+            amp_scale = np.amax(signal)
+
+        signal = ((signal/amp_scale)*amp)
         return signal
 
     def paint(self, painter, rect, palette):
