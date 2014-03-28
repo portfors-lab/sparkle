@@ -80,7 +80,7 @@ class TestSpikey():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         assert len(files) == 1
 
-    def test_save_calibration(self):
+    def test_save_tone_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
         self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
@@ -100,7 +100,6 @@ class TestSpikey():
 
         # now check saved data
         hfile = h5py.File(fname, 'r')
-        # signals = hfile['signal']
         peaks = hfile['fft_peaks']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
@@ -116,10 +115,42 @@ class TestSpikey():
         assert_equal(peaks.shape,(ntraces,nreps))
         assert cal_vector.shape == (nfreqs,) 
 
-        # npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
-        # assert_equal(signals.shape,(nreps, npts))
-        # assert cal_vector.shape == ((npts/2+1),)
+        hfile.close()
 
+    def test_save_noise_calibration(self):
+        self.form.ui.tab_group.setCurrentIndex(2)
+        self.form.ui.reprate_spnbx.setValue(10)
+        self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
+        self.form.ui.calibration_widget.ui.cal_type_cmbbx.setCurrentIndex(1) # noise stim
+        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
+
+        timeout = 30
+        start = time.time()
+        while self.form.ui.running_label.text() == "RECORDING" and (time.time()-start) < timeout:
+            time.sleep(1)
+            QApplication.processEvents()
+            
+        assert self.form.ui.running_label.text() == "OFF"
+
+        # check that calibration file was saved
+        assert self.form.calvals['use_calfile'] == True
+        fname = self.form.calvals['calfile']
+
+        # now check saved data
+        hfile = h5py.File(fname, 'r')
+        signals = hfile['signal']
+        stim = json.loads(hfile.attrs['stim'])
+        cal_vector = hfile['calibration_intensities']
+
+        # make sure displayed counts jive with saved file
+        nreps = self.form.ui.calibration_widget.ui.curve_widget.ui.nreps_spnbx.value()
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], hfile.attrs['samplerate_ad'])
+
+        npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
+        assert_equal(signals.shape,(nreps, npts))
+        assert cal_vector.shape == ((npts/2+1),)
+        
         hfile.close()
 
     def test_apply_calibration(self):
@@ -148,7 +179,7 @@ class TestSpikey():
         print 'files', files
         assert len(files) == 0
 
-    def test_abort_calibration(self):
+    def test_abort_tone_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
         self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)

@@ -412,7 +412,7 @@ class TestAcquisitionModel():
         
         hfile.close()
 
-    def test_calibration_protocol(self):
+    def test_tone_calibration_protocol(self):
         winsz = 0.1 #seconds
         acq_rate = 500000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
@@ -431,18 +431,45 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(calname, 'r')
         peaks = hfile['fft_peaks']
-        # signals = hfile['signal']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
         assert_equal(peaks.shape,(ntraces,nreps))
-        # npts =  winsz*acq_rate
-        # assert_equal(signals.shape,(nreps, npts))
-        
+
         assert cal_vector.shape == (21,) #beware, will fail if defaults change
-        # assert cal_vector.shape == ((npts/2+1),)
+
+        hfile.close()
+
+    def test_noise_calibration_protocol(self):
+        winsz = 0.1 #seconds
+        acq_rate = 500000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        manager.set_calibration_by_index(1)
+        tc = manager.calibration_stimulus('noise')
+        nreps = tc.repCount()
+        # tc.autoParameters()
+        # use tuning curve defaults?
+        manager.set_calibration_duration(winsz)
+        t = manager.run_calibration(0.1, False)
+        t.join()
+        calname = manager.process_calibration()
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(calname, 'r')
+        signals = hfile['signal']
+        stim = json.loads(hfile.attrs['stim'])
+        cal_vector = hfile['calibration_intensities']
+
+        assert_in('components', stim[0])
+        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        npts =  winsz*acq_rate
+        assert_equal(signals.shape,(nreps, npts))
+        
+        assert cal_vector.shape == ((npts/2+1),)
 
         hfile.close()
 

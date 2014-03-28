@@ -177,6 +177,8 @@ class AcquisitionManager():
     def calibration_stimulus(self, mode):
         if mode == 'tone':
             return self.tone_calibrator.stimulus
+        elif mode =='noise':
+            return self.bs_calibrator.stimulus
 
     def explore_genrate(self):
         return self.explorer.stimulus.samplerate()
