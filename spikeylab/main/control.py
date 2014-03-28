@@ -358,10 +358,15 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
-        stim_index = self.ui.calibration_widget.current_index()
-        self.acqmodel.set_calibration_by_index(stim_index)
+        if self.ui.calibration_widget.ui.applycal_ckbx.isChecked():
+            stim_index = self.ui.calibration_widget.current_index()
+            self.acqmodel.set_calibration_by_index(stim_index)
+        else:
+            # Always use noise on saving calibration.
+            # BEWARE: Hardcoded to index 1... this could change?!
+            self.acqmodel.set_calibration_by_index(1)
 
-        if self.ui.calibration_widget.is_tone_cal():
+        if self.ui.calibration_widget.ui.applycal_ckbx.isChecked() and self.ui.calibration_widget.is_tone_cal():
             frequencies, intensities = self.acqmodel.calibration_range()
             self.livecurve = ProgressWidget(list(frequencies), list(intensities))
             self.livecurve.set_labels('calibration')
@@ -369,7 +374,7 @@ class MainWindow(ControlWindow):
             self.ui.plot_dock.switch_display('calibration')
         else:
             self.ui.plot_dock.switch_display('calexp')
-            
+
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
 
