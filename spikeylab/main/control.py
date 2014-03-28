@@ -176,10 +176,7 @@ class MainWindow(ControlWindow):
             self.run_protocol()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
             self.acqmodel.set_calibration_reps(self.ui.calibration_widget.ui.nreps_spnbx.value())
-            if self.ui.calibration_widget.is_tone_cal():
-                self.run_calibration()
-            else:
-                self.run_noise_calibration()
+            self.run_calibration()
         else: 
             raise Exception("unrecognized tab selection")
 
@@ -289,7 +286,7 @@ class MainWindow(ControlWindow):
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
             calname = self.acqmodel.process_calibration(save)
-            if self.ui.calibration_widget.is_tone_cal():
+            if not self.ui.calibration_widget.is_tone_cal() and save:
                 attenuations, freqs = load_calibration_file(calname, self.calvals['calf'])
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
@@ -361,32 +358,20 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
 
-        frequencies, intensities = self.acqmodel.calibration_range()
-        self.livecurve = ProgressWidget(list(frequencies), list(intensities))
-        self.livecurve.set_labels('calibration')
-        self.ui.progress_dock.setWidget(self.livecurve)
-        self.ui.plot_dock.switch_display('calibration')
-
-        reprate = self.ui.reprate_spnbx.value()
-        interval = (1/reprate)*1000
-
-        self.on_update()
-        self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
-
-    def run_noise_calibration(self):
-        self.ui.start_btn.setEnabled(False)
-        self.active_operation = 'calibration'
-
-        self.ui.stop_btn.clicked.disconnect()
-        self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
-
-        self.ui.plot_dock.switch_display('calibration')
-
-        reprate = self.ui.reprate_spnbx.value()
-        interval = (1/reprate)*1000
-
         stim_index = self.ui.calibration_widget.current_index()
         self.acqmodel.set_calibration_by_index(stim_index)
+
+        if self.ui.calibration_widget.is_tone_cal():
+            frequencies, intensities = self.acqmodel.calibration_range()
+            self.livecurve = ProgressWidget(list(frequencies), list(intensities))
+            self.livecurve.set_labels('calibration')
+            self.ui.progress_dock.setWidget(self.livecurve)
+            self.ui.plot_dock.switch_display('calibration')
+        else:
+            self.ui.plot_dock.switch_display('calexp')
+            
+        reprate = self.ui.reprate_spnbx.value()
+        interval = (1/reprate)*1000
 
         self.on_update()
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
@@ -438,6 +423,7 @@ class MainWindow(ControlWindow):
         self.ui.calibration_widget.ui.dblabel.setNum(db)
         self.calibration_display.update_in_fft(freqs, spectrum)
 
+
     def display_db_result(self, f, db, resultdb):
         try:
             self.ui.calibration_widget.ui.db_lbl.setNum(resultdb)
@@ -471,11 +457,16 @@ class MainWindow(ControlWindow):
             
     def display_stim(self, signal, fs):
         freq, spectrum = calc_spectrum(signal, fs)
+        timevals = np.arange(len(signal)).astype(float)/fs
         if self.active_operation == 'calibration':
-            self.calibration_display.update_out_fft(freq, spectrum)
-            self.ui.calibration_widget.ui.avo_lbl.setText(str(np.amax(signal)))
+            if self.ui.plot_dock.current() == 'calexp':
+                self.extended_display.update_signal(timevals, signal, plot='stim')
+                self.extended_display.update_fft(freq, spectrum, plot='stim')
+                self.extended_display.update_spec(signal, fs, plot='stim')
+            else:
+                self.calibration_display.update_out_fft(freq, spectrum)
+                self.ui.calibration_widget.ui.avo_lbl.setText(str(np.amax(signal)))
         else:
-            timevals = np.arange(len(signal)).astype(float)/fs
             if self.ui.plot_dock.current() == 'standard':
                 self.display.update_signal(timevals, signal)
                 self.display.update_fft(freq, spectrum)

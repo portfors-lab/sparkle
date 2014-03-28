@@ -417,7 +417,7 @@ class TestAcquisitionModel():
         acq_rate = 500000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        tc = manager.calibration_stimulus()
+        tc = manager.calibration_stimulus('tone')
         ntraces = tc.traceCount()
         nreps = tc.repCount()
         # tc.autoParameters()
@@ -430,18 +430,19 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(calname, 'r')
-        # peaks = hfile['fft_peaks']
-        signals = hfile['signal']
+        peaks = hfile['fft_peaks']
+        # signals = hfile['signal']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
-        # assert_equal(peaks.shape,(ntraces,nreps))
-        npts =  winsz*acq_rate
-        assert_equal(signals.shape,(nreps, npts))
-        # assert cal_vector.shape == (21,) #beware, will fail if defaults change
-        assert cal_vector.shape == ((npts/2+1),)
+        assert_equal(peaks.shape,(ntraces,nreps))
+        # npts =  winsz*acq_rate
+        # assert_equal(signals.shape,(nreps, npts))
+        
+        assert cal_vector.shape == (21,) #beware, will fail if defaults change
+        # assert cal_vector.shape == ((npts/2+1),)
 
         hfile.close()
 

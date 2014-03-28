@@ -192,4 +192,4 @@ class AcquisitionManager():
 
     def load_calibration_template(self, template):
         self.tone_calibrator.stimulus.clearComponents()
-        self.tone_calibrator.stimulus.loadFromTemplate(template, self.calibrator.stimulus)
+        self.tone_calibrator.stimulus.loadFromTemplate(template, self.tone_calibrator.stimulus)

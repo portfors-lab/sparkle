@@ -100,8 +100,8 @@ class TestSpikey():
 
         # now check saved data
         hfile = h5py.File(fname, 'r')
-        signals = hfile['signal']
-        # peaks = hfile['fft_peaks']
+        # signals = hfile['signal']
+        peaks = hfile['fft_peaks']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
 
@@ -110,15 +110,15 @@ class TestSpikey():
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], hfile.attrs['samplerate_ad'])
 
-        # nfreqs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.freq_nsteps_lbl.text())
-        # ndbs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.db_nsteps_lbl.text())
-        # ntraces = nfreqs*ndbs
-        # assert_equal(peaks.shape,(ntraces,nreps))
-        # assert cal_vector.shape == (nfreqs,) 
+        nfreqs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.freq_nsteps_lbl.text())
+        ndbs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.db_nsteps_lbl.text())
+        ntraces = nfreqs*ndbs
+        assert_equal(peaks.shape,(ntraces,nreps))
+        assert cal_vector.shape == (nfreqs,) 
 
-        npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
-        assert_equal(signals.shape,(nreps, npts))
-        assert cal_vector.shape == ((npts/2+1),)
+        # npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
+        # assert_equal(signals.shape,(nreps, npts))
+        # assert cal_vector.shape == ((npts/2+1),)
 
         hfile.close()
 
@@ -165,11 +165,11 @@ class TestSpikey():
         # cannot abort noise calibration... it's too quick anyways
 
         # make sure there is not calibration file present
-        assert self.form.calvals['calfile'] != None
+        assert self.form.calvals['calfile'] == ''
 
         files = glob.glob(self.tempfolder + os.sep + 'calibration*.hdf5')
         print 'files', files
-        assert len(files) > 0
+        assert len(files) == 0
 
     def test_tuning_curve(self):
         self.form.ui.tab_group.setCurrentIndex(1)
