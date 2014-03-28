@@ -6,7 +6,7 @@ from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.main.explore_acquisition import Explorer
 from spikeylab.main.protocol_experimenter import ProtocolExperimenter
 from spikeylab.main.chart_experimenter import ChartExperimenter
-from spikeylab.main.calibration_experimenter import CalibrationExperimenter
+from spikeylab.main.calibration_experimenter_bs import CalibrationExperimenter
 
 class AcquisitionManager():
     def __init__(self):
@@ -132,7 +132,7 @@ class AcquisitionManager():
         results, fname, freq = self.calibrator.process_calibration(save)
         if save:
             self.set_calibration(fname, freq)
-        return results, fname
+        return fname
 
     def halt(self):
         """Halt any/all running operations"""

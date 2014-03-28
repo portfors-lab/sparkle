@@ -422,9 +422,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             
             X = np.fft.rfft(signal)
             f = np.arange(npts/2+1)/(float(npts)/fs)
-            # closest frequencies in range
-            # f0 = np.where(f-frange[0] >= 0)[0][0]
-            # f1 = np.where(f-frange[-1] <= 0)[0][-1]
+            # closest frequencies within range
             f0 = (np.abs(f-frange[0])).argmin()
             f1 = (np.abs(f-frange[1])).argmin()
 

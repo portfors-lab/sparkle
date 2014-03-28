@@ -168,6 +168,11 @@ def bb_cal_curve(sig, resp, fs, frange):
 
     diffdB = XmagdB - YmagdB
 
+    fq = np.arange(npts/2+1)/(float(npts)/fs)
+    plt.figure()
+    plt.plot(fq, diffdB)
+    plt.title('diff db in cal funct')
+    plt.show()
     # restrict to desired frequencies and smooth
     # this should probably be done on the other side,
     # before it gets applied.
@@ -176,7 +181,7 @@ def bb_cal_curve(sig, resp, fs, frange):
     diffdB = smooth(diffdB)
     # diffdB = -1*diffdB
 
-    fq = np.arange(npts/2+1)/(float(npts)/fs)
+
 
     return diffdB[f0:f1], fq[f0:f1]
 

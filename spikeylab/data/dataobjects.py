@@ -236,6 +236,7 @@ class AcquisitionData():
                 self.hdf5.attrs[attr] = val
         else:
             for attr, val in attrdict.iteritems():
+                print 'key', attr, val
                 self.hdf5[key].attrs[attr] = val
         
 
@@ -286,11 +287,17 @@ def load_calibration_file(filename, reffreq):
     cal_vector = calfile['calibration_intensities'].value
     calset = calfile['calibration_intensities']
     frequencies = calset.attrs['frequencies']
+    if frequencies == 'all':
+        # means calibration all frequencies present in fft
+        stim_info = json.loads(calfile.attrs['stim'])
+        fs = stim_info[0]['samplerate_da']
+        npts = len(cal_vector)
+        frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
     # adjust to current ref frequency (should be zero if same as calibration)
     offset = cal_vector[frequencies == reffreq]
-    print 'frequencies', frequencies
-    print 'calvector', cal_vector
-    print 'calfile frequency', calset.attrs['calibration_frequency'], 'current frequency', reffreq, 'offset', offset
+    # print 'frequencies', frequencies
+    # print 'calvector', cal_vector
+    # print 'calfile frequency', calset.attrs['calibration_frequency'], 'current frequency', reffreq, 'offset', offset
     cal_vector -= offset
     caldb = calset.attrs['calibration_dB']
     calv = calset.attrs['calibration_voltage']

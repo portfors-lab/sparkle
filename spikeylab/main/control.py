@@ -17,6 +17,8 @@ from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
+from spikeylab.data.dataobjects import load_calibration_file
+from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 from controlwindow import ControlWindow
 
@@ -28,6 +30,8 @@ BLACK = QtGui.QPalette()
 BLACK.setColor(QtGui.QPalette.Foreground,QtCore.Qt.black)
 
 DEVNAME = "PCI-6259"
+
+TONE_CAL = False
 
 class MainWindow(ControlWindow):
     def __init__(self, inputs_filename=''):
@@ -173,7 +177,10 @@ class MainWindow(ControlWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-            self.run_calibration()
+            if TONE_CAL:
+                self.run_calibration()
+            else:
+                self.run_noise_calibration()
         else: 
             raise Exception("unrecognized tab selection")
 
@@ -282,7 +289,13 @@ class MainWindow(ControlWindow):
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
-            results, calname = self.acqmodel.process_calibration(save)
+            calname = self.acqmodel.process_calibration(save)
+            if not TONE_CAL:
+                attenuations, freqs = load_calibration_file(calname, self.calvals['calf'])
+                self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
+                self.pw.setWindowFlags(QtCore.Qt.Window)
+                self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
+                self.pw.show()
         self.on_stop()
 
     def run_chart(self):
@@ -361,6 +374,21 @@ class MainWindow(ControlWindow):
         self.on_update()
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
 
+    def run_noise_calibration(self):
+        self.ui.start_btn.setEnabled(False)
+        self.active_operation = 'calibration'
+
+        self.ui.stop_btn.clicked.disconnect()
+        self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
+
+        self.ui.plot_dock.switch_display('calibration')
+
+        reprate = self.ui.reprate_spnbx.value()
+        interval = (1/reprate)*1000
+
+        self.on_update()
+        self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
+
     def display_response(self, times, response):
         # print 'response signal', len(response)
         if len(times) != len(response):
@@ -384,7 +412,7 @@ class MainWindow(ControlWindow):
             else:
                 spectrum = signal_fft
             self.ui.dblevel_lbl3.setNum(np.amax(spectrum))
-            # spectrum[0] = 0
+            spectrum[0] = 0
             self.extended_display.update_signal(times, response, plot='response')
             self.extended_display.update_fft(freq, spectrum, plot='response')
             self.extended_display.update_spec(response, sr, plot='response')

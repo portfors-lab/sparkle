@@ -74,6 +74,8 @@ class Experimenter(AbstractAcquisitionModel):
                             # do this after collection so plots match details
                             self.signals.stim_generated.emit(signal, test.samplerate())
                             self.signals.current_trace.emit(itest,itrace,trace_doc)
+                            self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                        
                         self.signals.current_rep.emit(irep)
 
                         self.player.reset()

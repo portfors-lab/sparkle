@@ -41,7 +41,7 @@ def calc_spectrum(signal,rate):
     sp = np.fft.rfft(signal)/npts
     #print('sp len ', len(sp))
 
-    return freq, abs(sp.real)
+    return freq, abs(sp).real
 
 def get_fft_peak(spectrum, freq, atfrequency=None):
     # find the peak values for spectrum

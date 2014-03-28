@@ -422,21 +422,26 @@ class TestAcquisitionModel():
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
+        manager.set_calibration_duration(winsz)
         t = manager.run_calibration(0.1, False)
         t.join()
-        results, calname = manager.process_calibration()
+        calname = manager.process_calibration()
         manager.close_data()
 
         # now check saved data
         hfile = h5py.File(calname, 'r')
-        peaks = hfile['fft_peaks']
+        # peaks = hfile['fft_peaks']
+        signals = hfile['signal']
         stim = json.loads(hfile.attrs['stim'])
         cal_vector = hfile['calibration_intensities']
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
-        assert_equal(peaks.shape,(ntraces,nreps))
-        assert cal_vector.shape == (21,) #beware, will fail if defaults change
+        # assert_equal(peaks.shape,(ntraces,nreps))
+        npts =  winsz*acq_rate
+        assert_equal(signals.shape,(nreps, npts))
+        # assert cal_vector.shape == (21,) #beware, will fail if defaults change
+        assert cal_vector.shape == ((npts/2+1),)
 
         hfile.close()
 
@@ -444,7 +449,8 @@ class TestAcquisitionModel():
         manager = AcquisitionManager()
 
         manager.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
-                            acqtime=winsz, aisr=acq_rate)
+                            acqtime=winsz, aisr=acq_rate, caldb=100,
+                            calv=1.0)
         manager.set_calibration(sample.calibration_filename())
 
         manager.set_save_params(self.tempfolder, 'testdata')
