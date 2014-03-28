@@ -31,8 +31,6 @@ BLACK.setColor(QtGui.QPalette.Foreground,QtCore.Qt.black)
 
 DEVNAME = "PCI-6259"
 
-TONE_CAL = False
-
 class MainWindow(ControlWindow):
     def __init__(self, inputs_filename=''):
         # set up model and stimlui first, 
@@ -67,7 +65,7 @@ class MainWindow(ControlWindow):
         self.display.colormap_changed.connect(self.relay_cmap_change)
 
         self.ui.protocolView.setModel(self.acqmodel.protocol_model())
-        self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus())
+        self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus('tone'))
 
         self.acqmodel.signals.response_collected.connect(self.display_response)
         self.acqmodel.signals.calibration_response_collected.connect(self.display_calibration_response)
@@ -177,7 +175,8 @@ class MainWindow(ControlWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-            if TONE_CAL:
+            self.acqmodel.set_calibration_reps(self.ui.calibration_widget.ui.nreps_spnbx.value())
+            if self.ui.calibration_widget.is_tone_cal():
                 self.run_calibration()
             else:
                 self.run_noise_calibration()
@@ -290,7 +289,7 @@ class MainWindow(ControlWindow):
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
             calname = self.acqmodel.process_calibration(save)
-            if not TONE_CAL:
+            if self.ui.calibration_widget.is_tone_cal():
                 attenuations, freqs = load_calibration_file(calname, self.calvals['calf'])
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
@@ -385,6 +384,9 @@ class MainWindow(ControlWindow):
 
         reprate = self.ui.reprate_spnbx.value()
         interval = (1/reprate)*1000
+
+        stim_index = self.ui.calibration_widget.current_index()
+        self.acqmodel.set_calibration_by_index(stim_index)
 
         self.on_update()
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())

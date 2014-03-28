@@ -59,6 +59,9 @@ class CalibrationExperimenter(Experimenter):
     def set_duration(self, dur):
         self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
 
+    def set_reps(self, reps):
+        self.stimulus.setRepCount(reps)
+
     def _initialize_run(self):
         self.current_dataset_name = 'calibration'
         self.calibration_frequencies = []

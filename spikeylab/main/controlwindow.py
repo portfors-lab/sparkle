@@ -43,6 +43,9 @@ class ControlWindow(QtGui.QMainWindow):
             self.ui.parameter_stack.addWidget(editor)
             self.ui.explore_stim_type_cmbbx.addItem(stim.name)
 
+        for calstim in self.acqmodel.bs_calibrator.get_stims(): #tsk
+            self.ui.calibration_widget.add_option(calstim)
+
         try:
             settings = QtCore.QSettings("audiolab")
             self.restoreGeometry(settings.value("geometry"))
@@ -79,7 +82,7 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input", failure)
                     return False
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-                calibration_stimulus = self.acqmodel.calibration_stimulus()
+                calibration_stimulus = self.acqmodel.calibration_stimulus('tone')
                 failmsg = calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)

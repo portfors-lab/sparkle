@@ -6,7 +6,8 @@ from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.main.explore_acquisition import Explorer
 from spikeylab.main.protocol_experimenter import ProtocolExperimenter
 from spikeylab.main.chart_experimenter import ChartExperimenter
-from spikeylab.main.calibration_experimenter_bs import CalibrationExperimenter
+from spikeylab.main.calibration_experimenter_bs import CalibrationExperimenterBS
+from spikeylab.main.calibration_experimenter import CalibrationExperimenter
 
 class AcquisitionManager():
     def __init__(self):
@@ -19,13 +20,15 @@ class AcquisitionManager():
 
         self.explorer = Explorer(self.signals)
         self.protocoler =  ProtocolExperimenter(self.signals)
-        self.calibrator = CalibrationExperimenter(self.signals)
+        self.bs_calibrator = CalibrationExperimenterBS(self.signals)
+        self.tone_calibrator = CalibrationExperimenter(self.signals)
         self.charter = ChartExperimenter(self.signals)
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
         self.signals.samplerateChanged = self.explorer.stimulus.samplerateChanged
-
+        self.selected_calibration_index = 0
+        
     def stimuli_list(self):
         return self.explorer.stimuli_list()
 
@@ -42,10 +45,16 @@ class AcquisitionManager():
         self.explorer.set_calibration(calibration_vector, calibration_freqs, frange)
         self.protocoler.set_calibration(calibration_vector, calibration_freqs, frange)
         self.charter.set_calibration(calibration_vector, calibration_freqs, frange)
-        self.calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
+        self.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
+        self.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
 
     def set_calibration_duration(self, dur):
-        self.calibrator.set_duration(dur)
+        self.bs_calibrator.set_duration(dur)
+        self.tone_calibrator.set_duration(dur)
+
+    def set_calibration_reps(self, reps):
+        self.bs_calibrator.set_reps(reps)
+        self.tone_calibrator.set_reps(reps)
 
     def create_data_file(self):
         # find first available file name
@@ -62,7 +71,6 @@ class AcquisitionManager():
         logger.info('Opened datafile: {}'.format(fname))
 
         return fname
-
 
     def set_threshold(self, threshold):
         """Spike detection threshold
@@ -83,16 +91,19 @@ class AcquisitionManager():
         """
         self.savefolder = savefolder
         self.savename = savename
-        self.calibrator.set_save_params(folder=self.savefolder)
+        self.bs_calibrator.set_save_params(folder=self.savefolder)
+        self.tone_calibrator.set_save_params(folder=self.savefolder)
 
     def set_calibration_file_name(self, savename):
         """Filename for which to save calibrations to"""
-        self.calibrator.set_save_params(folder=self.savefolder, name=savename)
+        self.bs_calibrator.set_save_params(folder=self.savefolder, name=savename)
+        self.tone_calibrator.set_save_params(folder=self.savefolder, name=savename)
 
     def set_params(self, **kwargs):
         self.explorer.set_params(**kwargs)
         self.protocoler.set_params(**kwargs)
-        self.calibrator.set_params(**kwargs)
+        self.bs_calibrator.set_params(**kwargs)
+        self.tone_calibrator.set_params(**kwargs)
         self.charter.set_params(**kwargs)
 
     def set_stim_by_index(self, index):
@@ -113,10 +124,19 @@ class AcquisitionManager():
     def run_protocol(self):
         return self.protocoler.run()
 
+    def set_calibration_by_index(self, idx):
+        self.selected_calibration_index = idx
+
     def run_calibration(self, interval, applycal):
-        self.calibrator.apply_calibration(applycal)
-        self.calibrator.setup(interval)
-        return self.calibrator.run()
+        if self.selected_calibration_index == 0:
+            self.tone_calibrator.apply_calibration(applycal)
+            self.tone_calibrator.setup(interval)
+            return self.tone_calibrator.run()
+        else:
+            self.bs_calibrator.set_stim_by_index(self.selected_calibration_index-1)
+            self.bs_calibrator.apply_calibration(applycal)
+            self.bs_calibrator.setup(interval)
+            return self.bs_calibrator.run()
 
     def start_chart(self):
         self.charter.start_chart()
@@ -129,7 +149,11 @@ class AcquisitionManager():
         return self.charter.run()
 
     def process_calibration(self, save=True):
-        results, fname, freq = self.calibrator.process_calibration(save)
+        if self.selected_calibration_index == 0:
+            results, fname, freq = self.tone_calibrator.process_calibration(save)
+        else:
+            results, fname, freq = self.bs_calibrator.process_calibration(save)
+        
         if save:
             self.set_calibration(fname, freq)
         return fname
@@ -138,7 +162,8 @@ class AcquisitionManager():
         """Halt any/all running operations"""
         self.explorer.halt()
         self.protocoler.halt()
-        self.calibrator.halt()
+        self.bs_calibrator.halt()
+        self.tone_calibrator.halt()
         self.charter.halt()
 
     def close_data(self):
@@ -149,21 +174,22 @@ class AcquisitionManager():
     def protocol_model(self):
         return self.protocoler.protocol_model
 
-    def calibration_stimulus(self):
-        return self.calibrator.stimulus
+    def calibration_stimulus(self, mode):
+        if mode == 'tone':
+            return self.tone_calibrator.stimulus
 
     def explore_genrate(self):
         return self.explorer.stimulus.samplerate()
 
     def calibration_genrate(self):
-        return self.calibrator.stimulus.samplerate()
+        return self.bs_calibrator.stimulus.samplerate()
 
     def calibration_range(self):
-        return self.calibrator.stimulus.autoParamRanges()
+        return self.tone_calibrator.stimulus.autoParamRanges()
 
     def calibration_template(self):
-        return self.calibrator.stimulus.templateDoc()
+        return self.tone_calibrator.stimulus.templateDoc()
 
     def load_calibration_template(self, template):
-        self.calibrator.stimulus.clearComponents()
-        self.calibrator.stimulus.loadFromTemplate(template, self.calibrator.stimulus)
+        self.tone_calibrator.stimulus.clearComponents()
+        self.tone_calibrator.stimulus.loadFromTemplate(template, self.calibrator.stimulus)
