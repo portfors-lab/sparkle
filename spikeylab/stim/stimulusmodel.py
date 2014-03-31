@@ -36,6 +36,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.caldb = None
         self.calibration_attenuations = None
         self.calibration_frequencies = None
+        self.maxv = 3.0
 
         self.stimid = uuid.uuid1()
 
@@ -390,10 +391,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
         total_signal = self.apply_calibration(total_signal, samplerate)
 
         undesired_attenuation = 0
-        if USE_RMS:
-            maxv = self.calv*1.414213562373 # peak value for sine wave rms
-        else:
-            maxv = self.calv
+        # if USE_RMS:
+        #     maxv = self.calv*1.414213562373 # peak value for sine wave rms
+        # else:
+        #     maxv = self.calv
+        maxv = self.maxv
 
         if max(abs(total_signal)) > maxv:
             peak = max(abs(total_signal))
@@ -425,13 +427,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # closest frequencies within range
             f0 = (np.abs(f-frange[0])).argmin()
             f1 = (np.abs(f-frange[1])).argmin()
+            # we don't want to attenutated any frequencies in range,
+            # so add indexes according to how much we will smooth edges out
+            winsz = 99
+            f0 -= winsz/2
+            f1 += winsz/2
 
             cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
             interp_freqs = f[f0:f1]
             Hroi = cal_func(interp_freqs)
             H = np.zeros((npts/2+1,))
             H[f0:f1] = Hroi
-            H = smooth(H)
+            H = smooth(H, winsz)
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)
 

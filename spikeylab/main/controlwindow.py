@@ -82,7 +82,11 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input", failure)
                     return False
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-                calibration_stimulus = self.acqmodel.calibration_stimulus('tone')
+                if self.ui.calibration_widget.ui.savecal_ckbx.isChecked() or not self.ui.calibration_widget.current_selection() == 'Tone Curve':
+                    calibration_stimulus = self.acqmodel.calibration_stimulus('noise')
+                else:
+                    calibration_stimulus = self.acqmodel.calibration_stimulus('tone')
+
                 failmsg = calibration_stimulus.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
@@ -93,13 +97,7 @@ class ControlWindow(QtGui.QMainWindow):
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
-                if self.ui.calibration_widget.ui.savecal_ckbx.isChecked():
-                    if not calibration_stimulus.contains_pval('frequency', self.calvals['calf']):
-                        QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference frequency")
-                        return False
-                    if not calibration_stimulus.contains_pval('intensity', self.calvals['caldb']):
-                        QtGui.QMessageBox.warning(self, "Invalid Input", "Calibration curve does not include calibration reference intensity")
-                        return False
+
         return True
 
     def update_unit_labels(self, tscale, fscale, setup=False):

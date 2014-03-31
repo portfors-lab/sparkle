@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Fri Mar 28 16:52:41 2014
+# Created: Mon Mar 31 09:17:25 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -205,6 +205,7 @@ class Ui_CalibrationWidget(object):
         self.caleditor_stack.setCurrentIndex(0)
         QtCore.QObject.connect(self.cal_type_cmbbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.caleditor_stack.setCurrentIndex)
         QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frame.setEnabled)
+        QtCore.QObject.connect(self.applycal_ckbx, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.test_type_grp.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(CalibrationWidget)
 
     def retranslateUi(self, CalibrationWidget):

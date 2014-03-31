@@ -386,12 +386,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>363</x>
+     <x>362</x>
+     <y>28</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>734</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applycal_ckbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>test_type_grp</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>350</x>
      <y>27</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>57</y>
+     <x>310</x>
+     <y>69</y>
     </hint>
    </hints>
   </connection>

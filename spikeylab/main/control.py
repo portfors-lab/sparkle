@@ -284,9 +284,9 @@ class MainWindow(ControlWindow):
     def on_group_done(self, halted):
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
-            save = self.ui.calibration_widget.ui.savecal_ckbx.isChecked() and not halted
-            calname = self.acqmodel.process_calibration(save)
-            if not self.ui.calibration_widget.is_tone_cal() and save:
+            save = self.ui.calibration_widget.save_checked() and not halted
+            calname = self.acqmodel.process_calibration(save, self.calvals['calf'])
+            if save:
                 attenuations, freqs = load_calibration_file(calname, self.calvals['calf'])
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)

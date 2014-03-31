@@ -148,14 +148,15 @@ class AcquisitionManager():
         self.charter.setup(interval)
         return self.charter.run()
 
-    def process_calibration(self, save=True):
+    def process_calibration(self, save=True, calf=15000):
         if self.selected_calibration_index == 0:
             results, fname, freq = self.tone_calibrator.process_calibration(save)
         else:
             results, fname, freq = self.bs_calibrator.process_calibration(save)
-        
+        # restrict to same frequency range as before
         if save:
-            self.set_calibration(fname, freq)
+            frange = self.bs_calibrator.calibration_frange
+            self.set_calibration(fname, calf=calf, frange=frange)
         return fname
 
     def halt(self):

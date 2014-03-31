@@ -37,5 +37,11 @@ class CalibrationWidget(QtGui.QWidget):
     def current_index(self):
         return self.ui.cal_type_cmbbx.currentIndex()
 
+    def current_selection(self):
+        return self.ui.cal_type_cmbbx.currentText()
+        
     def is_tone_cal(self):
         return self.ui.cal_type_cmbbx.currentIndex() == 0
+
+    def save_checked(self):
+        return self.ui.savecal_ckbx.isChecked()

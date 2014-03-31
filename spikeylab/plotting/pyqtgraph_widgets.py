@@ -265,7 +265,8 @@ class SimplePlotWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
 
-        self.pdi = self.plot(xpoints, ypoints)
+        self.pdi = self.plot(xpoints, ypoints, pen='k')
+        self.resize(800,500)
 
     def set_labels(self, xlabel=None, ylabel=None, title=None):
         if xlabel is not None:

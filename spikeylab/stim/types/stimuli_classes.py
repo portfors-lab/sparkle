@@ -2,7 +2,7 @@ import os
 import wave
 
 import scipy.io.wavfile as wv
-from scipy.signal import chirp
+from scipy.signal import chirp, hann
 import numpy as np
 
 from PyQt4 import QtGui, QtCore
@@ -96,8 +96,11 @@ class FMSweep(Tone):
 
         if self._risefall > 0:
             rf_npts = self._risefall * fs
-            signal[:rf_npts] = signal[:rf_npts] * np.linspace(0,1,rf_npts)
-            signal[-rf_npts:] = signal[-rf_npts:] * np.linspace(1,0,rf_npts)
+            wnd = hann(rf_npts*2) # cosine taper
+            signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
+            signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
+            # signal[:rf_npts] = signal[:rf_npts] * np.linspace(0,1,rf_npts)
+            # signal[-rf_npts:] = signal[-rf_npts:] * np.linspace(1,0,rf_npts)
         return signal
 
     def paint(self, painter, rect, palette):
