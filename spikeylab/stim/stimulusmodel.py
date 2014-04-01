@@ -1,6 +1,7 @@
 import numpy as np
 import uuid
 from scipy.interpolate import interp1d
+from scipy.signal import hann
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import calc_spectrum, smooth
@@ -429,20 +430,62 @@ class StimulusModel(QtCore.QAbstractItemModel):
             f1 = (np.abs(f-frange[1])).argmin()
             # we don't want to attenutated any frequencies in range,
             # so add indexes according to how much we will smooth edges out
-            winsz = 99
-            f0 -= winsz/2
-            f1 += winsz/2
+            winsz = 1000
+            # f0 -= winsz/2
+            # f1 += winsz/2
 
             cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
             interp_freqs = f[f0:f1]
             Hroi = cal_func(interp_freqs)
             H = np.zeros((npts/2+1,))
             H[f0:f1] = Hroi
+
+            wnd = (hann(winsz) * (H[f1-1]))
+            H[f1:(f1+winsz/2)] = wnd[winsz/2:]
+            # print 'value at f1', H[f1-1]
+            # wnd = np.linspace(H[f1-1], 0, winsz/2)
+            # H[f1:(f1+winsz/2)] = wnd
+
+            # plt.figure()
+            # plt.subplot(121)
+            # plt.plot(f, H.real)
+            # plt.subplot(122)
+            # plt.plot(f, H.imag)
+            # plt.title('H')
+            # plt.figure()
+            # plt.subplot(121)
+            # plt.plot(f, X.real)
+            # plt.subplot(122)
+            # plt.plot(f, X.imag)
+            # plt.title('X')
+
             H = smooth(H, winsz)
+
+            # plt.figure()
+            # plt.subplot(121)
+            # plt.plot(f, H.real)
+            # plt.subplot(122)
+            # plt.plot(f, H.imag)
+            # plt.title('H after smooth')
+            
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)
-
             Xadjusted = X*H
+            
+            # plt.figure()
+            # plt.subplot(121)
+            # plt.plot(f, Xadjusted.real)
+            # plt.subplot(122)
+            # plt.plot(f, Xadjusted.imag)
+            # plt.title('Xadjusted')
+            # plt.show()
+            # plt.figure()
+            # plt.subplot(121)
+            # plt.plot(f, X.real - Xadjusted.real)
+            # plt.subplot(122)
+            # plt.plot(f, X.imag - Xadjusted.imag)
+            # plt.title('Xadjusted diff')
+            # plt.show()
 
             adjusted_signal = np.fft.irfft(Xadjusted)
 

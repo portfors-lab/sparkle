@@ -30,6 +30,10 @@ class CalibrationExperimenterBS(Experimenter):
         save_data = True
         self.group_name = 'group_0'
 
+        self.calibration_vector = None
+        self.calibration_freqs = None
+        self.calibration_frange = None
+
     def get_stims(self):
         return self.stim_components
 
@@ -136,7 +140,7 @@ class CalibrationExperimenterBS(Experimenter):
         diffdB = XmagdB - YmagdB
 
         # may want to smooth results here?
-        diffdB = smooth(diffdB)
+        # diffdB = smooth(diffdB)
 
         # frequencies present in calibration spectrum
         npts = len(y)

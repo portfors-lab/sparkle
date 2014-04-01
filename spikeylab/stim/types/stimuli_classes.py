@@ -99,8 +99,6 @@ class FMSweep(Tone):
             wnd = hann(rf_npts*2) # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
-            # signal[:rf_npts] = signal[:rf_npts] * np.linspace(0,1,rf_npts)
-            # signal[-rf_npts:] = signal[-rf_npts:] * np.linspace(1,0,rf_npts)
         return signal
 
     def paint(self, painter, rect, palette):
