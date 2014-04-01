@@ -118,6 +118,12 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
         self.endInsertRows()
     
+    def clearTests(self):
+        self.beginRemoveRows(QtCore.QModelIndex(), 0, self.rowCount()-1)
+        self.test_order = []
+        self.tests = {}
+        self.endRemoveRows()
+
     def stimulusList(self):
         """Return a list of StimulusModels in correct order"""
         stimuli = []

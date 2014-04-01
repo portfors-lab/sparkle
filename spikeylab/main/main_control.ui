@@ -70,7 +70,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -328,7 +328,24 @@
            <widget class="ProtocolView" name="protocolView"/>
           </item>
           <item>
-           <widget class="StimulusLabelTable" name="stimulus_choices" native="true"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="StimulusLabelTable" name="stimulus_choices" native="true"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>clear protocol</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -1091,12 +1108,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
+     <x>583</x>
      <y>116</y>
     </hint>
     <hint type="destinationlabel">
-     <x>432</x>
-     <y>282</y>
+     <x>674</x>
+     <y>397</y>
     </hint>
    </hints>
   </connection>
@@ -1123,8 +1140,8 @@
    <slot>mode_toggled(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>734</x>
-     <y>277</y>
+     <x>927</x>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
      <x>705</x>
@@ -1180,6 +1197,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>clear_protocol()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>585</x>
+     <y>645</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>697</x>
+     <y>562</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1201,5 +1234,6 @@
   <slot>tab_changed(int)</slot>
   <slot>show_log()</slot>
   <slot>grab_cal()</slot>
+  <slot>clear_protocol()</slot>
  </slots>
 </ui>

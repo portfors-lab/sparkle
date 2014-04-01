@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Mar 14 09:28:52 2014
+# Created: Tue Apr 01 16:36:03 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -185,9 +185,16 @@ class Ui_ControlWindow(object):
         self.protocolView = ProtocolView(self.tab_protocol)
         self.protocolView.setObjectName(_fromUtf8("protocolView"))
         self.verticalLayout_5.addWidget(self.protocolView)
+        self.horizontalLayout_9 = QtGui.QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(_fromUtf8("horizontalLayout_9"))
         self.stimulus_choices = StimulusLabelTable(self.tab_protocol)
         self.stimulus_choices.setObjectName(_fromUtf8("stimulus_choices"))
-        self.verticalLayout_5.addWidget(self.stimulus_choices)
+        self.horizontalLayout_9.addWidget(self.stimulus_choices)
+        self.pushButton = QtGui.QPushButton(self.tab_protocol)
+        self.pushButton.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.horizontalLayout_9.addWidget(self.pushButton)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_9)
         self.tab_group.addTab(self.tab_protocol, _fromUtf8(""))
         self.tab_calibrate = QtGui.QWidget()
         self.tab_calibrate.setObjectName(_fromUtf8("tab_calibrate"))
@@ -517,7 +524,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tab_group.setCurrentIndex(0)
+        self.tab_group.setCurrentIndex(1)
         self.parameter_stack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
@@ -530,6 +537,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionShow_Progress, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_progress)
         QtCore.QObject.connect(self.tab_group, QtCore.SIGNAL(_fromUtf8("currentChanged(int)")), ControlWindow.tab_changed)
         QtCore.QObject.connect(self.actionShow_Log, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.show_log)
+        QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.clear_protocol)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -561,6 +569,7 @@ class Ui_ControlWindow(object):
         self.rep_num.setText(_translate("ControlWindow", "0", None))
         self.trace_info.setText(_translate("ControlWindow", "Super cool info", None))
         self.label_2.setText(_translate("ControlWindow", "Experiment Protocol:", None))
+        self.pushButton.setText(_translate("ControlWindow", "clear protocol", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_protocol), _translate("ControlWindow", "Experiment", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_calibrate), _translate("ControlWindow", "Calibration", None))
         self.label_30.setText(_translate("ControlWindow", "AI channel", None))

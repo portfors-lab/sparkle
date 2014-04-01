@@ -599,6 +599,9 @@ class MainWindow(ControlWindow):
     def save_explore_toggled(self, save):
         self.save_explore = save
 
+    def clear_protocol(self):
+        self.acqmodel.clear_protocol()
+
     def show_display(self):
         self.ui.plot_dock.setVisible(True)
 

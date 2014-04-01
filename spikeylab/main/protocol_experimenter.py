@@ -61,7 +61,6 @@ class ProtocolExperimenter(Experimenter):
         self.signals.spikes_found.emit(response_bins, irep)
 
         self.datafile.append(self.current_dataset_name, response)
-        self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
         if irep == self.nreps-1:
             total_spikes = float(sum(spike_counts))
@@ -80,3 +79,6 @@ class ProtocolExperimenter(Experimenter):
         self.spike_counts = spike_counts
         self.spike_latencies = spike_latencies
         self.spike_rates = spike_rates
+
+    def clear(self):
+        self.protocol_model.clearTests()
