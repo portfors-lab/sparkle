@@ -12,8 +12,8 @@ from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 ROW_HEIGHT = 100
 ROW_SPACE = 25
 
-PIXELS_PER_MS = 5
-GRID_MS = 25
+GRID_PIXEL_MIN = 100
+GRID_PIXEL_MAX = 200
 
 #Enums
 BUILDMODE = 0
@@ -42,6 +42,21 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         self.mode = BUILDMODE
         self._rects = [[]]
+        # these orignal settings are important
+        self.pixels_per_ms = 5
+        self.grid_ms = 25
+
+    def setPixelScale(self, pxms):
+        pxms = float(pxms)/2
+        self.pixels_per_ms = pxms
+        if pxms*self.grid_ms < GRID_PIXEL_MIN:
+            self.grid_ms = self.grid_ms*2
+        elif pxms*self.grid_ms > GRID_PIXEL_MAX:
+            self.grid_ms = self.grid_ms/2
+        self.hashIsDirty = True
+        self.viewport().update()
+
+        return self.grid_ms
 
     def setModel(self, model):
         super(StimulusView, self).setModel(model)
@@ -77,12 +92,12 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         x, y = 0, 0
         maxx = 0
         for row in range(self.model().rowCount(self.rootIndex())):
-            y = row*ROW_HEIGHT + row*ROW_SPACE
+            y = row*ROW_HEIGHT + row*ROW_SPACE + ROW_SPACE
             x = 0
             for col in range(self.model().columnCountForRow(row)):
                 index = self.model().index(row, col, self.rootIndex())
                 duration = self.model().data(index, QtCore.Qt.SizeHintRole)
-                width = duration * PIXELS_PER_MS * 1000
+                width = duration * self.pixels_per_ms * 1000
                 if width is not None:
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
@@ -195,12 +210,13 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         # draw grid lines
         wid = int(max(viewrect.width(), self._width))
-        nlines = (wid/PIXELS_PER_MS)/GRID_MS
+        nlines = int((wid/self.pixels_per_ms)/self.grid_ms)
         y0 = viewrect.y()
         y1 = viewrect.y() + viewrect.height()
-        for iline in range(nlines):
-            x = (iline * GRID_MS * PIXELS_PER_MS) - self.horizontalScrollBar().value()
-            painter.drawLine(x, y0, x, y1)
+        for iline in range(1, nlines + 1):
+            x = (iline * self.grid_ms * self.pixels_per_ms) - self.horizontalScrollBar().value()
+            painter.drawLine(x, y0+11, x, y1)
+            painter.drawText(x-5, y0+10, str(iline*self.grid_ms))
 
         # painting of components
         for row in range(self.model().rowCount(self.rootIndex())):
@@ -268,7 +284,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             rect = self._rects[index[0]][index[1]]
             x = rect.x()
 
-        y0 = index[0]*(ROW_HEIGHT + ROW_SPACE)
+        y0 = index[0]*(ROW_HEIGHT + ROW_SPACE) + ROW_SPACE
         y1 = y0 + ROW_HEIGHT
 
         # adjust for scrolled viewport
@@ -325,11 +341,11 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.hashIsDirty = True
 
     def updateGeometries(self,a=None, b=None):
-        self.horizontalScrollBar().setSingleStep(PIXELS_PER_MS)
+        self.horizontalScrollBar().setSingleStep(self.pixels_per_ms)
         self.horizontalScrollBar().setPageStep(self.viewport().width())
         self.horizontalScrollBar().setRange(0, max(0, self._width - self.viewport().width()))
 
-        self.verticalScrollBar().setSingleStep(PIXELS_PER_MS)
+        self.verticalScrollBar().setSingleStep(self.pixels_per_ms)
         self.verticalScrollBar().setPageStep(self.viewport().height())
         self.verticalScrollBar().setRange(0, max(0, self._height - self.viewport().height()))
         
@@ -349,7 +365,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
     def sizeHint(self, option, index):
         # calculate size by data component
         component = index.data()
-        width = self.component.duration() * PIXELS_PER_MS*1000
+        width = self.component.duration() * self.pixels_per_ms*1000
         return QtCore.QSize(width, 50)
 
     def createEditor(self, parent, option, index):

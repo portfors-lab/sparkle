@@ -47,7 +47,7 @@
          <x>0</x>
          <y>0</y>
          <width>643</width>
-         <height>314</height>
+         <height>341</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -136,6 +136,33 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Drag Components onto view to Add. Double click to edit; right drag to move.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Grid scale(ms):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSlider" name="horizontalSlider">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>12</number>
+           </property>
+           <property name="value">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer">
@@ -228,6 +255,7 @@ p, li { white-space: pre-wrap; }
    <container>1</container>
    <slots>
     <slot>setRepCount(int)</slot>
+    <slot>setPixelScale()</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -253,7 +281,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>922</x>
-     <y>290</y>
+     <y>254</y>
     </hint>
     <hint type="destinationlabel">
      <x>892</x>
@@ -269,7 +297,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>923</x>
-     <y>378</y>
+     <y>342</y>
     </hint>
     <hint type="destinationlabel">
      <x>1052</x>
@@ -285,7 +313,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>923</x>
-     <y>320</y>
+     <y>284</y>
     </hint>
     <hint type="destinationlabel">
      <x>642</x>
@@ -300,12 +328,28 @@ p, li { white-space: pre-wrap; }
    <slot>saveStimulus()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>868</x>
-     <y>337</y>
+     <x>923</x>
+     <y>313</y>
     </hint>
     <hint type="destinationlabel">
      <x>942</x>
      <y>353</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>trackview</receiver>
+   <slot>setPixelScale()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>758</x>
+     <y>172</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>615</x>
+     <y>244</y>
     </hint>
    </hints>
   </connection>

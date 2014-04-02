@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Tue Apr 01 17:23:18 2014
+# Created: Wed Apr 02 16:48:11 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,7 +47,7 @@ class Ui_StimulusEditor(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 314))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 341))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setMargin(0)
@@ -89,6 +89,19 @@ class Ui_StimulusEditor(object):
         self.hint_txedt.setFrameShape(QtGui.QFrame.Panel)
         self.hint_txedt.setObjectName(_fromUtf8("hint_txedt"))
         self.verticalLayout.addWidget(self.hint_txedt)
+        self.gridLayout = QtGui.QGridLayout()
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.label = QtGui.QLabel(self.frame)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
+        self.horizontalSlider = QtGui.QSlider(self.frame)
+        self.horizontalSlider.setMinimum(1)
+        self.horizontalSlider.setMaximum(12)
+        self.horizontalSlider.setProperty("value", 10)
+        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider.setObjectName(_fromUtf8("horizontalSlider"))
+        self.gridLayout.addWidget(self.horizontalSlider, 0, 1, 1, 1)
+        self.verticalLayout.addLayout(self.gridLayout)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.gridLayout_3 = QtGui.QGridLayout()
@@ -133,6 +146,7 @@ class Ui_StimulusEditor(object):
         QtCore.QObject.connect(self.ok_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.close)
         QtCore.QObject.connect(self.preview_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.preview)
         QtCore.QObject.connect(self.save_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), StimulusEditor.saveStimulus)
+        QtCore.QObject.connect(self.horizontalSlider, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.trackview.setPixelScale)
         QtCore.QMetaObject.connectSlotsByName(StimulusEditor)
 
     def retranslateUi(self, StimulusEditor):
@@ -144,6 +158,7 @@ class Ui_StimulusEditor(object):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Drag Components onto view to Add. Double click to edit; right drag to move.</p></body></html>", None))
+        self.label.setText(_translate("StimulusEditor", "Grid scale(ms):", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
         self.preview_btn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
         self.save_btn.setText(_translate("StimulusEditor", "Save As...", None))
