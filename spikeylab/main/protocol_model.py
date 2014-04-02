@@ -169,9 +169,10 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             factory = item
             # create new stimulus then!
             stim = StimulusModel()
-            factory.init_stim(stim)
-            stim.setEditor(factory.editor())
-            self.model().insertNewTest(stim, location)
+            cancel = factory.init_stim(stim)
+            if not cancel:
+                stim.setEditor(factory.editor())
+                self.model().insertNewTest(stim, location)
         elif event.source() == self:
             selected_id = item
             self.model().insertTest(selected_id, location)

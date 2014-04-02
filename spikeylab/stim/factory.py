@@ -99,7 +99,10 @@ class TemplateFactory(StimFactory):
         # load saved settings into stimulus
         fname = QtGui.QFileDialog.getOpenFileName(None, u"Load Stimulus from File", 
                                     self.save_folder, "Stimulus Settings (*.json)")
-        with open(fname, 'r') as jf:
-            state = json.load(jf)
-        stim.loadFromTemplate(state, stim)
-        self._editor = stim.editor
+        if fname:
+            with open(fname, 'r') as jf:
+                state = json.load(jf)
+            stim.loadFromTemplate(state, stim)
+            self._editor = stim.editor
+        else:
+            return 1
