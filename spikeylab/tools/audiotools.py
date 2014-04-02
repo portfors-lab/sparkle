@@ -179,7 +179,6 @@ def smooth(x, window_len=99, window='hamming'):
     if window_len < 3:
         return x
     if window_len % 2 == 0:
-        print 'adding one to window'
         window_len +=1
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'kaiser']:

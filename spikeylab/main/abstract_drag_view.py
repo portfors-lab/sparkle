@@ -22,8 +22,15 @@ class AbstractDragView():
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
             index = self.indexAt(event.pos())
+            # grab the pixmap first, as it may be cleared from component,
+            # and slows GUI due to redraw.
+            pixmap = self.grabImage(index)
+
             selected = self.model().data(index, QtCore.Qt.UserRole+1)
 
+            if selected is None:
+                return
+                
             ## convert to  a bytestream
             bstream = cPickle.dumps(selected)
             mimeData = QtCore.QMimeData()
@@ -32,8 +39,6 @@ class AbstractDragView():
             self.limbo_component = selected
             drag = QtGui.QDrag(self)
             drag.setMimeData(mimeData)
-
-            pixmap = self.grabImage(index)
 
             # below makes the pixmap half transparent
             painter = QtGui.QPainter(pixmap)
@@ -59,7 +64,6 @@ class AbstractDragView():
             event.accept()
         else:
             event.ignore()
-
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("application/x-protocol"):

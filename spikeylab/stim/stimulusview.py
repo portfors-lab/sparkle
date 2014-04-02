@@ -2,8 +2,6 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-import cPickle
-
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.drag_label import DragLabel
@@ -25,6 +23,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     """View for building/editing stimulus components"""
     hashIsDirty = False
     _height = ROW_HEIGHT
+    _width = 10
     _component_defaults = {}
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
@@ -76,6 +75,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
         x, y = 0, 0
+        maxx = 0
         for row in range(self.model().rowCount(self.rootIndex())):
             y = row*ROW_HEIGHT + row*ROW_SPACE
             x = 0
@@ -86,8 +86,13 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                 if width is not None:
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
+                maxx = max(maxx, x)
 
+        self._width = maxx + 10
         self._height = y+ROW_HEIGHT
+        self.viewport().update()
+        self.updateGeometries()
+        self.hashIsDirty = False
 
     def splitAt(self, point):
         wx = point.x() + self.horizontalScrollBar().value()
@@ -159,6 +164,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                 self.verticalScrollBar().value() + min(
                     rect.bottom() - area.bottom(), rect.top() - area.top()))
 
+        self.viewport().update()
+
     def scrollContentsBy(self, dx, dy):
         # self.scrollDirtyRegion(dx,dy) #in web example
         self.viewport().scroll(dx, dy)
@@ -187,14 +194,15 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         painter.setPen(foreground)  
 
         # draw grid lines
-        nlines = (viewrect.width()/PIXELS_PER_MS)/GRID_MS
+        wid = int(max(viewrect.width(), self._width))
+        nlines = (wid/PIXELS_PER_MS)/GRID_MS
         y0 = viewrect.y()
-        y1 = viewrect.y()+viewrect.height()
+        y1 = viewrect.y() + viewrect.height()
         for iline in range(nlines):
-            x = iline * GRID_MS * PIXELS_PER_MS
+            x = (iline * GRID_MS * PIXELS_PER_MS) - self.horizontalScrollBar().value()
             painter.drawLine(x, y0, x, y1)
 
-        # actual painting of widget?
+        # painting of components
         for row in range(self.model().rowCount(self.rootIndex())):
             for col in range(self.model().columnCountForRow(row)):
                 index = self.model().index(row, col, self.rootIndex())
@@ -214,7 +222,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         painter.restore()
 
         if self.dragline is not None:
-            pen = QtGui.QPen(QtCore.Qt.red)
+            pen = QtGui.QPen(QtCore.Qt.blue)
+            pen.setWidth(3)
             painter.setPen(pen)
             painter.drawLine(self.dragline)
 
@@ -230,7 +239,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
     def grabImage(self, index):
         # grab an image of the cell  we are moving
-        rect = self._rects[index.row()][index.column()]
+        # rect = self._rects[index.row()][index.column()]
+        rect = self.visualRect(index)
         pixmap = QtGui.QPixmap()
         pixmap = pixmap.grabWidget(self, rect)     
         return pixmap
@@ -261,6 +271,11 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         y0 = index[0]*(ROW_HEIGHT + ROW_SPACE)
         y1 = y0 + ROW_HEIGHT
 
+        # adjust for scrolled viewport
+        x -= self.horizontalScrollBar().value()
+        y0 -= self.verticalScrollBar().value()
+        y1 -= self.verticalScrollBar().value()
+        
         return QtCore.QLine(x,y0,x,y1)
 
 
@@ -296,7 +311,6 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 
     def selectionChanged(self, selected, deselected):
-        # print 'selection changed', selected, deselected
         super(StimulusView, self).selectionChanged(selected, deselected)
 
     def visualRegionForSelection(self, selection):
@@ -308,6 +322,20 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
     def update_defaults(self, sender, state):
         self._component_defaults[sender] = state
+        self.hashIsDirty = True
+
+    def updateGeometries(self,a=None, b=None):
+        self.horizontalScrollBar().setSingleStep(PIXELS_PER_MS)
+        self.horizontalScrollBar().setPageStep(self.viewport().width())
+        self.horizontalScrollBar().setRange(0, max(0, self._width - self.viewport().width()))
+
+        self.verticalScrollBar().setSingleStep(PIXELS_PER_MS)
+        self.verticalScrollBar().setPageStep(self.viewport().height())
+        self.verticalScrollBar().setRange(0, max(0, self._height - self.viewport().height()))
+        
+    def resizeEvent(self, event):
+        self.hashIsDirty = True
+        super(StimulusView, self).resizeEvent(event)
 
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
@@ -360,6 +388,8 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
             return True
 
         return super(ComponentDelegate, self).eventFilter(editor, event)
+
+
 
 if __name__ == "__main__":
     import sys

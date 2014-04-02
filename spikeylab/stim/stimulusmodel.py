@@ -120,6 +120,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         elif role >= QtCore.Qt.UserRole:  #return the whole python object
             if len(self._segments[index.row()]) > index.column():
                 component = self._segments[index.row()][index.column()]
+                if role == QtCore.Qt.UserRole +1:
+                    # filters out any qt classes to make serializable
+                    component.clean()
             else:
                 component = None
             return component

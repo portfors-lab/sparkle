@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Mon Feb 24 12:49:41 2014
+# Created: Tue Apr 01 17:23:18 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,7 +47,7 @@ class Ui_StimulusEditor(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 377))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 314))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setMargin(0)

@@ -105,6 +105,9 @@ class AbstractStimulusComponent(object):
     def serialize(self):
         return cPickle.dumps(self)
 
+    def clean(self):
+        pass    
+
     @staticmethod
     def deserialize(stream):
         return cPickle.loads(stream)

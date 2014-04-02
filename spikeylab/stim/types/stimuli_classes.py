@@ -116,6 +116,7 @@ class Vocalization(AbstractStimulusComponent):
     protocol = True
     _filename = None
     _browsedir = os.path.expanduser('~')
+    _cached_pixmap = None # for faster drawing
 
     def browsedir(self):
         return self._browsedir
@@ -161,22 +162,25 @@ class Vocalization(AbstractStimulusComponent):
 
 
     def paint(self, painter, rect, palette):
-
         if self._filename is not None:
-            spec, f, bins, fs = spectrogram(self._filename)
-            spec = spec.T
-            spec = abs(np.fliplr(spec))
-            spec_max = np.amax(spec)
-            # print np.amax(scaled), np.amin(scaled), scaled.shape, spec_max
-            scaled = np.around(spec/(spec_max/255)).astype(int)
+            if self._cached_pixmap is None:
+                spec, f, bins, fs = spectrogram(self._filename)
+                spec = spec.T
+                spec = abs(np.fliplr(spec))
+                spec_max = np.amax(spec)
+                # print np.amax(scaled), np.amin(scaled), scaled.shape, spec_max
+                scaled = np.around(spec/(spec_max/255)).astype(int)
 
-            width, height = scaled.shape
-            image = QtGui.QImage(width, height, QtGui.QImage.Format_RGB32)
-            for x in xrange(width):
-                for y in xrange(height):
-                    image.setPixel(x,y, COLORTABLE[scaled[x,y]])
+                width, height = scaled.shape
+                image = QtGui.QImage(width, height, QtGui.QImage.Format_RGB32)
+                for x in xrange(width):
+                    for y in xrange(height):
+                        image.setPixel(x,y, COLORTABLE[scaled[x,y]])
 
-            pixmap = QtGui.QPixmap.fromImage(image)
+                pixmap = QtGui.QPixmap.fromImage(image)
+                self._cached_pixmap = pixmap
+            else:
+                pixmap = self._cached_pixmap
             painter.drawPixmap(rect.x(), rect.y(), rect.width(), rect.height(), pixmap)
         else:
             painter.save()
@@ -229,6 +233,9 @@ class Vocalization(AbstractStimulusComponent):
         if self._filename is None:
             return "Vocalization stimulus without a specified file"
         return 0
+
+    def clean(self):
+        self._cached_pixmap = None
 
 class WhiteNoise(AbstractStimulusComponent):
     name = "White Noise"
