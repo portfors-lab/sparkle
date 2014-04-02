@@ -80,43 +80,6 @@ class TestSpikey():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         assert len(files) == 1
 
-    def test_save_tone_calibration(self):
-        self.form.ui.tab_group.setCurrentIndex(2)
-        self.form.ui.reprate_spnbx.setValue(10)
-        self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
-        QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
-
-        timeout = 30
-        start = time.time()
-        while self.form.ui.running_label.text() == "RECORDING" and (time.time()-start) < timeout:
-            time.sleep(1)
-            QApplication.processEvents()
-            
-        assert self.form.ui.running_label.text() == "OFF"
-
-        # check that calibration file was saved
-        assert self.form.calvals['use_calfile'] == True
-        fname = self.form.calvals['calfile']
-
-        # now check saved data
-        hfile = h5py.File(fname, 'r')
-        peaks = hfile['fft_peaks']
-        stim = json.loads(hfile.attrs['stim'])
-        cal_vector = hfile['calibration_intensities']
-
-        # make sure displayed counts jive with saved file
-        nreps = self.form.ui.calibration_widget.ui.curve_widget.ui.nreps_spnbx.value()
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], hfile.attrs['samplerate_ad'])
-
-        nfreqs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.freq_nsteps_lbl.text())
-        ndbs = int(self.form.ui.calibration_widget.ui.curve_widget.ui.db_nsteps_lbl.text())
-        ntraces = nfreqs*ndbs
-        assert_equal(peaks.shape,(ntraces,nreps))
-        assert cal_vector.shape == (nfreqs,) 
-
-        hfile.close()
-
     def test_save_noise_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
         self.form.ui.reprate_spnbx.setValue(10)
@@ -179,10 +142,10 @@ class TestSpikey():
         print 'files', files
         assert len(files) == 0
 
-    def test_abort_tone_calibration(self):
+    def xtest_abort_tone_calibration(self):
         self.form.ui.tab_group.setCurrentIndex(2)
         self.form.ui.reprate_spnbx.setValue(10)
-        self.form.ui.calibration_widget.ui.savecal_ckbx.setChecked(True)
+        self.form.ui.calibration_widget.ui.applycal_ckbx.setChecked(True)
         original_calfile = self.form.calvals['calfile'] #may be None
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
@@ -193,9 +156,8 @@ class TestSpikey():
         QApplication.processEvents()
         assert self.form.ui.running_label.text() == "OFF"
 
-        # cannot abort noise calibration... it's too quick anyways
-
         # make sure there is not calibration file present
+        print 'calfile', self.form.calvals['calfile'], self.form.calvals['use_calfile']
         assert self.form.calvals['calfile'] == ''
 
         files = glob.glob(self.tempfolder + os.sep + 'calibration*.hdf5')

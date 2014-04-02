@@ -148,7 +148,7 @@ class AcquisitionManager():
         self.charter.setup(interval)
         return self.charter.run()
 
-    def process_calibration(self, save=True, calf=15000):
+    def process_calibration(self, save=True, calf=20000):
         if self.selected_calibration_index == 0:
             results, fname, freq = self.tone_calibrator.process_calibration(save)
         else:

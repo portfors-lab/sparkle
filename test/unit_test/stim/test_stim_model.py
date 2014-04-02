@@ -193,7 +193,7 @@ class TestStimModel():
         signal, atten, ovld = model.signal()
         assert atten == 0
         if USE_RMS:
-            assert round(np.amax(signal),4) == calv*1.414
+            assert round(np.amax(signal),4) == calv*1.414213562373
         else:
             assert round(np.amax(signal),3) == calv
         # do math to make this more accurate

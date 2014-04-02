@@ -75,6 +75,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="value">
+         <number>1</number>
+        </property>
        </widget>
       </item>
      </layout>

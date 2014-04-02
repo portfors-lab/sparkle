@@ -110,6 +110,7 @@ class TestAcquisitionModel():
         tone0 = PureTone()
         tone0.setDuration(0.02)
         tone0.setIntensity(manager.protocoler.caldb)
+        tone0.setFrequency(100000)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
         stim0.setSamplerate(gen_rate)

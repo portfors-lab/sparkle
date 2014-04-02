@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Mon Mar 31 09:17:25 2014
+# Created: Wed Apr 02 15:37:23 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -57,6 +57,7 @@ class Ui_CalibrationWidget(object):
         self.horizontalLayout_4.addWidget(self.label_2)
         self.nreps_spnbx = QtGui.QSpinBox(self.calgroup)
         self.nreps_spnbx.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.nreps_spnbx.setProperty("value", 1)
         self.nreps_spnbx.setObjectName(_fromUtf8("nreps_spnbx"))
         self.horizontalLayout_4.addWidget(self.nreps_spnbx)
         self.verticalLayout.addWidget(self.calgroup)
