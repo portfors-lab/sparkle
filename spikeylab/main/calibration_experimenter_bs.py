@@ -9,15 +9,13 @@ from spikeylab.tools.audiotools import smooth
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.data.dataobjects import AcquisitionData
+from spikeylab.tools.util import increment_title
 
 import matplotlib.pyplot as plt
 
 class CalibrationExperimenterBS(Experimenter):
     def __init__(self, signals):
         Experimenter.__init__(self, signals)
-
-        self.savefolder = None
-        self.savename = 'calibration'
 
         self.player = FinitePlayer()
 
@@ -28,7 +26,7 @@ class CalibrationExperimenterBS(Experimenter):
         self.protocol_model.insertNewTest(self.stimulus, 0)
 
         save_data = True
-        self.group_name = 'group_0'
+        self.group_name = 'calibration_1'
 
         self.calibration_vector = None
         self.calibration_freqs = None
@@ -43,23 +41,13 @@ class CalibrationExperimenterBS(Experimenter):
         # add one to index because of tone curve
         self.stimulus.insertComponent(self.stim_components[index])
 
-    def set_save_params(self, folder=None, name=None):
-        """Folder and filename where raw experiment data will be saved to
-
-        :param savefolder: folder for experiment data
-        :type savefolder: str
-        :param samename: filename template, without extention for individal experiment files
-        :type savename: str
-        """
-        if folder is not None:
-            self.savefolder = folder
-        if name is not None:
-            self.savename = name
-
     def stash_calibration(self, attenuations, freqs, frange):
         self.calibration_vector = attenuations
         self.calibration_freqs = freqs
         self.calibration_frange = frange
+
+    def stashed_calibration(self):
+        return self.calibration_vector, self.calibration_freqs
 
     def apply_calibration(self, apply_cal):
         self.apply_cal = apply_cal
@@ -76,26 +64,22 @@ class CalibrationExperimenterBS(Experimenter):
         self.stimulus.setRepCount(reps)
 
     def _initialize_run(self):
-        self.current_dataset_name = 'calibration'
        
         self.stimulus.data(self.stimulus.index(0,0)).setIntensity(self.caldb)
 
         print 'using stimulus', self.stimulus.data(self.stimulus.index(0,0)).name
 
-        if self.savefolder is None or self.savename is None:
-            print "You must first set a save folder and filename"
-        fname = create_unique_path(self.savefolder, self.savename)
-        logger = logging.getLogger('main')
-        logger.info('calibration file name %s' % fname)
-
-        self.datafile = AcquisitionData(fname)
-        self.datafile.init_group(self.current_dataset_name)
+        self.current_dataset_name = self.group_name
+        self.datafile.init_group(self.current_dataset_name, mode='calibration')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
                                 nested_name='signal')
 
+        logger = logging.getLogger('main')
+        logger.info('calibration dataset %s' % self.current_dataset_name)
+
         info = {'samplerate_ad': self.player.aisr}
-        self.datafile.set_metadata('', info)
+        self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
@@ -118,7 +102,6 @@ class CalibrationExperimenterBS(Experimenter):
         """processes calibration control signal. Determines transfer function
         of speaker to get frequency vs. attenuation curve."""
         print 'process the calibration'
-        dataset_name = 'calibration'
         avg_signal = np.mean(self.datafile.get('signal'), axis=0)
         # remove dc offset
         avg_signal = avg_signal - np.mean(avg_signal)
@@ -150,26 +133,27 @@ class CalibrationExperimenterBS(Experimenter):
         # with reference point set by user
         diffdB -= diffdB[fq == self.calf]
 
+        print 'The maximum dB SPL is', self.caldb - max(diffdB)
+
         # save a vector of only the calibration intensity results
-        fname = self.datafile.filename
         if save:
-            self.datafile.init_data(dataset_name, mode='calibration',
+            self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                     dims=diffdB.shape,
                                     nested_name='calibration_intensities')
-            self.datafile.append(dataset_name, diffdB,
+            self.datafile.append(self.current_dataset_name, diffdB,
                                  nested_name='calibration_intensities')
 
             relevant_info = {'frequencies': 'all', 'calibration_dB':self.caldb,
                              'calibration_voltage': self.calv, 'calibration_frequency': self.calf,
                              }
-            self.datafile.set_metadata('calibration_intensities',
+            self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
                                        relevant_info)
-            self.datafile.close()
-            self.signals.calibration_file_changed.emit(fname)
+
+            self.group_name = increment_title(self.group_name)
+
             print 'finished calibration :)'
         else:
             # delete the data saved to file thus far.
-            self.datafile.close()
-            os.remove(fname)
+            self.datafile.delete_group(self.current_dataset_name)
             print 'calibration not saved'
-        return diffdB, fname, self.calf
+        return diffdB, self.current_dataset_name, self.calf

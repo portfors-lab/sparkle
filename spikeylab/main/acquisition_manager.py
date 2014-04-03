@@ -1,7 +1,7 @@
 import logging
 
 from spikeylab.tools.util import create_unique_path
-from spikeylab.data.dataobjects import AcquisitionData, load_calibration_file
+from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.tools.qthreading import ProtocolSignals
 from spikeylab.main.explore_acquisition import Explorer
 from spikeylab.main.protocol_experimenter import ProtocolExperimenter
@@ -32,14 +32,16 @@ class AcquisitionManager():
     def stimuli_list(self):
         return self.explorer.stimuli_list()
 
-    def set_calibration(self, cal_fname, calf=None, frange=None):
-        if cal_fname is None:
-            calibration_vector, calibration_freqs, frange = None, None, None
-        else:    
+    def set_calibration(self, datakey, calf=None, frange=None):
+        if datakey is None:
+            calibration_vector, calibration_freqs = None, None
+        else:
+            if calf is None:
+                raise Exception('calibration reference frequency must be specified')    
             try:
-                cal = load_calibration_file(cal_fname, calf)
+                cal = self.datafile.get_calibration(datakey, calf)
             except:
-                print "Error: unable to load calibration data from file: ", cal_fname
+                print "Error: unable to load calibration data from: ", datakey
                 raise
             calibration_vector, calibration_freqs = cal
         self.explorer.set_calibration(calibration_vector, calibration_freqs, frange)
@@ -47,6 +49,10 @@ class AcquisitionManager():
         self.charter.set_calibration(calibration_vector, calibration_freqs, frange)
         self.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
         self.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
+        self.current_calibration_name = datakey
+        
+    def current_calibration(self):
+        return self.bs_calibrator.stashed_calibration()
 
     def set_calibration_duration(self, dur):
         self.bs_calibrator.set_duration(dur)
@@ -66,11 +72,25 @@ class AcquisitionManager():
         self.explorer.set_params(datafile=self.datafile)
         self.protocoler.set_params(datafile=self.datafile)
         self.charter.set_params(datafile=self.datafile)
+        self.bs_calibrator.set_params(datafile=self.datafile)
+        self.tone_calibrator.set_params(datafile=self.datafile)
 
         logger = logging.getLogger('main')
         logger.info('Opened datafile: {}'.format(fname))
 
         return fname
+
+    def set_data_file(self, fname):
+        self.datafile = AcquisitionData(fname, filemode='a')
+
+        self.explorer.set_params(datafile=self.datafile)
+        self.protocoler.set_params(datafile=self.datafile)
+        self.charter.set_params(datafile=self.datafile)
+        self.bs_calibrator.set_params(datafile=self.datafile)
+        self.tone_calibrator.set_params(datafile=self.datafile)
+
+        logger = logging.getLogger('main')
+        logger.info('Opened datafile: {}'.format(fname))
 
     def set_threshold(self, threshold):
         """Spike detection threshold
@@ -91,13 +111,6 @@ class AcquisitionManager():
         """
         self.savefolder = savefolder
         self.savename = savename
-        self.bs_calibrator.set_save_params(folder=self.savefolder)
-        self.tone_calibrator.set_save_params(folder=self.savefolder)
-
-    def set_calibration_file_name(self, savename):
-        """Filename for which to save calibrations to"""
-        self.bs_calibrator.set_save_params(folder=self.savefolder, name=savename)
-        self.tone_calibrator.set_save_params(folder=self.savefolder, name=savename)
 
     def set_params(self, **kwargs):
         self.explorer.set_params(**kwargs)
@@ -150,14 +163,15 @@ class AcquisitionManager():
 
     def process_calibration(self, save=True, calf=20000):
         if self.selected_calibration_index == 0:
-            results, fname, freq = self.tone_calibrator.process_calibration(save)
+            results, calname, freq = self.tone_calibrator.process_calibration(save)
         else:
-            results, fname, freq = self.bs_calibrator.process_calibration(save)
+            results, calname, freq = self.bs_calibrator.process_calibration(save)
         # restrict to same frequency range as before
         if save:
             frange = self.bs_calibrator.calibration_frange
-            self.set_calibration(fname, calf=calf, frange=frange)
-        return fname
+            print 'setting calibration with range', frange
+            self.set_calibration(calname, calf=calf, frange=frange)
+        return calname
 
     def halt(self):
         """Halt any/all running operations"""

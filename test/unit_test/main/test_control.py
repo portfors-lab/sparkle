@@ -97,18 +97,23 @@ class TestSpikey():
 
         # check that calibration file was saved
         assert self.form.calvals['use_calfile'] == True
-        fname = self.form.calvals['calfile']
+        fname = self.form.acqmodel.datafile.filename
+        calname = self.form.acqmodel.datafile.calibration_list()[0]
+
+        # force close the datafile, even though UI is still open, 
+        # so we can examine it independently
+        self.form.acqmodel.datafile.close()
 
         # now check saved data
         hfile = h5py.File(fname, 'r')
-        signals = hfile['signal']
-        stim = json.loads(hfile.attrs['stim'])
-        cal_vector = hfile['calibration_intensities']
+        signals = hfile[calname]['signal']
+        stim = json.loads(hfile[calname].attrs['stim'])
+        cal_vector = hfile[calname]['calibration_intensities']
 
         # make sure displayed counts jive with saved file
         nreps = self.form.ui.calibration_widget.ui.curve_widget.ui.nreps_spnbx.value()
         assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], hfile.attrs['samplerate_ad'])
+        assert_equal(stim[0]['samplerate_da'], hfile[calname].attrs['samplerate_ad'])
 
         npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
         assert_equal(signals.shape,(nreps, npts))
@@ -121,9 +126,11 @@ class TestSpikey():
         self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.applycal_ckbx.setChecked(True)
         
-        self.form.acqmodel.set_calibration(sample.calibration_filename())
-        
-        original_calfile = self.form.calvals['calfile'] #may be None
+        self.form.acqmodel.set_data_file(sample.calibration_filename())
+        calname = self.form.acqmodel.datafile.calibration_list()[0]
+        self.form.acqmodel.set_calibration(calname, calf=15000, frange=[5000, 100000])
+
+        original_calfile = self.form.calvals['calname'] 
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
 
@@ -136,7 +143,7 @@ class TestSpikey():
         assert self.form.ui.running_label.text() == "OFF"
 
         # make sure there is not calibration file present
-        assert self.form.calvals['calfile'] == original_calfile
+        assert self.form.calvals['calname'] == original_calfile
 
         files = glob.glob(self.tempfolder + os.sep + 'calibration*.hdf5')
         print 'files', files
@@ -146,7 +153,7 @@ class TestSpikey():
         self.form.ui.tab_group.setCurrentIndex(2)
         self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.applycal_ckbx.setChecked(True)
-        original_calfile = self.form.calvals['calfile'] #may be None
+        original_calfile = self.form.calvals['calname'] #may be None
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
         assert self.form.ui.running_label.text() == "RECORDING"
@@ -157,8 +164,8 @@ class TestSpikey():
         assert self.form.ui.running_label.text() == "OFF"
 
         # make sure there is not calibration file present
-        print 'calfile', self.form.calvals['calfile'], self.form.calvals['use_calfile']
-        assert self.form.calvals['calfile'] == ''
+        print 'calname', self.form.calvals['calname'], self.form.calvals['use_calfile']
+        assert self.form.calvals['calname'] == ''
 
         files = glob.glob(self.tempfolder + os.sep + 'calibration*.hdf5')
         print 'files', files
@@ -243,7 +250,7 @@ class TestSpikey():
                          Qt.LeftButton, Qt.NoModifier, QPoint(10,10))
 
         QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.trackview.viewport(), 
-                         Qt.LeftButton, Qt.NoModifier, QPoint(10,10))
+                         Qt.LeftButton, Qt.NoModifier, QPoint(10,35))
 
         QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.parametizer.parametizer.param_list.viewport(), 
                          Qt.LeftButton, Qt.NoModifier, QPoint(10,10))

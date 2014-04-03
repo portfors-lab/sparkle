@@ -17,8 +17,7 @@ class CalibrationExperimenter(Experimenter):
     def __init__(self, signals):
         Experimenter.__init__(self, signals)
 
-        self.savefolder = None
-        self.savename = 'calibration'
+        self.group_name = 'calibration_test_1'
 
         self.player = FinitePlayer()
 
@@ -33,7 +32,6 @@ class CalibrationExperimenter(Experimenter):
         self.protocol_model.insertNewTest(control_stim, 0)
 
         save_data = True
-        self.group_name = 'group_0'
 
     def set_save_params(self, folder=None, name=None):
         """Folder and filename where raw experiment data will be saved to
@@ -63,18 +61,11 @@ class CalibrationExperimenter(Experimenter):
         self.stimulus.setRepCount(reps)
 
     def _initialize_run(self):
-        self.current_dataset_name = 'calibration'
         self.calibration_frequencies = []
         self.calibration_indexes = []
-       
-        if self.savefolder is None or self.savename is None:
-            print "You must first set a save folder and filename"
-        fname = create_unique_path(self.savefolder, self.savename)
-        logger = logging.getLogger('main')
-        logger.info('calibration file name %s' % fname)
 
-        self.datafile = AcquisitionData(fname)
-        self.datafile.init_group(self.current_dataset_name)
+        self.current_dataset_name = self.group_name
+        self.datafile.init_group(self.current_dataset_name, mode='calibration')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
                                 nested_name='fft_peaks')
@@ -84,6 +75,9 @@ class CalibrationExperimenter(Experimenter):
 
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata('', info)
+
+        logger = logging.getLogger('main')
+        logger.info('calibration dataset %s' % self.current_dataset_name)
 
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
@@ -160,7 +154,6 @@ class CalibrationExperimenter(Experimenter):
         """processes the data gathered in a calibration run (does not work if multiple
             calibrations), returns resultant dB"""
         print 'process the calibration'
-        dataset_name = 'calibration'
 
         vfunc = np.vectorize(calc_db)
 
@@ -177,33 +170,12 @@ class CalibrationExperimenter(Experimenter):
         # print 'vfunc inputs', vmaxes, self.caldb, cal_vmax
 
         resultant_dB = vfunc(peaks, self.calpeak) * -1 #db attenuation
-        # print 'results', resultant_dB
 
         print 'calibration frequences', self.calibration_frequencies, 'indexes', self.calibration_indexes
-        print 'resultant_dB', resultant_dB
-
-        print 'The maximum dB SPL is', self.caldb - max(resultant_dB)
+        print 'attenuations', resultant_dB
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
         # save a vector of only the calibration intensity results
-        fname = self.datafile.filename
-        if save:
-            self.datafile.init_data(dataset_name, mode='calibration',
-                                    dims=calibration_vector.shape,
-                                    nested_name='calibration_intensities')
-            self.datafile.append(dataset_name, calibration_vector,
-                                 nested_name='calibration_intensities')
-
-            relevant_info = {'frequencies':self.calibration_frequencies, 'calibration_dB':self.caldb,
-                             'calibration_voltage': self.calv, 'calibration_frequency': self.calf}
-            self.datafile.set_metadata(u'calibration_intensities',
-                                       relevant_info)
-            self.datafile.close()
-            self.signals.calibration_file_changed.emit(fname)
-            print 'finished calibration :)'
-        else:
             # delete the data saved to file thus far.
-            self.datafile.close()
-            os.remove(fname)
-            print 'calibration not saved'
-        return resultant_dB, fname, self.calf
+        self.datafile.delete_group(self.current_dataset_name)
+        return resultant_dB, '', self.calf

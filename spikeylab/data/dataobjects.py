@@ -20,49 +20,70 @@ class AcquisitionData():
     3. Continuous acquisition, this is a 'chart' function where data is
     acquired continuously without break until the user stops the operation
     """
-    def __init__(self, filename, user='unknown'):
-        # check that filename ends with '.hdf5', appending if necessary
-        self.hdf5 = h5py.File(filename, 'w')
+    def __init__(self, filename, user='unknown', filemode='w-'):
+        if filemode not in ['w-', 'a']:
+            raise Exception("Unknown or unallowed filemode {}".format(filemode))
+        print 'opening', filename, 'mode', filemode
+        self.hdf5 = h5py.File(filename, filemode)
         self.filename = filename
-        self.groups = {}
-        self.datasets = {}
-        self.meta = {}
 
         self.open_set_size = 32
         self.chunk_size = 2**24 # better to have a multiple of fs?
-
-        self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
-        self.hdf5.attrs['who'] = user
-        self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
-
-        self.test_count = -1
         self.needs_repack = False
 
+        self.datasets = {}
+        self.meta = {}
+        if filemode == 'w-':
+            self.groups = {}
+            self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
+            self.hdf5.attrs['who'] = user
+            self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
+            self.test_count = -1
+        else:
+            self.groups = dict(self.hdf5.items())
+            print 'groups', self.groups
+
     def close(self):
+        # check that all stim doc has closing brackets
         for key in self.datasets.keys():
             if 'stim' in self.datasets[key].attrs.keys():
-                self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
+                if self.datasets[key].attrs['stim'][-1] != ']':
+                    self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
         for key in self.groups.keys():
             if 'stim' in self.groups[key].attrs.keys():
-                self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
+                if self.groups[key].attrs['stim'][-1] != ']':
+                    self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
         
         fname = self.hdf5.filename
-        self.hdf5.close()
 
-        if self.needs_repack:
-            repack(fname)
-        
-    def init_group(self, key):
-        """create a high level group"""
-        if key == 'calibration':
-            # calibration in it's own file, so the file will be the group
-            self.groups[key] = self.hdf5
-            self.meta[key] = {'mode': 'calibration'}
-            self.set_metadata('', {'start': time.strftime('%H:%M:%S'), 
-                              'mode':'calibration', 'stim': '[ '})
+        # if there was no data saved, just remove the file
+        if len(self.hdf5.keys()) == 0:
+            remove = True
         else:
-            self.groups[key] = self.hdf5.create_group(key)
-            self.meta[key] = {'mode': 'finite'}
+            remove = False
+
+        self.hdf5.close()
+        if remove:
+            os.remove(fname)
+        else:
+            if self.needs_repack:
+                repack(fname)
+
+    def close_data(self, key):
+        if key in self.datasets:
+            if 'stim' in self.datasets[key].attrs.keys():
+                self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
+        if key in self.groups:
+            if 'stim' in self.groups[key].attrs.keys():
+                self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']' 
+    
+    def init_group(self, key, mode='finite'):
+        """create a high level group"""
+        self.groups[key] = self.hdf5.create_group(key)
+        self.meta[key] = {'mode': mode}
+        if mode == 'calibration':
+            self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 
+                              'mode':'calibration', 'stim': '[ '})
 
     def init_data(self, key, dims=None, mode='finite', nested_name=None):
         """
@@ -187,6 +208,26 @@ class AcquisitionData():
     def get_info(self, key):
         return self.hdf5[key].attrs.items()
 
+    def get_calibration(self, key, reffreq):
+        cal_vector = self.groups[key]['calibration_intensities'].value
+        stim_info = json.loads(self.groups[key].attrs['stim'])
+        fs = stim_info[0]['samplerate_da']
+        npts = len(cal_vector)
+        frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
+
+        offset = cal_vector[frequencies == reffreq]
+        print 'offset', offset, reffreq
+        cal_vector -= offset
+
+        return (cal_vector, frequencies)
+
+    def calibration_list(self):
+        cal_names = []
+        for grpky in self.groups.keys():
+            if 'calibration' in grpky:
+                cal_names.append(grpky)
+        return cal_names
+
     def trim(self, key):
         """
         Removes empty rows from dataset
@@ -228,6 +269,11 @@ class AcquisitionData():
         print 'consolidated', self.hdf5.keys()
         self.needs_repack = True
 
+    def delete_group(self, key):
+        del self.groups[key]
+        del self.hdf5[key]
+        self.needs_repack = True
+
     def set_metadata(self, key, attrdict):
         # key is an iterable of group keys (str), with the last
         # string being the attribute name
@@ -236,7 +282,6 @@ class AcquisitionData():
                 self.hdf5.attrs[attr] = val
         else:
             for attr, val in attrdict.iteritems():
-                print 'key', attr, val
                 self.hdf5[key].attrs[attr] = val
         
 
@@ -281,28 +326,28 @@ def increment(index, dims, data_shape):
         inc_index -=1
     return index
 
-def load_calibration_file(filename, reffreq):
-    print 'calibration filename', filename
-    calfile = h5py.File(filename, 'r')
-    cal_vector = calfile['calibration_intensities'].value
-    calset = calfile['calibration_intensities']
-    frequencies = calset.attrs['frequencies']
-    if frequencies == 'all':
-        # means calibration all frequencies present in fft
-        stim_info = json.loads(calfile.attrs['stim'])
-        fs = stim_info[0]['samplerate_da']
-        npts = len(cal_vector)
-        frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
-    # adjust to current ref frequency (should be zero if same as calibration)
-    offset = cal_vector[frequencies == reffreq]
-    # print 'frequencies', frequencies
-    # print 'calvector', cal_vector
-    # print 'calfile frequency', calset.attrs['calibration_frequency'], 'current frequency', reffreq, 'offset', offset
-    cal_vector -= offset
-    caldb = calset.attrs['calibration_dB']
-    calv = calset.attrs['calibration_voltage']
-    calfile.close()
-    return (cal_vector, frequencies)
+# def load_calibration_file(filename, reffreq):
+#     print 'calibration filename', filename
+#     calfile = h5py.File(filename, 'r')
+#     cal_vector = calfile['calibration_intensities'].value
+#     calset = calfile['calibration_intensities']
+#     frequencies = calset.attrs['frequencies']
+#     if frequencies == 'all':
+#         # means calibration all frequencies present in fft
+#         stim_info = json.loads(calfile.attrs['stim'])
+#         fs = stim_info[0]['samplerate_da']
+#         npts = len(cal_vector)
+#         frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
+#     # adjust to current ref frequency (should be zero if same as calibration)
+#     offset = cal_vector[frequencies == reffreq]
+#     # print 'frequencies', frequencies
+#     # print 'calvector', cal_vector
+#     # print 'calfile frequency', calset.attrs['calibration_frequency'], 'current frequency', reffreq, 'offset', offset
+#     cal_vector -= offset
+#     caldb = calset.attrs['calibration_dB']
+#     calv = calset.attrs['calibration_voltage']
+#     calfile.close()
+#     return (cal_vector, frequencies)
 
 def repack(h5file):
     """

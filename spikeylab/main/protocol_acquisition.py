@@ -85,7 +85,8 @@ class Experimenter(AbstractAcquisitionModel):
         except Broken:
             # save some abortion message
             self.player.stop()
-
+            
+        self.datafile.close_data(self.current_dataset_name)
         self.signals.group_finished.emit(self._halt)
 
     def _initialize_test(self, test):

@@ -17,7 +17,6 @@ from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
-from spikeylab.data.dataobjects import load_calibration_file
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 from controlwindow import ControlWindow
@@ -79,7 +78,6 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.current_rep.connect(self.report_rep)
         self.acqmodel.signals.group_finished.connect(self.on_group_done)
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
-        self.acqmodel.signals.calibration_file_changed.connect(self.update_calfile)
         self.acqmodel.signals.tuning_curve_started.connect(self.spawn_tuning_curve)
         self.acqmodel.signals.tuning_curve_response.connect(self.display_tuning_curve)
 
@@ -287,7 +285,9 @@ class MainWindow(ControlWindow):
             save = self.ui.calibration_widget.save_checked() and not halted
             calname = self.acqmodel.process_calibration(save, self.calvals['calf'])
             if save:
-                attenuations, freqs = load_calibration_file(calname, self.calvals['calf'])
+                self.calvals['calname'] = calname
+                self.calvals['use_calfile'] = True
+                attenuations, freqs = self.acqmodel.current_calibration()
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
                 self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
@@ -510,12 +510,12 @@ class MainWindow(ControlWindow):
             self.saveformat = saveformat
 
     def launch_calibration_dlg(self):
-        dlg = CalibrationDialog(default_vals = self.calvals, fscale=self.fscale)
+        dlg = CalibrationDialog(default_vals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
         if dlg.exec_():
             values = dlg.values()
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
-                self.acqmodel.set_calibration(values['calfile'], values['calf'], values['frange'])
+                self.acqmodel.set_calibration(values['calname'], values['calf'], values['frange'])
             else:
                 self.acqmodel.set_calibration(None)
             self.calvals = values
@@ -535,10 +535,6 @@ class MainWindow(ControlWindow):
             self.exvocal.set_spec_args(**argdict)
             QtGui.QApplication.processEvents()
             self.spec_args = argdict
-
-    def update_calfile(self, filename):
-        self.calvals['calfile'] = filename
-        self.calvals['use_calfile'] = True
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """

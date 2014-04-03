@@ -180,7 +180,7 @@ class TestStimModel():
 
     def test_signal_overload_voltage(self):
         caldb = 100
-        calv = 0.1
+        calv = 2.0
         model = StimulusModel()
         component0 = PureTone()
         component1 = PureTone()
@@ -192,10 +192,8 @@ class TestStimModel():
 
         signal, atten, ovld = model.signal()
         assert atten == 0
-        if USE_RMS:
-            assert round(np.amax(signal),4) == calv*1.414213562373
-        else:
-            assert round(np.amax(signal),3) == calv
+        # print 'maxv', model.maxv, 'signal max', np.amax(signal), 'overload', ovld
+        assert np.amax(signal) == model.maxv
         # do math to make this more accurate
         assert ovld > 0
 

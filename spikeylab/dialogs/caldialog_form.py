@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Wed Mar 19 13:10:08 2014
+# Created: Thu Apr 03 12:56:42 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,10 +43,10 @@ class Ui_CalibrationDialog(object):
         self.verticalLayout.addWidget(self.calfile_radio)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.calfile_lnedt = QtGui.QLineEdit(self.groupBox)
-        self.calfile_lnedt.setEnabled(False)
-        self.calfile_lnedt.setObjectName(_fromUtf8("calfile_lnedt"))
-        self.horizontalLayout.addWidget(self.calfile_lnedt)
+        self.cal_choice_cmbbx = QtGui.QComboBox(self.groupBox)
+        self.cal_choice_cmbbx.setEnabled(False)
+        self.cal_choice_cmbbx.setObjectName(_fromUtf8("cal_choice_cmbbx"))
+        self.horizontalLayout.addWidget(self.cal_choice_cmbbx)
         self.browse_btn = QtGui.QPushButton(self.groupBox)
         self.browse_btn.setEnabled(False)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -143,7 +143,6 @@ class Ui_CalibrationDialog(object):
         self.retranslateUi(CalibrationDialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), CalibrationDialog.conditional_accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), CalibrationDialog.reject)
-        QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.calfile_lnedt.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.browse_btn.setDisabled)
         QtCore.QObject.connect(self.browse_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.browseFiles)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.label_8.setDisabled)
@@ -153,6 +152,7 @@ class Ui_CalibrationDialog(object):
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.range_btn.setDisabled)
         QtCore.QObject.connect(self.range_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.maxRange)
         QtCore.QObject.connect(self.plot_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.plotCurve)
+        QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.cal_choice_cmbbx.setDisabled)
         QtCore.QMetaObject.connectSlotsByName(CalibrationDialog)
 
     def retranslateUi(self, CalibrationDialog):

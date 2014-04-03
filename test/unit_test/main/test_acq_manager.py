@@ -110,7 +110,7 @@ class TestAcquisitionModel():
         tone0 = PureTone()
         tone0.setDuration(0.02)
         tone0.setIntensity(manager.protocoler.caldb)
-        tone0.setFrequency(100000)
+        tone0.setFrequency(90000)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
         stim0.setSamplerate(gen_rate)
@@ -426,22 +426,12 @@ class TestAcquisitionModel():
         manager.set_calibration_duration(winsz)
         t = manager.run_calibration(0.1, False)
         t.join()
-        calname = manager.process_calibration()
+        calname = manager.process_calibration(False)
+        fname = manager.datafile.filename
         manager.close_data()
 
-        # now check saved data
-        hfile = h5py.File(calname, 'r')
-        peaks = hfile['fft_peaks']
-        stim = json.loads(hfile.attrs['stim'])
-        cal_vector = hfile['calibration_intensities']
-
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
-        assert_equal(peaks.shape,(ntraces,nreps))
-
-        assert cal_vector.shape == (21,) #beware, will fail if defaults change
-
-        hfile.close()
+        # tone calibration should never save
+        assert not os.path.isfile(fname)
 
     def test_noise_calibration_protocol(self):
         winsz = 0.1 #seconds
@@ -457,13 +447,15 @@ class TestAcquisitionModel():
         t = manager.run_calibration(0.1, False)
         t.join()
         calname = manager.process_calibration()
+        fname = manager.datafile.filename
         manager.close_data()
 
         # now check saved data
-        hfile = h5py.File(calname, 'r')
-        signals = hfile['signal']
-        stim = json.loads(hfile.attrs['stim'])
-        cal_vector = hfile['calibration_intensities']
+        print 'calname', calname
+        hfile = h5py.File(fname, 'r')
+        signals = hfile[calname]['signal']
+        stim = json.loads(hfile[calname].attrs['stim'])
+        cal_vector = hfile[calname]['calibration_intensities']
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], tc.samplerate())
@@ -480,7 +472,9 @@ class TestAcquisitionModel():
         manager.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
                             acqtime=winsz, aisr=acq_rate, caldb=100,
                             calv=1.0)
-        manager.set_calibration(sample.calibration_filename())
+        manager.set_data_file(sample.calibration_filename())
+        calname = manager.datafile.calibration_list()[0]
+        manager.set_calibration(calname, calf=15000, frange=[5000, 100000])
 
         manager.set_save_params(self.tempfolder, 'testdata')
         fname = manager.create_data_file()

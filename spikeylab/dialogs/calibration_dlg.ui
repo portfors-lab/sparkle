@@ -43,7 +43,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLineEdit" name="calfile_lnedt">
+         <widget class="QComboBox" name="cal_choice_cmbbx">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -317,22 +317,6 @@
   <connection>
    <sender>none_radio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>calfile_lnedt</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>66</x>
-     <y>41</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>175</x>
-     <y>89</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>none_radio</sender>
-   <signal>toggled(bool)</signal>
    <receiver>browse_btn</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
@@ -471,6 +455,22 @@
     <hint type="destinationlabel">
      <x>358</x>
      <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>none_radio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cal_choice_cmbbx</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>140</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>87</y>
     </hint>
    </hints>
   </connection>
