@@ -10,6 +10,7 @@ from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
+from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.reorder import random_order
 from spikeylab.stim.factory import TCFactory
 from PyQt4.QtCore import Qt
@@ -37,6 +38,7 @@ class TestAcquisitionModel():
         winsz = 0.2 #seconds
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
+        self.fake_calibration(manager)
 
         #insert some stimuli
         gen_rate = 500000
@@ -56,12 +58,14 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], gen_rate)
         assert_equal(test.shape,(1,1,winsz*acq_rate))
+
+        assert 'calibration_' in hfile['segment_1'].attrs['calibration_used'] 
 
         hfile.close()
 
@@ -89,13 +93,15 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], gen_rate)
         assert_equal(test.shape,(1,1,winsz*acq_rate))
         assert stim[0]['overloaded_attenuation'] == 0
+
+        assert hfile['segment_1'].attrs['calibration_used'] == '' 
 
         hfile.close()
 
@@ -104,6 +110,7 @@ class TestAcquisitionModel():
         winsz = 0.2 #seconds
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
+        self.fake_calibration(manager)
         #insert some stimuli
         gen_rate = 500000
 
@@ -124,7 +131,7 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
@@ -153,7 +160,7 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
@@ -191,7 +198,7 @@ class TestAcquisitionModel():
         manager.close_data()
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stims = json.loads(test.attrs['stim'])
         freqs = []
         for stim in stims:
@@ -230,7 +237,7 @@ class TestAcquisitionModel():
         manager.close_data()
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stims = json.loads(test.attrs['stim'])
         #get a list of the freqency order
         freqs = []
@@ -314,7 +321,7 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         print hfile.keys()
-        test = hfile['explore_0']
+        test = hfile['explore_1']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
@@ -343,7 +350,7 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['segment_0']['test_0']
+        test = hfile['segment_1']['test_1']
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
@@ -368,7 +375,7 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['chart_0']
+        test = hfile['chart_1']
         stim = json.loads(test.attrs['stim'])
         assert stim == []
         assert test.size > 1
@@ -402,7 +409,7 @@ class TestAcquisitionModel():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        test = hfile['chart_0']
+        test = hfile['chart_1']
         stim = json.loads(test.attrs['stim'])
 
         print 'stim', stim
@@ -470,13 +477,23 @@ class TestAcquisitionModel():
         manager = AcquisitionManager()
 
         manager.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
-                            acqtime=winsz, aisr=acq_rate, caldb=100,
-                            calv=1.0)
-        manager.set_data_file(sample.calibration_filename())
-        calname = manager.datafile.calibration_list()[0]
-        manager.set_calibration(calname, calf=15000, frange=[5000, 100000])
+                           acqtime=winsz, aisr=acq_rate, caldb=100,
+                           calv=1.0)
 
         manager.set_save_params(self.tempfolder, 'testdata')
         fname = manager.create_data_file()
 
         return manager, fname
+
+    def fake_calibration(self, manager):
+        # cheat and pretend we already did a calibration
+        frange = [5000, 100000]
+        cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
+        calname = cal_data_file.calibration_list()[0]
+        calibration_vector, calibration_freqs = cal_data_file.get_calibration(calname, reffreq=15000)
+        
+        manager.explorer.set_calibration(calibration_vector, calibration_freqs, frange, calname)
+        manager.protocoler.set_calibration(calibration_vector, calibration_freqs, frange, calname)
+        manager.charter.set_calibration(calibration_vector, calibration_freqs, frange, calname)
+        manager.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
+        manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)

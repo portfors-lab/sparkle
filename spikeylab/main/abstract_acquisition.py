@@ -20,7 +20,7 @@ class AbstractAcquisitionModel():
         self.binsz = 0.005
 
         self.update_reference_voltage()
-        self.set_calibration(None, None, None)
+        self.set_calibration(None, None, None, None)
 
         self.player_lock = threading.Lock()
 

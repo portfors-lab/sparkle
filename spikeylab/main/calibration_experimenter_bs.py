@@ -41,10 +41,11 @@ class CalibrationExperimenterBS(Experimenter):
         # add one to index because of tone curve
         self.stimulus.insertComponent(self.stim_components[index])
 
-    def stash_calibration(self, attenuations, freqs, frange):
+    def stash_calibration(self, attenuations, freqs, frange, calname):
         self.calibration_vector = attenuations
         self.calibration_freqs = freqs
         self.calibration_frange = frange
+        self.calname = calname
 
     def stashed_calibration(self):
         return self.calibration_vector, self.calibration_freqs
@@ -87,6 +88,7 @@ class CalibrationExperimenterBS(Experimenter):
         if self.apply_cal:
             self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
         else:
+            self.calname = None
             self.protocol_model.setCalibration(None, None, None)
 
     def _initialize_test(self, test):

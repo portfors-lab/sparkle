@@ -44,13 +44,12 @@ class AcquisitionManager():
                 print "Error: unable to load calibration data from: ", datakey
                 raise
             calibration_vector, calibration_freqs = cal
-        self.explorer.set_calibration(calibration_vector, calibration_freqs, frange)
-        self.protocoler.set_calibration(calibration_vector, calibration_freqs, frange)
-        self.charter.set_calibration(calibration_vector, calibration_freqs, frange)
-        self.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
-        self.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange)
-        self.current_calibration_name = datakey
-        
+        self.explorer.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        self.protocoler.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        self.charter.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        self.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        self.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, datakey)
+
     def current_calibration(self):
         return self.bs_calibrator.stashed_calibration()
 

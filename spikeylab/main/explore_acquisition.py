@@ -18,7 +18,7 @@ class Explorer(AbstractAcquisitionModel):
 
         self.player = FinitePlayer()
         self.save_data = False
-        self.set_name = 'explore_0'
+        self.set_name = 'explore_1'
 
         stimuli_types = get_stimuli_models()
         self._explore_stimuli = [x() for x in stimuli_types if x.explore]
@@ -26,7 +26,7 @@ class Explorer(AbstractAcquisitionModel):
     def stimuli_list(self):
         return self._explore_stimuli
 
-    def set_calibration(self, attenuations, freqs, frange):
+    def set_calibration(self, attenuations, freqs, frange, calname):
         self.stimulus.setCalibration(attenuations, freqs, frange)
 
     def update_reference_voltage(self):

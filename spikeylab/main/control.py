@@ -338,6 +338,7 @@ class MainWindow(ControlWindow):
         self.on_update()
         if self.current_mode == 'windowed':
             overload = self.acqmodel.setup_protocol(interval)
+            overload = [item for sublist in overload for item in sublist] # flatten
             if np.any(np.array(overload) > 0):
                 answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
                                 'Stimuli in test list are over the maximum allowable voltage output. They will be rescaled with a maximum undesired attenuation of {:.2f}dB.\n \

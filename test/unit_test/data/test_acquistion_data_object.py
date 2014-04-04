@@ -112,7 +112,7 @@ class TestAcqusitionData():
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
 
-        np.testing.assert_array_equal(acq_data.get('test_0', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
 
         acq_data.close()
 
@@ -133,7 +133,7 @@ class TestAcqusitionData():
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
 
-        np.testing.assert_array_equal(acq_data.get('test_0', (2,)), np.squeeze(fakedata*2))
+        np.testing.assert_array_equal(acq_data.get('test_1', (2,)), np.squeeze(fakedata*2))
 
         acq_data.close()
 
@@ -173,7 +173,7 @@ class TestAcqusitionData():
         for iset in range(nsets):
             acq_data.insert('fake', [iset], fakedata*iset)
 
-        np.testing.assert_array_equal(acq_data.get('test_0', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
 
         acq_data.close()
 
@@ -251,7 +251,7 @@ class TestAcqusitionData():
         acq_data.close()
 
         hfile = h5py.File(fname)
-        test = hfile['fake']['test_0']
+        test = hfile['fake']['test_1']
         stim = json.loads(test.attrs['stim'])
         assert_equal(stim[0]['duration'], 0.1)
         hfile.close()
@@ -269,6 +269,7 @@ class TestAcqusitionData():
 
         acq_data.consolidate('fake')
 
+        print 'sizes', acq_data.get('fake').size, nsets*npoints
         assert acq_data.get('fake').size == nsets*npoints
         acq_data.close()
 

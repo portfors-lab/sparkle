@@ -21,7 +21,7 @@ class AcquisitionData():
     acquired continuously without break until the user stops the operation
     """
     def __init__(self, filename, user='unknown', filemode='w-'):
-        if filemode not in ['w-', 'a']:
+        if filemode not in ['w-', 'a', 'r']:
             raise Exception("Unknown or unallowed filemode {}".format(filemode))
         print 'opening', filename, 'mode', filemode
         self.hdf5 = h5py.File(filename, filemode)
@@ -38,7 +38,7 @@ class AcquisitionData():
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
             self.hdf5.attrs['who'] = user
             self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
-            self.test_count = -1
+            self.test_count = 0
         else:
             self.groups = dict(self.hdf5.items())
             print 'groups', self.groups
@@ -122,9 +122,12 @@ class AcquisitionData():
             self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
                               'mode':mode, 'stim': '[ '})
         elif mode == 'continuous':
-            self.datasets[key+'_set0'] = self.hdf5.create_dataset(key+'_set0', (self.chunk_size,))
-            self.datasets[key+'_set0'].attrs['stim'] = ''
-            self.meta[key] = {'mode':mode, 'set_counter':0, 'cursor':0, 'start': time.strftime('%H:%M:%S')}
+            self.datasets[key+'_set1'] = self.hdf5.create_dataset(key+'_set1', (self.chunk_size,))
+            self.datasets[key+'_set1'].attrs['stim'] = ''
+            self.meta[key] = {'mode':mode, 'set_counter':1, 'cursor':0, 'start': time.strftime('%H:%M:%S')}
+            # create a dataset for the key itself, so to allow setting attributes, 
+            # that will get copied after consolidation
+            self.hdf5.create_dataset(key, (1,))
         else:
             raise Exception("Unknown acquisition mode")
         
@@ -244,7 +247,13 @@ class AcquisitionData():
         if self.meta[key]['mode'] not in ['continuous']:
             print "consolidation not supported for mode: ", self.meta[key]['mode']
             return
+
+        # get a copy of the attributes saved, then delete placeholder
+        attr_tmp = self.hdf5[key].attrs.items()
+        del self.hdf5[key]
+
         setnum = self.meta[key]['set_counter']
+        setnum -= 1 # convert from 1-indexed to 0-indexed
         current_index = self.meta[key]['cursor']
         total_samples = (self.chunk_size * setnum) + current_index
         self.datasets[key] = self.hdf5.create_dataset(key, (total_samples,))
@@ -252,19 +261,23 @@ class AcquisitionData():
         self.datasets[key].attrs['start'] = self.meta[key]['start']
         self.datasets[key].attrs['mode'] = 'continuous'
 
-        for iset in range(setnum):
-            self.datasets[key][iset*self.chunk_size:(iset+1)*self.chunk_size] = self.datasets[key+'_set'+str(iset)][:]
-            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(iset)].attrs['stim']
+        for iset in range(0, setnum):
+            self.datasets[key][iset*self.chunk_size:(iset+1)*self.chunk_size] = self.datasets[key+'_set'+str(iset+1)][:]
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(iset+1)].attrs['stim']
         
         # last set may not be complete
         if current_index != 0:
-            self.datasets[key][setnum*self.chunk_size:(setnum*self.chunk_size)+current_index] = self.datasets[key+'_set'+str(setnum)][:current_index]
-            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(setnum)].attrs['stim']
+            self.datasets[key][setnum*self.chunk_size:(setnum*self.chunk_size)+current_index] = self.datasets[key+'_set'+str(setnum+1)][:current_index]
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(setnum+1)].attrs['stim']
+
+        # copy back attributes from placeholder
+        for k, v in attr_tmp:
+            self.datasets[key].attrs[k] = v
 
         # now go ahead and delete fractional sets.
         for iset in range(setnum+1):
-            del self.datasets[key+'_set'+str(iset)]
-            del self.hdf5[key+'_set'+str(iset)]
+            del self.datasets[key+'_set'+str(iset+1)]
+            del self.hdf5[key+'_set'+str(iset+1)]
 
         print 'consolidated', self.hdf5.keys()
         self.needs_repack = True
@@ -282,6 +295,8 @@ class AcquisitionData():
                 self.hdf5.attrs[attr] = val
         else:
             for attr, val in attrdict.iteritems():
+                if val is None:
+                    val = '' # can't save None attribute value to HDF5
                 self.hdf5[key].attrs[attr] = val
         
 
@@ -325,29 +340,6 @@ def increment(index, dims, data_shape):
         index[inc_index:] = [0]*len(index[inc_index:])
         inc_index -=1
     return index
-
-# def load_calibration_file(filename, reffreq):
-#     print 'calibration filename', filename
-#     calfile = h5py.File(filename, 'r')
-#     cal_vector = calfile['calibration_intensities'].value
-#     calset = calfile['calibration_intensities']
-#     frequencies = calset.attrs['frequencies']
-#     if frequencies == 'all':
-#         # means calibration all frequencies present in fft
-#         stim_info = json.loads(calfile.attrs['stim'])
-#         fs = stim_info[0]['samplerate_da']
-#         npts = len(cal_vector)
-#         frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
-#     # adjust to current ref frequency (should be zero if same as calibration)
-#     offset = cal_vector[frequencies == reffreq]
-#     # print 'frequencies', frequencies
-#     # print 'calvector', cal_vector
-#     # print 'calfile frequency', calset.attrs['calibration_frequency'], 'current frequency', reffreq, 'offset', offset
-#     cal_vector -= offset
-#     caldb = calset.attrs['calibration_dB']
-#     calv = calset.attrs['calibration_voltage']
-#     calfile.close()
-#     return (cal_vector, frequencies)
 
 def repack(h5file):
     """

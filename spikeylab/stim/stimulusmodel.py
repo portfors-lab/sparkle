@@ -392,9 +392,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for track in track_signals:
             total_signal[0:len(track)] += track
 
-        print 'signal max', np.amax(total_signal)
         total_signal = self.apply_calibration(total_signal, samplerate)
-        print 'signal max', np.amax(total_signal)
 
         undesired_attenuation = 0
         # if USE_RMS:

@@ -3,6 +3,7 @@ from spikeylab.stim.factory import BuilderFactory, TCFactory
 from spikeylab.stim.auto_parameter_view import AddLabel
 from spikeylab.main.drag_label import DragLabel
 from spikeylab.stim.types.stimuli_classes import PureTone
+from spikeylab.data.dataobjects import AcquisitionData
 
 import sys 
 import time, os, glob
@@ -126,10 +127,8 @@ class TestSpikey():
         self.form.ui.reprate_spnbx.setValue(10)
         self.form.ui.calibration_widget.ui.applycal_ckbx.setChecked(True)
         
-        self.form.acqmodel.set_data_file(sample.calibration_filename())
-        calname = self.form.acqmodel.datafile.calibration_list()[0]
-        self.form.acqmodel.set_calibration(calname, calf=15000, frange=[5000, 100000])
-
+        fake_calibration(self.form.acqmodel)
+        
         original_calfile = self.form.calvals['calname'] 
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)
@@ -330,6 +329,18 @@ class TestSpikey():
         drop.source = lambda: DragLabel(comp)
         self.form.ui.protocolView.stim_editor.ui.trackview.dropEvent(drop)
 
+def fake_calibration(manager):
+    # cheat and pretend we already did a calibration
+    frange = [5000, 100000]
+    cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
+    calname = cal_data_file.calibration_list()[0]
+    calibration_vector, calibration_freqs = cal_data_file.get_calibration(calname, reffreq=15000)
+    
+    manager.explorer.set_calibration(calibration_vector, calibration_freqs, frange, calname)
+    manager.protocoler.set_calibration(calibration_vector, calibration_freqs, frange, calname)
+    manager.charter.set_calibration(calibration_vector, calibration_freqs, frange, calname)
+    manager.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
+    manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
 
     # def test_verify_no_tests(self):
     #     self.form.ui.tab_group.setCurrentIndex(1)

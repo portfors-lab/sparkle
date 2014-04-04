@@ -46,10 +46,11 @@ class CalibrationExperimenter(Experimenter):
         if name is not None:
             self.savename = name
 
-    def stash_calibration(self, attenuations, freqs, frange):
+    def stash_calibration(self, attenuations, freqs, frange, calname):
         self.calibration_vector = attenuations
         self.calibration_freqs = freqs
         self.calibration_frange = frange
+        self.calname = calname
 
     def apply_calibration(self, apply_cal):
         self.apply_cal = apply_cal
@@ -74,7 +75,7 @@ class CalibrationExperimenter(Experimenter):
                                 nested_name='vmax')
 
         info = {'samplerate_ad': self.player.aisr}
-        self.datafile.set_metadata('', info)
+        self.datafile.set_metadata(self.current_dataset_name, info)
 
         logger = logging.getLogger('main')
         logger.info('calibration dataset %s' % self.current_dataset_name)

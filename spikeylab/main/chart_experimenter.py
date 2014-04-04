@@ -6,7 +6,7 @@ class ChartExperimenter(Experimenter):
     def __init__(self, signals):
         Experimenter.__init__(self, signals)
 
-        self.chart_name = 'chart_0'
+        self.chart_name = 'chart_1'
         save_data = False
         self.player = ContinuousPlayer()
         self.player.set_read_function(self.emit_ncollected)

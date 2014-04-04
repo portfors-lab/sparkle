@@ -12,9 +12,10 @@ class Experimenter(AbstractAcquisitionModel):
 
         AbstractAcquisitionModel.__init__(self, signals)
 
-    def set_calibration(self, attenuations, freqs, frange):
+    def set_calibration(self, attenuations, freqs, frange, calname):
         self.protocol_model.setCalibration(attenuations, freqs, frange)
-        
+        self.calname = calname
+
     def update_reference_voltage(self):
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
@@ -24,6 +25,11 @@ class Experimenter(AbstractAcquisitionModel):
         self._halt = False
 
         setname = self._initialize_run()
+
+        # save the current calibration to data file doc
+        info = {'calibration_used': self.calname}
+        self.datafile.set_metadata(self.current_dataset_name, info)
+
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
         self.start_time = time.time()
