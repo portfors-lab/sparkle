@@ -28,7 +28,11 @@ class AcquisitionManager():
 
         self.signals.samplerateChanged = self.explorer.stimulus.samplerateChanged
         self.selected_calibration_index = 0
-        
+        self.current_cellid = 0
+
+    def increment_cellid(self):
+        self.current_cellid +=1
+
     def stimuli_list(self):
         return self.explorer.stimuli_list()
 
@@ -212,3 +216,7 @@ class AcquisitionManager():
 
     def clear_protocol(self):
         self.protocoler.clear()
+
+    def set_group_comment(self, comment):
+        """Sets a comment for the last executed protocol group"""
+        self.protocoler.set_comment(self.current_cellid, comment)

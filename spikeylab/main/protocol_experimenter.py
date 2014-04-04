@@ -80,5 +80,9 @@ class ProtocolExperimenter(Experimenter):
         self.spike_latencies = spike_latencies
         self.spike_rates = spike_rates
 
+    def set_comment(self, cellid, comment):
+        info = {'cellid': cellid, 'comment': comment}
+        self.datafile.set_metadata(self.current_dataset_name, info)
+
     def clear(self):
         self.protocol_model.clearTests()

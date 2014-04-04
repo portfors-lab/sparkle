@@ -11,7 +11,7 @@ from PyQt4 import QtCore, QtGui
 
 from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
-from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog
+from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
@@ -280,6 +280,7 @@ class MainWindow(ControlWindow):
         self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
 
     def on_group_done(self, halted):
+        print 'active opertation', self.active_operation
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.save_checked() and not halted
@@ -292,6 +293,22 @@ class MainWindow(ControlWindow):
                 self.pw.setWindowFlags(QtCore.Qt.Window)
                 self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
                 self.pw.show()
+        elif self.active_operation == 'protocol':
+            if self.acqmodel.current_cellid == 0:
+                # first acquisition, don't ask if it's a new cell
+                self.acqmodel.increment_cellid()
+            else:
+                answer = QtGui.QMessageBox.question(self, 'Cell ID', 'New cell?',
+                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+                if answer == QtGui.QMessageBox.Yes:
+                    self.acqmodel.increment_cellid()
+
+            cellbox = CellCommentDialog(cellid=self.acqmodel.current_cellid)
+            if cellbox.exec_():
+                comment = cellbox.comment()
+                self.acqmodel.set_group_comment(comment)
+                print 'saved commment'
+
         self.on_stop()
 
     def run_chart(self):
