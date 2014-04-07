@@ -26,6 +26,8 @@ class PlayerBase():
 
         self.maxv = 5 #Volts
 
+        self.stim_changed = False
+
         # establish connection to the attenuator
         try:
             pa5 = win32com.client.Dispatch("PA5.x")
@@ -64,6 +66,11 @@ class PlayerBase():
                 # raise
 
             self.ngenerated +=1
+            if self.stim_changed:
+                new_gen = self.stim
+            else:
+                new_gen = None
+            self.stim_changed = False
 
         except:
             print u'ERROR! TERMINATE!'
@@ -71,7 +78,7 @@ class PlayerBase():
             raise
 
         self.tone_lock.release()
-
+        return new_gen
 
     def set_stim(self, signal, sr, attenuation=0):
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
@@ -85,6 +92,7 @@ class PlayerBase():
         self.stim = signal
         self.sr = sr
         self.atten = attenuation
+        self.stim_changed = True
 
         self.tone_lock.release()
 
@@ -132,7 +140,7 @@ class FinitePlayer(PlayerBase):
         self.ngenerated = 0
         self.nacquired = 0
 
-        self.reset()
+        return self.reset()
 
     def run(self):
         """Begin simultaneous generation/acquisition, returns read samples"""
@@ -171,7 +179,7 @@ class FinitePlayer(PlayerBase):
         response_npts = int(self.aitime*self.aisr)
         try:
             self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
-            self.reset_generation(u"ai/StartTrigger")
+            new_gen = self.reset_generation(u"ai/StartTrigger")
         except:
             print u'ERROR! TERMINATE!'
             self.daq_lock.release()
@@ -179,6 +187,7 @@ class FinitePlayer(PlayerBase):
             raise
 
         self.daq_lock.release()
+        return new_gen
 
     def stop(self):
         try:
@@ -226,11 +235,12 @@ class ContinuousPlayer(PlayerBase):
 
     def reset(self):
         try:
-            self.reset_generation(u"")
+            new_gen = self.reset_generation(u"")
         except:
             print u'ERROR! GENERATION FAILED!'
             # self.stop()
             raise
+        return new_gen
 
     def stop(self):
         try:

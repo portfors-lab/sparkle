@@ -54,6 +54,7 @@ class PureTone(Tone):
 
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
+
         if USE_RMS:
             tone = tone*1.414213562373
         return tone
@@ -219,9 +220,10 @@ class Vocalization(AbstractStimulusComponent):
 
         if self._risefall > 0:
             rf_npts = self._risefall * fs
-            signal[:rf_npts] = signal[:rf_npts] * np.linspace(0,1,rf_npts)
-            signal[-rf_npts:] = signal[-rf_npts:] * np.linspace(1,0,rf_npts)
-
+            wnd = hann(rf_npts*2) # cosine taper
+            signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
+            signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
+            
         return signal
 
     def auto_details(self):

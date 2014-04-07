@@ -123,7 +123,7 @@ class AcquisitionManager():
         self.charter.set_params(**kwargs)
 
     def set_stim_by_index(self, index):
-        return self.explorer.set_stim_by_index(index)
+        return self.explorer.set_stim_by_index(index)[1]
 
     def current_stim(self):
         return self.explorer.current_signal()

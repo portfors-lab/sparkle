@@ -4,6 +4,7 @@ from scipy.integrate import simps, trapz
 import scipy.io.wavfile as wv
 from matplotlib import mlab
 from matplotlib import pyplot
+from scipy.signal import hann
 
 from PyQt4.QtGui import QImage
 
@@ -34,13 +35,12 @@ def calc_spectrum(signal,rate):
     #padded_signal[:len(signal)] = signal
     #signal = padded_signal
     npts = len(signal)
-
-    freq = np.arange(npts/2+1)/(npts/rate)
+    mdpt = (npts+1) % 2
+    freq = np.arange(npts/2+mdpt)/(npts/rate)
     #print('freq len ', len(freq))
 
     sp = np.fft.rfft(signal)/npts
     #print('sp len ', len(sp))
-
     return freq, abs(sp).real
 
 def get_fft_peak(spectrum, freq, atfrequency=None):
@@ -86,13 +86,14 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
         # .format(amp,freq,npts,rf_npts))
     
         tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
-        #add rise fall
+                    
         if risefall > 0:
-            tone[:rf_npts] = tone[:rf_npts] * np.linspace(0,1,rf_npts)
-            tone[-rf_npts:] = tone[-rf_npts:] * np.linspace(1,0,rf_npts)
-        
-        timevals = np.arange(npts)/samplerate
+            rf_npts = risefall * samplerate
+            wnd = hann(rf_npts*2) # cosine taper
+            tone[:rf_npts] = tone[:rf_npts] * wnd[:rf_npts]
+            tone[-rf_npts:] = tone[-rf_npts:] * wnd[rf_npts:]
 
+        timevals = np.arange(npts)/samplerate
 
     except:
         print("WARNING: Unable to produce tone")
@@ -115,7 +116,8 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
         sr, wavdata = source
         
     # normalize
-    wavdata = wavdata/np.max(abs(wavdata))
+    if np.max(abs(wavdata)) != 0:
+        wavdata = wavdata/np.max(abs(wavdata))
     duration = len(wavdata)/sr
 
     if window == 'hanning':
@@ -137,6 +139,12 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
 
     # convert to db scale for display
     spec = 10. * np.log10(Pxx)
+    
+    # inf values prevent spec from drawing in pyqtgraph
+    # ... so set to miniumum value in spec?
+    # would be great to have spec in db SPL, and set any -inf to 0
+    spec[np.isneginf(spec)] = np.nan
+    spec[np.isnan(spec)] = np.nanmin(spec)
 
     return spec, freqs, bins, duration
 

@@ -36,6 +36,7 @@ class TestSpikey():
 
     def tearDown(self):
         self.form.close()
+        QApplication.closeAllWindows()
         # delete all data files in temp folder -- this will also clear out past
         # test runs that produced errors and did not delete their files
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
@@ -119,7 +120,6 @@ class TestSpikey():
         npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
         assert_equal(signals.shape,(nreps, npts))
         assert cal_vector.shape == ((npts/2+1),)
-        
         hfile.close()
 
     def test_apply_calibration(self):

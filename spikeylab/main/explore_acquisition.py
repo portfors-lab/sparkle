@@ -69,7 +69,6 @@ class Explorer(AbstractAcquisitionModel):
         # arm the first read
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
-        self.player.start()
 
         # and go!
         self.acq_thread.start()
@@ -82,6 +81,7 @@ class Explorer(AbstractAcquisitionModel):
         spike_rates = []
         self.irep = 0
         times = self.aitimes
+        stim = self.player.start()
         while not self._halt:
             # print 'explore worker'
             try:
@@ -90,7 +90,8 @@ class Explorer(AbstractAcquisitionModel):
                 response = self.player.run()
                 
                 self.signals.response_collected.emit(times, response)
-
+                if stim is not None:
+                    self.signals.stim_generated.emit(stim, self.player.get_samplerate())
                 # process response; calculate spike times
                 spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
                 spike_counts.append(len(spike_times))
@@ -105,7 +106,7 @@ class Explorer(AbstractAcquisitionModel):
 
                 #lock it so we don't get a times mismatch
                 self.player_lock.acquire()
-                self.player.reset()
+                stim = self.player.reset()
                 times = self.aitimes
                 self.player_lock.release()
 

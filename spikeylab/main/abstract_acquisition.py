@@ -23,7 +23,8 @@ class AbstractAcquisitionModel():
         self.set_calibration(None, None, None, None)
 
         self.player_lock = threading.Lock()
-
+        self.current_dataset_name = None
+        
     def update_reference_voltage(self):
         raise NotImplementedError
 

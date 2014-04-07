@@ -59,9 +59,11 @@ class ProtocolDisplay(QtGui.QWidget):
     def update_spec(self, *args, **kwargs):
         if args[0] == None:
             self.spec_plot.clear_img()
-        else:
+        elif isinstance(args[0], basestring):
             self.spec_plot.from_file(*args, **kwargs)
-
+        else:
+            self.spec_plot.update_data(*args,**kwargs)
+            
     def show_spec(self, fname):
         """ Draw image if none present """
         if not self.spec_plot.has_img() and fname is not None:

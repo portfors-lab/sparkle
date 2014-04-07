@@ -214,16 +214,7 @@ class MainWindow(ControlWindow):
         self.binsz = binsz
 
         self.display.set_xlimits((0,winsz))
-        # update or clear spec
-        if str(self.ui.explore_stim_type_cmbbx.currentText().lower()) == 'vocalization':
-            # don't update file - revert to last double clicked
-            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            stim_widget = self.ui.parameter_stack.widget(stim_index)
-            if stim_widget.current_wav_file != self.selected_wav_file:
-                stim_widget.component().setFile(self.selected_wav_file)
-            self.display.show_spec(self.selected_wav_file)
-        else:
-            self.display.update_spec(None)
+
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             nreps = self.ui.ex_nreps_spnbx.value()
 
@@ -231,7 +222,7 @@ class MainWindow(ControlWindow):
             
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            signal, ovld = self.acqmodel.set_stim_by_index(stim_index)
+            ovld = self.acqmodel.set_stim_by_index(stim_index)
             # print 'stim signal', len(signal)
             self.ui.over_atten_lbl.setNum(ovld)
             if ovld > 0:
@@ -241,7 +232,7 @@ class MainWindow(ControlWindow):
 
             gen_rate = self.acqmodel.explore_genrate()
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
-            self.display_stim(signal, gen_rate)
+            # self.display_stim(signal, gen_rate)
             self.display.set_nreps(nreps)
         if self.current_mode == 'chart':
             return winsz, acq_rate
@@ -293,7 +284,7 @@ class MainWindow(ControlWindow):
                 self.pw.setWindowFlags(QtCore.Qt.Window)
                 self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
                 self.pw.show()
-        elif self.active_operation == 'protocol':
+        elif self.active_operation == 'protocol' and self.current_mode == 'windowed':
             if self.acqmodel.current_cellid == 0:
                 # first acquisition, don't ask if it's a new cell
                 self.acqmodel.increment_cellid()
@@ -493,10 +484,14 @@ class MainWindow(ControlWindow):
             if self.ui.plot_dock.current() == 'standard':
                 self.display.update_signal(timevals, signal)
                 self.display.update_fft(freq, spectrum)
+                self.display.update_spec(signal, fs)
             elif self.ui.plot_dock.current() == 'calexp':
                 self.extended_display.update_signal(timevals, signal, plot='stim')
                 self.extended_display.update_fft(freq, spectrum, plot='stim')
                 self.extended_display.update_spec(signal, fs, plot='stim')
+                # this actually auto ranges the response plots, but we only
+                # need to do this when the stim changes
+                self.extended_display.auto_range()
 
     def report_progress(self, itest, itrace, stim_info):
         self.ui.test_num.setText(str(itest))
@@ -559,7 +554,6 @@ class MainWindow(ControlWindow):
         # display spectrogram of file
         spath = self.exvocal.current_wav_file
 
-        self.display.update_spec(spath)
         sr, wavdata = wv.read(spath)
         self.display_stim(wavdata, sr)
 

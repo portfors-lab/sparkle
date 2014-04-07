@@ -8,6 +8,7 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
 
         self.stim_fft_plot = FFTWidget(self, rotation=0)
         self.response_fft_plot = FFTWidget(self, rotation=0)
+        self.response_fft_plot.disableAutoRange()
 
         self.stim_fft_plot.set_title("Stimulus FFT")
         self.response_fft_plot.set_title("Response FFT")
@@ -15,6 +16,7 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
 
         self.stim_signal_plot = FFTWidget(rotation=0)
         self.response_signal_plot = FFTWidget(rotation=0)
+        self.response_signal_plot.disableAutoRange()
         self.stim_signal_plot.setLabel('left', 'Potential', units='V')
         self.response_signal_plot.setLabel('left', 'Potential', units='V')
         self.response_signal_plot.setLabel('bottom', 'Time', units='s')
@@ -105,3 +107,7 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
     def set_xlimits(self, lims):
         self.response_signal_plot.set_xlim(lims)
         self.stim_signal_plot.set_xlim(lims)
+
+    def auto_range(self):
+        self.response_signal_plot.autoRange()
+        self.response_fft_plot.autoRange()

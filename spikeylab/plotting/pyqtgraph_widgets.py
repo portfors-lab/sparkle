@@ -137,7 +137,8 @@ class TraceWidget(BasePlot):
                 # take it to 0
                 stim_y = stim_y - np.amin(stim_y)
                 # normalize
-                stim_y = stim_y/np.amax(stim_y)
+                if np.amax(stim_y) != 0:
+                    stim_y = stim_y/np.amax(stim_y)
                 # scale for new size
                 stim_y = stim_y*stim_height
                 # raise to right place in plot

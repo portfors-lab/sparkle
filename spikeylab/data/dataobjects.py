@@ -45,14 +45,19 @@ class AcquisitionData():
 
     def close(self):
         # check that all stim doc has closing brackets
-        for key in self.datasets.keys():
-            if 'stim' in self.datasets[key].attrs.keys():
-                if self.datasets[key].attrs['stim'][-1] != ']':
-                    self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
-        for key in self.groups.keys():
-            if 'stim' in self.groups[key].attrs.keys():
-                if self.groups[key].attrs['stim'][-1] != ']':
-                    self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
+        # bad hack!
+        if 'closed' in self.hdf5.__repr__().lower():
+            return
+        if self.hdf5.mode != 'r':
+            for key in self.datasets.keys():
+                print 'checking key', key
+                if 'stim' in self.datasets[key].attrs.keys():
+                    if self.datasets[key].attrs['stim'][-1] != ']':
+                        self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
+            for key in self.groups.keys():
+                if 'stim' in self.groups[key].attrs.keys():
+                    if self.groups[key].attrs['stim'][-1] != ']':
+                        self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
         
         fname = self.hdf5.filename
 
