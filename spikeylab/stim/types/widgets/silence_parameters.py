@@ -22,6 +22,7 @@ class SilenceParameterWidget(AbstractParameterWidget):
 
     def saveToObject(self):
         self._component.setDuration(self.dur_spnbx.value()*self.scales[0])
+        self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def component(self):
         return self._component
