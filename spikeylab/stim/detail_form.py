@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stim_detail.ui'
 #
-# Created: Tue Apr 08 12:57:21 2014
+# Created: Tue Apr 08 16:51:54 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -108,6 +108,11 @@ class Ui_StimDetailWidget(object):
         self.label_9.setObjectName(_fromUtf8("label_9"))
         self.verticalLayout.addWidget(self.label_9)
         self.component_details = ComponentDetailWidget(StimDetailWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.component_details.sizePolicy().hasHeightForWidth())
+        self.component_details.setSizePolicy(sizePolicy)
         self.component_details.setObjectName(_fromUtf8("component_details"))
         self.verticalLayout.addWidget(self.component_details)
         self.protocol_progress_bar = QtGui.QProgressBar(StimDetailWidget)

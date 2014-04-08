@@ -224,7 +224,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.reprate_spnbx.setValue(inputsdict.get('reprate', 1))
         self.display.spiketrace_plot.set_raster_bounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
-        self.display.set_spec_args(**self.spec_args)        
+        self.display.set_spec_args(**self.spec_args)  
+        self.view_settings = inputsdict.get('view_settings', {'fontsz': 10, 'display_attributes':{}})
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 
                                       'calv':0.1, 'use_calfile':False, 
                                       'frange':(5000, 1e5), 'calname': ''})

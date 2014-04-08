@@ -70,7 +70,7 @@
       <item>
        <widget class="QTabWidget" name="tab_group">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_explore">
          <attribute name="title">
@@ -267,6 +267,45 @@
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="CalibrationWidget" name="calibration_widget" native="true"/>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="1">
+             <widget class="QLabel" name="dblevel_lbl">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>dB SPL level:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="dblevel_lbl2">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="dblevel_lbl3">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_19">
+              <property name="text">
+               <string>FFT peak</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -560,11 +599,18 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionShow_Data_display"/>
-    <addaction name="actionShow_PSTH"/>
-    <addaction name="actionShow_Progress"/>
-    <addaction name="actionShow_Log"/>
-    <addaction name="actionShow_Stimulus_Details"/>
+    <widget class="QMenu" name="menuShow">
+     <property name="title">
+      <string>Show</string>
+     </property>
+     <addaction name="actionData_Display"/>
+     <addaction name="actionPSTH"/>
+     <addaction name="actionProgress"/>
+     <addaction name="actionLog"/>
+     <addaction name="actionStimulus_Details"/>
+    </widget>
+    <addaction name="actionView_Settings"/>
+    <addaction name="menuShow"/>
    </widget>
    <addaction name="menuOptions"/>
    <addaction name="menuView"/>
@@ -751,45 +797,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="1">
-        <widget class="QLabel" name="dblevel_lbl">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_18">
-         <property name="text">
-          <string>dB SPL level:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="dblevel_lbl2">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="dblevel_lbl3">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_19">
-         <property name="text">
-          <string>FFT peak</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
     </layout>
    </widget>
   </widget>
@@ -851,6 +858,36 @@
   <action name="actionShow_Stimulus_Details">
    <property name="text">
     <string>Show Stimulus Details</string>
+   </property>
+  </action>
+  <action name="actionView_Settings">
+   <property name="text">
+    <string>View Settings...</string>
+   </property>
+  </action>
+  <action name="actionData_Display">
+   <property name="text">
+    <string>Data Display</string>
+   </property>
+  </action>
+  <action name="actionPSTH">
+   <property name="text">
+    <string>PSTH</string>
+   </property>
+  </action>
+  <action name="actionProgress">
+   <property name="text">
+    <string>Progress</string>
+   </property>
+  </action>
+  <action name="actionLog">
+   <property name="text">
+    <string>Log</string>
+   </property>
+  </action>
+  <action name="actionStimulus_Details">
+   <property name="text">
+    <string>Stimulus Details</string>
    </property>
   </action>
  </widget>
@@ -953,34 +990,34 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Data_display</sender>
+   <sender>actionData_Display</sender>
    <signal>triggered()</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>show_display()</slot>
+   <receiver>plot_dock</receiver>
+   <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>541</x>
-     <y>346</y>
+     <x>386</x>
+     <y>570</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_PSTH</sender>
+   <sender>actionPSTH</sender>
    <signal>triggered()</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>show_psth()</slot>
+   <receiver>psth_dock</receiver>
+   <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>541</x>
-     <y>346</y>
+     <x>901</x>
+     <y>220</y>
     </hint>
    </hints>
   </connection>
@@ -991,12 +1028,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>583</x>
-     <y>116</y>
+     <x>406</x>
+     <y>123</y>
     </hint>
     <hint type="destinationlabel">
-     <x>674</x>
-     <y>397</y>
+     <x>502</x>
+     <y>432</y>
     </hint>
    </hints>
   </connection>
@@ -1023,8 +1060,8 @@
    <slot>mode_toggled(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>927</x>
-     <y>281</y>
+     <x>761</x>
+     <y>289</y>
     </hint>
     <hint type="destinationlabel">
      <x>705</x>
@@ -1033,18 +1070,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Progress</sender>
+   <sender>actionProgress</sender>
    <signal>triggered()</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>show_progress()</slot>
+   <receiver>progress_dock</receiver>
+   <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>544</x>
-     <y>342</y>
+     <x>901</x>
+     <y>481</y>
     </hint>
    </hints>
   </connection>
@@ -1065,18 +1102,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Log</sender>
+   <sender>actionLog</sender>
    <signal>triggered()</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>show_log()</slot>
+   <receiver>log_dock</receiver>
+   <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>544</x>
-     <y>342</y>
+     <x>56</x>
+     <y>281</y>
     </hint>
    </hints>
   </connection>
@@ -1087,8 +1124,8 @@
    <slot>clear_protocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>585</x>
-     <y>645</y>
+     <x>502</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1097,7 +1134,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Stimulus_Details</sender>
+   <sender>actionStimulus_Details</sender>
    <signal>triggered()</signal>
    <receiver>detail_dock</receiver>
    <slot>showNormal()</slot>
@@ -1107,8 +1144,24 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1079</x>
-     <y>614</y>
+     <x>922</x>
+     <y>596</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionView_Settings</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>launch_view_dlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>512</x>
+     <y>309</y>
     </hint>
    </hints>
   </connection>
@@ -1134,5 +1187,6 @@
   <slot>show_log()</slot>
   <slot>grab_cal()</slot>
   <slot>clear_protocol()</slot>
+  <slot>launch_view_dlg()</slot>
  </slots>
 </ui>

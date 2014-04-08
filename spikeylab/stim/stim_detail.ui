@@ -167,7 +167,14 @@
     </widget>
    </item>
    <item>
-    <widget class="ComponentDetailWidget" name="component_details" native="true"/>
+    <widget class="ComponentDetailWidget" name="component_details" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QProgressBar" name="protocol_progress_bar">

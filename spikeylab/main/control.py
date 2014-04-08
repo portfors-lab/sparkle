@@ -11,7 +11,8 @@ from PyQt4 import QtCore, QtGui
 
 from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
-from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, CalibrationDialog, CellCommentDialog
+from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
+            ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
@@ -271,7 +272,6 @@ class MainWindow(ControlWindow):
         self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
 
     def on_group_done(self, halted):
-        print 'active opertation', self.active_operation
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.save_checked() and not halted
@@ -494,7 +494,6 @@ class MainWindow(ControlWindow):
                 self.extended_display.auto_range()
 
     def report_progress(self, itest, itrace, stim_info):
-        print 'reporting progress', stim_info
         self.ui.stim_details.set_test_num(itest)
         self.ui.stim_details.set_trace_num(itrace)
         self.ui.stim_details.set_doc(stim_info)
@@ -543,6 +542,12 @@ class MainWindow(ControlWindow):
             self.exvocal.set_spec_args(**argdict)
             QtGui.QApplication.processEvents()
             self.spec_args = argdict
+
+    def launch_view_dlg(self):
+        dlg = ViewSettingsDialog(self.view_settings)
+        if dlg.exec_():
+            self.view_settings = dlg.values()
+            self.ui.stim_details.set_display_attributes(self.view_settings['display_attributes'])
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """
@@ -605,20 +610,8 @@ class MainWindow(ControlWindow):
     def clear_protocol(self):
         self.acqmodel.clear_protocol()
 
-    def show_display(self):
-        self.ui.plot_dock.setVisible(True)
-
-    def show_psth(self):
-        self.ui.psth_dock.setVisible(True)
-
     def set_status_msg(self, status):
         self.statusBar().showMessage(status)
-
-    def show_progress(self):
-        self.ui.progress_dock.setVisible(True)
-
-    def show_log(self):
-        self.ui.log_dock.setVisible(True)
 
     def closeEvent(self,event):
         # stop any tasks that may be running

@@ -75,7 +75,8 @@ class AbstractStimulusComponent(object):
         state = {
                 'duration' : self._duration,
                 'intensity' : self._intensity,
-                'risefall' : self._risefall
+                'risefall' : self._risefall,
+                'stim_type' : self.name
                 }
         return state
 

@@ -24,3 +24,6 @@ class StimDetailWidget(QtGui.QWidget):
 
         self.ui.component_details.clear_doc()
         self.ui.component_details.set_doc(doc['components'])
+
+    def set_display_attributes(self, attrs):
+        self.ui.component_details.set_display_table(attrs)
