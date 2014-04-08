@@ -6,9 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1230</width>
-    <height>743</height>
+    <width>1025</width>
+    <height>619</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -64,11 +69,6 @@
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
        <widget class="QTabWidget" name="tab_group">
-        <property name="font">
-         <font>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
         <property name="currentIndex">
          <number>1</number>
         </property>
@@ -162,11 +162,6 @@
              <layout class="QGridLayout" name="gridLayout_7">
               <item row="1" column="0">
                <widget class="QLabel" name="label_39">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
                 <property name="text">
                  <string>Reps</string>
                 </property>
@@ -174,11 +169,6 @@
               </item>
               <item row="1" column="1">
                <widget class="QSpinBox" name="ex_nreps_spnbx">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
                 <property name="minimum">
                  <number>1</number>
                 </property>
@@ -209,11 +199,6 @@
               </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_6">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
                 <property name="text">
                  <string>Gen. Sample rate</string>
                 </property>
@@ -243,80 +228,6 @@
           <string>Experiment</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <layout class="QGridLayout" name="gridLayout_2">
-            <item row="0" column="2">
-             <widget class="QLabel" name="label_14">
-              <property name="text">
-               <string>Rep:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Test:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Trace:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="trace_num">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="trace_type">
-              <property name="text">
-               <string>None</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QLabel" name="label_15">
-              <property name="text">
-               <string>Type:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="test_num">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_21">
-              <property name="text">
-               <string>Details:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QLabel" name="rep_num">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" colspan="4">
-             <widget class="QLabel" name="trace_info">
-              <property name="text">
-               <string>Super cool info</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
@@ -403,11 +314,6 @@
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="label">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>Acq. Sample rate</string>
             </property>
@@ -422,11 +328,6 @@
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_10">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>Window size</string>
             </property>
@@ -441,11 +342,6 @@
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_12">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>Threshold</string>
             </property>
@@ -460,11 +356,6 @@
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_43">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>Spike bin size</string>
             </property>
@@ -479,11 +370,6 @@
           </item>
           <item row="0" column="1">
            <widget class="SmartSpinBox" name="aisr_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -494,11 +380,6 @@
           </item>
           <item row="4" column="1">
            <widget class="SmartSpinBox" name="binsz_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -509,11 +390,6 @@
           </item>
           <item row="2" column="1">
            <widget class="SmartSpinBox" name="windowsz_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -524,11 +400,6 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="reprate_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
@@ -554,11 +425,6 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>Rep rate</string>
             </property>
@@ -579,11 +445,6 @@
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="thresh_spnbx">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
@@ -682,8 +543,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1230</width>
-     <height>21</height>
+     <width>1025</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -703,6 +564,7 @@
     <addaction name="actionShow_PSTH"/>
     <addaction name="actionShow_Progress"/>
     <addaction name="actionShow_Log"/>
+    <addaction name="actionShow_Stimulus_Details"/>
    </widget>
    <addaction name="menuOptions"/>
    <addaction name="menuView"/>
@@ -796,11 +658,6 @@
           </item>
           <item row="1" column="1">
            <widget class="QLabel" name="spike_latency_lbl">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>0</string>
             </property>
@@ -936,6 +793,21 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="detail_dock">
+   <property name="windowTitle">
+    <string>Stimulus Details</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QVBoxLayout" name="verticalLayout_11">
+     <item>
+      <widget class="StimDetailWidget" name="stim_details" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionSave_Options">
    <property name="text">
     <string>Save Options...</string>
@@ -974,6 +846,11 @@
   <action name="actionShow_Log">
    <property name="text">
     <string>Show Log</string>
+   </property>
+  </action>
+  <action name="actionShow_Stimulus_Details">
+   <property name="text">
+    <string>Show Stimulus Details</string>
    </property>
   </action>
  </widget>
@@ -1016,6 +893,12 @@
    <class>PlotDockWidget</class>
    <extends>QDockWidget</extends>
    <header>spikeylab.main.plotdock</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>StimDetailWidget</class>
+   <extends>QWidget</extends>
+   <header>spikeylab.stim.detail_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -1210,6 +1093,22 @@
     <hint type="destinationlabel">
      <x>697</x>
      <y>562</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_Stimulus_Details</sender>
+   <signal>triggered()</signal>
+   <receiver>detail_dock</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1079</x>
+     <y>614</y>
     </hint>
    </hints>
   </connection>

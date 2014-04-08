@@ -494,18 +494,13 @@ class MainWindow(ControlWindow):
                 self.extended_display.auto_range()
 
     def report_progress(self, itest, itrace, stim_info):
-        self.ui.test_num.setText(str(itest))
-        self.ui.trace_num.setText(str(itrace))
-        stim_types = [comp['stim_type'] for comp in stim_info['components']]
-        # print 'stim_types', stim_types
-        if len(set(stim_types)) == 1:
-            self.ui.trace_type.setText(stim_types[0])
-        else:
-            self.ui.trace_type.setText('who knows?')
-        self.ui.trace_info.setText(" A 500g jar of honey represents about ten million trips from the hive to flowers and back again.")
+        print 'reporting progress', stim_info
+        self.ui.stim_details.set_test_num(itest)
+        self.ui.stim_details.set_trace_num(itrace)
+        self.ui.stim_details.set_doc(stim_info)
 
     def report_rep(self, irep):
-        self.ui.rep_num.setText(str(irep))
+        self.ui.stim_details.set_rep_num(irep)
 
     def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
         self.ui.spike_total_lbl.setText(str(total_spikes))
