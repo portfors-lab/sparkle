@@ -51,6 +51,8 @@ class NoiseParameterWidget(AbstractParameterWidget):
         self.db_spnbx.valueChanged.connect(self.valueChanged.emit)
         self.dur_spnbx.editingFinished.connect(self.valueChanged.emit)
 
+        self.valueChanged.connect(self.saveToObject)
+        
     def setComponent(self, component):
         self.dur_spnbx.setValue(component.duration()/self.scales[0])
         self.db_spnbx.setValue(component.intensity())

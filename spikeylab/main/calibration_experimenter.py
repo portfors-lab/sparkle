@@ -23,6 +23,7 @@ class CalibrationExperimenter(Experimenter):
 
         self.stimulus = StimulusModel()
         CCFactory.init_stim(self.stimulus)
+
         self.protocol_model.insertNewTest(self.stimulus, 0)
 
         # add in a tone at the calibration frequency and intensity
@@ -98,7 +99,6 @@ class CalibrationExperimenter(Experimenter):
 
     def _initialize_test(self, test):
         self.peak_avg = []
-        return
 
     def _process_response(self, response, trace_info, irep):
         freq, spectrum = calc_spectrum(response, self.player.aisr)
@@ -134,7 +134,6 @@ class CalibrationExperimenter(Experimenter):
             self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
             self.signals.response_collected.emit(self.aitimes, response)
-            self.signals.calibration_response_collected.emit((f, db), spectrum, freq, peak_fft, vmax)
         
         # calculate resultant dB and emit
         if USE_FFT:

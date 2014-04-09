@@ -144,12 +144,12 @@ class AcquisitionManager():
         self.selected_calibration_index = idx
 
     def run_calibration(self, interval, applycal):
-        if self.selected_calibration_index == 0:
+        if self.selected_calibration_index == 2:
             self.tone_calibrator.apply_calibration(applycal)
             self.tone_calibrator.setup(interval)
             return self.tone_calibrator.run()
         else:
-            self.bs_calibrator.set_stim_by_index(self.selected_calibration_index-1)
+            self.bs_calibrator.set_stim_by_index(self.selected_calibration_index)
             self.bs_calibrator.apply_calibration(applycal)
             self.bs_calibrator.setup(interval)
             return self.bs_calibrator.run()
@@ -165,7 +165,7 @@ class AcquisitionManager():
         return self.charter.run()
 
     def process_calibration(self, save=True, calf=20000):
-        if self.selected_calibration_index == 0:
+        if self.selected_calibration_index == 2:
             results, calname, freq = self.tone_calibrator.process_calibration(save)
         else:
             results, calname, freq = self.bs_calibrator.process_calibration(save)
@@ -208,11 +208,20 @@ class AcquisitionManager():
         return self.tone_calibrator.stimulus.autoParamRanges()
 
     def calibration_template(self):
-        return self.tone_calibrator.stimulus.templateDoc()
+        temp = {}
+        temp['tone_doc'] = self.tone_calibrator.stimulus.templateDoc()
+        comp_doc = []
+        for calstim in self.bs_calibrator.get_stims():
+            comp_doc.append(calstim.stateDict())
+        temp['noise_doc'] = comp_doc
+        return temp
 
     def load_calibration_template(self, template):
         self.tone_calibrator.stimulus.clearComponents()
-        self.tone_calibrator.stimulus.loadFromTemplate(template, self.tone_calibrator.stimulus)
+        self.tone_calibrator.stimulus.loadFromTemplate(template['tone_doc'], self.tone_calibrator.stimulus)
+        comp_doc = template['noise_doc']
+        for state, calstim in zip(comp_doc, self.bs_calibrator.get_stims()):
+            calstim.loadState(state)
 
     def clear_protocol(self):
         self.protocoler.clear()

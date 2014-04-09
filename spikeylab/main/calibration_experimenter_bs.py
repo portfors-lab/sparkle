@@ -57,7 +57,6 @@ class CalibrationExperimenterBS(Experimenter):
         # self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
         # this may be set at any time, and is not checked before run, so set
         # all stim components
-        print 'setting duration', dur
         for comp in self.stim_components:
             comp.setDuration(dur)
 

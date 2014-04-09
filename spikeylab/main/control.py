@@ -373,7 +373,7 @@ class MainWindow(ControlWindow):
         else:
             # Always use noise on saving calibration.
             # BEWARE: Hardcoded to index 1... this could change?!
-            self.acqmodel.set_calibration_by_index(1)
+            self.acqmodel.set_calibration_by_index(0)
 
         if self.ui.calibration_widget.ui.applycal_ckbx.isChecked() and self.ui.calibration_widget.is_tone_cal():
             frequencies, intensities = self.acqmodel.calibration_range()
@@ -440,7 +440,6 @@ class MainWindow(ControlWindow):
 
     def display_db_result(self, f, db, resultdb):
         try:
-            self.ui.calibration_widget.ui.db_lbl.setNum(resultdb)
             self.livecurve.set_point(f,db,resultdb)
         except:
             print u"WARNING : Problem drawing to calibration plot"
@@ -479,7 +478,6 @@ class MainWindow(ControlWindow):
                 self.extended_display.update_spec(signal, fs, plot='stim')
             else:
                 self.calibration_display.update_out_fft(freq, spectrum)
-                self.ui.calibration_widget.ui.avo_lbl.setText(str(np.amax(signal)))
         else:
             if self.ui.plot_dock.current() == 'standard':
                 self.display.update_signal(timevals, signal)

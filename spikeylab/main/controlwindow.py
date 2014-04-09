@@ -32,6 +32,9 @@ class ControlWindow(QtGui.QMainWindow):
         self.load_inputs(inputs_filename)
         self.inputs_filename = inputs_filename
 
+        for calstim in self.acqmodel.bs_calibrator.get_stims()[::-1]: #tsk
+            self.ui.calibration_widget.add_option(calstim)
+
         # keep a reference to a dummy stimulus view, to be able to update
         # default attributes in stimulus builder from explore components
         self.dummyview = StimulusView()
@@ -42,9 +45,6 @@ class ControlWindow(QtGui.QMainWindow):
             self.dummyview.update_defaults(stim.__class__.__name__, stim.stateDict())
             self.ui.parameter_stack.addWidget(editor)
             self.ui.explore_stim_type_cmbbx.addItem(stim.name)
-
-        for calstim in self.acqmodel.bs_calibrator.get_stims(): #tsk
-            self.ui.calibration_widget.add_option(calstim)
 
         try:
             settings = QtCore.QSettings("audiolab")
@@ -245,8 +245,9 @@ class ControlWindow(QtGui.QMainWindow):
         self.fscale = 0
         self.update_unit_labels(tscale, fscale, setup=True)
 
-        if 'calparams' in inputsdict:
-            self.acqmodel.load_calibration_template(inputsdict['calparams'])
+        cal_template = inputsdict.get('calparams', None)
+        if cal_template is not None:
+            self.acqmodel.load_calibration_template(cal_template)
 
         for stim in self.explore_stimuli:
             try:

@@ -27,12 +27,13 @@ class CalibrationWidget(QtGui.QWidget):
 
     def add_option(self, stim):
         # set the editor widgets for noise and sweep
-        self.ui.cal_type_cmbbx.addItem(stim.name)
+        self.ui.cal_type_cmbbx.insertItem(0,stim.name)
         editor = stim.showEditor()
         # should probably make this less coupled
         self.duration_widgets.append(editor.dur_spnbx)
         editor.dur_spnbx.setEnabled(False)
-        self.ui.caleditor_stack.addWidget(editor)
+        self.ui.caleditor_stack.insertWidget(0, editor)
+        self.ui.cal_type_cmbbx.setCurrentIndex(0)
 
     def current_index(self):
         return self.ui.cal_type_cmbbx.currentIndex()
@@ -41,7 +42,7 @@ class CalibrationWidget(QtGui.QWidget):
         return self.ui.cal_type_cmbbx.currentText()
         
     def is_tone_cal(self):
-        return self.ui.cal_type_cmbbx.currentIndex() == 0
+        return self.ui.cal_type_cmbbx.currentIndex() == self.ui.cal_type_cmbbx.count() -1
 
     def save_checked(self):
         return self.ui.savecal_ckbx.isChecked()
