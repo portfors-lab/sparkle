@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
-class ComponentDetailWidget(QtGui.QWidget):
+class ComponentsDetailWidget(QtGui.QWidget):
     """class that presents the stimulus doc in a clear and useful way"""
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self)
@@ -22,44 +22,49 @@ class ComponentDetailWidget(QtGui.QWidget):
         self.default_attributes = defaults
 
     def set_doc(self, docs):
-        font = QtGui.QFont()
-        font.setPointSize(14)
+        # sort stim by start time
+        docs = sorted(docs, key=lambda k: k['start_s'])
+
         for doc in docs:
             stim_type = doc['stim_type']
             if not stim_type in self.display_table:
                 continue
             if not stim_type in self.display_table[stim_type]:
                 continue
-            glay = QtGui.QGridLayout()
-            # always at least include stimulus type
-            title = QtGui.QLabel(stim_type)
-            title.setFont(font)
-            glay.addWidget(title,0,0)
-            # get any other attributes to display, or defaults if not specified
             display_attributes = self.display_table.get(stim_type, self.default_attributes)
-            for i, attr in enumerate(display_attributes):
-                if attr == stim_type:
-                    continue # already got it
-                val = doc[attr]
-                # add to UI
-                glay.addWidget(QtGui.QLabel(attr),i+1,0)
-                glay.addWidget(QtGui.QLabel(str(val)),i+1,1)
-            self.lyt.addLayout(glay)
+            
+            self.lyt.addWidget(ComponentDetailFrame(doc, display_attributes))
 
     def clear_doc(self):
         clearLayout(self.lyt)
 
-def clearLayout(layout):
-    if layout is not None:
-        while layout.count():
-            item = layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-            else:
-                clearLayout(item.layout())
+class ComponentDetailFrame(QtGui.QFrame):
+    def __init__(self, comp_doc, display_attributes, parent=None):
+        QtGui.QFrame.__init__(self)
 
-class ComponentDetailSelector(QtGui.QWidget):
+        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
+        font = QtGui.QFont()
+        font.setPointSize(14)
+
+        glay = QtGui.QGridLayout()
+        stim_type = comp_doc['stim_type']
+
+        # always at least include stimulus type
+        title = QtGui.QLabel(stim_type)
+        title.setFont(font)
+        glay.addWidget(title,0,0)
+        # get any other attributes to display, or defaults if not specified
+        for i, attr in enumerate(display_attributes):
+            if attr == stim_type:
+                continue # already got it
+            val = comp_doc[attr]
+            # add to UI
+            glay.addWidget(QtGui.QLabel(attr),i+1,0)
+            glay.addWidget(QtGui.QLabel(str(val)),i+1,1)
+            
+        self.setLayout(glay)
+
+class ComponentsDetailSelector(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self)
 
@@ -87,10 +92,11 @@ class ComponentDetailSelector(QtGui.QWidget):
             attrs[w.stim_type] = w.get_checked()
         return attrs
 
-class ComponentAttributerChecker(QtGui.QWidget):
+class ComponentAttributerChecker(QtGui.QFrame):
     def __init__(self, comp_attributes, parent=None):
-        QtGui.QWidget.__init__(self)
+        QtGui.QFrame.__init__(self)
 
+        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
         layout = QtGui.QGridLayout()
 
         font = QtGui.QFont()
@@ -105,6 +111,7 @@ class ComponentAttributerChecker(QtGui.QWidget):
 
         self.setLayout(layout)
         self.stim_type = stim_type
+
 
     def set_checked(self, tocheck):
         layout = self.layout()
@@ -121,3 +128,13 @@ class ComponentAttributerChecker(QtGui.QWidget):
             if w.isChecked():
                 attrs.append(w.text())
         return attrs
+
+def clearLayout(layout):
+    if layout is not None:
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            else:
+                clearLayout(item.layout())

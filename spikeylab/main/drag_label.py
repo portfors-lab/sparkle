@@ -11,8 +11,10 @@ class DragLabel(QtGui.QLabel):
     def __init__(self, factoryclass, parent=None):
         super(DragLabel, self).__init__(parent)
         self.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.Panel)
+        self.setLineWidth(2)
         self.setClass(factoryclass)
-        self.setFixedSize(QtCore.QSize(100,25))
+        self.setMinimumSize(QtCore.QSize(100,32))
+        self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
     def setClass(self, factoryclass):
         """Constructor for the component type this label is to represent"""

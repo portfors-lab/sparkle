@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\view_dlg.ui'
 #
-# Created: Tue Apr 08 15:58:13 2014
+# Created: Wed Apr 09 09:51:07 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,7 +55,7 @@ class Ui_ViewSettingsDialog(object):
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.detail_widget = ComponentDetailSelector(self.scrollAreaWidgetContents)
+        self.detail_widget = ComponentsDetailSelector(self.scrollAreaWidgetContents)
         self.detail_widget.setObjectName(_fromUtf8("detail_widget"))
         self.verticalLayout_2.addWidget(self.detail_widget)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -81,4 +81,4 @@ class Ui_ViewSettingsDialog(object):
         self.label_3.setText(_translate("ViewSettingsDialog", "Attributes to show:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("ViewSettingsDialog", "Tab 2", None))
 
-from spikeylab.stim.component_detail import ComponentDetailSelector
+from spikeylab.stim.component_detail import ComponentsDetailSelector

@@ -187,6 +187,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['windowsz'] = self.ui.windowsz_spnbx.value()
         savedict['raster_bounds'] = self.display.spiketrace_plot.get_raster_bounds()
         savedict['specargs'] = self.spec_args
+        savedict['view_settings'] = self.view_settings
         savedict['calvals'] = self.calvals
         savedict['calparams'] = self.acqmodel.calibration_template()
 
@@ -226,6 +227,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.spec_args = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
         self.display.set_spec_args(**self.spec_args)  
         self.view_settings = inputsdict.get('view_settings', {'fontsz': 10, 'display_attributes':{}})
+        self.ui.stim_details.set_display_attributes(self.view_settings['display_attributes'])
+        font = QtGui.QFont()
+        font.setPointSize(self.view_settings['fontsz'])
+        QtGui.QApplication.setFont(font)
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 
                                       'calv':0.1, 'use_calfile':False, 
                                       'frange':(5000, 1e5), 'calname': ''})

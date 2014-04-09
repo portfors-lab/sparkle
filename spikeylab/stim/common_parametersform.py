@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
-# Created: Sun Jan 26 23:38:54 2014
+# Created: Wed Apr 09 10:31:54 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,16 +26,13 @@ except AttributeError:
 class Ui_ParameterWidget(object):
     def setupUi(self, ParameterWidget):
         ParameterWidget.setObjectName(_fromUtf8("ParameterWidget"))
-        ParameterWidget.resize(452, 174)
+        ParameterWidget.resize(452, 169)
         self.verticalLayout = QtGui.QVBoxLayout(ParameterWidget)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.gridLayout_5 = QtGui.QGridLayout()
         self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
         self.label_40 = QtGui.QLabel(ParameterWidget)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label_40.setFont(font)
         self.label_40.setObjectName(_fromUtf8("label_40"))
         self.gridLayout_5.addWidget(self.label_40, 3, 0, 1, 1)
         self.label_6 = QtGui.QLabel(ParameterWidget)
@@ -47,9 +44,6 @@ class Ui_ParameterWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_32.sizePolicy().hasHeightForWidth())
         self.label_32.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label_32.setFont(font)
         self.label_32.setObjectName(_fromUtf8("label_32"))
         self.gridLayout_5.addWidget(self.label_32, 1, 0, 1, 1)
         self.tunit_lbl_0 = QtGui.QLabel(ParameterWidget)
@@ -61,9 +55,6 @@ class Ui_ParameterWidget(object):
         self.tunit_lbl_0.setObjectName(_fromUtf8("tunit_lbl_0"))
         self.gridLayout_5.addWidget(self.tunit_lbl_0, 1, 2, 1, 1)
         self.label_42 = QtGui.QLabel(ParameterWidget)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label_42.setFont(font)
         self.label_42.setObjectName(_fromUtf8("label_42"))
         self.gridLayout_5.addWidget(self.label_42, 0, 0, 1, 1)
         self.tunit_lbl_1 = QtGui.QLabel(ParameterWidget)
@@ -78,18 +69,12 @@ class Ui_ParameterWidget(object):
         self.db_spnbx.setObjectName(_fromUtf8("db_spnbx"))
         self.gridLayout_5.addWidget(self.db_spnbx, 0, 1, 1, 1)
         self.dur_spnbx = SmartSpinBox(ParameterWidget)
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.dur_spnbx.setFont(font)
         self.dur_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.dur_spnbx.setDecimals(3)
         self.dur_spnbx.setMaximum(1000.0)
         self.dur_spnbx.setObjectName(_fromUtf8("dur_spnbx"))
         self.gridLayout_5.addWidget(self.dur_spnbx, 1, 1, 1, 1)
         self.risefall_spnbx = SmartSpinBox(ParameterWidget)
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.risefall_spnbx.setFont(font)
         self.risefall_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.risefall_spnbx.setDecimals(3)
         self.risefall_spnbx.setMaximum(500.0)

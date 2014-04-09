@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stim_detail.ui'
 #
-# Created: Tue Apr 08 16:51:54 2014
+# Created: Wed Apr 09 10:14:12 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -107,14 +107,26 @@ class Ui_StimDetailWidget(object):
         self.label_9.setFont(font)
         self.label_9.setObjectName(_fromUtf8("label_9"))
         self.verticalLayout.addWidget(self.label_9)
-        self.component_details = ComponentDetailWidget(StimDetailWidget)
+        self.scrollArea = QtGui.QScrollArea(StimDetailWidget)
+        self.scrollArea.setFrameShape(QtGui.QFrame.NoFrame)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 471, 253))
+        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_2.setMargin(0)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.component_details = ComponentsDetailWidget(self.scrollAreaWidgetContents)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.component_details.sizePolicy().hasHeightForWidth())
         self.component_details.setSizePolicy(sizePolicy)
         self.component_details.setObjectName(_fromUtf8("component_details"))
-        self.verticalLayout.addWidget(self.component_details)
+        self.verticalLayout_2.addWidget(self.component_details)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.verticalLayout.addWidget(self.scrollArea)
         self.protocol_progress_bar = QtGui.QProgressBar(StimDetailWidget)
         self.protocol_progress_bar.setProperty("value", 0)
         self.protocol_progress_bar.setObjectName(_fromUtf8("protocol_progress_bar"))
@@ -138,4 +150,4 @@ class Ui_StimDetailWidget(object):
         self.trace_type.setText(_translate("StimDetailWidget", "audio", None))
         self.label_9.setText(_translate("StimDetailWidget", "Components:", None))
 
-from spikeylab.stim.component_detail import ComponentDetailWidget
+from spikeylab.stim.component_detail import ComponentsDetailWidget

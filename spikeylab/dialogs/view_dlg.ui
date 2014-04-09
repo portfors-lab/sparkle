@@ -75,7 +75,7 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="ComponentDetailSelector" name="detail_widget" native="true"/>
+            <widget class="ComponentsDetailSelector" name="detail_widget" native="true"/>
            </item>
           </layout>
          </widget>
@@ -99,7 +99,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ComponentDetailSelector</class>
+   <class>ComponentsDetailSelector</class>
    <extends>QWidget</extends>
    <header>spikeylab.stim.component_detail</header>
    <container>1</container>

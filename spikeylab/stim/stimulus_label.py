@@ -20,6 +20,7 @@ class StimulusLabelTable(QtGui.QWidget):
         tc_lbl = DragLabel(TCFactory)
         template_lbl = DragLabel(TemplateFactory)
         self.trash_lbl = TrashWidget()
+        self.trash_lbl.setMinimumWidth(100)
 
         layout.addWidget(builder_lbl, 0,0)
         layout.addWidget(tc_lbl,0,1)

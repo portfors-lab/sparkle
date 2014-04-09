@@ -12,10 +12,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
-        self.setStyleSheet("IncrementInput { background-color: white; \
-                            border-top:1px inset lightgrey; \
-                            border-right:1px inset lightgrey}\
-                            ")
+
         self.up10.setIcon(arrowup())
         self.up5.setIcon(arrowup())
         self.up1.setIcon(arrowup())
@@ -50,6 +47,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
             val += n
             self.setValue(val)
         self.valueChanged.emit()
+        print self.value_lnedt.font().pointSize()
 
     def value(self):
         return self.numtype(self.value_lnedt.text())
@@ -64,12 +62,6 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     def checkInput(self):
         if self.value_lnedt.text() == '':
             self.setValue(0)
-
-    def paintEvent(self, event):
-        o = QtGui.QStyleOption()
-        o.initFrom(self)
-        p = QtGui.QPainter(self)
-        self.style().drawPrimitive(QtGui.QStyle.PE_Widget, o, p, self)
 
 if __name__ == '__main__':
     import sys

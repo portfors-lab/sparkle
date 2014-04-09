@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Apr 08 15:50:21 2014
+# Created: Wed Apr 09 11:33:29 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,9 +27,6 @@ class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
         ControlWindow.resize(1025, 619)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        ControlWindow.setFont(font)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -148,8 +145,10 @@ class Ui_ControlWindow(object):
         self.stimulus_choices = StimulusLabelTable(self.tab_protocol)
         self.stimulus_choices.setObjectName(_fromUtf8("stimulus_choices"))
         self.horizontalLayout_9.addWidget(self.stimulus_choices)
+        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_9.addItem(spacerItem2)
         self.pushButton = QtGui.QPushButton(self.tab_protocol)
-        self.pushButton.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.pushButton.setMaximumSize(QtCore.QSize(200, 16777215))
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.horizontalLayout_9.addWidget(self.pushButton)
         self.verticalLayout_5.addLayout(self.horizontalLayout_9)
@@ -291,8 +290,8 @@ class Ui_ControlWindow(object):
         self.mode_cmbx.addItem(_fromUtf8(""))
         self.horizontalLayout_6.addWidget(self.mode_cmbx)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
-        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem2)
+        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem3)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
         self.start_chart_btn = QtGui.QPushButton(self.centralwidget)
@@ -315,7 +314,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1025, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1025, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -399,8 +398,8 @@ class Ui_ControlWindow(object):
         self.spike_total_lbl = QtGui.QLabel(self.psth_container)
         self.spike_total_lbl.setObjectName(_fromUtf8("spike_total_lbl"))
         self.gridLayout_9.addWidget(self.spike_total_lbl, 0, 1, 1, 1)
-        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_9.addItem(spacerItem3, 0, 2, 1, 1)
+        spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_9.addItem(spacerItem4, 0, 2, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_9)
         self.verticalLayout_10.addWidget(self.psth_container)
         self.psth_dock.setWidget(self.dockWidgetContents_2)
@@ -479,7 +478,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tab_group.setCurrentIndex(2)
+        self.tab_group.setCurrentIndex(1)
         self.parameter_stack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)

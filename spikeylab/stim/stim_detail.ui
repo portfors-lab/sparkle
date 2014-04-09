@@ -167,13 +167,38 @@
     </widget>
    </item>
    <item>
-    <widget class="ComponentDetailWidget" name="component_details" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
      </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>471</width>
+        <height>253</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="ComponentsDetailWidget" name="component_details" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -187,7 +212,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ComponentDetailWidget</class>
+   <class>ComponentsDetailWidget</class>
    <extends>QWidget</extends>
    <header>spikeylab.stim.component_detail</header>
    <container>1</container>

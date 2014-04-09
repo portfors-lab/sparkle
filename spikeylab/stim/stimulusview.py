@@ -206,7 +206,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         viewrect = event.rect()
         painter.fillRect(viewrect, background)
-        painter.setPen(foreground)  
+        painter.setPen(foreground)
+
+        fontsz = self.font().pointSize()  
 
         # draw grid lines
         wid = int(max(viewrect.width(), self._width))
@@ -215,8 +217,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         y1 = viewrect.y() + viewrect.height()
         for iline in range(1, nlines + 1):
             x = (iline * self.grid_ms * self.pixels_per_ms) - self.horizontalScrollBar().value()
-            painter.drawLine(x, y0+11, x, y1)
-            painter.drawText(x-5, y0+10, str(iline*self.grid_ms))
+            painter.drawLine(x, y0+fontsz+2, x, y1)
+            painter.drawText(x-5, y0+fontsz+1, str(iline*self.grid_ms))
 
         # painting of components
         for row in range(self.model().rowCount(self.rootIndex())):

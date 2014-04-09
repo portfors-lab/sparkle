@@ -548,6 +548,9 @@ class MainWindow(ControlWindow):
         if dlg.exec_():
             self.view_settings = dlg.values()
             self.ui.stim_details.set_display_attributes(self.view_settings['display_attributes'])
+            font = QtGui.QFont()
+            font.setPointSize(self.view_settings['fontsz'])
+            QtGui.QApplication.setFont(font)
 
     def wavfile_selected(self, model_index):
         """ On double click of wav file, load into display """

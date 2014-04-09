@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\incrementer.ui'
 #
-# Created: Tue Jan 28 19:28:49 2014
+# Created: Wed Apr 09 11:06:49 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_IncrementInput(object):
     def setupUi(self, IncrementInput):
         IncrementInput.setObjectName(_fromUtf8("IncrementInput"))
-        IncrementInput.resize(371, 51)
+        IncrementInput.resize(371, 49)
         IncrementInput.setAutoFillBackground(True)
         IncrementInput.setStyleSheet(_fromUtf8(""))
         self.horizontalLayout = QtGui.QHBoxLayout(IncrementInput)
@@ -40,10 +40,6 @@ class Ui_IncrementInput(object):
         sizePolicy.setHeightForWidth(self.value_lnedt.sizePolicy().hasHeightForWidth())
         self.value_lnedt.setSizePolicy(sizePolicy)
         self.value_lnedt.setMinimumSize(QtCore.QSize(0, 0))
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.value_lnedt.setFont(font)
-        self.value_lnedt.setStyleSheet(_fromUtf8("border: none"))
         self.value_lnedt.setObjectName(_fromUtf8("value_lnedt"))
         self.horizontalLayout.addWidget(self.value_lnedt)
         self.gridLayout = QtGui.QGridLayout()
@@ -54,6 +50,7 @@ class Ui_IncrementInput(object):
         self.down10.setMinimumSize(QtCore.QSize(20, 0))
         self.down10.setMaximumSize(QtCore.QSize(50, 16777215))
         self.down10.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
+        self.down10.setText(_fromUtf8(""))
         self.down10.setObjectName(_fromUtf8("down10"))
         self.gridLayout.addWidget(self.down10, 2, 0, 1, 1)
         self.up10 = QtGui.QPushButton(IncrementInput)
@@ -64,9 +61,6 @@ class Ui_IncrementInput(object):
         self.up10.setSizePolicy(sizePolicy)
         self.up10.setMinimumSize(QtCore.QSize(30, 0))
         self.up10.setMaximumSize(QtCore.QSize(50, 16777215))
-        font = QtGui.QFont()
-        font.setPointSize(8)
-        self.up10.setFont(font)
         self.up10.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
         self.up10.setObjectName(_fromUtf8("up10"))
         self.gridLayout.addWidget(self.up10, 1, 0, 1, 1)
@@ -80,6 +74,7 @@ class Ui_IncrementInput(object):
         self.down1.setMinimumSize(QtCore.QSize(20, 0))
         self.down1.setMaximumSize(QtCore.QSize(50, 16777215))
         self.down1.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
+        self.down1.setText(_fromUtf8(""))
         self.down1.setObjectName(_fromUtf8("down1"))
         self.gridLayout.addWidget(self.down1, 2, 2, 1, 1)
         self.up5 = QtGui.QPushButton(IncrementInput)
@@ -92,6 +87,7 @@ class Ui_IncrementInput(object):
         self.down5.setMinimumSize(QtCore.QSize(20, 0))
         self.down5.setMaximumSize(QtCore.QSize(50, 16777215))
         self.down5.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
+        self.down5.setText(_fromUtf8(""))
         self.down5.setObjectName(_fromUtf8("down5"))
         self.gridLayout.addWidget(self.down5, 2, 1, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
@@ -108,10 +104,7 @@ class Ui_IncrementInput(object):
     def retranslateUi(self, IncrementInput):
         IncrementInput.setWindowTitle(_translate("IncrementInput", "Form", None))
         self.value_lnedt.setText(_translate("IncrementInput", "0", None))
-        self.down10.setText(_translate("IncrementInput", "   ", None))
         self.up10.setText(_translate("IncrementInput", "10", None))
         self.up1.setText(_translate("IncrementInput", "1", None))
-        self.down1.setText(_translate("IncrementInput", "   ", None))
         self.up5.setText(_translate("IncrementInput", "5", None))
-        self.down5.setText(_translate("IncrementInput", "   ", None))
 

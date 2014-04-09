@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>452</width>
-    <height>174</height>
+    <height>169</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,11 +21,6 @@
     <layout class="QGridLayout" name="gridLayout_5">
      <item row="3" column="0">
       <widget class="QLabel" name="label_40">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>Rise fall time</string>
        </property>
@@ -45,11 +40,6 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
        </property>
        <property name="text">
         <string>Duration</string>
@@ -71,11 +61,6 @@
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_42">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>Intensity</string>
        </property>
@@ -99,11 +84,6 @@
      </item>
      <item row="1" column="1">
       <widget class="SmartSpinBox" name="dur_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::NoButtons</enum>
        </property>
@@ -117,11 +97,6 @@
      </item>
      <item row="3" column="1">
       <widget class="SmartSpinBox" name="risefall_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::NoButtons</enum>
        </property>

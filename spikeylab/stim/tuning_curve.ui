@@ -18,11 +18,6 @@
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="2" column="2">
       <widget class="QSpinBox" name="db_stop_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="maximum">
         <number>120</number>
        </property>
@@ -33,11 +28,6 @@
      </item>
      <item row="1" column="2">
       <widget class="QSpinBox" name="freq_stop_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="maximum">
         <number>200</number>
        </property>
@@ -74,11 +64,6 @@
      </item>
      <item row="1" column="1">
       <widget class="QSpinBox" name="freq_start_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="maximum">
         <number>200</number>
        </property>
@@ -92,11 +77,6 @@
      </item>
      <item row="2" column="1">
       <widget class="QSpinBox" name="db_start_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="maximum">
         <number>150</number>
        </property>
@@ -116,11 +96,6 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>Frequency</string>
        </property>
@@ -135,11 +110,6 @@
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_18">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>Intensity</string>
        </property>
@@ -186,22 +156,10 @@
       </widget>
      </item>
      <item row="2" column="3">
-      <widget class="SmartSpinBox" name="db_step_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-      </widget>
+      <widget class="SmartSpinBox" name="db_step_spnbx"/>
      </item>
      <item row="1" column="3">
-      <widget class="SmartSpinBox" name="freq_step_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-      </widget>
+      <widget class="SmartSpinBox" name="freq_step_spnbx"/>
      </item>
      <item row="1" column="5">
       <widget class="QLineEdit" name="freq_nsteps_lbl">
@@ -219,11 +177,6 @@
          <width>50</width>
          <height>16777215</height>
         </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
        </property>
        <property name="inputMask">
         <string/>
@@ -256,11 +209,6 @@
          <height>16777215</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -278,11 +226,6 @@
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="0" column="3">
       <widget class="QLabel" name="label_14">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>Rise fall time</string>
        </property>
@@ -295,11 +238,6 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
        </property>
        <property name="text">
         <string>Duration</string>
@@ -334,11 +272,6 @@
      </item>
      <item row="1" column="4">
       <widget class="QSpinBox" name="nreps_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="minimum">
         <number>1</number>
        </property>
@@ -352,11 +285,6 @@
      </item>
      <item row="1" column="3">
       <widget class="QLabel" name="label_31">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>Reps</string>
        </property>
@@ -364,24 +292,13 @@
      </item>
      <item row="0" column="1">
       <widget class="SmartSpinBox" name="dur_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="maximum">
         <double>1000.000000000000000</double>
        </property>
       </widget>
      </item>
      <item row="0" column="4">
-      <widget class="SmartSpinBox" name="risefall_spnbx">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-      </widget>
+      <widget class="SmartSpinBox" name="risefall_spnbx"/>
      </item>
     </layout>
    </item>

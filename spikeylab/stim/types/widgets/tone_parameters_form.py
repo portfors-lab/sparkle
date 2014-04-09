@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tone_parameters.ui'
 #
-# Created: Sun Jan 26 21:18:51 2014
+# Created: Wed Apr 09 10:30:12 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -56,9 +56,6 @@ class Ui_ToneParameterWidget(object):
         sizePolicy.setHeightForWidth(self.label_41.sizePolicy().hasHeightForWidth())
         self.label_41.setSizePolicy(sizePolicy)
         self.label_41.setMinimumSize(QtCore.QSize(75, 0))
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label_41.setFont(font)
         self.label_41.setObjectName(_fromUtf8("label_41"))
         self.gridLayout.addWidget(self.label_41, 0, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)

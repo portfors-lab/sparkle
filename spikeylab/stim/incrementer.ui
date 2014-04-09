@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>371</width>
-    <height>51</height>
+    <height>49</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,14 +49,6 @@
        <height>0</height>
       </size>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: none</string>
-     </property>
      <property name="text">
       <string>0</string>
      </property>
@@ -94,7 +86,7 @@
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
        </property>
        <property name="text">
-        <string>   </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -117,11 +109,6 @@
          <width>50</width>
          <height>16777215</height>
         </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
@@ -171,7 +158,7 @@
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
        </property>
        <property name="text">
-        <string>   </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -215,7 +202,7 @@
         <string notr="true">QWidget { background-color:rgb(234, 234, 234); }</string>
        </property>
        <property name="text">
-        <string>   </string>
+        <string/>
        </property>
       </widget>
      </item>
