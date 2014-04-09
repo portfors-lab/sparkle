@@ -190,6 +190,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['view_settings'] = self.view_settings
         savedict['calvals'] = self.calvals
         savedict['calparams'] = self.acqmodel.calibration_template()
+        savedict['calreps'] = self.ui.calibration_widget.ui.nreps_spnbx.value()
 
         # parameter settings
         for stim in self.explore_stimuli:
@@ -231,6 +232,7 @@ class ControlWindow(QtGui.QMainWindow):
         font = QtGui.QFont()
         font.setPointSize(self.view_settings['fontsz'])
         QtGui.QApplication.setFont(font)
+        self.ui.calibration_widget.ui.nreps_spnbx.setValue(inputsdict.get('calreps', 5))
         self.calvals = inputsdict.get('calvals', {'calf':20000, 'caldb':100, 
                                       'calv':0.1, 'use_calfile':False, 
                                       'frange':(5000, 1e5), 'calname': ''})

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\view_dlg.ui'
 #
-# Created: Wed Apr 09 09:51:07 2014
+# Created: Wed Apr 09 16:18:52 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,12 +33,14 @@ class Ui_ViewSettingsDialog(object):
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.ui_tab = QtGui.QWidget()
         self.ui_tab.setObjectName(_fromUtf8("ui_tab"))
+        self.gridLayout = QtGui.QGridLayout(self.ui_tab)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label = QtGui.QLabel(self.ui_tab)
-        self.label.setGeometry(QtCore.QRect(40, 40, 81, 16))
         self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.fontsz_spnbx = QtGui.QDoubleSpinBox(self.ui_tab)
-        self.fontsz_spnbx.setGeometry(QtCore.QRect(130, 40, 62, 22))
         self.fontsz_spnbx.setObjectName(_fromUtf8("fontsz_spnbx"))
+        self.gridLayout.addWidget(self.fontsz_spnbx, 0, 1, 1, 1)
         self.tabWidget.addTab(self.ui_tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
@@ -69,7 +71,7 @@ class Ui_ViewSettingsDialog(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
         self.retranslateUi(ViewSettingsDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ViewSettingsDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ViewSettingsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(ViewSettingsDialog)

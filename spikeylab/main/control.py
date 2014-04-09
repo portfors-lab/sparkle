@@ -174,7 +174,6 @@ class MainWindow(ControlWindow):
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
             self.run_protocol()
         elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-            self.acqmodel.set_calibration_reps(self.ui.calibration_widget.ui.nreps_spnbx.value())
             self.run_calibration()
         else: 
             raise Exception("unrecognized tab selection")
@@ -366,6 +365,8 @@ class MainWindow(ControlWindow):
 
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
+        
+        self.acqmodel.set_calibration_reps(self.ui.calibration_widget.ui.nreps_spnbx.value())
 
         if self.ui.calibration_widget.ui.applycal_ckbx.isChecked():
             stim_index = self.ui.calibration_widget.current_index()
