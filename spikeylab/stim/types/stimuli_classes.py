@@ -86,6 +86,18 @@ class FMSweep(Tone):
     _stop_f = 1e5
     explore = True
 
+    def startFrequency(self):
+        return self._start_f
+
+    def stopFrequency(self):
+        return self._stop_f
+
+    def setStartFrequency(self, f):
+        self._start_f = f
+
+    def setStopFrequency(self, f):
+        self._stop_f = f
+
     def signal(self, fs, atten, caldb, calv):
         amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
         npts = self._duration*fs
@@ -107,7 +119,7 @@ class FMSweep(Tone):
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
 
     def showEditor(self):
-        editor = silence_parameters.NoiseParameterWidget()
+        editor = silence_parameters.ChirpParameterWidget()
         editor.setComponent(self)
         return editor
 
