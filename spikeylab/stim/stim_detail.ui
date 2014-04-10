@@ -180,7 +180,7 @@
         <x>0</x>
         <y>0</y>
         <width>471</width>
-        <height>253</height>
+        <height>280</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -199,13 +199,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QProgressBar" name="protocol_progress_bar">
-     <property name="value">
-      <number>0</number>
-     </property>
     </widget>
    </item>
   </layout>

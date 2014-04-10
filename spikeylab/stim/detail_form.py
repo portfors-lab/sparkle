@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\stim_detail.ui'
 #
-# Created: Wed Apr 09 10:14:12 2014
+# Created: Thu Apr 10 12:25:12 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -112,7 +112,7 @@ class Ui_StimDetailWidget(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 471, 253))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 471, 280))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setMargin(0)
@@ -127,10 +127,6 @@ class Ui_StimDetailWidget(object):
         self.verticalLayout_2.addWidget(self.component_details)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
-        self.protocol_progress_bar = QtGui.QProgressBar(StimDetailWidget)
-        self.protocol_progress_bar.setProperty("value", 0)
-        self.protocol_progress_bar.setObjectName(_fromUtf8("protocol_progress_bar"))
-        self.verticalLayout.addWidget(self.protocol_progress_bar)
 
         self.retranslateUi(StimDetailWidget)
         QtCore.QMetaObject.connectSlotsByName(StimDetailWidget)

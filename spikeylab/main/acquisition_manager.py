@@ -137,6 +137,9 @@ class AcquisitionManager():
     def setup_protocol(self, interval):
         return self.protocoler.setup(interval)
 
+    def protocol_total_count(self):
+        return self.protocoler.count()
+
     def run_protocol(self):
         return self.protocoler.run()
 

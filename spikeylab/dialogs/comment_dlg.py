@@ -7,6 +7,7 @@ class CellCommentDialog(QtGui.QDialog):
         self.ui = Ui_CellCommentDialog()
         self.ui.setupUi(self)
 
+        self.setWindowTitle("Cell Comment")
         self.ui.cellid_lbl.setNum(cellid)
 
     def comment(self):

@@ -25,10 +25,13 @@ from controlwindow import ControlWindow
 RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
 GREEN = QtGui.QPalette()
-GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.green)
+GREEN.setColor(QtGui.QPalette.Foreground,QtCore.Qt.darkGreen)
+GREEN.setColor(QtGui.QPalette.Background,QtCore.Qt.green)
 BLACK = QtGui.QPalette()
 BLACK.setColor(QtGui.QPalette.Foreground,QtCore.Qt.black)
 
+GREENSS = "QLabel { background-color : limegreen; color : darkgreen; }"
+REDSS = "QLabel { background-color : transparent; color : red; }"
 DEVNAME = "PCI-6259"
 
 class MainWindow(ControlWindow):
@@ -53,7 +56,7 @@ class MainWindow(ControlWindow):
         cnames = get_ai_chans(DEVNAME.encode())
         self.ui.aichan_box.addItems(cnames)
 
-        self.ui.running_label.setPalette(RED)
+        self.ui.running_label.setStyleSheet(REDSS)
 
         self.apply_calibration = False
         self.calpeak = None
@@ -167,7 +170,7 @@ class MainWindow(ControlWindow):
             if self.ui.plot_dock.current() == 'calibration':
                 self.ui.plot_dock.switch_display('standard')
             self.ui.running_label.setText(u"RECORDING")
-            self.ui.running_label.setPalette(GREEN)
+            self.ui.running_label.setStyleSheet(GREENSS)
 
         if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
             self.run_explore()
@@ -188,7 +191,7 @@ class MainWindow(ControlWindow):
 
         self.run_chart()
         self.ui.running_label.setText(u"RECORDING")
-        self.ui.running_label.setPalette(GREEN)
+        self.ui.running_label.setStyleSheet(GREENSS)
         self.ui.start_chart_btn.setEnabled(False)
         self.ui.aichan_box.setEnabled(False)
         self.ui.aisr_spnbx.setEnabled(False)
@@ -243,7 +246,7 @@ class MainWindow(ControlWindow):
             self.active_operation = None
             self.live_lock.unlock()
             self.ui.running_label.setText(u"OFF")
-            self.ui.running_label.setPalette(RED)
+            self.ui.running_label.setStyleSheet(REDSS)
             self.ui.aichan_box.setEnabled(True)
             self.connect_updatable(False)
         self.ui.start_btn.setEnabled(True)
@@ -251,11 +254,11 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.on_stop)
 
-
         self.ui.aisr_spnbx.setEnabled(True)
         self.ui.aochan_box.setEnabled(True)
         reprate = self.ui.reprate_spnbx.setEnabled(True)
         self.ui.stop_btn.setEnabled(False)
+        self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; } QProgressBar::chunk {background-color: grey; width: 10px; margin-top: 1px; margin-bottom: 1px}")
 
     def on_stop_chart(self):
         self.acqmodel.stop_chart()
@@ -263,7 +266,7 @@ class MainWindow(ControlWindow):
         self.active_operation = None
         self.live_lock.unlock()
         self.ui.running_label.setText(u"OFF")
-        self.ui.running_label.setPalette(RED)
+        self.ui.running_label.setStyleSheet(REDSS)
         self.ui.aichan_box.setEnabled(True)
         self.ui.aisr_spnbx.setEnabled(True)
         self.ui.stop_chart_btn.setEnabled(False)
@@ -354,6 +357,10 @@ class MainWindow(ControlWindow):
                 if answer == QtGui.QMessageBox.No:
                     self.on_stop()
                     return
+
+            self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
+            self.ui.protocol_progress_bar.setMaximum(self.acqmodel.protocol_total_count()-1)
+            self.ui.protocol_progress_bar.reset()
 
             self.acqmodel.run_protocol()
         else:
@@ -499,6 +506,7 @@ class MainWindow(ControlWindow):
 
     def report_rep(self, irep):
         self.ui.stim_details.set_rep_num(irep)
+        self.ui.protocol_progress_bar.setValue(self.ui.protocol_progress_bar.value() + 1)
 
     def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
         self.ui.spike_total_lbl.setText(str(total_spikes))

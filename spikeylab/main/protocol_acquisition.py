@@ -19,6 +19,13 @@ class Experimenter(AbstractAcquisitionModel):
     def update_reference_voltage(self):
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
+    def count(self):
+        """Total number of all tests/traces/reps currently in this protocol"""
+        total = 0
+        for test in self.protocol_model.stimulusList():
+            total += test.traceCount()*test.loopCount()*test.repCount()
+        return total
+
     def setup(self, interval):
         self.trace_counter = 0
 
