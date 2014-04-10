@@ -1,6 +1,10 @@
 import threading
 import Queue
-import win32com.client
+import platform
+if platform.system() == 'Windows':
+    import win32com.client
+elif platform.system() == 'Linux':
+    pass
 
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
 

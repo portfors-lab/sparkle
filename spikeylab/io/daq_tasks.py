@@ -1,7 +1,12 @@
 #from PyDAQmx import Task
 #from PyDAQmx.DAQmxConstants import *
 #from PyDAQmx.DAQmxTypes import *
-from PyDAQmx import *
+try:
+    from PyDAQmx import *
+except:
+    print 'ERROR IMPORTING DEVICE DRIVERS, RUNNING IN DEVELOPMENT MODE'
+    from daqmx_stub import *
+    from ctypes import *
 import numpy as np
 
 class AITask(Task):

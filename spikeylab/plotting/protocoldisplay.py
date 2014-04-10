@@ -1,9 +1,6 @@
 import sys
 import numpy as np
 
-from enthought.etsconfig.etsconfig import ETSConfig
-ETSConfig.toolkit = "qt4"
-
 from spikeylab.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
 
 from PyQt4 import QtGui, QtCore

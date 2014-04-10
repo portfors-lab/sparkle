@@ -75,8 +75,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    test_file = os.path.join(os.path.expanduser('~'),r'Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
-    vocal0.setFile(test_file)
+    # test_file = os.path.join(os.path.expanduser('~'),r'Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    # vocal0.setFile(test_file)
 
     silence0 = Silence()
     silence0.setDuration(0.025)

@@ -52,6 +52,7 @@ class TestStimulusEditor():
 
     def test_save(self):
         self.editor.show()
+        QApplication.processEvents()
         QTimer.singleShot(1000, self.close_dialog)
         QTest.mouseClick(self.editor.ui.save_btn, Qt.LeftButton)
         

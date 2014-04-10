@@ -4,7 +4,7 @@ import time
 import threading, Queue
 
 import h5py
-from nose.tools import assert_in, assert_equal
+from nose.tools import assert_in, assert_equal, nottest
 
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.stim.stimulusmodel import StimulusModel
@@ -359,6 +359,7 @@ class TestAcquisitionModel():
 
         hfile.close()
 
+    @nottest
     def test_chart_no_stim(self):
         winsz = 1.0 # this is actually ignored by manager in this case
         acq_rate = 100000
@@ -384,6 +385,7 @@ class TestAcquisitionModel():
         hfile.close()
         self.done = True
 
+    @nottest
     def test_chart_tone_protocol(self):
         winsz = 0.1 #seconds
         acq_rate = 50000

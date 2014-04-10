@@ -113,11 +113,12 @@ class TestSpikey():
         cal_vector = hfile[calname]['calibration_intensities']
 
         # make sure displayed counts jive with saved file
-        nreps = self.form.ui.calibration_widget.ui.curve_widget.ui.nreps_spnbx.value()
+        nreps = self.form.ui.calibration_widget.ui.nreps_spnbx.value()
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], hfile[calname].attrs['samplerate_ad'])
 
         npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
+        print 'data shape', signals.shape, (nreps, npts)
         assert_equal(signals.shape,(nreps, npts))
         assert cal_vector.shape == ((npts/2+1),)
         hfile.close()

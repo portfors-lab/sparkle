@@ -3,6 +3,7 @@ import h5py
 import time
 import json
 import os
+import socket
 
 from spikeylab.tools.exceptions import DataIndexError
 from spikeylab.tools.util import convert2native
@@ -37,7 +38,8 @@ class AcquisitionData():
             self.groups = {}
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
             self.hdf5.attrs['who'] = user
-            self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
+            # self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
+            self.hdf5.attrs['computername'] = socket.gethostname()
             self.test_count = 0
         else:
             self.groups = dict(self.hdf5.items())
@@ -50,7 +52,7 @@ class AcquisitionData():
             return
         if self.hdf5.mode != 'r':
             for key in self.datasets.keys():
-                print 'checking key', key
+                # print 'checking key', key
                 if 'stim' in self.datasets[key].attrs.keys():
                     if self.datasets[key].attrs['stim'][-1] != ']':
                         self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
