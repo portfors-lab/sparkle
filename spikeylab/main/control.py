@@ -160,6 +160,7 @@ class MainWindow(ControlWindow):
         reprate = self.ui.reprate_spnbx.setEnabled(False)
         self.ui.stop_btn.setEnabled(True)
         self.plot_progress = False
+        self.ui.protocol_progress_bar.setValue(0)
 
         if self.current_mode == 'windowed':
             if self.acqmodel.datafile is None:
@@ -282,6 +283,7 @@ class MainWindow(ControlWindow):
                 self.calvals['calname'] = calname
                 self.calvals['use_calfile'] = True
                 attenuations, freqs = self.acqmodel.current_calibration()
+                self.ui.current_cal_lbl.setText(calname)
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
                 self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
@@ -358,9 +360,9 @@ class MainWindow(ControlWindow):
                     self.on_stop()
                     return
 
+            # reset style sheet of progress bar
             self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
-            self.ui.protocol_progress_bar.setMaximum(self.acqmodel.protocol_total_count()-1)
-            self.ui.protocol_progress_bar.reset()
+            self.ui.protocol_progress_bar.setMaximum(self.acqmodel.protocol_total_count())
 
             self.acqmodel.run_protocol()
         else:
@@ -396,6 +398,11 @@ class MainWindow(ControlWindow):
         interval = (1/reprate)*1000
 
         self.on_update()
+
+         # reset style sheet of progress bar
+        self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
+        self.ui.protocol_progress_bar.setMaximum(self.acqmodel.calibration_total_count())
+
         self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
 
     def display_response(self, times, response):

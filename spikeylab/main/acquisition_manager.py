@@ -146,6 +146,12 @@ class AcquisitionManager():
     def set_calibration_by_index(self, idx):
         self.selected_calibration_index = idx
 
+    def calibration_total_count(self):
+        if self.selected_calibration_index == 2:
+            return self.tone_calibrator.count()
+        else:
+            return self.bs_calibrator.count()
+
     def run_calibration(self, interval, applycal):
         if self.selected_calibration_index == 2:
             self.tone_calibrator.apply_calibration(applycal)

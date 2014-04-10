@@ -53,7 +53,8 @@ class ControlWindow(QtGui.QMainWindow):
             # self.ui.psth.restoreGeometry(settings.value("psth_dock/geometry"))
 
             self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
-
+            self.ui.protocol_progress_bar.setMinimum(0)
+            
         except Exception as e:
             print e
 

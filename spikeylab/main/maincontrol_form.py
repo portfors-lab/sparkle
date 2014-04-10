@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Thu Apr 10 11:39:07 2014
+# Created: Thu Apr 10 13:08:35 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(1025, 619)
+        ControlWindow.resize(1332, 803)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -57,6 +57,8 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        self.verticalLayout_12 = QtGui.QVBoxLayout()
+        self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
         self.tab_group = QtGui.QTabWidget(self.centralwidget)
         self.tab_group.setObjectName(_fromUtf8("tab_group"))
         self.tab_explore = QtGui.QWidget()
@@ -156,11 +158,6 @@ class Ui_ControlWindow(object):
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.horizontalLayout_9.addWidget(self.pushButton)
         self.verticalLayout_5.addLayout(self.horizontalLayout_9)
-        self.protocol_progress_bar = QtGui.QProgressBar(self.tab_protocol)
-        self.protocol_progress_bar.setEnabled(True)
-        self.protocol_progress_bar.setProperty("value", 0)
-        self.protocol_progress_bar.setObjectName(_fromUtf8("protocol_progress_bar"))
-        self.verticalLayout_5.addWidget(self.protocol_progress_bar)
         self.tab_group.addTab(self.tab_protocol, _fromUtf8(""))
         self.tab_calibrate = QtGui.QWidget()
         self.tab_calibrate.setObjectName(_fromUtf8("tab_calibrate"))
@@ -188,7 +185,13 @@ class Ui_ControlWindow(object):
         self.gridLayout_3.addWidget(self.label_19, 2, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.tab_group.addTab(self.tab_calibrate, _fromUtf8(""))
-        self.horizontalLayout_5.addWidget(self.tab_group)
+        self.verticalLayout_12.addWidget(self.tab_group)
+        self.protocol_progress_bar = QtGui.QProgressBar(self.centralwidget)
+        self.protocol_progress_bar.setEnabled(True)
+        self.protocol_progress_bar.setProperty("value", 0)
+        self.protocol_progress_bar.setObjectName(_fromUtf8("protocol_progress_bar"))
+        self.verticalLayout_12.addWidget(self.protocol_progress_bar)
+        self.horizontalLayout_5.addLayout(self.verticalLayout_12)
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.gridLayout_4 = QtGui.QGridLayout()
@@ -299,6 +302,20 @@ class Ui_ControlWindow(object):
         self.mode_cmbx.addItem(_fromUtf8(""))
         self.horizontalLayout_6.addWidget(self.mode_cmbx)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
+        self.frame = QtGui.QFrame(self.centralwidget)
+        self.frame.setFrameShape(QtGui.QFrame.HLine)
+        self.frame.setFrameShadow(QtGui.QFrame.Raised)
+        self.frame.setObjectName(_fromUtf8("frame"))
+        self.verticalLayout_2.addWidget(self.frame)
+        self.gridLayout_2 = QtGui.QGridLayout()
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.label_8 = QtGui.QLabel(self.centralwidget)
+        self.label_8.setObjectName(_fromUtf8("label_8"))
+        self.gridLayout_2.addWidget(self.label_8, 0, 0, 1, 1)
+        self.current_cal_lbl = QtGui.QLabel(self.centralwidget)
+        self.current_cal_lbl.setObjectName(_fromUtf8("current_cal_lbl"))
+        self.gridLayout_2.addWidget(self.current_cal_lbl, 0, 1, 1, 1)
+        self.verticalLayout_2.addLayout(self.gridLayout_2)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem2)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
@@ -323,7 +340,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1025, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1332, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -547,6 +564,8 @@ class Ui_ControlWindow(object):
         self.label_17.setText(_translate("ControlWindow", "Mode", None))
         self.mode_cmbx.setItemText(0, _translate("ControlWindow", "Windowed", None))
         self.mode_cmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
+        self.label_8.setText(_translate("ControlWindow", "Calibration:", None))
+        self.current_cal_lbl.setText(_translate("ControlWindow", "None", None))
         self.start_chart_btn.setText(_translate("ControlWindow", "Start Chart", None))
         self.stop_chart_btn.setText(_translate("ControlWindow", "Stop Chart", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
