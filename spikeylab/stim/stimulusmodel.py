@@ -460,7 +460,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # plt.plot(f, abs(X).imag)
             # plt.title('X')
 
-            H = smooth(H, winsz)
+            # H = smooth(H, winsz)
 
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)

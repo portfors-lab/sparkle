@@ -124,7 +124,7 @@ class CalibrationExperimenterBS(Experimenter):
         diffdB = XmagdB - YmagdB
 
         # may want to smooth results here?
-        # diffdB = smooth(diffdB)
+        diffdB = smooth(diffdB, 99)
 
         # frequencies present in calibration spectrum
         npts = len(y)

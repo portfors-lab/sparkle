@@ -269,11 +269,11 @@ class SimplePlotWidget(BasePlot):
         self.pdi = self.plot(xpoints, ypoints, pen='k')
         self.resize(800,500)
 
-    def set_labels(self, xlabel=None, ylabel=None, title=None):
+    def set_labels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         if xlabel is not None:
-            self.setLabel('bottom', xlabel)
+            self.setLabel('bottom', xlabel, units=xunits)
         if ylabel is not None:
-            self.setLabel('left', ylabel)
+            self.setLabel('left', ylabel, units=yunits)
         if title is not None:
             self.set_title(title)
 

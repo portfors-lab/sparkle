@@ -286,7 +286,7 @@ class MainWindow(ControlWindow):
                 self.ui.current_cal_lbl.setText(calname)
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
-                self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
+                self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
                 self.pw.show()
         elif self.active_operation == 'protocol' and self.current_mode == 'windowed':
             if self.acqmodel.current_cellid == 0:
@@ -399,7 +399,7 @@ class MainWindow(ControlWindow):
 
         self.on_update()
 
-         # reset style sheet of progress bar
+        # reset style sheet of progress bar
         self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
         self.ui.protocol_progress_bar.setMaximum(self.acqmodel.calibration_total_count())
 
