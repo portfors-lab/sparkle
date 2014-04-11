@@ -148,7 +148,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
 
     return spec, freqs, bins, duration
 
-def smooth(x, window_len=99, window='hamming'):
+def smooth(x, window_len=99, window='hanning'):
     """smooth the data using a window with requested size.
     
     This method is based on the convolution of a scaled window with the signal.

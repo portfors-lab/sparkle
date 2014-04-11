@@ -433,7 +433,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             f1 = (np.abs(f-frange[1])).argmin()
             # we don't want to attenutated any frequencies in range,
             # so add indexes according to how much we will smooth edges out
-            winsz = 1000
+            winsz = 100
             # f0 -= winsz/2
             # f1 += winsz/2
 
@@ -443,8 +443,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             H = np.zeros((npts/2+1,))
             H[f0:f1] = Hroi
 
-            wnd = (hann(winsz) * (H[f1-1]))
-            H[f1:(f1+winsz/2)] = wnd[winsz/2:]
             # print 'value at f1', H[f1-1]
             # wnd = np.linspace(H[f1-1], 0, winsz/2)
             # H[f1:(f1+winsz/2)] = wnd
@@ -457,12 +455,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # plt.title('H')
             # plt.figure()
             # plt.subplot(121)
-            # plt.plot(f, X.real)
+            # plt.plot(f, abs(X).real)
             # plt.subplot(122)
-            # plt.plot(f, X.imag)
+            # plt.plot(f, abs(X).imag)
             # plt.title('X')
 
             H = smooth(H, winsz)
+
+            # convert to voltage scalars
+            H = 10**((H).astype(float)/20)
+            # winsz = 1000
+            # wnd = (hann(winsz) * (H[f1-1] -1)) + 1
+            # H[f1-1:(f1+winsz/2)-1] = wnd[winsz/2:]
 
             # plt.figure()
             # plt.subplot(121)
@@ -471,17 +475,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # plt.plot(f, H.imag)
             # plt.title('H after smooth')
             
-            # convert to voltage scalars
-            H = 10**((H).astype(float)/20)
             Xadjusted = X*H
             
             # plt.figure()
             # plt.subplot(121)
-            # plt.plot(f, Xadjusted.real)
+            # plt.plot(f, abs(Xadjusted).real)
             # plt.subplot(122)
-            # plt.plot(f, Xadjusted.imag)
+            # plt.plot(f, abs(Xadjusted).imag)
             # plt.title('Xadjusted')
-            # plt.show()
+            # # plt.show()
             # plt.figure()
             # plt.subplot(121)
             # plt.plot(f, X.real - Xadjusted.real)
