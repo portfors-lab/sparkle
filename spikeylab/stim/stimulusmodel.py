@@ -426,8 +426,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
             frange = self.calibration_frange
             fs = self.samplerate()
             
-            X = np.fft.rfft(signal)
-            f = np.arange(npts/2+1)/(float(npts)/fs)
+            pad_factor = 1.1
+            # X = np.fft.rfft(signal)
+            # f = np.arange(len(X))/(float(npts)/fs)
+            X = np.fft.rfft(signal, n=int(len(signal)*pad_factor))
+            f = np.arange(len(X))/(float(npts)/fs*pad_factor)
             # closest frequencies within range
             f0 = (np.abs(f-frange[0])).argmin()
             f1 = (np.abs(f-frange[1])).argmin()
@@ -440,7 +443,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
             interp_freqs = f[f0:f1]
             Hroi = cal_func(interp_freqs)
-            H = np.zeros((npts/2+1,))
+            H = np.zeros((len(X),))
             H[f0:f1] = Hroi
 
             # print 'value at f1', H[f1-1]
@@ -494,7 +497,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
             adjusted_signal = np.fft.irfft(Xadjusted)
 
-            return adjusted_signal
+            return adjusted_signal[:len(signal)]
         else:
             return signal
 
