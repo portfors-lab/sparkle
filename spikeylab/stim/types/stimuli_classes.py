@@ -287,6 +287,7 @@ class WhiteNoise(AbstractStimulusComponent):
             amp_scale = np.amax(signal)
 
         signal = ((signal/amp_scale)*amp)
+        print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
         return signal
 
     def paint(self, painter, rect, palette):
@@ -304,6 +305,7 @@ class WhiteNoise(AbstractStimulusComponent):
 class Silence(AbstractStimulusComponent):
     name = "silence"
     protocol = True
+    _risefall = 0
     def paint(self, painter, rect, palette):
         mid = rect.y() + (rect.height()/2)
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)

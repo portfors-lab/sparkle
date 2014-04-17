@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Thu Apr 10 13:08:35 2014
+# Created: Wed Apr 16 11:06:07 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -177,12 +177,15 @@ class Ui_ControlWindow(object):
         self.dblevel_lbl2 = QtGui.QLabel(self.tab_calibrate)
         self.dblevel_lbl2.setObjectName(_fromUtf8("dblevel_lbl2"))
         self.gridLayout_3.addWidget(self.dblevel_lbl2, 1, 1, 1, 1)
-        self.dblevel_lbl3 = QtGui.QLabel(self.tab_calibrate)
-        self.dblevel_lbl3.setObjectName(_fromUtf8("dblevel_lbl3"))
-        self.gridLayout_3.addWidget(self.dblevel_lbl3, 2, 1, 1, 1)
+        self.over_atten_lbl_2 = QtGui.QLabel(self.tab_calibrate)
+        self.over_atten_lbl_2.setObjectName(_fromUtf8("over_atten_lbl_2"))
+        self.gridLayout_3.addWidget(self.over_atten_lbl_2, 2, 1, 1, 1)
         self.label_19 = QtGui.QLabel(self.tab_calibrate)
         self.label_19.setObjectName(_fromUtf8("label_19"))
         self.gridLayout_3.addWidget(self.label_19, 2, 0, 1, 1)
+        self.label_9 = QtGui.QLabel(self.tab_calibrate)
+        self.label_9.setObjectName(_fromUtf8("label_9"))
+        self.gridLayout_3.addWidget(self.label_9, 1, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.tab_group.addTab(self.tab_calibrate, _fromUtf8(""))
         self.verticalLayout_12.addWidget(self.tab_group)
@@ -504,7 +507,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tab_group.setCurrentIndex(1)
+        self.tab_group.setCurrentIndex(2)
         self.parameter_stack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_save_dlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launch_calibration_dlg)
@@ -544,10 +547,11 @@ class Ui_ControlWindow(object):
         self.pushButton.setText(_translate("ControlWindow", "clear protocol", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_protocol), _translate("ControlWindow", "Experiment", None))
         self.dblevel_lbl.setText(_translate("ControlWindow", "0", None))
-        self.label_18.setText(_translate("ControlWindow", "dB SPL level:", None))
+        self.label_18.setText(_translate("ControlWindow", "absolute dB SPL level:", None))
         self.dblevel_lbl2.setText(_translate("ControlWindow", "0", None))
-        self.dblevel_lbl3.setText(_translate("ControlWindow", "0", None))
-        self.label_19.setText(_translate("ControlWindow", "FFT peak", None))
+        self.over_atten_lbl_2.setText(_translate("ControlWindow", "0", None))
+        self.label_19.setText(_translate("ControlWindow", "undesired attenuation", None))
+        self.label_9.setText(_translate("ControlWindow", "peak dB SPL level", None))
         self.tab_group.setTabText(self.tab_group.indexOf(self.tab_calibrate), _translate("ControlWindow", "Calibration", None))
         self.label_30.setText(_translate("ControlWindow", "AI channel", None))
         self.label_29.setText(_translate("ControlWindow", "Stim channel", None))

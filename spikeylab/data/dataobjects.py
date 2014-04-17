@@ -226,7 +226,7 @@ class AcquisitionData():
         frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
 
         offset = cal_vector[frequencies == reffreq]
-        print 'offset', offset, reffreq
+        # print 'offset', offset, reffreq
         cal_vector -= offset
 
         return (cal_vector, frequencies)

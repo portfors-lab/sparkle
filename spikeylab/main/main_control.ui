@@ -63,7 +63,7 @@
         <item>
          <widget class="QTabWidget" name="tab_group">
           <property name="currentIndex">
-           <number>1</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_explore">
            <attribute name="title">
@@ -286,7 +286,7 @@
               <item row="0" column="0">
                <widget class="QLabel" name="label_18">
                 <property name="text">
-                 <string>dB SPL level:</string>
+                 <string>absolute dB SPL level:</string>
                 </property>
                </widget>
               </item>
@@ -298,7 +298,7 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QLabel" name="dblevel_lbl3">
+               <widget class="QLabel" name="over_atten_lbl_2">
                 <property name="text">
                  <string>0</string>
                 </property>
@@ -307,7 +307,14 @@
               <item row="2" column="0">
                <widget class="QLabel" name="label_19">
                 <property name="text">
-                 <string>FFT peak</string>
+                 <string>undesired attenuation</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>peak dB SPL level</string>
                 </property>
                </widget>
               </item>

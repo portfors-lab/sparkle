@@ -84,6 +84,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
         self.acqmodel.signals.tuning_curve_started.connect(self.spawn_tuning_curve)
         self.acqmodel.signals.tuning_curve_response.connect(self.display_tuning_curve)
+        self.acqmodel.signals.over_voltage.connect(self.report_overv)
 
         self.ui.thresh_spnbx.valueChanged.connect(self.set_plot_thresh)        
         self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
@@ -226,13 +227,9 @@ class MainWindow(ControlWindow):
             
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
-            ovld = self.acqmodel.set_stim_by_index(stim_index)
+            self.acqmodel.set_stim_by_index(stim_index)
             # print 'stim signal', len(signal)
-            self.ui.over_atten_lbl.setNum(ovld)
-            if ovld > 0:
-                self.ui.over_atten_lbl.setPalette(RED)
-            else:
-                self.ui.over_atten_lbl.setPalette(BLACK)
+            
 
             gen_rate = self.acqmodel.explore_genrate()
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
@@ -380,6 +377,7 @@ class MainWindow(ControlWindow):
         if self.ui.calibration_widget.ui.applycal_ckbx.isChecked():
             stim_index = self.ui.calibration_widget.current_index()
             self.acqmodel.set_calibration_by_index(stim_index)
+            self.ui.calibration_widget.save_to_object()        
         else:
             # Always use noise on saving calibration.
             # BEWARE: Hardcoded to index 1... this could change?!
@@ -414,20 +412,17 @@ class MainWindow(ControlWindow):
         elif self.ui.plot_dock.current() == 'calexp':
                 
             rms = np.sqrt(np.mean(pow(response,2)))
-            # vmax = np.amax(response) - np.mean(response) 
-            vmax = rms*1.414
-            # print 'abs max', vmax, 'rms', rms, 'cheat', vmax*0.707
             masterdb = 94 + (20.*np.log10(rms/(0.004)))
-            masterdb2 = 94 + (20.*np.log10(vmax/(0.004)))
-            self.ui.dblevel_lbl.setNum(masterdb)
-            self.ui.dblevel_lbl2.setNum(masterdb2)
             sr = self.ui.aisr_spnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
+            mx = np.amax(signal_fft[5:])
+            peakspl = 94 + (20.*np.log10((abs(mx)/np.sqrt(2))/0.004))
+            self.ui.dblevel_lbl.setNum(masterdb)
+            self.ui.dblevel_lbl2.setNum(peakspl)
             if False:
                 spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/peak))
             else:
                 spectrum = signal_fft
-            self.ui.dblevel_lbl3.setNum(np.amax(spectrum))
             spectrum[0] = 0
             self.extended_display.update_signal(times, response, plot='response')
             self.extended_display.update_fft(freq, spectrum, plot='response')
@@ -515,6 +510,18 @@ class MainWindow(ControlWindow):
         self.ui.stim_details.set_rep_num(irep)
         self.ui.protocol_progress_bar.setValue(self.ui.protocol_progress_bar.value() + 1)
 
+    def report_overv(self, overdb):
+        if overdb > 0:
+            pal = RED
+        else:
+            pal = BLACK
+        if self.active_operation == 'calibration':
+            self.ui.over_atten_lbl_2.setNum(overdb)
+            self.ui.over_atten_lbl_2.setPalette(pal)
+        elif self.active_operation == 'explore':
+            self.ui.over_atten_lbl.setNum(overdb)
+            self.ui.over_atten_lbl.setPalette(pal)
+
     def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
         self.ui.spike_total_lbl.setText(str(total_spikes))
         self.ui.spike_avg_lbl.setText(str(avg_count))
@@ -537,9 +544,12 @@ class MainWindow(ControlWindow):
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
                 self.acqmodel.set_calibration(values['calname'], values['calf'], values['frange'])
+                self.ui.current_cal_lbl.setText(values['calname'])
             else:
+                self.ui.current_cal_lbl.setText('None')
                 self.acqmodel.set_calibration(None)
             self.calvals = values
+            
 
     def launch_scale_dlg(self):
         field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}

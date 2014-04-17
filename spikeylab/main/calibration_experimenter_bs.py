@@ -65,10 +65,6 @@ class CalibrationExperimenterBS(Experimenter):
 
     def _initialize_run(self):
        
-        self.stimulus.data(self.stimulus.index(0,0)).setIntensity(self.caldb)
-
-        print 'using stimulus', self.stimulus.data(self.stimulus.index(0,0)).name
-
         self.current_dataset_name = self.group_name
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
@@ -87,10 +83,12 @@ class CalibrationExperimenterBS(Experimenter):
         if self.apply_cal:
             self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
         else:
+            self.stimulus.data(self.stimulus.index(0,0)).setIntensity(self.caldb)
             self.calname = None
             self.protocol_model.setCalibration(None, None, None)
 
     def _initialize_test(self, test):
+        print 'intensity laterrrrrrr', test._segments[0][0].intensity()
         return
 
     def _process_response(self, response, trace_info, irep):

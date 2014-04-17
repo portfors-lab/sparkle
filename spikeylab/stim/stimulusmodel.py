@@ -37,7 +37,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.caldb = None
         self.calibration_attenuations = None
         self.calibration_frequencies = None
-        self.maxv = 3.0
+        self.maxv = 5.0
 
         self.stimid = uuid.uuid1()
 
@@ -312,6 +312,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         Apply the autoparameters to this stimulus and return a list of
         the resulting stimuli, and a complimentary list of doc dictionaries
         """
+        print "Getting expanded stim................................"
         # 3 loops now -- could be done in one...
         signals = self.expandFunction(self.signal)
         docs = self.expandFunction(self.doc)
@@ -401,11 +402,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
         #     maxv = self.calv
         maxv = self.maxv
 
-        if max(abs(total_signal)) > maxv:
-            peak = max(abs(total_signal))
+        sig_max = max(abs(total_signal))
+        if sig_max > maxv:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             # scale stim down to outputable max
-            total_signal = (total_signal/peak)*maxv
+            total_signal = (total_signal/sig_max)*maxv
             after_rms = np.sqrt(np.mean(pow(total_signal,2)))
             attenuated = 20 * np.log10(before_rms/after_rms)
             if attenuated <= atten:
@@ -415,7 +416,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 atten = 0
                 # log this, at least to console!
                 print("WARNING: STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
-                    UNDESIRED ATTENUATION {:.2f}dB".format(peak, self.calv, undesired_attenuation))
+                    UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, self.maxv, undesired_attenuation))
 
         return total_signal, atten, undesired_attenuation
 
@@ -450,50 +451,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # wnd = np.linspace(H[f1-1], 0, winsz/2)
             # H[f1:(f1+winsz/2)] = wnd
 
-            # plt.figure()
-            # plt.subplot(121)
-            # plt.plot(f, H.real)
-            # plt.subplot(122)
-            # plt.plot(f, H.imag)
-            # plt.title('H')
-            # plt.figure()
-            # plt.subplot(121)
-            # plt.plot(f, abs(X).real)
-            # plt.subplot(122)
-            # plt.plot(f, abs(X).imag)
-            # plt.title('X')
-
-            # H = smooth(H, winsz)
+            # H = smooth(H, 11)
 
             # convert to voltage scalars
             H = 10**((H).astype(float)/20)
             # winsz = 1000
             # wnd = (hann(winsz) * (H[f1-1] -1)) + 1
             # H[f1-1:(f1+winsz/2)-1] = wnd[winsz/2:]
-
-            # plt.figure()
-            # plt.subplot(121)
-            # plt.plot(f, H.real)
-            # plt.subplot(122)
-            # plt.plot(f, H.imag)
-            # plt.title('H after smooth')
             
             Xadjusted = X*H
-            
-            # plt.figure()
-            # plt.subplot(121)
-            # plt.plot(f, abs(Xadjusted).real)
-            # plt.subplot(122)
-            # plt.plot(f, abs(Xadjusted).imag)
-            # plt.title('Xadjusted')
-            # # plt.show()
-            # plt.figure()
-            # plt.subplot(121)
-            # plt.plot(f, X.real - Xadjusted.real)
-            # plt.subplot(122)
-            # plt.plot(f, X.imag - Xadjusted.imag)
-            # plt.title('Xadjusted diff')
-            # plt.show()
 
             adjusted_signal = np.fft.irfft(Xadjusted)
 

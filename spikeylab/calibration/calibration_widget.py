@@ -35,6 +35,13 @@ class CalibrationWidget(QtGui.QWidget):
         self.ui.caleditor_stack.insertWidget(0, editor)
         self.ui.cal_type_cmbbx.setCurrentIndex(0)
 
+    def save_to_object(self):
+        for i in range(self.ui.caleditor_stack.count()):
+            try:
+                self.ui.caleditor_stack.widget(i).saveToObject()
+            except:
+                print 'index {} does not have method saveToObject'.format(i)
+
     def current_index(self):
         return self.ui.cal_type_cmbbx.currentIndex()
 

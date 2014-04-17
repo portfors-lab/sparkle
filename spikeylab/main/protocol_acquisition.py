@@ -3,6 +3,7 @@ import threading
 
 from spikeylab.main.abstract_acquisition import AbstractAcquisitionModel
 from spikeylab.main.protocol_model import ProtocolTabelModel
+import cProfile
 
 class Broken(Exception): pass
 
@@ -50,7 +51,8 @@ class Experimenter(AbstractAcquisitionModel):
 
         # go through and get any overloads, this is not efficient since
         # I am going to be calculating the signals again later, so stash?
-        undesired_attenuations = [stim.expandedStim()[2] for stim in stimuli]
+        # undesired_attenuations = [stim.expandedStim()[2] for stim in stimuli]
+        undesired_attenuations = [[0]]
         return undesired_attenuations
 
     def run(self):
@@ -67,12 +69,18 @@ class Experimenter(AbstractAcquisitionModel):
             for itest, test in enumerate(stimuli):
                 # pull out signal from stim model
                 test.setReferenceVoltage(self.caldb, self.calv)
-                self._initialize_test(test)
 
-                traces, doc, ov = test.expandedStim()
+                self._initialize_test(test)
+                profiler = cProfile.Profile()
+                print 'profiling....'
+                profiler.enable()
+                traces, docs, overs = test.expandedStim()
+                profiler.disable()
+                print 'finished profiling'
+                profiler.dump_stats('stim_gen_cal.profile')
                 nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
-                for itrace, (trace, trace_doc) in enumerate(zip(traces, doc)):
+                for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                     signal, atten = trace
                     self.player.set_stim(signal, test.samplerate(), atten)
 
@@ -87,6 +95,7 @@ class Experimenter(AbstractAcquisitionModel):
                             # do this after collection so plots match details
                             self.signals.stim_generated.emit(signal, test.samplerate())
                             self.signals.current_trace.emit(itest,itrace,trace_doc)
+                            self.signals.over_voltage.emit(over)
                             self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         
                         self.signals.current_rep.emit(irep)

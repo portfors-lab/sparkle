@@ -73,6 +73,7 @@ class ProtocolSignals(QtCore.QObject):
     calibration_file_changed = QtCore.pyqtSignal(str)
     tuning_curve_started = QtCore.pyqtSignal(list, list, str)
     tuning_curve_response = QtCore.pyqtSignal(int, int, float)
+    over_voltage = QtCore.pyqtSignal(float)
 
 class TestSignals(QtCore.QObject):
     update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)

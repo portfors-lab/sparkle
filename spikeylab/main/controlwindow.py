@@ -78,6 +78,10 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input",
                             "Window size must equal or exceed stimulus length")
                     return False
+                if selected_stim.intensity() > self.calvals['caldb']:
+                    QtGui.QMessageBox.warning(self, "Invalid Input",
+                            "Intensity must be below calibrated maximum {}dB SPL".format(self.calvals['caldb']))
+                    return False
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
                 protocol_model = self.acqmodel.protocol_model()
                 failure = protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)
@@ -87,6 +91,7 @@ class ControlWindow(QtGui.QMainWindow):
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
                 if self.ui.calibration_widget.ui.savecal_ckbx.isChecked() or not self.ui.calibration_widget.current_selection() == 'Tone Curve':
                     calibration_stimulus = self.acqmodel.calibration_stimulus('noise')
+                    self.ui.calibration_widget.save_to_object()
                 else:
                     calibration_stimulus = self.acqmodel.calibration_stimulus('tone')
 
@@ -128,7 +133,7 @@ class ControlWindow(QtGui.QMainWindow):
                     field.setMinimum(0.001)
                     if not setup:
                         field.setValue(field.value()*0.001)
-                    field.setMaximum(3)
+                    field.setMaximum(20)
                 for lbl in self.time_labels:
                     lbl.setText(u's')
             else:
