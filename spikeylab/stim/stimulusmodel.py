@@ -1,7 +1,7 @@
 import numpy as np
 import uuid
 from scipy.interpolate import interp1d
-from scipy.signal import hann
+from scipy.signal import hann, fftconvolve
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import calc_spectrum, smooth
@@ -35,8 +35,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # reference for what voltage == what intensity
         self.calv = None
         self.caldb = None
-        self.calibration_attenuations = None
-        self.calibration_frequencies = None
+        self.impulse_response = None
         self.maxv = 5.0
 
         self.stimid = uuid.uuid1()
@@ -60,9 +59,35 @@ class StimulusModel(QtCore.QAbstractItemModel):
             if frange is None:
                 frange = (frequencies[0], frequencies[-1])
 
-        self.calibration_attenuations = db_boost_array
-        self.calibration_frequencies = frequencies
-        self.calibration_frange = frange
+            print 'calculating impulse response!!! :)'
+            # calculate filter kernel from attenuation vector
+            # treat attenuation vector as magnitude frequency response of system
+            npts = len(db_boost_array)
+            fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
+            # could decimate without interpolating, but leaving in for flexibility
+            calc_func = interp1d(frequencies, db_boost_array)
+            factor0 = 4
+            # reduce the number of points in the frequency response by factor0 
+            print 'calibration fs', fs, frequencies[1] - frequencies[0], npts
+            decimated_freq = np.arange((npts)/(factor0))/(float(npts-1-factor0)/factor0)*fs/2
+            print 'freq avail before', frequencies[0], frequencies[-1]
+            print 'new freq range avail', decimated_freq[0], decimated_freq[-1]
+            decimated_attenuations = calc_func(decimated_freq)
+            f0 = (np.abs(decimated_freq-frange[0])).argmin()
+            f1 = (np.abs(decimated_freq-frange[1])).argmin()
+            print 'decimated freq', decimated_freq[f0], decimated_freq[f0-1]
+            print 'frequency indexes', frange, f0, f1
+            decimated_attenuations[:f0] = 0
+            decimated_attenuations[f1:] = 0
+            decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.1)
+            freq_response = 10**((decimated_attenuations).astype(float)/20)
+
+            impulse_response = np.fft.irfft(freq_response)
+            impulse_response = np.roll(impulse_response, len(impulse_response)/2)
+            factor1 = 2
+            self.impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
+        else:
+            self.impulse_response = None
 
     def setSamplerate(self, fs):
         print 'attempting to set samplerate on fixed rate stimulus'
@@ -421,49 +446,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
         return total_signal, atten, undesired_attenuation
 
     def apply_calibration(self, signal, fs):
-        if self.calibration_attenuations is not None and self.calibration_frequencies is not None :
+        if self.impulse_response is not None:
+            print 'appling conv calibration'
             # print 'interpolated calibration'#, self.calibration_frequencies
-            npts = len(signal)
-            frange = self.calibration_frange
-            fs = self.samplerate()
-            
-            pad_factor = 1.1
-            # X = np.fft.rfft(signal)
-            # f = np.arange(len(X))/(float(npts)/fs)
-            X = np.fft.rfft(signal, n=int(len(signal)*pad_factor))
-            f = np.arange(len(X))/(float(npts)/fs*pad_factor)
-            # closest frequencies within range
-            f0 = (np.abs(f-frange[0])).argmin()
-            f1 = (np.abs(f-frange[1])).argmin()
-            # we don't want to attenutated any frequencies in range,
-            # so add indexes according to how much we will smooth edges out
-            winsz = 100
-            # f0 -= winsz/2
-            # f1 += winsz/2
-
-            cal_func = interp1d(self.calibration_frequencies, self.calibration_attenuations)
-            interp_freqs = f[f0:f1]
-            Hroi = cal_func(interp_freqs)
-            H = np.zeros((len(X),))
-            H[f0:f1] = Hroi
-
-            # print 'value at f1', H[f1-1]
-            # wnd = np.linspace(H[f1-1], 0, winsz/2)
-            # H[f1:(f1+winsz/2)] = wnd
-
-            # H = smooth(H, 11)
-
-            # convert to voltage scalars
-            H = 10**((H).astype(float)/20)
-            # winsz = 1000
-            # wnd = (hann(winsz) * (H[f1-1] -1)) + 1
-            # H[f1-1:(f1+winsz/2)-1] = wnd[winsz/2:]
-            
-            Xadjusted = X*H
-
-            adjusted_signal = np.fft.irfft(Xadjusted)
-
-            return adjusted_signal[:len(signal)]
+            adjusted_signal = fftconvolve(signal, self.impulse_response)
+            adjusted_signal = adjusted_signal[len(self.impulse_response)/2:len(adjusted_signal)-len(self.impulse_response)/2]
+            return adjusted_signal
         else:
             return signal
 
@@ -558,3 +546,10 @@ def get_component(comp_name, class_list):
             return comp_class()
     else:
         return None
+
+def tukey(winlen, alpha):
+    taper = hann(winlen*alpha)
+    rect = np.ones(winlen-len(taper) + 1)
+    win = fftconvolve(taper, rect)
+    print 'window lensss', winlen, len(win)
+    return win
