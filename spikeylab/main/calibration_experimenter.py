@@ -11,7 +11,7 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
 from spikeylab.data.dataobjects import AcquisitionData
 
-USE_FFT = False
+USE_FFT = True
 
 class CalibrationExperimenter(Experimenter):
     def __init__(self, signals):
@@ -117,7 +117,7 @@ class CalibrationExperimenter(Experimenter):
         peak_fft = spec_peak_at_f[0]
 
         # vmax = np.amax(abs(response))
-        vmax = np.sqrt(np.mean(pow(response,2)))*1.414 #rms
+        vmax = np.sqrt(np.mean(pow(response,2))) #/ np.sqrt(2) #rms
 
         if self.trace_counter >= 0:
             if irep == 0:
@@ -133,7 +133,7 @@ class CalibrationExperimenter(Experimenter):
                                  nested_name='vmax')
             self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
-            self.signals.response_collected.emit(self.aitimes, response)
+            self.signals.calibration_response_collected.emit(spectrum, freq, vmax)
         
         # calculate resultant dB and emit
         if USE_FFT:
@@ -147,7 +147,8 @@ class CalibrationExperimenter(Experimenter):
                 self.calpeak = mean_peak
                 self.trace_counter +=1
             else:
-                resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
+                # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
+                resultdb = 94 + (20.*np.log10((mean_peak/np.sqrt(2))/0.004))
                 self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):

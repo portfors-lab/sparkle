@@ -410,41 +410,29 @@ class MainWindow(ControlWindow):
         if self.ui.plot_dock.current() == 'standard':
             self.display.update_spiketrace(times, response)
         elif self.ui.plot_dock.current() == 'calexp':
-                
-            rms = np.sqrt(np.mean(pow(response,2)))
+            # convert voltage amplitudes into dB SPL    
+            rms = np.sqrt(np.mean(pow(response,2))) / np.sqrt(2)
             masterdb = 94 + (20.*np.log10(rms/(0.004)))
             sr = self.ui.aisr_spnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
-            mx = np.amax(signal_fft[5:])
-            peakspl = 94 + (20.*np.log10((abs(mx)/np.sqrt(2))/0.004))
+            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/0.004))
+            spectrum[0] = 0
+            peakspl = np.amax(spectrum)
             self.ui.dblevel_lbl.setNum(masterdb)
             self.ui.dblevel_lbl2.setNum(peakspl)
-            if False:
-                spectrum = self.calvals['caldb'] + (20.*np.log10(signal_fft/peak))
-            else:
-                spectrum = signal_fft
-            spectrum[0] = 0
             self.extended_display.update_signal(times, response, plot='response')
             self.extended_display.update_fft(freq, spectrum, plot='response')
             self.extended_display.update_spec(response, sr, plot='response')
 
-    def display_calibration_response(self, fdb, spectrum, freqs, spec_peak, vmax):
-        # display fft here
-        f, db = fdb
-        # print 'response f', f, 'db', db
-        spectrum[0] = 0
-        spec_max, max_freq = get_fft_peak(spectrum, freqs)
-        if spec_max != spec_peak:
-            print 'max freq', max_freq, 'current', f
-            self.ui.calibration_widget.ui.fftf_lbl.setPalette(RED)
-        else:
-            self.ui.calibration_widget.ui.fftf_lbl.setPalette(BLACK)
+    def display_calibration_response(self, spectrum, freqs, rms):
 
-        self.ui.calibration_widget.ui.aiv_lbl.setNum(vmax)
-        self.ui.calibration_widget.ui.fftpeak_lbl.setNum(spec_max)
-        self.ui.calibration_widget.ui.fftf_lbl.setNum(spec_peak)
-        self.ui.calibration_widget.ui.flabel.setNum(f)
-        self.ui.calibration_widget.ui.dblabel.setNum(db)
+        masterdb = 94 + (20.*np.log10(rms/(0.004)))
+        spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
+        spectrum[0] = 0
+        peakspl = np.amax(spectrum)
+        self.ui.dblevel_lbl.setNum(masterdb)
+        self.ui.dblevel_lbl2.setNum(peakspl)
+
         self.calibration_display.update_in_fft(freqs, spectrum)
 
 
@@ -480,6 +468,9 @@ class MainWindow(ControlWindow):
             
     def display_stim(self, signal, fs):
         freq, spectrum = calc_spectrum(signal, fs)
+        # spectrum = spectrum / np.sqrt(2)
+        spectrum = 20 * np.log10(spectrum/ self.calvals['calv']) + self.calvals['caldb']
+
         timevals = np.arange(len(signal)).astype(float)/fs
         if self.active_operation == 'calibration':
             if self.ui.plot_dock.current() == 'calexp':

@@ -62,7 +62,7 @@ class ProtocolSignals(QtCore.QObject):
     warning = QtCore.pyqtSignal(str)
     response_collected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
     average_response = QtCore.pyqtSignal(int, int, float)
-    calibration_response_collected = QtCore.pyqtSignal(tuple, numpy.ndarray, numpy.ndarray, float, float)
+    calibration_response_collected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, float)
     current_trace = QtCore.pyqtSignal(int, int, dict)
     current_rep = QtCore.pyqtSignal(int)
     spikes_found = QtCore.pyqtSignal(list, int)

@@ -66,9 +66,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
             fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
             # could decimate without interpolating, but leaving in for flexibility
             calc_func = interp1d(frequencies, db_boost_array)
-            factor0 = 4
+            factor0 = 2
             # reduce the number of points in the frequency response by factor0 
-            print 'calibration fs', fs, frequencies[1] - frequencies[0], npts
             decimated_freq = np.arange((npts)/(factor0))/(float(npts-1-factor0)/factor0)*fs/2
             decimated_attenuations = calc_func(decimated_freq)
             f0 = (np.abs(decimated_freq-frange[0])).argmin()
@@ -76,23 +75,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
             decimated_attenuations[:f0] = 0
             decimated_attenuations[f1:] = 0
             decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.05)
-            # plt.subplot(211)
-            # plt.plot(decimated_attenuations)
             freq_response = 10**((decimated_attenuations).astype(float)/20)
-            # plt.subplot(212)
-            # plt.plot(freq_response)
-            # plt.show()
-            
+
             impulse_response = np.fft.irfft(freq_response)
-            # plt.figure()
-            # plt.subplot(211)
-            # plt.plot(impulse_response)
+
             impulse_response = np.roll(impulse_response, len(impulse_response)/2)
             factor1 = 2
             self.impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
-            # plt.subplot(212)
-            # plt.plot(self.impulse_response)
-            # plt.show()
         else:
             self.impulse_response = None
 

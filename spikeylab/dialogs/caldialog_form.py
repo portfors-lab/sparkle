@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Thu Apr 03 12:56:42 2014
+# Created: Mon Apr 28 14:48:03 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -114,7 +114,7 @@ class Ui_CalibrationDialog(object):
         self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
         self.caldb_spnbx = QtGui.QSpinBox(CalibrationDialog)
         self.caldb_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.caldb_spnbx.setMaximum(110)
+        self.caldb_spnbx.setMaximum(120)
         self.caldb_spnbx.setObjectName(_fromUtf8("caldb_spnbx"))
         self.gridLayout.addWidget(self.caldb_spnbx, 1, 1, 1, 1)
         self.calv_spnbx = QtGui.QDoubleSpinBox(CalibrationDialog)
