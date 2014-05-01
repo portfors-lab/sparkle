@@ -37,6 +37,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.caldb = None
         self.impulse_response = None
         self.maxv = 5.0
+        self.minv = 0.005
 
         self.stimid = uuid.uuid1()
 
@@ -66,9 +67,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
             fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
             # could decimate without interpolating, but leaving in for flexibility
             calc_func = interp1d(frequencies, db_boost_array)
-            factor0 = 2
+            factor0 = 4
             # reduce the number of points in the frequency response by factor0 
-            decimated_freq = np.arange((npts)/(factor0))/(float(npts-1-factor0)/factor0)*fs/2
+            decimated_freq = np.arange((npts)/(factor0))/(float(npts-1-factor0+(factor0%2))/factor0)*fs/2
             decimated_attenuations = calc_func(decimated_freq)
             f0 = (np.abs(decimated_freq-frange[0])).argmin()
             f1 = (np.abs(decimated_freq-frange[1])).argmin()
@@ -78,10 +79,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
             freq_response = 10**((decimated_attenuations).astype(float)/20)
 
             impulse_response = np.fft.irfft(freq_response)
-
+            
+            # rotate to create causal filter, and truncate
             impulse_response = np.roll(impulse_response, len(impulse_response)/2)
             factor1 = 2
+
             self.impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
+
         else:
             self.impulse_response = None
 
@@ -394,7 +398,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
         track_signals = []
         max_db = max([comp.intensity() for t in self._segments for comp in t])
         # everything is maxed up to calibration dB and attenuated from there
-        atten = self.caldb - max_db
+        # atten = self.caldb - max_db
+        atten = 0
         if atten < 0:
             raise Exception("Stimulus intensity over maxium")
         # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten
@@ -403,7 +408,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             for component in track:
                 track_list.append(component.signal(fs=samplerate, 
                                                    atten=0, 
-                                                   caldb=max_db, 
+                                                   caldb=self.caldb, 
                                                    calv=self.calv))
             if len(track_list) > 0:   
                 track_signals.append(np.hstack(track_list))
@@ -417,19 +422,24 @@ class StimulusModel(QtCore.QAbstractItemModel):
         total_signal = self.apply_calibration(total_signal, samplerate)
 
         undesired_attenuation = 0
-        # if USE_RMS:
-        #     maxv = self.calv*1.414213562373 # peak value for sine wave rms
-        # else:
-        #     maxv = self.calv
+
         maxv = self.maxv
+
+        # sig_max = max(abs(total_signal))
+        # if sig_max > self.calv:
+        #     over_db = 20 * np.log10(sig_max/self.calv)
+        #     allowance = float(min(over_db, atten))
+        #     scalev = (10 ** (allowance/20)*self.calv)
+        #     total_signal = total_signal/scalev
+        #     print 'sigmax {}, over_db {}, allowance {}, scalev {}'.format(sig_max, over_db, allowance, scalev)
+        #     atten -= allowance
 
         sig_max = max(abs(total_signal))
         if sig_max > maxv:
-            before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             # scale stim down to outputable max
             total_signal = (total_signal/sig_max)*maxv
-            after_rms = np.sqrt(np.mean(pow(total_signal,2)))
-            attenuated = 20 * np.log10(before_rms/after_rms)
+            attenuated = 20 * np.log10(sig_max/maxv)
+
             if attenuated <= atten:
                 atten = atten - attenuated
             else:
@@ -438,6 +448,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 # log this, at least to console!
                 print("WARNING: STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
                     UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, self.maxv, undesired_attenuation))
+        elif sig_max < self.minv:
+            before_rms = np.sqrt(np.mean(pow(total_signal,2)))
+            total_signal = (total_signal/sig_max)*self.minv
+            after_rms = np.sqrt(np.mean(pow(total_signal,2)))
+            attenuated = -20 * np.log10(before_rms/after_rms)
+            # print 'signal below min, adding {} attenuation'.format(attenuated)
+            atten += attenuated
 
         return total_signal, atten, undesired_attenuation
 
@@ -541,6 +558,7 @@ def get_component(comp_name, class_list):
             return comp_class()
     else:
         return None
+
 
 def tukey(winlen, alpha):
     taper = hann(winlen*alpha)

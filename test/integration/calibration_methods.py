@@ -1,16 +1,25 @@
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
 
-import sys
+import sys, csv
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
-from scipy.signal import convolve, fftconvolve
+from scipy.signal import convolve, fftconvolve, hann
 
 TONE_CAL = False
 NOISE_CAL = True
+CONV_CAL = True
 
-def smooth(x,window_len=99):
+
+def tukey(winlen, alpha):
+    taper = hann(winlen*alpha)
+    rect = np.ones(winlen-len(taper) + 1)
+    win = fftconvolve(taper, rect)
+    win = win / np.amax(win)
+    return win
+
+def smooth(x,window_len=99, window='hanning'):
     """smooth the data using a window with requested size.
     
     This method is based on the convolution of a scaled window with the signal.
@@ -57,18 +66,19 @@ def smooth(x,window_len=99):
 
     s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
     #print(len(s))
-    # if window == 'flat': #moving average
-    #     w=np.ones(window_len,'d')
-    # else:
-        # w=eval('np.'+window+'(window_len)')
-
-    w = np.kaiser(window_len,4)
+    if window == 'flat': #moving average
+        w = np.ones(window_len,'d')
+    elif window == 'kaiser':
+        w = np.kaiser(window_len,4)
+    else:
+        w = eval('np.'+window+'(window_len)')
     y=np.convolve(w/w.sum(),s,mode='valid')
     return y[window_len/2:len(y)-window_len/2]
 
 def calc_db(peak, calpeak):
-    pbdB = 20 * np.log10(peak/calpeak)
-    return pbdB
+    pbdb = (20.*np.log10((peak/np.sqrt(2))/0.004)) - 94
+    # pbdB = 20 * np.log10(peak/calpeak)
+    return pbdb
 
 def calc_error(predicted, recorded, frange, title=None):
     npts = len(predicted)
@@ -145,6 +155,9 @@ def bb_cal_curve(sig, resp, fs, frange):
     dc = np.mean(resp)
     resp = resp - dc
 
+    print 'saving recoreded signal'
+    np.savetxt('tmp\script_signal.csv', resp)
+
     npts = len(sig)
     f0 = np.ceil(frange[0]/(float(fs)/npts))
     f1 = np.floor(frange[1]/(float(fs)/npts))
@@ -152,6 +165,9 @@ def bb_cal_curve(sig, resp, fs, frange):
     y = resp
     # y = y/np.amax(y) # normalize
     Y = np.fft.rfft(y)
+
+    print 'saving recoreded signal fft'
+    np.savetxt('tmp\script_Y.csv', Y)
 
     x = sig
     # x = x/np.amax(x) # normalize
@@ -168,11 +184,15 @@ def bb_cal_curve(sig, resp, fs, frange):
 
     diffdB = XmagdB - YmagdB
 
+    np.savetxt('tmp\script_YmagdB.csv', YmagdB)
+    np.savetxt('tmp\script_XmagdB.csv', XmagdB)
+
+
     fq = np.arange(npts/2+1)/(float(npts)/fs)
-    plt.figure()
-    plt.plot(fq, diffdB)
-    plt.title('diff db in cal funct')
-    plt.show()
+    # plt.figure()
+    # plt.plot(fq, diffdB)
+    # plt.title('diff db in cal funct')
+    # plt.show()
     # restrict to desired frequencies and smooth
     # this should probably be done on the other side,
     # before it gets applied.
@@ -183,7 +203,8 @@ def bb_cal_curve(sig, resp, fs, frange):
 
 
 
-    return diffdB[f0:f1], fq[f0:f1]
+    # return diffdB[f0:f1], fq[f0:f1]
+    return diffdB, fq
 
 def bb_calibration(sig, resp, fs, frange):
     """Given original signal and recording, spits out a calibrated signal"""
@@ -221,13 +242,50 @@ def bb_calibration(sig, resp, fs, frange):
 
     # still issues warning because all of Y/X is executed to selected answers from
     # H = np.where(X.real!=0, Y/X, 1)
-    H[:f0].real = 1
-    H[f1:].real = 1
-    H = smooth(H)
+    # H[:f0].real = 1
+    # H[f1:].real = 1
+    # H = smooth(H)
 
     A = X / H
 
     return np.fft.irfft(A)
+
+def calc_ir(db_boost_array, frequencies, frange):
+    npoints = len(db_boost_array)
+    # fs = (frequencies[1] - frequencies[0]) * (npoints - 1) *2
+    # could decimate without interpolating, but leaving in for flexibility
+    calc_func = interp1d(frequencies, db_boost_array)
+    factor0 = 4
+    print 'using fs', fs
+    # reduce the number of points in the frequency response by factor0 
+    decimated_freq = np.arange((npoints)/(factor0))/(float(npoints-1-factor0+(factor0%2))/factor0)*fs/2
+    print 'cal freq', frequencies[0], frequencies[-1]
+    print 'decimated freq', decimated_freq[0], decimated_freq[-1]
+    decimated_attenuations = calc_func(decimated_freq)
+
+    f0 = (np.abs(decimated_freq-frange[0])).argmin()
+    f1 = (np.abs(decimated_freq-frange[1])).argmin()
+    print 'f0, f1', f0, f1
+
+    decimated_attenuations[:f0] = 0
+    decimated_attenuations[f1:] = 0
+    decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.05)
+    np.savetxt('tmp\script_deciatten.csv', decimated_attenuations)
+    freq_response = 10**((decimated_attenuations).astype(float)/20)
+
+    np.savetxt('tmp\script_freqresp.csv', freq_response)
+    impulse_response = np.fft.irfft(freq_response)
+    
+    # rotate to create causal filter, and truncate
+    impulse_response = np.roll(impulse_response, len(impulse_response)/2)
+    factor1 = 2
+    impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
+    return impulse_response
+
+def convolve_impulse(signal, fs, impulse_response):
+    adjusted_signal = fftconvolve(signal, impulse_response)
+    adjusted_signal = adjusted_signal[len(impulse_response)/2:len(adjusted_signal)-len(impulse_response)/2 + 1]
+    return adjusted_signal
 
 def record(sig):
     reps = []
@@ -242,13 +300,13 @@ def record(sig):
     return np.mean(reps, axis=0)
 
 # method 1 Tone Curve
-nreps = 5
-refv = 0.1 # Volts
-refdb = 100 # dB SPL
+nreps = 3
+refv = 1.0 # Volts
+refdb = 114 # dB SPL
 calf = 15000
 dur = 0.2 #seconds (window and stim)
 fs = 5e5
-tone_frequencies = range(5000, 110000, 1000)
+tone_frequencies = range(5000, 110000, 2000)
 # tone_frequencies = [5000, 50000, 100000]
 frange = [5000, 100000] # range to apply calibration to
 npts = dur*fs
@@ -269,6 +327,10 @@ if not TONE_CAL and not NOISE_CAL:
     sys.exit()
 
 vfunc = np.vectorize(calc_db)
+
+plt.figure()
+ax = plt.subplot(111)
+ax.yaxis.grid(True)
 
 if TONE_CAL:
     calpeaks = []
@@ -341,8 +403,7 @@ if TONE_CAL:
     testcurve_db2 = vfunc(testpeaks2, test_peak2) * -1
 
     print 'plotting results...'
-    plt.figure()
-    plt.subplot(111)
+
     plt.plot(tone_frequencies, calcurve_db, label='vmax before')
     plt.plot(tone_frequencies, calcurve_db2, label='fft before')
     plt.title("Calibration curve (attenuation dB)")
@@ -378,52 +439,80 @@ if NOISE_CAL:
     # adjust according to calf
     noise_curve_db -= noise_curve_db[noise_frequencies == calf]
     chirp_curve_db, chirp_frequencies = bb_cal_curve(chirp_signal, mean_control_chirp, fs, frange)
-    print 'calf val', chirp_curve_db[chirp_frequencies == calf]
+    # print 'calf val', chirp_curve_db[chirp_frequencies == calf]
     chirp_curve_db -= chirp_curve_db[chirp_frequencies == calf]
 
+    np.savetxt('tmp\scriptcal.csv', noise_curve_db)
+
     freqs = np.arange(npts/2+1)/(float(npts)/fs)
-    testpeaks3 = []
-    print 'testing calibration curve noise...'
-    for tf in tone_frequencies:
-        sys.stdout.write('.') # print without spaces
-        reps = []
-        tone.setFrequency(tf)
-        calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
-                                fs, frange, noise_frequencies, noise_curve_db)
-        mean_response = record(calibrated_tone)
-        spectrum = np.fft.rfft(mean_response)
-        ftp = spectrum[freqs == tf][0]
-        mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
-        testpeaks3.append(mag)
-    print
+    impulse_response = calc_ir(noise_curve_db, freqs, frange)
 
-    print 'test curves finished'
-    test_peak3 = testpeaks3[tone_frequencies.index(calf)]
-    testcurve_db3 = vfunc(testpeaks3, test_peak3) * -1
+    np.savetxt('tmp\script_imresp.csv', impulse_response)
 
-    testpeaks4 = []
+    tone.setIntensity(80)
+
+    # testpeaks3 = []
+    # print 'testing calibration curve noise...'
+    # for tf in tone_frequencies:
+    #     sys.stdout.write('.') # print without spaces
+    #     reps = []
+    #     tone.setFrequency(tf)
+    #     calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+    #                             fs, frange, noise_frequencies, noise_curve_db)
+    #     mean_response = record(calibrated_tone)
+    #     spectrum = np.fft.rfft(mean_response)
+    #     ftp = spectrum[freqs == tf][0]
+    #     mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+    #     testpeaks3.append(mag)
+    # print
+
+    # test_peak3 = testpeaks3[tone_frequencies.index(calf)]
+    # testcurve_db3 = vfunc(testpeaks3, test_peak3) * -1
+
+    # testpeaks4 = []
+    # print 'testing calibration curve chirp...'
+    # for tf in tone_frequencies:
+    #     sys.stdout.write('.') # print without spaces
+    #     reps = []
+    #     tone.setFrequency(tf)
+    #     calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+    #                             fs, frange, chirp_frequencies, chirp_curve_db)
+    #     mean_response = record(calibrated_tone)
+    #     spectrum = np.fft.rfft(mean_response)
+    #     ftp = spectrum[freqs == tf][0]
+    #     mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
+    #     testpeaks4.append(mag)
+    # print
+
+    # test_peak4 = testpeaks4[tone_frequencies.index(calf)]
+    # testcurve_db4 = vfunc(testpeaks4, test_peak4) * -1
+
+    testpeaks5 = []
     print 'testing calibration curve chirp...'
     for tf in tone_frequencies:
         sys.stdout.write('.') # print without spaces
         reps = []
         tone.setFrequency(tf)
-        calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
-                                fs, frange, chirp_frequencies, chirp_curve_db)
+        calibrated_tone = convolve_impulse(tone.signal(fs, 0, refdb, refv), 
+                                fs, impulse_response)
         mean_response = record(calibrated_tone)
         spectrum = np.fft.rfft(mean_response)
+        print 'peak indx for',tf,  np.where(freqs==tf)
         ftp = spectrum[freqs == tf][0]
         mag = np.sqrt(np.real(ftp)**2 + np.imag(ftp)**2)
-        testpeaks4.append(mag)
+        # mag = abs(ftp)
+        testpeaks5.append(mag)
     print
 
+    test_peak5 = testpeaks5[tone_frequencies.index(calf)]
+    testcurve_db5 = vfunc(testpeaks5, test_peak5) * -1
     print 'test curves finished'
-    test_peak4 = testpeaks4[tone_frequencies.index(calf)]
-    testcurve_db4 = vfunc(testpeaks4, test_peak4) * -1
 
     plt.plot(noise_frequencies, noise_curve_db, label='noise before')
-    plt.plot(chirp_frequencies, chirp_curve_db, label='chirp before')
+    # plt.plot(chirp_frequencies, chirp_curve_db, label='chirp before')
     plt.plot(tone_frequencies, testcurve_db3, label='noise after')
-    plt.plot(tone_frequencies, testcurve_db4, label='chirp after')
+    # plt.plot(tone_frequencies, testcurve_db4, label='chirp after')
+    plt.plot(tone_frequencies, testcurve_db5, label='noise conv after')
     plt.legend()
 
 if TONE_CAL:

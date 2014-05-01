@@ -41,7 +41,7 @@ def calc_spectrum(signal,rate):
 
     sp = np.fft.rfft(signal)/npts
     #print('sp len ', len(sp))
-    return freq, abs(sp).real
+    return freq, abs(sp)
 
 def get_fft_peak(spectrum, freq, atfrequency=None):
     # find the peak values for spectrum
@@ -190,7 +190,7 @@ def smooth(x, window_len=99, window='hanning'):
         window_len +=1
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'kaiser']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError, "Window is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
 
 
     s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
