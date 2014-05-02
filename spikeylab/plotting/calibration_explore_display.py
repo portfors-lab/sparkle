@@ -14,6 +14,11 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         self.response_fft_plot.set_title("Response FFT")
         self.response_fft_plot.setXLink(self.stim_fft_plot)
 
+        self.stim_fft_plot.enableAutoRange(x=True, y=False)
+        self.response_fft_plot.enableAutoRange(x=True, y=False)
+        self.stim_fft_plot.setRange(yRange=(0,100))
+        self.response_fft_plot.setRange(yRange=(0,100))
+
         self.stim_signal_plot = FFTWidget(rotation=0)
         self.response_signal_plot = FFTWidget(rotation=0)
         self.response_signal_plot.disableAutoRange()

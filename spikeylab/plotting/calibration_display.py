@@ -18,6 +18,11 @@ class CalibrationDisplay(QtGui.QWidget):
         self.in_fft.setLabel('bottom', 'Frequency', units='Hz')
         self.in_fft.setLabel('left', '', units='')
 
+        self.in_fft.enableAutoRange(x=True, y=False)
+        self.out_fft.enableAutoRange(x=True, y=False)
+        self.in_fft.setRange(yRange=(0,100))
+        self.out_fft.setRange(yRange=(0,100))
+
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
         splitter.addWidget(self.out_fft)

@@ -9,7 +9,7 @@ class ProtocolDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.fft_plot = FFTWidget(self)
+        self.fft_plot = FFTWidget(self, rotation=-90)
         self.spiketrace_plot = TraceWidget(self)
         self.spec_plot = SpecWidget(self)
 
