@@ -29,11 +29,14 @@ class TestStimulusEditor():
         # add tone, vocalization, and silence components
         component = PureTone()
         component.setIntensity(34)
+        component.setDuration(0.2)
         model.insertComponent(component, (0,0))
         vocal = Vocalization()
         vocal.setFile(sample.samplewav())
         model.insertComponent(vocal, (1,0))
         silence = Silence()
+        # have gap between tone and vocal
+        silence.setDuration(0.5)
         model.insertComponent(silence, (1,0))
         nsteps = self.add_auto_param(model)
         editor = StimulusEditor()

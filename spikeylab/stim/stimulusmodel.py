@@ -36,7 +36,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.calv = None
         self.caldb = None
         self.impulse_response = None
-        self.maxv = 5.0
+        self.maxv = 7.0
         self.minv = 0.005
 
         self.stimid = uuid.uuid1()
@@ -67,7 +67,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
             # could decimate without interpolating, but leaving in for flexibility
             calc_func = interp1d(frequencies, db_boost_array)
-            factor0 = 4
+            factor0 = 12
             # reduce the number of points in the frequency response by factor0 
             decimated_freq = np.arange((npts)/(factor0))/(float(npts-1-factor0+(factor0%2))/factor0)*fs/2
             decimated_attenuations = calc_func(decimated_freq)
@@ -82,7 +82,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             
             # rotate to create causal filter, and truncate
             impulse_response = np.roll(impulse_response, len(impulse_response)/2)
-            factor1 = 2
+            factor1 = 4
 
             self.impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
 

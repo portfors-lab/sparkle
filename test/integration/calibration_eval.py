@@ -1,14 +1,21 @@
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
+from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget
 
-import sys, csv
+import sys, csv, time
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.signal import convolve, fftconvolve, hann
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
+
+class MyTableWidgetItem(QtGui.QTableWidgetItem):
+    def __lt__(self, other):
+        try:
+            return float(self.text()) < float(other.text())
+        except:
+            return super(MyTableWidgetItem, self).__lt__(other)
 
 def tukey(winlen, alpha):
     taper = hann(winlen*alpha)
@@ -51,6 +58,10 @@ def calc_db(peak, calpeak):
 
 def calc_error(predicted, recorded, frange, title=None):
     npts = len(predicted)
+
+    dc = np.mean(recorded)
+    recorded = recorded - dc
+
     f = np.arange(npts/2+1)/(float(npts)/fs)
     f0 = (np.abs(f-frange[0])).argmin()
     f1 = (np.abs(f-frange[1])).argmin()
@@ -58,28 +69,31 @@ def calc_error(predicted, recorded, frange, title=None):
     # predicted = predicted/np.amax(predicted)
     # recorded = recorded/np.amax(recorded)
 
-    predicted_spectrum = np.fft.rfft(predicted)
-    recorded_spectrum = np.fft.rfft(recorded)
+    predicted_spectrum = abs(np.fft.rfft(predicted)/npts)
+    recorded_spectrum = abs(np.fft.rfft(recorded)/npts)
 
+    # evaluate error only for calibrated region
     predicted_roi = predicted_spectrum[f0:f1]
     recorded_roi = recorded_spectrum[f0:f1]
 
-    # normalize for ROI
-    predicted_roi = abs(predicted_roi/np.amax(predicted_roi))
-    recorded_roi = abs(recorded_roi/np.amax(recorded_roi))
+    # convert into dB scale
+    predicted_db = refdb + 20 * np.log10(predicted_roi/ refv)
+    # recorded_db = calc_db(recorded_roi,0)
+    recorded_db = 94 + (20.*np.log10((recorded_roi/np.sqrt(2))/0.004))
 
-    mse = (np.sum((recorded_roi.real - predicted_roi.real)**2))/npts
-    mae = abs(np.mean(recorded_roi.real - predicted_roi.real))
+    mse = (np.sum((recorded_db - predicted_db)**2))/npts
+    mae = abs(np.mean(recorded_db - predicted_db))
     mse2 = np.sqrt(mse)
 
     # plt.figure()
     # plt.suptitle('{} {:.4f}'.format(title, mse2))
     # plt.subplot(211)
-    # plt.plot(f[f0:f1], predicted_roi.real)
+    # plt.plot(f[f0:f1], predicted_db)
     # plt.title("predicted")
     # plt.subplot(212)
     # plt.title("recorded")
-    # plt.plot(f[f0:f1], recorded_roi.real)
+    # plt.plot(f[f0:f1], recorded_db)
+    # plt.show()
 
     return mse, mse2, mae
 
@@ -225,7 +239,6 @@ def calc_ir(db_boost_array, frequencies, frange, decimation=4, truncation=2):
 
     f0 = (np.abs(decimated_freq-frange[0])).argmin()
     f1 = (np.abs(decimated_freq-frange[1])).argmin()
-    print 'f0, f1', f0, f1
 
     decimated_attenuations[:f0] = 0
     decimated_attenuations[f1:] = 0
@@ -258,18 +271,20 @@ def record(sig):
     return np.mean(reps, axis=0)
 
 
-MULT_CAL = True
+MULT_CAL = False
 CONV_CAL = True
 NOISE_CAL = True
-CHIRP_CAL = True
+CHIRP_CAL = False
 
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
 SMOOTHINGS = [99]
 # DECIMATIONS = range(1,9)
-DECIMATIONS = [4]
-TRUNCATIONS = [2]
+DECIMATIONS = [1, 4, 12, 100]
+# TRUNCATIONS = [1, 2, 4, 8]
+# DECIMATIONS = [4]
+TRUNCATIONS = [1, 4, 12, 100]
 
-TONE_CURVE = True
+TONE_CURVE = False
 PLOT_RESULTS = True
 
 # method 1 Tone Curve
@@ -281,8 +296,8 @@ dur = 0.2 #seconds (window and stim)
 fs = 5e5
 
 if __name__ == "__main__":
-    tone_frequencies = range(5000, 110000, 2000)
-    # tone_frequencies = [5000, calf, 50000, 100000]
+    # tone_frequencies = range(5000, 110000, 2000)
+    tone_frequencies = [5000, calf, 50000, 100000]
     frange = [2000, 105000] # range to apply calibration to
     npts = dur*fs
 
@@ -384,7 +399,7 @@ if __name__ == "__main__":
                         info['calibration'] = impulse_response
                         calibration_methods.append(info.copy())
 
-
+    print 'number of cals to perform', len(calibration_methods)
     if TONE_CURVE:
 
         tone = PureTone()
@@ -422,21 +437,30 @@ if __name__ == "__main__":
 
     print 'calibrating vf noise...'
 
-    for cal_params in calibration_methods:
+    wn.setIntensity(80)
+    wn_signal = wn.signal(fs, 0, refdb, refv)
+    chirp.setIntensity(80)
+    chirp_signal = chirp.signal(fs, 0, refdb, refv)
 
+    for cal_params in calibration_methods:
+        start = time.time()
         wn_signal_calibrated = apply_calibration(wn_signal, fs, frange, 
                                                  freqs, cal_params['calibration'],
                                                  cal_params['method'])
+        tdif = time.time() - start
         mean_response = record(wn_signal_calibrated)
         cal_params['noise_response'] = mean_response
+        cal_params['time'] = tdif
 
     for cal_params in calibration_methods:
-
+        start = time.time()
         chirp_signal_calibrated = apply_calibration(chirp_signal, fs, frange, 
                                                  freqs, cal_params['calibration'],
                                                  cal_params['method'])
+        tdif = time.time() - start
         mean_response = record(chirp_signal_calibrated)
         cal_params['chirp_response'] = mean_response
+        cal_params['time'] = tdif
 
 #####################################
 # Report results
@@ -444,7 +468,6 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
 
     if PLOT_RESULTS:
-        nsubplots = len(calibration_methods)
         if TONE_CURVE:
             fig0 = QtGui.QWidget()
             layout = QtGui.QGridLayout()
@@ -458,48 +481,75 @@ if __name__ == "__main__":
                 layout.addWidget(subplot, pltidx, 0)
                 pltidx +=1
             fig0.setLayout(layout)
+            fig0.setWindowTitle('Tone curve')
             fig0.show()
 
         fig1 = QtGui.QWidget()
         layout = QtGui.QGridLayout()
         pltidx = 0
+        subplot = FFTWidget(rotation=0)
+        spectrum = abs(np.fft.rfft(wn_signal)/npts)
+        spectrum = refdb + 20 * np.log10(spectrum/ refv)
+        subplot.update_data(freqs, spectrum)
+        subplot.set_title('desired')
+        layout.addWidget(subplot, pltidx, 0)
+        pltidx +=1
         for cal_params in calibration_methods:
             subplot = FFTWidget(rotation=0)
             spectrum = abs(np.fft.rfft(cal_params['noise_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
-            spectrum[0] = 0
+            # spectrum[0] = 0
             subplot.update_data(freqs, spectrum)
             subplot.set_title('{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['decimation'], cal_params['truncation']))
-            layout.addWidget(subplot, pltidx, 0)
+            rowidx = pltidx/2
+            colidx = pltidx % 2
+            layout.addWidget(subplot, rowidx, colidx)
             pltidx +=1
         fig1.setLayout(layout)
+        fig1.setWindowTitle('Noise stim')
         fig1.show()
 
         fig2 = QtGui.QWidget()
         layout = QtGui.QGridLayout()
         pltidx = 0
+        subplot = FFTWidget(rotation=0)
+        spectrum = abs(np.fft.rfft(chirp_signal)/npts)
+        spectrum = refdb + 20 * np.log10(spectrum/ refv)
+        subplot.update_data(freqs, spectrum)
+        subplot.set_title('desired')
+        layout.addWidget(subplot, pltidx, 0)
+        pltidx +=1
         for cal_params in calibration_methods:
+            # subplot = SpecWidget()
+            # subplot.update_data(cal_params['chirp_response'], fs)
             subplot = FFTWidget(rotation=0)
             spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
-            spectrum[0] = 0
+            rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
+            masterdb = 94 + (20.*np.log10(rms/(0.004)))
+            print 'received overall db', masterdb
+            # spectrum[0] = 0
             subplot.update_data(freqs, spectrum)
             subplot.set_title('{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['decimation'], cal_params['truncation']))
-            layout.addWidget(subplot, pltidx, 0)
+            rowidx = pltidx/2
+            colidx = pltidx % 2
+            layout.addWidget(subplot, rowidx, colidx)
             pltidx +=1
         fig2.setLayout(layout)
+        fig2.setWindowTitle('Chirp stim')
         fig2.show()
 
-    # Table of results error  
+# Table of results error =======================
 
-    column_headers = ['method', 'signal', 'smoothing', 'decimation', 'truncation', 'MAE', 'NMSE', 'RMSE', 'test signal']
-    table = QtGui.QTableWidget(len(cal_params), len(column_headers))
+    column_headers = ['method', 'signal', 'smoothing', 'decimation', 'truncation', 'MAE', 'NMSE', 'RMSE', 'time', 'test signal']
+    table = QtGui.QTableWidget(len(calibration_methods)*2, len(column_headers))
     table.setHorizontalHeaderLabels(column_headers)
 
+    print 'number of cal_params', len(calibration_methods)
     irow = 0
     for cal_params in calibration_methods:
         if 'noise_response' in cal_params:
@@ -508,7 +558,7 @@ if __name__ == "__main__":
             cal_params['NMSE'] = ctrl_err
             cal_params['RMSE'] = ctrl_err_sr
             for icol, col in enumerate(column_headers[:-1]):
-                item = QtGui.QTableWidgetItem(str(cal_params[col]))
+                item = MyTableWidgetItem(str(cal_params[col]))
                 table.setItem(irow, icol, item)
             item = QtGui.QTableWidgetItem('noise')
             table.setItem(irow, icol+1, item)
@@ -520,7 +570,7 @@ if __name__ == "__main__":
             cal_params['NMSE'] = ctrl_err
             cal_params['RMSE'] = ctrl_err_sr
             for icol, col in enumerate(column_headers[:-1]):
-                item = QtGui.QTableWidgetItem(str(cal_params[col]))
+                item = MyTableWidgetItem(str(cal_params[col]))
                 table.setItem(irow, icol, item)
             item = QtGui.QTableWidgetItem('chirp')
             table.setItem(irow, icol+1, item)

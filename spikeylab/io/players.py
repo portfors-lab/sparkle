@@ -28,7 +28,7 @@ class PlayerBase():
         self.aitask = None
         self.aotask = None
 
-        self.maxv = 5 #Volts
+        self.maxv = 7 #Volts
 
         self.stim_changed = False
 
@@ -90,7 +90,7 @@ class PlayerBase():
         # in the interest of not blowing out the speakers I am going to set this to 5?
         if max(abs(signal)) > self.maxv:
             print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM({}V), RECALULATING".format(max(abs(signal)), self.maxv))
-            signal = signal/max(abs(signal))
+            signal = signal/max(abs(signal))*self.maxv
 
         self.tone_lock.acquire()
         self.stim = signal
