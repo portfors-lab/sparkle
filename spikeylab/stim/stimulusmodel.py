@@ -1,10 +1,8 @@
 import numpy as np
 import uuid
-from scipy.interpolate import interp1d
-from scipy.signal import hann, fftconvolve
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.tools.audiotools import calc_spectrum, smooth
+from spikeylab.tools.audiotools import calc_spectrum, smooth, calc_impulse_response, convolve_filter, tukey
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
@@ -60,31 +58,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             if frange is None:
                 frange = (frequencies[0], frequencies[-1])
 
-            print 'calculating impulse response!!! :)'
-            # calculate filter kernel from attenuation vector
-            # treat attenuation vector as magnitude frequency response of system
-            npts = len(db_boost_array)
-            fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
-            # could decimate without interpolating, but leaving in for flexibility
-            calc_func = interp1d(frequencies, db_boost_array)
-            factor0 = 12
-            # reduce the number of points in the frequency response by factor0 
-            decimated_freq = np.arange((npts)/(factor0))/(float(npts-1-factor0+(factor0%2))/factor0)*fs/2
-            decimated_attenuations = calc_func(decimated_freq)
-            f0 = (np.abs(decimated_freq-frange[0])).argmin()
-            f1 = (np.abs(decimated_freq-frange[1])).argmin()
-            decimated_attenuations[:f0] = 0
-            decimated_attenuations[f1:] = 0
-            decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.05)
-            freq_response = 10**((decimated_attenuations).astype(float)/20)
-
-            impulse_response = np.fft.irfft(freq_response)
-            
-            # rotate to create causal filter, and truncate
-            impulse_response = np.roll(impulse_response, len(impulse_response)/2)
-            factor1 = 4
-
-            self.impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
+            self.impulse_response = calc_impulse_response(db_boost_array, frequencies, frange)
 
         else:
             self.impulse_response = None
@@ -419,7 +393,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for track in track_signals:
             total_signal[0:len(track)] += track
 
-        total_signal = self.apply_calibration(total_signal, samplerate)
+        total_signal = convolve_filter(total_signal, self.impulse_response)
 
         undesired_attenuation = 0
 
@@ -457,15 +431,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
             atten += attenuated
 
         return total_signal, atten, undesired_attenuation
-
-    def apply_calibration(self, signal, fs):
-        if self.impulse_response is not None:
-            # print 'interpolated calibration'#, self.calibration_frequencies
-            adjusted_signal = fftconvolve(signal, self.impulse_response)
-            adjusted_signal = adjusted_signal[len(self.impulse_response)/2:len(adjusted_signal)-len(self.impulse_response)/2 + 1]
-            return adjusted_signal
-        else:
-            return signal
 
     def doc(self, starttime=True):
         samplerate = self.samplerate()
@@ -558,11 +523,3 @@ def get_component(comp_name, class_list):
             return comp_class()
     else:
         return None
-
-
-def tukey(winlen, alpha):
-    taper = hann(winlen*alpha)
-    rect = np.ones(winlen-len(taper) + 1)
-    win = fftconvolve(taper, rect)
-    win = win / np.amax(win)
-    return win

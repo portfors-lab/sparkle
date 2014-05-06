@@ -5,7 +5,7 @@ import numpy as np
 from spikeylab.tools.util import create_unique_path
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from spikeylab.tools.audiotools import smooth
+from spikeylab.tools.audiotools import calc_attenuation_curve
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.data.dataobjects import AcquisitionData
@@ -102,35 +102,9 @@ class CalibrationExperimenterBS(Experimenter):
         of speaker to get frequency vs. attenuation curve."""
         print 'process the calibration'
         avg_signal = np.mean(self.datafile.get('signal'), axis=0)
-        # remove dc offset
-        avg_signal = avg_signal - np.mean(avg_signal)
 
-        y = avg_signal
-        x = self.stimulus.signal()[0]
-
-        Y = np.fft.rfft(y)
-        X = np.fft.rfft(x)
-
-        Ymag = np.sqrt(Y.real**2 + Y.imag**2)
-        Xmag = np.sqrt(X.real**2 + X.imag**2)
-
-        # convert to decibel scale
-        YmagdB = 20 * np.log10(Ymag)
-        XmagdB = 20 * np.log10(Xmag)
-
-        # now we can substract to get attenuation curve
-        diffdB = XmagdB - YmagdB
-
-        # may want to smooth results here?
-        diffdB = smooth(diffdB, 99)
-
-        # frequencies present in calibration spectrum
-        npts = len(y)
-        fq = np.arange(npts/2+1)/(float(npts)/self.stimulus.samplerate())
-
-        # shift by the given calibration frequency to align attenutation
-        # with reference point set by user
-        diffdB -= diffdB[fq == self.calf]
+        diffdB = calc_attenuation_curve(self.stimulus.signal()[0], avg_signal,
+                                        self.stimulus.samplerate(), self.calf)
 
         print 'The maximum dB SPL is', self.caldb - max(diffdB)
 

@@ -456,3 +456,48 @@ class ScrollingWidget(BasePlot):
             xlim[0] += self._deltax*npoints_to_add
             self.set_xlim(xlim)
 
+class StackedPlot(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(StackedPlot, self).__init__(parent)
+
+        self.stacker = QtGui.QStackedWidget()
+
+        prev_btn = QtGui.QPushButton('<')
+        next_btn = QtGui.QPushButton('>')
+        first_btn = QtGui.QPushButton('|<')
+        last_btn = QtGui.QPushButton('>|')
+        prev_btn.clicked.connect(self.prev_plot)
+        next_btn.clicked.connect(self.next_plot)
+        first_btn.clicked.connect(self.first_plot)
+        last_btn.clicked.connect(self.last_plot)
+        btn_layout = QtGui.QHBoxLayout()
+        btn_layout.addWidget(first_btn)
+        btn_layout.addWidget(prev_btn)
+        btn_layout.addWidget(next_btn)
+        btn_layout.addWidget(last_btn)
+
+        layout = QtGui.QVBoxLayout(self)
+        layout.addWidget(self.stacker)
+        layout.addLayout(btn_layout)
+
+        # self.plots = []
+
+    def add_plot(self, xdata, ydata, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
+        p = SimplePlotWidget(xdata, ydata)
+        p.set_labels(xlabel, ylabel, title, xunits, yunits)
+        # self.plots.append(p)
+        self.stacker.addWidget(p)
+
+    def next_plot(self):
+        if self.stacker.currentIndex() < self.stacker.count():
+            self.stacker.setCurrentIndex(self.stacker.currentIndex()+1)
+
+    def prev_plot(self):
+        if self.stacker.currentIndex() > 0:
+            self.stacker.setCurrentIndex(self.stacker.currentIndex()-1)
+
+    def first_plot(self):
+        self.stacker.setCurrentIndex(0)
+
+    def last_plot(self):
+        self.stacker.setCurrentIndex(self.stacker.count()-1)

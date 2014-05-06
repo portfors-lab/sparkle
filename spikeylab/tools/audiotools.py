@@ -2,20 +2,19 @@ from __future__ import division
 import numpy as np
 from scipy.integrate import simps, trapz
 import scipy.io.wavfile as wv
+from scipy.interpolate import interp1d
 from matplotlib import mlab
 from matplotlib import pyplot
-from scipy.signal import hann
+from scipy.signal import hann, fftconvolve
 
 from PyQt4.QtGui import QImage
 
 VERBOSE = False
-DBFACTOR = 20
-OUTPUT_MINIMUM = 0.01
 
 def calc_db(peak, cal_peak):
     u""" converts voltage difference into deicbels : 20*log10(peak/cal_peak)"""
     try:
-        pbdB = DBFACTOR * np.log10(peak/cal_peak)
+        pbdB = 20 * np.log10(peak/cal_peak)
     except ZeroDivisionError:
         print u'attempted division by zero:'
         print u'peak {}, caldb {}, calpeak {}'.format(peak, caldb, cal_peak)
@@ -75,7 +74,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     """
     npts = dur * samplerate
     try:
-        amp = (10 ** ((db-caldb)/DBFACTOR)*calv)
+        amp = (10 ** ((db-caldb)/20)*calv)
 
         if VERBOSE:
             print("current dB: {}, attenuation: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, atten, freq/1000, amp))
@@ -203,3 +202,148 @@ def smooth(x, window_len=99, window='hanning'):
 
     y = np.convolve(w/w.sum(),s,mode='valid')
     return y[window_len/2-1:len(y)-window_len/2]
+
+
+def convolve_filter(signal, impulse_response):
+    if impulse_response is not None:
+        # print 'interpolated calibration'#, self.calibration_frequencies
+        adjusted_signal = fftconvolve(signal, impulse_response)
+        adjusted_signal = adjusted_signal[len(impulse_response)/2:len(adjusted_signal)-len(impulse_response)/2 + 1]
+        return adjusted_signal
+    else:
+        return signal
+
+
+def calc_impulse_response(db_boost_array, frequencies, frange, decimation_factor=8, truncation_factor=4):
+    # calculate filter kernel from attenuation vector
+    # treat attenuation vector as magnitude frequency response of system
+    npts = len(db_boost_array)
+    fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
+
+    # could decimate without interpolating, but leaving in for flexibility
+    calc_func = interp1d(frequencies, db_boost_array)
+    # reduce the number of points in the frequency response by decimation_factor 
+    # decimated_freq = np.arange((npts)//(decimation_factor))/(float(npts-1-decimation_factor+(decimation_factor%2))/decimation_factor)*fs/2
+    decimated_freq = np.arange(np.ceil(npts/decimation_factor))/((npts-1)/(decimation_factor/2))*fs
+    
+    print '-'*30
+    print 'desired npts', np.ceil(npts/decimation_factor)
+    print 'decimated freq range', decimated_freq[0], decimated_freq[-1]
+    print 'provieded range', frequencies[0], frequencies[-1]
+    decimated_attenuations = calc_func(decimated_freq)
+    f0 = (np.abs(decimated_freq-frange[0])).argmin()
+    f1 = (np.abs(decimated_freq-frange[1])).argmin()
+    decimated_attenuations[:f0] = 0
+    decimated_attenuations[f1:] = 0
+    decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.05)
+    freq_response = 10**((decimated_attenuations).astype(float)/20)
+
+    impulse_response = np.fft.irfft(freq_response)
+    
+    # rotate to create causal filter, and truncate
+    impulse_response = np.roll(impulse_response, len(impulse_response)//2)
+
+    return impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//2):(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//2)]
+
+def calc_attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
+    """Calculate an attenuation roll-off curve, from a signal and its recording"""
+    # remove dc offset
+    resp = resp - np.mean(resp)
+
+    y = resp
+    x = signal
+
+    Y = np.fft.rfft(y)
+    X = np.fft.rfft(x)
+
+    Ymag = np.sqrt(Y.real**2 + Y.imag**2)
+    Xmag = np.sqrt(X.real**2 + X.imag**2)
+
+    # convert to decibel scale
+    YmagdB = 20 * np.log10(Ymag)
+    XmagdB = 20 * np.log10(Xmag)
+
+    # now we can substract to get attenuation curve
+    diffdB = XmagdB - YmagdB
+
+    # may want to smooth results here?
+    diffdB = smooth(diffdB, smooth_pts)
+
+    # frequencies present in calibration spectrum
+    npts = len(y)
+    fq = np.arange(npts/2+1)/(float(npts)/fs)
+
+    # shift by the given calibration frequency to align attenutation
+    # with reference point set by user
+    diffdB -= diffdB[fq == calf]
+
+    return diffdB
+
+def bb_calibration(signal, resp, fs, frange):
+    """Given original signal and recording, spits out a calibrated signal"""
+    # remove dc offset from recorded response (synthesized orignal shouldn't have one)
+    dc = np.mean(resp)
+    resp = resp - dc
+
+    npts = len(signal)
+    f0 = np.ceil(frange[0]/(float(fs)/npts))
+    f1 = np.floor(frange[1]/(float(fs)/npts))
+
+    y = resp
+    # y = y/np.amax(y) # normalize
+    Y = np.fft.rfft(y)
+
+    x = signal
+    # x = x/np.amax(x) # normalize
+    X = np.fft.rfft(x)
+
+    H = Y/X
+
+    # still issues warning because all of Y/X is executed to selected answers from
+    # H = np.where(X.real!=0, Y/X, 1)
+    # H[:f0].real = 1
+    # H[f1:].real = 1
+    # H = smooth(H)
+
+    A = X / H
+
+    return np.fft.irfft(A)
+
+
+def multiply_frequencies(signal, fs, frange, calfqs, calvals):
+    """Given a vector of dB attenuations, adjust signal by 
+       multiplication in the frequency domain"""
+
+    X = np.fft.rfft(signal)
+
+    npts = len(signal)
+    f = np.arange(npts/2+1)/(float(npts)/fs)
+    f0 = (np.abs(f-frange[0])).argmin()
+    f1 = (np.abs(f-frange[1])).argmin()
+
+    cal_func = interp1d(calfqs, calvals)
+    frange = f[f0:f1]
+    Hroi = cal_func(frange)
+    H = np.zeros((npts/2+1,))
+    H[f0:f1] = Hroi
+
+    H = smooth(H)
+
+    H = 10**((H).astype(float)/20)
+
+    # Xadjusted = X.copy()
+    # Xadjusted[f0:f1] *= H
+    # Xadjusted = smooth(Xadjusted)
+
+    Xadjusted = X*H
+
+    signal_calibrated = np.fft.irfft(Xadjusted)
+    return signal_calibrated
+
+
+def tukey(winlen, alpha):
+    taper = hann(winlen*alpha)
+    rect = np.ones(winlen-len(taper) + 1)
+    win = fftconvolve(taper, rect)
+    win = win / np.amax(win)
+    return win

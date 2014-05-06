@@ -1,6 +1,8 @@
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget
+from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget, StackedPlot
+from spikeylab.tools.audiotools import tukey, calc_impulse_response, \
+                convolve_filter, smooth, calc_attenuation_curve, multiply_frequencies
 
 import sys, csv, time
 import numpy as np
@@ -16,40 +18,6 @@ class MyTableWidgetItem(QtGui.QTableWidgetItem):
             return float(self.text()) < float(other.text())
         except:
             return super(MyTableWidgetItem, self).__lt__(other)
-
-def tukey(winlen, alpha):
-    taper = hann(winlen*alpha)
-    rect = np.ones(winlen-len(taper) + 1)
-    win = fftconvolve(taper, rect)
-    win = win / np.amax(win)
-    return win
-
-def smooth(x,window_len=99, window='hanning'):
-
-    if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
-
-    if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
-
-
-    if window_len<3:
-        return x
-
-
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
-
-    s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
-    #print(len(s))
-    if window == 'flat': #moving average
-        w = np.ones(window_len,'d')
-    elif window == 'kaiser':
-        w = np.kaiser(window_len,4)
-    else:
-        w = eval('np.'+window+'(window_len)')
-    y=np.convolve(w/w.sum(),s,mode='valid')
-    return y[window_len/2:len(y)-window_len/2]
 
 def calc_db(peak, calpeak):
     pbdb = 94 + (20.*np.log10((peak/np.sqrt(2))/0.00407))
@@ -101,162 +69,10 @@ def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     if method == 'multiply':
         return multiply_frequencies(sig, fs, frange, calfqs, calvals)
     elif method == 'convolve':
-        return convolve_impulse(sig, fs, calvals)
+        return convolve_filter(sig, calvals)
     else:
         raise Exception("Unknown calibration method: {}".format(method))
 
-def multiply_frequencies(sig, fs, frange, calfqs, calvals):
-    X = np.fft.rfft(sig)
-
-    npts = len(sig)
-    f = np.arange(npts/2+1)/(float(npts)/fs)
-    f0 = (np.abs(f-frange[0])).argmin()
-    f1 = (np.abs(f-frange[1])).argmin()
-
-    # plt.figure()
-    # plt.plot(calfqs,calvals)
-    # plt.title('cal apply inputs')
-
-    cal_func = interp1d(calfqs, calvals)
-    frange = f[f0:f1]
-    Hroi = cal_func(frange)
-    H = np.zeros((npts/2+1,))
-    H[f0:f1] = Hroi
-    # plt.figure()
-    # plt.plot(f,H)
-    # plt.title('H apply cal pre-smoothing')
-    H = smooth(H)
-    # plt.figure()
-    # plt.plot(f,H)
-    # plt.title('H apply cal')
-    # plt.show()
-    # convert to voltage scalars
-    H = 10**((H).astype(float)/20)
-    # Xadjusted = X.copy()
-    # Xadjusted[f0:f1] *= H
-    # Xadjusted = smooth(Xadjusted)
-    Xadjusted = X*H
-
-    signal_calibrated = np.fft.irfft(Xadjusted)
-    return signal_calibrated
-
-def bb_cal_curve(sig, resp, fs, frange):
-    """Given original signal and recording, generates a dB attenuation curve"""
-    # remove dc offset from recorded response (orignal shouldn't have one)
-    dc = np.mean(resp)
-    resp = resp - dc
-
-    npts = len(sig)
-    f0 = np.ceil(frange[0]/(float(fs)/npts))
-    f1 = np.floor(frange[1]/(float(fs)/npts))
-
-    y = resp
-    # y = y/np.amax(y) # normalize
-    Y = np.fft.rfft(y)
-
-    x = sig
-    # x = x/np.amax(x) # normalize
-    X = np.fft.rfft(x)
-    
-    # H = np.where(X.real!=0, Y/X, 1)
-    # diffdB = 20 * np.log10(H)
-
-    Ymag = np.sqrt(Y.real**2 + Y.imag**2)
-    Xmag = np.sqrt(X.real**2 + X.imag**2)
-
-    YmagdB = 20 * np.log10(Ymag)
-    XmagdB = 20 * np.log10(Xmag)
-
-    diffdB = XmagdB - YmagdB
-
-
-    # fq = np.arange(npts/2+1)/(float(npts)/fs)
-    # plt.figure()
-    # plt.plot(fq, diffdB)
-    # plt.title('diff db in cal funct')
-    # plt.show()
-    # restrict to desired frequencies and smooth
-    # this should probably be done on the other side,
-    # before it gets applied.
-
-
-    # return diffdB[f0:f1], fq[f0:f1]
-    return diffdB
-
-def bb_calibration(sig, resp, fs, frange):
-    """Given original signal and recording, spits out a calibrated signal"""
-    # remove dc offset from recorded response (synthesized orignal shouldn't have one)
-    dc = np.mean(resp)
-    resp = resp - dc
-
-    npts = len(sig)
-    f0 = np.ceil(frange[0]/(float(fs)/npts))
-    f1 = np.floor(frange[1]/(float(fs)/npts))
-
-    y = resp
-    # y = y/np.amax(y) # normalize
-    Y = np.fft.rfft(y)
-
-    x = sig
-    # x = x/np.amax(x) # normalize
-    X = np.fft.rfft(x)
-
-    # can use magnitude too...
-    """
-    Ymag = np.sqrt(Y.real**2 + Y.imag**2)
-    Xmag = np.sqrt(X.real**2 + X.imag**2)
-    # zeros = Xmag == 0
-    # Xmag[zeros] = 1
-    # Hmag = Ymag/Xmag
-    # Xmag[zeros] = 0
-    Hmag = np.where(Xmag == 0, 0, Ymag/Xmag)
-    Hmag[:f0] = 1
-    Hmag[f1:] = 1
-    # Hmag = smooth(Hmag)
-    """
-
-    H = Y/X
-
-    # still issues warning because all of Y/X is executed to selected answers from
-    # H = np.where(X.real!=0, Y/X, 1)
-    # H[:f0].real = 1
-    # H[f1:].real = 1
-    # H = smooth(H)
-
-    A = X / H
-
-    return np.fft.irfft(A)
-
-def calc_ir(db_boost_array, frequencies, frange, decimation=4, truncation=2):
-    npoints = len(db_boost_array)
-    # fs = (frequencies[1] - frequencies[0]) * (npoints - 1) *2
-    # could decimate without interpolating, but leaving in for flexibility
-    calc_func = interp1d(frequencies, db_boost_array)
-    factor0 = decimation
-    # reduce the number of points in the frequency response by factor0 
-    decimated_freq = np.arange((npoints)/(factor0))/(float(npoints-1-factor0+(factor0%2))/factor0)*fs/2
-    decimated_attenuations = calc_func(decimated_freq)
-
-    f0 = (np.abs(decimated_freq-frange[0])).argmin()
-    f1 = (np.abs(decimated_freq-frange[1])).argmin()
-
-    decimated_attenuations[:f0] = 0
-    decimated_attenuations[f1:] = 0
-    decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.05)
-    freq_response = 10**((decimated_attenuations).astype(float)/20)
-
-    impulse_response = np.fft.irfft(freq_response)
-    
-    # rotate to create causal filter, and truncate
-    impulse_response = np.roll(impulse_response, len(impulse_response)/2)
-    factor1 = truncation
-    impulse_response = impulse_response[(len(impulse_response)/2)-(len(impulse_response)/factor1/2):(len(impulse_response)/2)+(len(impulse_response)/factor1/2)]
-    return impulse_response
-
-def convolve_impulse(signal, fs, impulse_response):
-    adjusted_signal = fftconvolve(signal, impulse_response)
-    adjusted_signal = adjusted_signal[len(impulse_response)/2:len(adjusted_signal)-len(impulse_response)/2 + 1]
-    return adjusted_signal
 
 def record(sig):
     reps = []
@@ -278,10 +94,10 @@ CHIRP_CAL = False
 
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
 SMOOTHINGS = [99]
-# DECIMATIONS = range(1,9)
-DECIMATIONS = [1, 4, 12, 100]
+DECIMATIONS = [12]
+# DECIMATIONS = [1, 4, 12, 100]
 # TRUNCATIONS = [1, 2, 4, 8]
-# DECIMATIONS = [4]
+TRUNCATIONS = [4]
 TRUNCATIONS = [1, 4, 12, 100]
 
 TONE_CURVE = False
@@ -340,15 +156,14 @@ if __name__ == "__main__":
     calibration_methods = []
     if NOISE_CAL:
         # generate unsmoothed calibration attenuation vector
-        noise_curve_db = bb_cal_curve(wn_signal, mean_control_noise, fs, frange)
-        # shift according to calf
-        noise_curve_db -= noise_curve_db[freqs == calf]
+        noise_curve_db = calc_attenuation_curve(wn_signal, mean_control_noise, fs, calf, smooth_pts=0)
 
         info = {'signal':'noise'}
         if MULT_CAL:
             info['method'] =  'multiply'
             info['decimation'] = None
             info['truncation'] = None
+            info['len'] = len(noise_curve_db)
             for sm in SMOOTHINGS:
                 smoothed_attenuations = smooth(noise_curve_db, sm)
                 info['smoothing'] = sm
@@ -365,20 +180,22 @@ if __name__ == "__main__":
                     info['decimation'] = deci
                     for trunc in TRUNCATIONS:
                         info['truncation'] = trunc
-                        impulse_response = calc_ir(smoothed_attenuations, freqs, frange, deci, trunc)
+                        impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, deci, trunc)
+                        info['len'] = len(impulse_response)
                         info['calibration'] = impulse_response
                         calibration_methods.append(info.copy())
 
 
     if CHIRP_CAL:
             
-        chirp_curve_db = bb_cal_curve(chirp_signal, mean_control_chirp, fs, frange)
+        chirp_curve_db = calc_attenuation_curve(chirp_signal, mean_control_chirp, fs, calf, smooth_pts=0)
         chirp_curve_db -= chirp_curve_db[freqs == calf]
         info = {'signal':'chirp'}
         if MULT_CAL:
             info['method'] =  'multiply'
             info['decimation'] = None
             info['truncation'] = None
+            info['len'] = len(chirp_curve_db)
             for sm in SMOOTHINGS:
                 smoothed_attenuations = smooth(chirp_curve_db, sm)
                 info['smoothing'] = sm
@@ -395,7 +212,8 @@ if __name__ == "__main__":
                     info['decimation'] = deci
                     for trunc in TRUNCATIONS:
                         info['truncation'] = trunc
-                        impulse_response = calc_ir(smoothed_attenuations, freqs, frange, deci, trunc)
+                        impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, deci, trunc)
+                        info['len'] = len(impulse_response)
                         info['calibration'] = impulse_response
                         calibration_methods.append(info.copy())
 
@@ -469,83 +287,51 @@ if __name__ == "__main__":
 
     if PLOT_RESULTS:
         if TONE_CURVE:
-            fig0 = QtGui.QWidget()
-            layout = QtGui.QGridLayout()
-            pltidx = 0
+            fig0 = StackedPlot()
             for cal_params in calibration_methods:
-                subplot = FFTWidget(rotation=0)
-                subplot.update_data(tone_frequencies, cal_params['tone_curve'])
-                subplot.set_title('Tones {}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
-                      cal_params['signal'], cal_params['smoothing'], 
-                      cal_params['decimation'], cal_params['truncation']))
-                layout.addWidget(subplot, pltidx, 0)
-                pltidx +=1
-            fig0.setLayout(layout)
+                fig0.add_plot(tone_frequencies, cal_params['tone_curve'], 
+                             title='Tones {}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'],
+                             cal_params['signal'], cal_params['smoothing'], 
+                             cal_params['decimation'], cal_params['truncation']))
             fig0.setWindowTitle('Tone curve')
             fig0.show()
 
-        fig1 = QtGui.QWidget()
-        layout = QtGui.QGridLayout()
-        pltidx = 0
-        subplot = FFTWidget(rotation=0)
+        fig1 = StackedPlot()
         spectrum = abs(np.fft.rfft(wn_signal)/npts)
         spectrum = refdb + 20 * np.log10(spectrum/ refv)
-        subplot.update_data(freqs, spectrum)
-        subplot.set_title('desired')
-        layout.addWidget(subplot, pltidx, 0)
-        pltidx +=1
+        fig1.add_plot(freqs, spectrum, title='desired')
         for cal_params in calibration_methods:
-            subplot = FFTWidget(rotation=0)
             spectrum = abs(np.fft.rfft(cal_params['noise_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             # spectrum[0] = 0
-            subplot.update_data(freqs, spectrum)
-            subplot.set_title('{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
+            fig1.add_plot(freqs, spectrum, title='{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['decimation'], cal_params['truncation']))
-            rowidx = pltidx/2
-            colidx = pltidx % 2
-            layout.addWidget(subplot, rowidx, colidx)
-            pltidx +=1
-        fig1.setLayout(layout)
         fig1.setWindowTitle('Noise stim')
         fig1.show()
 
-        fig2 = QtGui.QWidget()
-        layout = QtGui.QGridLayout()
-        pltidx = 0
-        subplot = FFTWidget(rotation=0)
+        fig2 = StackedPlot()
         spectrum = abs(np.fft.rfft(chirp_signal)/npts)
         spectrum = refdb + 20 * np.log10(spectrum/ refv)
-        subplot.update_data(freqs, spectrum)
-        subplot.set_title('desired')
-        layout.addWidget(subplot, pltidx, 0)
-        pltidx +=1
+        fig2.add_plot(freqs, spectrum, title='desired')
         for cal_params in calibration_methods:
             # subplot = SpecWidget()
             # subplot.update_data(cal_params['chirp_response'], fs)
-            subplot = FFTWidget(rotation=0)
             spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
             masterdb = 94 + (20.*np.log10(rms/(0.004)))
             print 'received overall db', masterdb
             # spectrum[0] = 0
-            subplot.update_data(freqs, spectrum)
-            subplot.set_title('{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
+            fig2.add_plot(freqs, spectrum, title='{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['decimation'], cal_params['truncation']))
-            rowidx = pltidx/2
-            colidx = pltidx % 2
-            layout.addWidget(subplot, rowidx, colidx)
-            pltidx +=1
-        fig2.setLayout(layout)
         fig2.setWindowTitle('Chirp stim')
         fig2.show()
 
 # Table of results error =======================
 
-    column_headers = ['method', 'signal', 'smoothing', 'decimation', 'truncation', 'MAE', 'NMSE', 'RMSE', 'time', 'test signal']
+    column_headers = ['method', 'signal', 'smoothing', 'decimation', 'truncation', 'len', 'MAE', 'NMSE', 'RMSE', 'time', 'test signal']
     table = QtGui.QTableWidget(len(calibration_methods)*2, len(column_headers))
     table.setHorizontalHeaderLabels(column_headers)
 
