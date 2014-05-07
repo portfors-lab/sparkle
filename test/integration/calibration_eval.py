@@ -311,18 +311,19 @@ if __name__ == "__main__":
         spectrum = abs(np.fft.rfft(chirp_signal)/npts)
         spectrum = refdb + 20 * np.log10(spectrum/ refv)
         fig2.add_plot(freqs, spectrum, title='desired')
+        # fig2.add_spectrogram(chirp_signal, fs, title='desired')
         for cal_params in calibration_methods:
-            # subplot = SpecWidget()
-            # subplot.update_data(cal_params['chirp_response'], fs)
+            ttl = '{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
+                      cal_params['signal'], cal_params['smoothing'], 
+                      cal_params['decimation'], cal_params['truncation'])
+            # fig2.add_spectrogram(cal_params['chirp_response'], fs, title=ttl)
             spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
             masterdb = 94 + (20.*np.log10(rms/(0.004)))
             print 'received overall db', masterdb
             # spectrum[0] = 0
-            fig2.add_plot(freqs, spectrum, title='{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
-                      cal_params['signal'], cal_params['smoothing'], 
-                      cal_params['decimation'], cal_params['truncation']))
+            fig2.add_plot(freqs, spectrum, title=ttl)
         fig2.setWindowTitle('Chirp stim')
         fig2.show()
 

@@ -488,6 +488,13 @@ class StackedPlot(QtGui.QWidget):
         # self.plots.append(p)
         self.stacker.addWidget(p)
 
+    def add_spectrogram(self, ydata, fs, title=None):
+        p = SpecWidget()
+        p.update_data(ydata, fs)
+        if title is not None:
+            p.set_title(title)
+        self.stacker.addWidget(p)
+
     def next_plot(self):
         if self.stacker.currentIndex() < self.stacker.count():
             self.stacker.setCurrentIndex(self.stacker.currentIndex()+1)
