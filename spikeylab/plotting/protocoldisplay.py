@@ -19,7 +19,6 @@ class ProtocolDisplay(QtGui.QWidget):
 
         # custom behaviour for spec view all option
         vb = self.spec_plot.getViewBox()
-        print 'vb is..............', vb
         vb.menu.viewAll.triggered.disconnect()
         vb.menu.viewAll.triggered.connect(self.spec_auto_range)
         # self.fft_plot.set_title("Stimulus FFT")

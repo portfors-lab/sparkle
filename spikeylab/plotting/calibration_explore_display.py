@@ -22,6 +22,7 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         self.stim_signal_plot = FFTWidget(rotation=0)
         self.response_signal_plot = FFTWidget(rotation=0)
         self.response_signal_plot.disableAutoRange()
+        self.response_signal_plot.setRange(yRange=(-0.1,0.1))
         self.stim_signal_plot.setLabel('left', 'Potential', units='V')
         self.response_signal_plot.setLabel('left', 'Potential', units='V')
         self.response_signal_plot.setLabel('bottom', 'Time', units='s')

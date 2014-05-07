@@ -19,7 +19,7 @@ class SpikeyViewBox(pg.ViewBox):
         self.menu.viewAll.triggered.disconnect()
         self.menu.viewAll.triggered.connect(self.auto_range)
 
-        self._custom_mouse = False
+        self._custom_mouse = True
         self._zero_wheel = False
 
     def set_custom_mouse(self):

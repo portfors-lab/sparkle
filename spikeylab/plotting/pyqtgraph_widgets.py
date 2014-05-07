@@ -251,7 +251,7 @@ class FFTWidget(BasePlot):
         self.fft_plot.rotate(rotation)
         self.getPlotItem().vb.set_custom_mouse()
 
-        if rotation == 90:
+        if abs(rotation) == 90:
             self.setLabel('left', 'Frequency', units='Hz')
             self.setMouseEnabled(x=False,y=True)
 
