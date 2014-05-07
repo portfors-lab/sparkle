@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Wed Apr 09 10:46:12 2014
+# Created: Wed May 07 15:18:28 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -199,6 +199,8 @@ class Ui_TuningCurveEditor(object):
         QtCore.QObject.connect(self.dur_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimDuration)
         QtCore.QObject.connect(self.risefall_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.setStimRisefall)
         QtCore.QObject.connect(self.save_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), TuningCurveEditor.saveStimulus)
+        QtCore.QObject.connect(self.freq_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
+        QtCore.QObject.connect(self.db_step_spnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QMetaObject.connectSlotsByName(TuningCurveEditor)
 
     def retranslateUi(self, TuningCurveEditor):

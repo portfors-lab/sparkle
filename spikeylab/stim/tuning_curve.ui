@@ -415,8 +415,8 @@
    <slot>submit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>50</y>
+     <x>349</x>
+     <y>48</y>
     </hint>
     <hint type="destinationlabel">
      <x>187</x>
@@ -431,8 +431,8 @@
    <slot>submit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>78</y>
+     <x>349</x>
+     <y>74</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -485,6 +485,38 @@
     <hint type="destinationlabel">
      <x>479</x>
      <y>279</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>freq_step_spnbx</sender>
+   <signal>editingFinished()</signal>
+   <receiver>TuningCurveEditor</receiver>
+   <slot>submit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>495</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>db_step_spnbx</sender>
+   <signal>editingFinished()</signal>
+   <receiver>TuningCurveEditor</receiver>
+   <slot>submit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>392</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>386</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
