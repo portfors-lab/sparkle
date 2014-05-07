@@ -22,7 +22,6 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
         self.risefall_spnbx.valueChanged.connect(self.valueChanged.emit)
 
         self.dur_spnbx.setKeyboardTracking(False)
-        # self.db_spnbx.setKeyboardTracking(False)
         self.risefall_spnbx.setKeyboardTracking(False)
 
     def intensityValue(self):

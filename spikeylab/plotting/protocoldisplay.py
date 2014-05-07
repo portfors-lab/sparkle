@@ -17,6 +17,11 @@ class ProtocolDisplay(QtGui.QWidget):
         self.spiketrace_plot.setToolTip('Spike Trace')
         self.spec_plot.setToolTip('Stimulus Spectrogram')
 
+        # custom behaviour for spec view all option
+        vb = self.spec_plot.getViewBox()
+        print 'vb is..............', vb
+        vb.menu.viewAll.triggered.disconnect()
+        vb.menu.viewAll.triggered.connect(self.spec_auto_range)
         # self.fft_plot.set_title("Stimulus FFT")
         # self.spiketrace_plot.set_title("Response Trace")
         # self.spec_plot.set_title("Stimulus Spectrogram")
@@ -115,6 +120,13 @@ class ProtocolDisplay(QtGui.QWidget):
     def set_fscale(self, scale):
         self.fft_plot.set_fscale(scale)
         self.spec_plot.set_fscale(scale)
+
+    def spec_auto_range(self):
+        trace_range = self.spiketrace_plot.viewRange()[0]
+        vb = self.spec_plot.getViewBox()
+        vb.autoRange(padding=0)
+        self.spec_plot.set_xlim(trace_range)
+
 
 if __name__ == "__main__":
     import random, time, os

@@ -257,7 +257,7 @@ class FFTWidget(BasePlot):
 
         elif rotation == 0:
             self.setLabel('bottom', 'Frequency', units='Hz')
-            self.setMouseEnabled(x=True,y=False)
+            self.setMouseEnabled(x=False,y=True)
 
     def update_data(self, index_data, value_data):
         self.fft_plot.setData(index_data, value_data)
