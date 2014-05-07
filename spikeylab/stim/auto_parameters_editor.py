@@ -65,9 +65,9 @@ class Parametizer(QtGui.QWidget):
 
         self.param_model.emptied.connect(self.table_emptied)
         self.param_model.hintRequested.connect(self.hintRequested)
+        self.param_model.stimChanged.connect(view.dataChanged)
 
     def table_emptied(self, empty):
-        print 'table empty', empty
         self.param_model.stimView().setEnabled(not empty)
         if empty:
             self.param_model.stimView().setSelectionModel(QtGui.QItemSelectionModel(self.param_model.stimView().model()))

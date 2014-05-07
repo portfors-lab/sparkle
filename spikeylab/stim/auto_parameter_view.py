@@ -119,4 +119,9 @@ class ComboboxDelegate(QtGui.QStyledItemDelegate):
 
 class SmartDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        return SmartSpinBox(parent)
+        spnbox = SmartSpinBox(parent)
+        # could set this in setEditorData to reflect
+        # parameter specific max and mins
+        spnbox.setMinimum(0)
+        spnbox.setMaximum(2000)
+        return spnbox

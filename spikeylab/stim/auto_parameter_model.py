@@ -12,6 +12,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     _paramid = 0
     emptied = QtCore.pyqtSignal(bool)
     hintRequested = QtCore.pyqtSignal(str)
+    stimChanged = QtCore.pyqtSignal(QtCore.QModelIndex, QtCore.QModelIndex)
     def __init__(self, stimulus=None):
         super(AutoParameterModel, self).__init__()
         self._parameters = []
@@ -131,6 +132,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                             comps = selection_model.selectionComponents()
                             for component in comps:
                                 component.set(param['parameter'], value*multiplier)
+                            # emit signal, so stimulusview knows to update
+                            self.stimChanged.emit(self._stimmodel.index(0,0), self._stimmodel.index(self._stimmodel.rowCount(), self._stimmodel.columnCount()))
             else:
                 param[self.headers[index.column()]] = value
         elif role == QtCore.Qt.UserRole:
