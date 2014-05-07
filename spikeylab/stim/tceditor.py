@@ -82,6 +82,9 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         else:
             w.setPalette(BLACK)
 
+    def duration_input_widget(self):
+        return self.ui.dur_spnbx
+
 if __name__ == "__main__":
     import sys
     from spikeylab.stim.auto_parameter_model import AutoParameterModel

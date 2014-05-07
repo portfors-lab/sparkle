@@ -18,8 +18,12 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
         self.setTScale(self.scales[0], setup=True)
         # relay editing signals
         self.db_spnbx.valueChanged.connect(self.valueChanged.emit)
-        self.dur_spnbx.editingFinished.connect(self.valueChanged.emit)
-        self.risefall_spnbx.editingFinished.connect(self.valueChanged.emit)
+        self.dur_spnbx.valueChanged.connect(self.valueChanged.emit)
+        self.risefall_spnbx.valueChanged.connect(self.valueChanged.emit)
+
+        self.dur_spnbx.setKeyboardTracking(False)
+        # self.db_spnbx.setKeyboardTracking(False)
+        self.risefall_spnbx.setKeyboardTracking(False)
 
     def intensityValue(self):
         return self.db_spnbx.value()

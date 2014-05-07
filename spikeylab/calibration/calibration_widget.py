@@ -30,8 +30,9 @@ class CalibrationWidget(QtGui.QWidget):
         self.ui.cal_type_cmbbx.insertItem(0,stim.name)
         editor = stim.showEditor()
         # should probably make this less coupled
-        self.duration_widgets.append(editor.dur_spnbx)
-        editor.dur_spnbx.setEnabled(False)
+        dur_input = editor.duration_input_widget()
+        self.duration_widgets.append(dur_input)
+        dur_input.setEnabled(False)
         self.ui.caleditor_stack.insertWidget(0, editor)
         self.ui.cal_type_cmbbx.setCurrentIndex(0)
 

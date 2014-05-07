@@ -72,7 +72,6 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         self.setLayout(layout)
 
         # splitter_fft.setSizes()
-        print 'windowsize', 
         height = self.size().height()
         splitter_left.setSizes([height*0.3, height*0.1])
         splitter_main.setSizes([height*0.4, height*0.6])
