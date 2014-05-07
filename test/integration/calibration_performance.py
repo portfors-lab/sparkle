@@ -1,16 +1,11 @@
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget
+from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import tukey, calc_impulse_response, \
-                convolve_filter, smooth, calc_attenuation_curve, multiply_frequencies
+                convolve_filter, calc_attenuation_curve, multiply_frequencies
 
-import sys, csv, time, os
-import json
+import sys, time, os, json
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
-from scipy.signal import convolve, fftconvolve, hann
 
 from PyQt4 import QtGui, QtCore
 
