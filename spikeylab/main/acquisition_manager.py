@@ -65,11 +65,12 @@ class AcquisitionManager():
         self.bs_calibrator.set_reps(reps)
         self.tone_calibrator.set_reps(reps)
 
-    def create_data_file(self):
+    def create_data_file(self, fname=None):
         # find first available file name
-        if self.savefolder is None or self.savename is None:
-            print "You must first set a save folder and filename"
-        fname = create_unique_path(self.savefolder, self.savename)
+        if fname is None:
+            if self.savefolder is None or self.savename is None:
+                print "You must first set a save folder and filename"
+            fname = create_unique_path(self.savefolder, self.savename)
         self.datafile = AcquisitionData(fname)
 
         self.explorer.set_params(datafile=self.datafile)

@@ -9,7 +9,7 @@ from spikeylab.tools.audiotools import calc_attenuation_curve
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.tools.util import increment_title
+from spikeylab.tools.util import next_str_num
 
 import matplotlib.pyplot as plt
 
@@ -26,7 +26,7 @@ class CalibrationExperimenterBS(Experimenter):
         self.protocol_model.insertNewTest(self.stimulus, 0)
 
         save_data = True
-        self.group_name = 'calibration_1'
+        self.group_name = 'calibration_'
 
         self.calibration_vector = None
         self.calibration_freqs = None
@@ -65,7 +65,9 @@ class CalibrationExperimenterBS(Experimenter):
 
     def _initialize_run(self):
        
-        self.current_dataset_name = self.group_name
+        data_items = self.datafile.groups.keys()
+        self.current_dataset_name = next_str_num(self.group_name, data_items)
+        
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
@@ -122,7 +124,6 @@ class CalibrationExperimenterBS(Experimenter):
             self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
                                        relevant_info)
 
-            self.group_name = increment_title(self.group_name)
 
             print 'finished calibration :)'
         else:

@@ -2,7 +2,7 @@ import numpy as np
 
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.tools import spikestats
-from spikeylab.tools.util import increment_title
+from spikeylab.tools.util import next_str_num
 from spikeylab.io.players import FinitePlayer
 
 class ProtocolExperimenter(Experimenter):
@@ -10,13 +10,15 @@ class ProtocolExperimenter(Experimenter):
         Experimenter.__init__(self, signals)
 
         save_data = True
-        self.group_name = 'segment_1'
+        self.group_name = 'segment_'
         self.player = FinitePlayer()
 
     def _initialize_run(self):
-        self.current_dataset_name = self.group_name
+        data_items = self.datafile.groups.keys()
+        self.current_dataset_name = next_str_num(self.group_name, data_items)
+
+        print 'current_dataset_name', self.current_dataset_name
         self.datafile.init_group(self.current_dataset_name)
-        self.group_name = increment_title(self.group_name)
 
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata(self.current_dataset_name, info)

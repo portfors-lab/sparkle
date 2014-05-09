@@ -1,4 +1,4 @@
-from spikeylab.tools.util import increment_title, convert2native
+from spikeylab.tools.util import increment_title, convert2native, next_str_num
 
 import numpy as np
 
@@ -19,3 +19,31 @@ def test_convert():
     print 'mixed converted', mixed_converted
     for i in range(len(mixed_expected)):
         assert mixed_converted[i] == mixed_expected[i]
+
+def test_next_str_num_existing():
+    pattern = 'Mouse497_'
+    items = ['Cat365', 'Mouse497_2', 'Mouse497_3']
+    next_str = next_str_num(pattern, items)
+
+    assert next_str == 'Mouse497_4'
+
+def test_next_str_num_first():
+    pattern = 'Mouse497_'
+    items = ['Cat365', 'Dog_7']
+    next_str = next_str_num(pattern, items)
+
+    assert next_str == 'Mouse497_1'
+
+def test_next_str_num_empty():
+    pattern = 'Mouse497_'
+    items = []
+    next_str = next_str_num(pattern, items)
+
+    assert next_str == 'Mouse497_1'
+
+def test_next_str_num_numbers():
+    pattern = 'Mouse497'
+    items = ['Mouse4972', 'Mouse4973']
+    next_str = next_str_num(pattern, items)
+
+    assert next_str == 'Mouse4974'

@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
-            ViewSettingsDialog, CalibrationDialog, CellCommentDialog
+            ViewSettingsDialog, CalibrationDialog, CellCommentDialog, InitialDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
@@ -35,11 +35,16 @@ REDSS = "QLabel { background-color : transparent; color : red; }"
 DEVNAME = "PCI-6259"
 
 class MainWindow(ControlWindow):
-    def __init__(self, inputs_filename=''):
+    def __init__(self, inputs_filename='', datafile=None, filemode='w-'):
         # set up model and stimlui first, 
         # as saved configuration relies on this
         self.acqmodel = AcquisitionManager()
-        
+        if datafile is not None:
+            if filemode == 'w-':
+                self.acqmodel.create_data_file(datafile)
+            else:
+                self.acqmodel.load_data_file(datafile)
+
         # get stimuli editor widgets
         self.explore_stimuli = self.acqmodel.stimuli_list()
         
@@ -229,7 +234,6 @@ class MainWindow(ControlWindow):
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             self.acqmodel.set_stim_by_index(stim_index)
             # print 'stim signal', len(signal)
-            
 
             gen_rate = self.acqmodel.explore_genrate()
             self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
@@ -639,7 +643,11 @@ class MainWindow(ControlWindow):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    myapp = MainWindow("controlinputs.json")
-    app.setActiveWindow(myapp)
-    myapp.show()
-    sys.exit(app.exec_())
+    dlg = InitialDialog()
+    if dlg.exec_():
+        fname, fmode = dlg.getfile()
+        myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
+        app.setActiveWindow(myapp)
+        myapp.show()
+        sys.exit(app.exec_())
+    print 'canceled'
