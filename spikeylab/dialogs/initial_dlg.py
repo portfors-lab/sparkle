@@ -1,26 +1,42 @@
+import os
 from PyQt4 import QtGui
-from initialform import Ui_InitialDlg
 
-class InitialDialog(QtGui.QDialog):
+class InitialDialog(QtGui.QFileDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
-        self.ui = Ui_InitialDlg()
-        self.ui.setupUi(self)
+        QtGui.QFileDialog.__init__(self)
+        self.setNameFilter("data files (*.hdf5 *.h5)")
+        self.setLabelText(QtGui.QFileDialog.Reject, 'Quit')
+        self.setLabelText(QtGui.QFileDialog.Accept, '---')
 
-    def browse(self):
-        if self.ui.new_radio.isChecked():
-            fname = QtGui.QFileDialog.getSaveFileName(self, u"Create New File",
-                                    filter="data files(*.hdf5 *.h5)")
-        elif self.ui.prev_radio.isChecked():
-            fname = QtGui.QFileDialog.getOpenFileName(self, "Append to Existing Data File", 
-                                    filter="data files(*.hdf5 *.h5)")
-        if fname is not None:
-            self.ui.filename_lnedt.setText(fname)
+        # reverse engineer to get a hold of file name line edit
+        layout = self.layout()
+        for i in range(layout.count()):
+            try:
+                w = layout.itemAt(i).widget()
+                if isinstance(w, QtGui.QLineEdit):
+                    print 'found line edit'
+                    w.textChanged.connect(self.update_label)
+            except:
+                # wasn't a widget
+                pass
+
+    def update_label(self):
+        current_file = self.selectedFiles()[0]
+        if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
+            current_file += '.hdf5'
+        if os.path.isfile(current_file):
+            self.setLabelText(QtGui.QFileDialog.Accept, 'Reload')
+        elif os.path.isdir(current_file):
+            self.setLabelText(QtGui.QFileDialog.Accept, 'Open')
+        else:
+            self.setLabelText(QtGui.QFileDialog.Accept, 'Create')
 
     def getfile(self):
-        fname = self.ui.filename_lnedt.text()
-        if self.ui.new_radio.isChecked():
-            mode = 'w-'
+        current_file = self.selectedFiles()[0]
+        if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
+            current_file += '.hdf5'
+        if os.path.isfile(current_file):
+            fmode = 'a'
         else:
-            mode = 'a'
-        return fname, mode
+            fmode = 'w-'
+        return current_file, fmode
