@@ -42,6 +42,7 @@ class AcquisitionData():
             self.hdf5.attrs['computername'] = socket.gethostname()
             self.test_count = 0
         else:
+            self.test_count = self.hdf5.attrs['test_count']
             self.groups = dict(self.hdf5.items())
             print 'groups', self.groups
 
@@ -61,6 +62,7 @@ class AcquisitionData():
                     if self.groups[key].attrs['stim'][-1] != ']':
                         self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
         
+        self.hdf5.attrs['test_count'] = self.test_count
         fname = self.hdf5.filename
 
         # if there was no data saved, just remove the file
@@ -224,8 +226,10 @@ class AcquisitionData():
         fs = stim_info[0]['samplerate_da']
         npts = len(cal_vector)
         frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
-
-        offset = cal_vector[frequencies == reffreq]
+        if reffreq in frequencies:
+            offset = cal_vector[frequencies == reffreq]
+        else:
+            offset = np.interp(reffreq, frequencies, cal_vector)
         # print 'offset', offset, reffreq
         cal_vector -= offset
 

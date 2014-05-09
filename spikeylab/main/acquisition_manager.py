@@ -83,7 +83,7 @@ class AcquisitionManager():
 
         return fname
 
-    def set_data_file(self, fname):
+    def load_data_file(self, fname):
         self.datafile = AcquisitionData(fname, filemode='a')
 
         self.explorer.set_params(datafile=self.datafile)
@@ -123,7 +123,7 @@ class AcquisitionManager():
         self.charter.set_params(**kwargs)
 
     def set_stim_by_index(self, index):
-        return self.explorer.set_stim_by_index(index)[1]
+        self.explorer.set_stim_by_index(index)
 
     def current_stim(self):
         return self.explorer.current_signal()

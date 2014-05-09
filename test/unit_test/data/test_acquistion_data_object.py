@@ -104,13 +104,7 @@ class TestAcqusitionData():
         nsets = 3
         npoints = 10
         fakedata = np.ones((npoints,))
-
-        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
-            
-        acq_data.init_data('fake', (nsets, npoints))
-        for iset in range(nsets):
-            acq_data.append('fake', fakedata*iset)
+        acq_data = self.setup_finite(fakedata, nsets)
 
         np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
 
@@ -125,14 +119,8 @@ class TestAcqusitionData():
         nsets = 3
         npoints = 10
         fakedata = np.ones((1,npoints))
-
-        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
-            
-        acq_data.init_data('fake', (nsets, npoints))
-        for iset in range(nsets):
-            acq_data.append('fake', fakedata*iset)
-
+        acq_data = self.setup_finite(fakedata, nsets)
+        
         np.testing.assert_array_equal(acq_data.get('test_1', (2,)), np.squeeze(fakedata*2))
 
         acq_data.close()
@@ -165,17 +153,43 @@ class TestAcqusitionData():
         nsets = 3
         npoints = 10
         fakedata = np.ones((npoints,))
-
-        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
-            
-        acq_data.init_data('fake', (nsets, npoints))
-        for iset in range(nsets):
-            acq_data.insert('fake', [iset], fakedata*iset)
+        acq_data = self.setup_finite(fakedata, nsets, 'insert')
 
         np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
 
         acq_data.close()
+
+    def test_finite_dataset_save(self):
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+        acq_data = self.setup_finite(fakedata, nsets)
+        acq_data.close()
+
+        hfile = h5py.File(acq_data.filename)
+        test = hfile['fake']['test_1']
+        assert test.shape == (nsets, npoints)
+        np.testing.assert_array_equal(test[1], fakedata*1)
+        hfile.close()
+
+    def test_finite_dataset_reload(self):
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+        acq_data = self.setup_finite(fakedata, nsets)
+        acq_data.close()
+
+        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='a')
+        print 'hdf5 keys', reloaded_acq_data.hdf5.keys()
+
+        reloaded_acq_data.init_data('fake1', (nsets, npoints))
+        for iset in range(nsets):
+            reloaded_acq_data.append('fake1', fakedata*iset)
+        reloaded_acq_data.close()
+
+        hfile = h5py.File(acq_data.filename)
+        assert hfile.keys() == ['fake', 'fake1']
+        hfile.close()
 
     def test_open_dataset_append_even_sets(self):
         """
@@ -311,3 +325,68 @@ class TestAcqusitionData():
         assert hfile['fake'][-1] == 31
         assert len(stim) == nsets
         hfile.close()
+
+    def test_calibration_data(self):
+        npoints = 250000
+        caldata = np.ones((npoints,))
+        calname ='calibration0'
+
+        acq_data = self.setup_calibration(calname, caldata)
+        acq_data.close_data(calname)
+        cal1 = acq_data.get_calibration(calname, reffreq=15000)[0]
+
+        # subtract one because vector gets shifted by reffreq value
+        np.testing.assert_array_equal(caldata-1, cal1)
+        assert acq_data.calibration_list() == [calname]
+        acq_data.close()
+
+    def test_reload_calibration_data(self):
+        npoints = 250000
+        caldata = np.ones((npoints,))
+        calname ='calibration0'
+
+        acq_data = self.setup_calibration(calname, caldata)
+        acq_data.close()
+
+        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='a')
+
+        cal1 = reloaded_acq_data.get_calibration(calname, reffreq=15000)[0]
+
+        # subtract one because vector gets shifted by reffreq value
+        np.testing.assert_array_equal(caldata-1, cal1)
+        assert reloaded_acq_data.calibration_list() == [calname]
+        reloaded_acq_data.close()
+
+    def setup_calibration(self, calname, caldata):
+
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname)
+
+        acq_data.init_group(calname, mode='calibration')
+        acq_data.init_data(calname, mode='calibration', 
+                            dims=caldata.shape, nested_name='calibration_intensities')
+        acq_data.append(calname, caldata, nested_name='calibration_intensities')
+        relevant_info = {'frequencies': 'all', 'calibration_dB':115,
+                         'calibration_voltage': 1.0, 'calibration_frequency': 15000,
+                         }
+        acq_data.append_trace_info(calname, {'samplerate_da':100000})
+        acq_data.set_metadata('/'.join([calname, 'calibration_intensities']),
+                              relevant_info)
+
+        return acq_data
+
+    def setup_finite(self, fakedata, nsets, operation='append'):
+        npoints = len(np.squeeze(fakedata))
+        print 'len {} and shape {}'.format(len(fakedata), fakedata.shape)
+
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname)
+
+        acq_data.init_data('fake', (nsets, npoints))
+        for iset in range(nsets):
+            if operation == 'append':
+                acq_data.append('fake', fakedata*iset)
+            else:
+                acq_data.insert('fake', [iset], fakedata*iset)
+
+        return acq_data
