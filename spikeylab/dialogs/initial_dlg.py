@@ -7,6 +7,7 @@ class InitialDialog(QtGui.QFileDialog):
         self.setNameFilter("data files (*.hdf5 *.h5)")
         self.setLabelText(QtGui.QFileDialog.Reject, 'Quit')
         self.setLabelText(QtGui.QFileDialog.Accept, '---')
+        self.setWindowTitle("Select Data Save Location")
 
         # reverse engineer to get a hold of file name line edit
         layout = self.layout()

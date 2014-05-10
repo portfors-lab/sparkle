@@ -214,7 +214,7 @@ def convolve_filter(signal, impulse_response):
         return signal
 
 
-def calc_impulse_response(db_boost_array, frequencies, frange, decimation_factor=8, truncation_factor=4):
+def calc_impulse_response(db_boost_array, frequencies, frange, decimation_factor=12, truncation_factor=4):
     # calculate filter kernel from attenuation vector
     # treat attenuation vector as magnitude frequency response of system
     npts = len(db_boost_array)
