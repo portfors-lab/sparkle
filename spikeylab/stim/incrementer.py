@@ -47,7 +47,6 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
             val += n
             self.setValue(val)
         self.valueChanged.emit()
-        print self.value_lnedt.font().pointSize()
 
     def value(self):
         return self.numtype(self.value_lnedt.text())

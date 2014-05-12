@@ -172,6 +172,7 @@ class Vocalization(AbstractStimulusComponent):
             # Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
 
             self._duration = float(len(wavdata))/sr
+            self._cached_pixmap = None
 
 
     def paint(self, painter, rect, palette):
