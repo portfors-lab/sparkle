@@ -243,7 +243,11 @@ def calc_impulse_response(db_boost_array, frequencies, frange, decimation_factor
     # rotate to create causal filter, and truncate
     impulse_response = np.roll(impulse_response, len(impulse_response)//2)
 
-    return impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//2):(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//2)]
+    impulse_response = impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//2):(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//2)]
+    
+    #should I also window the impulse response???
+
+    return impulse_response
 
 def calc_attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
     """Calculate an attenuation roll-off curve, from a signal and its recording"""
@@ -253,10 +257,12 @@ def calc_attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
     y = resp
     x = signal
 
+    # convert time signals to frequency domain
     Y = np.fft.rfft(y)
     X = np.fft.rfft(x)
 
-    Ymag = np.sqrt(Y.real**2 + Y.imag**2)
+    # take the magnitude of signals
+    Ymag = np.sqrt(Y.real**2 + Y.imag**2) # equivalent to abs(Y)
     Xmag = np.sqrt(X.real**2 + X.imag**2)
 
     # convert to decibel scale
@@ -313,10 +319,11 @@ def bb_calibration(signal, resp, fs, frange):
 def multiply_frequencies(signal, fs, frange, calfqs, calvals):
     """Given a vector of dB attenuations, adjust signal by 
        multiplication in the frequency domain"""
-
-    X = np.fft.rfft(signal)
-
+    pad_factor = 1.2
     npts = len(signal)
+
+    X = np.fft.rfft(signal,  n=int(len(signal)*pad_factor))
+
     f = np.arange(npts/2+1)/(float(npts)/fs)
     f0 = (np.abs(f-frange[0])).argmin()
     f1 = (np.abs(f-frange[1])).argmin()
@@ -338,7 +345,7 @@ def multiply_frequencies(signal, fs, frange, calfqs, calvals):
     Xadjusted = X*H
 
     signal_calibrated = np.fft.irfft(Xadjusted)
-    return signal_calibrated
+    return signal_calibrated[:len(signal)]
 
 
 def tukey(winlen, alpha):
