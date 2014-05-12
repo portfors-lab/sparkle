@@ -41,10 +41,7 @@ MULT_CAL = True
 CONV_CAL = True
 
 SMOOTHING = 99
-# DECIMATIONS = range(1,9)
-DECIMATIONS = [1, 4, 12, 100]
 # TRUNCATIONS = [1, 2, 4, 8]
-# DECIMATIONS = [4]
 TRUNCATIONS = [1, 4, 12, 100]
 
 # method 1 Tone Curve
@@ -93,7 +90,6 @@ if __name__ == "__main__":
     info = {'signal':'noise'}
     if MULT_CAL:
         info['method'] =  'multiply'
-        info['decimation'] = None
         info['truncation'] = None
         info['len'] = len(noise_curve_db)
         info['calibration'] = noise_curve_db
@@ -102,14 +98,12 @@ if __name__ == "__main__":
 
     if CONV_CAL:
         info['method'] =  'convolve'
-        for deci in DECIMATIONS:
-            info['decimation'] = deci
-            for trunc in TRUNCATIONS:
-                info['truncation'] = trunc
-                impulse_response = calc_impulse_response(noise_curve_db, freqs, frange, deci, trunc)
-                info['len'] = len(impulse_response)
-                info['calibration'] = impulse_response
-                calibration_methods.append(info.copy())
+        for trunc in TRUNCATIONS:
+            info['truncation'] = trunc
+            impulse_response = calc_impulse_response(noise_curve_db, freqs, frange, trunc)
+            info['len'] = len(impulse_response)
+            info['calibration'] = impulse_response
+            calibration_methods.append(info.copy())
 
     chirp = FMSweep()
     chirp.setDuration(dur)
@@ -150,7 +144,7 @@ if __name__ == "__main__":
     
 # Table of results error =======================
 
-    column_headers = ['method', 'signal', 'decimation', 'truncation', 'len', 'vocal_time', 'chirp_time']
+    column_headers = ['method', 'signal', 'truncation', 'len', 'vocal_time', 'chirp_time']
     table = QtGui.QTableWidget(len(calibration_methods), len(column_headers))
     table.setHorizontalHeaderLabels(column_headers)
 

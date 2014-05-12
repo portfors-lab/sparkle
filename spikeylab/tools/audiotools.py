@@ -214,29 +214,19 @@ def convolve_filter(signal, impulse_response):
         return signal
 
 
-def calc_impulse_response(db_boost_array, frequencies, frange, decimation_factor=12, truncation_factor=4):
+def calc_impulse_response(db_boost_array, frequencies, frange, truncation_factor=64):
     # calculate filter kernel from attenuation vector
     # treat attenuation vector as magnitude frequency response of system
-    npts = len(db_boost_array)
-    fs = (frequencies[1] - frequencies[0]) * (npts - 1) *2
+    npts = (len(db_boost_array)- 1) *2
+    fs = (frequencies[1] - frequencies[0]) * npts
 
-    # could decimate without interpolating, but leaving in for flexibility
-    calc_func = interp1d(frequencies, db_boost_array)
-    # reduce the number of points in the frequency response by decimation_factor 
-    # decimated_freq = np.arange((npts)//(decimation_factor))/(float(npts-1-decimation_factor+(decimation_factor%2))/decimation_factor)*fs/2
-    decimated_freq = np.arange(np.ceil(npts/decimation_factor))/((npts-1)/(decimation_factor/2))*fs
-    
-    print '-'*30
-    print 'desired npts', np.ceil(npts/decimation_factor)
-    print 'decimated freq range', decimated_freq[0], decimated_freq[-1]
-    print 'provieded range', frequencies[0], frequencies[-1]
-    decimated_attenuations = calc_func(decimated_freq)
-    f0 = (np.abs(decimated_freq-frange[0])).argmin()
-    f1 = (np.abs(decimated_freq-frange[1])).argmin()
-    decimated_attenuations[:f0] = 0
-    decimated_attenuations[f1:] = 0
-    decimated_attenuations[f0:f1] = decimated_attenuations[f0:f1]*tukey(len(decimated_attenuations[f0:f1]), 0.05)
-    freq_response = 10**((decimated_attenuations).astype(float)/20)
+    freq = np.arange(npts/2+1)/(float(npts)/fs)
+
+    attenuations = np.zeros_like(db_boost_array)
+    f0 = (np.abs(freq-frange[0])).argmin()
+    f1 = (np.abs(freq-frange[1])).argmin()
+    attenuations[f0:f1] = db_boost_array[f0:f1]*tukey(len(db_boost_array[f0:f1]), 0.05)
+    freq_response = 10**((attenuations).astype(float)/20)
 
     impulse_response = np.fft.irfft(freq_response)
     
@@ -245,7 +235,8 @@ def calc_impulse_response(db_boost_array, frequencies, frange, decimation_factor
 
     impulse_response = impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//2):(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//2)]
     
-    #should I also window the impulse response???
+    # should I also window the impulse response - by how much?
+    impulse_response = impulse_response * tukey(len(impulse_response), 0.05)
 
     return impulse_response
 
@@ -324,14 +315,14 @@ def multiply_frequencies(signal, fs, frange, calfqs, calvals):
 
     X = np.fft.rfft(signal,  n=int(len(signal)*pad_factor))
 
-    f = np.arange(npts/2+1)/(float(npts)/fs)
+    f = np.arange(len(X))/(float(npts)/fs*pad_factor)
     f0 = (np.abs(f-frange[0])).argmin()
     f1 = (np.abs(f-frange[1])).argmin()
 
     cal_func = interp1d(calfqs, calvals)
     frange = f[f0:f1]
     Hroi = cal_func(frange)
-    H = np.zeros((npts/2+1,))
+    H = np.zeros((len(X),))
     H[f0:f1] = Hroi
 
     H = smooth(H)

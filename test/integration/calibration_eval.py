@@ -84,18 +84,16 @@ def record(sig):
     return np.mean(reps, axis=0)
 
 
-MULT_CAL = False
+MULT_CAL = True
 CONV_CAL = True
 NOISE_CAL = True
 CHIRP_CAL = False
 
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
 SMOOTHINGS = [99]
-DECIMATIONS = [12]
-# DECIMATIONS = [1, 4, 12, 100]
+# TRUNCATIONS = [4]
 # TRUNCATIONS = [1, 2, 4, 8]
-TRUNCATIONS = [4]
-TRUNCATIONS = [1, 4, 12, 100]
+TRUNCATIONS = [1, 4, 16, 32, 64, 100]
 
 TONE_CURVE = False
 PLOT_RESULTS = True
@@ -158,7 +156,6 @@ if __name__ == "__main__":
         info = {'signal':'noise'}
         if MULT_CAL:
             info['method'] =  'multiply'
-            info['decimation'] = None
             info['truncation'] = None
             info['len'] = len(noise_curve_db)
             for sm in SMOOTHINGS:
@@ -173,14 +170,12 @@ if __name__ == "__main__":
             for sm in SMOOTHINGS:
                 smoothed_attenuations = smooth(noise_curve_db, sm)
                 info['smoothing'] = sm
-                for deci in DECIMATIONS:
-                    info['decimation'] = deci
-                    for trunc in TRUNCATIONS:
-                        info['truncation'] = trunc
-                        impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, deci, trunc)
-                        info['len'] = len(impulse_response)
-                        info['calibration'] = impulse_response
-                        calibration_methods.append(info.copy())
+                for trunc in TRUNCATIONS:
+                    info['truncation'] = trunc
+                    impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, trunc)
+                    info['len'] = len(impulse_response)
+                    info['calibration'] = impulse_response
+                    calibration_methods.append(info.copy())
 
 
     if CHIRP_CAL:
@@ -190,7 +185,6 @@ if __name__ == "__main__":
         info = {'signal':'chirp'}
         if MULT_CAL:
             info['method'] =  'multiply'
-            info['decimation'] = None
             info['truncation'] = None
             info['len'] = len(chirp_curve_db)
             for sm in SMOOTHINGS:
@@ -205,14 +199,12 @@ if __name__ == "__main__":
             for sm in SMOOTHINGS:
                 smoothed_attenuations = smooth(chirp_curve_db, sm)
                 info['smoothing'] = sm
-                for deci in DECIMATIONS:
-                    info['decimation'] = deci
-                    for trunc in TRUNCATIONS:
-                        info['truncation'] = trunc
-                        impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, deci, trunc)
-                        info['len'] = len(impulse_response)
-                        info['calibration'] = impulse_response
-                        calibration_methods.append(info.copy())
+                for trunc in TRUNCATIONS:
+                    info['truncation'] = trunc
+                    impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, trunc)
+                    info['len'] = len(impulse_response)
+                    info['calibration'] = impulse_response
+                    calibration_methods.append(info.copy())
 
     print 'number of cals to perform', len(calibration_methods)
     if TONE_CURVE:
@@ -287,9 +279,9 @@ if __name__ == "__main__":
             fig0 = StackedPlot()
             for cal_params in calibration_methods:
                 fig0.add_plot(tone_frequencies, cal_params['tone_curve'], 
-                             title='Tones {}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'],
+                             title='Tones {}, {}, sm:{}, trunc:{}'.format(cal_params['method'],
                              cal_params['signal'], cal_params['smoothing'], 
-                             cal_params['decimation'], cal_params['truncation']))
+                              cal_params['truncation']))
             fig0.setWindowTitle('Tone curve')
             fig0.show()
 
@@ -301,9 +293,9 @@ if __name__ == "__main__":
             spectrum = abs(np.fft.rfft(cal_params['noise_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             # spectrum[0] = 0
-            fig1.add_plot(freqs, spectrum, title='{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
+            fig1.add_plot(freqs, spectrum, title='{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
-                      cal_params['decimation'], cal_params['truncation']))
+                      cal_params['truncation']))
         fig1.setWindowTitle('Noise stim')
         fig1.show()
 
@@ -313,9 +305,9 @@ if __name__ == "__main__":
         fig2.add_plot(freqs, spectrum, title='desired')
         # fig2.add_spectrogram(chirp_signal, fs, title='desired')
         for cal_params in calibration_methods:
-            ttl = '{}, {}, sm:{}, deci:{}, trunc:{}'.format(cal_params['method'], 
+            ttl = '{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
-                      cal_params['decimation'], cal_params['truncation'])
+                      cal_params['truncation'])
             # fig2.add_spectrogram(cal_params['chirp_response'], fs, title=ttl)
             spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
@@ -329,7 +321,7 @@ if __name__ == "__main__":
 
 # Table of results error =======================
 
-    column_headers = ['method', 'signal', 'smoothing', 'decimation', 'truncation', 'len', 'MAE', 'NMSE', 'RMSE', 'time', 'test signal']
+    column_headers = ['method', 'signal', 'smoothing', 'truncation', 'len', 'MAE', 'NMSE', 'RMSE', 'time', 'test signal']
     table = QtGui.QTableWidget(len(calibration_methods)*2, len(column_headers))
     table.setHorizontalHeaderLabels(column_headers)
 
