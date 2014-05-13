@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
-            ViewSettingsDialog, CalibrationDialog, CellCommentDialog, InitialDialog
+            ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
@@ -521,13 +521,15 @@ class MainWindow(ControlWindow):
         self.ui.spike_rate_lbl.setText(str(avg_rate))
 
     def launch_save_dlg(self):
-        field_vals = {u'savefolder' : self.savefolder, u'savename' : self.savename, u'saveformat' : self.saveformat}
-        dlg = SavingDialog(default_vals = field_vals)
+        dlg = SavingDialog(default_file = self.acqmodel.current_data_file())
         if dlg.exec_():
-            savefolder, savename, saveformat = dlg.values()
-            self.savefolder = savefolder
-            self.savename = savename
-            self.saveformat = saveformat
+            fname, fmode = dlg.getfile()
+            if fmode == 'w-':
+                self.acqmodel.create_data_file(fname)
+            else:
+                self.acqmodel.load_data_file(fname)
+            # calibration clears on data file load
+            self.ui.current_cal_lbl.setText('None')
 
     def launch_calibration_dlg(self):
         dlg = CalibrationDialog(default_vals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
@@ -542,7 +544,6 @@ class MainWindow(ControlWindow):
                 self.acqmodel.set_calibration(None)
             self.calvals = values
             
-
     def launch_scale_dlg(self):
         field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}
         dlg = ScaleDialog(default_vals=field_vals)
@@ -640,7 +641,7 @@ class MainWindow(ControlWindow):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    dlg = InitialDialog()
+    dlg = SavingDialog()
     if dlg.exec_():
         fname, fmode = dlg.getfile()
         myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)

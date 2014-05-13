@@ -1,29 +1,46 @@
+import os
 from PyQt4 import QtGui
-from savingform import Ui_SaveOptDlg
 
-class SavingDialog(QtGui.QDialog):
-    def __init__(self, parent=None, default_vals=None):
-        QtGui.QDialog.__init__(self,parent)
-        self.ui = Ui_SaveOptDlg()
-        self.ui.setupUi(self)
+class SavingDialog(QtGui.QFileDialog):
+    def __init__(self, default_file=None):
+        QtGui.QFileDialog.__init__(self)
+        self.setNameFilter("data files (*.hdf5 *.h5)")
+        self.setLabelText(QtGui.QFileDialog.Reject, 'Quit')
+        self.setLabelText(QtGui.QFileDialog.Accept, '---')
+        self.setWindowTitle("Select Data Save Location")
 
-        if default_vals is not None:
-            self.ui.savefolder_lnedt.setText(default_vals[u'savefolder'])
-            self.ui.savename_lnedt.setText(default_vals[u'savename'])
-            formats = [self.ui.saveformat_cmbx.itemText(i) for i in xrange(self.ui.saveformat_cmbx.count())]
-            formatidx = formats.index(default_vals[u'saveformat'])
-            self.ui.saveformat_cmbx.setCurrentIndex(formatidx)
+        # reverse engineer to get a hold of file name line edit
+        layout = self.layout()
+        for i in range(layout.count()):
+            try:
+                w = layout.itemAt(i).widget()
+                if isinstance(w, QtGui.QLineEdit):
+                    w.textChanged.connect(self.update_label)
+            except:
+                # wasn't a widget
+                pass
 
-    def browseFolders(self):
-        folder = QtGui.QFileDialog.getExistingDirectory(self, u"select folder",  self.ui.savefolder_lnedt.text())
-        self.ui.savefolder_lnedt.setText(folder)
-        #bdlg.setFileMode(QtGui.QFileDialog.Directory)
-        #bdlg.setOption(QtGui.QFileDialog.ShowDirsOnly)
-        #bdlg.exec_()
+        if default_file is not None:
+            self.selectFile(default_file)
+            self.setLabelText(QtGui.QFileDialog.Reject, 'Cancel')
 
-    def values(self):
-        folder = str(self.ui.savefolder_lnedt.text())
-        name = str(self.ui.savename_lnedt.text())
-        sformat = str(self.ui.saveformat_cmbx.currentText())
+    def update_label(self):
+        current_file = self.selectedFiles()[0]
+        if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
+            current_file += '.hdf5'
+        if os.path.isfile(current_file):
+            self.setLabelText(QtGui.QFileDialog.Accept, 'Reload')
+        elif os.path.isdir(current_file):
+            self.setLabelText(QtGui.QFileDialog.Accept, 'Open')
+        else:
+            self.setLabelText(QtGui.QFileDialog.Accept, 'Create')
 
-        return folder, name, sformat
+    def getfile(self):
+        current_file = self.selectedFiles()[0]
+        if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
+            current_file += '.hdf5'
+        if os.path.isfile(current_file):
+            fmode = 'a'
+        else:
+            fmode = 'w-'
+        return current_file, fmode

@@ -48,10 +48,15 @@ class AcquisitionManager():
                 print "Error: unable to load calibration data from: ", datakey
                 raise
             calibration_vector, calibration_freqs = cal
+        print 'setting explore calibration'
         self.explorer.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        print 'setting protocol calibration'
         self.protocoler.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        print 'setting chart calibration'
         self.charter.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        print 'setting calibrator calibration'
         self.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, datakey)
+        print 'setting tone calibrator calibration'
         self.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, datakey)
 
     def current_calibration(self):
@@ -92,9 +97,13 @@ class AcquisitionManager():
         self.charter.set_params(datafile=self.datafile)
         self.bs_calibrator.set_params(datafile=self.datafile)
         self.tone_calibrator.set_params(datafile=self.datafile)
+        self.set_calibration(None)
 
         logger = logging.getLogger('main')
         logger.info('Opened datafile: {}'.format(fname))
+
+    def current_data_file(self):
+        return self.datafile.filename
 
     def set_threshold(self, threshold):
         """Spike detection threshold

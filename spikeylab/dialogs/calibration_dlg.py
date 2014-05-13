@@ -27,12 +27,6 @@ class CalibrationDialog(QtGui.QDialog):
         self.pw = None
         self.datafile = datafile
 
-    def browseFiles(self):
-        calfile = QtGui.QFileDialog.getOpenFileName(self, u"Select calibration file", 
-                                    self.ui.calfile_lnedt.text(), "Calibration data files(*.hdf5 *.h5)")
-        if calfile is not None:
-            self.ui.calfile_lnedt.setText(calfile)
-
     def maxRange(self):
         try:
             x, freqs = self.datafile.get_calibration(self.ui.cal_choice_cmbbx.currentText(), self.ui.calf_spnbx.value()*self.fscale)

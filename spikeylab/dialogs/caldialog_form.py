@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Mon Apr 28 14:48:03 2014
+# Created: Tue May 13 13:35:58 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,16 +47,6 @@ class Ui_CalibrationDialog(object):
         self.cal_choice_cmbbx.setEnabled(False)
         self.cal_choice_cmbbx.setObjectName(_fromUtf8("cal_choice_cmbbx"))
         self.horizontalLayout.addWidget(self.cal_choice_cmbbx)
-        self.browse_btn = QtGui.QPushButton(self.groupBox)
-        self.browse_btn.setEnabled(False)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.browse_btn.sizePolicy().hasHeightForWidth())
-        self.browse_btn.setSizePolicy(sizePolicy)
-        self.browse_btn.setMaximumSize(QtCore.QSize(25, 16777215))
-        self.browse_btn.setObjectName(_fromUtf8("browse_btn"))
-        self.horizontalLayout.addWidget(self.browse_btn)
         self.plot_btn = QtGui.QPushButton(self.groupBox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -143,8 +133,6 @@ class Ui_CalibrationDialog(object):
         self.retranslateUi(CalibrationDialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), CalibrationDialog.conditional_accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), CalibrationDialog.reject)
-        QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.browse_btn.setDisabled)
-        QtCore.QObject.connect(self.browse_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CalibrationDialog.browseFiles)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.label_8.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frange_low_spnbx.setDisabled)
         QtCore.QObject.connect(self.none_radio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.frange_high_spnbx.setDisabled)
@@ -160,7 +148,6 @@ class Ui_CalibrationDialog(object):
         self.groupBox.setTitle(_translate("CalibrationDialog", "Calibration file", None))
         self.none_radio.setText(_translate("CalibrationDialog", "None", None))
         self.calfile_radio.setText(_translate("CalibrationDialog", "Use saved calibration", None))
-        self.browse_btn.setText(_translate("CalibrationDialog", "...", None))
         self.plot_btn.setText(_translate("CalibrationDialog", "P", None))
         self.label_8.setText(_translate("CalibrationDialog", "Calibration frequency range", None))
         self.funit_lbl_2.setText(_translate("CalibrationDialog", "kHz", None))

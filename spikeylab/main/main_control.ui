@@ -870,12 +870,12 @@
   </widget>
   <action name="actionSave_Options">
    <property name="text">
-    <string>Save Options...</string>
+    <string>Change Data File...</string>
    </property>
   </action>
   <action name="actionSet_Calibration">
    <property name="text">
-    <string>Set Calibration...</string>
+    <string>Calibration Parameters...</string>
    </property>
   </action>
   <action name="actionSet_Scale">

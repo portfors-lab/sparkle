@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Apr 16 11:06:07 2014
+# Created: Tue May 13 13:00:54 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -594,8 +594,8 @@ class Ui_ControlWindow(object):
         self.progress_dock.setWindowTitle(_translate("ControlWindow", "Progress", None))
         self.log_dock.setWindowTitle(_translate("ControlWindow", "Log", None))
         self.detail_dock.setWindowTitle(_translate("ControlWindow", "Stimulus Details", None))
-        self.actionSave_Options.setText(_translate("ControlWindow", "Save Options...", None))
-        self.actionSet_Calibration.setText(_translate("ControlWindow", "Set Calibration...", None))
+        self.actionSave_Options.setText(_translate("ControlWindow", "Change Data File...", None))
+        self.actionSet_Calibration.setText(_translate("ControlWindow", "Calibration Parameters...", None))
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
         self.actionShow_Data_display.setText(_translate("ControlWindow", "Show Data Display", None))
         self.actionShow_PSTH.setText(_translate("ControlWindow", "Show PSTH", None))
