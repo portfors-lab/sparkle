@@ -128,6 +128,9 @@ class MainWindow(ControlWindow):
                 break
         logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
 
+        fname = os.path.basename(self.acqmodel.current_data_file())
+        self.ui.data_file_lbl.setText(fname)
+
         self.calpeak = None
         self.ui.tab_group.setCurrentIndex(0)
 
@@ -530,6 +533,9 @@ class MainWindow(ControlWindow):
                 self.acqmodel.load_data_file(fname)
             # calibration clears on data file load
             self.ui.current_cal_lbl.setText('None')
+            fname = os.path.basename(fname)
+            self.ui.data_file_lbl.setText(fname)
+
 
     def launch_calibration_dlg(self):
         dlg = CalibrationDialog(default_vals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue May 13 13:00:54 2014
+# Created: Tue May 13 13:53:03 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -316,8 +316,22 @@ class Ui_ControlWindow(object):
         self.label_8.setObjectName(_fromUtf8("label_8"))
         self.gridLayout_2.addWidget(self.label_8, 0, 0, 1, 1)
         self.current_cal_lbl = QtGui.QLabel(self.centralwidget)
+        self.current_cal_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.current_cal_lbl.setWordWrap(True)
         self.current_cal_lbl.setObjectName(_fromUtf8("current_cal_lbl"))
         self.gridLayout_2.addWidget(self.current_cal_lbl, 0, 1, 1, 1)
+        self.data_file_lbl = QtGui.QLabel(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.data_file_lbl.sizePolicy().hasHeightForWidth())
+        self.data_file_lbl.setSizePolicy(sizePolicy)
+        self.data_file_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.data_file_lbl.setObjectName(_fromUtf8("data_file_lbl"))
+        self.gridLayout_2.addWidget(self.data_file_lbl, 1, 1, 1, 1)
+        self.label_14 = QtGui.QLabel(self.centralwidget)
+        self.label_14.setObjectName(_fromUtf8("label_14"))
+        self.gridLayout_2.addWidget(self.label_14, 1, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_2)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem2)
@@ -570,6 +584,8 @@ class Ui_ControlWindow(object):
         self.mode_cmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
         self.label_8.setText(_translate("ControlWindow", "Calibration:", None))
         self.current_cal_lbl.setText(_translate("ControlWindow", "None", None))
+        self.data_file_lbl.setText(_translate("ControlWindow", "None", None))
+        self.label_14.setText(_translate("ControlWindow", "Data File:", None))
         self.start_chart_btn.setText(_translate("ControlWindow", "Start Chart", None))
         self.stop_chart_btn.setText(_translate("ControlWindow", "Stop Chart", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
