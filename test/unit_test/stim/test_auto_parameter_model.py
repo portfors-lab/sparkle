@@ -195,7 +195,8 @@ class TestAutoParameterModel():
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
 
-        assert model.verify()
+        # duration 0 now allowed
+        assert model.verify() == 0
 
     def test_verify_bad_step_size(self):
         component = PureTone()
@@ -218,16 +219,19 @@ class TestAutoParameterModel():
         component = PureTone()
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
+        model.setData(model.index(0,1), -1, QtCore.Qt.EditRole)
         model.setData(model.index(0,2), 10, QtCore.Qt.EditRole)
         model.setData(model.index(0,3), 1, QtCore.Qt.EditRole)
 
-        assert model.verify()
+        # cannot set a bad start value
+        assert model.verify() == 0
 
-    def test_verify_bad_stop_value(self):
+    def test_verify_bad_stopstep_value(self):
         component = PureTone()
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
         model.setData(model.index(0,1), 10, QtCore.Qt.EditRole)
+        model.setData(model.index(0,2), 10, QtCore.Qt.EditRole)
         model.setData(model.index(0,3), 10, QtCore.Qt.EditRole)
 
         assert model.verify()

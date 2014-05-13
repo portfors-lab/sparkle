@@ -41,14 +41,13 @@ class TestAcquisitionModel():
         self.fake_calibration(manager)
 
         #insert some stimuli
-        gen_rate = 500000
 
         tone0 = PureTone()
         tone0.setDuration(0.02)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        stim0.setSamplerate(gen_rate)
         manager.protocol_model().insertNewTest(stim0,0)
+        gen_rate = stim0.samplerate()
 
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
@@ -76,14 +75,13 @@ class TestAcquisitionModel():
         manager, fname = self.create_acqmodel(winsz, acq_rate)
         manager.set_calibration(None)
         #insert some stimuli
-        gen_rate = 500000
 
         tone0 = PureTone()
         tone0.setDuration(0.02)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        stim0.setSamplerate(gen_rate)
         manager.protocol_model().insertNewTest(stim0,0)
+        gen_rate = stim0.samplerate()
 
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
@@ -112,7 +110,6 @@ class TestAcquisitionModel():
         manager, fname = self.create_acqmodel(winsz, acq_rate)
         self.fake_calibration(manager)
         #insert some stimuli
-        gen_rate = 500000
 
         tone0 = PureTone()
         tone0.setDuration(0.02)
@@ -120,8 +117,8 @@ class TestAcquisitionModel():
         tone0.setFrequency(90000)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        stim0.setSamplerate(gen_rate)
         manager.protocol_model().insertNewTest(stim0,0)
+        gen_rate = stim0.samplerate()
 
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
@@ -393,14 +390,13 @@ class TestAcquisitionModel():
         manager.set_params(savechart=True)
 
         #insert some stimuli
-        gen_rate = 500000
 
         tone0 = PureTone()
         tone0.setDuration(winsz)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        stim0.setSamplerate(gen_rate)
         manager.protocol_model().insertNewTest(stim0,0)
+        gen_rate = stim0.samplerate()
 
         manager.start_chart()
         t = manager.run_chart_protocol(0.15)
@@ -424,8 +420,8 @@ class TestAcquisitionModel():
 
     def test_tone_calibration_protocol(self):
         winsz = 0.1 #seconds
-        acq_rate = 500000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz)
+        acq_rate = manager.calibration_genrate()
 
         tc = manager.calibration_stimulus('tone')
         ntraces = tc.traceCount()
@@ -444,8 +440,8 @@ class TestAcquisitionModel():
 
     def test_noise_calibration_protocol(self):
         winsz = 0.1 #seconds
-        acq_rate = 500000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager, fname = self.create_acqmodel(winsz)
+        acq_rate = manager.calibration_genrate()
 
         manager.set_calibration_by_index(1)
         tc = manager.calibration_stimulus('noise')
@@ -475,9 +471,11 @@ class TestAcquisitionModel():
 
         hfile.close()
 
-    def create_acqmodel(self, winsz, acq_rate):
+    def create_acqmodel(self, winsz, acq_rate=None):
         manager = AcquisitionManager()
 
+        if acq_rate is None:
+            acq_rate = manager.calibration_genrate()
         manager.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
                            acqtime=winsz, aisr=acq_rate, caldb=100,
                            calv=1.0)

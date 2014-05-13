@@ -54,7 +54,7 @@ class PureTone(Tone):
 
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
-
+        
         if USE_RMS:
             tone = tone*1.414213562373
         return tone

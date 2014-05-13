@@ -214,25 +214,30 @@ def convolve_filter(signal, impulse_response):
         return signal
 
 
-def calc_impulse_response(db_boost_array, frequencies, frange, truncation_factor=64):
+def calc_impulse_response(genrate, db_boost_array, frequencies, frange, truncation_factor=64):
     # calculate filter kernel from attenuation vector
     # treat attenuation vector as magnitude frequency response of system
     npts = (len(db_boost_array)- 1) *2
     fs = (frequencies[1] - frequencies[0]) * npts
 
     freq = np.arange(npts/2+1)/(float(npts)/fs)
+    max_freq = genrate/2+1
 
     attenuations = np.zeros_like(db_boost_array)
     f0 = (np.abs(freq-frange[0])).argmin()
     f1 = (np.abs(freq-frange[1])).argmin()
+    fmax = (np.abs(freq-max_freq)).argmin()
     attenuations[f0:f1] = db_boost_array[f0:f1]*tukey(len(db_boost_array[f0:f1]), 0.05)
     freq_response = 10**((attenuations).astype(float)/20)
+
+    freq_response = freq_response[:fmax]
 
     impulse_response = np.fft.irfft(freq_response)
     
     # rotate to create causal filter, and truncate
     impulse_response = np.roll(impulse_response, len(impulse_response)//2)
 
+    # truncate
     impulse_response = impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//2):(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//2)]
     
     # should I also window the impulse response - by how much?

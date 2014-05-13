@@ -69,7 +69,9 @@ class CalibrationExperimenterBS(Experimenter):
         self.current_dataset_name = next_str_num(self.group_name, data_items)
         
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+        print '!!!!!!!!!using samplerate', self.stimulus.samplerate()
+        # print 'initialize data signal size', self.stimulus.duration(), self.stimulus.samplerate(), (self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate())
+        self.datafile.init_data(self.current_dataset_name, mode='calibration', 
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
                                 nested_name='signal')
 
@@ -90,10 +92,10 @@ class CalibrationExperimenterBS(Experimenter):
             self.protocol_model.setCalibration(None, None, None)
 
     def _initialize_test(self, test):
-        print 'intensity laterrrrrrr', test._segments[0][0].intensity()
         return
 
     def _process_response(self, response, trace_info, irep):
+        # print 'size of response:', response.shape
         self.datafile.append(self.current_dataset_name, response, 
                              nested_name='signal')
 

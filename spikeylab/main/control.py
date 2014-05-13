@@ -129,6 +129,7 @@ class MainWindow(ControlWindow):
         logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
 
         self.calpeak = None
+        self.ui.tab_group.setCurrentIndex(0)
 
     def connect_updatable(self, connect):
         if connect:
@@ -233,11 +234,7 @@ class MainWindow(ControlWindow):
             # have model sort all signals stuff out?
             stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
             self.acqmodel.set_stim_by_index(stim_index)
-            # print 'stim signal', len(signal)
 
-            gen_rate = self.acqmodel.explore_genrate()
-            self.ui.aosr_spnbx.setValue(gen_rate/self.fscale)
-            # self.display_stim(signal, gen_rate)
             self.display.set_nreps(nreps)
         if self.current_mode == 'chart':
             return winsz, acq_rate
@@ -608,7 +605,7 @@ class MainWindow(ControlWindow):
     def tab_changed(self, tab_index):
         if self.ui.tab_group.tabText(tab_index).lower() == 'calibration':
             self.stashed_aisr = self.ui.aisr_spnbx.value()
-            self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_genrate())
+            self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_genrate()/self.fscale)
             self.ui.aisr_spnbx.setEnabled(False)
         elif self.prev_tab == 'calibration':
             self.ui.aisr_spnbx.setEnabled(True)

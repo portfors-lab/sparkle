@@ -37,6 +37,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.maxv = 7.0
         self.minv = 0.005
 
+        self._attenuation_vector = None
+        self._cal_frequencies = None
+        self._cal_frange = None
+
         self.stimid = uuid.uuid1()
 
         self.editor = None
@@ -58,10 +62,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
             if frange is None:
                 frange = (frequencies[0], frequencies[-1])
 
-            self.impulse_response = calc_impulse_response(db_boost_array, frequencies, frange)
+            print 'setting calibration with samplerate', self.samplerate()
+            self.impulse_response = calc_impulse_response(self.samplerate(), db_boost_array, frequencies, frange)
+            # hang on to these for re-calculating impulse response on samplerate change
+            self._attenuation_vector = db_boost_array
+            self._cal_frequencies = frequencies
+            self._cal_frange = frange
 
         else:
             self.impulse_response = None
+
+    def updateCalibration(self):
+        self.setCalibration(self._attenuation_vector, self._cal_frequencies, self._cal_frange)
 
     def setSamplerate(self, fs):
         print 'attempting to set samplerate on fixed rate stimulus'
@@ -196,6 +208,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
             if value.samplerate() is not None:
                 # print 'emitting samplerate change', value.samplerate()
                 self.samplerateChanged.emit(value.samplerate())
+                # update calibration
+                self.updateCalibration()
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
@@ -374,7 +388,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # everything is maxed up to calibration dB and attenuated from there
         # atten = self.caldb - max_db
         atten = 0
-        if atten < 0:
+        if max_db > self.caldb:
             raise Exception("Stimulus intensity over maxium")
         # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten
         for track in self._segments:
@@ -422,7 +436,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 # log this, at least to console!
                 print("WARNING: STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
                     UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, self.maxv, undesired_attenuation))
-        elif sig_max < self.minv:
+        elif sig_max < self.minv and sig_max !=0:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             total_signal = (total_signal/sig_max)*self.minv
             after_rms = np.sqrt(np.mean(pow(total_signal,2)))

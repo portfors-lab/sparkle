@@ -72,12 +72,12 @@ class Experimenter(AbstractAcquisitionModel):
 
                 self._initialize_test(test)
                 profiler = cProfile.Profile()
-                print 'profiling....'
-                profiler.enable()
+                # print 'profiling....'
+                # profiler.enable()
                 traces, docs, overs = test.expandedStim()
-                profiler.disable()
-                print 'finished profiling'
-                profiler.dump_stats('stim_gen_cal.profile')
+                # profiler.disable()
+                # print 'finished profiling'
+                # profiler.dump_stats('stim_gen_cal.profile')
                 nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
                 for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
@@ -101,7 +101,6 @@ class Experimenter(AbstractAcquisitionModel):
                         self.signals.current_rep.emit(irep)
 
                         self.player.reset()
-                    # always save protocol response
 
                     self.player.stop()
         except Broken:

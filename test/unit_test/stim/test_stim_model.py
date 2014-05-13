@@ -139,6 +139,7 @@ class TestStimModel():
         assert atten == 0
         # rounding errors (or rather how python stores numbers) make this necessary
         if USE_RMS:
+            print 'values', round(np.amax(signal),4), calv*1.414
             assert round(np.amax(signal),4) == calv*1.414
         else:
             assert round(np.amax(signal),3) == calv
@@ -149,18 +150,19 @@ class TestStimModel():
         model = StimulusModel()
         component0 = PureTone()
         component1 = PureTone()
-        component0.setIntensity(caldb-10)
-        component1.setIntensity(80)
+        component0.setIntensity(caldb-20)
+        component1.setIntensity(70)
         model.insertComponent(component0, (0,0))
         model.insertComponent(component1, (0,0))
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
-        assert atten == 10
+        assert atten == 0
+        # 20 decibel reduction == 0.1 scale in amplitude
         if USE_RMS:
-            assert round(np.amax(signal),4) == calv*1.414
+            assert round(np.amax(signal),5) == (calv*1.414)/10
         else:
-            assert round(np.amax(signal),3) == calv
+            assert round(np.amax(signal),4) == calv/10
 
     @raises(Exception)
     def test_signal_gt_caldb(self):
@@ -178,10 +180,26 @@ class TestStimModel():
 
         signal, atten, ovld = model.signal()
 
+    def test_signal_below_min(self):
+        caldb = 100
+        calv = 0.1
+        model = StimulusModel()
+        component0 = PureTone()
+        component0.setIntensity(10)
+        model.insertComponent(component0, (0,0))
+        model.setReferenceVoltage(caldb, calv)
+
+        signal, atten, ovld = model.signal()
+        assert atten > 0
+
+        assert round(np.amax(signal),4) == model.minv
+
     def test_signal_overload_voltage(self):
         caldb = 100
         calv = 2.0
         model = StimulusModel()
+        # set maxv something we know will overload
+        model.maxv = 5.0 
         component0 = PureTone()
         component1 = PureTone()
         component0.setIntensity(caldb)
@@ -331,6 +349,7 @@ class TestStimModel():
             signal0, atten0 = signals0[i]
             signal1, atten1 = signals1[i]
             np.testing.assert_array_equal(signal0, signal1)
+            print 'atten0 {}, atten1 {}'.format(atten0, atten1)
             assert atten0 == atten1
             assert_equal(docs0[i], docs1[i])
 
