@@ -13,11 +13,8 @@ class SpikeyViewBox(pg.ViewBox):
         self.fake_action = QtGui.QAction("", None)
         self.fake_action.setVisible(False)
         self.fake_action.setCheckable(True)
-        self.menu.leftMenu = self.fake_action
-        self.menu.mouseModes = [self.fake_action]
 
-        self.menu.viewAll.triggered.disconnect()
-        self.menu.viewAll.triggered.connect(self.auto_range)
+        self.menu = SpikeyViewBoxMenu(self)
 
         self._custom_mouse = True
         self._zero_wheel = False
@@ -75,3 +72,29 @@ class SpikeyViewBox(pg.ViewBox):
         if state is not None:
             self.setMouseEnabled(*state)
 
+class SpikeyViewBoxMenu(QtGui.QMenu):
+    """ Super simplified menu based from pyqtgraph ViewBoxMenu"""
+    def __init__(self, view):
+        QtGui.QMenu.__init__(self)
+
+        self.setTitle("ViewBox options")
+        self.viewAll = QtGui.QAction("View All", self)
+        self.viewAll.triggered.connect(self.autoRange)
+        self.addAction(self.viewAll)
+        self.view = view
+
+    def autoRange(self):
+        self.view.autoRange(padding=0)
+
+    def copy(self):
+        m = QtGui.QMenu()
+        for sm in self.subMenus():
+            if isinstance(sm, QtGui.QMenu):
+                m.addMenu(sm)
+            else:
+                m.addAction(sm)
+        m.setTitle(self.title())
+        return m
+
+    def subMenus(self):
+        return [self.viewAll] 

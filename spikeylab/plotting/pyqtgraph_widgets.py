@@ -26,7 +26,9 @@ class BasePlot(pg.PlotWidget):
                 self.getPlotItem().ctrlMenu.removeAction(act)
         # print '-'*20
         # for act in self.getPlotItem().vb.menu.actions():
-        #     print act.text()
+        #     if act.text() != 'View All':
+        #         print 'removing', act.text()
+        #         self.getPlotItem().vb.menu.removeAction(act)
         # print '-'*20
 
     def set_tscale(self, scale):
