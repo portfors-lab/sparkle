@@ -252,6 +252,7 @@ class MainWindow(ControlWindow):
             self.ui.aichan_box.setEnabled(True)
             self.connect_updatable(False)
         self.ui.start_btn.setEnabled(True)
+        self.ui.stop_btn.setText("Stop")
         self.ui.start_btn.setText('Start')
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.on_stop)
@@ -343,6 +344,7 @@ class MainWindow(ControlWindow):
         self.display.update_spec(None)
 
         self.ui.start_btn.setEnabled(False)
+        self.ui.stop_btn.setText("Abort")
         self.active_operation = 'protocol'
 
         reprate = self.ui.reprate_spnbx.value()
@@ -371,6 +373,7 @@ class MainWindow(ControlWindow):
 
     def run_calibration(self):
         self.ui.start_btn.setEnabled(False)
+        self.ui.stop_btn.setText("Abort")
         self.active_operation = 'calibration'
 
         self.ui.stop_btn.clicked.disconnect()

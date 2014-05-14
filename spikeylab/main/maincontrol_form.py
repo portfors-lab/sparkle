@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue May 13 13:53:03 2014
+# Created: Wed May 14 08:39:09 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -589,7 +589,7 @@ class Ui_ControlWindow(object):
         self.start_chart_btn.setText(_translate("ControlWindow", "Start Chart", None))
         self.stop_chart_btn.setText(_translate("ControlWindow", "Stop Chart", None))
         self.start_btn.setText(_translate("ControlWindow", "Start", None))
-        self.stop_btn.setText(_translate("ControlWindow", "Abort", None))
+        self.stop_btn.setText(_translate("ControlWindow", "Stop", None))
         self.menuOptions.setTitle(_translate("ControlWindow", "Options", None))
         self.menuView.setTitle(_translate("ControlWindow", "View", None))
         self.menuShow.setTitle(_translate("ControlWindow", "Show", None))
