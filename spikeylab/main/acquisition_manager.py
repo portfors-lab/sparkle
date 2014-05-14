@@ -188,11 +188,6 @@ class AcquisitionManager():
             results, calname, freq = self.tone_calibrator.process_calibration(save)
         else:
             results, calname, freq = self.bs_calibrator.process_calibration(save)
-        # restrict to same frequency range as before
-        if save:
-            frange = self.bs_calibrator.calibration_frange
-            print 'setting calibration with range', frange
-            self.set_calibration(calname, calf=calf, frange=frange)
         return calname
 
     def halt(self):

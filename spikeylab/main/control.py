@@ -19,6 +19,7 @@ from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
+from spikeylab.main.wait_widget import WaitWidget
 
 from controlwindow import ControlWindow
 
@@ -280,8 +281,10 @@ class MainWindow(ControlWindow):
         if self.active_operation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibration_widget.save_checked() and not halted
-            calname = self.acqmodel.process_calibration(save, self.calvals['calf'])
+            calname = self.acqmodel.process_calibration(save)
             if save:
+                ww = self.show_wait()
+                self.acqmodel.set_calibration(calname, self.calvals['calf'], self.calvals['frange'])
                 self.calvals['calname'] = calname
                 self.calvals['use_calfile'] = True
                 attenuations, freqs = self.acqmodel.current_calibration()
@@ -289,6 +292,7 @@ class MainWindow(ControlWindow):
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
                 self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
+                ww.close()
                 self.pw.show()
         elif self.active_operation == 'protocol' and self.current_mode == 'windowed':
             if self.acqmodel.current_cellid == 0:
@@ -546,8 +550,10 @@ class MainWindow(ControlWindow):
             values = dlg.values()
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
+                ww = self.show_wait()
                 self.acqmodel.set_calibration(values['calname'], values['calf'], values['frange'])
                 self.ui.current_cal_lbl.setText(values['calname'])
+                ww.close()
             else:
                 self.ui.current_cal_lbl.setText('None')
                 self.acqmodel.set_calibration(None)
@@ -641,6 +647,17 @@ class MainWindow(ControlWindow):
 
     def set_status_msg(self, status):
         self.statusBar().showMessage(status)
+
+    def show_wait(self):
+        screen_pos = self.geometry()
+        ww = WaitWidget()
+        ww.show()
+        wait_pos = QtCore.QRect(screen_pos.x() + screen_pos.width()/2 - ww.width()/2,
+            screen_pos.y() + screen_pos.height()/2 - ww.height()/2, 
+            ww.width(), ww.height())
+        ww.setGeometry(wait_pos)
+        QtGui.QApplication.processEvents()
+        return ww
 
     def closeEvent(self,event):
         # stop any tasks that may be running
