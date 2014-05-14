@@ -8,6 +8,7 @@ from spikeylab.main.protocol_experimenter import ProtocolExperimenter
 from spikeylab.main.chart_experimenter import ChartExperimenter
 from spikeylab.main.calibration_experimenter_bs import CalibrationExperimenterBS
 from spikeylab.main.calibration_experimenter import CalibrationExperimenter
+from spikeylab.stim.stimulusmodel import StimulusModel
 
 class AcquisitionManager():
     def __init__(self):
@@ -48,6 +49,9 @@ class AcquisitionManager():
                 print "Error: unable to load calibration data from: ", datakey
                 raise
             calibration_vector, calibration_freqs = cal
+        # clear one cache -- affects all StimulusModels
+        StimulusModel.clear_cache()
+        print 'clearing cache', '*'*20
         print 'setting explore calibration'
         self.explorer.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
         print 'setting protocol calibration'

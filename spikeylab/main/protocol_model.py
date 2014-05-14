@@ -33,6 +33,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
         self.calibration_frange = frange
+        print 'current tests', self.tests.values(), self.test_order
         for test in self.tests.values():
             test.setCalibration(db_boost_array, frequencies, frange)
 
@@ -145,6 +146,12 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
                 return msg
         return 0
 
+    def purge_tests(self):
+        # delete orphaned tests
+        for uid in self.tests.keys():
+            if uid not in self.test_order:
+                self.tests.pop(uid)
+
 class ProtocolView(AbstractDragView, QtGui.QTableView):
     def __init__(self,parent=None):
         QtGui.QTableView.__init__(self,parent)
@@ -215,6 +222,8 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         y = self.rowHeight(0)*row
         return 0, y
 
+    def purge_model(self):    
+        self.model().purge_tests()
 
 if __name__ == '__main__': # pragma: no cover
     

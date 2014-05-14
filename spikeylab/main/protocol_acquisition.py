@@ -16,6 +16,7 @@ class Experimenter(AbstractAcquisitionModel):
     def set_calibration(self, attenuations, freqs, frange, calname):
         self.protocol_model.setCalibration(attenuations, freqs, frange)
         self.calname = calname
+        self.cal_frange = frange
 
     def update_reference_voltage(self):
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
@@ -35,7 +36,7 @@ class Experimenter(AbstractAcquisitionModel):
         setname = self._initialize_run()
 
         # save the current calibration to data file doc
-        info = {'calibration_used': self.calname}
+        info = {'calibration_used': self.calname, 'calibration_range': self.cal_frange}
         self.datafile.set_metadata(self.current_dataset_name, info)
 
         # save the start time and set last tick to expired, so first
@@ -71,7 +72,7 @@ class Experimenter(AbstractAcquisitionModel):
                 test.setReferenceVoltage(self.caldb, self.calv)
 
                 self._initialize_test(test)
-                profiler = cProfile.Profile()
+                # profiler = cProfile.Profile()
                 # print 'profiling....'
                 # profiler.enable()
                 traces, docs, overs = test.expandedStim()

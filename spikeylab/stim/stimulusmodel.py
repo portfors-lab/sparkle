@@ -20,6 +20,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     Holds all relevant parameters
     """
     samplerateChanged = QtCore.pyqtSignal(int)
+    kernel_cache = {} # persistent across all existing StimulusModels
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self._nreps = 1 # reps of each unique stimulus
@@ -63,7 +64,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 frange = (frequencies[0], frequencies[-1])
 
             print 'setting calibration with samplerate', self.samplerate()
-            self.impulse_response = calc_impulse_response(self.samplerate(), db_boost_array, frequencies, frange)
+            fs = self.samplerate()
+            if fs in StimulusModel.kernel_cache:
+                print '---->using cached filter'
+                self.impulse_response = StimulusModel.kernel_cache[fs]
+            else:
+                print '---->calculating new filter', self.kernel_cache
+                self.impulse_response = calc_impulse_response(fs, db_boost_array, frequencies, frange)
+                # mutable type so will affect data structure persistently
+                StimulusModel.kernel_cache[fs] = self.impulse_response
+
+            # calculate for the default samplerate, if not already, since
+            # we are very likely to need it, and it's better to have this done
+            # up front, than cause lag in the UI later
+            if DEFAULT_SAMPLERATE not in StimulusModel.kernel_cache:
+                StimulusModel.kernel_cache[DEFAULT_SAMPLERATE] = calc_impulse_response(DEFAULT_SAMPLERATE, db_boost_array, frequencies, frange)
+
             # hang on to these for re-calculating impulse response on samplerate change
             self._attenuation_vector = db_boost_array
             self._cal_frequencies = frequencies
@@ -75,8 +91,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def updateCalibration(self):
         self.setCalibration(self._attenuation_vector, self._cal_frequencies, self._cal_frange)
 
+    @staticmethod
+    def clear_cache():
+        StimulusModel.kernel_cache = {}
+
     def setSamplerate(self, fs):
-        print 'attempting to set samplerate on fixed rate stimulus'
+        raise Exception('attempting to set samplerate on fixed rate stimulus')
 
     def samplerate(self):
         rates = []
@@ -530,6 +550,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if self.caldb is None or self.calv is None:
             return "Test reference voltage not set"
         return 0
+
 
 def get_component(comp_name, class_list):
     for comp_class in class_list:

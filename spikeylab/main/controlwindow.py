@@ -58,6 +58,9 @@ class ControlWindow(QtGui.QMainWindow):
         except Exception as e:
             print e
 
+        # connect item models to trash can signal
+        self.ui.stimulus_choices.trash().item_trashed.connect(self.ui.protocolView.purge_model)
+
     def verify_inputs(self, mode):
         if mode == 'chart':
             if self.ui.aisr_spnbx.value()*self.fscale > 100000:

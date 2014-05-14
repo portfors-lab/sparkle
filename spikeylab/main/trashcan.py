@@ -3,6 +3,7 @@ import os
 from PyQt4 import QtGui, QtCore
 
 class TrashWidget(QtGui.QPushButton):
+    item_trashed = QtCore.pyqtSignal()
     def __init__(self,parent=None):
         QtGui.QPushButton.__init__(self, parent)
 
@@ -29,6 +30,10 @@ class TrashWidget(QtGui.QPushButton):
     def leaveEvent(self, event):
         self.setFlat(True)
         event.accept()
+
+    def dropEvent(self, event):
+        super(TrashWidget, self).dropEvent(event)
+        self.item_trashed.emit()
 
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.ChildRemoved and self.underMouse():

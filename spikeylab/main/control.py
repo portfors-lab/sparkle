@@ -45,7 +45,10 @@ class MainWindow(ControlWindow):
                 self.acqmodel.create_data_file(datafile)
             else:
                 self.acqmodel.load_data_file(datafile)
-
+            fname = os.path.basename(self.acqmodel.current_data_file())
+        else:
+            fname = None
+            
         # get stimuli editor widgets
         self.explore_stimuli = self.acqmodel.stimuli_list()
         
@@ -129,7 +132,6 @@ class MainWindow(ControlWindow):
                 break
         logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
 
-        fname = os.path.basename(self.acqmodel.current_data_file())
         self.ui.data_file_lbl.setText(fname)
 
         self.calpeak = None
