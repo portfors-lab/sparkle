@@ -37,10 +37,10 @@ class PureTone(Tone):
     def setFrequency(self, freq):
         self._frequency = freq
 
-    def showEditor(self):
-        editor = tone_parameters.ToneParameterWidget()
-        editor.setComponent(self)
-        return editor
+    # def showEditor(self):
+    #     editor = tone_parameters.ToneParameterWidget()
+    #     editor.setComponent(self)
+    #     return editor
 
     def paint(self, painter, rect, palette):
         if (self._frequency/self._scales[1]) - np.floor(self._frequency/self._scales[1]) > 0.0:
@@ -80,7 +80,7 @@ class PureTone(Tone):
                 return "Generation sample rate must be at least twice the stimulus frequency"
         return super(PureTone, self).verify(**kwargs)
 
-class FMSweep(Tone):
+class FMSweep(AbstractStimulusComponent):
     name = "FM Sweep"
     _start_f = 5000
     _stop_f = 1e5
@@ -118,10 +118,27 @@ class FMSweep(Tone):
         mid = rect.y() + (rect.height()/2)
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
 
-    def showEditor(self):
-        editor = silence_parameters.ChirpParameterWidget()
-        editor.setComponent(self)
-        return editor
+    def auto_details(self):
+        details = super(FMSweep, self).auto_details()
+        details['start_f'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000, 'text': "Start Frequency"}
+        details['stop_f'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000, 'text': "Stop Frequency"}
+        return details
+
+    def loadState(self, state):
+        super(FMSweep,self).loadState(state)
+        self._start_f = state['start_f']
+        self._stop_f = state['stop_f']
+
+    def stateDict(self):
+        state = super(FMSweep, self).stateDict()
+        state['start_f'] = self._start_f
+        state['stop_f'] = self._stop_f
+        return state
+
+    # def showEditor(self):
+    #     editor = silence_parameters.ChirpParameterWidget()
+    #     editor.setComponent(self)
+    #     return editor
 
 class Vocalization(AbstractStimulusComponent):
     name = "Vocalization"

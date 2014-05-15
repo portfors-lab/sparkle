@@ -26,9 +26,6 @@ class SilenceParameterWidget(AbstractParameterWidget):
         self._component.setDuration(self.dur_spnbx.value()*self.scales[0])
         self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
 
-    def component(self):
-        return self._component
-
     def setContentFocus(self):  
         self.dur_spnbx.setFocus()
         self.dur_spnbx.selectAll()
@@ -59,9 +56,6 @@ class NoiseParameterWidget(AbstractParameterWidget):
         self._component.setDuration(self.common.durationValue())
         self._component.setRisefall(self.common.risefallValue())
         self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
-
-    def component(self):
-        return self._component
 
     def setContentFocus(self):
         self.common.dur_spnbx.setFocus()

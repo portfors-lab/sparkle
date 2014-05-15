@@ -16,7 +16,7 @@ class ControlWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self, parent)
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
-
+        
         self.calibration_display = self.ui.plot_dock.displays['calibration']
         self.extended_display = self.ui.plot_dock.displays['calexp']
         self.scrollplot = self.ui.plot_dock.displays['chart']
@@ -113,31 +113,35 @@ class ControlWindow(QtGui.QMainWindow):
 
     def update_unit_labels(self, tscale, fscale, setup=False):
 
+        AbstractEditorWidget.scales = [tscale, fscale]
+
         if tscale != self.tscale:
             self.tscale = tscale
-            # bad!
-            AbstractEditorWidget().setTScale(self.tscale, setup=setup)
+
             AbstractStimulusComponent().update_tscale(self.tscale)
+            AbstractEditorWidget.purge_deleted_widgets()
+            time_inputs = self.time_inputs + AbstractEditorWidget.tunit_fields
+            time_labels = self.time_labels + AbstractEditorWidget.tunit_labels
 
             self.display.set_tscale(self.tscale)
             
             if self.tscale == 0.001:
-                for field in self.time_inputs:
+                for field in time_inputs:
                     field.setMaximum(3000)
                     if not setup:
                         field.setValue(field.value()/0.001)
                     field.setDecimals(0)
                     field.setMinimum(1)
-                for lbl in self.time_labels:
+                for lbl in time_labels:
                     lbl.setText(u'ms')
             elif self.tscale == 1:
-                for field in self.time_inputs:
+                for field in time_inputs:
                     field.setDecimals(3)
                     field.setMinimum(0.001)
                     if not setup:
                         field.setValue(field.value()*0.001)
                     field.setMaximum(20)
-                for lbl in self.time_labels:
+                for lbl in time_labels:
                     lbl.setText(u's')
             else:
                 print self.tscale
@@ -145,30 +149,32 @@ class ControlWindow(QtGui.QMainWindow):
 
         if fscale != self.fscale:
             self.fscale = fscale
-            AbstractEditorWidget().setFScale(self.fscale, setup=setup)
+
             AbstractStimulusComponent().update_fscale(self.fscale)
+            frequency_inputs = self.frequency_inputs + AbstractEditorWidget.funit_fields
+            frequency_labels = self.frequency_labels + AbstractEditorWidget.funit_labels
 
             self.display.set_fscale(self.fscale)
             self.calibration_display.set_fscale(self.fscale)
 
             if self.fscale == 1000:
-                for field in self.frequency_inputs:
+                for field in frequency_inputs:
                     field.setDecimals(3)
                     field.setMinimum(0.001)
                     if not setup:
                         field.setValue(field.value()/1000)
                     field.setMaximum(500)
-                for lbl in self.frequency_labels:
+                for lbl in frequency_labels:
                     lbl.setText(u'kHz')
 
             elif self.fscale == 1:
-                for field in self.frequency_inputs:
+                for field in frequency_inputs:
                     field.setMaximum(500000)
                     if not setup:
                         field.setValue(field.value()*1000)
                     field.setDecimals(0)
                     field.setMinimum(1)
-                for lbl in self.frequency_labels:
+                for lbl in frequency_labels:
                     lbl.setText(u'Hz')
             else:
                 print self.fscale

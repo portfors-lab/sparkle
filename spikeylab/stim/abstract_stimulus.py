@@ -3,6 +3,8 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
+from spikeylab.stim.generic_parameters import GenericParameterWidget
+
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     name = 'unknown'
@@ -51,7 +53,10 @@ class AbstractStimulusComponent(object):
         painter.restore()
 
     def showEditor(self):
-        raise NotImplementedError
+        """ Generate a default editor that creates fields based on this
+        components auto-details. Override this method to use custom editor"""
+        editor = GenericParameterWidget(self)
+        return editor
 
     def signal(self, **kwargs):
         """kwargs must include: fs and optionally include 

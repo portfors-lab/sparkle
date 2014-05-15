@@ -33,7 +33,6 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         self.calibration_vector = db_boost_array
         self.calibration_frequencies = frequencies
         self.calibration_frange = frange
-        print 'current tests', self.tests.values(), self.test_order
         for test in self.tests.values():
             test.setCalibration(db_boost_array, frequencies, frange)
 

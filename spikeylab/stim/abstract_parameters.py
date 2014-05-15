@@ -10,9 +10,11 @@ class AbstractParameterWidget(AbstractEditorWidget):
     def name(self):
         return self._component.name
 
+    def component(self):
+        return self._component
+
     def setComponent(self, component):
         raise NotImplementedError
 
     def saveToObject(self):
         raise NotImplementedError
-

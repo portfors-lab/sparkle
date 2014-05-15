@@ -15,7 +15,8 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
         self.tunit_labels.append(self.tunit_lbl_1)
         self.tunit_fields.append(self.dur_spnbx)
         self.tunit_fields.append(self.risefall_spnbx)
-        self.setTScale(self.scales[0], setup=True)
+        # self.setTScale(self.scales[0], setup=True)
+        # need to initialize units to current scale
         # relay editing signals
         self.db_spnbx.valueChanged.connect(self.valueChanged.emit)
         self.dur_spnbx.valueChanged.connect(self.valueChanged.emit)
@@ -47,5 +48,17 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
         self.dur_spnbx.setValue(component.duration()/self.scales[0])
         self.risefall_spnbx.setValue(component.risefall()/self.scales[0])
 
+    def getValue(self, field):
+        if field == 'intensity':
+            return self.db_spnbx.value()
+        if field == 'duration':
+            return self.dur_spnbx.value()*self.scales[0]
+        if field == 'risefall':
+            return self.risefall_spnbx.value()*self.scales[0]
+
     def setDuration(self, duration):
         self.dur_spnbx.setValue(duration/self.scales[0])
+
+    def fieldNames(self):
+        """ Return the names of the fields this widget handles """
+        return ['intensity', 'duration', 'risefall']

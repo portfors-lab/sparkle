@@ -62,6 +62,15 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         if self.value_lnedt.text() == '':
             self.setValue(0)
 
+    def setDecimals(self, val):
+        pass
+
+    def setMaximum(self, val):
+        self.maximum = val
+
+    def setMinimum(self, val):
+        self.minimum = val
+
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)
