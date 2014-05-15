@@ -135,11 +135,6 @@ class FMSweep(AbstractStimulusComponent):
         state['stop_f'] = self._stop_f
         return state
 
-    # def showEditor(self):
-    #     editor = silence_parameters.ChirpParameterWidget()
-    #     editor.setComponent(self)
-    #     return editor
-
 class Vocalization(AbstractStimulusComponent):
     name = "Vocalization"
     explore = True
@@ -311,11 +306,6 @@ class WhiteNoise(AbstractStimulusComponent):
     def paint(self, painter, rect, palette):
         mid = rect.y() + (rect.height()/2)
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
-
-    def showEditor(self):
-        editor = silence_parameters.NoiseParameterWidget()
-        editor.setComponent(self)
-        return editor
 
     def setTransfer(self, H):
         self.transfer = H

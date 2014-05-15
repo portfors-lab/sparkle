@@ -16,7 +16,7 @@ class ControlWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self, parent)
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
-        
+
         self.calibration_display = self.ui.plot_dock.displays['calibration']
         self.extended_display = self.ui.plot_dock.displays['calexp']
         self.scrollplot = self.ui.plot_dock.displays['chart']
@@ -118,7 +118,7 @@ class ControlWindow(QtGui.QMainWindow):
         if tscale != self.tscale:
             self.tscale = tscale
 
-            AbstractStimulusComponent().update_tscale(self.tscale)
+            AbstractStimulusComponent.update_tscale(self.tscale)
             AbstractEditorWidget.purge_deleted_widgets()
             time_inputs = self.time_inputs + AbstractEditorWidget.tunit_fields
             time_labels = self.time_labels + AbstractEditorWidget.tunit_labels
@@ -150,7 +150,7 @@ class ControlWindow(QtGui.QMainWindow):
         if fscale != self.fscale:
             self.fscale = fscale
 
-            AbstractStimulusComponent().update_fscale(self.fscale)
+            AbstractStimulusComponent.update_fscale(self.fscale)
             frequency_inputs = self.frequency_inputs + AbstractEditorWidget.funit_fields
             frequency_labels = self.frequency_labels + AbstractEditorWidget.funit_labels
 

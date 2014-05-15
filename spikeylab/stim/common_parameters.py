@@ -4,13 +4,14 @@ from common_parametersform import Ui_ParameterWidget
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 
 class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
-    """ Widget that accepts input for parameters that all stimuli
+    """Widget that accepts input for parameters that all stimuli
      types have in common"""
     valueChanged = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         self.db_spnbx.numtype = int
+
         self.tunit_labels.append(self.tunit_lbl_0)
         self.tunit_labels.append(self.tunit_lbl_1)
         self.tunit_fields.append(self.dur_spnbx)
@@ -47,6 +48,9 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
         self.db_spnbx.setValue(component.intensity())
         self.dur_spnbx.setValue(component.duration()/self.scales[0])
         self.risefall_spnbx.setValue(component.risefall()/self.scales[0])
+
+        self.tunit_lbl_0.setText(component._labels[0])
+        self.tunit_lbl_1.setText(component._labels[0])
 
     def getValue(self, field):
         if field == 'intensity':

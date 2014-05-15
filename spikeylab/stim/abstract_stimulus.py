@@ -72,7 +72,7 @@ class AbstractStimulusComponent(object):
         """A list of the parameter names that are available to
         be set using auto-paramter manipulation. Subclasses should
         reimplement and add to this list"""
-        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':2},
+        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0., 'max':2.},
                 'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':120}, 
                 'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 
@@ -90,21 +90,23 @@ class AbstractStimulusComponent(object):
         self._intensity = state['intensity']
         self._risefall = state['risefall']
 
-    def update_fscale(self, scale):
-        self._scales[1] = scale
+    @staticmethod
+    def update_fscale(scale):
+        AbstractStimulusComponent._scales[1] = scale
         if scale == 1000:
-            self._labels[1] = 'kHz'
+            AbstractStimulusComponent._labels[1] = 'kHz'
         elif scale == 1:
-            self._labels[1] = 'Hz'
+            AbstractStimulusComponent._labels[1] = 'Hz'
         else:
             raise Exception(u"Invalid frequency scale")
 
-    def update_tscale(self, scale):
-        self._scales[0] = scale
+    @staticmethod
+    def update_tscale(scale):
+        AbstractStimulusComponent._scales[0] = scale
         if scale == 0.001:
-            self._labels[0] = 'ms'
+            AbstractStimulusComponent._labels[0] = 'ms'
         elif scale == 1:
-            self._labels[0] = 's'
+            AbstractStimulusComponent._labels[0] = 's'
         else:
             raise Exception(u"Invalid time scale")
 
