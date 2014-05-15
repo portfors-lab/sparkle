@@ -108,7 +108,10 @@ class ControlWindow(QtGui.QMainWindow):
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
-
+            if not self.acqmodel.attenuator_connection():
+                failmsg = "Error Connection to attenuator, make sure it it turned on and connected, and try again"
+                QtGui.QMessageBox.warning(self, "Connection Error", failmsg)
+                return False
         return True
 
     def update_unit_labels(self, tscale, fscale, setup=False):

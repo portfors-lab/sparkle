@@ -247,3 +247,17 @@ class AcquisitionManager():
     def set_group_comment(self, comment):
         """Sets a comment for the last executed protocol group"""
         self.protocoler.set_comment(self.current_cellid, comment)
+
+    def attenuator_connection(self):
+        # all or none will be connected
+        acquisition_modules = [self.explorer, self.protocoler, self.bs_calibrator, self.tone_calibrator, self.charter]
+        if not acquisition_modules[0].player.attenuator_connected():
+            #attempt to re-connect first
+            for module in acquisition_modules:
+                success = module.player.connect_attenuator()
+            if success is None:
+                return False
+            else:
+                return True
+        else:
+            return True

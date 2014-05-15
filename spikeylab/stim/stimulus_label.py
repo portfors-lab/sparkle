@@ -28,6 +28,7 @@ class StimulusLabelTable(QtGui.QWidget):
         layout.addWidget(self.trash_lbl, 0,3)
 
         self.setLayout(layout)
+        self.setToolTip("Drag to list")
 
     def trash(self):
         return self.trash_lbl

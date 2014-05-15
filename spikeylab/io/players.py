@@ -32,22 +32,7 @@ class PlayerBase():
 
         self.stim_changed = False
 
-        # establish connection to the attenuator
-        try:
-            pa5 = win32com.client.Dispatch("PA5.x")
-            success = pa5.ConnectPA5('GB', 1)
-            if success == 1:
-                print 'Connection to PA5 attenuator established'
-            else:
-                print 'Connection to PA5 attenuator failed'
-                errmsg = pa5.GetError()
-                print u"Error: ", errmsg
-                raise Exception(u"Attenuator connection failed")
-        except:
-            print "Error connecting to attenuator"
-            pa5 = None
-
-        self.attenuator = pa5
+        self.connect_attenuator()        
 
     def start(self):
         raise NotImplementedError
@@ -125,6 +110,29 @@ class PlayerBase():
     def set_maxv(self, v):
         return
         self.maxv = v
+
+    def connect_attenuator(self):
+        # establish connection to the attenuator
+        try:
+            pa5 = win32com.client.Dispatch("PA5.x")
+            success = pa5.ConnectPA5('GB', 1)
+            if success == 1:
+                print 'Connection to PA5 attenuator established'
+            else:
+                print 'Connection to PA5 attenuator failed'
+                errmsg = pa5.GetError()
+                print u"Error: ", errmsg
+                raise Exception(u"Attenuator connection failed")
+        except:
+            print "Error connecting to attenuator"
+            pa5 = None
+
+        self.attenuator = pa5
+        
+        return self.attenuator
+
+    def attenuator_connected(self):
+        return self.attenuator is not None
 
 class FinitePlayer(PlayerBase):
     """For finite generation/acquisition tasks"""

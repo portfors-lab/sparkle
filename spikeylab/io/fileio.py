@@ -41,7 +41,7 @@ def mightysave(filename, data, filetype=u'auto'):
                 # so go through and convert
             data = filter_keys(data)
             print data
-            spio.savemat(filename, data)
+            spio.savemat(filename, data, oned_as='column')
         elif filetype == u'pkl':
             with open(filename, u'wb') as pf:
                 pickle.dump(data, pf)
