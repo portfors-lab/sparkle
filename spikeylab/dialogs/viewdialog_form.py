@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\view_dlg.ui'
 #
-# Created: Wed Apr 09 16:18:52 2014
+# Created: Thu May 15 16:43:01 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -79,8 +79,8 @@ class Ui_ViewSettingsDialog(object):
     def retranslateUi(self, ViewSettingsDialog):
         ViewSettingsDialog.setWindowTitle(_translate("ViewSettingsDialog", "Dialog", None))
         self.label.setText(_translate("ViewSettingsDialog", "Font Size", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.ui_tab), _translate("ViewSettingsDialog", "Tab 1", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.ui_tab), _translate("ViewSettingsDialog", "Appearence", None))
         self.label_3.setText(_translate("ViewSettingsDialog", "Attributes to show:", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("ViewSettingsDialog", "Tab 2", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("ViewSettingsDialog", "Stimuli", None))
 
 from spikeylab.stim.component_detail import ComponentsDetailSelector

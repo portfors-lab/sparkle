@@ -63,6 +63,7 @@ class AcquisitionData():
                         self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
         
         self.hdf5.attrs['test_count'] = self.test_count
+        print 'final test count', self.hdf5.attrs['test_count']
         fname = self.hdf5.filename
 
         # if there was no data saved, just remove the file

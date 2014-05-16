@@ -21,7 +21,7 @@
      </property>
      <widget class="QWidget" name="ui_tab">
       <attribute name="title">
-       <string>Tab 1</string>
+       <string>Appearence</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
@@ -38,7 +38,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Tab 2</string>
+       <string>Stimuli</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
