@@ -147,8 +147,8 @@ class CalibrationExperimenter(Experimenter):
                 self.calpeak = mean_peak
                 self.trace_counter +=1
             else:
-                resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
-                # resultdb = 94 + (20.*np.log10((mean_peak/np.sqrt(2))/0.00407))
+                # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
+                resultdb = 94 + (20.*np.log10((mean_peak/np.sqrt(2))/0.0048))
                 self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):

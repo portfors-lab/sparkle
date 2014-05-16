@@ -428,7 +428,7 @@ class MainWindow(ControlWindow):
             masterdb = 94 + (20.*np.log10(rms/(0.004)))
             sr = self.ui.aisr_spnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
-            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/0.004))
+            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/0.0048))
             spectrum[0] = 0
             peakspl = np.amax(spectrum)
             self.ui.dblevel_lbl.setNum(masterdb)

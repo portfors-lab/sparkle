@@ -1,66 +1,17 @@
+import sys, time
+import numpy as np
+
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
 from spikeylab.plotting.pyqtgraph_widgets import StackedPlot
 from spikeylab.tools.audiotools import tukey, calc_impulse_response, \
-                convolve_filter, smooth, calc_attenuation_curve, multiply_frequencies
+                convolve_filter, smooth, calc_attenuation_curve, multiply_frequencies, \
+                calc_db
 
-import sys, time
-import numpy as np
+from test.scripts.util import calc_error, record, MyTableWidgetItem
 
 from PyQt4 import QtGui, QtCore
 
-class MyTableWidgetItem(QtGui.QTableWidgetItem):
-    def __lt__(self, other):
-        try:
-            return float(self.text()) < float(other.text())
-        except:
-            return super(MyTableWidgetItem, self).__lt__(other)
-
-def calc_db(peak, calpeak):
-    pbdb = 94 + (20.*np.log10((peak/np.sqrt(2))/0.00407))
-    # pbdB = 20 * np.log10(peak/calpeak)
-    return pbdb
-
-def calc_error(predicted, recorded, frange, title=None):
-    npts = len(predicted)
-
-    dc = np.mean(recorded)
-    recorded = recorded - dc
-
-    f = np.arange(npts/2+1)/(float(npts)/fs)
-    f0 = (np.abs(f-frange[0])).argmin()
-    f1 = (np.abs(f-frange[1])).argmin()
-
-    # predicted = predicted/np.amax(predicted)
-    # recorded = recorded/np.amax(recorded)
-
-    predicted_spectrum = abs(np.fft.rfft(predicted)/npts)
-    recorded_spectrum = abs(np.fft.rfft(recorded)/npts)
-
-    # evaluate error only for calibrated region
-    predicted_roi = predicted_spectrum[f0:f1]
-    recorded_roi = recorded_spectrum[f0:f1]
-
-    # convert into dB scale
-    predicted_db = refdb + 20 * np.log10(predicted_roi/ refv)
-    # recorded_db = calc_db(recorded_roi,0)
-    recorded_db = 94 + (20.*np.log10((recorded_roi/np.sqrt(2))/0.004))
-
-    mse = (np.sum((recorded_db - predicted_db)**2))/npts
-    mae = abs(np.mean(recorded_db - predicted_db))
-    mse2 = np.sqrt(mse)
-
-    # plt.figure()
-    # plt.suptitle('{} {:.4f}'.format(title, mse2))
-    # plt.subplot(211)
-    # plt.plot(f[f0:f1], predicted_db)
-    # plt.title("predicted")
-    # plt.subplot(212)
-    # plt.title("recorded")
-    # plt.plot(f[f0:f1], recorded_db)
-    # plt.show()
-
-    return mse, mse2, mae
 
 def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     if method == 'multiply':
@@ -70,24 +21,10 @@ def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     else:
         raise Exception("Unknown calibration method: {}".format(method))
 
-
-def record(sig):
-    reps = []
-    player.set_stim(sig, fs)
-    player.start()
-    for irep in range(nreps):
-        response = player.run()
-        reps.append(response)
-        player.reset()
-
-    player.stop()
-    return np.mean(reps, axis=0)
-
-
-MULT_CAL = True
+MULT_CAL = False
 CONV_CAL = True
-NOISE_CAL = True
-CHIRP_CAL = False
+NOISE_CAL = False
+CHIRP_CAL = True
 
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
 SMOOTHINGS = [99]
@@ -99,11 +36,10 @@ TONE_CURVE = False
 PLOT_RESULTS = True
 
 # method 1 Tone Curve
-nreps = 3
-refv = 1.2 # Volts
+refv = 1.0 # Volts
 refdb = 115 # dB SPL
 calf = 15000
-dur = 0.2 #seconds (window and stim)
+dur = 0.1 #seconds (window and stim)
 fs = 5e5
 
 if __name__ == "__main__":
@@ -133,7 +69,7 @@ if __name__ == "__main__":
     # control stim, witout calibration
     print 'control noise...'
 
-    mean_control_noise = record(wn_signal)
+    mean_control_noise = record(player, wn_signal, fs)
 
     chirp = FMSweep()
     chirp.setDuration(dur)
@@ -143,7 +79,7 @@ if __name__ == "__main__":
     # control stim, witout calibration
     print 'control chirp...'
 
-    mean_control_chirp = record(chirp_signal)
+    mean_control_chirp = record(player, chirp_signal, fs)
 
     freqs = np.arange(npts/2+1)/(float(npts)/fs)
 
@@ -172,7 +108,7 @@ if __name__ == "__main__":
                 info['smoothing'] = sm
                 for trunc in TRUNCATIONS:
                     info['truncation'] = trunc
-                    impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, trunc)
+                    impulse_response = calc_impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
                     info['len'] = len(impulse_response)
                     info['calibration'] = impulse_response
                     calibration_methods.append(info.copy())
@@ -201,7 +137,7 @@ if __name__ == "__main__":
                 info['smoothing'] = sm
                 for trunc in TRUNCATIONS:
                     info['truncation'] = trunc
-                    impulse_response = calc_impulse_response(smoothed_attenuations, freqs, frange, trunc)
+                    impulse_response = calc_impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
                     info['len'] = len(impulse_response)
                     info['calibration'] = impulse_response
                     calibration_methods.append(info.copy())
@@ -229,7 +165,7 @@ if __name__ == "__main__":
                 calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
                                         fs, frange, freqs, cal_params['calibration'],
                                         cal_params['method'])
-                mean_response = record(calibrated_tone)
+                mean_response = record(player, calibrated_tone)
                 spectrum = np.fft.rfft(mean_response)/npts
                 ftp = spectrum[freqs == tf][0]
                 mag = abs(ftp)
@@ -255,7 +191,7 @@ if __name__ == "__main__":
                                                  freqs, cal_params['calibration'],
                                                  cal_params['method'])
         tdif = time.time() - start
-        mean_response = record(wn_signal_calibrated)
+        mean_response = record(player, wn_signal_calibrated, fs)
         cal_params['noise_response'] = mean_response
         cal_params['time'] = tdif
 
@@ -265,7 +201,7 @@ if __name__ == "__main__":
                                                  freqs, cal_params['calibration'],
                                                  cal_params['method'])
         tdif = time.time() - start
-        mean_response = record(chirp_signal_calibrated)
+        mean_response = record(player, chirp_signal_calibrated, fs)
         cal_params['chirp_response'] = mean_response
         cal_params['time'] = tdif
 
@@ -292,6 +228,9 @@ if __name__ == "__main__":
         for cal_params in calibration_methods:
             spectrum = abs(np.fft.rfft(cal_params['noise_response'])/npts)
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
+            rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
+            masterdb = 94 + (20.*np.log10(rms/(0.004)))
+            print 'noise received overall db', masterdb
             # spectrum[0] = 0
             fig1.add_plot(freqs, spectrum, title='{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
@@ -313,7 +252,7 @@ if __name__ == "__main__":
             spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
             masterdb = 94 + (20.*np.log10(rms/(0.004)))
-            print 'received overall db', masterdb
+            print 'chirp received overall db', masterdb
             # spectrum[0] = 0
             fig2.add_plot(freqs, spectrum, title=ttl)
         fig2.setWindowTitle('Chirp stim')
@@ -329,7 +268,7 @@ if __name__ == "__main__":
     irow = 0
     for cal_params in calibration_methods:
         if 'noise_response' in cal_params:
-            ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, cal_params['noise_response'], frange)
+            ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, cal_params['noise_response'], fs, frange, refdb, refv)
             cal_params['MAE'] = ctrl_mae
             cal_params['NMSE'] = ctrl_err
             cal_params['RMSE'] = ctrl_err_sr
@@ -341,7 +280,7 @@ if __name__ == "__main__":
             irow +=1
 
         if 'chirp_response' in cal_params:
-            ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, cal_params['chirp_response'], frange)
+            ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, cal_params['chirp_response'], fs, frange, refdb, refv)
             cal_params['MAE'] = ctrl_mae
             cal_params['NMSE'] = ctrl_err
             cal_params['RMSE'] = ctrl_err_sr

@@ -3,18 +3,13 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import tukey, calc_impulse_response, \
                 convolve_filter, calc_attenuation_curve, multiply_frequencies
+from test.scripts.util import calc_error, record, MyTableWidgetItem
+
 
 import sys, time, os, json
 import numpy as np
 
 from PyQt4 import QtGui, QtCore
-
-class MyTableWidgetItem(QtGui.QTableWidgetItem):
-    def __lt__(self, other):
-        try:
-            return float(self.text()) < float(other.text())
-        except:
-            return super(MyTableWidgetItem, self).__lt__(other)
 
 def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     if method == 'multiply':
@@ -23,18 +18,6 @@ def apply_calibration(sig, fs, frange, calfqs, calvals, method):
         return convolve_filter(sig, calvals)
     else:
         raise Exception("Unknown calibration method: {}".format(method))
-
-def record(sig):
-    reps = []
-    player.set_stim(sig, fs)
-    player.start()
-    for irep in range(nreps):
-        response = player.run()
-        reps.append(response)
-        player.reset()
-
-    player.stop()
-    return np.mean(reps, axis=0)
 
 
 MULT_CAL = True
@@ -78,7 +61,7 @@ if __name__ == "__main__":
     # control stim, witout calibration
     print 'control noise...'
 
-    mean_control_noise = record(wn_signal)
+    mean_control_noise = record(player, wn_signal, fs)
 
     freqs = np.arange(npts/2+1)/(float(npts)/fs)
 
@@ -100,7 +83,7 @@ if __name__ == "__main__":
         info['method'] =  'convolve'
         for trunc in TRUNCATIONS:
             info['truncation'] = trunc
-            impulse_response = calc_impulse_response(noise_curve_db, freqs, frange, trunc)
+            impulse_response = calc_impulse_response(fs, noise_curve_db, freqs, frange, trunc)
             info['len'] = len(impulse_response)
             info['calibration'] = impulse_response
             calibration_methods.append(info.copy())

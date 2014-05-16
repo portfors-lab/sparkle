@@ -14,6 +14,7 @@ VERBOSE = False
 def calc_db(peak, cal_peak):
     u""" converts voltage difference into deicbels : 20*log10(peak/cal_peak)"""
     try:
+        # pbdb = 94 + (20.*np.log10((peak/np.sqrt(2))/0.00407))
         pbdB = 20 * np.log10(peak/cal_peak)
     except ZeroDivisionError:
         print u'attempted division by zero:'
