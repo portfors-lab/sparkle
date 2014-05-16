@@ -15,7 +15,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.test_order = []
         self.tests = {}
-        self.headers = ['Test type', 'Reps', 'Length', 'Total', 'Generation rate']
+        self.headers = ['Tag', 'Test type', 'Reps', 'Length', 'Total', 'Generation rate']
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
         self.caldb = None
         self.calv = None
@@ -45,22 +45,24 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         return len(self.test_order)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
-        return 5
+        return 6
 
     def data(self, index, role):
-        if role == QtCore.Qt.DisplayRole:
+        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             stimid = self.test_order[index.row()]
             test = self.tests[stimid]
             col = index.column()
             if col == 0:
-                item = test.stimType()
+                item = test.userTag()
             elif col == 1:
-                item = test.repCount()
+                item = test.stimType()
             elif col == 2:
-                item = test.traceCount()
+                item = test.repCount()
             elif col == 3:
+                item = test.traceCount()
+            elif col == 4:
                 item = test.traceCount()*test.loopCount()*test.repCount()
-            elif col ==4:
+            elif col == 5:
                 item = test.samplerate()
 
             return item
@@ -73,14 +75,18 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             return stimid
 
     def flags(self, index):
-        if index.column() == 1:
+        if index.column() == 0:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         else:
             return QtCore.Qt.ItemIsEnabled
 
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:
-            if index.column() == 1:
+            if index.column() == 0:
+                stimid = self.test_order[index.row()]
+                test = self.tests[stimid]
+                test.setUserTag(value)
+            if index.column() == 2:
                 stimid = self.test_order[index.row()]
                 test = self.tests[stimid]
                 test.setRepCount(value)
@@ -206,12 +212,23 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         x = self.width()
         return QtCore.QLine(0,y,x,y)
 
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            index = self.indexAt(event.pos())
+            if index.isValid():
+                print 'test index', index.row(), index.column()
+                if index.column() == 0:
+                    self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
+        else:
+            super(ProtocolView, self).mousePressEvent(event)
+
     def mouseDoubleClickEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             index = self.indexAt(event.pos())
-            selected = self.model().data(index, QtCore.Qt.UserRole)
-            self.stim_editor = selected.showEditor()
-            self.stim_editor.show()
+            if index.isValid():
+                selected = self.model().data(index, QtCore.Qt.UserRole)
+                self.stim_editor = selected.showEditor()
+                self.stim_editor.show()
 
     def indexXY(self, index):
         """Return the top left coordinates of the row for the given index"""

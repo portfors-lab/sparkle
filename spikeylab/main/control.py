@@ -394,7 +394,7 @@ class MainWindow(ControlWindow):
         else:
             # Always use noise on saving calibration.
             # BEWARE: Hardcoded to index 1... this could change?!
-            self.acqmodel.set_calibration_by_index(0)
+            self.acqmodel.set_calibration_by_index(1)
 
         if self.ui.calibration_widget.ui.applycal_ckbx.isChecked() and self.ui.calibration_widget.is_tone_cal():
             frequencies, intensities = self.acqmodel.calibration_range()

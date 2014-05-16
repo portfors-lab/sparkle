@@ -35,7 +35,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.calv = None
         self.caldb = None
         self.impulse_response = None
-        self.maxv = 7.0
+        self.maxv = 2.0
         self.minv = 0.005
 
         self._attenuation_vector = None
@@ -47,6 +47,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.editor = None
         self.reorder = None
         self.reorder_name = None
+        self.user_tag = '' # user enter tag
+
+    def setUserTag(self, tag):
+        self.user_tag = tag
+
+    def userTag(self):
+        return self.user_tag
 
     def setReferenceVoltage(self, caldb, calv):
         # make sure these are python types, so json encoding doesn't get throw
@@ -380,6 +387,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if stim is None:
             stim = StimulusModel()
         stim.setRepCount(template['reps'])
+        stim.setUserTag(template.get('user_tag', ''))
         # don't set calibration details - this should be the same application wide
         stim.setEditor(get_stimulus_editor(template['testtype']))
         component_classes = get_stimuli_models()
@@ -486,7 +494,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             testtype = self.editor.name
         else:
             testtype = None
-        return {'samplerate_da':samplerate, 'reps': self._nreps, 
+        return {'samplerate_da':samplerate, 'reps': self._nreps, 'user_tag': self.user_tag,
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list,
                 'testtype': testtype}
 
