@@ -30,6 +30,7 @@ class BasePlot(pg.PlotWidget):
         #         print 'removing', act.text()
         #         self.getPlotItem().vb.menu.removeAction(act)
         # print '-'*20
+        self.setMouseEnabled(x=False,y=True)
 
     def set_tscale(self, scale):
         pass
@@ -65,7 +66,6 @@ class TraceWidget(BasePlot):
         self.sigRangeChanged.connect(self.range_change)
 
         self.disableAutoRange()
-        self.setMouseEnabled(x=False,y=True)
 
         raster_bounds_action = QtGui.QAction("Edit raster bounds", None)
         self.scene().contextMenu.append(raster_bounds_action) #should use function for this?
@@ -161,8 +161,6 @@ class SpecWidget(BasePlot):
 
         self.img = pg.ImageItem()
         self.addItem(self.img)
-
-        self.setMouseEnabled(x=False,y=True)
 
         cmap_action = QtGui.QAction("Edit colormap", None)
         self.scene().contextMenu.append(cmap_action) #should use function for this?
@@ -328,7 +326,6 @@ class PSTHWidget(BasePlot):
         self.addItem(self.histo)
         self.setLabel('bottom', 'Time Bins', units='s')
         self.setLabel('left', 'Spike Counts')
-        self.setMouseEnabled(x=False,y=True)
         self.set_xlim((0, 0.25))
         self.set_ylim((0, 10))
 
@@ -401,7 +398,6 @@ class ScrollingWidget(BasePlot):
         self.scroll_plot = self.plot(pen=pencolor)
 
         self.disableAutoRange()
-        self.setMouseEnabled(x=False,y=True)
 
     def set_sr(self, sr):
         self._deltax = (1/float(sr))
