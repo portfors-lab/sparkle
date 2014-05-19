@@ -1,19 +1,7 @@
 import sys
 import numpy as np
 from spikeylab.io.players import FinitePlayer
-
-def record(sig, atten):
-    nreps = 3
-    reps = []
-    player.set_stim(sig, fs, atten)
-    player.start()
-    for irep in range(nreps):
-        response = player.run()
-        reps.append(response)
-        player.reset()
-
-    player.stop()
-    return np.mean(reps, axis=0)
+from test.scripts.util import record
 
 refV = 1.0
 dur = 0.2
@@ -37,7 +25,7 @@ for atten in attenuation_range:
         sys.stdout.write('.') # print without space
         tone = refV * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
         tone_rms = np.sqrt(np.mean(pow(tone,2)))
-        result = record(tone, atten)
+        result = record(player, tone, fs, atten)
         rms = np.sqrt(np.mean(pow(result,2)))
         db = 20.*np.log10(rms/tone_rms)
 
@@ -49,6 +37,7 @@ for atten in attenuation_range:
         freq_results.append(db)
     all_results.append(freq_results)
     plt.plot(frequency_range, freq_results, label=str(atten))
+print 'done'
 
 plt.legend()
 

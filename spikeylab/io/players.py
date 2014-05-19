@@ -28,7 +28,7 @@ class PlayerBase():
         self.aitask = None
         self.aotask = None
 
-        self.maxv = 1.5 #Volts
+        self.maxv = 9.5 #Volts
 
         self.stim_changed = False
 

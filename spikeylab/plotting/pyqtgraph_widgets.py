@@ -270,11 +270,11 @@ class SimplePlotWidget(BasePlot):
             for row in ypoints:
                 self.append_data(xpoints, row)
         else:
-            self.pdi = self.plot(xpoints, ypoints, pen='k')
+            self.pdi = self.plot(xpoints, ypoints, pen='b')
         self.resize(800,500)
 
     def append_data(self, xpoints, ypoints):
-        self.plot(xpoints, ypoints, pen='k')
+        self.plot(xpoints, ypoints, pen='b')
 
     def set_labels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         if xlabel is not None:

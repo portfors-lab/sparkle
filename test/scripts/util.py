@@ -52,10 +52,10 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     return mse, mse2, mae
 
 
-def record(player, sig, fs):
+def record(player, sig, fs, atten=0):
     nreps = 3
     reps = []
-    player.set_stim(sig, fs)
+    player.set_stim(sig, fs, atten)
     player.start()
     for irep in range(nreps):
         response = player.run()

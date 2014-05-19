@@ -35,16 +35,16 @@ TONE_CURVE = True
 PLOT_RESULTS = True
 
 # method 1 Tone Curve
-refv = 1.0 # Volts
-refdb = 115 # dB SPL
+refv = 0.1 # Volts
+refdb = 90 # dB SPL
 calf = 15000
 dur = 0.1 #seconds (window and stim)
 fs = 5e5
 
 if __name__ == "__main__":
-    tone_frequencies = range(5000, 110000, 2000)
+    tone_frequencies = range(5000, 100000, 2000)
     # tone_frequencies = [5000, calf, 50000, 100000]
-    tone_intensities = [50, 60, 70, 80]
+    tone_intensities = [50, 60, 70, 80, 90, 100]
     frange = [2000, 105000] # range to apply calibration to
     npts = dur*fs
 
@@ -157,6 +157,15 @@ if __name__ == "__main__":
             testpeaks = np.zeros((len(tone_intensities), len(tone_frequencies)))
             print 'running tone curve {}/{}'.format(counter, len(cal_params)),
             counter +=1
+
+            tone.setIntensity(refdb)
+            tone.setFrequency(calf)
+            tone_signal = tone.signal(fs, 0, refdb, refv)
+            mean_response = record(player, tone_signal, fs)
+            spectrum = np.fft.rfft(mean_response)/npts
+            ftp = spectrum[freqs == calf][0]
+            test_peak= abs(ftp)
+            
             for db_idx, ti in enumerate(tone_intensities):
                 tone.setIntensity(ti)
                 for freq_idx, tf in enumerate(tone_frequencies):
@@ -172,8 +181,7 @@ if __name__ == "__main__":
                     mag = abs(ftp)
                     testpeaks[db_idx, freq_idx] = mag
 
-            # test_peak = testpeaks[tone_frequencies.index(calf)]
-            testcurve_db = vfunc(testpeaks)#, test_peak)
+            testcurve_db = vfunc(testpeaks, test_peak) + refdb
             cal_params['tone_curve'] = testcurve_db
             print
 
