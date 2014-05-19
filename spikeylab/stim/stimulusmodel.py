@@ -35,7 +35,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.calv = None
         self.caldb = None
         self.impulse_response = None
-        self.maxv = 2.0
+        self.maxv = 1.5
         self.minv = 0.005
 
         self._attenuation_vector = None

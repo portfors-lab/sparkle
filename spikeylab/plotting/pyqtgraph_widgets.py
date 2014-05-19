@@ -265,9 +265,16 @@ class FFTWidget(BasePlot):
 class SimplePlotWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
-
-        self.pdi = self.plot(xpoints, ypoints, pen='k')
+        ypoints = np.squeeze(ypoints)
+        if len(ypoints.shape) > 1:
+            for row in ypoints:
+                self.append_data(xpoints, row)
+        else:
+            self.pdi = self.plot(xpoints, ypoints, pen='k')
         self.resize(800,500)
+
+    def append_data(self, xpoints, ypoints):
+        self.plot(xpoints, ypoints, pen='k')
 
     def set_labels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         if xlabel is not None:

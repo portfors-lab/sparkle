@@ -11,11 +11,13 @@ from PyQt4.QtGui import QImage
 
 VERBOSE = False
 
-def calc_db(peak, cal_peak):
+def calc_db(peak, cal_peak=None):
     u""" converts voltage difference into deicbels : 20*log10(peak/cal_peak)"""
     try:
-        # pbdb = 94 + (20.*np.log10((peak/np.sqrt(2))/0.00407))
-        pbdB = 20 * np.log10(peak/cal_peak)
+        if cal_peak:
+            pbdB = 20 * np.log10(peak/cal_peak)
+        else:
+            pbdB = 94 + (20.*np.log10((peak/np.sqrt(2))/0.0048))
     except ZeroDivisionError:
         print u'attempted division by zero:'
         print u'peak {}, caldb {}, calpeak {}'.format(peak, caldb, cal_peak)
@@ -218,17 +220,20 @@ def convolve_filter(signal, impulse_response):
 def calc_impulse_response(genrate, db_boost_array, frequencies, frange, truncation_factor=64):
     # calculate filter kernel from attenuation vector
     # treat attenuation vector as magnitude frequency response of system
-    npts = (len(db_boost_array)- 1) *2
-    fs = (frequencies[1] - frequencies[0]) * npts
 
-    freq = np.arange(npts/2+1)/(float(npts)/fs)
+    freq = frequencies
     max_freq = genrate/2+1
 
     attenuations = np.zeros_like(db_boost_array)
-    f0 = (np.abs(freq-frange[0])).argmin()
-    f1 = (np.abs(freq-frange[1])).argmin()
+    # add extra points for windowing
+    winsz = 0.05 # percent
+    lowf = max(0, frange[0] - (frange[1] - frange[0])*winsz)
+    highf = min(frequencies[-1], frange[1] + (frange[1] - frange[0])*winsz)
+
+    f0 = (np.abs(freq-lowf)).argmin()
+    f1 = (np.abs(freq-highf)).argmin()
     fmax = (np.abs(freq-max_freq)).argmin()
-    attenuations[f0:f1] = db_boost_array[f0:f1]*tukey(len(db_boost_array[f0:f1]), 0.05)
+    attenuations[f0:f1] = db_boost_array[f0:f1]*tukey(len(db_boost_array[f0:f1]), winsz)
     freq_response = 10**((attenuations).astype(float)/20)
 
     freq_response = freq_response[:fmax]
