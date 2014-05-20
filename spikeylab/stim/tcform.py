@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Wed May 07 15:18:28 2014
+# Created: Tue May 20 16:41:38 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -213,8 +213,8 @@ class Ui_TuningCurveEditor(object):
         self.label_27.setText(_translate("TuningCurveEditor", "Stop", None))
         self.label_28.setText(_translate("TuningCurveEditor", "Step", None))
         self.label_3.setText(_translate("TuningCurveEditor", "No. steps", None))
-        self.freq_nsteps_lbl.setText(_translate("TuningCurveEditor", "0", None))
-        self.db_nsteps_lbl.setText(_translate("TuningCurveEditor", "0", None))
+        self.freq_nsteps_lbl.setText(_translate("TuningCurveEditor", "-1", None))
+        self.db_nsteps_lbl.setText(_translate("TuningCurveEditor", "-1", None))
         self.label_14.setText(_translate("TuningCurveEditor", "Rise fall time", None))
         self.label_22.setText(_translate("TuningCurveEditor", "Duration", None))
         self.tunit_lbl_4.setText(_translate("TuningCurveEditor", "ms", None))
