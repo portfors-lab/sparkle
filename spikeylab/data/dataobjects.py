@@ -6,7 +6,7 @@ import os
 import socket
 
 from spikeylab.tools.exceptions import DataIndexError
-from spikeylab.tools.util import convert2native
+from spikeylab.tools.util import convert2native, max_str_num
 
 class AcquisitionData():
     """
@@ -42,9 +42,16 @@ class AcquisitionData():
             self.hdf5.attrs['computername'] = socket.gethostname()
             self.test_count = 0
         else:
-            self.test_count = self.hdf5.attrs['test_count']
+            # find highes numbered test.. tight coupling to acquisition classes
+            print 'data file keys', self.hdf5.keys()
+            group_prefix = 'segment_'
+            dset_prefix = 'test_'
             self.groups = dict(self.hdf5.items())
-            print 'groups', self.groups
+            gnum = max_str_num(group_prefix, self.hdf5.keys())
+            if gnum > 0:
+                self.test_count = max_str_num(dset_prefix, self.hdf5[group_prefix + str(gnum)].keys())
+            else:
+                self.test_count = 0
 
     def close(self):
         # check that all stim doc has closing brackets
@@ -62,8 +69,6 @@ class AcquisitionData():
                     if self.groups[key].attrs['stim'][-1] != ']':
                         self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
         
-        self.hdf5.attrs['test_count'] = self.test_count
-        print 'final test count', self.hdf5.attrs['test_count']
         fname = self.hdf5.filename
 
         # if there was no data saved, just remove the file

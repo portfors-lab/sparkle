@@ -208,6 +208,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
             self._segments.pop(len(self._segments)-1)
             self.endRemoveRows()
 
+        # this could have affected the sample of this stimulus
+        self.samplerateChanged.emit(self.samplerate())
+
+
     def insertItem(self, index, item):
         self.insertComponent(item, (index.row(), index.column()))
 
@@ -234,9 +238,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if value.__class__.__name__ == 'Vocalization':
             if value.samplerate() is not None:
                 # print 'emitting samplerate change', value.samplerate()
-                self.samplerateChanged.emit(value.samplerate())
                 # update calibration
                 self.updateCalibration()
+        self.samplerateChanged.emit(self.samplerate())
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable

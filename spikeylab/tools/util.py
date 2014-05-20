@@ -18,15 +18,19 @@ def create_unique_path(folder, file_template, ext='hdf5'):
     path = os.path.join(folder, file_template+str(counter)+'.'+ext)
     return path
 
-def next_str_num(prefix, strlist):
+def max_str_num(prefix, strlist):
     exp = prefix + '(\d+)'
     searchfun = lambda x: re.search(exp, x)
     matches = map(searchfun, strlist)
     nums = [int(x.group(1)) for x in matches if x is not None]
     if len(nums) > 0:
-        return prefix + str(max(nums) + 1)
+        return max(nums)
     else:
-        return prefix + '1'
+        return 0
+
+def next_str_num(prefix, strlist):
+    n = max_str_num(prefix, strlist)
+    return prefix + str(n + 1)
 
 def convert2native(obj):
     if hasattr(obj, '__iter__'):

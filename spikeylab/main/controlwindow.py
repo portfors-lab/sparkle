@@ -278,7 +278,7 @@ class ControlWindow(QtGui.QMainWindow):
             except KeyError:
                 print 'Unable to load saved inputs for', stim.__class__
 
-        self.ui.aosr_spnbx.setValue(self.acqmodel.explore_genrate())
+        self.ui.aosr_spnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
         self.save_inputs(self.inputs_filename)
