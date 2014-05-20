@@ -93,10 +93,13 @@ class Parametizer(QtGui.QWidget):
 
     def hideEvent(self, event):
         self.param_model.stimView().setMode(0)
+        # change stimulus components to reflect auto-parameter start values
+        self.param_model.updateComponentStartVals()
         self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; right drag to move.')
 
     def closeEvent(self, event):
         self.param_model.stimView().setMode(0)
+        self.param_model.updateComponentStartVals()
 
 
 class HidableParameterEditor(WidgetHider):

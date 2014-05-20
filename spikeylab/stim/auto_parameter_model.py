@@ -127,13 +127,6 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 if multiplier is not None:
                     if self.checkLimits(value*multiplier, param):
                         param[self.headers[index.column()]] = value*multiplier
-                        if index.column() == 1: # start value, change component to match
-                            selection_model = self._selectionmap[param['paramid']]
-                            comps = selection_model.selectionComponents()
-                            for component in comps:
-                                component.set(param['parameter'], value*multiplier)
-                            # emit signal, so stimulusview knows to update
-                            self.stimChanged.emit(self._stimmodel.index(0,0), self._stimmodel.index(self._stimmodel.rowCount(), self._stimmodel.columnCount()))
             else:
                 param[self.headers[index.column()]] = value
         elif role == QtCore.Qt.UserRole:
@@ -144,6 +137,16 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
             self._parameters[row] = value
         return True
 
+    def updateComponentStartVals(self):
+        """Go through selected components for each parameter and set the start value"""
+        for param in self._parameters:
+            selection_model = self._selectionmap[param['paramid']]
+            comps = selection_model.selectionComponents()
+            for component in comps:
+                component.set(param['parameter'], param['start'])
+                # emit signal, so stimulusview knows to update
+                self.stimChanged.emit(self._stimmodel.index(0,0), self._stimmodel.index(self._stimmodel.rowCount(), self._stimmodel.columnCount()))
+    
     def getDetail(self, index, detail):
         param = self._parameters[index.row()]
         param_type = param['parameter']

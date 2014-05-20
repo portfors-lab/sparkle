@@ -143,10 +143,12 @@ class TestAutoParameterModel():
         for i, value in enumerate(values):
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
+        model.updateComponentStartVals()
         # make sure it component is at orignal value
         assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
 
         model.setData(model.index(0,1), value, QtCore.Qt.EditRole)
+        model.updateComponentStartVals()
 
         assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
 

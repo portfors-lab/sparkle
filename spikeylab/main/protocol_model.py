@@ -40,6 +40,9 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.headers[section]
+
+    def allHeaders(self):
+        return self.headers
                         
     def rowCount(self, parent=QtCore.QModelIndex()):
         return len(self.test_order)
@@ -75,7 +78,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             return stimid
 
     def flags(self, index):
-        if index.column() == 0:
+        if index.column() == 0 or index.column == self.headers.index('Reps'):
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         else:
             return QtCore.Qt.ItemIsEnabled

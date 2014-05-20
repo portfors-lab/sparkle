@@ -13,7 +13,7 @@ class TestProtocolModel():
         model.insertNewTest(stim,0)        
 
         assert_equal(stim, model.data(model.index(0,0), role=QtCore.Qt.UserRole))
-        assert model.data(model.index(0,2), role=QtCore.Qt.DisplayRole) == 0
+        assert model.data(model.index(0,3), role=QtCore.Qt.DisplayRole) == 0
 
     def test_insert_remove_stim(self):
         model = ProtocolTabelModel()
@@ -23,12 +23,18 @@ class TestProtocolModel():
         stim.insertComponent(component, (0,0))
         model.insertNewTest(stim,0)        
 
+        headers = model.allHeaders()
+        repidx = headers.index('Reps')
+        lenidx = headers.index('Length')
+        totalidx = headers.index('Total')
+        fsidx = headers.index('Generation rate')
+
         assert_equal(stim, model.data(model.index(0,0), role=QtCore.Qt.UserRole))
         assert_equal([stim], model.stimulusList())
-        assert model.data(model.index(0,1), role=QtCore.Qt.DisplayRole) == 1
-        assert model.data(model.index(0,2), role=QtCore.Qt.DisplayRole) == 1
-        assert model.data(model.index(0,3), role=QtCore.Qt.DisplayRole) == 1
-        assert model.data(model.index(0,4), role=QtCore.Qt.DisplayRole) == stim.samplerate()
+        assert model.data(model.index(0,repidx), role=QtCore.Qt.DisplayRole) == 1
+        assert model.data(model.index(0,lenidx), role=QtCore.Qt.DisplayRole) == 1
+        assert model.data(model.index(0,totalidx), role=QtCore.Qt.DisplayRole) == 1
+        assert model.data(model.index(0,fsidx), role=QtCore.Qt.DisplayRole) == stim.samplerate()
         assert model.rowCount() == 1
 
         model.removeTest(0)
@@ -48,12 +54,16 @@ class TestProtocolModel():
         assert stim.repCount() == 1
 
         newreps = 3
-        model.setData(model.index(0,1), newreps, QtCore.Qt.EditRole)
+        headers = model.allHeaders()
+        repidx = headers.index('Reps')
+        lenidx = headers.index('Length')
+        totalidx = headers.index('Total')
+        model.setData(model.index(0,repidx), newreps, QtCore.Qt.EditRole)
 
         assert stim.repCount() == newreps
-        assert model.data(model.index(0,1), role=QtCore.Qt.DisplayRole) == newreps
-        assert model.data(model.index(0,2), role=QtCore.Qt.DisplayRole) == 1
-        assert model.data(model.index(0,3), role=QtCore.Qt.DisplayRole) == newreps
+        assert model.data(model.index(0,repidx), role=QtCore.Qt.DisplayRole) == newreps
+        assert model.data(model.index(0,lenidx), role=QtCore.Qt.DisplayRole) == 1
+        assert model.data(model.index(0,totalidx), role=QtCore.Qt.DisplayRole) == newreps
 
     def test_verify_no_tests(self):
         model = ProtocolTabelModel()
