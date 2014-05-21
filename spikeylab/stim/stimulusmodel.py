@@ -296,16 +296,16 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for p in params:
             # inclusive range
             if p['step'] > 0:
-                if p['start'] > p['stop']:
-                    start = p['stop']
-                    stop = p['start']
+                start = p['start']
+                stop = p['stop']
+                if start > stop:
+                    step = p['step']*-1
                 else:
-                    start = p['start']
-                    stop = p['stop']
+                    step = p['step']
                 nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
                 # print 'start, stop, steps', start, stop, nsteps
-                # print 'linspace inputs', start, start+p['step']*(nsteps-1), nsteps
-                step_tmp = np.linspace(start, start+p['step']*(nsteps-1), nsteps)
+                # print 'linspace inputs', start, start+step*(nsteps-1), nsteps
+                step_tmp = np.linspace(start, start+step*(nsteps-1), nsteps)
                 if step_tmp[-1] != stop:
                     step_tmp = np.append(step_tmp,stop)
                 print 'step range', step_tmp
