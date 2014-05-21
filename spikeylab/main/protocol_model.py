@@ -219,7 +219,6 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         if event.button() == QtCore.Qt.LeftButton:
             index = self.indexAt(event.pos())
             if index.isValid():
-                print 'test index', index.row(), index.column()
                 if index.column() == 0:
                     self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
         else:

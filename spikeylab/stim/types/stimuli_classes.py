@@ -182,8 +182,10 @@ class Vocalization(AbstractStimulusComponent):
             # wavdata = wavdata.astype(float)
             # nfft=512
             # Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
+            duration = np.trunc((float(len(wavdata))/sr)*1000)/1000
 
-            self._duration = float(len(wavdata))/sr
+            # self._duration = float(len(wavdata))/sr
+            self._duration = duration
             self._cached_pixmap = None
 
 
@@ -236,6 +238,14 @@ class Vocalization(AbstractStimulusComponent):
             raise Exception("specified samplerate does not match wav stimulus")
         # normalize to calibration
         wavdata = wavdata.astype(float)
+
+        #truncate to nears ms
+        duration = float(len(wavdata))/sr
+        print 'duration, desired', duration, np.trunc(duration*1000)/1000
+        desired_npts = int((np.trunc(duration*1000)/1000)*sr)
+        print 'npts. desired', len(wavdata), desired_npts
+        wavdata = wavdata[:desired_npts]
+
         if USE_RMS:
             amp_scale = np.sqrt(np.mean(pow(wavdata,2)))
         else:
@@ -342,3 +352,4 @@ class SFM(AbstractStimulusComponent):
 
 class Ripples(AbstractStimulusComponent):
     name = "ripples"
+

@@ -506,6 +506,7 @@ class MainWindow(ControlWindow):
                 self.extended_display.auto_range()
 
     def report_progress(self, itest, itrace, stim_info):
+        # print 'progress', stim_info
         self.ui.stim_details.set_test_num(itest)
         self.ui.stim_details.set_trace_num(itrace)
         self.ui.stim_details.set_doc(stim_info)

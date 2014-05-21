@@ -72,7 +72,7 @@ class Experimenter(AbstractAcquisitionModel):
                 test.setReferenceVoltage(self.caldb, self.calv)
 
                 self._initialize_test(test)
-                # profiler = cProfile.Profile()
+                profiler = cProfile.Profile()
                 # print 'profiling....'
                 # profiler.enable()
                 traces, docs, overs = test.expandedStim()
@@ -81,6 +81,8 @@ class Experimenter(AbstractAcquisitionModel):
                 # profiler.dump_stats('stim_gen_cal.profile')
                 nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
+                print 'profiling....'
+                profiler.enable()
                 for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                     signal, atten = trace
                     self.player.set_stim(signal, test.samplerate(), atten)
@@ -104,6 +106,9 @@ class Experimenter(AbstractAcquisitionModel):
                         self.player.reset()
 
                     self.player.stop()
+                profiler.disable()
+                print 'finished profiling'
+                profiler.dump_stats('test_run.profile')
         except Broken:
             # save some abortion message
             self.player.stop()

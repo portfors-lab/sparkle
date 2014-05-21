@@ -91,7 +91,8 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
                     
         if risefall > 0:
             rf_npts = risefall * samplerate
-            wnd = hann(rf_npts*2) # cosine taper
+            # error was occuring here without round or floor
+            wnd = hann(np.floor(rf_npts*2)) # cosine taper
             tone[:rf_npts] = tone[:rf_npts] * wnd[:rf_npts]
             tone[-rf_npts:] = tone[-rf_npts:] * wnd[rf_npts:]
 
@@ -116,6 +117,11 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
         wavdata = wavdata.astype(float)
     else:
         sr, wavdata = source
+        
+    #truncate to nears ms
+    duration = float(len(wavdata))/sr
+    desired_npts = int((np.trunc(duration*1000)/1000)*sr)
+    wavdata = wavdata[:desired_npts]
         
     # normalize
     if np.max(abs(wavdata)) != 0:

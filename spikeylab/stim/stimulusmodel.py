@@ -297,10 +297,19 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # inclusive range
             if p['step'] > 0:
                 if p['start'] > p['stop']:
-                    step = -1*p['step']
+                    start = p['stop']
+                    stop = p['start']
                 else:
-                    step = p['step']
-                steps.append(np.append(np.arange(p['start'], p['stop'], step),p['stop']))
+                    start = p['start']
+                    stop = p['stop']
+                nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
+                # print 'start, stop, steps', start, stop, nsteps
+                # print 'linspace inputs', start, start+p['step']*(nsteps-1), nsteps
+                step_tmp = np.linspace(start, start+p['step']*(nsteps-1), nsteps)
+                if step_tmp[-1] != stop:
+                    step_tmp = np.append(step_tmp,stop)
+                print 'step range', step_tmp
+                steps.append(step_tmp)
             else:
                 assert p['start'] == p['stop']
                 steps.append([p['start']])
@@ -332,7 +341,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 comp_inds = self._auto_params.selection(param)
                 for index in comp_inds:
                     component = self.data(index, QtCore.Qt.UserRole)
-                    component.set(param['parameter'], varylist[itrace][ip])
+                    # print 'setting component parameter {} to {}'.format(param['parameter'], varylist[itrace][ip])
+                    component.set(param['parameter'], np.around(varylist[itrace][ip],4))
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
             stim_list.append(func(*args))
@@ -454,7 +464,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         #     print 'sigmax {}, over_db {}, allowance {}, scalev {}'.format(sig_max, over_db, allowance, scalev)
         #     atten -= allowance
 
-        sig_max = max(abs(total_signal))
+        sig_max = np.max(abs(total_signal))
         if sig_max > maxv:
             # scale stim down to outputable max
             total_signal = (total_signal/sig_max)*maxv
