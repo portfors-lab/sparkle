@@ -4,6 +4,7 @@ import time
 import threading, Queue
 
 import h5py
+import numpy as np
 from nose.tools import assert_in, assert_equal, nottest
 
 from spikeylab.main.acquisition_manager import AcquisitionManager
@@ -169,22 +170,10 @@ class TestAcquisitionModel():
     def test_auto_parameter_protocol(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
+        nreps = 3
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        nreps = 3
-        component = PureTone()
-        stim_model = StimulusModel()
-        stim_model.insertComponent(component, (0,0))
-        stim_model.setRepCount(nreps)
-        auto_model = stim_model.autoParams()
-        auto_model.insertRows(0, 1)
-        
-        selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
-
-        values = ['frequency', 0, 100, 10]
-        for i, value in enumerate(values):
-            auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+        stim_model = create_stim(nreps)
 
         manager.protocol_model().insertNewTest(stim_model,0)
 
@@ -210,21 +199,11 @@ class TestAcquisitionModel():
     def test_auto_parameter_protocol_randomize(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
+        nreps = 1
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        component = PureTone()
-        stim_model = StimulusModel()
-        stim_model.insertComponent(component, (0,0))
+        stim_model = create_stim(nreps)
         stim_model.reorder = random_order
-        auto_model = stim_model.autoParams()
-        auto_model.insertRows(0, 1)
-        
-        selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
-
-        values = ['frequency', 0, 100, 10]
-        for i, value in enumerate(values):
-            auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
 
         manager.protocol_model().insertNewTest(stim_model,0)
         manager.setup_protocol(0.1)
@@ -243,10 +222,43 @@ class TestAcquisitionModel():
 
         assert freqs != sorted(freqs)
         assert_equal(stims[0]['samplerate_da'], stim_model.samplerate())
-        assert_equal(test.shape,(11,1,winsz*acq_rate))
+        assert_equal(test.shape,(11,nreps,winsz*acq_rate))
 
         hfile.close()
 
+    def test_protocol_timing(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        nreps = 4
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        stim_model = create_stim(nreps)
+
+        manager.protocol_model().insertNewTest(stim_model,0)
+
+        interval = 250
+        manager.setup_protocol(interval)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+        stims = json.loads(test.attrs['stim'])
+        # correct amount of time stamps per trace
+        assert len(stims[0]['time_stamps']) == stims[0]['reps']
+        # aggregate all time intervals
+        intervals = []
+        for stim in stims:
+            intervals.extend(stim['time_stamps'])
+        intervals = np.diff(intervals)
+        intervals = abs(intervals*1000 - interval)
+        print 'all intervals', intervals.shape, intervals
+        # 10ms tolerance, not as good as I would like
+        assert all(map(lambda x: x < 10, intervals))
+
+        hfile.close()
 
     def test_tone_explore(self):
         """Run search operation with tone stimulus"""
@@ -497,3 +509,21 @@ class TestAcquisitionModel():
         manager.charter.set_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
+
+def create_stim(nreps):
+    component = PureTone()
+    stim_model = StimulusModel()
+    stim_model.insertComponent(component, (0,0))
+    stim_model.setRepCount(nreps)
+    auto_model = stim_model.autoParams()
+    auto_model.insertRows(0, 1)
+    
+    selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+    selection_model.select(stim_model.index(0,0))
+
+    # values = ['frequency', 0, 100, 10]
+    values = ['duration', 65, 165, 10] # had caused problem in past
+    for i, value in enumerate(values):
+        auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+
+    return stim_model

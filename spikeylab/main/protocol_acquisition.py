@@ -81,34 +81,37 @@ class Experimenter(AbstractAcquisitionModel):
                 # profiler.dump_stats('stim_gen_cal.profile')
                 nreps = test.repCount()
                 self.nreps = test.repCount() # not sure I like this
-                print 'profiling....'
-                profiler.enable()
+                # print 'profiling....'
+                # profiler.enable()
                 for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                     signal, atten = trace
                     self.player.set_stim(signal, test.samplerate(), atten)
 
+                    stamps = []
                     self.player.start()
                     for irep in range(nreps):
                         self.interval_wait()
                         if self._halt:
                             raise Broken
                         response = self.player.run()
+                        stamps.append(time.time())
                         self._process_response(response, trace_doc, irep)
                         if irep == 0:
                             # do this after collection so plots match details
                             self.signals.stim_generated.emit(signal, test.samplerate())
                             self.signals.current_trace.emit(itest,itrace,trace_doc)
                             self.signals.over_voltage.emit(over)
-                            self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         
                         self.signals.current_rep.emit(irep)
 
                         self.player.reset()
-
+                        
+                    trace_doc['time_stamps'] = stamps
+                    self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                     self.player.stop()
-                profiler.disable()
-                print 'finished profiling'
-                profiler.dump_stats('test_run.profile')
+                # profiler.disable()
+                # print 'finished profiling'
+                # profiler.dump_stats('test_run.profile')
         except Broken:
             # save some abortion message
             self.player.stop()
