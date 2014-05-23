@@ -27,6 +27,9 @@ def spike_times(signal, threshold, sr, mint=None):
             else:
                 #first point in singleton
                 times.append(float(over[0])/sr)
+                if 1 not in segments:
+                    # make sure that first point is in there
+                    segments[0] = 1
             if segments[-1] != len(over)-1:
                 segments = np.insert(segments, [len(segments)], [len(over)-1])
             else:
@@ -58,7 +61,8 @@ def bin_spikes(spike_times, binsz):
     bins=[]
     for stime in spike_times:
         # bins.append((np.floor(stime/binsz)*binsz)+(binsz/2))
-        bins.append(int(np.floor(stime/binsz)))
+        # around to fix rounding errors
+        bins.append(int(np.floor(np.around(stime/binsz, 5))))
     return bins
 
 def spike_latency(signal, threshold, sr):

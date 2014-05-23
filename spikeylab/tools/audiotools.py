@@ -30,15 +30,10 @@ def calc_noise(fft_vector, ix1,ix2):
     return area
 
 def calc_spectrum(signal,rate):
-    #calculate complex fft
-
-    # pad with zeros?
-    #padded_signal = np.zeros(len(signal*2))
-    #padded_signal[:len(signal)] = signal
-    #signal = padded_signal
+    """Return the spectrum and frequency indexes for real-valued input signal"""
     npts = len(signal)
-    mdpt = (npts+1) % 2
-    freq = np.arange(npts/2+mdpt)/(npts/rate)
+    npts = npts - (npts % 2) # for odd length signals
+    freq = np.arange((npts/2)+1)/(npts/rate)
     #print('freq len ', len(freq))
 
     sp = np.fft.rfft(signal)/npts
