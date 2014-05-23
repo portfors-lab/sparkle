@@ -146,6 +146,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def columnCountForRow(self, row):
         return len(self._segments[row])
 
+    def componentCount(self):
+        return sum([self.columnCountForRow(x) for x in range(self.rowCount())])
+
     def data(self, index, role=QtCore.Qt.UserRole):
         if not index.isValid():
             return None
@@ -309,7 +312,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 if step_tmp[-1] != stop:
                     step_tmp = np.append(step_tmp,stop)
                 print 'step range', step_tmp
-                steps.append(step_tmp)
+                steps.append(np.around(step_tmp,4))
             else:
                 assert p['start'] == p['stop']
                 steps.append([p['start']])

@@ -89,7 +89,8 @@ class Explorer(AbstractAcquisitionModel):
                 self.interval_wait()
 
                 response = self.player.run()
-                
+                stamp = time.time()
+
                 self.signals.response_collected.emit(times, response)
                 if stim is not None:
                     self.signals.stim_generated.emit(stim, self.player.get_samplerate())
@@ -113,7 +114,7 @@ class Explorer(AbstractAcquisitionModel):
 
                 if self.save_data:
                     # save response data
-                    self.save_to_file(response)
+                    self.save_to_file(response, stamp)
 
                 self.irep +=1
                 if self.irep == self.nreps:
@@ -134,9 +135,11 @@ class Explorer(AbstractAcquisitionModel):
         if self.save_data:
             self.datafile.trim(self.current_dataset_name)
 
-    def save_to_file(self, data):
+    def save_to_file(self, data, stamp):
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
         info = self.stimulus.doc()
+        print 'saving doc', info
+        info['time_stamps'] = [stamp]
         info['samplerate_ad'] = self.player.aisr
         self.datafile.append_trace_info(self.current_dataset_name, info)

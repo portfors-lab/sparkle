@@ -10,7 +10,7 @@ from nose.tools import assert_in, assert_equal, nottest
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.reorder import random_order
 from spikeylab.stim.factory import TCFactory
@@ -59,11 +59,8 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
-        stim = json.loads(test.attrs['stim'])
 
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], gen_rate)
-        assert_equal(test.shape,(1,1,winsz*acq_rate))
+        check_result(test, stim0, winsz, acq_rate)
 
         assert 'calibration_' in hfile['segment_1'].attrs['calibration_used'] 
 
@@ -93,12 +90,10 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
+
         stim = json.loads(test.attrs['stim'])
 
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], gen_rate)
-        assert_equal(test.shape,(1,1,winsz*acq_rate))
-        assert stim[0]['overloaded_attenuation'] == 0
+        check_result(test, stim0, winsz, acq_rate)
 
         assert hfile['segment_1'].attrs['calibration_used'] == '' 
 
@@ -159,11 +154,8 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
-        stim = json.loads(test.attrs['stim'])
 
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], vocal0.samplerate())
-        assert_equal(test.shape,(1,1,winsz*acq_rate))
+        check_result(test, stim0, winsz, acq_rate)
 
         hfile.close()
 
@@ -173,7 +165,7 @@ class TestAcquisitionModel():
         nreps = 3
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        stim_model = create_stim(nreps)
+        stim_model = create_tone_stim(nreps)
 
         manager.protocol_model().insertNewTest(stim_model,0)
 
@@ -185,14 +177,8 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
-        stims = json.loads(test.attrs['stim'])
-        freqs = []
-        for stim in stims:
-            freqs.append(stim['components'][0]['frequency'])
 
-        assert freqs == sorted(freqs)
-        assert_equal(stims[0]['samplerate_da'], stim_model.samplerate())
-        assert_equal(test.shape,(11,nreps,winsz*acq_rate))
+        check_result(test, stim_model, winsz, acq_rate)
 
         hfile.close()
 
@@ -202,8 +188,8 @@ class TestAcquisitionModel():
         nreps = 1
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        stim_model = create_stim(nreps)
-        stim_model.reorder = random_order
+        stim_model = create_tone_stim(nreps)
+        stim_model.setReorderFunc(random_order, name='random')
 
         manager.protocol_model().insertNewTest(stim_model,0)
         manager.setup_protocol(0.1)
@@ -214,15 +200,8 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
-        stims = json.loads(test.attrs['stim'])
-        #get a list of the freqency order
-        freqs = []
-        for stim in stims:
-            freqs.append(stim['components'][0]['frequency'])
 
-        assert freqs != sorted(freqs)
-        assert_equal(stims[0]['samplerate_da'], stim_model.samplerate())
-        assert_equal(test.shape,(11,nreps,winsz*acq_rate))
+        check_result(test, stim_model, winsz, acq_rate)
 
         hfile.close()
 
@@ -232,7 +211,7 @@ class TestAcquisitionModel():
         nreps = 4
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        stim_model = create_stim(nreps)
+        stim_model = create_tone_stim(nreps)
 
         manager.protocol_model().insertNewTest(stim_model,0)
 
@@ -246,8 +225,7 @@ class TestAcquisitionModel():
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
         stims = json.loads(test.attrs['stim'])
-        # correct amount of time stamps per trace
-        assert len(stims[0]['time_stamps']) == stims[0]['reps']
+
         # aggregate all time intervals
         intervals = []
         for stim in stims:
@@ -255,7 +233,8 @@ class TestAcquisitionModel():
         intervals = np.diff(intervals)
         intervals = abs(intervals*1000 - interval)
         print 'all intervals', intervals.shape, intervals
-        # 10ms tolerance, not as good as I would like
+
+        # ms tolerance, not as good as I would like
         assert all(map(lambda x: x < 10, intervals))
 
         hfile.close()
@@ -331,6 +310,9 @@ class TestAcquisitionModel():
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         print hfile.keys()
         test = hfile['explore_1']
+
+        # check_result(test, manager.explorer.stimulus, winsz, acq_rate)
+
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
@@ -360,11 +342,14 @@ class TestAcquisitionModel():
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
-        stim = json.loads(test.attrs['stim'])
 
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
-        assert_equal(test.shape,(ntraces,nreps,winsz*acq_rate))
+        check_result(test, tc, winsz, acq_rate)
+
+        # stim = json.loads(test.attrs['stim'])
+
+        # assert_in('components', stim[0])
+        # assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        # assert_equal(test.shape,(ntraces,nreps,winsz*acq_rate))
 
         hfile.close()
 
@@ -510,7 +495,55 @@ class TestAcquisitionModel():
         manager.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
 
-def create_stim(nreps):
+def check_result(test_data, test_stim, winsz, acq_rate):
+    ntraces = test_stim.traceCount()
+    nreps = test_stim.repCount()
+    stim_doc = json.loads(test_data.attrs['stim'])
+
+    print 'stim doc', stim_doc[0]
+    # check everthing we can here
+    for stim_info in stim_doc:
+        assert len(stim_info['time_stamps']) == stim_info['reps']
+        assert stim_info['user_tag'] == ''
+        assert stim_info['overloaded_attenuation'] == 0
+        assert stim_info['reps'] == nreps
+        assert stim_info['calv'] == test_stim.calv
+        assert stim_info['caldb'] == test_stim.caldb
+        assert stim_info['samplerate_da'] == test_stim.samplerate()
+        assert stim_info['testtype'] is None # no editor in these tests
+        assert len(stim_info['components']) == test_stim.componentCount()
+        for component_info in stim_info['components']:
+            # required fields
+            assert 'risefall' in component_info
+            assert 'stim_type' in component_info
+            assert 'intensity' in component_info
+            assert 'duration' in component_info
+
+    assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
+
+    # to keep these tests simple, assume the altered component is at 
+    # index 0,0 and there is only a single auto parameter
+    if len(test_stim.autoParams().allData()) > 0:
+        params = test_stim.autoParams().allData()
+        value_ranges = test_stim.autoParamRanges()
+        print 'params', params, 'value_ranges', value_ranges
+        if test_stim.reorder is None:
+            for istim, stim_info in enumerate(stim_doc):
+                prevlen = 1
+                for ip, param in enumerate(params):
+                    print 'istim, ip', istim, ip, len(value_ranges[ip]), (istim / prevlen )% len(value_ranges[ip])
+                    print 'comparision', stim_info['components'][0][param['parameter']], value_ranges[ip][(istim / prevlen )% len(value_ranges[ip])]
+                    assert stim_info['components'][0][param['parameter']] == value_ranges[ip][(istim / prevlen )% len(value_ranges[ip])]
+                    prevlen *= len(value_ranges[ip])
+        else:
+            # just make sure the correct values are present
+            for ip, param in enumerate(params):
+                param_info = set([ stim_info['components'][0][param['parameter']] for stim_info in stim_doc])
+                print 'comparision', param_info , set(value_ranges[ip])
+                assert param_info == set(value_ranges[ip])
+
+
+def create_tone_stim(nreps):
     component = PureTone()
     stim_model = StimulusModel()
     stim_model.insertComponent(component, (0,0))
@@ -522,6 +555,26 @@ def create_stim(nreps):
     selection_model.select(stim_model.index(0,0))
 
     # values = ['frequency', 0, 100, 10]
+    values = ['duration', 65, 165, 10] # had caused problem in past
+    for i, value in enumerate(values):
+        auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+
+    return stim_model
+
+def create_vocal_stim(nreps):
+    component = Vocalization()
+    component.setFile(sample.samplewav())
+    delay = Silence()
+    stim_model = StimulusModel()
+    stim_model.insertComponent(component, (0,0))
+    stim_model.insertComponent(delay, (0,0))
+    stim_model.setRepCount(nreps)
+    auto_model = stim_model.autoParams()
+    auto_model.insertRows(0, 1)
+
+    selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
+    selection_model.select(stim_model.index(0,0))
+
     values = ['duration', 65, 165, 10] # had caused problem in past
     for i, value in enumerate(values):
         auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
