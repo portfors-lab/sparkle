@@ -8,7 +8,7 @@ from spikeylab.stim.factory import CCFactory
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_fft_peak, calc_db
+from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_peak, calc_db
 from spikeylab.data.dataobjects import AcquisitionData
 
 USE_FFT = True
@@ -107,7 +107,7 @@ class CalibrationExperimenter(Experimenter):
         db = trace_info['components'][0]['intensity']
         # print 'f', f, 'db', db
         
-        # spec_max, max_freq = get_fft_peak(spectrum, freq)
+        # spec_max, max_freq = get_peak(spectrum, freq)
         spec_peak_at_f = spectrum[freq == f]
         if len(spec_peak_at_f) != 1:
             print u"COULD NOT FIND TARGET FREQUENCY ",f

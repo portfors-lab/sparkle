@@ -14,7 +14,7 @@ from spikeylab.io.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
             ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
-from spikeylab.tools.audiotools import calc_spectrum, get_fft_peak
+from spikeylab.tools.audiotools import calc_spectrum
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
