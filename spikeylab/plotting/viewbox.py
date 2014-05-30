@@ -98,3 +98,6 @@ class SpikeyViewBoxMenu(QtGui.QMenu):
 
     def subMenus(self):
         return [self.viewAll] 
+
+    def setViewList(self, views):
+        pass

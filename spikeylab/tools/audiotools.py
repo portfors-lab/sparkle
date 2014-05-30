@@ -11,8 +11,7 @@ from scipy.signal import hann, fftconvolve
 
 from PyQt4.QtGui import QImage
 
-VERBOSE = False
-
+VERBOSE = True
 
 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
@@ -94,19 +93,16 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
         amp = (10 ** ((db-caldb)/20)*calv)
 
         if VERBOSE:
-            print("current dB: {}, attenuation: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, atten, freq/1000, amp))
+            print("current dB: {}, fs: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, samplerate, freq/1000, amp))
             print("cal dB: {}, V at cal dB: {}".format(caldb, calv))
-
-        rf_npts = risefall * samplerate
-        #print('amp {}, freq {}, npts {}, rf_npts {}'
-        # .format(amp,freq,npts,rf_npts))
     
         tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
-                    
+                  
+        print 'tone max', np.amax(tone)  
         if risefall > 0:
-            rf_npts = risefall * samplerate
-            # error was occuring here without round or floor
-            wnd = hann(np.floor(rf_npts*2)) # cosine taper
+            rf_npts = int(risefall * samplerate)
+            # print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
+            wnd = hann(rf_npts*2) # cosine taper
             tone[:rf_npts] = tone[:rf_npts] * wnd[:rf_npts]
             tone[-rf_npts:] = tone[-rf_npts:] * wnd[rf_npts:]
 
@@ -121,7 +117,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     return tone, timevals
 
 
-def spectrogram(source, nfft=512, overlap=90, window='hanning'):
+def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2.83):
     """
     Produce a matrix of spectral intensity, uses matplotlib's specgram
     function. Output is in dB scale.
@@ -150,11 +146,13 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
     duration = float(len(wavdata))/sr
     desired_npts = int((np.trunc(duration*1000)/1000)*sr)
     wavdata = wavdata[:desired_npts]
-        
-    # normalize
-    if np.max(abs(wavdata)) != 0:
-        wavdata = wavdata/np.max(abs(wavdata))
     duration = len(wavdata)/sr
+
+    rms = np.sqrt(np.mean(pow(wavdata,2))) / np.sqrt(2)
+    print 'spec rms', rms
+    # normalize
+    # if np.max(abs(wavdata)) != 0:
+    #     wavdata = wavdata/np.max(abs(wavdata))
 
     if window == 'hanning':
         winfnc = mlab.window_hanning
@@ -171,10 +169,10 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning'):
 
     Pxx, freqs, bins = mlab.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=noverlap,
                                      pad_to=nfft*2, window=winfnc, detrend=mlab.detrend_none,
-                                     sides='default', scale_by_freq=True)
+                                     sides='default', scale_by_freq=False)
 
     # convert to db scale for display
-    spec = 10. * np.log10(Pxx)
+    spec = 20. * np.log10(Pxx) + caldb
     
     # inf values prevent spec from drawing in pyqtgraph
     # ... so set to miniumum value in spec?

@@ -484,6 +484,8 @@ class MainWindow(ControlWindow):
         # spectrum = spectrum / np.sqrt(2)
         spectrum = 20 * np.log10(spectrum/ self.calvals['calv']) + self.calvals['caldb']
 
+        print 'spec max', np.amax(spectrum)
+        
         timevals = np.arange(len(signal)).astype(float)/fs
         if self.active_operation == 'calibration':
             if self.ui.plot_dock.current() == 'calexp':
