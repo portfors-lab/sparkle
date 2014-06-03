@@ -1,4 +1,4 @@
-import os
+import os, yaml
 import wave
 
 import scipy.io.wavfile as wv
@@ -11,10 +11,14 @@ from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.types.widgets import tone_parameters, silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
+from spikeylab.tools.systools import get_src_directory
 
 from pyqtgraph import GradientEditorItem
 
-USE_RMS = True
+src_dir = get_src_directory()
+with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+USE_RMS = config['use_rms']
 
 COLORTABLE=[]
 for i in reversed(range(256)): COLORTABLE.append(QtGui.qRgb(i,i,i))
@@ -55,11 +59,11 @@ class PureTone(Tone):
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
         rms = np.sqrt(np.mean(pow(tone,2)))
-        print 'before rms adjust', rms, 'max', np.amax(tone)
+        # print 'before rms adjust', rms, 'max', np.amax(tone)
         if USE_RMS:
             tone = tone*1.414213562373
         rms = np.sqrt(np.mean(pow(tone,2)))
-        print 'rms out of tone signal', rms, 'max', np.amax(tone)
+        # print 'rms out of tone signal', rms, 'max', np.amax(tone)
         return tone
 
     def stateDict(self):

@@ -94,6 +94,7 @@ class AcquisitionData():
     
     def init_group(self, key, mode='finite'):
         """create a high level group"""
+        print 'existing keys', self.hdf5.keys(),  'new key', key
         self.groups[key] = self.hdf5.create_group(key)
         self.meta[key] = {'mode': mode}
         if mode == 'calibration':

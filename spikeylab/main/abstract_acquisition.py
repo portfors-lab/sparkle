@@ -84,7 +84,7 @@ class AbstractAcquisitionModel():
         # calculate time since last interation and wait to acheive desired interval
         now = time.time()
         elapsed = (now - self.last_tick)*1000
-        print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
+        # print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
         if elapsed < self.interval:
             # print('sleep ', (self.interval-elapsed))
             self.signals.warning.emit('') # clear previous warning

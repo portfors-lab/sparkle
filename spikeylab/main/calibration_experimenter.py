@@ -1,8 +1,8 @@
-import os
+import os, yaml
 import logging
 import numpy as np
 
-from spikeylab.tools.util import create_unique_path
+from spikeylab.tools.util import next_str_num
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.factory import CCFactory
 from spikeylab.stim.types.stimuli_classes import PureTone
@@ -10,14 +10,21 @@ from spikeylab.io.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_peak, calc_db
 from spikeylab.data.dataobjects import AcquisitionData
+from spikeylab.tools.systools import get_src_directory
 
+# wether to use relative peak level (from FFT), or calculate from
+# microphone sensitivity level
 USE_FFT = True
+
+with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+mphone_sensitivity = config['microphone_sensitivity']
 
 class CalibrationExperimenter(Experimenter):
     def __init__(self, signals):
         Experimenter.__init__(self, signals)
 
-        self.group_name = 'calibration_test_1'
+        self.group_name = 'calibration_test_'
 
         self.player = FinitePlayer()
 
@@ -66,7 +73,9 @@ class CalibrationExperimenter(Experimenter):
         self.calibration_frequencies = []
         self.calibration_indexes = []
 
-        self.current_dataset_name = self.group_name
+        data_items = self.datafile.groups.keys()
+        self.current_dataset_name = next_str_num(self.group_name, data_items)
+
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
@@ -148,7 +157,7 @@ class CalibrationExperimenter(Experimenter):
                 self.trace_counter +=1
             else:
                 # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
-                resultdb = 94 + (20.*np.log10((mean_peak/np.sqrt(2))/0.0048))
+                resultdb = 94 + (20.*np.log10((mean_peak/np.sqrt(2))/mphone_sensitivity))
                 self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):

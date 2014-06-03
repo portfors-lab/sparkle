@@ -12,3 +12,6 @@ def get_appdir():
 
 def get_project_directory():
     return os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+def get_src_directory():
+    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))

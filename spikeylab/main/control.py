@@ -1,6 +1,6 @@
 import spikeylab
 
-import sys, os
+import sys, os, yaml
 import scipy.io.wavfile as wv
 import numpy as np
 import threading
@@ -20,6 +20,7 @@ from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObjec
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
+from spikeylab.tools.systools import get_src_directory
 
 from controlwindow import ControlWindow
 
@@ -34,6 +35,10 @@ BLACK.setColor(QtGui.QPalette.Foreground,QtCore.Qt.black)
 GREENSS = "QLabel { background-color : limegreen; color : darkgreen; }"
 REDSS = "QLabel { background-color : transparent; color : red; }"
 DEVNAME = "PCI-6259"
+
+with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+mphone_sensitivity = config['microphone_sensitivity']
 
 class MainWindow(ControlWindow):
     def __init__(self, inputs_filename='', datafile=None, filemode='w-'):
@@ -425,10 +430,10 @@ class MainWindow(ControlWindow):
         elif self.ui.plot_dock.current() == 'calexp':
             # convert voltage amplitudes into dB SPL    
             rms = np.sqrt(np.mean(pow(response,2))) / np.sqrt(2)
-            masterdb = 94 + (20.*np.log10(rms/(0.004)))
+            masterdb = 94 + (20.*np.log10(rms/(mphone_sensitivity)))
             sr = self.ui.aisr_spnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
-            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/0.0048))
+            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/mphone_sensitivity))
             spectrum[0] = 0
             peakspl = np.amax(spectrum)
             self.ui.dblevel_lbl.setNum(masterdb)
@@ -439,8 +444,8 @@ class MainWindow(ControlWindow):
 
     def display_calibration_response(self, spectrum, freqs, rms):
 
-        masterdb = 94 + (20.*np.log10(rms/(0.004)))
-        spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
+        masterdb = 94 + (20.*np.log10(rms/(mphone_sensitivity)))
+        spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/mphone_sensitivity))
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
         self.ui.dblevel_lbl.setNum(masterdb)
@@ -484,7 +489,7 @@ class MainWindow(ControlWindow):
         # spectrum = spectrum / np.sqrt(2)
         spectrum = 20 * np.log10(spectrum/ self.calvals['calv']) + self.calvals['caldb']
 
-        print 'spec max', np.amax(spectrum)
+        # print 'spec max', np.amax(spectrum)
         
         timevals = np.arange(len(signal)).astype(float)/fs
         if self.active_operation == 'calibration':

@@ -11,7 +11,7 @@ from scipy.signal import hann, fftconvolve
 
 from PyQt4.QtGui import QImage
 
-VERBOSE = True
+VERBOSE = False
 
 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
@@ -98,7 +98,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     
         tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
                   
-        print 'tone max', np.amax(tone)  
+        # print 'tone max', np.amax(tone)  
         if risefall > 0:
             rf_npts = int(risefall * samplerate)
             # print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
@@ -148,11 +148,13 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
     wavdata = wavdata[:desired_npts]
     duration = len(wavdata)/sr
 
-    rms = np.sqrt(np.mean(pow(wavdata,2))) / np.sqrt(2)
-    print 'spec rms', rms
+    if VERBOSE:
+        rms = np.sqrt(np.mean(pow(wavdata,2))) / np.sqrt(2)
+        print 'RMS of input signal to spectrogram', rms
+
     # normalize
-    # if np.max(abs(wavdata)) != 0:
-    #     wavdata = wavdata/np.max(abs(wavdata))
+    if np.max(abs(wavdata)) != 0:
+        wavdata = wavdata/np.max(abs(wavdata))
 
     if window == 'hanning':
         winfnc = mlab.window_hanning
@@ -172,7 +174,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
                                      sides='default', scale_by_freq=False)
 
     # convert to db scale for display
-    spec = 20. * np.log10(Pxx) + caldb
+    spec = 20. * np.log10(Pxx)
     
     # inf values prevent spec from drawing in pyqtgraph
     # ... so set to miniumum value in spec?

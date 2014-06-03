@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
-# Created: Wed Apr 09 10:31:54 2014
+# Created: Tue Jun 03 11:34:02 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,7 +71,7 @@ class Ui_ParameterWidget(object):
         self.dur_spnbx = SmartSpinBox(ParameterWidget)
         self.dur_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.dur_spnbx.setDecimals(3)
-        self.dur_spnbx.setMaximum(1000.0)
+        self.dur_spnbx.setMaximum(2000.0)
         self.dur_spnbx.setObjectName(_fromUtf8("dur_spnbx"))
         self.gridLayout_5.addWidget(self.dur_spnbx, 1, 1, 1, 1)
         self.risefall_spnbx = SmartSpinBox(ParameterWidget)

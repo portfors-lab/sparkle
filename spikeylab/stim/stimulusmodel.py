@@ -1,18 +1,24 @@
-import numpy as np
+import os, yaml
 import uuid
+import numpy as np
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import calc_spectrum, smooth, calc_impulse_response, convolve_filter, tukey
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
+from spikeylab.tools.systools import get_src_directory
 
 from PyQt4 import QtGui, QtCore
 
 import matplotlib.pyplot as plt
 
-DEFAULT_SAMPLERATE = 500000
-USE_RMS = True # WARNING THIS MUST MATCH FLAG IN STIMULI
+src_dir = get_src_directory()
+print 'src_dir', src_dir
+with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+DEFAULT_SAMPLERATE = config['default_genrate']
+USE_RMS = config['use_rms']
 
 class StimulusModel(QtCore.QAbstractItemModel):
     """
@@ -311,7 +317,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 step_tmp = np.linspace(start, start+step*(nsteps-1), nsteps)
                 if step_tmp[-1] != stop:
                     step_tmp = np.append(step_tmp,stop)
-                print 'step range', step_tmp
+                # print 'step range', step_tmp
                 steps.append(np.around(step_tmp,4))
             else:
                 assert p['start'] == p['stop']
