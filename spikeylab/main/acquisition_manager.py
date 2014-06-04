@@ -2,7 +2,7 @@ import logging
 
 from spikeylab.tools.util import create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.tools.qthreading import ProtocolSignals
+from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.main.explore_acquisition import Explorer
 from spikeylab.main.protocol_experimenter import ProtocolExperimenter
 from spikeylab.main.chart_experimenter import ChartExperimenter
@@ -51,16 +51,17 @@ class AcquisitionManager():
             calibration_vector, calibration_freqs = cal
         # clear one cache -- affects all StimulusModels
         StimulusModel.clear_cache()
-        print 'clearing cache', '*'*20
-        print 'setting explore calibration'
+        logger = logging.getLogger('main')
+        logger.debug('clearing cache')
+        logger.debug('setting explore calibration')
         self.explorer.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
-        print 'setting protocol calibration'
+        logger.debug('setting protocol calibration')
         self.protocoler.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
-        print 'setting chart calibration'
+        logger.debug('setting chart calibration')
         self.charter.set_calibration(calibration_vector, calibration_freqs, frange, datakey)
-        print 'setting calibrator calibration'
+        logger.debug('setting calibrator calibration')
         self.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, datakey)
-        print 'setting tone calibrator calibration'
+        logger.debug('setting tone calibrator calibration')
         self.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, datakey)
 
     def current_calibration(self):
@@ -78,7 +79,8 @@ class AcquisitionManager():
         # find first available file name
         if fname is None:
             if self.savefolder is None or self.savename is None:
-                print "You must first set a save folder and filename"
+                logger = logging.getLogger('main')
+                logger.error("You must first set a save folder and filename")
             fname = create_unique_path(self.savefolder, self.savename)
         self.datafile = AcquisitionData(fname)
 
@@ -87,9 +89,6 @@ class AcquisitionManager():
         self.charter.set_params(datafile=self.datafile)
         self.bs_calibrator.set_params(datafile=self.datafile)
         self.tone_calibrator.set_params(datafile=self.datafile)
-
-        logger = logging.getLogger('main')
-        logger.info('Opened datafile: {}'.format(fname))
 
         return fname
 
@@ -102,9 +101,6 @@ class AcquisitionManager():
         self.bs_calibrator.set_params(datafile=self.datafile)
         self.tone_calibrator.set_params(datafile=self.datafile)
         self.set_calibration(None)
-
-        logger = logging.getLogger('main')
-        logger.info('Opened datafile: {}'.format(fname))
 
     def current_data_file(self):
         return self.datafile.filename
@@ -204,7 +200,6 @@ class AcquisitionManager():
 
     def close_data(self):
         if self.datafile is not None:
-            print 'closing datafile'
             self.datafile.close()
 
     def protocol_model(self):

@@ -54,9 +54,9 @@ class ControlWindow(QtGui.QMainWindow):
 
             self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
             self.ui.protocol_progress_bar.setMinimum(0)
-            
         except Exception as e:
-            print e
+            logger = logging.getLogger('main')
+            logger.exception("Error Initializing main GUI")
 
         # connect item models to trash can signal
         self.ui.stimulus_choices.trash().item_trashed.connect(self.ui.protocolView.purge_model)
@@ -228,7 +228,8 @@ class ControlWindow(QtGui.QMainWindow):
             with open(inputsfname, 'r') as jf:
                 inputsdict = json.load(jf)
         except:
-            print "problem loading app data"
+            logger = logging.getLogger('main')
+            logger.exception("Unable to load app data")
             inputsdict = {}
         
         # set default values
@@ -276,7 +277,8 @@ class ControlWindow(QtGui.QMainWindow):
                 stim.loadState(inputsdict[stim.name])
 
             except KeyError:
-                print 'Unable to load saved inputs for', stim.__class__
+                logger = logging.getLogger('main')
+                logger.exception('Unable to load saved inputs for {}'.format(stim.__class__))
 
         self.ui.aosr_spnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 

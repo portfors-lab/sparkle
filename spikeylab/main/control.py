@@ -16,7 +16,6 @@ from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
-from spikeylab.tools.qthreading import GenericThread, GenericObject, SimpleObject, Thread
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
@@ -34,11 +33,12 @@ BLACK.setColor(QtGui.QPalette.Foreground,QtCore.Qt.black)
 
 GREENSS = "QLabel { background-color : limegreen; color : darkgreen; }"
 REDSS = "QLabel { background-color : transparent; color : red; }"
-DEVNAME = "PCI-6259"
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 mphone_sensitivity = config['microphone_sensitivity']
+DEVNAME = config['device_name']
+
 
 class MainWindow(ControlWindow):
     def __init__(self, inputs_filename='', datafile=None, filemode='w-'):
@@ -265,7 +265,8 @@ class MainWindow(ControlWindow):
         self.ui.stop_btn.clicked.disconnect()
         self.ui.stop_btn.clicked.connect(self.on_stop)
 
-        self.ui.aisr_spnbx.setEnabled(True)
+        if self.ui.tab_group.tabText(self.ui.tab_group.currentIndex()).lower() != 'calibration':
+            self.ui.aisr_spnbx.setEnabled(True)
         self.ui.aochan_box.setEnabled(True)
         reprate = self.ui.reprate_spnbx.setEnabled(True)
         self.ui.stop_btn.setEnabled(False)
@@ -676,12 +677,16 @@ class MainWindow(ControlWindow):
         super(MainWindow, self).closeEvent(event)
 
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
-    dlg = SavingDialog()
-    if dlg.exec_():
-        fname, fmode = dlg.getfile()
-        myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
-        app.setActiveWindow(myapp)
-        myapp.show()
-        sys.exit(app.exec_())
-    print 'canceled'
+    try:
+        app = QtGui.QApplication(sys.argv)
+        dlg = SavingDialog()
+        if dlg.exec_():
+            fname, fmode = dlg.getfile()
+            myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
+            app.setActiveWindow(myapp)
+            myapp.show()
+            sys.exit(app.exec_())
+        print 'canceled'
+    except:
+        logger = logging.getLogger('main')
+        logger.exception("Uncaught Exception from main")

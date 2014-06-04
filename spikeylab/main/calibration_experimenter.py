@@ -87,15 +87,14 @@ class CalibrationExperimenter(Experimenter):
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata(self.current_dataset_name, info)
 
-        logger = logging.getLogger('main')
-        logger.info('calibration dataset %s' % self.current_dataset_name)
-
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
 
         self.control_tone.setDuration(self.stimulus.data(self.stimulus.index(0,0)).duration())
         self.control_tone.setRisefall(self.stimulus.data(self.stimulus.index(0,0)).risefall())
-        print 'setting calibration frequency', self.calf
+        
+        logger = logging.getLogger('main')
+        logger.debug('setting calibration frequency'.format(self.calf))
         self.control_tone.setFrequency(self.calf)
         self.control_tone.setIntensity(self.caldb)
         self.calpeak = None

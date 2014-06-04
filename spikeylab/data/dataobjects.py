@@ -4,6 +4,7 @@ import time
 import json
 import os
 import socket
+import logging
 
 from spikeylab.tools.exceptions import DataIndexError
 from spikeylab.tools.util import convert2native, max_str_num
@@ -41,6 +42,9 @@ class AcquisitionData():
             # self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
             self.hdf5.attrs['computername'] = socket.gethostname()
             self.test_count = 0
+
+            logger = logging.getLogger('main')
+            logger.info('Created data file %s' % filename)
         else:
             # find highes numbered test.. tight coupling to acquisition classes
             print 'data file keys', self.hdf5.keys()
@@ -53,11 +57,14 @@ class AcquisitionData():
             else:
                 self.test_count = 0
 
+            logger = logging.getLogger('main')
+            logger.info('Opened data file %s' % filename)
+
     def close(self):
-        # check that all stim doc has closing brackets
         # bad hack!
         if 'closed' in self.hdf5.__repr__().lower():
             return
+        # check that all stim doc has closing brackets
         if self.hdf5.mode != 'r':
             for key in self.datasets.keys():
                 # print 'checking key', key
@@ -78,6 +85,10 @@ class AcquisitionData():
             remove = False
 
         self.hdf5.close()
+
+        logger = logging.getLogger('main')
+        logger.debug('Closed data file %s' % fname)
+
         if remove:
             os.remove(fname)
         else:
@@ -94,12 +105,14 @@ class AcquisitionData():
     
     def init_group(self, key, mode='finite'):
         """create a high level group"""
-        print 'existing keys', self.hdf5.keys(),  'new key', key
         self.groups[key] = self.hdf5.create_group(key)
         self.meta[key] = {'mode': mode}
         if mode == 'calibration':
             self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 
                               'mode':'calibration', 'stim': '[ '})
+
+        logger = logging.getLogger('main')
+        logger.info('Created data group %s' % key)
 
     def init_data(self, key, dims=None, mode='finite', nested_name=None):
         """
@@ -116,7 +129,8 @@ class AcquisitionData():
         :type mode: str
         """
         if mode == 'calibration':
-            self.datasets[nested_name] = self.groups[key].create_dataset(nested_name, dims)
+            setname = nested_name
+            self.datasets[nested_name] = self.groups[key].create_dataset(setname, dims)
             self.meta[nested_name] = {'cursor':[0]*len(dims)}
         elif mode == 'finite':
             self.test_count +=1
@@ -132,7 +146,8 @@ class AcquisitionData():
             if len(dims) > 1:
                 print "open acquisition only for single dimension data"
                 return
-            self.datasets[key] = self.hdf5.create_dataset(key, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
+            setname = key
+            self.datasets[key] = self.hdf5.create_dataset(setname, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
             self.meta[key] = {'mode':mode, 'cursor':0}
             setpath = key
             self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
@@ -143,10 +158,13 @@ class AcquisitionData():
             self.meta[key] = {'mode':mode, 'set_counter':1, 'cursor':0, 'start': time.strftime('%H:%M:%S')}
             # create a dataset for the key itself, so to allow setting attributes, 
             # that will get copied after consolidation
+            setname = key
             self.hdf5.create_dataset(key, (1,))
         else:
             raise Exception("Unknown acquisition mode")
         
+        logger = logging.getLogger('main')
+        logger.info('Created data Set %s' % setname)
 
     def append(self, key, data, nested_name=None):
         """
@@ -304,6 +322,9 @@ class AcquisitionData():
         del self.groups[key]
         del self.hdf5[key]
         self.needs_repack = True
+
+        logger = logging.getLogger('main')
+        logger.info('Deleted data group %s' % key)
 
     def set_metadata(self, key, attrdict):
         # key is an iterable of group keys (str), with the last

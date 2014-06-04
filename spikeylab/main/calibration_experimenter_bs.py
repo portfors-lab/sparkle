@@ -69,14 +69,14 @@ class CalibrationExperimenterBS(Experimenter):
         self.current_dataset_name = next_str_num(self.group_name, data_items)
         
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
-        print '!!!!!!!!!using samplerate', self.stimulus.samplerate()
+        
+        logger = logging.getLogger('main')
+        logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
+        
         # print 'initialize data signal size', self.stimulus.duration(), self.stimulus.samplerate(), (self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate())
         self.datafile.init_data(self.current_dataset_name, mode='calibration', 
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
                                 nested_name='signal')
-
-        logger = logging.getLogger('main')
-        logger.info('calibration dataset %s' % self.current_dataset_name)
 
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata(self.current_dataset_name, info)

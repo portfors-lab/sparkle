@@ -1,6 +1,7 @@
 import os, yaml
 import uuid
 import numpy as np
+import logging
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import calc_spectrum, smooth, calc_impulse_response, convolve_filter, tukey
@@ -14,7 +15,7 @@ from PyQt4 import QtGui, QtCore
 import matplotlib.pyplot as plt
 
 src_dir = get_src_directory()
-print 'src_dir', src_dir
+# print 'src_dir', src_dir
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 DEFAULT_SAMPLERATE = config['default_genrate']
@@ -70,19 +71,20 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def setCalibration(self, db_boost_array, frequencies, frange):
         # use supplied array of intensity adjustment to adjust tone output
         if db_boost_array is not None and frequencies is not None:
+            logger = logging.getLogger('main')
             if db_boost_array.shape != frequencies.shape:
-                print u"ERROR: calibration array and frequency array must have same dimensions"
+                logger.debug("ERROR: calibration array and frequency array must have same dimensions")
                 return
             if frange is None:
                 frange = (frequencies[0], frequencies[-1])
 
-            print 'setting calibration with samplerate', self.samplerate()
+            logger.debug('setting calibration with samplerate {}'.format(self.samplerate()))
             fs = self.samplerate()
             if fs in StimulusModel.kernel_cache:
-                print '---->using cached filter'
+                logger.debug('---->using cached filter')
                 self.impulse_response = StimulusModel.kernel_cache[fs]
             else:
-                print '---->calculating new filter', self.kernel_cache
+                logger.debug('---->calculating new filter for fs {}'.format(fs))
                 self.impulse_response = calc_impulse_response(fs, db_boost_array, frequencies, frange)
                 # mutable type so will affect data structure persistently
                 StimulusModel.kernel_cache[fs] = self.impulse_response
@@ -142,7 +144,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         if parent.isValid():
-            print 'querying column count by parent'
             wholerow = parent.internalPointer()
             return len(wholerow)
         else:
@@ -484,8 +485,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
             else:
                 undesired_attenuation = attenuated - atten
                 atten = 0
-                # log this, at least to console!
-                print("WARNING: STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
+                logger = logging.getLogger('main')
+                logger.warning("STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
                     UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, self.maxv, undesired_attenuation))
         elif sig_max < self.minv and sig_max !=0:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
@@ -534,7 +535,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
             editor.setStimulusModel(self)
             return editor
         else:
-            print 'Erm, no editor available :('
+            logger = logging.getLogger('main')
+            logger.warning('Erm, no editor available :(')
 
     def contains_pval(self, param_name, value):
         """Returns true is the given value is in the auto parameters"""
