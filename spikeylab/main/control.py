@@ -135,7 +135,7 @@ class MainWindow(ControlWindow):
             if h.get_name() == 'ui':
                 h.set_widget(self.ui.log_txedt)
                 break
-        logger.info("**** Program started "+time.strftime("%d-%m-%Y")+ ' ****')
+        logger.info("{} Program Started {} {}".format('*'*8, time.strftime("%d-%m-%Y"), '*'*8))
 
         self.ui.data_file_lbl.setText(fname)
 
@@ -685,8 +685,11 @@ if __name__ == "__main__":
             myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
             app.setActiveWindow(myapp)
             myapp.show()
-            sys.exit(app.exec_())
-        print 'canceled'
+            status = app.exec_()
+        else:
+            status = 0
+            print 'canceled'
     except:
         logger = logging.getLogger('main')
         logger.exception("Uncaught Exception from main")
+    sys.exit(status)
