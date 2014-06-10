@@ -162,7 +162,6 @@ class CalibrationExperimenter(Experimenter):
     def process_calibration(self, save=True):
         """processes the data gathered in a calibration run (does not work if multiple
             calibrations), returns resultant dB"""
-        print 'process the calibration'
 
         vfunc = np.vectorize(calc_db)
 

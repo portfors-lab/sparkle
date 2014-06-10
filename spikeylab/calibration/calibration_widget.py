@@ -1,3 +1,5 @@
+import logging
+
 from PyQt4 import QtGui
 
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
@@ -40,8 +42,9 @@ class CalibrationWidget(QtGui.QWidget):
         for i in range(self.ui.caleditor_stack.count()):
             try:
                 self.ui.caleditor_stack.widget(i).saveToObject()
-            except:
-                print 'index {} does not have method saveToObject'.format(i)
+            except AttributeError:
+                logger = logging.getLogger('main')
+                logger.debug('index {} does not have method saveToObject'.format(i))
 
     def current_index(self):
         return self.ui.cal_type_cmbbx.currentIndex()

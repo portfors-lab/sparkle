@@ -17,7 +17,6 @@ class ProtocolExperimenter(Experimenter):
         data_items = self.datafile.groups.keys()
         self.current_dataset_name = next_str_num(self.group_name, data_items)
 
-        print 'current_dataset_name', self.current_dataset_name
         self.datafile.init_group(self.current_dataset_name)
 
         info = {'samplerate_ad': self.player.aisr}

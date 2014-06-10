@@ -104,13 +104,13 @@ class CalibrationExperimenterBS(Experimenter):
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
         of speaker to get frequency vs. attenuation curve."""
-        print 'process the calibration'
         avg_signal = np.mean(self.datafile.get('signal'), axis=0)
 
         diffdB = calc_attenuation_curve(self.stimulus.signal()[0], avg_signal,
                                         self.stimulus.samplerate(), self.calf)
 
-        print 'The maximum dB SPL is', self.caldb - max(diffdB)
+        logger = logging.getLogger('main')
+        logger.debug('The maximum dB attenuation is {}, caldB {}'.format(max(diffdB), self.caldb))
 
         # save a vector of only the calibration intensity results
         if save:
@@ -126,10 +126,7 @@ class CalibrationExperimenterBS(Experimenter):
             self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
                                        relevant_info)
 
-
-            print 'finished calibration :)'
         else:
             # delete the data saved to file thus far.
             self.datafile.delete_group(self.current_dataset_name)
-            print 'calibration not saved'
         return diffdB, self.current_dataset_name, self.calf

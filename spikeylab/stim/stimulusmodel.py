@@ -376,7 +376,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
         Apply the autoparameters to this stimulus and return a list of
         the resulting stimuli, and a complimentary list of doc dictionaries
         """
-        print "Getting expanded stim................................"
+        logger = logging.getLogger('main')
+        logger.debug("Generating Expanded Stimulus")
         # 3 loops now -- could be done in one...
         signals = self.expandFunction(self.signal)
         docs = self.expandFunction(self.doc)

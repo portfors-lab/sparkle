@@ -89,11 +89,14 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
                 stimid = self.test_order[index.row()]
                 test = self.tests[stimid]
                 test.setUserTag(value)
+                return True
             if index.column() == 2:
                 stimid = self.test_order[index.row()]
                 test = self.tests[stimid]
                 test.setRepCount(value)
-
+                return True
+        return False
+        
     def removeItem(self, index):
         self.removeTest(index.row())
 

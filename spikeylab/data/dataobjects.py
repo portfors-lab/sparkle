@@ -25,7 +25,6 @@ class AcquisitionData():
     def __init__(self, filename, user='unknown', filemode='w-'):
         if filemode not in ['w-', 'a', 'r']:
             raise Exception("Unknown or unallowed filemode {}".format(filemode))
-        print 'opening', filename, 'mode', filemode
         self.hdf5 = h5py.File(filename, filemode)
         self.filename = filename
 
@@ -46,8 +45,8 @@ class AcquisitionData():
             logger = logging.getLogger('main')
             logger.info('Created data file %s' % filename)
         else:
-            # find highes numbered test.. tight coupling to acquisition classes
-            print 'data file keys', self.hdf5.keys()
+            # find highets numbered test.. tight coupling to acquisition classes
+            # print 'data file keys', self.hdf5.keys()
             group_prefix = 'segment_'
             dset_prefix = 'test_'
             self.groups = dict(self.hdf5.items())
@@ -164,7 +163,7 @@ class AcquisitionData():
             raise Exception("Unknown acquisition mode")
         
         logger = logging.getLogger('main')
-        logger.info('Created data Set %s' % setname)
+        logger.info('Created data set %s' % setname)
 
     def append(self, key, data, nested_name=None):
         """

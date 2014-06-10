@@ -134,14 +134,19 @@ class MainWindow(ControlWindow):
         # dig out the UI handler to assign text edit ... a better way?
         for h in handlers:
             if h.get_name() == 'ui':
-                h.set_widget(self.ui.log_txedt)
+                # h.signal.message.connect(self.ui.log_txedt.appendPlainText)
+                h.signal.message.connect(self.ui.log_txedt.appendHtml)
                 break
+
         logger.info("{} Program Started {} {}".format('*'*8, time.strftime("%d-%m-%Y"), '*'*8))
 
         self.ui.data_file_lbl.setText(fname)
 
         self.calpeak = None
         self.ui.tab_group.setCurrentIndex(0)
+
+    # def update_ui_log(self, message):
+    #     self.ui.log_txedt.appendPlainText(message)
 
     def connect_updatable(self, connect):
         if connect:
@@ -317,7 +322,9 @@ class MainWindow(ControlWindow):
             if cellbox.exec_():
                 comment = cellbox.comment()
                 self.acqmodel.set_group_comment(comment)
-                print 'saved commment'
+            else:
+                # save empty comment
+                self.acqmodel.set_group_comment('')
 
         self.on_stop()
 
@@ -678,9 +685,10 @@ class MainWindow(ControlWindow):
         super(MainWindow, self).closeEvent(event)
 
 
-def log_uncaught(typ, value, tb):
+def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
-    logger.error("Uncaught exception: "+''.join(traceback.format_exception(typ, value, tb)))
+    print 'exc_info', exc_info
+    logger.error("Uncaught exception: ", exc_info=exc_info)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

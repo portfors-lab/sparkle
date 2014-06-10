@@ -53,8 +53,8 @@ class Experimenter(AbstractAcquisitionModel):
 
         # go through and get any overloads, this is not efficient since
         # I am going to be calculating the signals again later, so stash?
-        # undesired_attenuations = [stim.expandedStim()[2] for stim in stimuli]
-        undesired_attenuations = [[0]]
+        self._cached_stims = [stim.expandedStim() for stim in stimuli]
+        undesired_attenuations = [s[2] for s in self._cached_stims]
         return undesired_attenuations
 
     def run(self):
@@ -68,6 +68,7 @@ class Experimenter(AbstractAcquisitionModel):
 
     def _worker(self, stimuli):
         try:
+            logger = logging.getLogger('main')
             try:
                 for itest, test in enumerate(stimuli):
                     # pull out signal from stim model
@@ -77,7 +78,7 @@ class Experimenter(AbstractAcquisitionModel):
                     profiler = cProfile.Profile()
                     # print 'profiling....'
                     # profiler.enable()
-                    traces, docs, overs = test.expandedStim()
+                    traces, docs, overs = self._cached_stims[itest]
                     # profiler.disable()
                     # print 'finished profiling'
                     # profiler.dump_stats('stim_gen_cal.profile')
@@ -111,6 +112,9 @@ class Experimenter(AbstractAcquisitionModel):
                         trace_doc['time_stamps'] = stamps
                         self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
+
+                    # log as well, test type and user tag will be the same across traces
+                    logger.info("Finished test type: {}, tag: {}".format(trace_doc['testtype'], trace_doc['user_tag']))
                     # profiler.disable()
                     # print 'finished profiling'
                     # profiler.dump_stats('test_run.profile')
@@ -121,8 +125,7 @@ class Experimenter(AbstractAcquisitionModel):
             self.datafile.close_data(self.current_dataset_name)
             self.signals.group_finished.emit(self._halt)
         except:
-            logger = logging.getLogger('main')
-            logger.exception("Uncaught Exception from Acq Thread:")
+            logger.exception("Uncaught Exception from Acq Thread: ")
 
     def _initialize_test(self, test):
         raise NotImplementedError
