@@ -1,5 +1,6 @@
 import time
 import threading
+import logging
 
 import numpy as np
 
@@ -77,15 +78,15 @@ class Explorer(AbstractAcquisitionModel):
         return self.acq_thread
 
     def _worker(self):
-        spike_counts = []
-        spike_latencies = []
-        spike_rates = []
-        self.irep = 0
-        times = self.aitimes
-        stim = self.player.start()
-        while not self._halt:
-            # print 'explore worker'
-            try:
+        try:
+            spike_counts = []
+            spike_latencies = []
+            spike_rates = []
+            self.irep = 0
+            times = self.aitimes
+            stim = self.player.start()
+            while not self._halt:
+                # print 'explore worker'
                 self.interval_wait()
 
                 response = self.player.run()
@@ -128,12 +129,13 @@ class Explorer(AbstractAcquisitionModel):
                     spike_latencies = []
                     spike_rates = []
 
-            except:
-                raise
+            self.player.stop()
+            if self.save_data:
+                self.datafile.trim(self.current_dataset_name)
 
-        self.player.stop()
-        if self.save_data:
-            self.datafile.trim(self.current_dataset_name)
+        except:
+            logger = logging.getLogger('main')
+            logger.exception("Uncaught Exception from Explore Thread:")
 
     def save_to_file(self, data, stamp):
         self.datafile.append(self.current_dataset_name, data)

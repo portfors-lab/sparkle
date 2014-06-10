@@ -6,6 +6,7 @@ import numpy as np
 import threading
 import logging
 import time
+import traceback
 
 from PyQt4 import QtCore, QtGui
 
@@ -676,20 +677,23 @@ class MainWindow(ControlWindow):
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
 
+
+def log_uncaught(typ, value, tb):
+    logger = logging.getLogger('main')
+    logger.error("Uncaught exception: "+''.join(traceback.format_exception(typ, value, tb)))
+
 if __name__ == "__main__":
-    try:
-        app = QtGui.QApplication(sys.argv)
-        dlg = SavingDialog()
-        if dlg.exec_():
-            fname, fmode = dlg.getfile()
-            myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
-            app.setActiveWindow(myapp)
-            myapp.show()
-            status = app.exec_()
-        else:
-            status = 0
-            print 'canceled'
-    except:
-        logger = logging.getLogger('main')
-        logger.exception("Uncaught Exception from main")
+    app = QtGui.QApplication(sys.argv)
+    sys.excepthook = log_uncaught
+    dlg = SavingDialog()
+    if dlg.exec_():
+        fname, fmode = dlg.getfile()
+        myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
+        app.setActiveWindow(myapp)
+        myapp.show()
+        status = app.exec_()
+    else:
+        status = 0
+        print 'canceled'
     sys.exit(status)
+
