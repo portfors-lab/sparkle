@@ -16,11 +16,12 @@ class TextEditHandler(logging.Handler):
     def emit(self, m):
         if m.levelno >= 40:
             if m.exc_info is not None:
-                # print 'infos', traceback.format_exception(*m.exc_info)
                 formatted_exc = ''.join(traceback.format_exception(*m.exc_info))
-                formatted_msg =  m.msg +'<br>'.join(formatted_exc.split('\n'))
+                # convert to HTML format
+                formatted_msg =  m.msg + formatted_exc.replace('\n', '<br>')
             else:
                 formatted_msg =  m.msg
+            formatted_msg =  formatted_msg.replace(' ', '&nbsp;')
             colored_message = '<font color="Red">' + formatted_msg + '</font>'
         elif m.levelno >= 30:
             colored_message = '<font color="Orange">' + m.msg + '</font>'
