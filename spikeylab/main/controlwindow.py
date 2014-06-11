@@ -81,10 +81,10 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input",
                             "Window size must equal or exceed stimulus length")
                     return False
-                if selected_stim.intensity() > self.calvals['caldb']:
-                    QtGui.QMessageBox.warning(self, "Invalid Input",
-                            "Intensity must be below calibrated maximum {}dB SPL".format(self.calvals['caldb']))
-                    return False
+                # if selected_stim.intensity() > self.calvals['caldb']:
+                #     QtGui.QMessageBox.warning(self, "Invalid Input",
+                #             "Intensity must be below calibrated maximum {}dB SPL".format(self.calvals['caldb']))
+                #     return False
             elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
                 protocol_model = self.acqmodel.protocol_model()
                 failure = protocol_model.verify(float(self.ui.windowsz_spnbx.value())*self.tscale)

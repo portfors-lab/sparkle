@@ -687,7 +687,6 @@ class MainWindow(ControlWindow):
 
 def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
-    print 'exc_info', exc_info
     logger.error("Uncaught exception: ", exc_info=exc_info)
 
 if __name__ == "__main__":

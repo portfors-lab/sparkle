@@ -1,3 +1,4 @@
+import os, yaml
 import threading
 import Queue
 import platform
@@ -7,9 +8,15 @@ elif platform.system() == 'Linux':
     pass
 
 from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
+from spikeylab.tools.systools import get_src_directory
 
 PRINT_WARNINGS = False
 VERBOSE = True
+
+src_dir = get_src_directory()
+with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+MAXV = config['max_voltage']
 
 class PlayerBase():
     """Holds state information for current acquisition/generation task"""
@@ -28,7 +35,7 @@ class PlayerBase():
         self.aitask = None
         self.aotask = None
 
-        self.maxv = 9.5 #Volts
+        self.maxv = MAXV #Volts
 
         self.stim_changed = False
 

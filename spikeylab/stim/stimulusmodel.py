@@ -20,6 +20,7 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 DEFAULT_SAMPLERATE = config['default_genrate']
 USE_RMS = config['use_rms']
+MAXV = config['max_voltage']
 
 class StimulusModel(QtCore.QAbstractItemModel):
     """
@@ -42,7 +43,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.calv = None
         self.caldb = None
         self.impulse_response = None
-        self.maxv = 9.5
         self.minv = 0.005
 
         self._attenuation_vector = None
@@ -438,11 +438,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         samplerate = self.samplerate()
         track_signals = []
         max_db = max([comp.intensity() for t in self._segments for comp in t])
-        # everything is maxed up to calibration dB and attenuated from there
         # atten = self.caldb - max_db
         atten = 0
-        if max_db > self.caldb:
-            raise Exception("Stimulus intensity over maxium")
+        # if max_db > self.caldb:
+        #     raise Exception("Stimulus intensity over maxium")
         # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten
         for track in self._segments:
             track_list = []
@@ -464,8 +463,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         undesired_attenuation = 0
 
-        maxv = self.maxv
-
         # sig_max = max(abs(total_signal))
         # if sig_max > self.calv:
         #     over_db = 20 * np.log10(sig_max/self.calv)
@@ -476,10 +473,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
         #     atten -= allowance
 
         sig_max = np.max(abs(total_signal))
-        if sig_max > maxv:
+        if sig_max > MAXV:
             # scale stim down to outputable max
-            total_signal = (total_signal/sig_max)*maxv
-            attenuated = 20 * np.log10(sig_max/maxv)
+            total_signal = (total_signal/sig_max)*MAXV
+            attenuated = 20 * np.log10(sig_max/MAXV)
 
             if attenuated <= atten:
                 atten = atten - attenuated
@@ -488,7 +485,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 atten = 0
                 logger = logging.getLogger('main')
                 logger.warning("STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
-                    UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, self.maxv, undesired_attenuation))
+                    UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, MAXV, undesired_attenuation))
         elif sig_max < self.minv and sig_max !=0:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             total_signal = (total_signal/sig_max)*self.minv
