@@ -4,7 +4,9 @@ Sonic Sparkle High-Five Data Acquisition System
 
 SSHF is an electrophysiology data acqusition and auditory stimulus assembly interface.
 
-The program is divided into three different types of operation: Search (Explore), Protocol, and Calibration. Also, there are two different modes of acquisition: windowed (finite), and chart (continuous). Currently, only finite acquisition is available.
+The program is divided into three different types of operation: search (explore), protocol (pre-defined), and calibration. Also, there are two different modes of acquisition: windowed (finite), and chart (continuous). Currently, only finite acquisition is available.
+
+:ref:`start`
 
 General Info
 ------------
