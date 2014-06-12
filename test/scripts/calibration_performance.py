@@ -1,4 +1,4 @@
-from spikeylab.io.players import FinitePlayer
+from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import tukey, calc_impulse_response, \

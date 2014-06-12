@@ -57,6 +57,8 @@ def record(player, sig, fs, atten=0):
     reps = []
     player.set_stim(sig, fs, atten)
     player.start()
+    # print 'stim shape', sig.shape, 'acq points', int(player.aitime*player.aisr)
+    # print 'samplerates', player.aisr, fs
     for irep in range(nreps):
         response = player.run()
         reps.append(response)
