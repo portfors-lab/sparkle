@@ -3,7 +3,7 @@ import numpy as np
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.tools import spikestats
 from spikeylab.tools.util import next_str_num
-from spikeylab.io.players import FinitePlayer
+from spikeylab.acq.players import FinitePlayer
 
 class ProtocolExperimenter(Experimenter):
     def __init__(self, signals):

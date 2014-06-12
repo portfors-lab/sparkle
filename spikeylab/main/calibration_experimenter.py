@@ -6,7 +6,7 @@ from spikeylab.tools.util import next_str_num
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.factory import CCFactory
 from spikeylab.stim.types.stimuli_classes import PureTone
-from spikeylab.io.players import FinitePlayer
+from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_peak, calc_db
 from spikeylab.data.dataobjects import AcquisitionData

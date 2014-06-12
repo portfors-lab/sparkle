@@ -131,7 +131,7 @@ if __name__ == "__main__":
     import random, time, os
     import numpy as np
     import spikeylab.tools.audiotools as audiotools
-    import scipy.io.wavfile as wv
+    import scipy.acq.wavfile as wv
     import test.sample as sample
     from scipy.io import loadmat
 

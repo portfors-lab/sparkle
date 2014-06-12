@@ -1,4 +1,4 @@
-from spikeylab.io.players import ContinuousPlayer
+from spikeylab.acq.players import ContinuousPlayer
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.tools.util import increment_title
 

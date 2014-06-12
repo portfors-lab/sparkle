@@ -4,7 +4,7 @@ import logging
 
 import numpy as np
 
-from spikeylab.io.players import FinitePlayer
+from spikeylab.acq.players import FinitePlayer
 from spikeylab.main.abstract_acquisition import AbstractAcquisitionModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.util import increment_title

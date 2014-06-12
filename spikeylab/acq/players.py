@@ -7,7 +7,7 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':
     pass
 
-from spikeylab.io.daq_tasks import AITaskFinite, AOTaskFinite, AITask
+from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask
 from spikeylab.tools.systools import get_src_directory
 
 PRINT_WARNINGS = False
