@@ -108,9 +108,10 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 param[self.headers[index.column()]] = value
                 # keep the displayed values the same, so multiply to ajust
                 # real underlying value
-                new_multiplier = float(self.getDetail(index, 'multiplier'))
+                new_multiplier = self.getDetail(index, 'multiplier')
                 
                 if old_multiplier is not None and old_multiplier != new_multiplier:
+                    new_multiplier = float(new_multiplier)
                     for col in range(1,4):
                         i = self.index(index.row(), col)
                         self.setData(i, self.data(i, QtCore.Qt.EditRole)*(new_multiplier/old_multiplier), QtCore.Qt.EditRole)

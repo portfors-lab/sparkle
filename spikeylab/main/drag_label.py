@@ -23,6 +23,12 @@ class DragLabel(QtGui.QLabel):
 
     def mousePressEvent(self, event):
         # create a new component with default values
+        self.dragStartPosition = event.pos()
+        
+    def mouseMoveEvent(self, event):
+        if (event.pos() - self.dragStartPosition).manhattanLength() < 10:
+            return
+        print 'mouse press slot!!!!!!!!'
         factory = self.factoryclass()
 
         mimeData = QtCore.QMimeData()
@@ -48,7 +54,7 @@ class DragLabel(QtGui.QLabel):
         drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
         drag.setPixmap(pixmap)
 
-        result = drag.start(QtCore.Qt.MoveAction)
+        result = drag.exec_(QtCore.Qt.MoveAction)
 
 
 if __name__ == '__main__':

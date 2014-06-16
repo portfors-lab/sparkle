@@ -219,13 +219,12 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         return QtCore.QLine(0,y,x,y)
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            index = self.indexAt(event.pos())
-            if index.isValid():
-                if index.column() == 0:
-                    self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
-        else:
-            super(ProtocolView, self).mousePressEvent(event)
+        index = self.indexAt(event.pos())
+        if index.isValid():
+            if index.column() == 0:
+                self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
+            else:
+                super(ProtocolView, self).mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:

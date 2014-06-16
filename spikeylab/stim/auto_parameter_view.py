@@ -41,13 +41,11 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         return pixmap
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            index = self.indexAt(event.pos())
-            if index.isValid():
-                self.selectRow(index.row())
-                self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
-        else:
-            super(AutoParameterTableView, self).mousePressEvent(event)
+        index = self.indexAt(event.pos())
+        if index.isValid():
+            self.selectRow(index.row())
+            self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
+        super(AutoParameterTableView, self).mousePressEvent(event)
 
     def paintEvent(self, event):
         super(AutoParameterTableView, self).paintEvent(event)

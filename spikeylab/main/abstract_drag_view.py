@@ -9,6 +9,7 @@ class AbstractDragView():
         self.setAcceptDrops(True)
         self.dragline = None
         self.original_pos = None
+        self.dragStartPosition = None
 
     def grabImage(self, index):
         raise NotImplementedError
@@ -20,43 +21,48 @@ class AbstractDragView():
         raise NotImplementedError
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
-            index = self.indexAt(event.pos())
-            # grab the pixmap first, as it may be cleared from component,
-            # and slows GUI due to redraw.
-            pixmap = self.grabImage(index)
+        self.dragStartPosition = event.pos()
 
-            selected = self.model().data(index, QtCore.Qt.UserRole+1)
+    def mouseMoveEvent(self, event):
+        if self.dragStartPosition is None or \
+            (event.pos() - self.dragStartPosition).manhattanLength() < QtGui.QApplication.startDragDistance():
+            return
+        index = self.indexAt(event.pos())
+        # grab the pixmap first, as it may be cleared from component,
+        # and slows GUI due to redraw.
+        pixmap = self.grabImage(index)
 
-            if selected is None:
-                return
-                
-            ## convert to  a bytestream
-            bstream = cPickle.dumps(selected)
-            mimeData = QtCore.QMimeData()
-            mimeData.setData("application/x-protocol", bstream)
+        selected = self.model().data(index, QtCore.Qt.UserRole+1)
 
-            self.limbo_component = selected
-            drag = QtGui.QDrag(self)
-            drag.setMimeData(mimeData)
-
-            # below makes the pixmap half transparent
-            painter = QtGui.QPainter(pixmap)
-            painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-            painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
-            painter.end()
+        if selected is None:
+            return
             
-            drag.setPixmap(pixmap)
+        ## convert to  a bytestream
+        bstream = cPickle.dumps(selected)
+        mimeData = QtCore.QMimeData()
+        mimeData.setData("application/x-protocol", bstream)
 
-            x, y = self.indexXY(index)
-            drag.setHotSpot(QtCore.QPoint(event.x()-x, event.y()-y))
-            # drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
-            drag.setPixmap(pixmap)
+        self.limbo_component = selected
+        drag = QtGui.QDrag(self)
+        drag.setMimeData(mimeData)
 
-            self.original_pos = index
+        # below makes the pixmap half transparent
+        painter = QtGui.QPainter(pixmap)
+        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+        painter.end()
+        
+        drag.setPixmap(pixmap)
 
-            self.model().removeItem(index)
-            result = drag.start(QtCore.Qt.MoveAction)
+        x, y = self.indexXY(index)
+        drag.setHotSpot(QtCore.QPoint(event.x()-x, event.y()-y))
+        # drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
+        drag.setPixmap(pixmap)
+
+        self.original_pos = index
+
+        self.model().removeItem(index)
+        result = drag.exec_(QtCore.Qt.MoveAction)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/x-protocol"):
@@ -81,6 +87,7 @@ class AbstractDragView():
         event.accept()
 
     def dropAssist(self, event):
+        self.dragStartPosition = None
         self.dragline = None
         self.original_pos = None
         data = event.mimeData()
@@ -96,3 +103,6 @@ class AbstractDragView():
                 self.model().insertItem(self.original_pos, selected)
                 self.original_pos = None
                 self.viewport().update()
+
+    def mouseReleaseEvent(self, event):
+        self.dragStartPosition = None
