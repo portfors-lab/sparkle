@@ -16,15 +16,15 @@ class StimulusLabelTable(QtGui.QWidget):
 
         layout = QtGui.QGridLayout()
 
-        builder_lbl = DragLabel(BuilderFactory)
-        tc_lbl = DragLabel(TCFactory)
-        template_lbl = DragLabel(TemplateFactory)
+        self.builder_lbl = DragLabel(BuilderFactory)
+        self.tc_lbl = DragLabel(TCFactory)
+        self.template_lbl = DragLabel(TemplateFactory)
         self.trash_lbl = TrashWidget()
         self.trash_lbl.setMinimumWidth(100)
 
-        layout.addWidget(builder_lbl, 0,0)
-        layout.addWidget(tc_lbl,0,1)
-        layout.addWidget(template_lbl,0,2)
+        layout.addWidget(self.builder_lbl, 0,0)
+        layout.addWidget(self.tc_lbl,0,1)
+        layout.addWidget(self.template_lbl,0,2)
         layout.addWidget(self.trash_lbl, 0,3)
 
         self.setLayout(layout)

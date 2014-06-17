@@ -28,7 +28,6 @@ class DragLabel(QtGui.QLabel):
     def mouseMoveEvent(self, event):
         if (event.pos() - self.dragStartPosition).manhattanLength() < 10:
             return
-        print 'mouse press slot!!!!!!!!'
         factory = self.factoryclass()
 
         mimeData = QtCore.QMimeData()
