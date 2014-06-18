@@ -12,6 +12,7 @@ from spikeylab.stim.types.widgets import silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
 from spikeylab.tools.systools import get_src_directory
+from spikeylab.tools.exceptions import FileDoesNotExistError
 
 from pyqtgraph import GradientEditorItem
 
@@ -174,8 +175,23 @@ class Vocalization(AbstractStimulusComponent):
 
     def loadState(self, state):
         super(Vocalization,self).loadState(state)
-        self._browsedir = state['browsedir']
-        self._filename = state['file']
+
+        browsedir = state['browsedir']
+        fname = state['file']
+
+        # error will occur later if unset
+        if os.path.isdir(browsedir):
+            self._browsedir = browsedir
+        if os.path.isfile(fname):
+            self._filename = fname
+            
+        # if not os.path.isdir(browsedir):
+        #     raise FileDoesNotExistError(browsedir)
+        # self._browsedir = browsedir
+
+        # if not os.path.isfile(fname):
+        #     raise FileDoesNotExistError(fname)
+        # self._filename = fname
 
     def setFile(self, fname):
         if fname is not None:
