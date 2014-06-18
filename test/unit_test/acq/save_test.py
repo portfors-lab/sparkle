@@ -1,6 +1,6 @@
 import os
 import glob
-from spikeylab.io import fileio
+from spikeylab.acq import fileio
 import numpy as np
 from nose.tools import with_setup
 

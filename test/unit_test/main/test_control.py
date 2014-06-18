@@ -140,6 +140,7 @@ class TestSpikey():
             time.sleep(1)
             QApplication.processEvents()
             
+        print 'label text', self.form.ui.running_label.text()    
         assert self.form.ui.running_label.text() == "OFF"
 
         # make sure there is not calibration file present
@@ -204,7 +205,7 @@ class TestSpikey():
         # press enter to accept tone paramters -- how can I get the editor widget for components????????
         # QTest.keyPress(self.form.ui.protocolView.stim_editor.ui.trackview)
         # self.form.ui.protocolView.stim_editor.ui.trackview.closeEditor()
-        
+
         QTest.mouseClick(self.form.ui.protocolView.stim_editor.ui.ok_btn, Qt.LeftButton)
 
         QTest.mouseClick(self.form.ui.start_btn, Qt.LeftButton)

@@ -7,6 +7,7 @@ import threading
 import logging
 import time
 import traceback
+import getpass
 
 from PyQt4 import QtCore, QtGui
 
@@ -138,8 +139,7 @@ class MainWindow(ControlWindow):
                 h.signal.message.connect(self.ui.log_txedt.appendHtml)
                 break
 
-        logger.info("{} Program Started {} {}".format('*'*8, time.strftime("%d-%m-%Y"), '*'*8))
-
+        logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
         self.ui.data_file_lbl.setText(fname)
 
         self.calpeak = None
@@ -624,6 +624,7 @@ class MainWindow(ControlWindow):
 
     def set_calibration_duration(self):
         winsz = float(self.ui.windowsz_spnbx.value())
+        print 'setting calibration duration', winsz
         # I shouldn't have to do both of these...
         self.acqmodel.set_calibration_duration(winsz*self.tscale)
         self.ui.calibration_widget.set_duration(winsz)

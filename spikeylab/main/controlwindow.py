@@ -48,8 +48,12 @@ class ControlWindow(QtGui.QMainWindow):
 
         try:
             settings = QtCore.QSettings("audiolab")
-            self.restoreGeometry(settings.value("geometry"))
-            self.restoreState(settings.value("windowState"))
+            if settings is not None:
+                self.restoreGeometry(settings.value("geometry"))
+                self.restoreState(settings.value("windowState"))
+            else:
+                logger = logging.getLogger('main')
+                logger.warning('Unable to restore QSettings for audiolab')
             # self.ui.psth.restoreGeometry(settings.value("psth_dock/geometry"))
 
             self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")

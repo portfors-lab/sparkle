@@ -1,7 +1,7 @@
 import numpy as np
 # import matplotlib.pyplot as plt
 
-from spikeylab.io.players import FinitePlayer, ContinuousPlayer
+from spikeylab.acq.players import FinitePlayer, ContinuousPlayer
 class TestDAQPlayers():
     def test_finite_acquisition_equal_dims(self):
         player = FinitePlayer()

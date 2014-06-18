@@ -15,6 +15,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.common.risefall_spnbx.setEnabled(False)
         # self.colormap_changed = self.ui.spec_preview.colormap_changed
         self.common.valueChanged.connect(self.valueChanged.emit)
+        self.input_widgets = {'intensity': self.common.db_spnbx}
 
     def setComponent(self, component):
         self.common.setFields(component)

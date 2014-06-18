@@ -71,6 +71,9 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     def setMinimum(self, val):
         self.minimum = val
 
+    def sizeHint(self):
+        return QtCore.QSize(450,45)
+
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)

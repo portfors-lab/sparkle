@@ -13,6 +13,13 @@ from PyQt4 import QtCore, QtGui
 
 import test.sample as sample
 
+import os, yaml
+from spikeylab.tools.systools import get_src_directory
+src_dir = get_src_directory()
+with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+MAXV = config['max_voltage']
+
 # get an error accessing class names if there is not a qapp running
 app = None
 def setUp():
@@ -164,11 +171,10 @@ class TestStimModel():
         else:
             assert round(np.amax(signal),4) == calv/10
 
-    @raises(Exception)
     def test_signal_gt_caldb(self):
         caldb = 100
         calv = 0.1
-        mod = 10
+        mod = 20
         model = StimulusModel()
         component0 = PureTone()
         component1 = PureTone()
@@ -179,6 +185,14 @@ class TestStimModel():
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
+
+        assert atten == 0
+        # 20 decibel increase == 10x scale in amplitude
+        if USE_RMS:
+            print 'values', round(np.amax(signal),5), calv*1.414*10
+            assert round(np.amax(signal),3) == (calv*1.414)*10
+        else:
+            assert round(np.amax(signal),4) == calv*10
 
     def test_signal_below_min(self):
         caldb = 100
@@ -196,10 +210,8 @@ class TestStimModel():
 
     def test_signal_overload_voltage(self):
         caldb = 100
-        calv = 2.0
+        calv = 12.0
         model = StimulusModel()
-        # set maxv something we know will overload
-        model.maxv = 5.0 
         component0 = PureTone()
         component1 = PureTone()
         component0.setIntensity(caldb)
@@ -210,8 +222,8 @@ class TestStimModel():
 
         signal, atten, ovld = model.signal()
         assert atten == 0
-        # print 'maxv', model.maxv, 'signal max', np.amax(signal), 'overload', ovld
-        assert np.amax(signal) == model.maxv
+        print 'maxv', MAXV, 'signal max', np.amax(signal), 'overload', ovld
+        assert np.amax(signal) == MAXV
         # do math to make this more accurate
         assert ovld > 0
 

@@ -20,7 +20,7 @@ class Parametizer(QtGui.QWidget):
         layout = QtGui.QVBoxLayout()
         btn_layout = QtGui.QHBoxLayout()
         
-        add_lbl = DragLabel(AddLabel)
+        self.add_lbl = DragLabel(AddLabel)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
@@ -31,7 +31,7 @@ class Parametizer(QtGui.QWidget):
         self.randomize_ckbx = QtGui.QCheckBox("Randomize order")
         self.randomize_ckbx.toggled.connect(self.randomToggle)
 
-        btn_layout.addWidget(add_lbl)
+        btn_layout.addWidget(self.add_lbl)
         btn_layout.addWidget(self.trash_lbl)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(self.randomize_ckbx)

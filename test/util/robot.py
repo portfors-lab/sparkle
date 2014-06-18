@@ -45,3 +45,7 @@ def keypress(key):
     if key == 'enter':
         key = k.return_key
     k.tap_key(key)
+
+def type(string):
+    k = PyKeyboard()
+    k.type_string(string)

@@ -3,7 +3,6 @@ from PyQt4 import QtGui
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.stim.incrementer import IncrementInput
 from spikeylab.stim.smart_spinbox import SmartSpinBox
-from spikeylab.stim.common_parameters import CommonParameterWidget
             
 class SilenceParameterWidget(AbstractParameterWidget):
     include_in_stack = False

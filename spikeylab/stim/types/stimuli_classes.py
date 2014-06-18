@@ -8,7 +8,7 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
-from spikeylab.stim.types.widgets import tone_parameters, silence_parameters
+from spikeylab.stim.types.widgets import silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone
 from spikeylab.tools.systools import get_src_directory
@@ -331,14 +331,15 @@ class Silence(AbstractStimulusComponent):
     name = "silence"
     protocol = True
     _risefall = 0
+    _intensity = 0
     def paint(self, painter, rect, palette):
         mid = rect.y() + (rect.height()/2)
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
 
-    def showEditor(self):
-        editor = silence_parameters.SilenceParameterWidget()
-        editor.setComponent(self)
-        return editor
+    def auto_details(self):
+        details = super(Silence, self).auto_details()
+        less_details = {'duration': details['duration']}
+        return less_details
 
     def signal(self, *args, **kwargs):
         fs = kwargs['fs']

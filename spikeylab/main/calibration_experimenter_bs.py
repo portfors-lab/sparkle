@@ -73,7 +73,7 @@ class CalibrationExperimenterBS(Experimenter):
         logger = logging.getLogger('main')
         logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
         
-        # print 'initialize data signal size', self.stimulus.duration(), self.stimulus.samplerate(), (self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate())
+        print 'initialize data signal size', self.stimulus.duration(), self.stimulus.samplerate(), (self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate())
         self.datafile.init_data(self.current_dataset_name, mode='calibration', 
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
                                 nested_name='signal')
@@ -95,7 +95,7 @@ class CalibrationExperimenterBS(Experimenter):
         return
 
     def _process_response(self, response, trace_info, irep):
-        # print 'size of response:', response.shape
+        print 'size of response:', response.shape
         self.datafile.append(self.current_dataset_name, response, 
                              nested_name='signal')
 
