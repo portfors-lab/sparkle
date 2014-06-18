@@ -13,3 +13,8 @@ def center(item, parent=None):
         else:
             global_point =  midpoint
     return global_point.x(), global_point.y()
+
+def hotspot(radio):
+    """Return a clickable coordinate for radio button"""
+    pt = radio.mapToGlobal(QtCore.QPoint(10,10))
+    return pt.x(), pt.y()

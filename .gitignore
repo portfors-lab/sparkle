@@ -20,6 +20,8 @@ tmp/
 
 # build files
 /doc/_build/
+/spikeylab/build/
+/spikeylab/dist/
 
 # testing
 cover/
