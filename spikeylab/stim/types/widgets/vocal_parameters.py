@@ -16,6 +16,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         # self.colormap_changed = self.ui.spec_preview.colormap_changed
         self.common.valueChanged.connect(self.valueChanged.emit)
         self.input_widgets = {'intensity': self.common.db_spnbx}
+        self.audio_extentions = ['wav']
 
     def setComponent(self, component):
         self.common.setFields(component)
@@ -50,6 +51,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
         self.filemodel = QtGui.QFileSystemModel(self)
         self.filemodel.setFilter(QtCore.QDir.Files)
+        filters = ['*.'+x for x in self.audio_extentions]
+        self.filemodel.setNameFilters(filters)
         self.filelist_view.setModel(self.filemodel)
         self.filelist_view.setRootIndex(self.filemodel.setRootPath(listroot))
 
@@ -84,6 +87,9 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     def wavfile_clicked(self, model_index):
         # display spectrogram of file
         spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
+        if not any(map(spath.endswith, self.audio_extentions)):
+            return # not an audio file
+            
         dur = self.spec_preview.from_file(spath)
         self.common.setDuration(dur)
         self.current_wav_file = spath
