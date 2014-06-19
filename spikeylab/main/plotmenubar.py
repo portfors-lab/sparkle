@@ -7,9 +7,9 @@ class PlotMenuBar(QtGui.QMenuBar):
         standardAction = QtGui.QAction('standard', self)
         calibrationAction = QtGui.QAction('calibration', self)
         calExpAction = QtGui.QAction('calibration explore', self)
-        standardAction.triggered.connect(lambda: self.switch_display('standard'))
-        calibrationAction.triggered.connect(lambda: self.switch_display('calibration'))
-        calExpAction.triggered.connect(lambda: self.switch_display('calexp'))
+        standardAction.triggered.connect(lambda: self.switchDisplay('standard'))
+        calibrationAction.triggered.connect(lambda: self.switchDisplay('calibration'))
+        calExpAction.triggered.connect(lambda: self.switchDisplay('calexp'))
 
         viewMenu = self.addMenu('View')
         viewMenu.addAction(standardAction)
@@ -18,8 +18,8 @@ class PlotMenuBar(QtGui.QMenuBar):
 
         self.dock = dock
 
-    def switch_display(self, display):
-        self.dock.switch_display(display)
+    def switchDisplay(self, display):
+        self.dock.switchDisplay(display)
 
     def mousePressEvent(self, event):
         if event.x() < 50:

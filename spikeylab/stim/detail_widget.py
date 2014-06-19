@@ -8,22 +8,22 @@ class StimDetailWidget(QtGui.QWidget):
         self.ui = Ui_StimDetailWidget()
         self.ui.setupUi(self)
 
-    def set_test_num(self, num):
-        self.ui.test_num.setNum(num+1)
+    def setTestNum(self, num):
+        self.ui.testNum.setNum(num+1)
 
-    def set_trace_num(self, num):
-        self.ui.trace_num.setNum(num+1)
+    def setTraceNum(self, num):
+        self.ui.traceNum.setNum(num+1)
 
-    def set_rep_num(self, num):
-        self.ui.rep_num.setNum(num+1)
+    def setRepNum(self, num):
+        self.ui.repNum.setNum(num+1)
 
-    def set_doc(self, doc):
-        self.ui.over_atten.setNum(doc['overloaded_attenuation'])
+    def setDoc(self, doc):
+        self.ui.overAtten.setNum(doc['overloaded_attenuation'])
         # also set composite stim type
-        self.ui.trace_type.setText(doc['testtype'])
+        self.ui.traceType.setText(doc['testtype'])
 
-        self.ui.component_details.clear_doc()
-        self.ui.component_details.set_doc(doc['components'])
+        self.ui.componentDetails.clearDoc()
+        self.ui.componentDetails.setDoc(doc['components'])
 
-    def set_display_attributes(self, attrs):
-        self.ui.component_details.set_display_table(attrs)
+    def setDisplayAttributes(self, attrs):
+        self.ui.componentDetails.setDisplayTable(attrs)

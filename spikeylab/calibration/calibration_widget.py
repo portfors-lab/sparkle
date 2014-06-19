@@ -11,49 +11,49 @@ class CalibrationWidget(QtGui.QWidget):
         super(CalibrationWidget,self).__init__(parent)
         self.ui = Ui_CalibrationWidget()
         self.ui.setupUi(self)
-        self.ui.curve_widget.ui.ok_btn.hide()
-        self.ui.curve_widget.ui.save_btn.hide()
-        self.ui.curve_widget.ui.dur_spnbx.setEnabled(False)
-        self.ui.curve_widget.ui.nreps_spnbx.hide()
-        self.ui.curve_widget.ui.label_31.hide()
-        self.duration_widgets = [self.ui.curve_widget.ui.dur_spnbx]
+        self.ui.curveWidget.ui.okBtn.hide()
+        self.ui.curveWidget.ui.saveBtn.hide()
+        self.ui.curveWidget.ui.durSpnbx.setEnabled(False)
+        self.ui.curveWidget.ui.nrepsSpnbx.hide()
+        self.ui.curveWidget.ui.label_31.hide()
+        self.durationWidgets = [self.ui.curveWidget.ui.durSpnbx]
 
     def setCurveModel(self, model):
         """sets the StimulusModel for this calibration curve"""
-        self.stim_model = model
-        self.ui.curve_widget.setStimulusModel(model)
+        self.stimModel = model
+        self.ui.curveWidget.setStimulusModel(model)
 
-    def set_duration(self, dur):
-        for w in self.duration_widgets:
+    def setDuration(self, dur):
+        for w in self.durationWidgets:
             w.setValue(dur)
 
-    def add_option(self, stim):
+    def addOption(self, stim):
         # set the editor widgets for noise and sweep
-        self.ui.cal_type_cmbbx.insertItem(0,stim.name)
+        self.ui.calTypeCmbbx.insertItem(0,stim.name)
         editor = stim.showEditor()
         # should probably make this less coupled
-        dur_input = editor.duration_input_widget()
-        self.duration_widgets.append(dur_input)
-        dur_input.setEnabled(False)
-        self.ui.caleditor_stack.insertWidget(0, editor)
-        self.ui.cal_type_cmbbx.setCurrentIndex(0)
+        durInput = editor.durationInputWidget()
+        self.durationWidgets.append(durInput)
+        durInput.setEnabled(False)
+        self.ui.caleditorStack.insertWidget(0, editor)
+        self.ui.calTypeCmbbx.setCurrentIndex(0)
 
-    def save_to_object(self):
-        for i in range(self.ui.caleditor_stack.count()):
+    def saveToObject(self):
+        for i in range(self.ui.caleditorStack.count()):
             try:
-                self.ui.caleditor_stack.widget(i).saveToObject()
+                self.ui.caleditorStack.widget(i).saveToObject()
             except AttributeError:
                 logger = logging.getLogger('main')
                 logger.debug('index {} does not have method saveToObject'.format(i))
 
-    def current_index(self):
-        return self.ui.cal_type_cmbbx.currentIndex()
+    def currentIndex(self):
+        return self.ui.calTypeCmbbx.currentIndex()
 
-    def current_selection(self):
-        return self.ui.cal_type_cmbbx.currentText()
+    def currentSelection(self):
+        return self.ui.calTypeCmbbx.currentText()
         
-    def is_tone_cal(self):
-        return self.ui.cal_type_cmbbx.currentIndex() == self.ui.cal_type_cmbbx.count() -1
+    def isToneCal(self):
+        return self.ui.calTypeCmbbx.currentIndex() == self.ui.calTypeCmbbx.count() -1
 
-    def save_checked(self):
-        return self.ui.savecal_ckbx.isChecked()
+    def saveChecked(self):
+        return self.ui.savecalCkbx.isChecked()

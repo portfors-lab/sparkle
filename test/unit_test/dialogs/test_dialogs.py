@@ -24,7 +24,7 @@ class TestCalibrationDialog():
         self.fscale = 1000
         self.defaults = {'calf':20000, 'caldb':100,  'calv':0.1, 'calfile':'', 
                          'use_calfile':False, 'frange':(5000, 1e5)}
-        self.dlg = CalibrationDialog(fscale=self.fscale, default_vals=self.defaults)
+        self.dlg = CalibrationDialog(fscale=self.fscale, defaultVals=self.defaults)
         self.dlg.show()
 
     def test_no_calfile_accept(self):

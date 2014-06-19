@@ -19,7 +19,7 @@
      <property name="title">
       <string>Time scale</string>
      </property>
-     <widget class="QRadioButton" name="sec_btn">
+     <widget class="QRadioButton" name="secBtn">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -32,7 +32,7 @@
        <string>seconds</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="ms_btn">
+     <widget class="QRadioButton" name="msBtn">
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -55,7 +55,7 @@
      <property name="title">
       <string>Frequency scale</string>
      </property>
-     <widget class="QRadioButton" name="hz_btn">
+     <widget class="QRadioButton" name="hzBtn">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -68,7 +68,7 @@
        <string>Hz</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="khz_btn">
+     <widget class="QRadioButton" name="khzBtn">
       <property name="geometry">
        <rect>
         <x>110</x>

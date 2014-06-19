@@ -8,7 +8,7 @@ class AbstractDragView():
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.dragline = None
-        self.original_pos = None
+        self.originalPos = None
         self.dragStartPosition = None
 
     def grabImage(self, index):
@@ -59,7 +59,7 @@ class AbstractDragView():
         # drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
         drag.setPixmap(pixmap)
 
-        self.original_pos = index
+        self.originalPos = index
 
         self.model().removeItem(index)
         result = drag.exec_(QtCore.Qt.MoveAction)
@@ -89,7 +89,7 @@ class AbstractDragView():
     def dropAssist(self, event):
         self.dragStartPosition = None
         self.dragline = None
-        self.original_pos = None
+        self.originalPos = None
         data = event.mimeData()
         stream = data.retrieveData("application/x-protocol",
             QtCore.QVariant.ByteArray)
@@ -98,10 +98,10 @@ class AbstractDragView():
     def childEvent(self, event):
         if event.type() == QtCore.QEvent.ChildRemoved:
             # hack to catch drop offs   
-            if self.original_pos is not None:
+            if self.originalPos is not None:
                 selected = self.limbo_component
-                self.model().insertItem(self.original_pos, selected)
-                self.original_pos = None
+                self.model().insertItem(self.originalPos, selected)
+                self.originalPos = None
                 self.viewport().update()
 
     def mouseReleaseEvent(self, event):

@@ -43,7 +43,7 @@ DEVNAME = config['device_name']
 
 
 class MainWindow(ControlWindow):
-    def __init__(self, inputs_filename='', datafile=None, filemode='w-'):
+    def __init__(self, inputsFilename='', datafile=None, filemode='w-'):
         # set up model and stimlui first, 
         # as saved configuration relies on this
         self.acqmodel = AcquisitionManager()
@@ -57,258 +57,257 @@ class MainWindow(ControlWindow):
             fname = None
             
         # get stimuli editor widgets
-        self.explore_stimuli = self.acqmodel.stimuli_list()
+        self.exploreStimuli = self.acqmodel.stimuli_list()
         
         # auto generated code intialization
-        ControlWindow.__init__(self, inputs_filename)
+        ControlWindow.__init__(self, inputsFilename)
         
-        self.ui.start_btn.clicked.connect(self.on_start)
-        self.ui.stop_btn.clicked.connect(self.on_stop)
-        self.ui.start_chart_btn.clicked.connect(self.on_start_chart)
-        self.ui.stop_chart_btn.clicked.connect(self.on_stop_chart)
+        self.ui.startBtn.clicked.connect(self.onStart)
+        self.ui.stopBtn.clicked.connect(self.onStop)
+        self.ui.startChartBtn.clicked.connect(self.onStartChart)
+        self.ui.stopChartBtn.clicked.connect(self.onStopChart)
 
         cnames = get_ao_chans(DEVNAME.encode())
-        self.ui.aochan_box.addItems(cnames)
+        self.ui.aochanBox.addItems(cnames)
         cnames = get_ai_chans(DEVNAME.encode())
-        self.ui.aichan_box.addItems(cnames)
+        self.ui.aichanBox.addItems(cnames)
 
-        self.ui.running_label.setStyleSheet(REDSS)
+        self.ui.runningLabel.setStyleSheet(REDSS)
 
-        self.apply_calibration = False
+        self.applyCalibration = False
         self.calpeak = None
 
-        self.live_lock = QtCore.QMutex()
+        self.liveLock = QtCore.QMutex()
 
-        # self.display.spiketrace_plot.traits.signals.threshold_updated.connect(self.update_thresh)
-        self.display.threshold_updated.connect(self.update_thresh)
-        self.display.colormap_changed.connect(self.relay_cmap_change)
+        self.display.thresholdUpdated.connect(self.updateThresh)
+        self.display.colormapChanged.connect(self.relayCMapChange)
 
         self.ui.protocolView.setModel(self.acqmodel.protocol_model())
-        self.ui.calibration_widget.setCurveModel(self.acqmodel.calibration_stimulus('tone'))
+        self.ui.calibrationWidget.setCurveModel(self.acqmodel.calibration_stimulus('tone'))
 
-        self.acqmodel.signals.response_collected.connect(self.display_response)
-        self.acqmodel.signals.calibration_response_collected.connect(self.display_calibration_response)
-        self.acqmodel.signals.average_response.connect(self.display_db_result)
-        self.acqmodel.signals.spikes_found.connect(self.display_raster)
-        self.acqmodel.signals.trace_finished.connect(self.trace_done)
-        self.acqmodel.signals.stim_generated.connect(self.display_stim)
-        self.acqmodel.signals.warning.connect(self.set_status_msg)
-        self.acqmodel.signals.ncollected.connect(self.update_chart)
-        self.acqmodel.signals.current_trace.connect(self.report_progress)
-        self.acqmodel.signals.current_rep.connect(self.report_rep)
-        self.acqmodel.signals.group_finished.connect(self.on_group_done)
-        self.acqmodel.signals.samplerateChanged.connect(self.update_generation_rate)
-        self.acqmodel.signals.tuning_curve_started.connect(self.spawn_tuning_curve)
-        self.acqmodel.signals.tuning_curve_response.connect(self.display_tuning_curve)
-        self.acqmodel.signals.over_voltage.connect(self.report_overv)
+        self.acqmodel.signals.response_collected.connect(self.displayResponse)
+        self.acqmodel.signals.calibration_response_collected.connect(self.displayCalibrationResponse)
+        self.acqmodel.signals.average_response.connect(self.displayDbResult)
+        self.acqmodel.signals.spikes_found.connect(self.displayRaster)
+        self.acqmodel.signals.trace_finished.connect(self.traceDone)
+        self.acqmodel.signals.stim_generated.connect(self.displayStim)
+        self.acqmodel.signals.warning.connect(self.setStatusMsg)
+        self.acqmodel.signals.ncollected.connect(self.updateChart)
+        self.acqmodel.signals.current_trace.connect(self.reportProgress)
+        self.acqmodel.signals.current_rep.connect(self.reportRep)
+        self.acqmodel.signals.group_finished.connect(self.onGroupDone)
+        self.acqmodel.signals.samplerateChanged.connect(self.updateGenerationRate)
+        self.acqmodel.signals.tuning_curve_started.connect(self.spawnTuningCurve)
+        self.acqmodel.signals.tuning_curve_response.connect(self.displayTuningCurve)
+        self.acqmodel.signals.over_voltage.connect(self.reportOverV)
 
-        self.ui.thresh_spnbx.valueChanged.connect(self.set_plot_thresh)        
-        self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
-        self.ui.binsz_spnbx.setKeyboardTracking(False)
-        self.ui.windowsz_spnbx.setKeyboardTracking(False)
-        self.ui.ex_nreps_spnbx.setKeyboardTracking(False)
-        self.ui.thresh_spnbx.setKeyboardTracking(False)
+        self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        
+        self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
+        self.ui.binszSpnbx.setKeyboardTracking(False)
+        self.ui.windowszSpnbx.setKeyboardTracking(False)
+        self.ui.exNrepsSpnbx.setKeyboardTracking(False)
+        self.ui.threshSpnbx.setKeyboardTracking(False)
 
-        self.active_operation = None
+        self.activeOperation = None
 
         # update GUI to reflect loaded values
-        self.set_plot_thresh()
-        self.set_calibration_duration()
+        self.setPlotThresh()
+        self.setCalibrationDuration()
 
         # set up wav file directory finder paths
-        self.exvocal = self.ui.parameter_stack.widget_for_name("Vocalization")
-        self.exvocal.filelist_view.doubleClicked.connect(self.wavfile_selected)
-        self.selected_wav_file = self.exvocal.current_wav_file
+        self.exvocal = self.ui.parameterStack.widgetForName("Vocalization")
+        self.exvocal.filelistView.doubleClicked.connect(self.wavfileSelected)
+        self.selectedWavFile = self.exvocal.currentWavFile
 
         # always start in windowed mode
-        self.mode_toggled('Windowed')
-        self.prev_tab = self.ui.tab_group.tabText(self.ui.tab_group.currentIndex()).lower()
+        self.modeToggled('Windowed')
+        self.prevTab = self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex()).lower()
         # always show plots on load
-        self.ui.plot_dock.setVisible(True)
-        self.ui.psth_dock.setVisible(True)
+        self.ui.plotDock.setVisible(True)
+        self.ui.psthDock.setVisible(True)
 
-        self.ui.stop_btn.setEnabled(False)
-        self.ui.stop_chart_btn.setEnabled(False)
+        self.ui.stopBtn.setEnabled(False)
+        self.ui.stopChartBtn.setEnabled(False)
 
         logger = logging.getLogger('main')
         handlers = logger.handlers
         # dig out the UI handler to assign text edit ... a better way?
         for h in handlers:
             if h.get_name() == 'ui':
-                # h.signal.message.connect(self.ui.log_txedt.appendPlainText)
-                h.signal.message.connect(self.ui.log_txedt.appendHtml)
+                # h.signal.message.connect(self.ui.logTxedt.appendPlainText)
+                h.signal.message.connect(self.ui.logTxedt.appendHtml)
                 break
 
         logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
-        self.ui.data_file_lbl.setText(fname)
+        self.ui.dataFileLbl.setText(fname)
 
         self.calpeak = None
-        self.ui.tab_group.setCurrentIndex(0)
+        self.ui.tabGroup.setCurrentIndex(0)
 
     # def update_ui_log(self, message):
-    #     self.ui.log_txedt.appendPlainText(message)
+    #     self.ui.logTxedt.appendPlainText(message)
 
-    def connect_updatable(self, connect):
+    def connectUpdatable(self, connect):
         if connect:
-            self.ui.start_btn.clicked.disconnect()
-            self.ui.start_btn.clicked.connect(self.on_update)
-            self.ui.binsz_spnbx.valueChanged.connect(self.on_update)
-            self.ui.windowsz_spnbx.valueChanged.connect(self.on_update)
-            self.ui.ex_nreps_spnbx.valueChanged.connect(self.on_update)
-            for editor in self.ui.parameter_stack.widgets():
-                editor.valueChanged.connect(self.on_update)
+            self.ui.startBtn.clicked.disconnect()
+            self.ui.startBtn.clicked.connect(self.onUpdate)
+            self.ui.binszSpnbx.valueChanged.connect(self.onUpdate)
+            self.ui.windowszSpnbx.valueChanged.connect(self.onUpdate)
+            self.ui.exNrepsSpnbx.valueChanged.connect(self.onUpdate)
+            for editor in self.ui.parameterStack.widgets():
+                editor.valueChanged.connect(self.onUpdate)
         else:
             try:
-                self.ui.ex_nreps_spnbx.valueChanged.disconnect()
-                self.ui.binsz_spnbx.valueChanged.disconnect()
-                self.ui.windowsz_spnbx.valueChanged.disconnect()
+                self.ui.exNrepsSpnbx.valueChanged.disconnect()
+                self.ui.binszSpnbx.valueChanged.disconnect()
+                self.ui.windowszSpnbx.valueChanged.disconnect()
                 # this should always remain connected 
-                self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
-                self.ui.start_btn.clicked.disconnect()
-                self.ui.start_btn.clicked.connect(self.on_start)
-                for editor in self.ui.parameter_stack.widgets():
+                self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
+                self.ui.startBtn.clicked.disconnect()
+                self.ui.startBtn.clicked.connect(self.onStart)
+                for editor in self.ui.parameterStack.widgets():
                     editor.valueChanged.disconnect()
             except TypeError:
                 # disconnecting already disconnected signals throws TypeError
                 pass
 
-    def on_start(self):
+    def onStart(self):
         # set plot axis to appropriate limits
         # first time set up data file
-        if not self.verify_inputs('windowed'):
+        if not self.verifyInputs('windowed'):
             return
 
         # disable the components we don't want changed amid generation
-        self.ui.aochan_box.setEnabled(False)
-        self.ui.aisr_spnbx.setEnabled(False)
-        reprate = self.ui.reprate_spnbx.setEnabled(False)
-        self.ui.stop_btn.setEnabled(True)
-        self.plot_progress = False
-        self.ui.protocol_progress_bar.setValue(0)
+        self.ui.aochanBox.setEnabled(False)
+        self.ui.aisrSpnbx.setEnabled(False)
+        reprate = self.ui.reprateSpnbx.setEnabled(False)
+        self.ui.stopBtn.setEnabled(True)
+        self.plotProgress = False
+        self.ui.protocolProgressBar.setValue(0)
 
-        if self.current_mode == 'windowed':
+        if self.currentMode == 'windowed':
             if self.acqmodel.datafile is None:
                 self.acqmodel.set_save_params(self.savefolder, self.savename)
                 self.acqmodel.create_data_file()
-            self.ui.aichan_box.setEnabled(False)
+            self.ui.aichanBox.setEnabled(False)
             # FIX ME:
-            if self.ui.plot_dock.current() == 'calibration':
-                self.ui.plot_dock.switch_display('standard')
-            self.ui.running_label.setText(u"RECORDING")
-            self.ui.running_label.setStyleSheet(GREENSS)
+            if self.ui.plotDock.current() == 'calibration':
+                self.ui.plotDock.switchDisplay('standard')
+            self.ui.runningLabel.setText(u"RECORDING")
+            self.ui.runningLabel.setStyleSheet(GREENSS)
 
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            self.run_explore()
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_protocol':
-            self.run_protocol()
-        elif self.ui.tab_group.currentWidget().objectName() == 'tab_calibrate':
-            self.run_calibration()
+        if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
+            self.runExplore()
+        elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
+            self.runProtocol()
+        elif self.ui.tabGroup.currentWidget().objectName() == 'tabCalibrate':
+            self.runCalibration()
         else: 
             raise Exception("unrecognized tab selection")
 
-    def on_start_chart(self):
-        if not self.verify_inputs('chart'):
+    def onStartChart(self):
+        if not self.verifyInputs('chart'):
             return
 
         if self.acqmodel.datafile is None:
             self.acqmodel.set_save_params(self.savefolder, self.savename)
             self.acqmodel.create_data_file()
 
-        self.run_chart()
-        self.ui.running_label.setText(u"RECORDING")
-        self.ui.running_label.setStyleSheet(GREENSS)
-        self.ui.start_chart_btn.setEnabled(False)
-        self.ui.aichan_box.setEnabled(False)
-        self.ui.aisr_spnbx.setEnabled(False)
-        self.ui.stop_chart_btn.setEnabled(True)
-        self.ui.windowsz_spnbx.valueChanged.connect(self.update_scolling_windowsize)
+        self.runChart()
+        self.ui.runningLabel.setText(u"RECORDING")
+        self.ui.runningLabel.setStyleSheet(GREENSS)
+        self.ui.startChartBtn.setEnabled(False)
+        self.ui.aichanBox.setEnabled(False)
+        self.ui.aisrSpnbx.setEnabled(False)
+        self.ui.stopChartBtn.setEnabled(True)
+        self.ui.windowszSpnbx.valueChanged.connect(self.updateScollingWindowsize)
 
-    def on_update(self):
-        if not self.verify_inputs(self.active_operation):
+    def onUpdate(self):
+        if not self.verifyInputs(self.activeOperation):
             return
-        aochan = self.ui.aochan_box.currentText()
-        aichan = self.ui.aichan_box.currentText()
-        acq_rate = self.ui.aisr_spnbx.value()*self.fscale
+        aochan = self.ui.aochanBox.currentText()
+        aichan = self.ui.aichanBox.currentText()
+        acq_rate = self.ui.aisrSpnbx.value()*self.fscale
 
-        winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
-        binsz = float(self.ui.binsz_spnbx.value())*self.tscale
+        winsz = float(self.ui.windowszSpnbx.value())*self.tscale
+        binsz = float(self.ui.binszSpnbx.value())*self.tscale
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
-        self.ui.psth.set_bins(bin_centers)
+        self.ui.psth.setBins(bin_centers)
         self.acqmodel.set_params(aochan=aochan, aichan=aichan,
                                  acqtime=winsz, aisr=acq_rate,
                                  binsz=binsz)
         self.binsz = binsz
 
-        self.display.set_xlimits((0,winsz))
+        self.display.setXlimits((0,winsz))
 
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            nreps = self.ui.ex_nreps_spnbx.value()
+        if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
+            nreps = self.ui.exNrepsSpnbx.value()
 
             self.acqmodel.set_params(nreps=nreps)
             
             # have model sort all signals stuff out?
-            stim_index = self.ui.explore_stim_type_cmbbx.currentIndex()
+            stim_index = self.ui.exploreStimTypeCmbbx.currentIndex()
             self.acqmodel.set_stim_by_index(stim_index)
 
-            self.display.set_nreps(nreps)
-        if self.current_mode == 'chart':
+            self.display.setNreps(nreps)
+        if self.currentMode == 'chart':
             return winsz, acq_rate
             
-    def on_stop(self):
+    def onStop(self):
         self.acqmodel.halt() # stops generation, and acquistion if linked
-        if self.current_mode == 'windowed':
-            self.active_operation = None
-            self.live_lock.unlock()
-            self.ui.running_label.setText(u"OFF")
-            self.ui.running_label.setStyleSheet(REDSS)
-            self.ui.aichan_box.setEnabled(True)
-            self.connect_updatable(False)
-        self.ui.start_btn.setEnabled(True)
-        self.ui.stop_btn.setText("Stop")
-        self.ui.start_btn.setText('Start')
-        self.ui.stop_btn.clicked.disconnect()
-        self.ui.stop_btn.clicked.connect(self.on_stop)
+        if self.currentMode == 'windowed':
+            self.activeOperation = None
+            self.liveLock.unlock()
+            self.ui.runningLabel.setText(u"OFF")
+            self.ui.runningLabel.setStyleSheet(REDSS)
+            self.ui.aichanBox.setEnabled(True)
+            self.connectUpdatable(False)
+        self.ui.startBtn.setEnabled(True)
+        self.ui.stopBtn.setText("Stop")
+        self.ui.startBtn.setText('Start')
+        self.ui.stopBtn.clicked.disconnect()
+        self.ui.stopBtn.clicked.connect(self.onStop)
 
-        if self.ui.tab_group.tabText(self.ui.tab_group.currentIndex()).lower() != 'calibration':
-            self.ui.aisr_spnbx.setEnabled(True)
-        self.ui.aochan_box.setEnabled(True)
-        reprate = self.ui.reprate_spnbx.setEnabled(True)
-        self.ui.stop_btn.setEnabled(False)
-        self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; } QProgressBar::chunk {background-color: grey; width: 10px; margin-top: 1px; margin-bottom: 1px}")
+        if self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex()).lower() != 'calibration':
+            self.ui.aisrSpnbx.setEnabled(True)
+        self.ui.aochanBox.setEnabled(True)
+        reprate = self.ui.reprateSpnbx.setEnabled(True)
+        self.ui.stopBtn.setEnabled(False)
+        self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; } QProgressBar::chunk {background-color: grey; width: 10px; margin-top: 1px; margin-bottom: 1px}")
 
-    def on_stop_chart(self):
+    def onStopChart(self):
         self.acqmodel.stop_chart()
-        self.ui.start_chart_btn.setEnabled(True)
-        self.active_operation = None
-        self.live_lock.unlock()
-        self.ui.running_label.setText(u"OFF")
-        self.ui.running_label.setStyleSheet(REDSS)
-        self.ui.aichan_box.setEnabled(True)
-        self.ui.aisr_spnbx.setEnabled(True)
-        self.ui.stop_chart_btn.setEnabled(False)
-        self.ui.windowsz_spnbx.valueChanged.disconnect()
-        self.ui.windowsz_spnbx.valueChanged.connect(self.set_calibration_duration)
+        self.ui.startChartBtn.setEnabled(True)
+        self.activeOperation = None
+        self.liveLock.unlock()
+        self.ui.runningLabel.setText(u"OFF")
+        self.ui.runningLabel.setStyleSheet(REDSS)
+        self.ui.aichanBox.setEnabled(True)
+        self.ui.aisrSpnbx.setEnabled(True)
+        self.ui.stopChartBtn.setEnabled(False)
+        self.ui.windowszSpnbx.valueChanged.disconnect()
+        self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
 
-    def on_group_done(self, halted):
-        if self.active_operation == 'calibration':
+    def onGroupDone(self, halted):
+        if self.activeOperation == 'calibration':
             #maybe don't call this at all if save is false?
-            save = self.ui.calibration_widget.save_checked() and not halted
+            save = self.ui.calibrationWidget.saveChecked() and not halted
             calname = self.acqmodel.process_calibration(save)
             if save:
-                ww = self.show_wait()
+                ww = self.showWait()
                 self.acqmodel.set_calibration(calname, self.calvals['calf'], self.calvals['frange'])
                 self.calvals['calname'] = calname
                 self.calvals['use_calfile'] = True
                 attenuations, freqs = self.acqmodel.current_calibration()
-                self.ui.current_cal_lbl.setText(calname)
+                self.ui.currentCalLbl.setText(calname)
                 self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
                 self.pw.setWindowFlags(QtCore.Qt.Window)
-                self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
+                self.pw.setLabels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
                 ww.close()
                 self.pw.show()
-        elif self.active_operation == 'protocol' and self.current_mode == 'windowed':
+        elif self.activeOperation == 'protocol' and self.currentMode == 'windowed':
             if self.acqmodel.current_cellid == 0:
                 # first acquisition, don't ask if it's a new cell
                 self.acqmodel.increment_cellid()
@@ -326,52 +325,52 @@ class MainWindow(ControlWindow):
                 # save empty comment
                 self.acqmodel.set_group_comment('')
 
-        self.on_stop()
+        self.onStop()
 
-    def run_chart(self):
-        winsz, acq_rate = self.on_update()
+    def runChart(self):
+        winsz, acq_rate = self.onUpdate()
         # change plot to scrolling plot
-        self.scrollplot.set_windowsize(winsz)
-        self.scrollplot.set_sr(acq_rate)
-        self.ui.plot_dock.switch_display('chart')
+        self.scrollplot.setWindowSize(winsz)
+        self.scrollplot.setSr(acq_rate)
+        self.ui.plotDock.switchDisplay('chart')
 
-        # self.active_operation = 'chart'
+        # self.activeOperation = 'chart'
         self.acqmodel.start_chart()
 
-    def update_scolling_windowsize(self):
-        winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
-        self.scrollplot.set_windowsize(winsz)
+    def updateScollingWindowsize(self):
+        winsz = float(self.ui.windowszSpnbx.value())*self.tscale
+        self.scrollplot.setWindowSize(winsz)
 
-    def update_chart(self, stim_data, response_data):
-        self.scrollplot.append_data(stim_data, response_data)
+    def updateChart(self, stimData, responseData):
+        self.scrollplot.appendData(stimData, responseData)
 
-    def update_generation_rate(self, fs):
-        self.ui.aosr_spnbx.setValue(fs/self.fscale)
+    def updateGenerationRate(self, fs):
+        self.ui.aosrSpnbx.setValue(fs/self.fscale)
 
-    def run_explore(self):
-        self.ui.start_btn.setText('Update')
+    def runExplore(self):
+        self.ui.startBtn.setText('Update')
         
-        self.connect_updatable(True)
+        self.connectUpdatable(True)
 
-        self.active_operation = 'explore'
-        reprate = self.ui.reprate_spnbx.value()
+        self.activeOperation = 'explore'
+        reprate = self.ui.reprateSpnbx.value()
         interval = (1/reprate)*1000
 
-        self.on_update()            
+        self.onUpdate()            
         self.acqmodel.run_explore(interval)
 
-    def run_protocol(self):
-        self.display.update_spec(None)
+    def runProtocol(self):
+        self.display.updateSpec(None)
 
-        self.ui.start_btn.setEnabled(False)
-        self.ui.stop_btn.setText("Abort")
-        self.active_operation = 'protocol'
+        self.ui.startBtn.setEnabled(False)
+        self.ui.stopBtn.setText("Abort")
+        self.activeOperation = 'protocol'
 
-        reprate = self.ui.reprate_spnbx.value()
+        reprate = self.ui.reprateSpnbx.value()
         interval = (1/reprate)*1000
         
-        self.on_update()
-        if self.current_mode == 'windowed':
+        self.onUpdate()
+        if self.currentMode == 'windowed':
             overload = self.acqmodel.setup_protocol(interval)
             overload = [item for sublist in overload for item in sublist] # flatten
             if np.any(np.array(overload) > 0):
@@ -380,120 +379,120 @@ class MainWindow(ControlWindow):
                                 Do you want to continue?'.format(np.amax(overload)),
                                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
                 if answer == QtGui.QMessageBox.No:
-                    self.on_stop()
+                    self.onStop()
                     return
 
             # reset style sheet of progress bar
-            self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
-            self.ui.protocol_progress_bar.setMaximum(self.acqmodel.protocol_total_count())
+            self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
+            self.ui.protocolProgressBar.setMaximum(self.acqmodel.protocol_total_count())
 
             self.acqmodel.run_protocol()
         else:
             self.acqmodel.run_chart_protocol(interval)
 
-    def run_calibration(self):
-        self.ui.start_btn.setEnabled(False)
-        self.ui.stop_btn.setText("Abort")
-        self.active_operation = 'calibration'
+    def runCalibration(self):
+        self.ui.startBtn.setEnabled(False)
+        self.ui.stopBtn.setText("Abort")
+        self.activeOperation = 'calibration'
 
-        self.ui.stop_btn.clicked.disconnect()
-        self.ui.stop_btn.clicked.connect(self.acqmodel.halt)
+        self.ui.stopBtn.clicked.disconnect()
+        self.ui.stopBtn.clicked.connect(self.acqmodel.halt)
         
-        self.acqmodel.set_calibration_reps(self.ui.calibration_widget.ui.nreps_spnbx.value())
+        self.acqmodel.set_calibration_reps(self.ui.calibrationWidget.ui.nrepsSpnbx.value())
 
-        if self.ui.calibration_widget.ui.applycal_ckbx.isChecked():
-            stim_index = self.ui.calibration_widget.current_index()
+        if self.ui.calibrationWidget.ui.applycalCkbx.isChecked():
+            stim_index = self.ui.calibrationWidget.currentIndex()
             self.acqmodel.set_calibration_by_index(stim_index)
-            self.ui.calibration_widget.save_to_object()        
+            self.ui.calibrationWidget.saveToObject()        
         else:
             # Always use noise on saving calibration.
             # BEWARE: Hardcoded to index 1... this could change?!
             self.acqmodel.set_calibration_by_index(1)
 
-        if self.ui.calibration_widget.ui.applycal_ckbx.isChecked() and self.ui.calibration_widget.is_tone_cal():
+        if self.ui.calibrationWidget.ui.applycalCkbx.isChecked() and self.ui.calibrationWidget.isToneCal():
             frequencies, intensities = self.acqmodel.calibration_range()
             self.livecurve = ProgressWidget(list(frequencies), list(intensities))
-            self.livecurve.set_labels('calibration')
-            self.ui.progress_dock.setWidget(self.livecurve)
-            self.ui.plot_dock.switch_display('calibration')
+            self.livecurve.setLabels('calibration')
+            self.ui.progressDock.setWidget(self.livecurve)
+            self.ui.plotDock.switchDisplay('calibration')
         else:
-            self.ui.plot_dock.switch_display('calexp')
+            self.ui.plotDock.switchDisplay('calexp')
 
-        reprate = self.ui.reprate_spnbx.value()
+        reprate = self.ui.reprateSpnbx.value()
         interval = (1/reprate)*1000
 
-        self.on_update()
+        self.onUpdate()
 
         # reset style sheet of progress bar
-        self.ui.protocol_progress_bar.setStyleSheet("QProgressBar { text-align: center; }")
-        self.ui.protocol_progress_bar.setMaximum(self.acqmodel.calibration_total_count())
+        self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
+        self.ui.protocolProgressBar.setMaximum(self.acqmodel.calibration_total_count())
 
-        self.acqmodel.run_calibration(interval, self.ui.calibration_widget.ui.applycal_ckbx.isChecked())
+        self.acqmodel.run_calibration(interval, self.ui.calibrationWidget.ui.applycalCkbx.isChecked())
 
-    def display_response(self, times, response):
+    def displayResponse(self, times, response):
         # print 'response signal', len(response)
         if len(times) != len(response):
             print "WARNING: times and response not equal"
-        if self.ui.plot_dock.current() == 'standard':
-            self.display.update_spiketrace(times, response)
-        elif self.ui.plot_dock.current() == 'calexp':
+        if self.ui.plotDock.current() == 'standard':
+            self.display.updateSpiketrace(times, response)
+        elif self.ui.plotDock.current() == 'calexp':
             # convert voltage amplitudes into dB SPL    
             rms = np.sqrt(np.mean(pow(response,2))) / np.sqrt(2)
             masterdb = 94 + (20.*np.log10(rms/(mphone_sensitivity)))
-            sr = self.ui.aisr_spnbx.value()*self.fscale
+            sr = self.ui.aisrSpnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
             spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/mphone_sensitivity))
             spectrum[0] = 0
             peakspl = np.amax(spectrum)
-            self.ui.dblevel_lbl.setNum(masterdb)
-            self.ui.dblevel_lbl2.setNum(peakspl)
-            self.extended_display.update_signal(times, response, plot='response')
-            self.extended_display.update_fft(freq, spectrum, plot='response')
-            self.extended_display.update_spec(response, sr, plot='response')
+            self.ui.dblevelLbl.setNum(masterdb)
+            self.ui.dblevelLbl2.setNum(peakspl)
+            self.extendedDisplay.updateSignal(times, response, plot='response')
+            self.extendedDisplay.updateFft(freq, spectrum, plot='response')
+            self.extendedDisplay.updateSpec(response, sr, plot='response')
 
-    def display_calibration_response(self, spectrum, freqs, rms):
+    def displayCalibrationResponse(self, spectrum, freqs, rms):
 
         masterdb = 94 + (20.*np.log10(rms/(mphone_sensitivity)))
         spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/mphone_sensitivity))
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
-        self.ui.dblevel_lbl.setNum(masterdb)
-        self.ui.dblevel_lbl2.setNum(peakspl)
+        self.ui.dblevelLbl.setNum(masterdb)
+        self.ui.dblevelLbl2.setNum(peakspl)
 
-        self.calibration_display.update_in_fft(freqs, spectrum)
+        self.calibrationDisplay.updateInFft(freqs, spectrum)
 
 
-    def display_db_result(self, f, db, resultdb):
+    def displayDbResult(self, f, db, resultdb):
         try:
-            self.livecurve.set_point(f,db,resultdb)
+            self.livecurve.setPoint(f,db,resultdb)
         except:
             print u"WARNING : Problem drawing to calibration plot"
             raise
 
-    def spawn_tuning_curve(self, frequencies, intensities, plot_type):
+    def spawnTuningCurve(self, frequencies, intensities, plotType):
         self.livecurve = ProgressWidget(frequencies, intensities)
-        self.livecurve.set_labels(plot_type)
+        self.livecurve.setLabels(plotType)
 
         # self.livecurve.show()
-        self.ui.progress_dock.setWidget(self.livecurve)
-        self.plot_progress = True
+        self.ui.progressDock.setWidget(self.livecurve)
+        self.plotProgress = True
 
-    def display_tuning_curve(self, f, db, spike_count):
-        if self.plot_progress:
-            self.livecurve.set_point(f, db, spike_count)
+    def displayTuningCurve(self, f, db, spikeCount):
+        if self.plotProgress:
+            self.livecurve.setPoint(f, db, spikeCount)
 
-    def display_raster(self, bins, repnum):
+    def displayRaster(self, bins, repnum):
         # convert to times for raster
         if repnum == 0:
-            self.ui.psth.clear_data()
-            self.display.clear_raster()
+            self.ui.psth.clearData()
+            self.display.clearRaster()
         if len(bins) > 0:
             binsz = self.binsz
             bin_times = (np.array(bins)*binsz)+(binsz/2)
-            self.display.add_raster_points(bin_times, repnum)
-            self.ui.psth.append_data(bins, repnum)
+            self.display.addRasterPoints(bin_times, repnum)
+            self.ui.psth.appendData(bins, repnum)
             
-    def display_stim(self, signal, fs):
+    def displayStim(self, signal, fs):
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
         spectrum = 20 * np.log10(spectrum/ self.calvals['calv']) + self.calvals['caldb']
@@ -501,56 +500,56 @@ class MainWindow(ControlWindow):
         # print 'spec max', np.amax(spectrum)
         
         timevals = np.arange(len(signal)).astype(float)/fs
-        if self.active_operation == 'calibration':
-            if self.ui.plot_dock.current() == 'calexp':
-                self.extended_display.update_signal(timevals, signal, plot='stim')
-                self.extended_display.update_fft(freq, spectrum, plot='stim')
-                self.extended_display.update_spec(signal, fs, plot='stim')
+        if self.activeOperation == 'calibration':
+            if self.ui.plotDock.current() == 'calexp':
+                self.extendedDisplay.updateSignal(timevals, signal, plot='stim')
+                self.extendedDisplay.updateFft(freq, spectrum, plot='stim')
+                self.extendedDisplay.updateSpec(signal, fs, plot='stim')
             else:
-                self.calibration_display.update_out_fft(freq, spectrum)
+                self.calibrationDisplay.updateOutFft(freq, spectrum)
         else:
-            if self.ui.plot_dock.current() == 'standard':
-                self.display.update_signal(timevals, signal)
-                self.display.update_fft(freq, spectrum)
-                self.display.update_spec(signal, fs)
-            elif self.ui.plot_dock.current() == 'calexp':
-                self.extended_display.update_signal(timevals, signal, plot='stim')
-                self.extended_display.update_fft(freq, spectrum, plot='stim')
-                self.extended_display.update_spec(signal, fs, plot='stim')
+            if self.ui.plotDock.current() == 'standard':
+                self.display.updateSignal(timevals, signal)
+                self.display.updateFft(freq, spectrum)
+                self.display.updateSpec(signal, fs)
+            elif self.ui.plotDock.current() == 'calexp':
+                self.extendedDisplay.updateSignal(timevals, signal, plot='stim')
+                self.extendedDisplay.updateFft(freq, spectrum, plot='stim')
+                self.extendedDisplay.updateSpec(signal, fs, plot='stim')
                 # this actually auto ranges the response plots, but we only
                 # need to do this when the stim changes
-                self.extended_display.auto_range()
+                self.extendedDisplay.autoRange0()
 
-    def report_progress(self, itest, itrace, stim_info):
-        # print 'progress', stim_info
-        self.ui.stim_details.set_test_num(itest)
-        self.ui.stim_details.set_trace_num(itrace)
-        self.ui.stim_details.set_doc(stim_info)
+    def reportProgress(self, itest, itrace, stimInfo):
+        # print 'progress', stimInfo
+        self.ui.stimDetails.setTestNum(itest)
+        self.ui.stimDetails.setTraceNum(itrace)
+        self.ui.stimDetails.setDoc(stimInfo)
 
-    def report_rep(self, irep):
-        self.ui.stim_details.set_rep_num(irep)
-        self.ui.protocol_progress_bar.setValue(self.ui.protocol_progress_bar.value() + 1)
+    def reportRep(self, irep):
+        self.ui.stimDetails.setRepNum(irep)
+        self.ui.protocolProgressBar.setValue(self.ui.protocolProgressBar.value() + 1)
 
-    def report_overv(self, overdb):
+    def reportOverV(self, overdb):
         if overdb > 0:
             pal = RED
         else:
             pal = BLACK
-        if self.active_operation == 'calibration':
-            self.ui.over_atten_lbl_2.setNum(overdb)
-            self.ui.over_atten_lbl_2.setPalette(pal)
-        elif self.active_operation == 'explore':
-            self.ui.over_atten_lbl.setNum(overdb)
-            self.ui.over_atten_lbl.setPalette(pal)
+        if self.activeOperation == 'calibration':
+            self.ui.overAttenLbl_2.setNum(overdb)
+            self.ui.overAttenLbl_2.setPalette(pal)
+        elif self.activeOperation == 'explore':
+            self.ui.overAttenLbl.setNum(overdb)
+            self.ui.overAttenLbl.setPalette(pal)
 
-    def trace_done(self, total_spikes, avg_count, avg_latency, avg_rate):
-        self.ui.spike_total_lbl.setText(str(total_spikes))
-        self.ui.spike_avg_lbl.setText(str(avg_count))
-        self.ui.spike_latency_lbl.setText(str(avg_latency*1000))
-        self.ui.spike_rate_lbl.setText(str(avg_rate))
+    def traceDone(self, totalSpikes, avgCount, avgLatency, avgRate):
+        self.ui.spikeTotalLbl.setText(str(totalSpikes))
+        self.ui.spikeAvgLbl.setText(str(avgCount))
+        self.ui.spikeLatencyLbl.setText(str(avgLatency*1000))
+        self.ui.spikeRateLbl.setText(str(avgRate))
 
-    def launch_save_dlg(self):
-        dlg = SavingDialog(default_file = self.acqmodel.current_data_file())
+    def launchSaveDlg(self):
+        dlg = SavingDialog(defaultFile = self.acqmodel.current_data_file())
         if dlg.exec_():
             fname, fmode = dlg.getfile()
             if fmode == 'w-':
@@ -558,130 +557,130 @@ class MainWindow(ControlWindow):
             else:
                 self.acqmodel.load_data_file(fname)
             # calibration clears on data file load
-            self.ui.current_cal_lbl.setText('None')
+            self.ui.currentCalLbl.setText('None')
             fname = os.path.basename(fname)
-            self.ui.data_file_lbl.setText(fname)
+            self.ui.dataFileLbl.setText(fname)
 
 
-    def launch_calibration_dlg(self):
-        dlg = CalibrationDialog(default_vals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
+    def launchCalibrationDlg(self):
+        dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
         if dlg.exec_():
             values = dlg.values()
             self.acqmodel.set_params(**values)
             if values['use_calfile']:
-                ww = self.show_wait()
+                ww = self.showWait()
                 self.acqmodel.set_calibration(values['calname'], values['calf'], values['frange'])
-                self.ui.current_cal_lbl.setText(values['calname'])
+                self.ui.currentCalLbl.setText(values['calname'])
                 ww.close()
             else:
-                self.ui.current_cal_lbl.setText('None')
+                self.ui.currentCalLbl.setText('None')
                 self.acqmodel.set_calibration(None)
             self.calvals = values
             
-    def launch_scale_dlg(self):
+    def launchScaleDlg(self):
         field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}
-        dlg = ScaleDialog(default_vals=field_vals)
+        dlg = ScaleDialog(defaultVals=field_vals)
         if dlg.exec_():
             fscale, tscale = dlg.values()
             self.update_unit_labels(tscale, fscale)
 
-    def launch_specgram_dlg(self):
-        dlg = SpecDialog(default_vals=self.spec_args)
+    def launchSpecgramDlg(self):
+        dlg = SpecDialog(defaultVals=self.spec_args)
         if dlg.exec_():
             argdict = dlg.values()
-            self.display.set_spec_args(**argdict)
-            self.exvocal.set_spec_args(**argdict)
+            self.display.setSpecArgs(**argdict)
+            self.exvocal.setSpecArgs(**argdict)
             QtGui.QApplication.processEvents()
             self.spec_args = argdict
 
-    def launch_view_dlg(self):
-        dlg = ViewSettingsDialog(self.view_settings)
+    def launchViewDlg(self):
+        dlg = ViewSettingsDialog(self.viewSettings)
         if dlg.exec_():
-            self.view_settings = dlg.values()
-            self.ui.stim_details.set_display_attributes(self.view_settings['display_attributes'])
+            self.viewSettings = dlg.values()
+            self.ui.stimDetails.setDisplayAttributes(self.viewSettings['display_attributes'])
             font = QtGui.QFont()
-            font.setPointSize(self.view_settings['fontsz'])
+            font.setPointSize(self.viewSettings['fontsz'])
             QtGui.QApplication.setFont(font)
 
-    def wavfile_selected(self, model_index):
+    def wavfileSelected(self, modelIndex):
         """ On double click of wav file, load into display """
         # display spectrogram of file
-        spath = self.exvocal.current_wav_file
+        spath = self.exvocal.currentWavFile
 
         sr, wavdata = wv.read(spath)
-        self.display_stim(wavdata, sr)
+        self.displayStim(wavdata, sr)
 
-        if self.ui.tab_group.currentWidget().objectName() == 'tab_explore':
-            winsz = float(self.ui.windowsz_spnbx.value())*self.tscale
+        if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
+            winsz = float(self.ui.windowszSpnbx.value())*self.tscale
 
-            self.display.set_xlimits((0,winsz))
-        self.selected_wav_file = spath
-        self.on_update()
+            self.display.setXlimits((0,winsz))
+        self.selectedWavFile = spath
+        self.onUpdate()
 
-    def relay_cmap_change(self, cmap):
+    def relayCMapChange(self, cmap):
         self.exvocal.update_colormap()
         self.spec_args['colormap'] = cmap
 
-    def set_calibration_duration(self):
-        winsz = float(self.ui.windowsz_spnbx.value())
+    def setCalibrationDuration(self):
+        winsz = float(self.ui.windowszSpnbx.value())
         print 'setting calibration duration', winsz
         # I shouldn't have to do both of these...
         self.acqmodel.set_calibration_duration(winsz*self.tscale)
-        self.ui.calibration_widget.set_duration(winsz)
+        self.ui.calibrationWidget.setDuration(winsz)
 
-    def update_thresh(self, thresh):
-        self.ui.thresh_spnbx.setValue(thresh)
+    def updateThresh(self, thresh):
+        self.ui.threshSpnbx.setValue(thresh)
         self.acqmodel.set_threshold(thresh)
 
-    def set_plot_thresh(self):
-        thresh = self.ui.thresh_spnbx.value()
-        self.display.spiketrace_plot.set_threshold(thresh)
+    def setPlotThresh(self):
+        thresh = self.ui.threshSpnbx.value()
+        self.display.spiketracePlot.setThreshold(thresh)
         self.acqmodel.set_threshold(thresh)
 
-    def tab_changed(self, tab_index):
-        if self.ui.tab_group.tabText(tab_index).lower() == 'calibration':
-            self.stashed_aisr = self.ui.aisr_spnbx.value()
-            self.ui.aisr_spnbx.setValue(self.acqmodel.calibration_genrate()/self.fscale)
-            self.ui.aisr_spnbx.setEnabled(False)
-        elif self.prev_tab == 'calibration':
-            self.ui.aisr_spnbx.setEnabled(True)
-            self.ui.aisr_spnbx.setValue(self.stashed_aisr)
-        self.prev_tab = self.ui.tab_group.tabText(tab_index).lower()
+    def tabChanged(self, tabIndex):
+        if self.ui.tabGroup.tabText(tabIndex).lower() == 'calibration':
+            self.stashedAisr = self.ui.aisrSpnbx.value()
+            self.ui.aisrSpnbx.setValue(self.acqmodel.calibration_genrate()/self.fscale)
+            self.ui.aisrSpnbx.setEnabled(False)
+        elif self.prevTab == 'calibration':
+            self.ui.aisrSpnbx.setEnabled(True)
+            self.ui.aisrSpnbx.setValue(self.stashedAisr)
+        self.prevTab = self.ui.tabGroup.tabText(tabIndex).lower()
 
-    def mode_toggled(self, mode):
-        self.current_mode = mode.lower()
-        if self.current_mode == "windowed":
-            self.ui.start_chart_btn.hide()
-            self.ui.stop_chart_btn.hide()
-        elif self.current_mode == "chart":
-            self.ui.stop_chart_btn.show()
-            self.ui.start_chart_btn.show()
+    def modeToggled(self, mode):
+        self.currentMode = mode.lower()
+        if self.currentMode == "windowed":
+            self.ui.startChartBtn.hide()
+            self.ui.stopChartBtn.hide()
+        elif self.currentMode == "chart":
+            self.ui.stopChartBtn.show()
+            self.ui.startChartBtn.show()
         else:
             raise Exception('unknown acquistion mode '+mode)
 
-    def save_explore_toggled(self, save):
-        self.save_explore = save
+    def saveExploreToggled(self, save):
+        self.saveExplore = save
 
-    def clear_protocol(self):
+    def clearProtocol(self):
         self.acqmodel.clear_protocol()
 
-    def set_status_msg(self, status):
+    def setStatusMsg(self, status):
         self.statusBar().showMessage(status)
 
-    def show_wait(self):
-        screen_pos = self.geometry()
+    def showWait(self):
+        screenPos = self.geometry()
         ww = WaitWidget()
         ww.show()
-        wait_pos = QtCore.QRect(screen_pos.x() + screen_pos.width()/2 - ww.width()/2,
-            screen_pos.y() + screen_pos.height()/2 - ww.height()/2, 
+        waitPos = QtCore.QRect(screenPos.x() + screenPos.width()/2 - ww.width()/2,
+            screenPos.y() + screenPos.height()/2 - ww.height()/2, 
             ww.width(), ww.height())
-        ww.setGeometry(wait_pos)
+        ww.setGeometry(waitPos)
         QtGui.QApplication.processEvents()
         return ww
 
     def closeEvent(self,event):
         # stop any tasks that may be running
-        self.on_stop()
+        self.onStop()
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
 

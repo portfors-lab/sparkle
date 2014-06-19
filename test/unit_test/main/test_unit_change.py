@@ -32,16 +32,16 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.aosr_spnbx.setValue(fs0/1000)
-        control.ui.aisr_spnbx.setValue(fs1/1000)
+        control.ui.aosrSpnbx.setValue(fs0/1000)
+        control.ui.aisrSpnbx.setValue(fs1/1000)
 
-        assert control.ui.aosr_spnbx.value() == fs0/1000 
-        assert control.ui.aisr_spnbx.value() == fs1/1000
+        assert control.ui.aosrSpnbx.value() == fs0/1000 
+        assert control.ui.aisrSpnbx.value() == fs1/1000
 
-        control.update_unit_labels(control.tscale, 1)
+        control.updateUnitLabels(control.tscale, 1)
 
-        assert control.ui.aosr_spnbx.value() == fs0 
-        assert control.ui.aisr_spnbx.value() == fs1
+        assert control.ui.aosrSpnbx.value() == fs0 
+        assert control.ui.aisrSpnbx.value() == fs1
 
         control.close()
 
@@ -52,18 +52,18 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.aosr_spnbx.setValue(fs0/1000)
-        control.ui.aisr_spnbx.setValue(fs1/1000)
+        control.ui.aosrSpnbx.setValue(fs0/1000)
+        control.ui.aisrSpnbx.setValue(fs1/1000)
 
-        assert control.ui.aosr_spnbx.value() == fs0/1000 
-        assert control.ui.aisr_spnbx.value() == fs1/1000
+        assert control.ui.aosrSpnbx.value() == fs0/1000 
+        assert control.ui.aisrSpnbx.value() == fs1/1000
 
-        control.update_unit_labels(control.tscale, 1)
-        control.update_unit_labels(control.tscale, 1000)
+        control.updateUnitLabels(control.tscale, 1)
+        control.updateUnitLabels(control.tscale, 1000)
 
-        print 'spin boxes', control.ui.aisr_spnbx.value(), fs1/1000
-        assert control.ui.aosr_spnbx.value() == fs0/1000 
-        assert control.ui.aisr_spnbx.value() == fs1/1000
+        print 'spin boxes', control.ui.aisrSpnbx.value(), fs1/1000
+        assert control.ui.aosrSpnbx.value() == fs0/1000 
+        assert control.ui.aisrSpnbx.value() == fs1/1000
 
         control.close()
 
@@ -75,16 +75,16 @@ class TestUnitChanges():
         t0 = 3.0
         t1 = 0.003
         # manually set the inputs of interest
-        control.ui.windowsz_spnbx.setValue(t0/0.001)
-        control.ui.binsz_spnbx.setValue(t1/0.001)
+        control.ui.windowszSpnbx.setValue(t0/0.001)
+        control.ui.binszSpnbx.setValue(t1/0.001)
 
-        assert control.ui.windowsz_spnbx.value() == t0/0.001
-        assert control.ui.binsz_spnbx.value() == t1/0.001
+        assert control.ui.windowszSpnbx.value() == t0/0.001
+        assert control.ui.binszSpnbx.value() == t1/0.001
 
-        control.update_unit_labels(1, control.fscale)
+        control.updateUnitLabels(1, control.fscale)
 
-        assert control.ui.windowsz_spnbx.value() == t0 
-        assert control.ui.binsz_spnbx.value() == t1
+        assert control.ui.windowszSpnbx.value() == t0 
+        assert control.ui.binszSpnbx.value() == t1
 
         control.close()
 
@@ -96,16 +96,16 @@ class TestUnitChanges():
         t0 = 3.0
         t1 = 0.003
         # manually set the inputs of interest
-        control.ui.windowsz_spnbx.setValue(t0/0.001)
-        control.ui.binsz_spnbx.setValue(t1/0.001)
+        control.ui.windowszSpnbx.setValue(t0/0.001)
+        control.ui.binszSpnbx.setValue(t1/0.001)
 
-        assert control.ui.windowsz_spnbx.value() == t0/0.001
-        assert control.ui.binsz_spnbx.value() == t1/0.001
+        assert control.ui.windowszSpnbx.value() == t0/0.001
+        assert control.ui.binszSpnbx.value() == t1/0.001
 
-        control.update_unit_labels(1, control.fscale)
-        control.update_unit_labels(0.001, control.fscale)
+        control.updateUnitLabels(1, control.fscale)
+        control.updateUnitLabels(0.001, control.fscale)
 
-        assert control.ui.windowsz_spnbx.value() == t0/0.001
-        assert control.ui.binsz_spnbx.value() == t1/0.001
+        assert control.ui.windowszSpnbx.value() == t0/0.001
+        assert control.ui.binszSpnbx.value() == t1/0.001
 
         control.close()

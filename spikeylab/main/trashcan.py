@@ -3,18 +3,18 @@ import os
 from PyQt4 import QtGui, QtCore
 
 class TrashWidget(QtGui.QPushButton):
-    item_trashed = QtCore.pyqtSignal()
+    itemTrashed = QtCore.pyqtSignal()
     def __init__(self,parent=None):
         QtGui.QPushButton.__init__(self, parent)
 
         thisfolder = os.path.dirname(os.path.realpath(__file__))
-        self.trash_icon = QtGui.QIcon(os.path.join(thisfolder,'trash.png'))
+        self.trashIcon = QtGui.QIcon(os.path.join(thisfolder,'trash.png'))
         self.setFlat(True)
-        self.setIcon(self.trash_icon)
+        self.setIcon(self.trashIcon)
         self.setIconSize(QtCore.QSize(25,25))
         self.setAcceptDrops(True)
 
-        self.under_mouse = False
+        self._underMouse = False
 
     def dragEnterEvent(self, event):
         self.setFlat(False)
@@ -33,7 +33,7 @@ class TrashWidget(QtGui.QPushButton):
 
     def dropEvent(self, event):
         super(TrashWidget, self).dropEvent(event)
-        self.item_trashed.emit()
+        self.itemTrashed.emit()
 
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.ChildRemoved and self.underMouse():

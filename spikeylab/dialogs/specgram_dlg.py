@@ -3,22 +3,22 @@ from specgramform import Ui_SpecDialog
 from matplotlib import cm
 
 class SpecDialog(QtGui.QDialog):
-    def __init__(self, parent=None, default_vals=None):
+    def __init__(self, parent=None, defaultVals=None):
         QtGui.QDialog.__init__(self,parent)
         self.ui = Ui_SpecDialog()
         self.ui.setupUi(self)
 
-        if default_vals is not None:
-            self.ui.nfft_spnbx.setValue(default_vals[u'nfft'])
-            funcs = [self.ui.window_cmbx.itemText(i).lower() for i in xrange(self.ui.window_cmbx.count())]
-            func_index = funcs.index(default_vals[u'window'])
-            self.ui.window_cmbx.setCurrentIndex(func_index)
-            self.ui.overlap_spnbx.setValue(default_vals['overlap'])
+        if defaultVals is not None:
+            self.ui.nfftSpnbx.setValue(defaultVals[u'nfft'])
+            funcs = [self.ui.windowCmbx.itemText(i).lower() for i in xrange(self.ui.windowCmbx.count())]
+            func_index = funcs.index(defaultVals[u'window'])
+            self.ui.windowCmbx.setCurrentIndex(func_index)
+            self.ui.overlapSpnbx.setValue(defaultVals['overlap'])
 
-        self.vals = default_vals
+        self.vals = defaultVals
 
     def values(self):
-        self.vals['nfft'] = self.ui.nfft_spnbx.value()
-        self.vals['window'] = self.ui.window_cmbx.currentText().lower()
-        self.vals['overlap'] = self.ui.overlap_spnbx.value()
+        self.vals['nfft'] = self.ui.nfftSpnbx.value()
+        self.vals['window'] = self.ui.windowCmbx.currentText().lower()
+        self.vals['overlap'] = self.ui.overlapSpnbx.value()
         return self.vals

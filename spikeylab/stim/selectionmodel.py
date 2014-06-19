@@ -5,19 +5,19 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
     hintRequested = QtCore.pyqtSignal(str)
     def __init__(self, model):
         QtGui.QItemSelectionModel.__init__(self, model)
-        self._selected_components = []
+        self._selectedComponents = []
 
     def select(self, index, command=QtGui.QItemSelectionModel.Toggle):
         """Changes the inclusion of the given index in the selection model"""
         component = self.model().data(index, QtCore.Qt.UserRole)
         if command == QtGui.QItemSelectionModel.Toggle:
-            if component in self._selected_components:
-                self._selected_components.remove(component)
+            if component in self._selectedComponents:
+                self._selectedComponents.remove(component)
                 self.selectionChanged.emit(self.selection(), QtGui.QItemSelection(index, index))
-                if len(self._selected_components) == 0:
+                if len(self._selectedComponents) == 0:
                     self.hintRequested.emit('Select Components in view to modify')
             else:
-                self._selected_components.append(component)
+                self._selectedComponents.append(component)
                 self.selectionChanged.emit(self.selection(), QtGui.QItemSelection())
                 self.hintRequested.emit('Select more components, or click again to toggle inclusion. To edit parameter type or bounds, select parameter field in table')
         else:
@@ -27,11 +27,11 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
         """Returns a list of QModelIndex currently in the model"""
         model = self.model()
         indexes = []
-        for comp in self._selected_components:
+        for comp in self._selectedComponents:
             index = model.indexByComponent(comp)
             if index is None:
                 # must have been removed from model, discard
-                self._selected_components.remove(comp)
+                self._selectedComponents.remove(comp)
             else:
                 indexes.append(index)
         return indexes
@@ -47,7 +47,7 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
         """Returns the names of the component types in this selection"""
         comps = []
         model = self.model()
-        for comp in self._selected_components:
+        for comp in self._selectedComponents:
             index = model.indexByComponent(comp)
             if index is not None:
                 comps.append(comp)

@@ -15,12 +15,12 @@ class StimulusEditor(AbstractEditorWidget):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()
         self.ui.setupUi(self)
-        self.ui.trackview.installEventFilter(self.ui.template_box.trash())
+        self.ui.trackview.installEventFilter(self.ui.templateBox.trash())
         # self.setWindowModality(2) # application modal
     
     def setStimulusModel(self, model):
         self.ui.trackview.setModel(model)
-        self.ui.nreps_spnbx.setValue(model.repCount())
+        self.ui.nrepsSpnbx.setValue(model.repCount())
         # parametizer grabs model from view
         self.ui.parametizer.setStimulusView(self.ui.trackview)
         self.ui.parametizer.hintRequested.connect(self.setHint)
@@ -32,16 +32,16 @@ class StimulusEditor(AbstractEditorWidget):
         stim_signal, atten, ovld = self.ui.trackview.model().signal()
 
         fig = SpecWidget()
-        fig.update_data(stim_signal, self.ui.trackview.model().samplerate())
-        fig.set_title('Stimulus Preview')
+        fig.updateData(stim_signal, self.ui.trackview.model().samplerate())
+        fig.setTitle('Stimulus Preview')
         fig.show()
-        self.preview_fig = fig
+        self.previewFig = fig
 
     def model(self):
         return self.ui.trackview.model()
 
     def setHint(self, message):
-        self.ui.hint_txedt.setText(message)
+        self.ui.hintTxedt.setText(message)
 
     def closeEvent(self, event):
         msg = self.ui.trackview.model().verify()

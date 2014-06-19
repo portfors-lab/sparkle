@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\raster_bounds_dlg.ui'
 #
-# Created: Mon Oct 07 15:01:54 2013
+# Created: Thu Jun 19 13:01:50 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,15 +34,15 @@ class Ui_RasterBoundsDialog(object):
         self.label = QtGui.QLabel(RasterBoundsDialog)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.upper_lnedt = QtGui.QLineEdit(RasterBoundsDialog)
-        self.upper_lnedt.setObjectName(_fromUtf8("upper_lnedt"))
-        self.gridLayout.addWidget(self.upper_lnedt, 0, 1, 1, 1)
+        self.upperLnedt = QtGui.QLineEdit(RasterBoundsDialog)
+        self.upperLnedt.setObjectName(_fromUtf8("upperLnedt"))
+        self.gridLayout.addWidget(self.upperLnedt, 0, 1, 1, 1)
         self.label_2 = QtGui.QLabel(RasterBoundsDialog)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
-        self.lower_lnedt = QtGui.QLineEdit(RasterBoundsDialog)
-        self.lower_lnedt.setObjectName(_fromUtf8("lower_lnedt"))
-        self.gridLayout.addWidget(self.lower_lnedt, 1, 1, 1, 1)
+        self.lowerLnedt = QtGui.QLineEdit(RasterBoundsDialog)
+        self.lowerLnedt.setObjectName(_fromUtf8("lowerLnedt"))
+        self.gridLayout.addWidget(self.lowerLnedt, 1, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         self.buttonBox = QtGui.QDialogButtonBox(RasterBoundsDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -59,14 +59,4 @@ class Ui_RasterBoundsDialog(object):
         RasterBoundsDialog.setWindowTitle(_translate("RasterBoundsDialog", "Raster y-axis bounds", None))
         self.label.setText(_translate("RasterBoundsDialog", "Upper bound", None))
         self.label_2.setText(_translate("RasterBoundsDialog", "Lower bound", None))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    RasterBoundsDialog = QtGui.QDialog()
-    ui = Ui_RasterBoundsDialog()
-    ui.setupUi(RasterBoundsDialog)
-    RasterBoundsDialog.show()
-    sys.exit(app.exec_())
 

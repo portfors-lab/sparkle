@@ -16,22 +16,22 @@ class StimulusLabelTable(QtGui.QWidget):
 
         layout = QtGui.QGridLayout()
 
-        self.builder_lbl = DragLabel(BuilderFactory)
-        self.tc_lbl = DragLabel(TCFactory)
-        self.template_lbl = DragLabel(TemplateFactory)
-        self.trash_lbl = TrashWidget()
-        self.trash_lbl.setMinimumWidth(100)
+        self.builderLbl = DragLabel(BuilderFactory)
+        self.tcLbl = DragLabel(TCFactory)
+        self.templateLbl = DragLabel(TemplateFactory)
+        self.trashLbl = TrashWidget()
+        self.trashLbl.setMinimumWidth(100)
 
-        layout.addWidget(self.builder_lbl, 0,0)
-        layout.addWidget(self.tc_lbl,0,1)
-        layout.addWidget(self.template_lbl,0,2)
-        layout.addWidget(self.trash_lbl, 0,3)
+        layout.addWidget(self.builderLbl, 0,0)
+        layout.addWidget(self.tcLbl,0,1)
+        layout.addWidget(self.templateLbl,0,2)
+        layout.addWidget(self.trashLbl, 0,3)
 
         self.setLayout(layout)
         self.setToolTip("Drag to list")
 
     def trash(self):
-        return self.trash_lbl
+        return self.trashLbl
 
 
 if __name__ == '__main__':

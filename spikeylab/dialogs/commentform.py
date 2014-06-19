@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\comment_dlg.ui'
 #
-# Created: Fri Apr 04 15:36:02 2014
+# Created: Thu Jun 19 11:21:26 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,12 +38,12 @@ class Ui_CellCommentDialog(object):
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
-        self.cellid_lbl = QtGui.QLabel(CellCommentDialog)
+        self.cellidLbl = QtGui.QLabel(CellCommentDialog)
         font = QtGui.QFont()
         font.setPointSize(14)
-        self.cellid_lbl.setFont(font)
-        self.cellid_lbl.setObjectName(_fromUtf8("cellid_lbl"))
-        self.horizontalLayout.addWidget(self.cellid_lbl)
+        self.cellidLbl.setFont(font)
+        self.cellidLbl.setObjectName(_fromUtf8("cellidLbl"))
+        self.horizontalLayout.addWidget(self.cellidLbl)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.label_2 = QtGui.QLabel(CellCommentDialog)
         font = QtGui.QFont()
@@ -51,29 +51,29 @@ class Ui_CellCommentDialog(object):
         self.label_2.setFont(font)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
-        self.comment_txtedt = QtGui.QPlainTextEdit(CellCommentDialog)
+        self.commentTxtedt = QtGui.QPlainTextEdit(CellCommentDialog)
         font = QtGui.QFont()
         font.setPointSize(10)
-        self.comment_txtedt.setFont(font)
-        self.comment_txtedt.setObjectName(_fromUtf8("comment_txtedt"))
-        self.verticalLayout.addWidget(self.comment_txtedt)
+        self.commentTxtedt.setFont(font)
+        self.commentTxtedt.setObjectName(_fromUtf8("commentTxtedt"))
+        self.verticalLayout.addWidget(self.commentTxtedt)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        self.ok_btn = QtGui.QPushButton(CellCommentDialog)
-        self.ok_btn.setObjectName(_fromUtf8("ok_btn"))
-        self.horizontalLayout_2.addWidget(self.ok_btn)
+        self.okBtn = QtGui.QPushButton(CellCommentDialog)
+        self.okBtn.setObjectName(_fromUtf8("okBtn"))
+        self.horizontalLayout_2.addWidget(self.okBtn)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(CellCommentDialog)
-        QtCore.QObject.connect(self.ok_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), CellCommentDialog.accept)
+        QtCore.QObject.connect(self.okBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), CellCommentDialog.accept)
         QtCore.QMetaObject.connectSlotsByName(CellCommentDialog)
 
     def retranslateUi(self, CellCommentDialog):
         CellCommentDialog.setWindowTitle(_translate("CellCommentDialog", "Form", None))
         self.label.setText(_translate("CellCommentDialog", "Cell ID:", None))
-        self.cellid_lbl.setText(_translate("CellCommentDialog", "0", None))
+        self.cellidLbl.setText(_translate("CellCommentDialog", "0", None))
         self.label_2.setText(_translate("CellCommentDialog", "Comments:", None))
-        self.ok_btn.setText(_translate("CellCommentDialog", "OK", None))
+        self.okBtn.setText(_translate("CellCommentDialog", "OK", None))
 

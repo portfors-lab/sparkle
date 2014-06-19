@@ -15,7 +15,7 @@ class GenericParameterWidget(AbstractParameterWidget):
 
         row_counter = 0
         details = component.auto_details()
-        self.input_widgets = {}
+        self.inputWidgets = {}
         for field, details in component.auto_details().items():
 
             if field in ['frequency', 'intensity']:
@@ -44,7 +44,7 @@ class GenericParameterWidget(AbstractParameterWidget):
                 self.funit_labels.append(lbl)
                 self.funit_fields.append(inpt)
             inpt.valueChanged.connect(self.valueChanged.emit)
-            self.input_widgets[field] = inpt
+            self.inputWidgets[field] = inpt
         layout.setRowStretch(row_counter, 1)
 
         self.setComponent(component)
@@ -54,20 +54,20 @@ class GenericParameterWidget(AbstractParameterWidget):
         state = component.stateDict()
         for field, detail in details.items():
             val = state[field]
-            self.input_widgets[field].setValue(val/detail['multiplier'])
+            self.inputWidgets[field].setValue(val/detail['multiplier'])
         self._component = component
 
     def saveToObject(self):
         details = self._component.auto_details()
-        for field, widget in self.input_widgets.items():
+        for field, widget in self.inputWidgets.items():
             self._component.set(field, widget.value()*details[field]['multiplier'])
-        self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
+        self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def setContentFocus(self):
         """ Builder calls this to get cursor in editor"""
-        self.input_widgets['duration'].setFocus()
-        self.input_widgets['duration'].selectAll()
+        self.inputWidgets['duration'].setFocus()
+        self.inputWidgets['duration'].selectAll()
 
-    def duration_input_widget(self):
-        return self.input_widgets['duration']
+    def durationInputWidget(self):
+        return self.inputWidgets['duration']
 

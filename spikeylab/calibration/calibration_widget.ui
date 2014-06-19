@@ -38,7 +38,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QRadioButton" name="savecal_ckbx">
+       <widget class="QRadioButton" name="savecalCkbx">
         <property name="text">
          <string>Save calibration</string>
         </property>
@@ -48,7 +48,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="applycal_ckbx">
+       <widget class="QRadioButton" name="applycalCkbx">
         <property name="text">
          <string>Test calibration</string>
         </property>
@@ -68,7 +68,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="nreps_spnbx">
+       <widget class="QSpinBox" name="nrepsSpnbx">
         <property name="maximumSize">
          <size>
           <width>100</width>
@@ -96,7 +96,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QGroupBox" name="test_type_grp">
+       <widget class="QGroupBox" name="testTypeGrp">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -105,7 +105,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QComboBox" name="cal_type_cmbbx">
+          <widget class="QComboBox" name="calTypeCmbbx">
            <item>
             <property name="text">
              <string>Tone Curve</string>
@@ -117,14 +117,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QStackedWidget" name="caleditor_stack">
+       <widget class="QStackedWidget" name="caleditorStack">
         <property name="currentIndex">
          <number>0</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="TuningCurveEditor" name="curve_widget" native="true"/>
+           <widget class="TuningCurveEditor" name="curveWidget" native="true"/>
           </item>
          </layout>
         </widget>
@@ -146,9 +146,9 @@
  <resources/>
  <connections>
   <connection>
-   <sender>cal_type_cmbbx</sender>
+   <sender>calTypeCmbbx</sender>
    <signal>currentIndexChanged(int)</signal>
-   <receiver>caleditor_stack</receiver>
+   <receiver>caleditorStack</receiver>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -162,7 +162,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>applycal_ckbx</sender>
+   <sender>applycalCkbx</sender>
    <signal>toggled(bool)</signal>
    <receiver>frame</receiver>
    <slot>setEnabled(bool)</slot>
@@ -178,9 +178,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>applycal_ckbx</sender>
+   <sender>applycalCkbx</sender>
    <signal>toggled(bool)</signal>
-   <receiver>test_type_grp</receiver>
+   <receiver>testTypeGrp</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

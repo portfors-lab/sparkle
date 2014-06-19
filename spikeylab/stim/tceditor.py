@@ -23,31 +23,31 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         self.dbmapper = QtGui.QDataWidgetMapper(self)
 
         # can't get mapper to map color
-        self.ui.freq_nsteps_lbl.textChanged.connect(self.update_text_color)
-        self.ui.db_nsteps_lbl.textChanged.connect(self.update_text_color)
+        self.ui.freqNstepsLbl.textChanged.connect(self.updateTextColor)
+        self.ui.dbNstepsLbl.textChanged.connect(self.updateTextColor)
 
     def setStimulusModel(self, model):
-        self.stim_model = model
-        self.parameter_model = model.autoParams()
+        self.stimModel = model
+        self.parameterModel = model.autoParams()
 
-        self.fmapper.setModel(self.parameter_model)
-        self.dbmapper.setModel(self.parameter_model)
-        self.fmapper.addMapping(self.ui.freq_start_spnbx, 1)
-        self.fmapper.addMapping(self.ui.freq_stop_spnbx, 2)
-        self.fmapper.addMapping(self.ui.freq_step_spnbx, 3)
-        self.fmapper.addMapping(self.ui.freq_nsteps_lbl, 4, 'text')
-        self.dbmapper.addMapping(self.ui.db_start_spnbx, 1)
-        self.dbmapper.addMapping(self.ui.db_stop_spnbx, 2)
-        self.dbmapper.addMapping(self.ui.db_step_spnbx, 3)
-        self.dbmapper.addMapping(self.ui.db_nsteps_lbl, 4, 'text')
+        self.fmapper.setModel(self.parameterModel)
+        self.dbmapper.setModel(self.parameterModel)
+        self.fmapper.addMapping(self.ui.freqStartSpnbx, 1)
+        self.fmapper.addMapping(self.ui.freqStopSpnbx, 2)
+        self.fmapper.addMapping(self.ui.freqStepSpnbx, 3)
+        self.fmapper.addMapping(self.ui.freqNstepsLbl, 4, 'text')
+        self.dbmapper.addMapping(self.ui.dbStartSpnbx, 1)
+        self.dbmapper.addMapping(self.ui.dbStopSpnbx, 2)
+        self.dbmapper.addMapping(self.ui.dbStepSpnbx, 3)
+        self.dbmapper.addMapping(self.ui.dbNstepsLbl, 4, 'text')
         self.fmapper.toFirst()
         self.dbmapper.setCurrentIndex(1)
 
-        tone = self.stim_model.data(self.stim_model.index(0,0), QtCore.Qt.UserRole)
+        tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole)
         info = tone.auto_details()
-        self.ui.dur_spnbx.setValue(tone.duration()/info['duration']['multiplier'])
-        self.ui.nreps_spnbx.setValue(self.stim_model.repCount())
-        self.ui.risefall_spnbx.setValue(tone.risefall()/info['risefall']['multiplier'])
+        self.ui.durSpnbx.setValue(tone.duration()/info['duration']['multiplier'])
+        self.ui.nrepsSpnbx.setValue(self.stimModel.repCount())
+        self.ui.risefallSpnbx.setValue(tone.risefall()/info['risefall']['multiplier'])
         self.tone = tone
 
     def submit(self):
@@ -58,32 +58,32 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         self.dbmapper.setCurrentIndex(1)
 
     def setStimDuration(self):
-        duration = self.ui.dur_spnbx.value()
+        duration = self.ui.durSpnbx.value()
         info = self.tone.auto_details()
         self.tone.setDuration(duration*info['duration']['multiplier'])
-        # self.stim_model.data(self.stim_model.index(0,0), QtCore.Qt.UserRole).setDuration(duration)
+        # self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole).setDuration(duration)
 
     def setStimReps(self):
-        reps = self.ui.nreps_spnbx.value()
-        self.stim_model.setRepCount(reps)
+        reps = self.ui.nrepsSpnbx.value()
+        self.stimModel.setRepCount(reps)
 
     def setStimRisefall(self):
-        rf = self.ui.risefall_spnbx.value()
+        rf = self.ui.risefallSpnbx.value()
         info = self.tone.auto_details()
         self.tone.setRisefall(rf*info['risefall']['multiplier'])
 
     def model(self):
-        return self.stim_model
+        return self.stimModel
 
-    def update_text_color(self, txt):
+    def updateTextColor(self, txt):
         w = self.sender()
         if int(txt) == 0:
             w.setPalette(RED)
         else:
             w.setPalette(BLACK)
 
-    def duration_input_widget(self):
-        return self.ui.dur_spnbx
+    def durationInputWidget(self):
+        return self.ui.durSpnbx
 
 if __name__ == "__main__":
     import sys

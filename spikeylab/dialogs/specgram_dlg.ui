@@ -27,7 +27,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QSpinBox" name="nfft_spnbx">
+      <widget class="QSpinBox" name="nfftSpnbx">
        <property name="minimum">
         <number>8</number>
        </property>
@@ -47,7 +47,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="window_cmbx">
+      <widget class="QComboBox" name="windowCmbx">
        <item>
         <property name="text">
          <string>Hanning</string>
@@ -83,7 +83,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QSpinBox" name="overlap_spnbx"/>
+      <widget class="QSpinBox" name="overlapSpnbx"/>
      </item>
     </layout>
    </item>

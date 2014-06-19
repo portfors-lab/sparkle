@@ -32,7 +32,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="cellid_lbl">
+      <widget class="QLabel" name="cellidLbl">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -58,7 +58,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="comment_txtedt">
+    <widget class="QPlainTextEdit" name="commentTxtedt">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
@@ -82,7 +82,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="ok_btn">
+      <widget class="QPushButton" name="okBtn">
        <property name="text">
         <string>OK</string>
        </property>
@@ -95,7 +95,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>ok_btn</sender>
+   <sender>okBtn</sender>
    <signal>clicked()</signal>
    <receiver>CellCommentDialog</receiver>
    <slot>accept()</slot>

@@ -24,7 +24,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     hashIsDirty = False
     _height = ROW_HEIGHT
     _width = 10
-    _component_defaults = {}
+    _componentDefaults = {}
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
         AbstractDragView.__init__(self)
@@ -43,20 +43,20 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.mode = BUILDMODE
         self._rects = [[]]
         # these orignal settings are important
-        self.pixels_per_ms = 5
-        self.grid_ms = 25
+        self.pixelsPerms = 5
+        self.gridms = 25
 
     def setPixelScale(self, pxms):
         pxms = float(pxms)/2
-        self.pixels_per_ms = pxms
-        if pxms*self.grid_ms < GRID_PIXEL_MIN:
-            self.grid_ms = self.grid_ms*2
-        elif pxms*self.grid_ms > GRID_PIXEL_MAX:
-            self.grid_ms = self.grid_ms/2
+        self.pixelsPerms = pxms
+        if pxms*self.gridms < GRID_PIXEL_MIN:
+            self.gridms = self.gridms*2
+        elif pxms*self.gridms > GRID_PIXEL_MAX:
+            self.gridms = self.gridms/2
         self.hashIsDirty = True
         self.viewport().update()
 
-        return self.grid_ms
+        return self.gridms
 
     def setModel(self, model):
         super(StimulusView, self).setModel(model)
@@ -97,7 +97,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             for col in range(self.model().columnCountForRow(row)):
                 index = self.model().index(row, col, self.rootIndex())
                 duration = self.model().data(index, QtCore.Qt.SizeHintRole)
-                width = duration * self.pixels_per_ms * 1000
+                width = duration * self.pixelsPerms * 1000
                 if width is not None:
                     self._rects[row][col] = QtCore.QRect(x,y, width, ROW_HEIGHT)
                     x += width
@@ -212,13 +212,13 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         # draw grid lines
         wid = int(max(viewrect.width(), self._width))
-        nlines = int((wid/self.pixels_per_ms)/self.grid_ms)
+        nlines = int((wid/self.pixelsPerms)/self.gridms)
         y0 = viewrect.y()
         y1 = viewrect.y() + viewrect.height()
         for iline in range(1, nlines + 1):
-            x = (iline * self.grid_ms * self.pixels_per_ms) - self.horizontalScrollBar().value()
+            x = (iline * self.gridms * self.pixelsPerms) - self.horizontalScrollBar().value()
             painter.drawLine(x, y0+fontsz+2, x, y1)
-            painter.drawText(x-5, y0+fontsz+1, str(iline*self.grid_ms))
+            painter.drawText(x-5, y0+fontsz+1, str(iline*self.gridms))
 
         # painting of components
         for row in range(self.model().rowCount(self.rootIndex())):
@@ -307,8 +307,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
             if isinstance(event.source(), DragLabel):
                 index = self.model().index(location[0], location[1])
-                if component.__class__.__name__ in self._component_defaults:
-                    component.loadState(self._component_defaults[component.__class__.__name__])
+                if component.__class__.__name__ in self._componentDefaults:
+                    component.loadState(self._componentDefaults[component.__class__.__name__])
                 self.edit(index)
 
             self.hashIsDirty = True
@@ -338,16 +338,16 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         return region
 
-    def update_defaults(self, sender, state):
-        self._component_defaults[sender] = state
+    def updateDefaults(self, sender, state):
+        self._componentDefaults[sender] = state
         self.hashIsDirty = True
 
     def updateGeometries(self,a=None, b=None):
-        self.horizontalScrollBar().setSingleStep(self.pixels_per_ms)
+        self.horizontalScrollBar().setSingleStep(self.pixelsPerms)
         self.horizontalScrollBar().setPageStep(self.viewport().width())
         self.horizontalScrollBar().setRange(0, max(0, self._width - self.viewport().width()))
 
-        self.verticalScrollBar().setSingleStep(self.pixels_per_ms)
+        self.verticalScrollBar().setSingleStep(self.pixelsPerms)
         self.verticalScrollBar().setPageStep(self.viewport().height())
         self.verticalScrollBar().setRange(0, max(0, self._height - self.viewport().height()))
         
@@ -367,7 +367,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
     def sizeHint(self, option, index):
         # calculate size by data component
         component = index.data()
-        width = self.component.duration() * self.pixels_per_ms*1000
+        width = self.component.duration() * self.pixelsPerms*1000
         return QtCore.QSize(width, 50)
 
     def createEditor(self, parent, option, index):
@@ -382,7 +382,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
         # connect editor to update defaults
         view = parent.parentWidget()
-        editor.attributes_saved.connect(view.update_defaults)
+        editor.attributesSaved.connect(view.updateDefaults)
 
         return editor
 

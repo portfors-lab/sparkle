@@ -9,36 +9,36 @@ class ProtocolDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.fft_plot = FFTWidget(self, rotation=-90)
-        self.spiketrace_plot = TraceWidget(self)
-        self.spec_plot = SpecWidget(self)
+        self.fftPlot = FFTWidget(self, rotation=-90)
+        self.spiketracePlot = TraceWidget(self)
+        self.specPlot = SpecWidget(self)
 
-        self.fft_plot.setToolTip('Stimulus Spectrum')
-        self.spiketrace_plot.setToolTip('Spike Trace')
-        self.spec_plot.setToolTip('Stimulus Spectrogram')
+        self.fftPlot.setToolTip('Stimulus Spectrum')
+        self.spiketracePlot.setToolTip('Spike Trace')
+        self.specPlot.setToolTip('Stimulus Spectrogram')
 
         # custom behaviour for spec view all option
-        vb = self.spec_plot.getViewBox()
+        vb = self.specPlot.getViewBox()
         vb.menu.viewAll.triggered.disconnect()
-        vb.menu.viewAll.triggered.connect(self.spec_auto_range)
-        # self.fft_plot.set_title("Stimulus FFT")
-        # self.spiketrace_plot.set_title("Response Trace")
-        # self.spec_plot.set_title("Stimulus Spectrogram")
+        vb.menu.viewAll.triggered.connect(self.specAutoRange)
+        # self.fftPlot.set_title("Stimulus FFT")
+        # self.spiketracePlot.set_title("Response Trace")
+        # self.specPlot.set_title("Stimulus Spectrogram")
 
-        self.spec_plot.setXLink(self.spiketrace_plot)
-        self.spec_plot.setMinimumHeight(100)
-        self.spiketrace_plot.setMinimumWidth(100)
-        self.spiketrace_plot.setMinimumHeight(100)
-        self.fft_plot.setMinimumWidth(100)
-        self.fft_plot.setMinimumHeight(100)
+        self.specPlot.setXLink(self.spiketracePlot)
+        self.specPlot.setMinimumHeight(100)
+        self.spiketracePlot.setMinimumWidth(100)
+        self.spiketracePlot.setMinimumHeight(100)
+        self.fftPlot.setMinimumWidth(100)
+        self.fftPlot.setMinimumHeight(100)
 
         splittersw = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
-        splittersw.addWidget(self.spec_plot)
-        splittersw.addWidget(self.spiketrace_plot)
+        splittersw.addWidget(self.specPlot)
+        splittersw.addWidget(self.spiketracePlot)
         splitterse.addWidget(splittersw)
-        splitterse.addWidget(self.fft_plot)
+        splitterse.addWidget(self.fftPlot)
 
         # set inital sizes
         splittersw.setSizes([100,500])
@@ -50,51 +50,51 @@ class ProtocolDisplay(QtGui.QWidget):
         self.setLayout(layout)
 
         #relay threshold signal
-        self.threshold_updated = self.spiketrace_plot.threshold_updated
-        self.colormap_changed = self.spec_plot.colormap_changed
+        self.thresholdUpdated = self.spiketracePlot.thresholdUpdated
+        self.colormapChanged = self.specPlot.colormapChanged
 
         # for the purposes of splitter not updating contents...
         self.splittersw = splittersw
         self.badbadbad = 0
 
-    def update_spec(self, *args, **kwargs):
+    def updateSpec(self, *args, **kwargs):
         if args[0] == None:
-            self.spec_plot.clear_img()
+            self.specPlot.clearImg()
         elif isinstance(args[0], basestring):
-            self.spec_plot.from_file(*args, **kwargs)
+            self.specPlot.fromFile(*args, **kwargs)
         else:
-            self.spec_plot.update_data(*args,**kwargs)
+            self.specPlot.updateData(*args,**kwargs)
             
-    def show_spec(self, fname):
+    def showSpec(self, fname):
         """ Draw image if none present """
-        if not self.spec_plot.has_img() and fname is not None:
-            self.spec_plot.from_file(fname)
+        if not self.specPlot.has_img() and fname is not None:
+            self.specPlot.fromFile(fname)
 
-    def set_spec_args(self, *args, **kwargs):
-        self.spec_plot.set_spec_args(*args, **kwargs)
+    def setSpecArgs(self, *args, **kwargs):
+        self.specPlot.setSpecArgs(*args, **kwargs)
 
-    def update_fft(self, *args, **kwargs):
-        self.fft_plot.update_data(*args, **kwargs)
+    def updateFft(self, *args, **kwargs):
+        self.fftPlot.updateData(*args, **kwargs)
 
-    def update_spiketrace(self, xdata, ydata):
-        self.spiketrace_plot.update_data(axeskey='response', x=xdata, y=ydata)
+    def updateSpiketrace(self, xdata, ydata):
+        self.spiketracePlot.updateData(axeskey='response', x=xdata, y=ydata)
 
-    def clear_raster(self):
-        self.spiketrace_plot.clear_data('raster')
+    def clearRaster(self):
+        self.spiketracePlot.clearData('raster')
 
-    def add_raster_points(self, xdata, repnum):
+    def addRasterPoints(self, xdata, repnum):
         """Add a list (or numpy array) of points to raster plot, 
            in any order.
            xdata: bin centers
            ydata: rep number """
         ydata = np.ones_like(xdata)*repnum
-        self.spiketrace_plot.append_data('raster', xdata, ydata)
+        self.spiketracePlot.appendData('raster', xdata, ydata)
 
-    def update_signal(self, xdata, ydata):
-        self.spiketrace_plot.update_data(axeskey='stim', x=xdata, y=ydata)
+    def updateSignal(self, xdata, ydata):
+        self.spiketracePlot.updateData(axeskey='stim', x=xdata, y=ydata)
 
-    def set_xlimits(self, lims):
-        self.spiketrace_plot.set_xlim(lims)
+    def setXlimits(self, lims):
+        self.spiketracePlot.setXlim(lims)
         # ridiculous...
         sizes = self.splittersw.sizes()
         if self.badbadbad:
@@ -106,25 +106,25 @@ class ProtocolDisplay(QtGui.QWidget):
         self.badbadbad = not self.badbadbad
         self.splittersw.setSizes(sizes)
 
-    def set_nreps(self, nreps):
-        self.spiketrace_plot.set_nreps(nreps)
+    def setNreps(self, nreps):
+        self.spiketracePlot.setNreps(nreps)
 
     def sizeHint(self):
         return QtCore.QSize(500,300)
 
-    def set_tscale(self, scale):
-        self.spiketrace_plot.set_tscale(scale)
-        self.spec_plot.set_tscale(scale)
+    def setTscale(self, scale):
+        self.spiketracePlot.setTscale(scale)
+        self.specPlot.setTscale(scale)
 
-    def set_fscale(self, scale):
-        self.fft_plot.set_fscale(scale)
-        self.spec_plot.set_fscale(scale)
+    def setFscale(self, scale):
+        self.fftPlot.setFscale(scale)
+        self.specPlot.setFscale(scale)
 
-    def spec_auto_range(self):
-        trace_range = self.spiketrace_plot.viewRange()[0]
-        vb = self.spec_plot.getViewBox()
+    def specAutoRange(self):
+        trace_range = self.spiketracePlot.viewRange()[0]
+        vb = self.specPlot.getViewBox()
         vb.autoRange(padding=0)
-        self.spec_plot.set_xlim(trace_range)
+        self.specPlot.setXlim(trace_range)
 
 
 if __name__ == "__main__":
@@ -143,8 +143,8 @@ if __name__ == "__main__":
     sylpath = sample.samplewav()
     spec, f, bins, fs = audiotools.spectrogram(sylpath)
 
-    # plot.update_spec(spec, xaxis=bins, yaxis=f)
-    plot.update_spec(sylpath)
+    # plot.updateSpec(spec, xaxis=bins, yaxis=f)
+    plot.updateSpec(sylpath)
 
     sr, wavdata = wv.read(sylpath)
     freqs, fft = audiotools.calc_spectrum(wavdata,sr)
@@ -162,32 +162,32 @@ if __name__ == "__main__":
     # x = np.arange(len(wavdata))
     # y = random.randint(0,10) * np.sin(x)
 
-    plot.update_signal(stim_times, wavdata)
-    plot.update_spiketrace(resp_times,resp)
+    plot.updateSignal(stim_times, wavdata)
+    plot.updateSpiketrace(resp_times,resp)
     # for i in range(10):
     #     y = random.randint(0,10) * np.sin(x)
-    #     plot.update_fft(x,y)
+    #     plot.updateFft(x,y)
     #     time.sleep(0.2)
     #     QtGui.QApplication.processEvents()
-    plot.update_fft(freqs,fft)
+    plot.updateFft(freqs,fft)
 
     nbins=20
     bin_centers = np.linspace(0,float(len(resp))/acq_rate, nbins)
     dummy_data = np.ones((nbins/2,))
     dummy_bins = bin_centers[0:-1:2]
-    plot.add_raster_points(dummy_bins, dummy_data)
+    plot.addRasterPoints(dummy_bins, dummy_data)
     dummy_data = np.ones(((nbins/2)-1,))*2
     dummy_bins = bin_centers[1:-2:2]
-    plot.add_raster_points(dummy_bins, dummy_data)
+    plot.addRasterPoints(dummy_bins, dummy_data)
     dummy_data = np.ones(((nbins/2)-1,))*3
     dummy_bins = bin_centers[1:-2:2]
-    plot.add_raster_points(dummy_bins, dummy_data)
+    plot.addRasterPoints(dummy_bins, dummy_data)
 
 
     # coerce x ranges to match
-    plot.set_xlimits([0, resp_times[-1]])
+    plot.setXlimits([0, resp_times[-1]])
 
-    plot.set_tscale(0.001)
-    plot.set_fscale(1000)
+    plot.setTscale(0.001)
+    plot.setFscale(1000)
 
     sys.exit(app.exec_())

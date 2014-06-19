@@ -12,12 +12,12 @@ class AbstractEditorWidget(QtGui.QWidget):
     funit_fields = []
     tunit_fields = []
     valueChanged = QtCore.pyqtSignal()
-    save_folder = os.path.expanduser('~')
+    saveFolder = os.path.expanduser('~')
 
     def saveStimulus(self):
         # manually instead of static function for testing purposes
         self.dialog = QtGui.QFileDialog(self, u"Save Stimulus Setup to File", 
-                                    self.save_folder, "Stimulus Settings (*.json)")
+                                    self.saveFolder, "Stimulus Settings (*.json)")
         self.dialog.setLabelText(QtGui.QFileDialog.Accept, 'Save')
 
         if self.dialog.exec_():
@@ -35,7 +35,7 @@ class AbstractEditorWidget(QtGui.QWidget):
         raise NotImplementedError
 
     @staticmethod
-    def purge_deleted_widgets():
+    def purgeDeletedWidgets():
 
         toremove = []
         for label in AbstractEditorWidget.funit_labels:

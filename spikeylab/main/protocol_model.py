@@ -13,15 +13,15 @@ from spikeylab.main.abstract_drag_view import AbstractDragView
 class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.test_order = []
+        self.testOrder = []
         self.tests = {}
         self.headers = ['Tag', 'Test type', 'Reps', 'Length', 'Total', 'Generation rate']
         self.setSupportedDragActions(QtCore.Qt.MoveAction)
         self.caldb = None
         self.calv = None
-        self.calibration_vector = None
-        self.calibration_frequencies = None
-        self.calibration_frange = None
+        self.calibrationVector = None
+        self.calibrationFrequencies = None
+        self.calibrationFrange = None
 
     def setReferenceVoltage(self, caldb, calv):
         self.caldb = caldb
@@ -30,9 +30,9 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             test.setReferenceVoltage(caldb, calv)
 
     def setCalibration(self, db_boost_array, frequencies, frange):
-        self.calibration_vector = db_boost_array
-        self.calibration_frequencies = frequencies
-        self.calibration_frange = frange
+        self.calibrationVector = db_boost_array
+        self.calibrationFrequencies = frequencies
+        self.calibrationFrange = frange
         for test in self.tests.values():
             test.setCalibration(db_boost_array, frequencies, frange)
 
@@ -45,14 +45,14 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         return self.headers
                         
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.test_order)
+        return len(self.testOrder)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         return 6
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            stimid = self.test_order[index.row()]
+            stimid = self.testOrder[index.row()]
             test = self.tests[stimid]
             col = index.column()
             if col == 0:
@@ -70,11 +70,11 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
 
             return item
         elif role == QtCore.Qt.UserRole:  #return the whole python object
-            stimid = self.test_order[index.row()]
+            stimid = self.testOrder[index.row()]
             test = self.tests[stimid]
             return test
         elif role == QtCore.Qt.UserRole+1:  #return the whole python object
-            stimid = self.test_order[index.row()]
+            stimid = self.testOrder[index.row()]
             return stimid
 
     def flags(self, index):
@@ -86,12 +86,12 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:
             if index.column() == 0:
-                stimid = self.test_order[index.row()]
+                stimid = self.testOrder[index.row()]
                 test = self.tests[stimid]
                 test.setUserTag(value)
                 return True
             if index.column() == 2:
-                stimid = self.test_order[index.row()]
+                stimid = self.testOrder[index.row()]
                 test = self.tests[stimid]
                 test.setRepCount(value)
                 return True
@@ -106,7 +106,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def removeTest(self, position):
         """Removes a test from the order list, but not keeps a reference"""
         self.beginRemoveRows(QtCore.QModelIndex(), position, position)
-        self.test_order.pop(position)
+        self.testOrder.pop(position)
         self.endRemoveRows()
 
     def insertTest(self, testid, position):
@@ -114,7 +114,7 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
         if position == -1:
             position = self.rowCount()
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
-        self.test_order.insert(position, testid)
+        self.testOrder.insert(position, testid)
         self.endInsertRows()
 
     def insertNewTest(self, stim, position):
@@ -123,44 +123,44 @@ class ProtocolTabelModel(QtCore.QAbstractTableModel):
             position = self.rowCount()
         self.beginInsertRows(QtCore.QModelIndex(), position, position)
         stim.setReferenceVoltage(self.caldb, self.calv)
-        stim.setCalibration(self.calibration_vector, self.calibration_frequencies, self.calibration_frange)
+        stim.setCalibration(self.calibrationVector, self.calibrationFrequencies, self.calibrationFrange)
         # cannot serialize Qt objects, so must use a proxy list
-        self.test_order.insert(position, stim.stimid)
+        self.testOrder.insert(position, stim.stimid)
         self.tests[stim.stimid] = stim
 
         self.endInsertRows()
     
     def clearTests(self):
         self.beginRemoveRows(QtCore.QModelIndex(), 0, self.rowCount()-1)
-        self.test_order = []
+        self.testOrder = []
         self.tests = {}
         self.endRemoveRows()
 
     def stimulusList(self):
         """Return a list of StimulusModels in correct order"""
         stimuli = []
-        for testid in self.test_order:
+        for testid in self.testOrder:
             stimuli.append(self.tests[testid])
         return stimuli
 
-    def verify(self, window_size=None):
+    def verify(self, windowSize=None):
         """Verify that this protocol model is valid. Return 0 if sucessful,
         a failure message otherwise"""
         if self.rowCount() == 0:
             return "Protocol must have at least one test"
         if self.caldb is None or self.calv is None:
             return "Protocol reference voltage not set"
-        for testid in self.test_order:
+        for testid in self.testOrder:
             test = self.tests[testid]
-            msg = test.verify(window_size)
+            msg = test.verify(windowSize)
             if msg:
                 return msg
         return 0
 
-    def purge_tests(self):
+    def purgeTests(self):
         # delete orphaned tests
         for uid in self.tests.keys():
-            if uid not in self.test_order:
+            if uid not in self.testOrder:
                 self.tests.pop(uid)
 
 class ProtocolView(AbstractDragView, QtGui.QTableView):
@@ -231,8 +231,8 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             index = self.indexAt(event.pos())
             if index.isValid():
                 selected = self.model().data(index, QtCore.Qt.UserRole)
-                self.stim_editor = selected.showEditor()
-                self.stim_editor.show()
+                self.stimEditor = selected.showEditor()
+                self.stimEditor.show()
 
     def indexXY(self, index):
         """Return the top left coordinates of the row for the given index"""
@@ -242,8 +242,8 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         y = self.rowHeight(0)*row
         return 0, y
 
-    def purge_model(self):    
-        self.model().purge_tests()
+    def purgeModel(self):    
+        self.model().purgeTests()
 
 if __name__ == '__main__': # pragma: no cover
     

@@ -18,88 +18,88 @@ class Parametizer(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
 
         layout = QtGui.QVBoxLayout()
-        btn_layout = QtGui.QHBoxLayout()
+        btnLayout = QtGui.QHBoxLayout()
         
-        self.add_lbl = DragLabel(AddLabel)
+        self.addLbl = DragLabel(AddLabel)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
         separator.setFrameShadow(QtGui.QFrame.Sunken)
         
-        self.trash_lbl = TrashWidget(self)
+        self.trashLbl = TrashWidget(self)
         
-        self.randomize_ckbx = QtGui.QCheckBox("Randomize order")
-        self.randomize_ckbx.toggled.connect(self.randomToggle)
+        self.randomizeCkbx = QtGui.QCheckBox("Randomize order")
+        self.randomizeCkbx.toggled.connect(self.randomToggle)
 
-        btn_layout.addWidget(self.add_lbl)
-        btn_layout.addWidget(self.trash_lbl)
-        btn_layout.addWidget(separator)
-        btn_layout.addWidget(self.randomize_ckbx)
+        btnLayout.addWidget(self.addLbl)
+        btnLayout.addWidget(self.trashLbl)
+        btnLayout.addWidget(separator)
+        btnLayout.addWidget(self.randomizeCkbx)
 
-        self.param_list = AutoParameterTableView()
-        self.param_list.installEventFilter(self.trash_lbl)
-        self.param_list.hintRequested.connect(self.hintRequested)
+        self.paramList = AutoParameterTableView()
+        self.paramList.installEventFilter(self.trashLbl)
+        self.paramList.hintRequested.connect(self.hintRequested)
 
         if stimulusview is not None:
             self.setStimulusView(stimulusview)
 
-        layout.addWidget(self.param_list)
-        layout.addLayout(btn_layout)
+        layout.addWidget(self.paramList)
+        layout.addLayout(btnLayout)
         self.setLayout(layout)
         self.setWindowTitle('Auto Parameters')
 
     def randomToggle(self, randomize):
         if randomize:
-            self.param_model.stimModel().setReorderFunc(order_function('random'), 'random')
+            self.paramModel.stimModel().setReorderFunc(order_function('random'), 'random')
         else:
-            self.param_model.stimModel().reorder = None
+            self.paramModel.stimModel().reorder = None
 
     def setParameterList(self, paramlist):
-        self.param_model.setParameterList(paramlist)
+        self.paramModel.setParameterList(paramlist)
 
     def setStimulusView(self, view):
-        self.param_model = view.model().autoParams()
-        self.param_model.setStimView(view)
-        self.param_list.setModel(self.param_model)
-        self.randomize_ckbx.setChecked(bool(view.model().reorder))
+        self.paramModel = view.model().autoParams()
+        self.paramModel.setStimView(view)
+        self.paramList.setModel(self.paramModel)
+        self.randomizeCkbx.setChecked(bool(view.model().reorder))
 
-        self.param_model.emptied.connect(self.table_emptied)
-        self.param_model.hintRequested.connect(self.hintRequested)
-        self.param_model.stimChanged.connect(view.dataChanged)
+        self.paramModel.emptied.connect(self.tableEmptied)
+        self.paramModel.hintRequested.connect(self.hintRequested)
+        self.paramModel.stimChanged.connect(view.dataChanged)
 
-    def table_emptied(self, empty):
-        self.param_model.stimView().setEnabled(not empty)
+    def tableEmptied(self, empty):
+        self.paramModel.stimView().setEnabled(not empty)
         if empty:
-            self.param_model.stimView().setSelectionModel(QtGui.QItemSelectionModel(self.param_model.stimView().model()))
+            self.paramModel.stimView().setSelectionModel(QtGui.QItemSelectionModel(self.paramModel.stimView().model()))
 
 
     def sizeHint(self):
         return QtCore.QSize(560,200)
 
     def showEvent(self, event):
-        selected = self.param_list.selectedIndexes()
+        selected = self.paramList.selectedIndexes()
         if len(selected) > 0:
-            self.param_model.updateSelectionModel(selected[0])
+            self.paramModel.updateSelectionModel(selected[0])
             self.hintRequested.emit('Select parameter to edit. \
                 Parameter must have selected components in order to edit fields')
-        elif self.param_model.rowCount() > 0:
+        elif self.paramModel.rowCount() > 0:
             # just select first item
-            self.param_list.selectRow(0)
-            self.param_model.updateSelectionModel(self.param_model.index(0,0))
+            self.paramList.selectRow(0)
+            self.paramModel.updateSelectionModel(self.paramModel.index(0,0))
         else:
-            self.param_model.stimView().setEnabled(False)
+            self.paramModel.stimView().setEnabled(False)
             self.hintRequested.emit('Drag to add parameter first')
-        self.param_model.stimView().setMode(1)
+        self.paramModel.stimView().setMode(1)
 
     def hideEvent(self, event):
-        self.param_model.stimView().setMode(0)
+        self.paramModel.stimView().setMode(0)
         # change stimulus components to reflect auto-parameter start values
-        self.param_model.updateComponentStartVals()
+        self.paramModel.updateComponentStartVals()
         self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; right drag to move.')
 
     def closeEvent(self, event):
-        self.param_model.stimView().setMode(0)
-        self.param_model.updateComponentStartVals()
+        self.paramModel.stimView().setMode(0)
+        self.paramModel.updateComponentStartVals()
 
 
 class HidableParameterEditor(WidgetHider):

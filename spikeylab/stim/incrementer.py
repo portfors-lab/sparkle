@@ -20,8 +20,8 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.down5.setIcon(arrowdown())
         self.down1.setIcon(arrowdown())
         # this will emit on partial values -- not what I want ideally
-        self.value_lnedt.editingFinished.connect(self.checkInput)
-        self.value_lnedt.editingFinished.connect(self.valueChanged.emit)
+        self.valueLnedt.editingFinished.connect(self.checkInput)
+        self.valueLnedt.editingFinished.connect(self.valueChanged.emit)
 
     def increment1(self):
         self.incrementn(1)
@@ -42,24 +42,24 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.incrementn(-10)
 
     def incrementn(self, n):
-        val = self.numtype(self.value_lnedt.text())
+        val = self.numtype(self.valueLnedt.text())
         if self.minimum <= (val + n) <= self.maximum:
             val += n
             self.setValue(val)
         self.valueChanged.emit()
 
     def value(self):
-        return self.numtype(self.value_lnedt.text())
+        return self.numtype(self.valueLnedt.text())
 
     def setValue(self, val):
         # type and range checking here!
         if val - floor(val) > 0.0:
-            self.value_lnedt.setText(str(val))
+            self.valueLnedt.setText(str(val))
         else:
-            self.value_lnedt.setText(str(int(val)))
+            self.valueLnedt.setText(str(int(val)))
 
     def checkInput(self):
-        if self.value_lnedt.text() == '':
+        if self.valueLnedt.text() == '':
             self.setValue(0)
 
     def setDecimals(self, val):

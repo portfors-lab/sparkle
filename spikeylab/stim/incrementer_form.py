@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\incrementer.ui'
 #
-# Created: Wed Apr 09 11:06:49 2014
+# Created: Wed Jun 18 16:49:26 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,15 +33,15 @@ class Ui_IncrementInput(object):
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setContentsMargins(0, 1, 1, 0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.value_lnedt = QtGui.QLineEdit(IncrementInput)
+        self.valueLnedt = QtGui.QLineEdit(IncrementInput)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.value_lnedt.sizePolicy().hasHeightForWidth())
-        self.value_lnedt.setSizePolicy(sizePolicy)
-        self.value_lnedt.setMinimumSize(QtCore.QSize(0, 0))
-        self.value_lnedt.setObjectName(_fromUtf8("value_lnedt"))
-        self.horizontalLayout.addWidget(self.value_lnedt)
+        sizePolicy.setHeightForWidth(self.valueLnedt.sizePolicy().hasHeightForWidth())
+        self.valueLnedt.setSizePolicy(sizePolicy)
+        self.valueLnedt.setMinimumSize(QtCore.QSize(0, 0))
+        self.valueLnedt.setObjectName(_fromUtf8("valueLnedt"))
+        self.horizontalLayout.addWidget(self.valueLnedt)
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setSpacing(0)
         self.gridLayout.setContentsMargins(-1, 1, 1, 1)
@@ -103,7 +103,7 @@ class Ui_IncrementInput(object):
 
     def retranslateUi(self, IncrementInput):
         IncrementInput.setWindowTitle(_translate("IncrementInput", "Form", None))
-        self.value_lnedt.setText(_translate("IncrementInput", "0", None))
+        self.valueLnedt.setText(_translate("IncrementInput", "0", None))
         self.up10.setText(_translate("IncrementInput", "10", None))
         self.up1.setText(_translate("IncrementInput", "1", None))
         self.up5.setText(_translate("IncrementInput", "5", None))

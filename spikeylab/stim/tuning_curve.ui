@@ -17,7 +17,7 @@
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="2" column="2">
-      <widget class="QSpinBox" name="db_stop_spnbx">
+      <widget class="QSpinBox" name="dbStopSpnbx">
        <property name="maximum">
         <number>120</number>
        </property>
@@ -27,7 +27,7 @@
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QSpinBox" name="freq_stop_spnbx">
+      <widget class="QSpinBox" name="freqStopSpnbx">
        <property name="maximum">
         <number>200</number>
        </property>
@@ -63,7 +63,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QSpinBox" name="freq_start_spnbx">
+      <widget class="QSpinBox" name="freqStartSpnbx">
        <property name="maximum">
         <number>200</number>
        </property>
@@ -76,7 +76,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QSpinBox" name="db_start_spnbx">
+      <widget class="QSpinBox" name="dbStartSpnbx">
        <property name="maximum">
         <number>150</number>
        </property>
@@ -156,13 +156,13 @@
       </widget>
      </item>
      <item row="2" column="3">
-      <widget class="SmartSpinBox" name="db_step_spnbx"/>
+      <widget class="SmartSpinBox" name="dbStepSpnbx"/>
      </item>
      <item row="1" column="3">
-      <widget class="SmartSpinBox" name="freq_step_spnbx"/>
+      <widget class="SmartSpinBox" name="freqStepSpnbx"/>
      </item>
      <item row="1" column="5">
-      <widget class="QLineEdit" name="freq_nsteps_lbl">
+      <widget class="QLineEdit" name="freqNstepsLbl">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -193,7 +193,7 @@
       </widget>
      </item>
      <item row="2" column="5">
-      <widget class="QLineEdit" name="db_nsteps_lbl">
+      <widget class="QLineEdit" name="dbNstepsLbl">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -271,7 +271,7 @@
       </widget>
      </item>
      <item row="1" column="4">
-      <widget class="QSpinBox" name="nreps_spnbx">
+      <widget class="QSpinBox" name="nrepsSpnbx">
        <property name="minimum">
         <number>1</number>
        </property>
@@ -291,14 +291,14 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="SmartSpinBox" name="dur_spnbx">
+      <widget class="SmartSpinBox" name="durSpnbx">
        <property name="maximum">
         <double>1000.000000000000000</double>
        </property>
       </widget>
      </item>
      <item row="0" column="4">
-      <widget class="SmartSpinBox" name="risefall_spnbx"/>
+      <widget class="SmartSpinBox" name="risefallSpnbx"/>
      </item>
     </layout>
    </item>
@@ -318,14 +318,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="save_btn">
+      <widget class="QPushButton" name="saveBtn">
        <property name="text">
         <string>Save As...</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="ok_btn">
+      <widget class="QPushButton" name="okBtn">
        <property name="text">
         <string>Ok</string>
        </property>
@@ -345,7 +345,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>ok_btn</sender>
+   <sender>okBtn</sender>
    <signal>clicked()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>close()</slot>
@@ -361,7 +361,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>nreps_spnbx</sender>
+   <sender>nrepsSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>setStimReps()</slot>
@@ -377,7 +377,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>freq_start_spnbx</sender>
+   <sender>freqStartSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>submit()</slot>
@@ -393,7 +393,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>db_start_spnbx</sender>
+   <sender>dbStartSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>submit()</slot>
@@ -409,7 +409,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>freq_stop_spnbx</sender>
+   <sender>freqStopSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>submit()</slot>
@@ -425,7 +425,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>db_stop_spnbx</sender>
+   <sender>dbStopSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>submit()</slot>
@@ -441,7 +441,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>dur_spnbx</sender>
+   <sender>durSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>setStimDuration()</slot>
@@ -457,7 +457,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>risefall_spnbx</sender>
+   <sender>risefallSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>setStimRisefall()</slot>
@@ -473,7 +473,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>save_btn</sender>
+   <sender>saveBtn</sender>
    <signal>clicked()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>saveStimulus()</slot>
@@ -489,7 +489,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>freq_step_spnbx</sender>
+   <sender>freqStepSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>submit()</slot>
@@ -505,7 +505,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>db_step_spnbx</sender>
+   <sender>dbStepSpnbx</sender>
    <signal>editingFinished()</signal>
    <receiver>TuningCurveEditor</receiver>
    <slot>submit()</slot>

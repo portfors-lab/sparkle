@@ -11,28 +11,28 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.setupUi(self)
 
         # grey out parameters determined by file, not to be altered by user
-        self.common.dur_spnbx.setEnabled(False)
-        self.common.risefall_spnbx.setEnabled(False)
-        # self.colormap_changed = self.ui.spec_preview.colormap_changed
+        self.common.durSpnbx.setEnabled(False)
+        self.common.risefallSpnbx.setEnabled(False)
+        # self.colormap_changed = self.ui.specPreview.colormap_changed
         self.common.valueChanged.connect(self.valueChanged.emit)
-        self.input_widgets = {'intensity': self.common.db_spnbx}
-        self.audio_extentions = ['wav']
+        self.inputWidgets = {'intensity': self.common.dbSpnbx}
+        self.audioExtentions = ['wav']
 
     def setComponent(self, component):
         self.common.setFields(component)
 
-        self.current_wav_file = component.file()
-        if self.current_wav_file is not None:
-            wav_parent_dir = dirname(self.current_wav_file)
+        self.currentWavFile = component.file()
+        if self.currentWavFile is not None:
+            wav_parent_dir = dirname(self.currentWavFile)
         else:
             wav_parent_dir = component.browsedir()
 
         self.setRootDirs(component.browsedir(), wav_parent_dir)
 
-        if self.current_wav_file is not None:
+        if self.currentWavFile is not None:
 
-            self.filelist_view.setCurrentIndex(self.filemodel.index(self.current_wav_file))
-            dur = self.spec_preview.from_file(self.current_wav_file)
+            self.filelistView.setCurrentIndex(self.filemodel.index(self.currentWavFile))
+            dur = self.specPreview.fromFile(self.currentWavFile)
             self.common.setDuration(dur)
 
         self._component = component
@@ -41,22 +41,22 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         # set up wav file directory finder paths
         self.dirmodel = QtGui.QFileSystemModel(self)
         self.dirmodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)
-        self.filetree_view.setModel(self.dirmodel)
-        self.filetree_view.setRootIndex(self.dirmodel.setRootPath(treeroot))
-        self.filetree_view.setCurrentIndex(self.dirmodel.index(listroot))
-        self.filetree_view.hideColumn(1)
-        self.filetree_view.hideColumn(2)
-        self.filetree_view.header().setStretchLastSection(False)
-        self.filetree_view.header().setResizeMode(0, QtGui.QHeaderView.Stretch) 
+        self.filetreeView.setModel(self.dirmodel)
+        self.filetreeView.setRootIndex(self.dirmodel.setRootPath(treeroot))
+        self.filetreeView.setCurrentIndex(self.dirmodel.index(listroot))
+        self.filetreeView.hideColumn(1)
+        self.filetreeView.hideColumn(2)
+        self.filetreeView.header().setStretchLastSection(False)
+        self.filetreeView.header().setResizeMode(0, QtGui.QHeaderView.Stretch) 
 
         self.filemodel = QtGui.QFileSystemModel(self)
         self.filemodel.setFilter(QtCore.QDir.Files)
-        filters = ['*.'+x for x in self.audio_extentions]
+        filters = ['*.'+x for x in self.audioExtentions]
         self.filemodel.setNameFilters(filters)
-        self.filelist_view.setModel(self.filemodel)
-        self.filelist_view.setRootIndex(self.filemodel.setRootPath(listroot))
+        self.filelistView.setModel(self.filemodel)
+        self.filelistView.setRootIndex(self.filemodel.setRootPath(listroot))
 
-        self.wavrootdir_lnedt.setText(treeroot)
+        self.wavrootdirLnedt.setText(treeroot)
 
     def getTreeRoot(self):
         return self.dirmodel.rootPath()
@@ -66,39 +66,39 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def saveToObject(self):
         self._component.setIntensity(self.common.intensityValue())
-        self._component.setFile(self.current_wav_file)
+        self._component.setFile(self.currentWavFile)
         self._component.setBrowseDir(self.dirmodel.rootPath())
 
-        self.attributes_saved.emit(self._component.__class__.__name__, self._component.stateDict())
+        self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def component(self):
         return self._component
 
-    def browse_wavdirs(self):
-        wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdir_lnedt.text())
-        self.filetree_view.setRootIndex(self.dirmodel.setRootPath(wavdir))
-        self.filelist_view.setRootIndex(self.filemodel.setRootPath(wavdir))
-        self.wavrootdir_lnedt.setText(wavdir)
+    def browseWavdirs(self):
+        wavdir = QtGui.QFileDialog.getExistingDirectory(self, 'select root folder', self.wavrootdirLnedt.text())
+        self.filetreeView.setRootIndex(self.dirmodel.setRootPath(wavdir))
+        self.filelistView.setRootIndex(self.filemodel.setRootPath(wavdir))
+        self.wavrootdirLnedt.setText(wavdir)
 
-    def wavdir_selected(self, model_index):
-        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
-        self.filelist_view.setRootIndex(self.filemodel.setRootPath(spath))
+    def wavdirSelected(self, modelIndex):
+        spath = self.dirmodel.fileInfo(modelIndex).absoluteFilePath()
+        self.filelistView.setRootIndex(self.filemodel.setRootPath(spath))
 
-    def wavfile_clicked(self, model_index):
+    def wavfileClicked(self, modelIndex):
         # display spectrogram of file
-        spath = self.dirmodel.fileInfo(model_index).absoluteFilePath()
-        if not any(map(spath.endswith, self.audio_extentions)):
+        spath = self.dirmodel.fileInfo(modelIndex).absoluteFilePath()
+        if not any(map(spath.endswith, self.audioExtentions)):
             return # not an audio file
-            
-        dur = self.spec_preview.from_file(spath)
+
+        dur = self.specPreview.fromFile(spath)
         self.common.setDuration(dur)
-        self.current_wav_file = spath
+        self.currentWavFile = spath
 
     def setContentFocus(self):
         pass
 
-    def set_spec_args(self, *args, **kwargs):
-        self.spec_preview.set_spec_args(*args, **kwargs)
+    def setSpecArgs(self, *args, **kwargs):
+        self.specPreview.setSpecArgs(*args, **kwargs)
 
-    def update_colormap(self):
-        self.spec_preview.update_colormap()
+    def updateColormap(self):
+        self.specPreview.updateColormap()

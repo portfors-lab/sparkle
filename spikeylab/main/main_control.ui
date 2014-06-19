@@ -32,7 +32,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="running_label">
+         <widget class="QLabel" name="runningLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -61,11 +61,11 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_12">
         <item>
-         <widget class="QTabWidget" name="tab_group">
+         <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
-          <widget class="QWidget" name="tab_explore">
+          <widget class="QWidget" name="tabExplore">
            <attribute name="title">
             <string>Explore</string>
            </attribute>
@@ -98,7 +98,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLabel" name="over_atten_lbl">
+                 <widget class="QLabel" name="overAttenLbl">
                   <property name="text">
                    <string>0</string>
                   </property>
@@ -120,7 +120,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <item>
-                 <widget class="QComboBox" name="explore_stim_type_cmbbx">
+                 <widget class="QComboBox" name="exploreStimTypeCmbbx">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -145,7 +145,7 @@
                </layout>
               </item>
               <item>
-               <widget class="DynamicStackedWidget" name="parameter_stack">
+               <widget class="DynamicStackedWidget" name="parameterStack">
                 <property name="currentIndex">
                  <number>-1</number>
                 </property>
@@ -161,7 +161,7 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QSpinBox" name="ex_nreps_spnbx">
+                 <widget class="QSpinBox" name="exNrepsSpnbx">
                   <property name="minimum">
                    <number>1</number>
                   </property>
@@ -198,7 +198,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="SmartSpinBox" name="aosr_spnbx">
+                 <widget class="SmartSpinBox" name="aosrSpnbx">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
@@ -216,7 +216,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_protocol">
+          <widget class="QWidget" name="tabProtocol">
            <attribute name="title">
             <string>Experiment</string>
            </attribute>
@@ -234,7 +234,7 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
-               <widget class="StimulusLabelTable" name="stimulus_choices" native="true"/>
+               <widget class="StimulusLabelTable" name="stimulusChoices" native="true"/>
               </item>
               <item>
                <spacer name="horizontalSpacer_4">
@@ -266,18 +266,18 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_calibrate">
+          <widget class="QWidget" name="tabCalibrate">
            <attribute name="title">
             <string>Calibration</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="CalibrationWidget" name="calibration_widget" native="true"/>
+             <widget class="CalibrationWidget" name="calibrationWidget" native="true"/>
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="1">
-               <widget class="QLabel" name="dblevel_lbl">
+               <widget class="QLabel" name="dblevelLbl">
                 <property name="text">
                  <string>0</string>
                 </property>
@@ -291,14 +291,14 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLabel" name="dblevel_lbl2">
+               <widget class="QLabel" name="dblevelLbl2">
                 <property name="text">
                  <string>0</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QLabel" name="over_atten_lbl_2">
+               <widget class="QLabel" name="overAttenLbl_2">
                 <property name="text">
                  <string>0</string>
                 </property>
@@ -325,7 +325,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QProgressBar" name="protocol_progress_bar">
+         <widget class="QProgressBar" name="protocolProgressBar">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -341,7 +341,7 @@
         <item>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="1">
-           <widget class="QComboBox" name="aochan_box"/>
+           <widget class="QComboBox" name="aochanBox"/>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_30">
@@ -357,7 +357,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="aichan_box"/>
+           <widget class="QComboBox" name="aichanBox"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_29">
@@ -433,7 +433,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="SmartSpinBox" name="aisr_spnbx">
+           <widget class="SmartSpinBox" name="aisrSpnbx">
             <property name="decimals">
              <number>3</number>
             </property>
@@ -443,7 +443,7 @@
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="SmartSpinBox" name="binsz_spnbx">
+           <widget class="SmartSpinBox" name="binszSpnbx">
             <property name="decimals">
              <number>3</number>
             </property>
@@ -453,7 +453,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="SmartSpinBox" name="windowsz_spnbx">
+           <widget class="SmartSpinBox" name="windowszSpnbx">
             <property name="decimals">
              <number>3</number>
             </property>
@@ -463,7 +463,7 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QDoubleSpinBox" name="reprate_spnbx">
+           <widget class="QDoubleSpinBox" name="reprateSpnbx">
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
@@ -508,7 +508,7 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="thresh_spnbx">
+           <widget class="QDoubleSpinBox" name="threshSpnbx">
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
@@ -532,7 +532,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="mode_cmbx">
+           <widget class="QComboBox" name="modeCmbx">
             <item>
              <property name="text">
               <string>Windowed</string>
@@ -567,7 +567,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="current_cal_lbl">
+           <widget class="QLabel" name="currentCalLbl">
             <property name="text">
              <string>None</string>
             </property>
@@ -580,7 +580,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="data_file_lbl">
+           <widget class="QLabel" name="dataFileLbl">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -620,14 +620,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
-           <widget class="QPushButton" name="start_chart_btn">
+           <widget class="QPushButton" name="startChartBtn">
             <property name="text">
              <string>Start Chart</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="stop_chart_btn">
+           <widget class="QPushButton" name="stopChartBtn">
             <property name="text">
              <string>Stop Chart</string>
             </property>
@@ -638,14 +638,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QPushButton" name="start_btn">
+           <widget class="QPushButton" name="startBtn">
             <property name="text">
              <string>Start</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="stop_btn">
+           <widget class="QPushButton" name="stopBtn">
             <property name="text">
              <string>Stop</string>
             </property>
@@ -698,7 +698,7 @@
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="PlotDockWidget" name="plot_dock">
+  <widget class="PlotDockWidget" name="plotDock">
    <property name="windowTitle">
     <string>Data Display</string>
    </property>
@@ -713,7 +713,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="psth_dock">
+  <widget class="QDockWidget" name="psthDock">
    <property name="windowTitle">
     <string>PSTH</string>
    </property>
@@ -723,7 +723,7 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_10">
      <item>
-      <widget class="QWidget" name="psth_container" native="true">
+      <widget class="QWidget" name="PSTHContainer" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <property name="spacing">
          <number>0</number>
@@ -785,7 +785,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="spike_latency_lbl">
+           <widget class="QLabel" name="spikeLatencyLbl">
             <property name="text">
              <string>0</string>
             </property>
@@ -813,21 +813,21 @@
            </widget>
           </item>
           <item row="1" column="4">
-           <widget class="QLabel" name="spike_rate_lbl">
+           <widget class="QLabel" name="spikeRateLbl">
             <property name="text">
              <string>0</string>
             </property>
            </widget>
           </item>
           <item row="0" column="4">
-           <widget class="QLabel" name="spike_avg_lbl">
+           <widget class="QLabel" name="spikeAvgLbl">
             <property name="text">
              <string>0</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="spike_total_lbl">
+           <widget class="QLabel" name="spikeTotalLbl">
             <property name="text">
              <string>0</string>
             </property>
@@ -854,7 +854,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="progress_dock">
+  <widget class="QDockWidget" name="progressDock">
    <property name="windowTitle">
     <string>Progress</string>
    </property>
@@ -873,7 +873,7 @@
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout" name="verticalLayout_7">
      <item>
-      <widget class="QPlainTextEdit" name="log_txedt">
+      <widget class="QPlainTextEdit" name="logTxedt">
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -892,7 +892,7 @@
    <widget class="QWidget" name="dockWidgetContents_5">
     <layout class="QVBoxLayout" name="verticalLayout_11">
      <item>
-      <widget class="StimDetailWidget" name="stim_details" native="true"/>
+      <widget class="StimDetailWidget" name="stimDetails" native="true"/>
      </item>
     </layout>
    </widget>
@@ -1027,7 +1027,7 @@
    <sender>actionSave_Options</sender>
    <signal>triggered()</signal>
    <receiver>ControlWindow</receiver>
-   <slot>launch_save_dlg()</slot>
+   <slot>launchSaveDlg()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1043,7 +1043,7 @@
    <sender>actionSet_Calibration</sender>
    <signal>triggered()</signal>
    <receiver>ControlWindow</receiver>
-   <slot>launch_calibration_dlg()</slot>
+   <slot>launchCalibrationDlg()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1059,7 +1059,7 @@
    <sender>actionSet_Scale</sender>
    <signal>triggered()</signal>
    <receiver>ControlWindow</receiver>
-   <slot>launch_scale_dlg()</slot>
+   <slot>launchScaleDlg()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1074,7 +1074,7 @@
   <connection>
    <sender>actionData_Display</sender>
    <signal>triggered()</signal>
-   <receiver>plot_dock</receiver>
+   <receiver>plotDock</receiver>
    <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1083,14 +1083,14 @@
     </hint>
     <hint type="destinationlabel">
      <x>386</x>
-     <y>570</y>
+     <y>782</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>actionPSTH</sender>
    <signal>triggered()</signal>
-   <receiver>psth_dock</receiver>
+   <receiver>psthDock</receiver>
    <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1098,24 +1098,24 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>901</x>
-     <y>220</y>
+     <x>1331</x>
+     <y>241</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>explore_stim_type_cmbbx</sender>
+   <sender>exploreStimTypeCmbbx</sender>
    <signal>currentIndexChanged(int)</signal>
-   <receiver>parameter_stack</receiver>
+   <receiver>parameterStack</receiver>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>406</x>
-     <y>123</y>
+     <x>628</x>
+     <y>117</y>
     </hint>
     <hint type="destinationlabel">
-     <x>502</x>
-     <y>432</y>
+     <x>664</x>
+     <y>154</y>
     </hint>
    </hints>
   </connection>
@@ -1123,7 +1123,7 @@
    <sender>actionSpectrogram_Parameters</sender>
    <signal>triggered()</signal>
    <receiver>ControlWindow</receiver>
-   <slot>launch_specgram_dlg()</slot>
+   <slot>launchSpecgramDlg()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1136,14 +1136,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>mode_cmbx</sender>
+   <sender>modeCmbx</sender>
    <signal>currentIndexChanged(QString)</signal>
    <receiver>ControlWindow</receiver>
-   <slot>mode_toggled(QString)</slot>
+   <slot>modeToggled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>761</x>
-     <y>289</y>
+     <x>1030</x>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
      <x>705</x>
@@ -1154,7 +1154,7 @@
   <connection>
    <sender>actionProgress</sender>
    <signal>triggered()</signal>
-   <receiver>progress_dock</receiver>
+   <receiver>progressDock</receiver>
    <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1162,16 +1162,16 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>901</x>
-     <y>481</y>
+     <x>1331</x>
+     <y>728</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>tab_group</sender>
+   <sender>tabGroup</sender>
    <signal>currentChanged(int)</signal>
    <receiver>ControlWindow</receiver>
-   <slot>tab_changed(int)</slot>
+   <slot>tabChanged()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>479</x>
@@ -1203,11 +1203,11 @@
    <sender>pushButton</sender>
    <signal>clicked()</signal>
    <receiver>ControlWindow</receiver>
-   <slot>clear_protocol()</slot>
+   <slot>clearProtocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>502</x>
-     <y>516</y>
+     <x>804</x>
+     <y>676</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1226,8 +1226,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>922</x>
-     <y>596</y>
+     <x>1331</x>
+     <y>782</y>
     </hint>
    </hints>
   </connection>
@@ -1235,7 +1235,7 @@
    <sender>actionView_Settings</sender>
    <signal>triggered()</signal>
    <receiver>ControlWindow</receiver>
-   <slot>launch_view_dlg()</slot>
+   <slot>launchViewDlg()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1270,5 +1270,26 @@
   <slot>grab_cal()</slot>
   <slot>clear_protocol()</slot>
   <slot>launch_view_dlg()</slot>
+  <slot>launchViewDlg()</slot>
+  <slot>launchSaveDlg()</slot>
+  <slot>launchCalibrationDlg()</slot>
+  <slot>changeExpInput()</slot>
+  <slot>wavdirSelected()</slot>
+  <slot>browseWavdirs()</slot>
+  <slot>wavfileSelected()</slot>
+  <slot>wavfileClicked()</slot>
+  <slot>launchScaleDlg()</slot>
+  <slot>showDisplay()</slot>
+  <slot>showPSTH()</slot>
+  <slot>addProtocolStim()</slot>
+  <slot>setExploreSamplerate()</slot>
+  <slot>launchSpecgramDlg()</slot>
+  <slot>modeToggled()</slot>
+  <slot>saveExploreToggled()</slot>
+  <slot>showProgress()</slot>
+  <slot>tabChanged()</slot>
+  <slot>showLog()</slot>
+  <slot>grabCal()</slot>
+  <slot>clearProtocol()</slot>
  </slots>
 </ui>

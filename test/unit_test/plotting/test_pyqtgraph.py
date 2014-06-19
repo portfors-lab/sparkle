@@ -40,7 +40,7 @@ class TestPyqtgraphPlots():
         fig.show()
         for i in range(1,5):
             y = self.data_func(i)
-            fig.update_data(self.t*1000, y) # gets integer divided by 1000
+            fig.updateData(self.t*1000, y) # gets integer divided by 1000
             QApplication.processEvents()
             time.sleep(PAUSE)
 
@@ -49,11 +49,11 @@ class TestPyqtgraphPlots():
     def test_trace_widget_spike(self):
         fig = TraceWidget()
         fig.setWindowTitle(inspect.stack()[0][3])
-        fig.set_threshold(0.5)
+        fig.setThreshold(0.5)
         fig.show()
         for i in range(1,5):
             y = self.data_func(i)
-            fig.update_data(axeskey='response', x=self.t, y=y)
+            fig.updateData(axeskey='response', x=self.t, y=y)
             fig.autoRange()
             QApplication.processEvents()
             time.sleep(PAUSE)
@@ -63,7 +63,7 @@ class TestPyqtgraphPlots():
     def test_trace_widget_raster(self):
         fig = TraceWidget()
         fig.setWindowTitle(inspect.stack()[0][3])
-        fig.set_nreps(5)
+        fig.setNreps(5)
         fig.show()
 
         acq_rate = 50000
@@ -71,19 +71,19 @@ class TestPyqtgraphPlots():
         bin_centers = np.linspace(0,float(20000)/acq_rate, nbins)
         dummy_bins = bin_centers[0:-1:2]
         dummy_data = np.ones_like(dummy_bins)
-        fig.append_data('raster', dummy_bins, dummy_data)
+        fig.appendData('raster', dummy_bins, dummy_data)
         QApplication.processEvents()
         time.sleep(PAUSE)
 
         dummy_bins = bin_centers[1:-2:2]
         dummy_data = np.ones_like(dummy_bins)*2
-        fig.append_data('raster', dummy_bins, dummy_data)
+        fig.appendData('raster', dummy_bins, dummy_data)
         QApplication.processEvents()
         time.sleep(PAUSE)
 
         dummy_bins = bin_centers[1:-2:2]
         dummy_data = np.ones_like(dummy_bins)*3
-        fig.append_data('raster', dummy_bins, dummy_data)
+        fig.appendData('raster', dummy_bins, dummy_data)
         QApplication.processEvents()
         time.sleep(PAUSE)
 
@@ -95,7 +95,7 @@ class TestPyqtgraphPlots():
         fig.show()
         for i in range(1,5):
             y = self.data_func(i)
-            fig.update_data(axeskey='stim', x=self.t, y=y)
+            fig.updateData(axeskey='stim', x=self.t, y=y)
             fig.autoRange()
             QApplication.processEvents()
             time.sleep(PAUSE)
@@ -109,7 +109,7 @@ class TestPyqtgraphPlots():
 
         for i in range(1,5):
             y = self.data_func(i)
-            fig.update_data(y, 32)
+            fig.updateData(y, 32)
             QApplication.processEvents()
             time.sleep(PAUSE)
             
@@ -122,7 +122,7 @@ class TestPyqtgraphPlots():
         fig.show()
         for y in ys:
             for x in xs:
-                fig.set_point(x, y, y*2)
+                fig.setPoint(x, y, y*2)
                 QApplication.processEvents()
                 time.sleep(PAUSE/4)
 
@@ -134,18 +134,18 @@ class TestPyqtgraphPlots():
         fig.show()
 
         dummy_data = [0, 1, 1, 1, 3, 4, 4,9,9,9,9,9, 7]
-        fig.set_bins(range(max(dummy_data)+1))
-        fig.append_data(dummy_data)
+        fig.setBins(range(max(dummy_data)+1))
+        fig.appendData(dummy_data)
         QApplication.processEvents()
         time.sleep(PAUSE)
 
         for i in range(3):
-            fig.append_data([3, 3, 4, 5])
+            fig.appendData([3, 3, 4, 5])
 
             QApplication.processEvents()
             time.sleep(PAUSE)
 
-        fig.clear_data()
+        fig.clearData()
 
         fig.close()
 
@@ -155,11 +155,11 @@ class TestPyqtgraphPlots():
         fig.show()
         winsz = 0.01 #seconds
         acq_rate = 50000 #Hz
-        fig.set_windowsize(winsz)
-        fig.set_sr(acq_rate)
+        fig.setWindowSize(winsz)
+        fig.setSr(acq_rate)
         for i in range(1,5):
             y = self.data_func(i)
-            fig.append_data(y,y)
+            fig.appendData(y,y)
             QApplication.processEvents()
             time.sleep(PAUSE)
         fig.close()

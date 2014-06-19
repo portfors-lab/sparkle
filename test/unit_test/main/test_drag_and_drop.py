@@ -20,7 +20,7 @@ from PyQt4 import QtGui, QtCore, QtTest
 import test.sample as sample
 
 PAUSE = 200
-ALLOW = 10
+ALLOW = 15
 
 app = None
 def setUp():
@@ -36,8 +36,12 @@ class TestDragNDrop():
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w')
-        self.form.ui.reprate_spnbx.setValue(10)
+        self.form.ui.reprateSpnbx.setValue(10)
         self.form.show()
+        # so that the data display doesn't get in the way of out
+        # mouse movements
+        self.form.ui.plotDock.close()
+        self.form.showMaximized()
 
     def tearDown(self):
         self.form.close()
@@ -57,23 +61,27 @@ class TestDragNDrop():
         fpath = sample.samplewav()
         parentdir, fname = os.path.split(fpath)
         self.form.exvocal.setRootDirs(parentdir, parentdir)
+        QtTest.QTest.qWait(PAUSE)    
         QtTest.QTest.qWait(ALLOW)
         idx = self.form.exvocal.filemodel.index(fpath)
-        pos = qttools.center(self.form.exvocal.filelist_view.visualRect(idx), self.form.exvocal.filelist_view.viewport())
+        print 'idx of vocal file', idx.row()
+        pos = qttools.center(self.form.exvocal.filelistView.visualRect(idx), self.form.exvocal.filelistView.viewport())
+        print 'pos of file', pos
         robot.click(pos)
-        # self.form.exvocal.current_wav_file = fname
+        # self.form.exvocal.currentWavFile = fname
         QtTest.QTest.qWait(PAUSE)    
 
         self.explore_run('vocalization')
 
     def test_save_calibration(self):
         """Defaults should be viable"""
-        self.form.ui.tab_group.setCurrentIndex(2)
-        robot.click(qttools.center(self.form.ui.calibration_widget.ui.savecal_ckbx))
-        
-        robot.click(qttools.center(self.form.ui.start_btn))
+        self.form.ui.tabGroup.setCurrentIndex(2)
+        robot.click(qttools.hotspot(self.form.ui.calibrationWidget.ui.savecalCkbx))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
+        
+        robot.click(qttools.center(self.form.ui.startBtn))
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.ui.runningLabel.text() == "RECORDING"
 
         self.wait_until_done()
 
@@ -95,11 +103,11 @@ class TestDragNDrop():
         cal_vector = hfile[calname]['calibration_intensities']
 
         # make sure displayed counts jive with saved file
-        nreps = self.form.ui.calibration_widget.ui.nreps_spnbx.value()
+        nreps = self.form.ui.calibrationWidget.ui.nrepsSpnbx.value()
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], hfile[calname].attrs['samplerate_ad'])
 
-        npts = (self.form.ui.aisr_spnbx.value()*self.form.fscale)*(self.form.ui.windowsz_spnbx.value()*self.form.tscale)
+        npts = (self.form.ui.aisrSpnbx.value()*self.form.fscale)*(self.form.ui.windowszSpnbx.value()*self.form.tscale)
         print 'data shape', signals.shape, (nreps, npts)
         assert_equal(signals.shape,(nreps, npts))
         assert cal_vector.shape == ((npts/2+1),)
@@ -112,13 +120,14 @@ class TestDragNDrop():
         self.run_all_apply_cal(False)
 
     def run_all_apply_cal(self, withcal):
-        self.form.ui.tab_group.setCurrentIndex(2)
-        robot.click(qttools.hotspot(self.form.ui.calibration_widget.ui.applycal_ckbx))
+        self.form.ui.tabGroup.setCurrentIndex(2)
+        robot.click(qttools.hotspot(self.form.ui.calibrationWidget.ui.applycalCkbx))
+        QtTest.QTest.qWait(ALLOW)
         
         # test for each option available
-        for i in range(self.form.ui.calibration_widget.ui.cal_type_cmbbx.count()):
+        for i in range(self.form.ui.calibrationWidget.ui.calTypeCmbbx.count()):
             self.run_apply_cal(withcal)
-            robot.move(qttools.center(self.form.ui.calibration_widget.ui.cal_type_cmbbx))
+            robot.move(qttools.center(self.form.ui.calibrationWidget.ui.calTypeCmbbx))
             robot.mousewheel(-1)
             QtTest.QTest.qWait(100)
 
@@ -130,9 +139,9 @@ class TestDragNDrop():
         calname = self.form.calvals['calname']
         assert self.form.calvals['use_calfile'] == withcal
 
-        robot.click(qttools.center(self.form.ui.start_btn))
+        robot.click(qttools.center(self.form.ui.startBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
+        assert self.form.ui.runningLabel.text() == "RECORDING"
 
         self.wait_until_done()
 
@@ -146,9 +155,9 @@ class TestDragNDrop():
 
         assert self.form.acqmodel.protocol_model().rowCount() == 1
 
-        robot.click(qttools.center(self.form.ui.start_btn))
+        robot.click(qttools.center(self.form.ui.startBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
+        assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
         dialogthread = threading.Thread(target=self.close_modal)
@@ -161,38 +170,38 @@ class TestDragNDrop():
         self.setup_tc()
 
         assert self.form.acqmodel.protocol_model().rowCount() == 1
-        robot.move(qttools.center(self.form.ui.mode_cmbx))
+        robot.move(qttools.center(self.form.ui.modeCmbx))
         robot.mousewheel(-1)
         QtTest.QTest.qWait(100)
 
-        robot.click(qttools.center(self.form.ui.start_btn))
+        robot.click(qttools.center(self.form.ui.startBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
-        assert self.form.ui.stop_btn.isEnabled()
+        assert self.form.ui.runningLabel.text() == "RECORDING"
+        assert self.form.ui.stopBtn.isEnabled()
 
         # modal dialog will block qt methods in main thread
         dialogthread = threading.Thread(target=self.close_modal)
         dialogthread.start()
 
         self.wait_until_done()
-        assert not self.form.ui.stop_btn.isEnabled()
+        assert not self.form.ui.stopBtn.isEnabled()
 
     def setup_tc(self):
-        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.tabGroup.setCurrentIndex(1)
         QtGui.QApplication.processEvents()
         pv = self.form.ui.protocolView
         
-        label_pos = qttools.center(self.form.ui.stimulus_choices.tc_lbl)
+        label_pos = qttools.center(self.form.ui.stimulusChoices.tcLbl)
         protocol_pos = qttools.center(pv)
 
         self.drag(label_pos, protocol_pos)
 
     def test_saved_stim(self):
-        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.tabGroup.setCurrentIndex(1)
         QtGui.QApplication.processEvents()
         pv = self.form.ui.protocolView
         
-        label_pos = qttools.center(self.form.ui.stimulus_choices.template_lbl)
+        label_pos = qttools.center(self.form.ui.stimulusChoices.templateLbl)
         protocol_pos = qttools.center(pv)
 
         # modal dialog will block qt methods in main thread
@@ -201,9 +210,9 @@ class TestDragNDrop():
 
         self.drag(label_pos, protocol_pos)
 
-        robot.click(qttools.center(self.form.ui.start_btn))
+        robot.click(qttools.center(self.form.ui.startBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
+        assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
         dialogthread = threading.Thread(target=self.close_modal)
@@ -234,11 +243,11 @@ class TestDragNDrop():
             [['duration', 10, 50, 10]])
 
     def explore_run(self, comptype):
-        self.form.ui.tab_group.setCurrentIndex(0)
-        stimuli = [self.form.ui.explore_stim_type_cmbbx.itemText(i).lower() for i in xrange(self.form.ui.explore_stim_type_cmbbx.count())]
+        self.form.ui.tabGroup.setCurrentIndex(0)
+        stimuli = [self.form.ui.exploreStimTypeCmbbx.itemText(i).lower() for i in xrange(self.form.ui.exploreStimTypeCmbbx.count())]
         tone_idx = stimuli.index(comptype)
-        # robot.click(qttools.center(self.form.ui.explore_stim_type_cmbbx))
-        robot.move(qttools.center(self.form.ui.explore_stim_type_cmbbx))
+        # robot.click(qttools.center(self.form.ui.exploreStimTypeCmbbx))
+        robot.move(qttools.center(self.form.ui.exploreStimTypeCmbbx))
         # scroll the mouse the number of ticks equal to it's index
         QtTest.QTest.qWait(1000)
         # neccessary to space out mouse wheel increments
@@ -246,21 +255,21 @@ class TestDragNDrop():
             robot.mousewheel(-1)
             QtTest.QTest.qWait(100)
 
-        robot.click(qttools.center(self.form.ui.start_btn))
+        robot.click(qttools.center(self.form.ui.startBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
+        assert self.form.ui.runningLabel.text() == "RECORDING"
         QtTest.QTest.qWait(1000)
-        robot.click(qttools.center(self.form.ui.stop_btn))
+        robot.click(qttools.center(self.form.ui.stopBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "OFF"
+        assert self.form.ui.runningLabel.text() == "OFF"
 
     def protocol_run(self, components, autoparams={}):
-        self.form.ui.tab_group.setCurrentIndex(1)
+        self.form.ui.tabGroup.setCurrentIndex(1)
 
         QtGui.QApplication.processEvents()
         pv = self.form.ui.protocolView
         
-        label_pos = qttools.center(self.form.ui.stimulus_choices.builder_lbl)
+        label_pos = qttools.center(self.form.ui.stimulusChoices.builderLbl)
         protocol_pos = qttools.center(pv)
 
         self.drag(label_pos, protocol_pos)
@@ -271,67 +280,67 @@ class TestDragNDrop():
         robot.doubleclick(item_pos)
         QtTest.QTest.qWait(PAUSE)
 
-        assert hasattr(pv, 'stim_editor')
+        assert hasattr(pv, 'stimEditor')
 
-        stim_editor = pv.stim_editor
-        track_pos = qttools.center(stim_editor.ui.trackview)
+        stimEditor = pv.stimEditor
+        track_pos = qttools.center(stimEditor.ui.trackview)
         for comp in components:
             name = comp[0]
             vals = comp[1]
-            tone_label_pos = qttools.center(stim_editor.ui.template_box.getLabelByName(name))
+            tone_label_pos = qttools.center(stimEditor.ui.templateBox.getLabelByName(name))
             self.drag(tone_label_pos, track_pos)
             self.set_paramters(name, vals)
             robot.keypress('enter')
 
-        assert stim_editor.ui.trackview.model().componentCount() == len(components)
+        assert stimEditor.ui.trackview.model().componentCount() == len(components)
         # pause neccessary for stims to update their visual rects,
         # to allow the following code to work
         QtTest.QTest.qWait(PAUSE) 
 
         if len(components) == 2:
             # line one up behind the other.. could make more robust my investigating row and column count
-            pos0 = qttools.center(stim_editor.ui.trackview.visualRect(stim_editor.ui.trackview.model().index(0,0)),stim_editor.ui.trackview.viewport())
-            comp0len = stim_editor.ui.trackview.visualRect(stim_editor.ui.trackview.model().index(0,0)).width()
+            pos0 = qttools.center(stimEditor.ui.trackview.visualRect(stimEditor.ui.trackview.model().index(0,0)),stimEditor.ui.trackview.viewport())
+            comp0len = stimEditor.ui.trackview.visualRect(stimEditor.ui.trackview.model().index(0,0)).width()
             pos0 = (pos0[0]+(comp0len/2)+15, pos0[1])
-            pos1 = qttools.center(stim_editor.ui.trackview.visualRect(stim_editor.ui.trackview.model().index(1,0)),stim_editor.ui.trackview.viewport())
+            pos1 = qttools.center(stimEditor.ui.trackview.visualRect(stimEditor.ui.trackview.model().index(1,0)),stimEditor.ui.trackview.viewport())
             self.drag(pos1,pos0)
-            assert stim_editor.ui.trackview.model().duration() == sum([x[1]['duration'] for x in components])/1000.
+            assert stimEditor.ui.trackview.model().duration() == sum([x[1]['duration'] for x in components])/1000.
 
 
-        robot.click(qttools.center(stim_editor.ui.parametizer.hide_btn))
+        robot.click(qttools.center(stimEditor.ui.parametizer.hideBtn))
         QtGui.QApplication.processEvents()
-        pztr = stim_editor.ui.parametizer.parametizer
+        pztr = stimEditor.ui.parametizer.parametizer
 
         for i, param in enumerate(autoparams):
-            add_pos = qttools.center(pztr.add_lbl)
-            list_pos = qttools.center(pztr.param_list)
+            add_pos = qttools.center(pztr.addLbl)
+            list_pos = qttools.center(pztr.paramList)
             self.drag(add_pos, list_pos)
             # just select first component
             QtTest.QTest.qWait(PAUSE)
-            robot.click(qttools.center(stim_editor.ui.trackview.visualRect(stim_editor.ui.trackview.model().index(0,0)),stim_editor.ui.trackview.viewport()))
+            robot.click(qttools.center(stimEditor.ui.trackview.visualRect(stimEditor.ui.trackview.model().index(0,0)),stimEditor.ui.trackview.viewport()))
             # fill in auto  parameter
             for j, param_item in enumerate(param):
                 # click the field
-                robot.click(qttools.center(pztr.param_list.visualRect(pztr.param_list.model().index(i,j)), pztr.param_list.viewport()))
+                robot.click(qttools.center(pztr.paramList.visualRect(pztr.paramList.model().index(i,j)), pztr.paramList.viewport()))
                 robot.type(str(param_item))
                 QtTest.QTest.qWait(PAUSE)
 
         QtGui.QApplication.processEvents()
         QtTest.QTest.qWait(PAUSE)
         # just use default tone settings, for now at least
-        robot.click(qttools.center(stim_editor.ui.ok_btn))
+        robot.click(qttools.center(stimEditor.ui.okBtn))
 
         # extract StimulusModel
         stim = self.form.acqmodel.protocol_model().data(self.form.acqmodel.protocol_model().index(0,0), QtCore.Qt.UserRole)
         assert stim.autoParams().rowCount() == len(autoparams)
         
         # set the window size to stim len + 100ms
-        robot.doubleclick(qttools.center(self.form.ui.windowsz_spnbx))
+        robot.doubleclick(qttools.center(self.form.ui.windowszSpnbx))
         robot.type(str(stim.duration()*1000+100))
 
-        robot.click(qttools.center(self.form.ui.start_btn))
+        robot.click(qttools.center(self.form.ui.startBtn))
         QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.running_label.text() == "RECORDING"
+        assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
         dialogthread = threading.Thread(target=self.close_modal)
@@ -340,10 +349,10 @@ class TestDragNDrop():
         self.wait_until_done()
 
     def wait_until_done(self):
-        while self.form.ui.running_label.text() == "RECORDING":
+        while self.form.ui.runningLabel.text() == "RECORDING":
             QtTest.QTest.qWait(500)
 
-        assert self.form.ui.running_label.text() == "OFF"
+        assert self.form.ui.runningLabel.text() == "OFF"
 
     def drag(self, source, dest):
         dragthread = threading.Thread(target=robot.mousedrag, args=(source, dest))
@@ -357,7 +366,7 @@ class TestDragNDrop():
             topWidgets = QtGui.QApplication.topLevelWidgets()
             dialogs = [w for w in topWidgets if isinstance(w, QtGui.QDialog)]
             time.sleep(1)
-        robot.click(qttools.center(dialogs[0].ui.ok_btn))
+        robot.click(qttools.center(dialogs[0].ui.okBtn))
 
     def set_paramters(self, name, vals):
         # find an editor and set the parameters
@@ -366,7 +375,7 @@ class TestDragNDrop():
         assert len(editors) == 1
         editor = editors[0]
         for field, val in vals.items():
-            input_pos = qttools.center(editor.input_widgets[field])
+            input_pos = qttools.center(editor.inputWidgets[field])
             robot.doubleclick(input_pos)
             robot.type(str(val))
             QtTest.QTest.qWait(PAUSE)

@@ -52,13 +52,6 @@ class TestStimuliTypes():
             stimulus.loadState(state)
             assert_equal(state, stimulus.stateDict())
 
-    def test_auto_details(self):        
-        mandatory_attrs = ['intensity', 'risefall']
-        for stimulus in self.stimuli:
-            details = stimulus.auto_details()
-            for attr in mandatory_attrs:
-                assert attr in details
-
     def test_serializable(self):
         for stimulus in self.stimuli:
             stream = stimulus.serialize()

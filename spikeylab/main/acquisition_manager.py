@@ -50,7 +50,7 @@ class AcquisitionManager():
                 raise
             calibration_vector, calibration_freqs = cal
         # clear one cache -- affects all StimulusModels
-        StimulusModel.clear_cache()
+        StimulusModel.clearCache()
         logger = logging.getLogger('main')
         logger.debug('clearing cache')
         logger.debug('setting explore calibration')

@@ -303,7 +303,7 @@ class TestStimModel():
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
         assert clone.editor.name == model.editor.name
-        assert clone.reorder_name == model.reorder_name
+        assert clone.reorderName == model.reorderName
         # how to check if signal sets are the same?
 
         assert clone.repCount() == model.repCount()
@@ -397,7 +397,7 @@ class TestStimModel():
         component.setDuration(0.3)
         model.insertComponent(component, (0,0))
         
-        assert model.verify(window_size=0.2)
+        assert model.verify(windowSize=0.2)
 
 
     def test_verify_success(self):
@@ -432,7 +432,7 @@ class TestStimModel():
         for i, value in enumerate(values):
             ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
 
-        invalid = stim_model.verify(window_size=0.1)
+        invalid = stim_model.verify(windowSize=0.1)
         print 'msg', invalid
         assert invalid == 0
 
@@ -477,7 +477,7 @@ class TestStimModel():
         for i, value in enumerate(values):
             ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
 
-        invalid = stim_model.verify(window_size=0.1)
+        invalid = stim_model.verify(windowSize=0.1)
         print 'msg', invalid
         assert invalid
 
@@ -498,10 +498,10 @@ class TestStimModel():
         for i, value in enumerate(values):
             ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
 
-        invalid = stim_model.verify(window_size=0.1)
+        invalid = stim_model.verify(windowSize=0.1)
         print 'msg', invalid
         assert invalid == 0
-        assert stim_model.contains_pval('frequency', 75000)
+        assert stim_model.containsPval('frequency', 75000)
 
     def add_auto_param(self, model):
         # adds an autoparameter to the given model

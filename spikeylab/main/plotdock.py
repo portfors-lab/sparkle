@@ -27,7 +27,7 @@ class PlotDockWidget(QtGui.QDockWidget):
         else:
             self.setWindowFlags(QtCore.Qt.Widget)
 
-    def switch_display(self, display):
+    def switchDisplay(self, display):
         if display in self.displays:
             self.setWidget(self.displays[display])
             self._current = display

@@ -34,28 +34,28 @@ class TestProtocolDisplay():
         display = ProtocolDisplay()
         display.show()
 
-        display.set_nreps(5)
+        display.setNreps(5)
 
-        display.update_spec(samplewav())
+        display.updateSpec(samplewav())
 
         data = self.data_func(3)
         nbins = 50
         bin_centers = np.linspace(0, self.t[-1], nbins)
         points = np.ones(nbins)
 
-        display.update_signal(self.t, data)
-        display.update_spiketrace(self.t, data)
-        display.update_fft(self.t, data)
-        display.add_raster_points(bin_centers, points)
-        display.add_raster_points(bin_centers, points*2)
+        display.updateSignal(self.t, data)
+        display.updateSpiketrace(self.t, data)
+        display.updateFft(self.t, data)
+        display.addRasterPoints(bin_centers, points)
+        display.addRasterPoints(bin_centers, points*2)
 
-        display.set_xlimits((self.t[0], self.t[-1]))
-        display.set_tscale(0.001)
-        display.set_fscale(1000)
+        display.setXlimits((self.t[0], self.t[-1]))
+        display.setTscale(0.001)
+        display.setFscale(1000)
 
         QApplication.processEvents()
 
-        display.clear_raster()
+        display.clearRaster()
 
         time.sleep(PAUSE)
 

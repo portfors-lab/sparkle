@@ -36,7 +36,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLineEdit" name="value_lnedt">
+    <widget class="QLineEdit" name="valueLnedt">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
        <horstretch>0</horstretch>

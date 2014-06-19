@@ -2,7 +2,7 @@ import os
 from PyQt4 import QtGui
 
 class SavingDialog(QtGui.QFileDialog):
-    def __init__(self, default_file=None):
+    def __init__(self, defaultFile=None):
         QtGui.QFileDialog.__init__(self)
         self.setNameFilter("data files (*.hdf5 *.h5)")
         self.setLabelText(QtGui.QFileDialog.Reject, 'Quit')
@@ -20,8 +20,8 @@ class SavingDialog(QtGui.QFileDialog):
                 # wasn't a widget
                 pass
 
-        if default_file is not None:
-            self.selectFile(default_file)
+        if defaultFile is not None:
+            self.selectFile(defaultFile)
             self.setLabelText(QtGui.QFileDialog.Reject, 'Cancel')
 
     def update_label(self):

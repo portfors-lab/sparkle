@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\view_dlg.ui'
 #
-# Created: Thu May 15 16:43:01 2014
+# Created: Thu Jun 19 11:22:09 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,9 +38,9 @@ class Ui_ViewSettingsDialog(object):
         self.label = QtGui.QLabel(self.ui_tab)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.fontsz_spnbx = QtGui.QDoubleSpinBox(self.ui_tab)
-        self.fontsz_spnbx.setObjectName(_fromUtf8("fontsz_spnbx"))
-        self.gridLayout.addWidget(self.fontsz_spnbx, 0, 1, 1, 1)
+        self.fontszSpnbx = QtGui.QDoubleSpinBox(self.ui_tab)
+        self.fontszSpnbx.setObjectName(_fromUtf8("fontszSpnbx"))
+        self.gridLayout.addWidget(self.fontszSpnbx, 0, 1, 1, 1)
         self.tabWidget.addTab(self.ui_tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
@@ -57,9 +57,9 @@ class Ui_ViewSettingsDialog(object):
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.detail_widget = ComponentsDetailSelector(self.scrollAreaWidgetContents)
-        self.detail_widget.setObjectName(_fromUtf8("detail_widget"))
-        self.verticalLayout_2.addWidget(self.detail_widget)
+        self.detailWidget = ComponentsDetailSelector(self.scrollAreaWidgetContents)
+        self.detailWidget.setObjectName(_fromUtf8("detailWidget"))
+        self.verticalLayout_2.addWidget(self.detailWidget)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout_3.addWidget(self.scrollArea)
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
@@ -71,7 +71,7 @@ class Ui_ViewSettingsDialog(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
         self.retranslateUi(ViewSettingsDialog)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ViewSettingsDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ViewSettingsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(ViewSettingsDialog)

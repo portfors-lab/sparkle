@@ -69,11 +69,11 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
                 return label
         elif role == QtCore.Qt.ForegroundRole:
             # color the background red for bad values
-            if not self.check_valid_cell(index):
+            if not self.checkValidCell(index):
                 return QtGui.QBrush(ERRCELL)
         elif role == QtCore.Qt.FontRole:
             # color the background red for bad values
-            if not self.check_valid_cell(index):
+            if not self.checkValidCell(index):
                 f = QtGui.QFont()
                 f.setWeight(QtGui.QFont.Bold)
                 return f
@@ -83,7 +83,7 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         elif role == self.SelectionModelRole:
             return self._selectionmap[self._parameters[index.row()]['paramid']]
 
-    def check_valid_cell(self, index):
+    def checkValidCell(self, index):
         col = index.column()
         param = self._parameters[index.row()]
         if param['parameter'] == '':
@@ -136,8 +136,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def updateComponentStartVals(self):
         """Go through selected components for each parameter and set the start value"""
         for param in self._parameters:
-            selection_model = self._selectionmap[param['paramid']]
-            comps = selection_model.selectionComponents()
+            selectionModel = self._selectionmap[param['paramid']]
+            comps = selectionModel.selectionComponents()
             for component in comps:
                 component.set(param['parameter'], param['start'])
                 # emit signal, so stimulusview knows to update
@@ -146,8 +146,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
     def getDetail(self, index, detail):
         param = self._parameters[index.row()]
         param_type = param['parameter']
-        selection_model = self._selectionmap[param['paramid']]
-        comps = selection_model.selectionComponents()
+        selectionModel = self._selectionmap[param['paramid']]
+        comps = selectionModel.selectionComponents()
         if len(comps) == 0 or param_type == '':
             return None
         # all components must match
@@ -165,8 +165,8 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         return matching_details.pop()
 
     def checkLimits(self, value, param):
-        selection_model = self._selectionmap[param['paramid']]
-        comps = selection_model.selectionComponents()
+        selectionModel = self._selectionmap[param['paramid']]
+        comps = selectionModel.selectionComponents()
         if len(comps) == 0:
             return False
         mins = []
@@ -274,12 +274,12 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
         """
         Return the selected Indexes for the given parameter
         """
-        selection_model = self._selectionmap[param['paramid']]
-        return selection_model.selectedIndexes()
+        selectionModel = self._selectionmap[param['paramid']]
+        return selectionModel.selectedIndexes()
 
     def selectionParameters(self, param):
-        selection_model = self._selectionmap[param['paramid']]
-        comps = selection_model.selectionComponents()
+        selectionModel = self._selectionmap[param['paramid']]
+        comps = selectionModel.selectionComponents()
         if len(comps) == 0:
             return []
         editable_sets = []
@@ -307,19 +307,19 @@ class AutoParameterModel(QtCore.QAbstractTableModel):
 
     @staticmethod
     def loadFromTemplate(template, stim_model):
-        auto_model = stim_model.autoParams() # or create and set new
+        autoModel = stim_model.autoParams() # or create and set new
         for param in reversed(template):
-            index = auto_model.index(0,0)
-            auto_model.insertRows(0,1)
+            index = autoModel.index(0,0)
+            autoModel.insertRows(0,1)
             # cheat and steal id, so we can set param directly
-            paramid = auto_model._parameters[0]['paramid']
+            paramid = autoModel._parameters[0]['paramid']
             param['paramid'] = paramid
             selection_tuples = param.pop('selection')
-            auto_model.setData(index, param)
+            autoModel.setData(index, param)
             # set the selected components
-            selection_model = auto_model.data(index, auto_model.SelectionModelRole)
+            selectionModel = autoModel.data(index, autoModel.SelectionModelRole)
             for selected in selection_tuples:
-                selection_model.select(stim_model.index(*selected))
+                selectionModel.select(stim_model.index(*selected))
 
         return True
 

@@ -5,7 +5,7 @@ import numpy as np
 from pymouse import PyMouse
 from pykeyboard import PyKeyboard
 
-def mousedrag(source, dest, speed=10000):
+def mousedrag(source, dest, speed=1000):
     m = PyMouse()
     m.press(*source)
 

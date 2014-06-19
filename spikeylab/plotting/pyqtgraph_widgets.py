@@ -32,107 +32,107 @@ class BasePlot(pg.PlotWidget):
         # print '-'*20
         self.setMouseEnabled(x=False,y=True)
 
-    def set_tscale(self, scale):
+    def setTscale(self, scale):
         pass
 
-    def set_fscale(self, scale):
+    def setFscale(self, scale):
         pass
 
-    def set_xlim(self, lim):
+    def setXlim(self, lim):
         self.setXRange(*lim, padding=0)
 
-    def set_ylim(self, lim):
+    def setYlim(self, lim):
         self.setYRange(*lim)
 
-    def set_title(self, title):
+    def setTitle(self, title):
         self.getPlotItem().setTitle(title)
 
 
 class TraceWidget(BasePlot):
     nreps = 20
-    raster_ymin = 0.5
-    raster_ymax = 1
-    raster_yslots = np.linspace(raster_ymin, raster_ymax, nreps)
-    threshold_updated = QtCore.pyqtSignal(float)
+    rasterYmin = 0.5
+    rasterYmax = 1
+    rasterYslots = np.linspace(rasterYmin, rasterYmax, nreps)
+    thresholdUpdated = QtCore.pyqtSignal(float)
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
-        self.trace_plot = self.plot(pen='k')
-        self.raster_plot = self.plot(pen=None, symbol='s', symbolPen=None, symbolSize=4, symbolBrush='k')
-        self.stim_plot = self.plot(pen='b')
-        self.stim_plot.curve.setToolTip("Stimulus Signal")
-        self.trace_plot.curve.setToolTip("Spike Trace")
+        self.tracePlot = self.plot(pen='k')
+        self.rasterPlot = self.plot(pen=None, symbol='s', symbolPen=None, symbolSize=4, symbolBrush='k')
+        self.stimPlot = self.plot(pen='b')
+        self.stimPlot.curve.setToolTip("Stimulus Signal")
+        self.tracePlot.curve.setToolTip("Spike Trace")
 
-        self.sigRangeChanged.connect(self.range_change)
+        self.sigRangeChanged.connect(self.rangeChange)
 
         self.disableAutoRange()
 
-        raster_bounds_action = QtGui.QAction("Edit raster bounds", None)
-        self.scene().contextMenu.append(raster_bounds_action) #should use function for this?
-        raster_bounds_action.triggered.connect(self.ask_raster_bounds)
+        rasterBoundsAction = QtGui.QAction("Edit raster bounds", None)
+        self.scene().contextMenu.append(rasterBoundsAction) #should use function for this?
+        rasterBoundsAction.triggered.connect(self.ask_raster_bounds)
 
-        self.thresh_line = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
-        self.addItem(self.thresh_line)
-        self.thresh_line.sigPositionChangeFinished.connect(self.update_thresh)
+        self.threshLine = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
+        self.addItem(self.threshLine)
+        self.threshLine.sigPositionChangeFinished.connect(self.update_thresh)
         self.setLabel('left', 'Potential', units='V')
         self.setLabel('bottom', 'Time', units='s')
 
-    def update_data(self, axeskey, x, y):
+    def updateData(self, axeskey, x, y):
         if axeskey == 'stim':
-            self.stim_plot.setData(x,y)
+            self.stimPlot.setData(x,y)
             # call manually to ajust placement of signal
             ranges = self.viewRange()
-            self.range_change(self, ranges)
+            self.rangeChange(self, ranges)
         if axeskey == 'response':
-            self.trace_plot.setData(x,y)
+            self.tracePlot.setData(x,y)
 
-    def append_data(self, axeskey, bins, ypoints):
+    def appendData(self, axeskey, bins, ypoints):
         if axeskey == 'raster':
-            x, y = self.raster_plot.getData()
+            x, y = self.rasterPlot.getData()
             # don't plot overlapping points
             bins = np.unique(bins)
             # adjust repetition number to response scale
-            ypoints = np.ones_like(bins)*self.raster_yslots[ypoints[0]]
+            ypoints = np.ones_like(bins)*self.rasterYslots[ypoints[0]]
             x = np.append(x, bins)
             y = np.append(y, ypoints)
-            self.raster_plot.setData(x, y)
+            self.rasterPlot.setData(x, y)
 
-    def clear_data(self, axeskey):
+    def clearData(self, axeskey):
         # if axeskey == 'response':
-        self.raster_plot.clear()
+        self.rasterPlot.clear()
 
-    def get_threshold(self):
+    def getThreshold(self):
         x, y = self.tresh_line.getData()
         return y[0]
 
-    def set_threshold(self, threshold):
-        self.thresh_line.setValue(threshold) 
+    def setThreshold(self, threshold):
+        self.threshLine.setValue(threshold) 
 
-    def set_nreps(self, nreps):
+    def setNreps(self, nreps):
         self.nreps = nreps
-        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
+        self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
 
-    def set_raster_bounds(self,lims):
-        self.raster_ymin = lims[0]
-        self.raster_ymax = lims[1]
-        self.raster_yslots = np.linspace(self.raster_ymin, self.raster_ymax, self.nreps)
+    def setRasterBounds(self,lims):
+        self.rasterYmin = lims[0]
+        self.rasterYmax = lims[1]
+        self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
 
     def ask_raster_bounds(self):
-        dlg = RasterBoundsDialog(bounds= (self.raster_ymin, self.raster_ymax))
+        dlg = RasterBoundsDialog(bounds= (self.rasterYmin, self.rasterYmax))
         if dlg.exec_():
             bounds = dlg.get_values()
-            self.set_raster_bounds(bounds)
+            self.setRasterBounds(bounds)
 
-    def get_raster_bounds(self):
-        return (self.raster_ymin, self.raster_ymax)
+    def getRasterBounds(self):
+        return (self.rasterYmin, self.rasterYmax)
 
-    def set_title(self, title):
+    def setTitle(self, title):
         pass
 
-    def range_change(self, pw, ranges):
+    def rangeChange(self, pw, ranges):
         if hasattr(ranges, '__iter__'):
             # adjust the stim signal so that it falls in the correct range
-            stim_x, stim_y = self.stim_plot.getData()
+            stim_x, stim_y = self.stimPlot.getData()
             if stim_y is not None:
                 yrange_size = ranges[1][1] - ranges[1][0]
                 stim_height = yrange_size*STIM_HEIGHT
@@ -145,81 +145,81 @@ class TraceWidget(BasePlot):
                 stim_y = stim_y*stim_height
                 # raise to right place in plot
                 stim_y = stim_y + (ranges[1][1] - (stim_height*1.1 + (stim_height*0.2)))
-                self.stim_plot.setData(stim_x, stim_y)
+                self.stimPlot.setData(stim_x, stim_y)
 
     def update_thresh(self):
-        self.threshold_updated.emit(self.thresh_line.value())
+        self.thresholdUpdated.emit(self.threshLine.value())
 
 class SpecWidget(BasePlot):
-    specgram_args = {u'nfft':512, u'window':u'hanning', u'overlap':90}
-    img_args = {'lut':None, 'state':None, 'levels':None}
-    reset_image_scale = True
-    img_scale = (1.,1.)
-    colormap_changed = QtCore.pyqtSignal(object)
+    specgramArgs = {u'nfft':512, u'window':u'hanning', u'overlap':90}
+    imgArgs = {'lut':None, 'state':None, 'levels':None}
+    resetImageScale = True
+    imgScale = (1.,1.)
+    colormapChanged = QtCore.pyqtSignal(object)
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
 
         self.img = pg.ImageItem()
         self.addItem(self.img)
 
-        cmap_action = QtGui.QAction("Edit colormap", None)
-        self.scene().contextMenu.append(cmap_action) #should use function for this?
-        cmap_action.triggered.connect(self.edit_colormap)
+        cmapAction = QtGui.QAction("Edit colormap", None)
+        self.scene().contextMenu.append(cmapAction) #should use function for this?
+        cmapAction.triggered.connect(self.editColormap)
 
         self.setLabel('bottom', 'Time', units='s')
         self.setLabel('left', 'Frequency', units='Hz')
 
-    def from_file(self, fname):
-        spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgram_args)
-        self.update_image(spec, bins, f)
+    def fromFile(self, fname):
+        spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgramArgs)
+        self.updateImage(spec, bins, f)
         return dur
 
-    def update_image(self, imgdata, xaxis=None, yaxis=None):
+    def updateImage(self, imgdata, xaxis=None, yaxis=None):
         imgdata = imgdata.T
         self.img.setImage(imgdata)
         if xaxis is not None and yaxis is not None:
             xscale = 1.0/(imgdata.shape[0]/xaxis[-1])
             yscale = 1.0/(imgdata.shape[1]/yaxis[-1])
-            self.reset_scale()        
+            self.resetScale()        
             self.img.scale(xscale, yscale)
-            self.img_scale = (xscale, yscale)
-        self.image_array = np.fliplr(imgdata)
-        self.update_colormap()
+            self.imgScale = (xscale, yscale)
+        self.imageArray = np.fliplr(imgdata)
+        self.updateColormap()
 
-    def reset_scale(self):
-        self.img.scale(1./self.img_scale[0], 1./self.img_scale[1])
-        self.img_scale = (1.,1.)
+    def resetScale(self):
+        self.img.scale(1./self.imgScale[0], 1./self.imgScale[1])
+        self.imgScale = (1.,1.)
 
-    def update_data(self, signal, fs):
-        spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgram_args)
-        self.update_image(spec, bins, f)
+    def updateData(self, signal, fs):
+        spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgramArgs)
+        self.updateImage(spec, bins, f)
 
-    def set_spec_args(self, **kwargs):
+    def setSpecArgs(self, **kwargs):
         for key, value in kwargs.items():
             if key == 'colormap':
-                self.img_args['lut'] = value['lut']
-                self.img_args['levels'] = value['levels']
-                self.img_args['state'] = value['state']
-                self.update_colormap()
+                self.imgArgs['lut'] = value['lut']
+                self.imgArgs['levels'] = value['levels']
+                self.imgArgs['state'] = value['state']
+                self.updateColormap()
             else:
-                self.specgram_args[key] = value
+                self.specgramArgs[key] = value
 
-    def clear_img(self):
+    def clearImg(self):
         self.img.image = None
         # self.img.setImage(np.array([[0]]))
 
-    def has_img(self):
+    def hasImg(self):
         return self.img.image is not None
 
-    def edit_colormap(self):
+    def editColormap(self):
         self.editor = pg.ImageView()
         # remove the ROI and Norm buttons
         self.editor.ui.roiBtn.setVisible(False)
         self.editor.ui.normBtn.setVisible(False)
-        self.editor.setImage(self.image_array)
-        if self.img_args['state'] is not None:
-            self.editor.getHistogramWidget().item.gradient.restoreState(self.img_args['state'])
-            self.editor.getHistogramWidget().item.setLevels(*self.img_args['levels'])
+        self.editor.setImage(self.imageArray)
+        if self.imgArgs['state'] is not None:
+            self.editor.getHistogramWidget().item.gradient.restoreState(self.imgArgs['state'])
+            self.editor.getHistogramWidget().item.setLevels(*self.imgArgs['levels'])
         
         self.editor.closeEvent = self.editor_close
         self.editor.show()
@@ -230,26 +230,26 @@ class SpecWidget(BasePlot):
         levels = self.editor.getHistogramWidget().item.getLevels()
         self.img.setLookupTable(lut)
         self.img.setLevels(levels)
-        self.img_args['lut'] = lut
-        self.img_args['state'] = state
-        self.img_args['levels'] = levels
-        self.colormap_changed.emit(self.img_args)
+        self.imgArgs['lut'] = lut
+        self.imgArgs['state'] = state
+        self.imgArgs['levels'] = levels
+        self.colormapChanged.emit(self.imgArgs)
 
-    def update_colormap(self):
-        if self.img_args['lut'] is not None:
-            self.img.setLookupTable(self.img_args['lut'])
-            self.img.setLevels(self.img_args['levels'])
+    def updateColormap(self):
+        if self.imgArgs['lut'] is not None:
+            self.img.setLookupTable(self.imgArgs['lut'])
+            self.img.setLevels(self.imgArgs['levels'])
 
-    def get_colormap(self):
-        return self.img_args
+    def getColormap(self):
+        return self.imgArgs
 
 class FFTWidget(BasePlot):
     def __init__(self, parent=None, rotation=90):
         super(FFTWidget, self).__init__(parent)
         
-        self.fft_plot = self.plot(pen='k')
-        self.fft_plot.rotate(rotation)
-        self.getPlotItem().vb.set_custom_mouse()
+        self.fftPlot = self.plot(pen='k')
+        self.fftPlot.rotate(rotation)
+        self.getPlotItem().vb.setCustomMouse()
 
         if abs(rotation) == 90:
             self.setLabel('left', 'Frequency', units='Hz')
@@ -259,8 +259,8 @@ class FFTWidget(BasePlot):
             self.setLabel('bottom', 'Frequency', units='Hz')
             self.setMouseEnabled(x=False,y=True)
 
-    def update_data(self, index_data, value_data):
-        self.fft_plot.setData(index_data, value_data)
+    def updateData(self, indexData, valueData):
+        self.fftPlot.setData(indexData, valueData)
 
 class SimplePlotWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
@@ -268,21 +268,21 @@ class SimplePlotWidget(BasePlot):
         ypoints = np.squeeze(ypoints)
         if len(ypoints.shape) > 1:
             for row in ypoints:
-                self.append_data(xpoints, row)
+                self.appendData(xpoints, row)
         else:
             self.pdi = self.plot(xpoints, ypoints, pen='b')
         self.resize(800,500)
 
-    def append_data(self, xpoints, ypoints):
+    def appendData(self, xpoints, ypoints):
         self.plot(xpoints, ypoints, pen='b')
 
-    def set_labels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
+    def setLabels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         if xlabel is not None:
             self.setLabel('bottom', xlabel, units=xunits)
         if ylabel is not None:
             self.setLabel('left', ylabel, units=yunits)
         if title is not None:
-            self.set_title(title)
+            self.setTitle(title)
 
 class ProgressWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
@@ -292,11 +292,11 @@ class ProgressWidget(BasePlot):
             # give each line a different color
             self.lines.append(self.plot(pen=pg.intColor(iline, hues=len(ypoints))))
 
-        self.set_xlim((xpoints[0], xpoints[-1]))
+        self.setXlim((xpoints[0], xpoints[-1]))
         self.xpoints = xpoints
         self.ypoints = ypoints
 
-    def set_point(self, x, y, value):
+    def setPoint(self, x, y, value):
         yindex = self.ypoints.index(y)
         xdata, ydata = self.lines[yindex].getData()
         if ydata is None:
@@ -307,20 +307,20 @@ class ProgressWidget(BasePlot):
             ydata = np.append(ydata, value)
         self.lines[yindex].setData(xdata, ydata)
 
-    def set_labels(self, name):
+    def setLabels(self, name):
         if name == "calibration":
             self.setWindowTitle("Calibration Curve")
-            self.set_title("Calibration Curve")
+            self.setTitle("Calibration Curve")
             self.setLabel('bottom', "Frequency", units='Hz')
             self.setLabel('left', 'Recorded Intensity (dB SPL)')
         elif name == "tuning":
             self.setWindowTitle("Tuning Curve")
-            self.set_title("Tuning Curve")
+            self.setTitle("Tuning Curve")
             self.setLabel('bottom', "Frequency", units="Hz")
             self.setLabel('left', "Spike Count (mean)")
         else:
             self.setWindowTitle("Spike Counts")
-            self.set_title("Spike Counts")
+            self.setTitle("Spike Counts")
             self.setLabel('bottom', "Test Number")
             self.setLabel('left', "Spike Count (mean)")
 
@@ -333,25 +333,25 @@ class PSTHWidget(BasePlot):
         self.addItem(self.histo)
         self.setLabel('bottom', 'Time Bins', units='s')
         self.setLabel('left', 'Spike Counts')
-        self.set_xlim((0, 0.25))
-        self.set_ylim((0, 10))
+        self.setXlim((0, 0.25))
+        self.setYlim((0, 10))
 
-        self.getPlotItem().vb.set_zero_wheel()
+        self.getPlotItem().vb.setZeroWheel()
 
-    def set_bins(self, bins):
+    def setBins(self, bins):
         """Set the bin centers (x values)"""
         self._bins = bins
         self._counts = np.zeros_like(self._bins)
         bar_width = bins[0]*1.5
         self.histo.setOpts(x=bins, height=self._counts, width=bar_width)
-        self.set_xlim((0, bins[-1]))
+        self.setXlim((0, bins[-1]))
 
-    def clear_data(self):
+    def clearData(self):
         """Clear all histograms (keep bins)"""
         self._counts = np.zeros_like(self._bins)
         self.histo.setOpts(height=self._counts)
 
-    def append_data(self, bins, repnum=None):
+    def appendData(self, bins, repnum=None):
         """Increase the values at bins (indexes)"""
         # self._counts[bins] +=1 # ignores dulplicates
         for b in bins:
@@ -361,67 +361,67 @@ class PSTHWidget(BasePlot):
 class ChartWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(ChartWidget, self).__init__(parent)
-        self.trace_plot = ScrollingWidget()
-        self.stim_plot = ScrollingWidget(pencolor='b')
+        self.tracePlot = ScrollingWidget()
+        self.stimPlot = ScrollingWidget(pencolor='b')
 
-        self.trace_plot.set_title('Brain Recording')
-        self.stim_plot.set_title('Stimulus Recording')
-        self.trace_plot.setLabel('left', 'Potential', units='V')
-        self.stim_plot.setLabel('left', ' ') # makes yaxis line up
-        self.trace_plot.setLabel('bottom', 'Time', units='s')
-        self.stim_plot.hideAxis('bottom')
-        self.stim_plot.setXLink('Brain Recording')
+        self.tracePlot.setTitle('Brain Recording')
+        self.stimPlot.setTitle('Stimulus Recording')
+        self.tracePlot.setLabel('left', 'Potential', units='V')
+        self.stimPlot.setLabel('left', ' ') # makes yaxis line up
+        self.tracePlot.setLabel('bottom', 'Time', units='s')
+        self.stimPlot.hideAxis('bottom')
+        self.stimPlot.setXLink('Brain Recording')
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
         splitter.setContentsMargins(0,0,0,0)
-        splitter.addWidget(self.stim_plot)
-        splitter.addWidget(self.trace_plot)
+        splitter.addWidget(self.stimPlot)
+        splitter.addWidget(self.tracePlot)
 
         layout = QtGui.QHBoxLayout()
         layout.setContentsMargins(0,0,0,0)
         layout.addWidget(splitter)
         self.setLayout(layout)
 
-    def set_sr(self, sr):
-        self.trace_plot.set_sr(sr)
-        self.stim_plot.set_sr(sr)
+    def setSr(self, sr):
+        self.tracePlot.setSr(sr)
+        self.stimPlot.setSr(sr)
 
-    def set_windowsize(self, winsz):
-        self.trace_plot.set_windowsize(winsz)
-        self.stim_plot.set_windowsize(winsz)
+    def setWindowSize(self, winsz):
+        self.tracePlot.setWindowSize(winsz)
+        self.stimPlot.setWindowSize(winsz)
 
-    def clear_data(self):
-        self.trace_plot.clear_data()
-        self.stim_plot.clear_data()
+    def clearData(self):
+        self.tracePlot.clearData()
+        self.stimPlot.clearData()
 
-    def append_data(self, stim, data):
-        self.trace_plot.append_data(data)
-        self.stim_plot.append_data(stim)
+    def appendData(self, stim, data):
+        self.tracePlot.appendData(data)
+        self.stimPlot.appendData(stim)
 
 class ScrollingWidget(BasePlot):
     def __init__(self, pencolor='k', parent=None):
         super(ScrollingWidget, self).__init__(parent)
-        self.scroll_plot = self.plot(pen=pencolor)
+        self.scrollPlot = self.plot(pen=pencolor)
 
         self.disableAutoRange()
 
-    def set_sr(self, sr):
+    def setSr(self, sr):
         self._deltax = (1/float(sr))
 
-    def set_windowsize(self, winsz):
+    def setWindowSize(self, winsz):
         self._windowsize = winsz
         # set range here then?
         x0 = self.getPlotItem().viewRange()[0][0]
-        self.set_xlim((x0, x0+winsz))
+        self.setXlim((x0, x0+winsz))
 
-    def clear_data(self):
-        self.scroll_plot.setData(None)
-        self.set_xlim((0, self._windowsize))
+    def clearData(self):
+        self.scrollPlot.setData(None)
+        self.setXlim((0, self._windowsize))
 
-    def append_data(self, data):
+    def appendData(self, data):
         npoints_to_add = len(data)
-        xdata, ydata = self.scroll_plot.getData()
+        xdata, ydata = self.scrollPlot.getData()
         if xdata is None:
             last_time = 0
             xdata = []
@@ -453,13 +453,13 @@ class ScrollingWidget(BasePlot):
         ydata = np.delete(ydata, removex)
 
         # assuming that samplerates must be the same
-        self.scroll_plot.setData(xdata, ydata)
+        self.scrollPlot.setData(xdata, ydata)
 
         # now scroll axis limits
         if xlim[1] < xdata[-1]:
             xlim[1] += self._deltax*npoints_to_add
             xlim[0] += self._deltax*npoints_to_add
-            self.set_xlim(xlim)
+            self.setXlim(xlim)
 
 class StackedPlot(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -467,49 +467,49 @@ class StackedPlot(QtGui.QWidget):
 
         self.stacker = QtGui.QStackedWidget()
 
-        prev_btn = QtGui.QPushButton('<')
-        next_btn = QtGui.QPushButton('>')
-        first_btn = QtGui.QPushButton('|<')
-        last_btn = QtGui.QPushButton('>|')
-        prev_btn.clicked.connect(self.prev_plot)
-        next_btn.clicked.connect(self.next_plot)
-        first_btn.clicked.connect(self.first_plot)
-        last_btn.clicked.connect(self.last_plot)
-        btn_layout = QtGui.QHBoxLayout()
-        btn_layout.addWidget(first_btn)
-        btn_layout.addWidget(prev_btn)
-        btn_layout.addWidget(next_btn)
-        btn_layout.addWidget(last_btn)
+        prevBtn = QtGui.QPushButton('<')
+        nextBtn = QtGui.QPushButton('>')
+        firstBtn = QtGui.QPushButton('|<')
+        lastBtn = QtGui.QPushButton('>|')
+        prevBtn.clicked.connect(self.prevPlot)
+        nextBtn.clicked.connect(self.nextPlot)
+        firstBtn.clicked.connect(self.firstPlot)
+        lastBtn.clicked.connect(self.lastPlot)
+        btnLayout = QtGui.QHBoxLayout()
+        btnLayout.addWidget(firstBtn)
+        btnLayout.addWidget(prevBtn)
+        btnLayout.addWidget(nextBtn)
+        btnLayout.addWidget(lastBtn)
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.stacker)
-        layout.addLayout(btn_layout)
+        layout.addLayout(btnLayout)
 
         # self.plots = []
 
-    def add_plot(self, xdata, ydata, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
+    def addPlot(self, xdata, ydata, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         p = SimplePlotWidget(xdata, ydata)
-        p.set_labels(xlabel, ylabel, title, xunits, yunits)
+        p.setLabels(xlabel, ylabel, title, xunits, yunits)
         # self.plots.append(p)
         self.stacker.addWidget(p)
 
-    def add_spectrogram(self, ydata, fs, title=None):
+    def addSpectrogram(self, ydata, fs, title=None):
         p = SpecWidget()
-        p.update_data(ydata, fs)
+        p.updateData(ydata, fs)
         if title is not None:
-            p.set_title(title)
+            p.setTitle(title)
         self.stacker.addWidget(p)
 
-    def next_plot(self):
+    def nextPlot(self):
         if self.stacker.currentIndex() < self.stacker.count():
             self.stacker.setCurrentIndex(self.stacker.currentIndex()+1)
 
-    def prev_plot(self):
+    def prevPlot(self):
         if self.stacker.currentIndex() > 0:
             self.stacker.setCurrentIndex(self.stacker.currentIndex()-1)
 
-    def first_plot(self):
+    def firstPlot(self):
         self.stacker.setCurrentIndex(0)
 
-    def last_plot(self):
+    def lastPlot(self):
         self.stacker.setCurrentIndex(self.stacker.count()-1)

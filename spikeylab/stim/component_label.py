@@ -11,7 +11,7 @@ class ComponentTemplateTable(QtGui.QWidget):
         layout = QtGui.QGridLayout()
         ncolumns = 2
 
-        self.stim_labels = {}
+        self.stimLabels = {}
         stimuli = get_stimuli_models()
         count = 0
         for stimulus in stimuli:
@@ -19,21 +19,21 @@ class ComponentTemplateTable(QtGui.QWidget):
                 label = DragLabel(stimulus)
                 layout.addWidget(label, count/ncolumns, count % ncolumns)
                 count += 1
-                self.stim_labels[stimulus.name.lower()] = label
+                self.stimLabels[stimulus.name.lower()] = label
 
-        self.trash_lbl = TrashWidget()
-        layout.addWidget(self.trash_lbl, count/ncolumns, count % ncolumns)
+        self.trashLbl = TrashWidget()
+        layout.addWidget(self.trashLbl, count/ncolumns, count % ncolumns)
 
         self.setLayout(layout)
 
     def trash(self):
-        return self.trash_lbl
+        return self.trashLbl
 
     def getLabelByName(self, name):
-        print 'stim labels', self.stim_labels
+        print 'stim labels', self.stimLabels
         name = name.lower()
-        if name in self.stim_labels:
-            return self.stim_labels[name]
+        if name in self.stimLabels:
+            return self.stimLabels[name]
         else:
             return None
 

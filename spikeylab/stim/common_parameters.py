@@ -10,58 +10,58 @@ class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
-        self.db_spnbx.numtype = int
+        self.dbSpnbx.numtype = int
 
         self.tunit_labels.append(self.tunit_lbl_0)
         self.tunit_labels.append(self.tunit_lbl_1)
-        self.tunit_fields.append(self.dur_spnbx)
-        self.tunit_fields.append(self.risefall_spnbx)
+        self.tunit_fields.append(self.durSpnbx)
+        self.tunit_fields.append(self.risefallSpnbx)
         # self.setTScale(self.scales[0], setup=True)
         # need to initialize units to current scale
         # relay editing signals
-        self.db_spnbx.valueChanged.connect(self.valueChanged.emit)
-        self.dur_spnbx.valueChanged.connect(self.valueChanged.emit)
-        self.risefall_spnbx.valueChanged.connect(self.valueChanged.emit)
+        self.dbSpnbx.valueChanged.connect(self.valueChanged.emit)
+        self.durSpnbx.valueChanged.connect(self.valueChanged.emit)
+        self.risefallSpnbx.valueChanged.connect(self.valueChanged.emit)
 
-        self.dur_spnbx.setKeyboardTracking(False)
-        self.risefall_spnbx.setKeyboardTracking(False)
+        self.durSpnbx.setKeyboardTracking(False)
+        self.risefallSpnbx.setKeyboardTracking(False)
 
     def intensityValue(self):
-        return self.db_spnbx.value()
+        return self.dbSpnbx.value()
 
     def durationValue(self):
-        return self.dur_spnbx.value()*self.scales[0]
+        return self.durSpnbx.value()*self.scales[0]
 
     def risefallValue(self):
-        return self.risefall_spnbx.value()*self.scales[0]
+        return self.risefallSpnbx.value()*self.scales[0]
 
     def setField(self, **field):
         if 'intensity' in field:
-            self.db_spnbx.setValue(field['intensity'])
+            self.dbSpnbx.setValue(field['intensity'])
         if 'duration' in field:
-            self.dur_spnbx.setValue(field['duration']/self.scales[0])
+            self.durSpnbx.setValue(field['duration']/self.scales[0])
         if 'risefall' in field:
-            self.risefall_spnbx.setValue(field['risefall']/self.scales[0])
+            self.risefallSpnbx.setValue(field['risefall']/self.scales[0])
 
     def setFields(self, component):
         """Set all the input fields to the values in the provided component"""
-        self.db_spnbx.setValue(component.intensity())
-        self.dur_spnbx.setValue(component.duration()/self.scales[0])
-        self.risefall_spnbx.setValue(component.risefall()/self.scales[0])
+        self.dbSpnbx.setValue(component.intensity())
+        self.durSpnbx.setValue(component.duration()/self.scales[0])
+        self.risefallSpnbx.setValue(component.risefall()/self.scales[0])
 
         self.tunit_lbl_0.setText(component._labels[0])
         self.tunit_lbl_1.setText(component._labels[0])
 
     def getValue(self, field):
         if field == 'intensity':
-            return self.db_spnbx.value()
+            return self.dbSpnbx.value()
         if field == 'duration':
-            return self.dur_spnbx.value()*self.scales[0]
+            return self.durSpnbx.value()*self.scales[0]
         if field == 'risefall':
-            return self.risefall_spnbx.value()*self.scales[0]
+            return self.risefallSpnbx.value()*self.scales[0]
 
     def setDuration(self, duration):
-        self.dur_spnbx.setValue(duration/self.scales[0])
+        self.durSpnbx.setValue(duration/self.scales[0])
 
     def fieldNames(self):
         """ Return the names of the fields this widget handles """

@@ -28,7 +28,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     Holds all relevant parameters
     """
     samplerateChanged = QtCore.pyqtSignal(int)
-    kernel_cache = {} # persistent across all existing StimulusModels
+    kernelCache = {} # persistent across all existing StimulusModels
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self._nreps = 1 # reps of each unique stimulus
@@ -37,30 +37,30 @@ class StimulusModel(QtCore.QAbstractItemModel):
         # 2D array of simulus components track number x component number
         self._segments = [[]]
         # add an empty place to place components into new track
-        self._auto_params = AutoParameterModel(self)
+        self._autoParams = AutoParameterModel(self)
 
         # reference for what voltage == what intensity
         self.calv = None
         self.caldb = None
-        self.impulse_response = None
+        self.impulseResponse = None
         self.minv = 0.005
 
-        self._attenuation_vector = None
-        self._cal_frequencies = None
-        self._cal_frange = None
+        self._attenuationVector = None
+        self._calFrequencies = None
+        self._calFrange = None
 
         self.stimid = uuid.uuid1()
 
         self.editor = None
         self.reorder = None
-        self.reorder_name = None
-        self.user_tag = '' # user enter tag
+        self.reorderName = None
+        self._userTag = '' # user enter tag
 
     def setUserTag(self, tag):
-        self.user_tag = tag
+        self._userTag = tag
 
     def userTag(self):
-        return self.user_tag
+        return self._userTag
 
     def setReferenceVoltage(self, caldb, calv):
         # make sure these are python types, so json encoding doesn't get throw
@@ -68,11 +68,11 @@ class StimulusModel(QtCore.QAbstractItemModel):
         self.caldb = caldb
         self.calv = calv
 
-    def setCalibration(self, db_boost_array, frequencies, frange):
+    def setCalibration(self, dbBoostArray, frequencies, frange):
         # use supplied array of intensity adjustment to adjust tone output
-        if db_boost_array is not None and frequencies is not None:
+        if dbBoostArray is not None and frequencies is not None:
             logger = logging.getLogger('main')
-            if db_boost_array.shape != frequencies.shape:
+            if dbBoostArray.shape != frequencies.shape:
                 logger.debug("ERROR: calibration array and frequency array must have same dimensions")
                 return
             if frange is None:
@@ -80,35 +80,35 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
             logger.debug('setting calibration with samplerate {}'.format(self.samplerate()))
             fs = self.samplerate()
-            if fs in StimulusModel.kernel_cache:
+            if fs in StimulusModel.kernelCache:
                 logger.debug('---->using cached filter')
-                self.impulse_response = StimulusModel.kernel_cache[fs]
+                self.impulseResponse = StimulusModel.kernelCache[fs]
             else:
                 logger.debug('---->calculating new filter for fs {}'.format(fs))
-                self.impulse_response = calc_impulse_response(fs, db_boost_array, frequencies, frange)
+                self.impulseResponse = calc_impulse_response(fs, dbBoostArray, frequencies, frange)
                 # mutable type so will affect data structure persistently
-                StimulusModel.kernel_cache[fs] = self.impulse_response
+                StimulusModel.kernelCache[fs] = self.impulseResponse
 
             # calculate for the default samplerate, if not already, since
             # we are very likely to need it, and it's better to have this done
             # up front, than cause lag in the UI later
-            if DEFAULT_SAMPLERATE not in StimulusModel.kernel_cache:
-                StimulusModel.kernel_cache[DEFAULT_SAMPLERATE] = calc_impulse_response(DEFAULT_SAMPLERATE, db_boost_array, frequencies, frange)
+            if DEFAULT_SAMPLERATE not in StimulusModel.kernelCache:
+                StimulusModel.kernelCache[DEFAULT_SAMPLERATE] = calc_impulse_response(DEFAULT_SAMPLERATE, dbBoostArray, frequencies, frange)
 
             # hang on to these for re-calculating impulse response on samplerate change
-            self._attenuation_vector = db_boost_array
-            self._cal_frequencies = frequencies
-            self._cal_frange = frange
+            self._attenuationVector = dbBoostArray
+            self._calFrequencies = frequencies
+            self._calFrange = frange
 
         else:
-            self.impulse_response = None
+            self.impulseResponse = None
 
     def updateCalibration(self):
-        self.setCalibration(self._attenuation_vector, self._cal_frequencies, self._cal_frange)
+        self.setCalibration(self._attenuationVector, self._calFrequencies, self._calFrange)
 
     @staticmethod
-    def clear_cache():
-        StimulusModel.kernel_cache = {}
+    def clearCache():
+        StimulusModel.kernelCache = {}
 
     def setSamplerate(self, fs):
         raise Exception('attempting to set samplerate on fixed rate stimulus')
@@ -131,10 +131,10 @@ class StimulusModel(QtCore.QAbstractItemModel):
             return DEFAULT_SAMPLERATE
 
     def setAutoParams(self, params):
-        self._auto_params = params
+        self._autoParams = params
 
     def autoParams(self):
-        return self._auto_params
+        return self._autoParams
 
     def headerData(self, section, orientation, role):
         return ''
@@ -231,7 +231,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def clearComponents(self):
         self._segments = [[]]
         # also clear auto parameters
-        self._auto_params.clearParameters()
+        self._autoParams.clearParameters()
 
     def indexByComponent(self, component):
         """return a QModelIndex for the given component, or None if
@@ -260,7 +260,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         nsegs = sum([len(track) for track in self._segments])
         if nsegs == 0:
             return 0
-        params = self._auto_params.allData()
+        params = self._autoParams.allData()
         steps = []
         ntraces = 1
         for p in params:
@@ -300,7 +300,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def autoParamRanges(self, params=None):
         """Return the expanded auto parameters, individually"""
         if params is None:
-            params = self._auto_params.allData()
+            params = self._autoParams.allData()
 
         steps = []
         for p in params:
@@ -328,7 +328,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         
     def expandFunction(self, func, args=[]):
         # initilize array to hold all varied parameters
-        params = self._auto_params.allData()
+        params = self._autoParams.allData()
 
         steps = self.autoParamRanges(params)
         ntraces = 1
@@ -348,7 +348,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         stim_list = []
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
-                comp_inds = self._auto_params.selection(param)
+                comp_inds = self._autoParams.selection(param)
                 for index in comp_inds:
                     component = self.data(index, QtCore.Qt.UserRole)
                     # print 'setting component parameter {} to {}'.format(param['parameter'], varylist[itrace][ip])
@@ -359,7 +359,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         # now reset the components to start value
         for ip, param in enumerate(params):
-            comp_inds = self._auto_params.selection(param)
+            comp_inds = self._autoParams.selection(param)
             for index in comp_inds:
                 component = self.data(index, QtCore.Qt.UserRole)
                 component.set(param['parameter'], varylist[0][ip])
@@ -369,7 +369,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def setReorderFunc(self, func, name=None):
         self.reorder = func
-        self.reorder_name = name
+        self.reorderName = name
 
     def expandedStim(self):
         """
@@ -402,9 +402,9 @@ class StimulusModel(QtCore.QAbstractItemModel):
         JSON/YAML/XML template to recreate this stimulus in another session
         """
         doc = self.doc(False)
-        auto_parameter_doc = self._auto_params.doc()
+        auto_parameter_doc = self._autoParams.doc()
         doc['autoparameters'] = auto_parameter_doc
-        doc['reorder'] = self.reorder_name
+        doc['reorder'] = self.reorderName
         return doc
 
     @staticmethod
@@ -459,7 +459,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for track in track_signals:
             total_signal[0:len(track)] += track
 
-        total_signal = convolve_filter(total_signal, self.impulse_response)
+        total_signal = convolve_filter(total_signal, self.impulseResponse)
 
         undesired_attenuation = 0
 
@@ -516,7 +516,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             testtype = self.editor.name
         else:
             testtype = None
-        return {'samplerate_da':samplerate, 'reps': self._nreps, 'user_tag': self.user_tag,
+        return {'samplerate_da':samplerate, 'reps': self._nreps, 'user_tag': self._userTag,
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list,
                 'testtype': testtype}
 
@@ -536,26 +536,26 @@ class StimulusModel(QtCore.QAbstractItemModel):
             logger = logging.getLogger('main')
             logger.warning('Erm, no editor available :(')
 
-    def contains_pval(self, param_name, value):
+    def containsPval(self, paramName, value):
         """Returns true is the given value is in the auto parameters"""
-        params = self._auto_params.allData()
+        params = self._autoParams.allData()
         steps = self.autoParamRanges(params)
         pnames = [p['parameter'] for p in params]
-        if param_name in pnames:
-            pidx = pnames.index(param_name)
+        if paramName in pnames:
+            pidx = pnames.index(paramName)
             return value in steps[pidx]
         else:
             return False
 
-    def verify_expanded(self, samplerate):
-        results = self.expandFunction(self.verify_components, args=(samplerate,))
+    def verifyExpanded(self, samplerate):
+        results = self.expandFunction(self.verifyComponents, args=(samplerate,))
         msg = [x for x in results if x]
         if len(msg) > 0:
             return msg[0]
         else:
             return 0
 
-    def verify_components(self, samplerate):
+    def verifyComponents(self, samplerate):
         # flatten list of components
         components = [comp for track in self._segments for comp in track]
         for comp in components:
@@ -564,18 +564,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 return msg
         return 0
 
-    def verify(self, window_size=None):
-        msg = self._auto_params.verify()
+    def verify(self, windowSize=None):
+        msg = self._autoParams.verify()
         if msg:
             return msg
         if self.traceCount() == 0:
             return "Test is empty"
-        if window_size is not None:
+        if windowSize is not None:
             durations = self.expandFunction(self.duration)
             # ranges are linear, so we only need to test first and last
-            if durations[0] > window_size or durations[-1] > window_size:
+            if durations[0] > windowSize or durations[-1] > windowSize:
                 return "Stimulus duration exceeds window duration"
-        msg = self.verify_expanded(self.samplerate())
+        msg = self.verifyExpanded(self.samplerate())
         if msg:
             return msg
         if self.caldb is None or self.calv is None:

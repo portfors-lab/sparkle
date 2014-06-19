@@ -9,37 +9,37 @@ class ComponentsDetailWidget(QtGui.QWidget):
         self.setLayout(self.lyt)
 
         # keeps track of which attributes to display
-        self.display_table = {}
-        self.default_attributes = ['intensity', 'risefall']
+        self.displayTable = {}
+        self.defaultAttributes = ['intensity', 'risefall']
         font = QtGui.QFont()
         font.setPointSize(12)
         self.setFont(font)
 
-    def set_display_table(self, table):
-        self.display_table = table
+    def setDisplayTable(self, table):
+        self.displayTable = table
 
-    def set_default_attributes(self, defaults):
-        self.default_attributes = defaults
+    def setDefaultAttributes(self, defaults):
+        self.defaultAttributes = defaults
 
-    def set_doc(self, docs):
+    def setDoc(self, docs):
         # sort stim by start time
         docs = sorted(docs, key=lambda k: k['start_s'])
 
         for doc in docs:
             stim_type = doc['stim_type']
-            if not stim_type in self.display_table:
+            if not stim_type in self.displayTable:
                 continue
-            if not stim_type in self.display_table[stim_type]:
+            if not stim_type in self.displayTable[stim_type]:
                 continue
-            display_attributes = self.display_table.get(stim_type, self.default_attributes)
+            display_attributes = self.displayTable.get(stim_type, self.defaultAttributes)
             
             self.lyt.addWidget(ComponentDetailFrame(doc, display_attributes))
 
-    def clear_doc(self):
+    def clearDoc(self):
         clearLayout(self.lyt)
 
 class ComponentDetailFrame(QtGui.QFrame):
-    def __init__(self, comp_doc, display_attributes, parent=None):
+    def __init__(self, comp_doc, displayAttributes, parent=None):
         QtGui.QFrame.__init__(self)
 
         self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
@@ -54,7 +54,7 @@ class ComponentDetailFrame(QtGui.QFrame):
         title.setFont(font)
         glay.addWidget(title,0,0)
         # get any other attributes to display, or defaults if not specified
-        for i, attr in enumerate(display_attributes):
+        for i, attr in enumerate(displayAttributes):
             if attr == stim_type:
                 continue # already got it
             val = comp_doc[attr]
@@ -71,29 +71,29 @@ class ComponentsDetailSelector(QtGui.QWidget):
         layout = QtGui.QVBoxLayout()
         self.setLayout(layout)
 
-    def set_components(self, components):
+    def setComponents(self, components):
         layout = self.layout()
         for comp in components:
-            attr_widget = ComponentAttributerChecker(comp)
-            layout.addWidget(attr_widget)
+            attrWidget = ComponentAttributerChecker(comp)
+            layout.addWidget(attrWidget)
 
-    def set_checked_details(self, checked):
+    def setCheckedDetails(self, checked):
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
             if w.stim_type in checked:
-                w.set_checked(checked[w.stim_type])
+                w.setChecked(checked[w.stim_type])
 
-    def get_checked_details(self):
+    def getCheckedDetails(self):
         attrs = {}
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
-            attrs[w.stim_type] = w.get_checked()
+            attrs[w.stim_type] = w.getChecked()
         return attrs
 
 class ComponentAttributerChecker(QtGui.QFrame):
-    def __init__(self, comp_attributes, parent=None):
+    def __init__(self, compAttributes, parent=None):
         QtGui.QFrame.__init__(self)
 
         self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
@@ -101,26 +101,26 @@ class ComponentAttributerChecker(QtGui.QFrame):
 
         font = QtGui.QFont()
         font.setBold(True)
-        stim_type = comp_attributes.pop('stim_type')
+        stim_type = compAttributes.pop('stim_type')
         title = QtGui.QCheckBox(stim_type)
         title.setFont(font)
         layout.addWidget(title,0,0)
 
-        for i, key in enumerate(comp_attributes):
+        for i, key in enumerate(compAttributes):
             layout.addWidget(QtGui.QCheckBox(key),i+1,0)
 
         self.setLayout(layout)
-        self.stim_type = stim_type
+        self.stimType = stim_type
 
 
-    def set_checked(self, tocheck):
+    def setChecked(self, tocheck):
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
             if w.text() in tocheck:
                 w.setChecked(True)
 
-    def get_checked(self):
+    def getChecked(self):
         attrs = []
         layout = self.layout()
         for i in range(layout.count()):

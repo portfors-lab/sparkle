@@ -24,7 +24,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QRadioButton" name="none_radio">
+       <widget class="QRadioButton" name="noneRadio">
         <property name="text">
          <string>None</string>
         </property>
@@ -34,7 +34,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="calfile_radio">
+       <widget class="QRadioButton" name="calfileRadio">
         <property name="text">
          <string>Use saved calibration</string>
         </property>
@@ -43,14 +43,14 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QComboBox" name="cal_choice_cmbbx">
+         <widget class="QComboBox" name="calChoiceCmbbx">
           <property name="enabled">
            <bool>false</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="plot_btn">
+         <widget class="QPushButton" name="plotBtn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -83,7 +83,7 @@
          </widget>
         </item>
         <item>
-         <widget class="SmartSpinBox" name="frange_low_spnbx">
+         <widget class="SmartSpinBox" name="frangeLowSpnbx">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -99,7 +99,7 @@
          </widget>
         </item>
         <item>
-         <widget class="SmartSpinBox" name="frange_high_spnbx">
+         <widget class="SmartSpinBox" name="frangeHighSpnbx">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -122,7 +122,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="range_btn">
+         <widget class="QPushButton" name="rangeBtn">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -165,7 +165,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="SmartSpinBox" name="calf_spnbx">
+      <widget class="SmartSpinBox" name="calfSpnbx">
        <property name="maximum">
         <double>200000.000000000000000</double>
        </property>
@@ -179,7 +179,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QSpinBox" name="caldb_spnbx">
+      <widget class="QSpinBox" name="caldbSpnbx">
        <property name="toolTip">
         <string>Maximum intensity</string>
        </property>
@@ -192,7 +192,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QDoubleSpinBox" name="calv_spnbx">
+      <widget class="QDoubleSpinBox" name="calvSpnbx">
        <property name="toolTip">
         <string>Maximum voltage output</string>
        </property>
@@ -293,7 +293,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>none_radio</sender>
+   <sender>noneRadio</sender>
    <signal>toggled(bool)</signal>
    <receiver>label_8</receiver>
    <slot>setDisabled(bool)</slot>
@@ -309,9 +309,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>none_radio</sender>
+   <sender>noneRadio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>frange_low_spnbx</receiver>
+   <receiver>frangeLowSpnbx</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -325,9 +325,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>none_radio</sender>
+   <sender>noneRadio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>frange_high_spnbx</receiver>
+   <receiver>frangeHighSpnbx</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -341,7 +341,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>none_radio</sender>
+   <sender>noneRadio</sender>
    <signal>toggled(bool)</signal>
    <receiver>funit_lbl_2</receiver>
    <slot>setDisabled(bool)</slot>
@@ -357,9 +357,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>none_radio</sender>
+   <sender>noneRadio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>range_btn</receiver>
+   <receiver>rangeBtn</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -373,7 +373,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>range_btn</sender>
+   <sender>rangeBtn</sender>
    <signal>clicked()</signal>
    <receiver>CalibrationDialog</receiver>
    <slot>maxRange()</slot>
@@ -389,7 +389,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>plot_btn</sender>
+   <sender>plotBtn</sender>
    <signal>clicked()</signal>
    <receiver>CalibrationDialog</receiver>
    <slot>plotCurve()</slot>
@@ -405,9 +405,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>none_radio</sender>
+   <sender>noneRadio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>cal_choice_cmbbx</receiver>
+   <receiver>calChoiceCmbbx</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

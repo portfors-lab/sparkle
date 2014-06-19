@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\scale_dlg.ui'
 #
-# Created: Tue Jun  4 13:54:51 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Thu Jun 19 11:21:41 2014
+#      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,57 +25,47 @@ except AttributeError:
 
 class Ui_ScaleDlg(object):
     def setupUi(self, ScaleDlg):
-        ScaleDlg.setObjectName(_fromUtf8(u"ScaleDlg"))
+        ScaleDlg.setObjectName(_fromUtf8("ScaleDlg"))
         ScaleDlg.resize(218, 133)
         self.verticalLayout = QtGui.QVBoxLayout(ScaleDlg)
-        self.verticalLayout.setObjectName(_fromUtf8(u"verticalLayout"))
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.groupBox = QtGui.QGroupBox(ScaleDlg)
-        self.groupBox.setObjectName(_fromUtf8(u"groupBox"))
-        self.sec_btn = QtGui.QRadioButton(self.groupBox)
-        self.sec_btn.setGeometry(QtCore.QRect(10, 20, 82, 17))
-        self.sec_btn.setObjectName(_fromUtf8(u"sec_btn"))
-        self.ms_btn = QtGui.QRadioButton(self.groupBox)
-        self.ms_btn.setGeometry(QtCore.QRect(110, 20, 82, 17))
-        self.ms_btn.setChecked(True)
-        self.ms_btn.setObjectName(_fromUtf8(u"ms_btn"))
+        self.groupBox.setObjectName(_fromUtf8("groupBox"))
+        self.secBtn = QtGui.QRadioButton(self.groupBox)
+        self.secBtn.setGeometry(QtCore.QRect(10, 20, 82, 17))
+        self.secBtn.setObjectName(_fromUtf8("secBtn"))
+        self.msBtn = QtGui.QRadioButton(self.groupBox)
+        self.msBtn.setGeometry(QtCore.QRect(110, 20, 82, 17))
+        self.msBtn.setChecked(True)
+        self.msBtn.setObjectName(_fromUtf8("msBtn"))
         self.verticalLayout.addWidget(self.groupBox)
         self.groupBox_2 = QtGui.QGroupBox(ScaleDlg)
-        self.groupBox_2.setObjectName(_fromUtf8(u"groupBox_2"))
-        self.hz_btn = QtGui.QRadioButton(self.groupBox_2)
-        self.hz_btn.setGeometry(QtCore.QRect(10, 20, 82, 17))
-        self.hz_btn.setObjectName(_fromUtf8(u"hz_btn"))
-        self.khz_btn = QtGui.QRadioButton(self.groupBox_2)
-        self.khz_btn.setGeometry(QtCore.QRect(110, 20, 82, 17))
-        self.khz_btn.setChecked(True)
-        self.khz_btn.setObjectName(_fromUtf8(u"khz_btn"))
+        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
+        self.hzBtn = QtGui.QRadioButton(self.groupBox_2)
+        self.hzBtn.setGeometry(QtCore.QRect(10, 20, 82, 17))
+        self.hzBtn.setObjectName(_fromUtf8("hzBtn"))
+        self.khzBtn = QtGui.QRadioButton(self.groupBox_2)
+        self.khzBtn.setGeometry(QtCore.QRect(110, 20, 82, 17))
+        self.khzBtn.setChecked(True)
+        self.khzBtn.setObjectName(_fromUtf8("khzBtn"))
         self.verticalLayout.addWidget(self.groupBox_2)
         self.buttonBox = QtGui.QDialogButtonBox(ScaleDlg)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName(_fromUtf8(u"buttonBox"))
+        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.verticalLayout.addWidget(self.buttonBox)
 
         self.retranslateUi(ScaleDlg)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8(u"accepted()")), ScaleDlg.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8(u"rejected()")), ScaleDlg.reject)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ScaleDlg.accept)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ScaleDlg.reject)
         QtCore.QMetaObject.connectSlotsByName(ScaleDlg)
 
     def retranslateUi(self, ScaleDlg):
-        ScaleDlg.setWindowTitle(_translate(u"ScaleDlg", u"Dialog", None))
-        self.groupBox.setTitle(_translate(u"ScaleDlg", u"Time scale", None))
-        self.sec_btn.setText(_translate(u"ScaleDlg", u"seconds", None))
-        self.ms_btn.setText(_translate(u"ScaleDlg", u"ms", None))
-        self.groupBox_2.setTitle(_translate(u"ScaleDlg", u"Frequency scale", None))
-        self.hz_btn.setText(_translate(u"ScaleDlg", u"Hz", None))
-        self.khz_btn.setText(_translate(u"ScaleDlg", u"kHz", None))
-
-
-if __name__ == u"__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    ScaleDlg = QtGui.QDialog()
-    ui = Ui_ScaleDlg()
-    ui.setupUi(ScaleDlg)
-    ScaleDlg.show()
-    sys.exit(app.exec_())
+        ScaleDlg.setWindowTitle(_translate("ScaleDlg", "Dialog", None))
+        self.groupBox.setTitle(_translate("ScaleDlg", "Time scale", None))
+        self.secBtn.setText(_translate("ScaleDlg", "seconds", None))
+        self.msBtn.setText(_translate("ScaleDlg", "ms", None))
+        self.groupBox_2.setTitle(_translate("ScaleDlg", "Frequency scale", None))
+        self.hzBtn.setText(_translate("ScaleDlg", "Hz", None))
+        self.khzBtn.setText(_translate("ScaleDlg", "kHz", None))
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
-# Created: Tue Jun 03 11:34:02 2014
+# Created: Thu Jun 19 13:26:28 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -65,21 +65,21 @@ class Ui_ParameterWidget(object):
         self.tunit_lbl_1.setSizePolicy(sizePolicy)
         self.tunit_lbl_1.setObjectName(_fromUtf8("tunit_lbl_1"))
         self.gridLayout_5.addWidget(self.tunit_lbl_1, 3, 2, 1, 1)
-        self.db_spnbx = IncrementInput(ParameterWidget)
-        self.db_spnbx.setObjectName(_fromUtf8("db_spnbx"))
-        self.gridLayout_5.addWidget(self.db_spnbx, 0, 1, 1, 1)
-        self.dur_spnbx = SmartSpinBox(ParameterWidget)
-        self.dur_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.dur_spnbx.setDecimals(3)
-        self.dur_spnbx.setMaximum(2000.0)
-        self.dur_spnbx.setObjectName(_fromUtf8("dur_spnbx"))
-        self.gridLayout_5.addWidget(self.dur_spnbx, 1, 1, 1, 1)
-        self.risefall_spnbx = SmartSpinBox(ParameterWidget)
-        self.risefall_spnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.risefall_spnbx.setDecimals(3)
-        self.risefall_spnbx.setMaximum(500.0)
-        self.risefall_spnbx.setObjectName(_fromUtf8("risefall_spnbx"))
-        self.gridLayout_5.addWidget(self.risefall_spnbx, 3, 1, 1, 1)
+        self.dbSpnbx = IncrementInput(ParameterWidget)
+        self.dbSpnbx.setObjectName(_fromUtf8("dbSpnbx"))
+        self.gridLayout_5.addWidget(self.dbSpnbx, 0, 1, 1, 1)
+        self.durSpnbx = SmartSpinBox(ParameterWidget)
+        self.durSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.durSpnbx.setDecimals(3)
+        self.durSpnbx.setMaximum(2000.0)
+        self.durSpnbx.setObjectName(_fromUtf8("durSpnbx"))
+        self.gridLayout_5.addWidget(self.durSpnbx, 1, 1, 1, 1)
+        self.risefallSpnbx = SmartSpinBox(ParameterWidget)
+        self.risefallSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.risefallSpnbx.setDecimals(3)
+        self.risefallSpnbx.setMaximum(500.0)
+        self.risefallSpnbx.setObjectName(_fromUtf8("risefallSpnbx"))
+        self.gridLayout_5.addWidget(self.risefallSpnbx, 3, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_5)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)

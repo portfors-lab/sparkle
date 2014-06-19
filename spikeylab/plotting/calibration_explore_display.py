@@ -6,113 +6,113 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.stim_fft_plot = FFTWidget(self, rotation=0)
-        self.response_fft_plot = FFTWidget(self, rotation=0)
-        self.response_fft_plot.disableAutoRange()
+        self.stimFftPlot = FFTWidget(self, rotation=0)
+        self.responseFftPlot = FFTWidget(self, rotation=0)
+        self.responseFftPlot.disableAutoRange()
 
-        self.stim_fft_plot.set_title("Stimulus FFT")
-        self.response_fft_plot.set_title("Response FFT")
-        self.response_fft_plot.setXLink(self.stim_fft_plot)
+        self.stimFftPlot.setTitle("Stimulus FFT")
+        self.responseFftPlot.setTitle("Response FFT")
+        self.responseFftPlot.setXLink(self.stimFftPlot)
 
-        self.stim_fft_plot.enableAutoRange(x=True, y=False)
-        self.response_fft_plot.enableAutoRange(x=True, y=False)
-        self.stim_fft_plot.setRange(yRange=(0,100))
-        self.response_fft_plot.setRange(yRange=(0,100))
+        self.stimFftPlot.enableAutoRange(x=True, y=False)
+        self.responseFftPlot.enableAutoRange(x=True, y=False)
+        self.stimFftPlot.setRange(yRange=(0,100))
+        self.responseFftPlot.setRange(yRange=(0,100))
 
-        self.stim_signal_plot = FFTWidget(rotation=0)
-        self.response_signal_plot = FFTWidget(rotation=0)
-        self.response_signal_plot.disableAutoRange()
-        self.response_signal_plot.setRange(yRange=(-0.1,0.1))
-        self.stim_signal_plot.setLabel('left', 'Potential', units='V')
-        self.response_signal_plot.setLabel('left', 'Potential', units='V')
-        self.response_signal_plot.setLabel('bottom', 'Time', units='s')
-        self.response_signal_plot.setMouseEnabled(x=False, y=True)
-        self.stim_signal_plot.setMouseEnabled(x=False, y=True)
-        self.response_signal_plot.set_title("Response Signal")
-        self.stim_signal_plot.set_title("Stimulus Signal")
-        self.stim_signal_plot.setXLink(self.response_signal_plot)
+        self.stimSignalPlot = FFTWidget(rotation=0)
+        self.responseSignalPlot = FFTWidget(rotation=0)
+        self.responseSignalPlot.disableAutoRange()
+        self.responseSignalPlot.setRange(yRange=(-0.1,0.1))
+        self.stimSignalPlot.setLabel('left', 'Potential', units='V')
+        self.responseSignalPlot.setLabel('left', 'Potential', units='V')
+        self.responseSignalPlot.setLabel('bottom', 'Time', units='s')
+        self.responseSignalPlot.setMouseEnabled(x=False, y=True)
+        self.stimSignalPlot.setMouseEnabled(x=False, y=True)
+        self.responseSignalPlot.setTitle("Response Signal")
+        self.stimSignalPlot.setTitle("Stimulus Signal")
+        self.stimSignalPlot.setXLink(self.responseSignalPlot)
 
-        self.stim_spec_plot = SpecWidget(self)
-        self.response_spec_plot = SpecWidget(self)
-        self.stim_spec_plot.setXLink(self.response_spec_plot)
-        self.stim_spec_plot.setYLink(self.response_spec_plot)
-        self.response_spec_plot.set_title("Response Spectrogram")
-        self.stim_spec_plot.set_title("Stim Spectrogram")
+        self.stimSpecPlot = SpecWidget(self)
+        self.responseSpecPlot = SpecWidget(self)
+        self.stimSpecPlot.setXLink(self.responseSpecPlot)
+        self.stimSpecPlot.setYLink(self.responseSpecPlot)
+        self.responseSpecPlot.setTitle("Response Spectrogram")
+        self.stimSpecPlot.setTitle("Stim Spectrogram")
 
-        splitter_signal = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter_fft = QtGui.QSplitter(QtCore.Qt.Vertical)
-        container_spec = QtGui.QWidget()
-        container_signal = QtGui.QWidget()
-        layout_spec = QtGui.QHBoxLayout()
-        layout_spec.setContentsMargins(0,0,0,0)
-        layout_signal = QtGui.QHBoxLayout()
-        layout_signal.setContentsMargins(0,0,0,0)
+        splitterSignal = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitterFft = QtGui.QSplitter(QtCore.Qt.Vertical)
+        containerSpec = QtGui.QWidget()
+        containerSignal = QtGui.QWidget()
+        layoutSpec = QtGui.QHBoxLayout()
+        layoutSpec.setContentsMargins(0,0,0,0)
+        layoutSignal = QtGui.QHBoxLayout()
+        layoutSignal.setContentsMargins(0,0,0,0)
 
-        # splitter_signal.addWidget(self.stim_signal_plot)
-        # splitter_signal.addWidget(self.response_signal_plot)
-        layout_signal.addWidget(self.stim_signal_plot)
-        layout_signal.addWidget(self.response_signal_plot)
-        container_signal.setLayout(layout_signal)
-        splitter_fft.addWidget(self.stim_fft_plot)
-        splitter_fft.addWidget(self.response_fft_plot)
-        layout_spec.addWidget(self.stim_spec_plot)
-        layout_spec.addWidget(self.response_spec_plot)
-        container_spec.setLayout(layout_spec)
+        # splitterSignal.addWidget(self.stimSignalPlot)
+        # splitterSignal.addWidget(self.responseSignalPlot)
+        layoutSignal.addWidget(self.stimSignalPlot)
+        layoutSignal.addWidget(self.responseSignalPlot)
+        containerSignal.setLayout(layoutSignal)
+        splitterFft.addWidget(self.stimFftPlot)
+        splitterFft.addWidget(self.responseFftPlot)
+        layoutSpec.addWidget(self.stimSpecPlot)
+        layoutSpec.addWidget(self.responseSpecPlot)
+        containerSpec.setLayout(layoutSpec)
 
-        splitter_left = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter_main = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitterLeft = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitterMain = QtGui.QSplitter(QtCore.Qt.Vertical)
 
-        splitter_left.addWidget(container_spec)
-        splitter_left.addWidget(container_signal)
-        splitter_main.addWidget(splitter_left)
-        splitter_main.addWidget(splitter_fft)
+        splitterLeft.addWidget(containerSpec)
+        splitterLeft.addWidget(containerSignal)
+        splitterMain.addWidget(splitterLeft)
+        splitterMain.addWidget(splitterFft)
 
         layout = QtGui.QHBoxLayout()
         layout.setContentsMargins(0,0,0,0)
-        layout.addWidget(splitter_main)
+        layout.addWidget(splitterMain)
         self.setLayout(layout)
 
-        # splitter_fft.setSizes()
+        # splitterFft.setSizes()
         height = self.size().height()
-        splitter_left.setSizes([height*0.3, height*0.1])
-        splitter_main.setSizes([height*0.4, height*0.6])
+        splitterLeft.setSizes([height*0.3, height*0.1])
+        splitterMain.setSizes([height*0.4, height*0.6])
 
-        self.colormap_changed = self.stim_spec_plot.colormap_changed
-        self.colormap_changed = self.response_spec_plot.colormap_changed
+        self.colormapChanged = self.stimSpecPlot.colormapChanged
+        self.colormapChanged = self.responseSpecPlot.colormapChanged
 
-    def set_spec_args(self, *args, **kwargs):
-        self.stim_spec_plot.set_spec_args(*args, **kwargs)
-        self.response_spec_plot.set_spec_args(*args, **kwargs)
+    def setSpecArgs(self, *args, **kwargs):
+        self.stimSpecPlot.setSpecArgs(*args, **kwargs)
+        self.responseSpecPlot.setSpecArgs(*args, **kwargs)
 
-    def update_spec(self, *args, **kwargs):
+    def updateSpec(self, *args, **kwargs):
         if args[0] == None:
-            self.stim_spec_plot.clear_img()
-            self.response_spec_plot.clear_img()
+            self.stimSpecPlot.clearImg()
+            self.responseSpecPlot.clearImg()
         else:
             p = kwargs.pop('plot')
             if p == 'response':
-                self.response_spec_plot.update_data(*args, **kwargs)
+                self.responseSpecPlot.updateData(*args, **kwargs)
             else:
-                self.stim_spec_plot.update_data(*args, **kwargs)
+                self.stimSpecPlot.updateData(*args, **kwargs)
 
-    def update_signal(self, *args, **kwargs):
+    def updateSignal(self, *args, **kwargs):
         p = kwargs.pop('plot')
         if p == 'response':
-            self.response_signal_plot.update_data(*args, **kwargs)
+            self.responseSignalPlot.updateData(*args, **kwargs)
         else:
-            self.stim_signal_plot.update_data(*args, **kwargs)
+            self.stimSignalPlot.updateData(*args, **kwargs)
 
-    def update_fft(self, *args, **kwargs):
+    def updateFft(self, *args, **kwargs):
         p = kwargs.pop('plot')
         if p == 'response': 
-            self.response_fft_plot.update_data(*args, **kwargs)
+            self.responseFftPlot.updateData(*args, **kwargs)
         else:
-            self.stim_fft_plot.update_data(*args, **kwargs)
+            self.stimFftPlot.updateData(*args, **kwargs)
 
-    def set_xlimits(self, lims):
-        self.response_signal_plot.set_xlim(lims)
-        self.stim_signal_plot.set_xlim(lims)
+    def setXlimits(self, lims):
+        self.responseSignalPlot.setXlim(lims)
+        self.stimSignalPlot.setXlim(lims)
 
-    def auto_range(self):
-        self.response_signal_plot.autoRange()
-        self.response_fft_plot.autoRange()
+    def autoRange(self):
+        self.responseSignalPlot.autoRange()
+        self.responseFftPlot.autoRange()

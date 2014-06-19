@@ -10,26 +10,26 @@ class SpikeyViewBox(pg.ViewBox):
         super(SpikeyViewBox, self).__init__(*args, **kwargs)
 
         # because of pyqtgraph internals, we can't just remove this action from menu
-        self.fake_action = QtGui.QAction("", None)
-        self.fake_action.setVisible(False)
-        self.fake_action.setCheckable(True)
+        self.fakeAction = QtGui.QAction("", None)
+        self.fakeAction.setVisible(False)
+        self.fakeAction.setCheckable(True)
 
         self.menu = SpikeyViewBoxMenu(self)
 
-        self._custom_mouse = True
-        self._zero_wheel = False
+        self._customMouse = True
+        self._zeroWheel = False
 
-    def set_custom_mouse(self):
-        self._custom_mouse = True
+    def setCustomMouse(self):
+        self._customMouse = True
 
-    def set_zero_wheel(self):
-        self._zero_wheel = True
+    def setZeroWheel(self):
+        self._zeroWheel = True
         # want padding in this case
         self.menu.viewAll.triggered.disconnect()
         self.menu.viewAll.triggered.connect(self.autoRange)
 
     def mouseDragEvent(self, ev, axis=None):
-        if self._custom_mouse and ev.button() == QtCore.Qt.RightButton:
+        if self._customMouse and ev.button() == QtCore.Qt.RightButton:
             ev.accept()  ## we accept all buttons
 
             # directly copy-pasted from ViewBox for ViewBox.RectMode
@@ -57,7 +57,7 @@ class SpikeyViewBox(pg.ViewBox):
             if state is not None:
                 self.setMouseEnabled(*state)
 
-    def auto_range(self):
+    def autoRange0(self):
         return self.autoRange(padding=0)
 
     def wheelEvent(self, ev, axis=None):
@@ -66,7 +66,7 @@ class SpikeyViewBox(pg.ViewBox):
         if ev.modifiers() == QtCore.Qt.ControlModifier:
             state = self.mouseEnabled()
             self.setMouseEnabled(not state[0], not state[1])
-        if self._zero_wheel:
+        if self._zeroWheel:
             ev.pos = lambda : self.mapViewToScene(QtCore.QPoint(0,0))
         super(SpikeyViewBox, self).wheelEvent(ev, axis)
         if state is not None:

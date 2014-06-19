@@ -17,10 +17,10 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="QLineEdit" name="wavrootdir_lnedt"/>
+      <widget class="QLineEdit" name="wavrootdirLnedt"/>
      </item>
      <item>
-      <widget class="QPushButton" name="wavrootdir_btn">
+      <widget class="QPushButton" name="wavrootdirBtn">
        <property name="text">
         <string>change</string>
        </property>
@@ -37,8 +37,8 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeView" name="filetree_view"/>
-      <widget class="QListView" name="filelist_view">
+      <widget class="QTreeView" name="filetreeView"/>
+      <widget class="QListView" name="filelistView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -47,7 +47,7 @@
        </property>
       </widget>
      </widget>
-     <widget class="SpecWidget" name="spec_preview" native="true">
+     <widget class="SpecWidget" name="specPreview" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -84,10 +84,10 @@
  <resources/>
  <connections>
   <connection>
-   <sender>filelist_view</sender>
+   <sender>filelistView</sender>
    <signal>clicked(QModelIndex)</signal>
    <receiver>VocalParameterWidget</receiver>
-   <slot>wavfile_clicked()</slot>
+   <slot>wavfileClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>490</x>
@@ -100,10 +100,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>filetree_view</sender>
+   <sender>filetreeView</sender>
    <signal>doubleClicked(QModelIndex)</signal>
    <receiver>VocalParameterWidget</receiver>
-   <slot>wavdir_selected()</slot>
+   <slot>wavdirSelected()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>189</x>
@@ -116,14 +116,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>wavrootdir_btn</sender>
+   <sender>wavrootdirBtn</sender>
    <signal>clicked()</signal>
    <receiver>VocalParameterWidget</receiver>
-   <slot>browse_wavdirs()</slot>
+   <slot>browseWavdirs()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>430</x>
-     <y>24</y>
+     <x>534</x>
+     <y>32</y>
     </hint>
     <hint type="destinationlabel">
      <x>526</x>
@@ -138,5 +138,9 @@
   <slot>browse_wavdirs()</slot>
   <slot>wavfile_clicked()</slot>
   <slot>folder_expanded()</slot>
+  <slot>wafileSelected()</slot>
+  <slot>wavdirSelected()</slot>
+  <slot>browseWavdirs()</slot>
+  <slot>wavfileClicked()</slot>
  </slots>
 </ui>
