@@ -13,7 +13,7 @@ class ViewSettingsDialog(QtGui.QDialog):
         stimuli = get_stimuli_models()
         comp_states = [stim().stateDict() for stim in stimuli if stim.protocol]
 
-        self.ui.detailWidget.set_components(comp_states)
+        self.ui.detailWidget.setComponents(comp_states)
         if defaultVals is not None:
             self.ui.fontszSpnbx.setValue(defaultVals['fontsz'])
             self.ui.detailWidget.setCheckedDetails(defaultVals['display_attributes'])

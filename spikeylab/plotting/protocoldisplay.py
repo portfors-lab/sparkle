@@ -16,6 +16,7 @@ class ProtocolDisplay(QtGui.QWidget):
         self.fftPlot.setToolTip('Stimulus Spectrum')
         self.spiketracePlot.setToolTip('Spike Trace')
         self.specPlot.setToolTip('Stimulus Spectrogram')
+        
 
         # custom behaviour for spec view all option
         vb = self.specPlot.getViewBox()

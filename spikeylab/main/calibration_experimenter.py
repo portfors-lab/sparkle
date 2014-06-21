@@ -73,7 +73,7 @@ class CalibrationExperimenter(Experimenter):
         self.calibration_frequencies = []
         self.calibration_indexes = []
 
-        data_items = self.datafile.groups.keys()
+        data_items = self.datafile.keys()
         self.current_dataset_name = next_str_num(self.group_name, data_items)
 
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
@@ -166,9 +166,9 @@ class CalibrationExperimenter(Experimenter):
         vfunc = np.vectorize(calc_db)
 
         if USE_FFT:
-            peaks = np.mean(abs(self.datafile.get('fft_peaks')), axis=1)
+            peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/fft_peaks')), axis=1)
         else:
-            peaks = np.mean(abs(self.datafile.get('vmax')), axis=1)
+            peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/vmax')), axis=1)
 
         # print 'calibration frequencies', self.calibration_frequencies
         # cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]

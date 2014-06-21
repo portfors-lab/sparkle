@@ -1,5 +1,6 @@
 import numpy as np
-from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask
+from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
+                                    get_ao_chans, get_ai_chans
 from PyDAQmx.DAQmxTypes import *
 import time
 
@@ -104,5 +105,10 @@ class TestDAQTasks():
         inbuffer = task.read()
         self.data.extend(inbuffer.squeeze().tolist())
 
+def test_get_ao_chans():
+    chans = get_ao_chans("PCI-6259")
+    assert len(chans) == 4
 
-
+def test_get_ai_chans():
+    chans = get_ai_chans("PCI-6259")
+    assert len(chans) == 32

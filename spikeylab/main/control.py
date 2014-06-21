@@ -560,7 +560,7 @@ class MainWindow(ControlWindow):
             self.ui.currentCalLbl.setText('None')
             fname = os.path.basename(fname)
             self.ui.dataFileLbl.setText(fname)
-
+        dlg.deleteLater()
 
     def launchCalibrationDlg(self):
         dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
@@ -576,13 +576,15 @@ class MainWindow(ControlWindow):
                 self.ui.currentCalLbl.setText('None')
                 self.acqmodel.set_calibration(None)
             self.calvals = values
-            
+        dlg.deleteLater()
+        
     def launchScaleDlg(self):
         field_vals = {u'fscale' : self.fscale, u'tscale' : self.tscale}
         dlg = ScaleDialog(defaultVals=field_vals)
         if dlg.exec_():
             fscale, tscale = dlg.values()
             self.update_unit_labels(tscale, fscale)
+        dlg.deleteLater()
 
     def launchSpecgramDlg(self):
         dlg = SpecDialog(defaultVals=self.spec_args)
@@ -592,6 +594,7 @@ class MainWindow(ControlWindow):
             self.exvocal.setSpecArgs(**argdict)
             QtGui.QApplication.processEvents()
             self.spec_args = argdict
+        dlg.deleteLater()
 
     def launchViewDlg(self):
         dlg = ViewSettingsDialog(self.viewSettings)
@@ -601,6 +604,7 @@ class MainWindow(ControlWindow):
             font = QtGui.QFont()
             font.setPointSize(self.viewSettings['fontsz'])
             QtGui.QApplication.setFont(font)
+        dlg.deleteLater()
 
     def wavfileSelected(self, modelIndex):
         """ On double click of wav file, load into display """
@@ -702,5 +706,6 @@ if __name__ == "__main__":
     else:
         status = 0
         print 'canceled'
+    dlg.deleteLater()
     sys.exit(status)
 

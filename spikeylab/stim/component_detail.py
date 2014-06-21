@@ -81,15 +81,15 @@ class ComponentsDetailSelector(QtGui.QWidget):
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
-            if w.stim_type in checked:
-                w.setChecked(checked[w.stim_type])
+            if w.stimType in checked:
+                w.setChecked(checked[w.stimType])
 
     def getCheckedDetails(self):
         attrs = {}
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
-            attrs[w.stim_type] = w.getChecked()
+            attrs[w.stimType] = w.getChecked()
         return attrs
 
 class ComponentAttributerChecker(QtGui.QFrame):
@@ -101,8 +101,8 @@ class ComponentAttributerChecker(QtGui.QFrame):
 
         font = QtGui.QFont()
         font.setBold(True)
-        stim_type = compAttributes.pop('stim_type')
-        title = QtGui.QCheckBox(stim_type)
+        stimType = compAttributes.pop('stim_type')
+        title = QtGui.QCheckBox(stimType)
         title.setFont(font)
         layout.addWidget(title,0,0)
 
@@ -110,7 +110,7 @@ class ComponentAttributerChecker(QtGui.QFrame):
             layout.addWidget(QtGui.QCheckBox(key),i+1,0)
 
         self.setLayout(layout)
-        self.stimType = stim_type
+        self.stimType = stimType
 
 
     def setChecked(self, tocheck):

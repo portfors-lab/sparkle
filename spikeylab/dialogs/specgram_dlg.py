@@ -15,6 +15,8 @@ class SpecDialog(QtGui.QDialog):
             self.ui.windowCmbx.setCurrentIndex(func_index)
             self.ui.overlapSpnbx.setValue(defaultVals['overlap'])
 
+        # by not creating a copy, this may cause changes if the caller is using
+        # the dict defaultVals
         self.vals = defaultVals
 
     def values(self):

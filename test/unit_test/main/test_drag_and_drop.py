@@ -5,6 +5,7 @@ from spikeylab.main.drag_label import DragLabel
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.dialogs.comment_dlg import CellCommentDialog
 from test.util import robot, qttools
 
 import sys 
@@ -24,10 +25,12 @@ ALLOW = 15
 
 app = None
 def setUp():
+    print 'ALL WIDGETS BEFORE', QtGui.QApplication.allWidgets()
     global app
     app = QtGui.QApplication(sys.argv)
 
 def tearDown():
+    # print 'ALL WIDGETS', QtGui.QApplication.allWidgets()
     global app
     app.exit(0)
 
@@ -223,10 +226,13 @@ class TestDragNDrop():
     def handle_file_dialog(self, fpath):
         dialogs = []
         folder, name = os.path.split(fpath)
-        while len(dialogs) == 0:
+        # while len(dialogs) == 0:
+        modalWidget = None
+        while modalWidget is None:
             print 'searching'
-            topWidgets = QtGui.QApplication.topLevelWidgets()
-            dialogs = [w for w in topWidgets if isinstance(w, QtGui.QDialog)]
+            # topWidgets = QtGui.QApplication.topLevelWidgets()
+            modalWidget = QtGui.QApplication.activeModalWidget()
+            # dialogs = [w for w in topWidgets if isinstance(w, QtGui.QDialog)]
             time.sleep(1)
         # print 'found dialogs', dialogs
         # don't know why but dialog doesn't register as a QFileDialog
@@ -364,8 +370,9 @@ class TestDragNDrop():
         dialogs = []
         while len(dialogs) == 0:
             topWidgets = QtGui.QApplication.topLevelWidgets()
-            dialogs = [w for w in topWidgets if isinstance(w, QtGui.QDialog)]
+            dialogs = [w for w in topWidgets if isinstance(w, CellCommentDialog)]
             time.sleep(1)
+        print 'dialogs', dialogs
         robot.click(qttools.center(dialogs[0].ui.okBtn))
 
     def set_paramters(self, name, vals):

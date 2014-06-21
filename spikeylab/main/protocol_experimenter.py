@@ -14,7 +14,7 @@ class ProtocolExperimenter(Experimenter):
         self.player = FinitePlayer()
 
     def _initialize_run(self):
-        data_items = self.datafile.groups.keys()
+        data_items = self.datafile.keys()
         self.current_dataset_name = next_str_num(self.group_name, data_items)
 
         self.datafile.init_group(self.current_dataset_name)

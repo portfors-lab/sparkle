@@ -4,9 +4,13 @@
 try:
     from PyDAQmx import *
 except:
-    print 'ERROR IMPORTING DEVICE DRIVERS, RUNNING IN DEVELOPMENT MODE'
     from daqmx_stub import *
     from ctypes import *
+
+    import logging
+    logger = logging.getLogger('main')
+    logger.warning('ERROR IMPORTING DEVICE DRIVERS, RUNNING IN DEVELOPMENT MODE')
+
 import numpy as np
 
 class AITask(Task):

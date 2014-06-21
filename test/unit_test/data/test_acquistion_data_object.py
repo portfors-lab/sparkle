@@ -9,7 +9,8 @@ import h5py
 from nose.tools import raises, assert_in, assert_equal
 
 from spikeylab.data.dataobjects import AcquisitionData, increment
-from spikeylab.tools.exceptions import DataIndexError
+from spikeylab.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
+                                        ReadOnlyError
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 
@@ -106,7 +107,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
         acq_data = self.setup_finite(fakedata, nsets)
 
-        np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get('fake/test_1', (1,)), fakedata*1)
 
         acq_data.close()
 
@@ -121,7 +122,7 @@ class TestAcqusitionData():
         fakedata = np.ones((1,npoints))
         acq_data = self.setup_finite(fakedata, nsets)
         
-        np.testing.assert_array_equal(acq_data.get('test_1', (2,)), np.squeeze(fakedata*2))
+        np.testing.assert_array_equal(acq_data.get('fake/test_1', (2,)), np.squeeze(fakedata*2))
 
         acq_data.close()
 
@@ -155,9 +156,19 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
         acq_data = self.setup_finite(fakedata, nsets, 'insert')
 
-        np.testing.assert_array_equal(acq_data.get('test_1', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get('fake/test_1', (1,)), fakedata*1)
 
         acq_data.close()
+
+    def test_finite_dataset_single_point(self):
+
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname)
+
+        acq_data.init_data('fake', (1,))
+        acq_data.append('fake', [1])
+
+        np.testing.assert_array_equal(acq_data.get('fake/test_1'), [1])
 
     def test_finite_dataset_save(self):
         nsets = 3
@@ -357,6 +368,61 @@ class TestAcqusitionData():
         assert reloaded_acq_data.calibration_list() == [calname]
         reloaded_acq_data.close()
 
+    def test_nested_group(self):
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+
+        gname = 'outer/inner'
+        acq_data = self.setup_finite(fakedata, nsets, groupname=gname)
+        
+        # auto naming of tests is regardless of group
+        np.testing.assert_array_equal(acq_data.get(gname + '/test_1', (1,)), fakedata*1)
+        acq_data.close()
+
+        # make sure this is at the proper hierarchy in a raw HDF5 file
+        hfile = h5py.File(acq_data.filename)
+        assert hfile.keys() == ['outer']
+        assert hfile['outer'].keys() == ['inner']
+        assert hfile['outer']['inner']['test_1'].shape == (nsets, npoints)
+
+        hfile.close()
+
+        # test the AcquisitionData class's ability to reload nested groups
+        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='r')
+        reloaded_data = reloaded_acq_data.get(gname + '/test_1')
+        assert reloaded_data.shape == (nsets, npoints)
+
+    def test_read_only_data(self):
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+        acq_data = self.setup_finite(fakedata, nsets)
+        acq_data.close()
+
+        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='r')
+        assert reloaded_acq_data.hdf5.keys() == ['fake']
+        reloaded_data = reloaded_acq_data.get('fake/test_1')
+        assert reloaded_data.shape == (nsets, npoints)
+
+        reloaded_acq_data.close()
+
+    @raises(ReadOnlyError)
+    def test_read_only_write_error(self):
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+        acq_data = self.setup_finite(fakedata, nsets)
+        acq_data.close()
+
+        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='r')
+        reloaded_acq_data.init_data('fake1', (nsets, npoints))
+
+    @raises(DisallowedFilemodeError)
+    def test_bad_filemode_error(self):
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname, filemode='w+')
+
     def setup_calibration(self, calname, caldata):
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
@@ -375,18 +441,20 @@ class TestAcqusitionData():
 
         return acq_data
 
-    def setup_finite(self, fakedata, nsets, operation='append'):
-        npoints = len(np.squeeze(fakedata))
+    def setup_finite(self, fakedata, nsets, operation='append', groupname='fake'):
+        # npoints = len(np.squeeze(fakedata))
+        fakedata = np.array(fakedata)
+        npoints = max(fakedata.shape)
         print 'len {} and shape {}'.format(len(fakedata), fakedata.shape)
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)
 
-        acq_data.init_data('fake', (nsets, npoints))
+        acq_data.init_data(groupname, (nsets, npoints))
         for iset in range(nsets):
             if operation == 'append':
-                acq_data.append('fake', fakedata*iset)
+                acq_data.append(groupname, fakedata*iset)
             else:
-                acq_data.insert('fake', [iset], fakedata*iset)
+                acq_data.insert(groupname, [iset], fakedata*iset)
 
         return acq_data

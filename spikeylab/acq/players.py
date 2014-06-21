@@ -54,9 +54,9 @@ class PlayerBase():
         try:
             self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=trigger)
             self.aotask.write(self.stim)
-            try:
+            if self.attenuator is not None:
                 self.attenuator.SetAtten(self.atten)
-            except:
+            else:
                 # print "ERROR: attenuation not set!"
                 pass
                 # raise

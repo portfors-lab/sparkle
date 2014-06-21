@@ -54,6 +54,8 @@ class TestStimulusEditor():
 
         assert self.editor.previewFig is not None
 
+        self.editor.previewFig.close()
+        
     def test_save(self):
         self.editor.show()
         QApplication.processEvents()

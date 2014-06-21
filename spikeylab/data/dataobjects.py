@@ -6,7 +6,8 @@ import os
 import socket
 import logging
 
-from spikeylab.tools.exceptions import DataIndexError
+from spikeylab.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
+                                        ReadOnlyError
 from spikeylab.tools.util import convert2native, max_str_num
 
 class AcquisitionData():
@@ -24,7 +25,7 @@ class AcquisitionData():
     """
     def __init__(self, filename, user='unknown', filemode='w-'):
         if filemode not in ['w-', 'a', 'r']:
-            raise Exception("Unknown or unallowed filemode {}".format(filemode))
+            raise DisallowedFilemodeError(filename, filemode)
         self.hdf5 = h5py.File(filename, filemode)
         self.filename = filename
 
@@ -35,7 +36,6 @@ class AcquisitionData():
         self.datasets = {}
         self.meta = {}
         if filemode == 'w-':
-            self.groups = {}
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
             self.hdf5.attrs['who'] = user
             # self.hdf5.attrs['computername'] = os.environ['COMPUTERNAME']
@@ -49,7 +49,6 @@ class AcquisitionData():
             # print 'data file keys', self.hdf5.keys()
             group_prefix = 'segment_'
             dset_prefix = 'test_'
-            self.groups = dict(self.hdf5.items())
             gnum = max_str_num(group_prefix, self.hdf5.keys())
             if gnum > 0:
                 self.test_count = max_str_num(dset_prefix, self.hdf5[group_prefix + str(gnum)].keys())
@@ -63,18 +62,7 @@ class AcquisitionData():
         # bad hack!
         if 'closed' in self.hdf5.__repr__().lower():
             return
-        # check that all stim doc has closing brackets
-        if self.hdf5.mode != 'r':
-            for key in self.datasets.keys():
-                # print 'checking key', key
-                if 'stim' in self.datasets[key].attrs.keys():
-                    if self.datasets[key].attrs['stim'][-1] != ']':
-                        self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
-            for key in self.groups.keys():
-                if 'stim' in self.groups[key].attrs.keys():
-                    if self.groups[key].attrs['stim'][-1] != ']':
-                        self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']'
-        
+
         fname = self.hdf5.filename
 
         # if there was no data saved, just remove the file
@@ -95,20 +83,19 @@ class AcquisitionData():
                 repack(fname)
 
     def close_data(self, key):
-        if key in self.datasets:
-            if 'stim' in self.datasets[key].attrs.keys():
-                self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'][:-1] + ']'
-        if key in self.groups:
-            if 'stim' in self.groups[key].attrs.keys():
-                self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'][:-1] + ']' 
-    
+        pass
+
     def init_group(self, key, mode='finite'):
         """create a high level group"""
-        self.groups[key] = self.hdf5.create_group(key)
+        # regular error thrown for write attempt on read only not informative enough for me
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
+        # self.groups[key] = self.hdf5.create_group(key)
+        self.hdf5.create_group(key)
         self.meta[key] = {'mode': mode}
         if mode == 'calibration':
             self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 
-                              'mode':'calibration', 'stim': '[ '})
+                              'mode':'calibration', 'stim': '[]'})
 
         logger = logging.getLogger('main')
         logger.info('Created data group %s' % key)
@@ -127,30 +114,33 @@ class AcquisitionData():
         :param mode: the kind of acquisition taking place
         :type mode: str
         """
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
         if mode == 'calibration':
             setname = nested_name
-            self.datasets[nested_name] = self.groups[key].create_dataset(setname, dims)
+            self.hdf5[key].create_dataset(setname, dims)
             self.meta[nested_name] = {'cursor':[0]*len(dims)}
         elif mode == 'finite':
             self.test_count +=1
             setname = 'test_'+str(self.test_count)
             setpath ='/'.join([key, setname])
-            if not key in self.groups:
+            if not key in self.hdf5:
                 self.init_group(key)
-            self.datasets[setname] = self.groups[key].create_dataset(setname, dims)
+            print 'creating dataset', dims
+            self.hdf5[key].create_dataset(setname, dims)
             self.meta[setname] = {'cursor':[0]*len(dims)}
             self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
-                              'mode':mode, 'stim': '[ '})
+                              'mode':mode, 'stim': '[]'})
         elif mode == 'open':
             if len(dims) > 1:
                 print "open acquisition only for single dimension data"
                 return
             setname = key
-            self.datasets[key] = self.hdf5.create_dataset(setname, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
+            self.hdf5.create_dataset(setname, ((self.open_set_size,) + dims), maxshape=((None,) + dims))
             self.meta[key] = {'mode':mode, 'cursor':0}
             setpath = key
             self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 
-                              'mode':mode, 'stim': '[ '})
+                              'mode':mode, 'stim': '[]'})
         elif mode == 'continuous':
             self.datasets[key+'_set1'] = self.hdf5.create_dataset(key+'_set1', (self.chunk_size,))
             self.datasets[key+'_set1'].attrs['stim'] = ''
@@ -169,6 +159,10 @@ class AcquisitionData():
         """
         Inserts data sequentially to structure in repeated calls.
         """
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
+        # make sure data is numpy array
+        data = np.array(data)
         mode = self.meta[key]['mode']
         if mode == 'finite' or mode == 'calibration':
             if nested_name is None:
@@ -182,15 +176,15 @@ class AcquisitionData():
                 index = current_location[:-len(data.shape)]
             # if data does crosses dimensions of datastructure, raise error
             # turn the index into a tuple so not to trigger advanced indexing
-            self.datasets[setname][tuple(index)] = data[:]
-            dims = self.datasets[setname].shape
+            self.hdf5[key][setname][tuple(index)] = data[:]
+            dims = self.hdf5[key][setname].shape
             increment(current_location, dims, data.shape)
         elif mode =='open':
             current_index = self.meta[key]['cursor']
-            self.datasets[key][current_index] = data
+            self.hdf5[key][current_index] = data
             current_index += 1
-            if current_index == self.datasets[key].shape[0]:
-                self.datasets[key].resize(current_index+self.open_set_size, axis=0)
+            if current_index == self.hdf5[key].shape[0]:
+                self.hdf5[key].resize(current_index+self.open_set_size, axis=0)
             self.meta[key]['cursor'] = current_index
         elif mode =='continuous':
             # assumes size of data < chunk size
@@ -221,12 +215,14 @@ class AcquisitionData():
         Inserts data to index location. For 'finite' mode only. Does not affect
         appending location marker.
         """
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
         mode = self.meta[key]['mode']
         if mode == 'finite':
             setname = 'test_'+str(self.test_count)
             # turn the index into a tuple so not to trigger advanced indexing
             index = tuple(index)
-            self.datasets[setname][index] = data[:]
+            self.hdf5[key][setname][index] = data[:]
         else:
             print "insert not supported for mode: ", mode
 
@@ -234,19 +230,20 @@ class AcquisitionData():
         """
         Return data for key at specified index
         """
+        print 'keys', self.hdf5.keys()
         if index is not None:
             index = tuple(index)
-            data = self.datasets[key][index]
+            data = self.hdf5[key][index]
         else:
-            data = self.datasets[key][:]
+            data = self.hdf5[key][:]
         return data
 
     def get_info(self, key):
         return self.hdf5[key].attrs.items()
 
     def get_calibration(self, key, reffreq):
-        cal_vector = self.groups[key]['calibration_intensities'].value
-        stim_info = json.loads(self.groups[key].attrs['stim'])
+        cal_vector = self.hdf5[key]['calibration_intensities'].value
+        stim_info = json.loads(self.hdf5[key].attrs['stim'])
         fs = stim_info[0]['samplerate_da']
         npts = len(cal_vector)
         frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
@@ -261,7 +258,7 @@ class AcquisitionData():
 
     def calibration_list(self):
         cal_names = []
-        for grpky in self.groups.keys():
+        for grpky in self.hdf5.keys():
             if 'calibration' in grpky:
                 cal_names.append(grpky)
         return cal_names
@@ -271,7 +268,7 @@ class AcquisitionData():
         Removes empty rows from dataset
         """
         current_index = self.meta[key]['cursor']
-        self.datasets[key].resize(current_index, axis=0)
+        self.hdf5[key].resize(current_index, axis=0)
 
     def consolidate(self, key):
         """
@@ -305,6 +302,10 @@ class AcquisitionData():
             self.datasets[key][setnum*self.chunk_size:(setnum*self.chunk_size)+current_index] = self.datasets[key+'_set'+str(setnum+1)][:current_index]
             self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + self.datasets[key+'_set'+str(setnum+1)].attrs['stim']
 
+        # make sure we have a closing bracket
+        if self.datasets[key].attrs['stim'][-1] != ']':
+            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + ']'
+        
         # copy back attributes from placeholder
         for k, v in attr_tmp:
             self.datasets[key].attrs[k] = v
@@ -315,10 +316,13 @@ class AcquisitionData():
             del self.hdf5[key+'_set'+str(iset+1)]
 
         print 'consolidated', self.hdf5.keys()
+        print 'stim attr', self.datasets[key].attrs['stim']
+        print
         self.needs_repack = True
 
     def delete_group(self, key):
-        del self.groups[key]
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
         del self.hdf5[key]
         self.needs_repack = True
 
@@ -326,6 +330,8 @@ class AcquisitionData():
         logger.info('Deleted data group %s' % key)
 
     def set_metadata(self, key, attrdict):
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
         # key is an iterable of group keys (str), with the last
         # string being the attribute name
         if key == '':
@@ -336,23 +342,39 @@ class AcquisitionData():
                 if val is None:
                     val = '' # can't save None attribute value to HDF5
                 self.hdf5[key].attrs[attr] = val
-        
-
+ 
     def append_trace_info(self, key, stim_data):
+        if self.hdf5.mode == 'r':
+            raise ReadOnlyError(self.filename)
         # append data to json list?
         if not isinstance(stim_data, basestring):
             stim_data = json.dumps(convert2native(stim_data))
         mode = self.meta[key]['mode']
         if mode == 'open':
-            self.datasets[key].attrs['stim'] = self.datasets[key].attrs['stim'] + stim_data + ','
+            append_stim(self.hdf5, key, stim_data)
         if mode == 'finite':
-            setname = 'test_'+str(self.test_count)
-            self.datasets[setname].attrs['stim'] = self.datasets[setname].attrs['stim'] + stim_data + ','
+            setname = key + '/' + 'test_'+str(self.test_count)
+            append_stim(self.hdf5, setname, stim_data)
         elif mode =='continuous':
             setnum = self.meta[key]['set_counter']
-            self.datasets[key+'_set'+str(setnum)].attrs['stim'] = self.datasets[key+'_set'+str(setnum)].attrs['stim'] + stim_data + ','
+            setname = key+'_set'+str(setnum)
+            append_stim(self.hdf5, setname, stim_data)
         elif mode == 'calibration':
-            self.groups[key].attrs['stim'] = self.groups[key].attrs['stim'] + stim_data + ','
+            append_stim(self.hdf5, key, stim_data)
+
+    def keys(self):
+        return self.hdf5.keys()
+
+def append_stim(container, key, stim_data):
+    if container[key].attrs['stim'] == '[]':
+         # first addition
+        existing_stim = '['
+    elif container[key].attrs['stim'] == '':
+        existing_stim = ''
+    else:
+        # removing closing bracket and add comma
+        existing_stim = container[key].attrs['stim'][:-1] + ','
+    container[key].attrs['stim'] = existing_stim + stim_data + ']'
 
 def increment(index, dims, data_shape):
     data_shape = data_shape

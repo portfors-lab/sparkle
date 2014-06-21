@@ -2,8 +2,8 @@ import os
 from PyQt4 import QtGui
 
 class SavingDialog(QtGui.QFileDialog):
-    def __init__(self, defaultFile=None):
-        QtGui.QFileDialog.__init__(self)
+    def __init__(self, defaultFile=None, *args, **kwargs):
+        QtGui.QFileDialog.__init__(self, *args, **kwargs)
         self.setNameFilter("data files (*.hdf5 *.h5)")
         self.setLabelText(QtGui.QFileDialog.Reject, 'Quit')
         self.setLabelText(QtGui.QFileDialog.Accept, '---')

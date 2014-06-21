@@ -65,7 +65,7 @@ class CalibrationExperimenterBS(Experimenter):
 
     def _initialize_run(self):
        
-        data_items = self.datafile.groups.keys()
+        data_items = self.datafile.keys()
         self.current_dataset_name = next_str_num(self.group_name, data_items)
         
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
@@ -104,7 +104,7 @@ class CalibrationExperimenterBS(Experimenter):
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
         of speaker to get frequency vs. attenuation curve."""
-        avg_signal = np.mean(self.datafile.get('signal'), axis=0)
+        avg_signal = np.mean(self.datafile.get(self.current_dataset_name + '/signal'), axis=0)
 
         diffdB = calc_attenuation_curve(self.stimulus.signal()[0], avg_signal,
                                         self.stimulus.samplerate(), self.calf)

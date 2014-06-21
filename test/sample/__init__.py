@@ -12,5 +12,8 @@ def samplewav():
 def calibration_filename():
     return os.path.join(sampledir(), 'calibration.hdf5')
 
+def datafile():
+    return os.path.join(sampledir(), 'dummydata.hdf5')
+
 def test_template():
     return os.path.join(sampledir(), 'multitone.json')

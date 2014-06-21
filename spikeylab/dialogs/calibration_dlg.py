@@ -32,6 +32,7 @@ class CalibrationDialog(QtGui.QDialog):
             x, freqs = self.datafile.get_calibration(self.ui.calChoiceCmbbx.currentText(), self.ui.calfSpnbx.value()*self.fscale)
             self.ui.frangeLowSpnbx.setValue(freqs[0]/self.fscale)
             self.ui.frangeHighSpnbx.setValue(freqs[-1]/self.fscale)
+            print 'set freq range', freqs[0], freqs[-1], freqs[0]/self.fscale, freqs[-1]/self.fscale
         except IOError:
             QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
         except KeyError:
@@ -42,7 +43,7 @@ class CalibrationDialog(QtGui.QDialog):
             attenuations, freqs = self.datafile.get_calibration(self.ui.calChoiceCmbbx.currentText(), self.ui.calfSpnbx.value()*self.fscale)
             self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
             self.pw.setWindowFlags(QtCore.Qt.Window)
-            self.pw.set_labels('Frequency', 'Attenuation', 'Calibration Curve')
+            self.pw.setLabels('Frequency', 'Attenuation', 'Calibration Curve')
             self.pw.show()
         except IOError:
             QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")

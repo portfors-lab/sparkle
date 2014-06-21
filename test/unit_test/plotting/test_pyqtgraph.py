@@ -23,6 +23,7 @@ def setUp():
     app = QApplication(sys.argv)
 
 def tearDown():
+    QApplication.closeAllWindows()    
     global app
     app.exit(0)
 

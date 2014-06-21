@@ -16,6 +16,7 @@ class ControlWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self, parent)
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.calibrationDisplay = self.ui.plotDock.displays['calibration']
         self.extendedDisplay = self.ui.plotDock.displays['calexp']
