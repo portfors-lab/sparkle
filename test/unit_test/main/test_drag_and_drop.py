@@ -23,19 +23,10 @@ import test.sample as sample
 PAUSE = 200
 ALLOW = 15
 
-app = None
-def setUp():
-    print 'ALL WIDGETS BEFORE', QtGui.QApplication.allWidgets()
-    global app
-    app = QtGui.QApplication(sys.argv)
-
-def tearDown():
-    # print 'ALL WIDGETS', QtGui.QApplication.allWidgets()
-    global app
-    app.exit(0)
-
 class TestDragNDrop():
     def setUp(self):
+        self.app = QtGui.QApplication(sys.argv)
+
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w')
@@ -49,11 +40,13 @@ class TestDragNDrop():
     def tearDown(self):
         self.form.close()
         QtGui.QApplication.closeAllWindows()
+
         # delete all data files in temp folder -- this will also clear out past
         # test runs that produced errors and did not delete their files
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
+        del self.app
 
     def test_tone_explore_defaults(self):
         """The defaults should combine to be a viable set-up"""

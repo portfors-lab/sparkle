@@ -19,9 +19,9 @@ def setUp():
 
 def tearDown():
     QApplication.closeAllWindows()
+    QApplication.processEvents()
     global app
-    app.exit(0)
-
+    del app
 
 class TestCalibrationDialog():
     def setUp(self):

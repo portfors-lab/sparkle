@@ -50,9 +50,9 @@ class TCFactory(StimFactory):
         tuning_curve.setData(tuning_curve.index(0,0), 'frequency', role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(0,1), 1, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(0,2), 100, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,3), 10, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,3), 20, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,1), 70, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(1,1), 90, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)
 
@@ -81,8 +81,8 @@ class CCFactory(StimFactory):
 
         tuning_curve.setData(tuning_curve.index(0,0), 'frequency', role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(0,1), 0, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,2), 200, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,3), 10, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,2), 100, role=QtCore.Qt.EditRole)
+        tuning_curve.setData(tuning_curve.index(0,3), 20, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,1), 90, role=QtCore.Qt.EditRole)
         tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)

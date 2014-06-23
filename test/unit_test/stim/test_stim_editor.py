@@ -1,5 +1,6 @@
 import os
 import json
+import threading, time
 
 from PyQt4.QtTest import QTest 
 from PyQt4.QtGui import QApplication
@@ -17,8 +18,10 @@ def setUp():
     app = QApplication([])
 
 def tearDown():
+    QApplication.closeAllWindows()
+    QApplication.processEvents()
     global app
-    app.exit(0)
+    del app
 
 class TestStimulusEditor():
 
@@ -46,6 +49,7 @@ class TestStimulusEditor():
 
     def tearDown(self):
         self.editor.close()
+        self.editor.deleteLater()
 
     def test_preview(self):
         
