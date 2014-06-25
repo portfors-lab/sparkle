@@ -10,7 +10,7 @@ class RasterBoundsDialog(QtGui.QDialog, Ui_RasterBoundsDialog):
             self.lowerLnedt.setText(str(bounds[0]))
             self.upperLnedt.setText(str(bounds[1]))
 
-    def getValues(self):
+    def values(self):
         lower = float(self.lowerLnedt.text())
         upper = float(self.upperLnedt.text())
         return (lower, upper)

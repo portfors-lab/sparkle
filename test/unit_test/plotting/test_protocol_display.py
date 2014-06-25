@@ -37,6 +37,17 @@ class TestProtocolDisplay():
         display.setNreps(5)
 
         display.updateSpec(samplewav())
+        display.specAutoRange()
+        QApplication.processEvents()
+        assert display.specPlot.hasImg()
+        time.sleep(PAUSE)
+        display.updateSpec(None)
+        QApplication.processEvents()
+        assert not display.specPlot.hasImg()
+        time.sleep(PAUSE)
+        display.showSpec(samplewav())
+        QApplication.processEvents()
+        assert display.specPlot.hasImg()
 
         data = self.data_func(3)
         nbins = 50

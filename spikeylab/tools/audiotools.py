@@ -34,11 +34,6 @@ def calc_db(peak, cal_peak=None):
         pbdB = 94 + (20.*np.log10((peak)/mphone_sensitivity))
     return pbdB
 
-def calc_noise(fft_vector, ix1,ix2):
-    fft_slice = fft_vector[ix1:ix2]
-    area = trapz(fft_slice)
-    return area
-
 def calc_spectrum(signal,rate):
     """Return the spectrum and frequency indexes for real-valued input signal"""
     npts = len(signal)
@@ -88,31 +83,31 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     :type calv: float
     :returns: tone, timevals -- the signal and the time index values
     """
-    npts = dur * samplerate
-    try:
-        amp = (10 ** ((db-caldb)/20)*calv)
+    if risefall*2 > dur:
+        raise ValueError('Duration must be greater than risefall time')
+    if samplerate <= 0:
+        raise ValueError("Samplerate must be greater than 0")
+    if caldb <= 0:
+        raise ValueError("Calibration dB SPL must be greater than 0")
 
-        if VERBOSE:
-            print("current dB: {}, fs: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, samplerate, freq/1000, amp))
-            print("cal dB: {}, V at cal dB: {}".format(caldb, calv))
-    
-        tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
-                  
-        # print 'tone max', np.amax(tone)  
-        if risefall > 0:
-            rf_npts = int(risefall * samplerate)
-            # print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
-            wnd = hann(rf_npts*2) # cosine taper
-            tone[:rf_npts] = tone[:rf_npts] * wnd[:rf_npts]
-            tone[-rf_npts:] = tone[-rf_npts:] * wnd[rf_npts:]
+    npts = int(dur * samplerate)
+    amp = (10 ** ((db-caldb)/20)*calv)
 
-        timevals = np.arange(npts)/samplerate
+    if VERBOSE:
+        print("current dB: {}, fs: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, samplerate, freq/1000, amp))
+        print("cal dB: {}, V at cal dB: {}".format(caldb, calv))
 
-    except:
-        print("WARNING: Unable to produce tone")
-        tone = np.zeros(npts)
-        timevals = np.arange(npts)/samplerate
-        raise
+    tone = amp * np.sin((freq*dur) * np.linspace(0, 2*np.pi, npts))
+              
+    # print 'tone max', np.amax(tone)  
+    if risefall > 0:
+        rf_npts = int(risefall * samplerate)
+        # print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
+        wnd = hann(rf_npts*2) # cosine taper
+        tone[:rf_npts] = tone[:rf_npts] * wnd[:rf_npts]
+        tone[-rf_npts:] = tone[-rf_npts:] * wnd[rf_npts:]
+
+    timevals = np.arange(npts)/samplerate
 
     return tone, timevals
 

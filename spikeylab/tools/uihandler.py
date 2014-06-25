@@ -9,7 +9,7 @@ class LogSignal(QtCore.QObject):
 class TextEditHandler(logging.Handler):
     """Relay log message via a signal to connected widgets. Using a signal
     vs. setting the text here allows for logging messages from threads."""
-    def __init__(self, widget=None):
+    def __init__(self):
         logging.Handler.__init__(self)
         self.signal = LogSignal()
 
@@ -29,6 +29,3 @@ class TextEditHandler(logging.Handler):
             colored_message = m.msg
 
         self.signal.message.emit(colored_message)
-
-    def set_widget(self, widget):
-        self.widget = widget

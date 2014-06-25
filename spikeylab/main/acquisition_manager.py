@@ -93,6 +93,7 @@ class AcquisitionManager():
         return fname
 
     def load_data_file(self, fname):
+        self.close_data()
         self.datafile = AcquisitionData(fname, filemode='a')
 
         self.explorer.set_params(datafile=self.datafile)

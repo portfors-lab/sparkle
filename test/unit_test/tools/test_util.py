@@ -1,6 +1,19 @@
-from spikeylab.tools.util import increment_title, convert2native, next_str_num
+import os, shutil
+
+from spikeylab.tools.util import increment_title, convert2native, \
+                                    next_str_num, create_unique_path
 
 import numpy as np
+
+tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
+
+def setup():
+    if not os.path.exists(tempfolder):
+        os.mkdir(tempfolder)
+
+def teardown():
+    # os.rmdir(tempfolder)
+    shutil.rmtree(tempfolder, ignore_errors=True)
 
 def test_increment_title():
     title = 'ex_4_12-4-13_5'
@@ -47,3 +60,12 @@ def test_next_str_num_numbers():
     next_str = next_str_num(pattern, items)
 
     assert next_str == 'Mouse4974'
+
+def test_create_unique_path_no_existing():
+    path = create_unique_path(tempfolder, 'test_file')
+    assert path == os.path.join(tempfolder,'test_file0.hdf5')
+
+def test_create_unique_path_with_existing():
+    open(os.path.join(tempfolder,'test_file0.hdf5'), 'a').close()
+    path = create_unique_path(tempfolder, 'test_file')
+    assert path == os.path.join(tempfolder,'test_file1.hdf5')

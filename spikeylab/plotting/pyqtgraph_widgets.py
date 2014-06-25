@@ -47,6 +47,9 @@ class BasePlot(pg.PlotWidget):
     def setTitle(self, title):
         self.getPlotItem().setTitle(title)
 
+    def getLabel(self, key):
+        axisItem = self.getPlotItem().axes[key]['item']
+        return axisItem.label.toPlainText()
 
 class TraceWidget(BasePlot):
     nreps = 20
@@ -69,7 +72,7 @@ class TraceWidget(BasePlot):
 
         rasterBoundsAction = QtGui.QAction("Edit raster bounds", None)
         self.scene().contextMenu.append(rasterBoundsAction) #should use function for this?
-        rasterBoundsAction.triggered.connect(self.ask_raster_bounds)
+        rasterBoundsAction.triggered.connect(self.askRasterBounds)
 
         self.threshLine = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.threshLine)
@@ -102,8 +105,8 @@ class TraceWidget(BasePlot):
         self.rasterPlot.clear()
 
     def getThreshold(self):
-        x, y = self.tresh_line.getData()
-        return y[0]
+        y = self.threshLine.value()
+        return y
 
     def setThreshold(self, threshold):
         self.threshLine.setValue(threshold) 
@@ -117,17 +120,14 @@ class TraceWidget(BasePlot):
         self.rasterYmax = lims[1]
         self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
 
-    def ask_raster_bounds(self):
+    def askRasterBounds(self):
         dlg = RasterBoundsDialog(bounds= (self.rasterYmin, self.rasterYmax))
         if dlg.exec_():
-            bounds = dlg.get_values()
+            bounds = dlg.values()
             self.setRasterBounds(bounds)
 
     def getRasterBounds(self):
         return (self.rasterYmin, self.rasterYmax)
-
-    def setTitle(self, title):
-        pass
 
     def rangeChange(self, pw, ranges):
         if hasattr(ranges, '__iter__'):
@@ -161,6 +161,7 @@ class SpecWidget(BasePlot):
 
         self.img = pg.ImageItem()
         self.addItem(self.img)
+        self.imageArray = np.array([[0]])
 
         cmapAction = QtGui.QAction("Edit colormap", None)
         self.scene().contextMenu.append(cmapAction) #should use function for this?
@@ -205,8 +206,8 @@ class SpecWidget(BasePlot):
                 self.specgramArgs[key] = value
 
     def clearImg(self):
+        self.img.setImage(np.array([[0]]))
         self.img.image = None
-        # self.img.setImage(np.array([[0]]))
 
     def hasImg(self):
         return self.img.image is not None
@@ -250,14 +251,13 @@ class FFTWidget(BasePlot):
         self.fftPlot = self.plot(pen='k')
         self.fftPlot.rotate(rotation)
         self.getPlotItem().vb.setCustomMouse()
+        self.setMouseEnabled(x=False,y=True)
 
         if abs(rotation) == 90:
             self.setLabel('left', 'Frequency', units='Hz')
-            self.setMouseEnabled(x=False,y=True)
 
         elif rotation == 0:
             self.setLabel('bottom', 'Frequency', units='Hz')
-            self.setMouseEnabled(x=False,y=True)
 
     def updateData(self, indexData, valueData):
         self.fftPlot.setData(indexData, valueData)
@@ -266,6 +266,7 @@ class SimplePlotWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
         ypoints = np.squeeze(ypoints)
+        print 'ypoints shape', ypoints.shape
         if len(ypoints.shape) > 1:
             for row in ypoints:
                 self.appendData(xpoints, row)
@@ -321,8 +322,8 @@ class ProgressWidget(BasePlot):
         else:
             self.setWindowTitle("Spike Counts")
             self.setTitle("Spike Counts")
-            self.setLabel('bottom', "Test Number")
-            self.setLabel('left', "Spike Count (mean)")
+            self.setLabel('bottom', "Test Number", units='')
+            self.setLabel('left', "Spike Count (mean)", units='')
 
 class PSTHWidget(BasePlot):
     _bins = np.arange(5)
@@ -357,6 +358,9 @@ class PSTHWidget(BasePlot):
         for b in bins:
             self._counts[b] += 1
         self.histo.setOpts(height=self._counts)
+
+    def getData(self):
+        return self.histo.opts['height']
 
 class ChartWidget(QtGui.QWidget):
     def __init__(self, parent=None):

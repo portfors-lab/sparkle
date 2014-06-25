@@ -114,10 +114,6 @@ class PlayerBase():
     def set_aichan(self, aichan):
         self.aichan = aichan
 
-    def set_maxv(self, v):
-        return
-        self.maxv = v
-
     def connect_attenuator(self):
         # establish connection to the attenuator
         try:

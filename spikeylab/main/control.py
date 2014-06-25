@@ -583,17 +583,17 @@ class MainWindow(ControlWindow):
         dlg = ScaleDialog(defaultVals=field_vals)
         if dlg.exec_():
             fscale, tscale = dlg.values()
-            self.update_unit_labels(tscale, fscale)
+            self.updateUnitLabels(tscale, fscale)
         dlg.deleteLater()
 
     def launchSpecgramDlg(self):
-        dlg = SpecDialog(defaultVals=self.spec_args)
+        dlg = SpecDialog(defaultVals=self.specArgs)
         if dlg.exec_():
             argdict = dlg.values()
             self.display.setSpecArgs(**argdict)
             self.exvocal.setSpecArgs(**argdict)
             QtGui.QApplication.processEvents()
-            self.spec_args = argdict
+            self.specArgs = argdict
         dlg.deleteLater()
 
     def launchViewDlg(self):
@@ -623,7 +623,7 @@ class MainWindow(ControlWindow):
 
     def relayCMapChange(self, cmap):
         self.exvocal.update_colormap()
-        self.spec_args['colormap'] = cmap
+        self.specArgs['colormap'] = cmap
 
     def setCalibrationDuration(self):
         winsz = float(self.ui.windowszSpnbx.value())

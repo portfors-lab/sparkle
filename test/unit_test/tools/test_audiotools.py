@@ -12,7 +12,7 @@ from scipy import signal
 from scipy.stats import linregress
 from nose.tools import raises
 
-from numpy.testing import assert_array_almost_equal, assert_almost_equal
+from numpy.testing import assert_array_almost_equal, assert_almost_equal, assert_array_equal
 import matplotlib.pyplot as plt
 
 def data_func(t, f):
@@ -118,7 +118,6 @@ def test_make_tone_regular_at_caldb():
     fs = 100000
     dur = 1
     risefall = 0.002
-    fs = 100000
     calv = 0.1
     caldb = 100
     npts = fs*dur
@@ -126,6 +125,7 @@ def test_make_tone_regular_at_caldb():
     tone, timevals = tools.make_tone(fq, db, dur, risefall, fs, caldb, calv)
 
     assert len(tone) == npts
+    assert len(timevals) == npts
 
     spectrum = np.fft.rfft(tone)
     peak_idx = (abs(spectrum - max(spectrum))).argmin()
@@ -143,14 +143,15 @@ def test_make_tone_irregular():
     fs = 200101
     dur = 0.7
     risefall = 0.0015
-    fs = 100000
     calv = 0.888
     caldb = 99
-    npts = fs*dur
+    npts = int(fs*dur)
 
     tone, timevals = tools.make_tone(fq, db, dur, risefall, fs, caldb, calv)
 
+    print 'lens', npts, len(tone), len(timevals)
     assert len(tone) == npts
+    assert len(timevals) == npts
 
     spectrum = np.fft.rfft(tone)
     peak_idx = (abs(spectrum - max(spectrum))).argmin()
@@ -161,7 +162,57 @@ def test_make_tone_irregular():
     assert np.around((20 * np.log10(np.amax(tone)/calv)) + caldb, 5) == db
 
     print 'durs', np.around(timevals[-1], 5), dur - (1./fs)
-    assert timevals[-1] == dur - (1./fs)
+    assert dur - 2*(1./fs) < timevals[-1] <= dur - (1./fs)
+
+def test_tone_zero_duration():
+    fq = 15000
+    db = 100
+    fs = 100000
+    dur = 0
+    risefall = 0
+    calv = 0.1
+    caldb = 100
+
+    tone, timevals = tools.make_tone(fq, db, dur, risefall, fs, caldb, calv)
+
+    assert len(tone) == 0
+    assert len(timevals) ==0
+
+@raises(ValueError)
+def test_tone_bad_risefall():
+    fq = 15000
+    db = 100
+    fs = 100000
+    dur = 0.1
+    risefall = 0.06
+    calv = 0.1
+    caldb = 100
+
+    tone, timevals = tools.make_tone(fq, db, dur, risefall, fs, caldb, calv)
+
+@raises(ValueError)
+def test_tone_bad_samplerate():
+    fq = 15000
+    db = 100
+    fs = 0
+    dur = 0.1
+    risefall = 0.01
+    calv = 0.1
+    caldb = 100
+
+    tone, timevals = tools.make_tone(fq, db, dur, risefall, fs, caldb, calv)
+
+@raises(ValueError)
+def test_tone_bad_caldb():
+    fq = 15000
+    db = 100
+    fs = 100000
+    dur = 0.1
+    risefall = 0.01
+    calv = 0.1
+    caldb = 0
+
+    tone, timevals = tools.make_tone(fq, db, dur, risefall, fs, caldb, calv)
 
 def test_spectrogram_from_file():
     spec, freqs, bins, duration = tools.spectrogram(sample.samplewav())
@@ -361,6 +412,10 @@ def test_convolve_complex_simple():
     assert_array_almost_equal(tools.convolve_filter(x,x),
                               [0+8j, 0+20j, 0+24j])
 
+def test_convolve_no_impulse():
+    x = np.array([1,2,3])
+    assert_array_equal(tools.convolve_filter(x,None), x)
+
 def test_tukey():
     npts = 100
     win = tools.tukey(npts, 0.1)
@@ -401,3 +456,13 @@ def test_smooth_window_too_small():
 def test_smooth_bad_window():
     x = np.random.random((100,))
     smx = tools.smooth(x, window_len=10, window='tukey')
+
+@raises(ValueError)
+def test_smooth_bad_dim():
+    x = np.ones((10,10))
+    smx = tools.smooth(x, window_len=5)
+
+@raises(ValueError)
+def test_smooth_bad_win_len():
+    x = np.ones((9,))
+    smx = tools.smooth(x, window_len=10)
