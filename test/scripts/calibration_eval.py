@@ -4,8 +4,8 @@ import numpy as np
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
 from spikeylab.plotting.pyqtgraph_widgets import StackedPlot
-from spikeylab.tools.audiotools import tukey, calc_impulse_response, \
-                convolve_filter, smooth, calc_attenuation_curve, multiply_frequencies, \
+from spikeylab.tools.audiotools import tukey, impulse_response, \
+                convolve_filter, smooth, attenuation_curve, multiply_frequencies, \
                 calc_db
 
 from test.scripts.util import calc_error, record, MyTableWidgetItem
@@ -21,7 +21,7 @@ def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     else:
         raise Exception("Unknown calibration method: {}".format(method))
 
-MULT_CAL = False
+MULT_CAL = True
 CONV_CAL = True
 NOISE_CAL = False
 CHIRP_CAL = True
@@ -29,9 +29,9 @@ CHIRP_CAL = True
 SMOOTHINGS = [99]
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
 TRUNCATIONS = [64]
-TRUNCATIONS = [1, 4, 16, 32, 64, 100]
-# DURATIONS = [0.2]
-DURATIONS = [0.1, 0.2, 0.5, 1.0]
+# TRUNCATIONS = [1, 4, 16, 32, 64, 100]
+DURATIONS = [0.2]
+# DURATIONS = [0.1, 0.2, 0.5, 1.0]
 SAMPLERATES = [5e5]
 # SAMPLERATES = [2e5, 3e5, 4e5, 5e5]
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     if NOISE_CAL:
         for durfs, signals in noise_signals.items():
             # generate unsmoothed calibration attenuation vector
-            noise_curve_db = calc_attenuation_curve(signals[0], signals[1], durfs[1], calf, smooth_pts=0)
+            noise_curve_db = attenuation_curve(signals[0], signals[1], durfs[1], calf, smooth_pts=0)
             freqs = freqq[durfs]
             noise_curve_db -= noise_curve_db[freqs == calf]
             info = {'signal':'noise', 'durfs': durfs}
@@ -122,16 +122,16 @@ if __name__ == "__main__":
                     info['smoothing'] = sm
                     for trunc in TRUNCATIONS:
                         info['truncation'] = trunc
-                        impulse_response = calc_impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
-                        info['len'] = len(impulse_response)
-                        info['calibration'] = impulse_response
+                        ir = impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
+                        info['len'] = len(ir)
+                        info['calibration'] = ir
                         calibration_methods.append(info.copy())
 
 
     if CHIRP_CAL:
         for durfs, signals in chirp_signals.items():
             
-            chirp_curve_db = calc_attenuation_curve(signals[0], signals[1], durfs[1], calf, smooth_pts=0)
+            chirp_curve_db = attenuation_curve(signals[0], signals[1], durfs[1], calf, smooth_pts=0)
             freqs = freqq[durfs]    
             chirp_curve_db -= chirp_curve_db[freqs == calf]
             info = {'signal':'chirp', 'durfs': durfs}
@@ -153,9 +153,9 @@ if __name__ == "__main__":
                     info['smoothing'] = sm
                     for trunc in TRUNCATIONS:
                         info['truncation'] = trunc
-                        impulse_response = calc_impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
-                        info['len'] = len(impulse_response)
-                        info['calibration'] = impulse_response
+                        ir = impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
+                        info['len'] = len(ir)
+                        info['calibration'] = ir
                         calibration_methods.append(info.copy())
 
     print 'number of cals to perform', len(calibration_methods)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
         if TONE_CURVE:
             fig0 = StackedPlot()
             for cal_params in calibration_methods:
-                fig0.add_plot(tone_frequencies, cal_params['tone_curve'], 
+                fig0.addPlot(tone_frequencies, cal_params['tone_curve'], 
                              title='Tones {}, {}, sm:{}, trunc:{}'.format(cal_params['method'],
                              cal_params['signal'], cal_params['smoothing'], 
                               cal_params['truncation']))
@@ -270,7 +270,7 @@ if __name__ == "__main__":
         fig1 = StackedPlot()
         spectrum = abs(np.fft.rfft(wn_signal)/npts)
         spectrum = refdb + 20 * np.log10(spectrum/ refv)
-        fig1.add_plot(freqs, spectrum, title='desired')
+        fig1.addPlot(freqs, spectrum, title='desired')
         for cal_params in calibration_methods:
             dur = cal_params['durfs'][0]
             fs = cal_params['durfs'][1]
@@ -282,7 +282,7 @@ if __name__ == "__main__":
             print 'noise received overall db', masterdb
             # spectrum[0] = 0
             freqs = freqq[cal_params['durfs']]
-            fig1.add_plot(freqs, spectrum, title='{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
+            fig1.addPlot(freqs, spectrum, title='{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['truncation']))
         fig1.setWindowTitle('Noise stim')
@@ -291,21 +291,21 @@ if __name__ == "__main__":
         fig2 = StackedPlot()
         spectrum = abs(np.fft.rfft(chirp_signal)/npts)
         spectrum = refdb + 20 * np.log10(spectrum/ refv)
-        # fig2.add_plot(freqs, spectrum, title='desired')
-        fig2.add_spectrogram(chirp_signal, fs, title='desired')
+        # fig2.addPlot(freqs, spectrum, title='desired')
+        fig2.addSpectrogram(chirp_signal, fs, title='desired')
         for cal_params in calibration_methods:
             freqs = freqq[cal_params['durfs']]
             fs = cal_params['durfs'][1]
             ttl = '{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['truncation'])
-            fig2.add_spectrogram(cal_params['chirp_response'], fs, title=ttl)
+            fig2.addSpectrogram(cal_params['chirp_response'], fs, title=ttl)
             # spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
             # spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             # rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
             # masterdb = 94 + (20.*np.log10(rms/(0.004)))
             # spectrum[0] = 0
-            # fig2.add_plot(freqs, spectrum, title=ttl)
+            # fig2.addPlot(freqs, spectrum, title=ttl)
             print 'chirp received overall db', masterdb
         fig2.setWindowTitle('Chirp stim')
         fig2.show()

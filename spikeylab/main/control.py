@@ -518,7 +518,7 @@ class MainWindow(ControlWindow):
                 self.extendedDisplay.updateSpec(signal, fs, plot='stim')
                 # this actually auto ranges the response plots, but we only
                 # need to do this when the stim changes
-                self.extendedDisplay.autoRange0()
+                self.extendedDisplay.autoRange()
 
     def reportProgress(self, itest, itrace, stimInfo):
         # print 'progress', stimInfo

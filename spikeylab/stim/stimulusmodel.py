@@ -4,7 +4,7 @@ import numpy as np
 import logging
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.tools.audiotools import calc_spectrum, smooth, calc_impulse_response, convolve_filter, tukey
+from spikeylab.tools.audiotools import calc_spectrum, smooth, impulse_response, convolve_filter, tukey
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
@@ -85,7 +85,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 self.impulseResponse = StimulusModel.kernelCache[fs]
             else:
                 logger.debug('---->calculating new filter for fs {}'.format(fs))
-                self.impulseResponse = calc_impulse_response(fs, dbBoostArray, frequencies, frange)
+                self.impulseResponse = impulse_response(fs, dbBoostArray, frequencies, frange)
                 # mutable type so will affect data structure persistently
                 StimulusModel.kernelCache[fs] = self.impulseResponse
 
@@ -93,7 +93,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             # we are very likely to need it, and it's better to have this done
             # up front, than cause lag in the UI later
             if DEFAULT_SAMPLERATE not in StimulusModel.kernelCache:
-                StimulusModel.kernelCache[DEFAULT_SAMPLERATE] = calc_impulse_response(DEFAULT_SAMPLERATE, dbBoostArray, frequencies, frange)
+                StimulusModel.kernelCache[DEFAULT_SAMPLERATE] = impulse_response(DEFAULT_SAMPLERATE, dbBoostArray, frequencies, frange)
 
             # hang on to these for re-calculating impulse response on samplerate change
             self._attenuationVector = dbBoostArray

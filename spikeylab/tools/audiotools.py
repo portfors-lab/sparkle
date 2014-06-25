@@ -23,15 +23,15 @@ def calc_db(peak, cal_peak=None):
     Converts voltage difference into decibels : 20*log10(peak/cal_peak)
     If calpeak not provided uses microphone sensitivity value from config file
     """
-    try:
-        if cal_peak:
-            pbdB = 20 * np.log10(peak/cal_peak)
-        else:
-            pbdB = 94 + (20.*np.log10((peak/np.sqrt(2))/mphone_sensitivity))
-    except ZeroDivisionError:
-        print u'attempted division by zero:'
-        print u'peak {}, caldb {}, calpeak {}'.format(peak, caldb, cal_peak)
-        pbdB = np.nan
+    if cal_peak is not None:
+        if cal_peak == 0:
+            if peak == 0:
+                return 0
+            else:
+                return np.nan
+        pbdB = 20 * np.log10(peak/cal_peak)
+    else:
+        pbdB = 94 + (20.*np.log10((peak)/mphone_sensitivity))
     return pbdB
 
 def calc_noise(fft_vector, ix1,ix2):
@@ -255,13 +255,13 @@ def convolve_filter(signal, impulse_response):
         return signal
 
 
-def calc_impulse_response(genrate, fresponse, frequencies, frange, truncation_factor=64):
+def impulse_response(genrate, fresponse, frequencies, frange, truncation_factor=64, db=True):
     """
     Calculate filter kernel from attenuation vector.
     Attenuation vector should represent magnitude frequency response of system
     :param genrate: The generation samplerate at which the test signal was played
     :type genrate: int
-    :param fresponse: Frequency response of the system, i.e. relative attenuations of frequencies
+    :param fresponse: Frequency response of the system in dB, i.e. relative attenuations of frequencies
     :type fresponse: numpy.ndarray
     :param frequencies: corresponding frequencies for the fresponse
     :type frequencies: numpy.ndarray
@@ -269,6 +269,8 @@ def calc_impulse_response(genrate, fresponse, frequencies, frange, truncation_fa
     :type frange: (int, int)
     :param truncation_factor: the factor by which to reduce the size of the impluse repsonse. e.g. a factor of 4 will produce an impulse response that is 1/4 the length of the input signal.
     :type truncation_factor: int
+    :param db: whether the fresponse given is the a vector of multiplication or decibel factors
+    :type db: bool
     :returns: numpy.ndarray -- the impulse response
     """
 
@@ -285,7 +287,10 @@ def calc_impulse_response(genrate, fresponse, frequencies, frange, truncation_fa
     f1 = (np.abs(freq-highf)).argmin()
     fmax = (np.abs(freq-max_freq)).argmin()
     attenuations[f0:f1] = fresponse[f0:f1]*tukey(len(fresponse[f0:f1]), winsz)
-    freq_response = 10**((attenuations).astype(float)/20)
+    if db:
+        freq_response = 10**((attenuations).astype(float)/20)
+    else:
+        freq_response = attenuations
 
     freq_response = freq_response[:fmax]
 
@@ -295,14 +300,14 @@ def calc_impulse_response(genrate, fresponse, frequencies, frange, truncation_fa
     impulse_response = np.roll(impulse_response, len(impulse_response)//2)
 
     # truncate
-    impulse_response = impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//2):(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//2)]
+    impulse_response = impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//4)-1:(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//4)+1]
     
     # should I also window the impulse response - by how much?
     impulse_response = impulse_response * tukey(len(impulse_response), 0.05)
 
     return impulse_response
 
-def calc_attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
+def attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
     """
     Calculate an attenuation roll-off curve, from a signal and its recording
 
@@ -317,9 +322,7 @@ def calc_attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
     :returns: numpy.ndarray -- attenuation vector
     """
     # remove dc offset
-    resp = resp - np.mean(resp)
-
-    y = resp
+    y = resp - np.mean(resp)
     x = signal
 
     # convert time signals to frequency domain
@@ -346,11 +349,12 @@ def calc_attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
 
     # shift by the given calibration frequency to align attenutation
     # with reference point set by user
-    diffdB -= diffdB[fq == calf]
+    fidx = (np.abs(fq-calf)).argmin()
+    diffdB -= diffdB[fidx]
 
     return diffdB
 
-def bb_calibration(signal, resp, fs, frange):
+def calibrate_signal(signal, resp, fs, frange):
     """Given original signal and recording, spits out a calibrated signal"""
     # remove dc offset from recorded response (synthesized orignal shouldn't have one)
     dc = np.mean(resp)
@@ -381,7 +385,7 @@ def bb_calibration(signal, resp, fs, frange):
     return np.fft.irfft(A)
 
 
-def multiply_frequencies(signal, fs, frange, calfqs, calvals):
+def multiply_frequencies(signal, fs, frange, calibration_frequencies, calvals):
     """Given a vector of dB attenuations, adjust signal by 
        multiplication in the frequency domain"""
     pad_factor = 1.2
@@ -393,21 +397,25 @@ def multiply_frequencies(signal, fs, frange, calfqs, calvals):
     f0 = (np.abs(f-frange[0])).argmin()
     f1 = (np.abs(f-frange[1])).argmin()
 
-    cal_func = interp1d(calfqs, calvals)
+    cal_func = interp1d(calibration_frequencies, calvals)
     frange = f[f0:f1]
     Hroi = cal_func(frange)
     H = np.zeros((len(X),))
     H[f0:f1] = Hroi
 
     H = smooth(H)
+    print 'H dB max', np.amax(H)
 
     H = 10**((H).astype(float)/20)
+    print 'H amp max', np.amax(H)
 
     # Xadjusted = X.copy()
     # Xadjusted[f0:f1] *= H
     # Xadjusted = smooth(Xadjusted)
 
     Xadjusted = X*H
+    print 'X max', np.amax(abs(X))
+    print 'Xadjusted max', np.amax(abs(Xadjusted))
 
     signal_calibrated = np.fft.irfft(Xadjusted)
     return signal_calibrated[:len(signal)]

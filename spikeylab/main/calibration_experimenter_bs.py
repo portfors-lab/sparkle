@@ -5,7 +5,7 @@ import numpy as np
 from spikeylab.tools.util import create_unique_path
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from spikeylab.tools.audiotools import calc_attenuation_curve
+from spikeylab.tools.audiotools import attenuation_curve
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.data.dataobjects import AcquisitionData
@@ -106,7 +106,7 @@ class CalibrationExperimenterBS(Experimenter):
         of speaker to get frequency vs. attenuation curve."""
         avg_signal = np.mean(self.datafile.get(self.current_dataset_name + '/signal'), axis=0)
 
-        diffdB = calc_attenuation_curve(self.stimulus.signal()[0], avg_signal,
+        diffdB = attenuation_curve(self.stimulus.signal()[0], avg_signal,
                                         self.stimulus.samplerate(), self.calf)
 
         logger = logging.getLogger('main')

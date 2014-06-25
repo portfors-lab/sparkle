@@ -1,8 +1,8 @@
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from spikeylab.tools.audiotools import tukey, calc_impulse_response, \
-                convolve_filter, calc_attenuation_curve, multiply_frequencies
+from spikeylab.tools.audiotools import tukey, impulse_response, \
+                convolve_filter, attenuation_curve, multiply_frequencies
 from test.scripts.util import calc_error, record, MyTableWidgetItem
 
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # set up calibration parameters to test
     calibration_methods = []
     # generate unsmoothed calibration attenuation vector
-    noise_curve_db = calc_attenuation_curve(wn_signal, mean_control_noise, fs, calf, SMOOTHING)
+    noise_curve_db = attenuation_curve(wn_signal, mean_control_noise, fs, calf, SMOOTHING)
 
     info = {'signal':'noise'}
     if MULT_CAL:
@@ -83,9 +83,9 @@ if __name__ == "__main__":
         info['method'] =  'convolve'
         for trunc in TRUNCATIONS:
             info['truncation'] = trunc
-            impulse_response = calc_impulse_response(fs, noise_curve_db, freqs, frange, trunc)
-            info['len'] = len(impulse_response)
-            info['calibration'] = impulse_response
+            ir = impulse_response(fs, noise_curve_db, freqs, frange, trunc)
+            info['len'] = len(ir)
+            info['calibration'] = ir
             calibration_methods.append(info.copy())
 
     chirp = FMSweep()
