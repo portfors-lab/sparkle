@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 from spikeylab.resources.icons import arrowup, arrowdown
 
 class WidgetHider(QtGui.QWidget):   

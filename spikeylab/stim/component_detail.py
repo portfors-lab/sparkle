@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 class ComponentsDetailWidget(QtGui.QWidget):
     """class that presents the stimulus doc in a clear and useful way"""

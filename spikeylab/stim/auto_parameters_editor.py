@@ -6,7 +6,6 @@ from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.drag_label import DragLabel
 from spikeylab.stim.auto_parameter_view import AutoParameterTableView, AddLabel
-from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.main.trashcan import TrashWidget
 from spikeylab.main.hidden_widget import WidgetHider
 from spikeylab.stim.reorder import order_function

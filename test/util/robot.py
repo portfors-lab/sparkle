@@ -1,7 +1,7 @@
 from __future__ import division
 import time
 
-import numpy as np
+from numpy import sqrt
 from pymouse import PyMouse
 from pykeyboard import PyKeyboard
 
@@ -11,7 +11,7 @@ def drag(source, dest, speed=1000):
 
     time.sleep(0.1)
 
-    npoints = int(np.sqrt((dest[0]-source[0])**2 + (dest[1]-source[1])**2 ) / (speed/1000))
+    npoints = int(sqrt((dest[0]-source[0])**2 + (dest[1]-source[1])**2 ) / (speed/1000))
     for i in range(npoints):
         x = int(source[0] + ((dest[0]-source[0])/npoints)*i)
         y = int(source[1] + ((dest[1]-source[1])/npoints)*i)

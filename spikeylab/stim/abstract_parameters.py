@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 
 from spikeylab.stim.abstract_editor import AbstractEditorWidget
 

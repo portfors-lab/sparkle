@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 
 from spikeylab.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
@@ -129,7 +128,7 @@ class ProtocolDisplay(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-    import random, time, os
+    import random, time, os, sys
     import numpy as np
     import spikeylab.tools.audiotools as audiotools
     import scipy.acq.wavfile as wv

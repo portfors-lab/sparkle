@@ -1,6 +1,5 @@
 import os
 import json
-import threading, time
 
 from PyQt4.QtTest import QTest 
 from PyQt4.QtGui import QApplication

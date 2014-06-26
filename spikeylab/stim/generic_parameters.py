@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox

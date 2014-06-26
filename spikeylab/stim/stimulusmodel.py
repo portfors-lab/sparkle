@@ -4,15 +4,13 @@ import numpy as np
 import logging
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.tools.audiotools import calc_spectrum, smooth, impulse_response, convolve_filter, tukey
+from spikeylab.tools.audiotools import impulse_response, convolve_filter
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
 
-from PyQt4 import QtGui, QtCore
-
-import matplotlib.pyplot as plt
+from PyQt4 import QtCore
 
 src_dir = get_src_directory()
 # print 'src_dir', src_dir

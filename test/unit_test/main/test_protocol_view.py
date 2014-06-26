@@ -8,7 +8,7 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.factory import BuilderFactory
 from spikeylab.main.drag_label import DragLabel
 
-from PyQt4 import QtCore, QtGui, QtTest
+from PyQt4 import QtCore, QtGui
 
 app = None
 def setUp():

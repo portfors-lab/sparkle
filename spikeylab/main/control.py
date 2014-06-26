@@ -3,10 +3,8 @@ import spikeylab
 import sys, os, yaml
 import scipy.io.wavfile as wv
 import numpy as np
-import threading
 import logging
 import time
-import traceback
 import getpass
 
 from PyQt4 import QtCore, QtGui
@@ -18,7 +16,6 @@ from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
 from spikeylab.main.acquisition_manager import AcquisitionManager
 from spikeylab.tools.audiotools import calc_spectrum
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
-from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
 from spikeylab.tools.systools import get_src_directory

@@ -1,13 +1,8 @@
 from spikeylab.main.control import MainWindow
-from spikeylab.stim.factory import BuilderFactory, TCFactory
-from spikeylab.stim.auto_parameter_view import AddLabel
-from spikeylab.main.drag_label import DragLabel
-from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 
-import sys 
-import time, os, glob
+import os, glob
 import json
 
 import h5py
@@ -23,7 +18,7 @@ ALLOW = 15
 
 class TestMainUI():
     def setUp(self):
-        self.app = QtGui.QApplication(sys.argv)
+        self.app = QtGui.QApplication([])
 
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')

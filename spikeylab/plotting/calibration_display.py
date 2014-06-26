@@ -1,6 +1,3 @@
-import sys
-import numpy as np
-
 from spikeylab.plotting.pyqtgraph_widgets import FFTWidget
 
 from PyQt4 import QtGui, QtCore

@@ -2,14 +2,10 @@ from __future__ import division
 
 import os, yaml
 import numpy as np
-from scipy.integrate import simps, trapz
 import scipy.io.wavfile as wv
 from scipy.interpolate import interp1d
 from matplotlib import mlab
-from matplotlib import pyplot
 from scipy.signal import hann, fftconvolve
-
-from PyQt4.QtGui import QImage
 
 VERBOSE = False
 

@@ -1,6 +1,5 @@
 import os, yaml
 import threading
-import Queue
 import platform
 if platform.system() == 'Windows':
     import win32com.client

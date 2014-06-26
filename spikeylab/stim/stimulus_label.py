@@ -2,9 +2,7 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
-from PyQt4 import QtGui, QtCore
-
-import cPickle
+from PyQt4 import QtGui
 
 from spikeylab.main.drag_label import DragLabel
 from spikeylab.stim.factory import BuilderFactory, TCFactory, TemplateFactory

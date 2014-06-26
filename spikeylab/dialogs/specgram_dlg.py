@@ -1,6 +1,5 @@
 from PyQt4 import QtGui
 from specgramform import Ui_SpecDialog
-from matplotlib import cm
 
 class SpecDialog(QtGui.QDialog):
     def __init__(self, parent=None, defaultVals=None):

@@ -1,9 +1,6 @@
 from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 from pyqtgraph.Point import Point
-import pyqtgraph.functions as fn
-
-import numpy as np
 
 class SpikeyViewBox(pg.ViewBox):
     def __init__(self, *args, **kwargs):

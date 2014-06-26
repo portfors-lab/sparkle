@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from commentform import Ui_CellCommentDialog
 
 class CellCommentDialog(QtGui.QDialog):

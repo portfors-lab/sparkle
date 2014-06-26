@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 class PlotMenuBar(QtGui.QMenuBar):
     def __init__(self, dock, parent=None):

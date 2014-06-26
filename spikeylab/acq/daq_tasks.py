@@ -1,6 +1,3 @@
-#from PyDAQmx import Task
-#from PyDAQmx.DAQmxConstants import *
-#from PyDAQmx.DAQmxTypes import *
 try:
     from PyDAQmx import *
 except:

@@ -8,8 +8,7 @@ from spikeylab.stim.factory import CCFactory
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.tools.audiotools import spectrogram, calc_spectrum, get_peak, calc_db
-from spikeylab.data.dataobjects import AcquisitionData
+from spikeylab.tools.audiotools import calc_spectrum, get_peak, calc_db
 from spikeylab.tools.systools import get_src_directory
 
 # wether to use relative peak level (from FFT), or calculate from

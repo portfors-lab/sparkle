@@ -1,7 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.main.abstract_drag_view import AbstractDragView
-from spikeylab.stim.selectionmodel import ComponentSelectionModel
 from spikeylab.stim.smart_spinbox import SmartSpinBox
 
 class AddLabel(object):

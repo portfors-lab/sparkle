@@ -1,14 +1,10 @@
 import spikeylab
 
-import cPickle
-
 from PyQt4 import QtGui, QtCore
 
-# from spikeylab.main.drag_label import DragLabel
 from spikeylab.stim.factory import StimFactory
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.main.abstract_drag_view import AbstractDragView
-
 
 class ProtocolTabelModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):

@@ -1,6 +1,5 @@
 import numpy as np
 import os, glob
-import shutil
 import json
 import random, string
 import re

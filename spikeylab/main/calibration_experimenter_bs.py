@@ -1,17 +1,12 @@
-import os
 import logging
 import numpy as np
 
-from spikeylab.tools.util import create_unique_path
 from spikeylab.main.protocol_acquisition import Experimenter
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import attenuation_curve
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.tools.util import next_str_num
-
-import matplotlib.pyplot as plt
 
 class CalibrationExperimenterBS(Experimenter):
     def __init__(self, signals):
