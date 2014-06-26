@@ -1,10 +1,10 @@
 from spikeylab.acq.players import ContinuousPlayer
-from spikeylab.main.protocol_acquisition import Experimenter
+from spikeylab.main.list_runner import ListAcquisitionRunner
 from spikeylab.tools.util import increment_title
 
-class ChartExperimenter(Experimenter):
+class ChartRunner(ListAcquisitionRunner):
     def __init__(self, signals):
-        Experimenter.__init__(self, signals)
+        ListAcquisitionRunner.__init__(self, signals)
 
         self.chart_name = 'chart_1'
         save_data = False

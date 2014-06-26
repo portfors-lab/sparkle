@@ -1,13 +1,13 @@
 import numpy as np
 
-from spikeylab.main.protocol_acquisition import Experimenter
+from spikeylab.main.list_runner import ListAcquisitionRunner
 from spikeylab.tools import spikestats
 from spikeylab.tools.util import next_str_num
 from spikeylab.acq.players import FinitePlayer
 
-class ProtocolExperimenter(Experimenter):
+class ProtocolRunner(ListAcquisitionRunner):
     def __init__(self, signals):
-        Experimenter.__init__(self, signals)
+        ListAcquisitionRunner.__init__(self, signals)
 
         save_data = True
         self.group_name = 'segment_'

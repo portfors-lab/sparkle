@@ -3,7 +3,7 @@ import threading
 
 import numpy as np
 
-class AbstractAcquisitionModel():
+class AbstractAcquisitionRunner():
     """Holds state information for an experimental session"""
     def __init__(self, signals):
         self.signals = signals

@@ -5,17 +5,17 @@ import logging
 import numpy as np
 
 from spikeylab.acq.players import FinitePlayer
-from spikeylab.main.abstract_acquisition import AbstractAcquisitionModel
+from spikeylab.main.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.tools.util import increment_title
 from spikeylab.tools import spikestats
 from spikeylab.stim.types import get_stimuli_models
 
-class Explorer(AbstractAcquisitionModel):
+class SearchRunner(AbstractAcquisitionRunner):
     def __init__(self, signals):
         self.stimulus = StimulusModel()
 
-        AbstractAcquisitionModel.__init__(self, signals)
+        AbstractAcquisitionRunner.__init__(self, signals)
 
         self.player = FinitePlayer()
         self.save_data = False

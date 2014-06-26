@@ -2,17 +2,17 @@ import time
 import threading
 import logging
 
-from spikeylab.main.abstract_acquisition import AbstractAcquisitionModel
+from spikeylab.main.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.main.protocol_model import ProtocolTabelModel
 import cProfile
 
 class Broken(Exception): pass
 
-class Experimenter(AbstractAcquisitionModel):
+class ListAcquisitionRunner(AbstractAcquisitionRunner):
     def __init__(self, signals):
         self.protocol_model = ProtocolTabelModel()
 
-        AbstractAcquisitionModel.__init__(self, signals)
+        AbstractAcquisitionRunner.__init__(self, signals)
 
     def set_calibration(self, attenuations, freqs, frange, calname):
         self.protocol_model.setCalibration(attenuations, freqs, frange)

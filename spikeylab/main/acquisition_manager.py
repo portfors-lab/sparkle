@@ -3,11 +3,10 @@ import logging
 from spikeylab.tools.util import create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.tools.qsignals import ProtocolSignals
-from spikeylab.main.explore_acquisition import Explorer
-from spikeylab.main.protocol_experimenter import ProtocolExperimenter
-from spikeylab.main.chart_experimenter import ChartExperimenter
-from spikeylab.main.calibration_experimenter_bs import CalibrationExperimenterBS
-from spikeylab.main.calibration_experimenter import CalibrationExperimenter
+from spikeylab.main.search_runner import SearchRunner
+from spikeylab.main.protocol_runner import ProtocolRunner
+from spikeylab.main.chart_runner import ChartRunner
+from spikeylab.main.calibration_runner import CalibrationRunner, CalibrationCurveRunner
 from spikeylab.stim.stimulusmodel import StimulusModel
 
 class AcquisitionManager():
@@ -19,11 +18,11 @@ class AcquisitionManager():
 
         self.signals = ProtocolSignals()
 
-        self.explorer = Explorer(self.signals)
-        self.protocoler =  ProtocolExperimenter(self.signals)
-        self.bs_calibrator = CalibrationExperimenterBS(self.signals)
-        self.tone_calibrator = CalibrationExperimenter(self.signals)
-        self.charter = ChartExperimenter(self.signals)
+        self.explorer = SearchRunner(self.signals)
+        self.protocoler =  ProtocolRunner(self.signals)
+        self.bs_calibrator = CalibrationRunner(self.signals)
+        self.tone_calibrator = CalibrationCurveRunner(self.signals)
+        self.charter = ChartRunner(self.signals)
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
