@@ -46,6 +46,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.pixelsPerms = 5
         self.gridms = 25
 
+    def rowReach(self):
+        return ROW_HEIGHT + ROW_SPACE
+
     def setPixelScale(self, pxms):
         pxms = float(pxms)/2
         self.pixelsPerms = pxms

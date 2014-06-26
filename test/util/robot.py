@@ -5,7 +5,7 @@ import numpy as np
 from pymouse import PyMouse
 from pykeyboard import PyKeyboard
 
-def mousedrag(source, dest, speed=1000):
+def drag(source, dest, speed=1000):
     m = PyMouse()
     m.press(*source)
 
@@ -50,6 +50,6 @@ def type(string):
     k = PyKeyboard()
     k.type_string(string)
 
-def mousewheel(ticks):
+def wheel(ticks):
     m = PyMouse()
     m.scroll(ticks)
