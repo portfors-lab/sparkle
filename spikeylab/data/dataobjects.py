@@ -7,12 +7,12 @@ import socket
 import logging
 
 from spikeylab.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
-                                        ReadOnlyError
+                                        ReadOnlyError, OverwriteFileError
 from spikeylab.tools.util import convert2native, max_str_num
 
 class AcquisitionData():
     """
-    Provides convenient access to raw data file; 
+    Provides convenient access to data file; 
     each data file should represent an experimental session.
 
     Three types of datasets: 
@@ -21,7 +21,9 @@ class AcquisitionData():
     2. Open-ended aquisition, where the size of the acqusition window is known, but the number of traces to acquire is not
     3. Continuous acquisition, this is a 'chart' function where data is acquired continuously without break until the user stops the operation
     
-    Upon new file creation the following attributes are saved to the file: date, user, computer name
+    Upon new file creation the following attributes are saved to the file: *date*, *user*, *computer name*
+
+    Finite datasets create sets with automatic naming of the scheme test_#, where the number starts with 1 and increments for the whole file, regardless of the group it is under.
 
     :param filename: the name of the HDF5 file to open.
     :type filename: str
@@ -32,10 +34,14 @@ class AcquisitionData():
     * 'w-' : Write to new file, without overwriting a file with the same name
     * 'a' : Append to existing file
     * 'r' : Read only, no writing allowed
+    Overwriting an exisiting file is not allowed, and will result in an error
     """
     def __init__(self, filename, user='unknown', filemode='w-'):
         if filemode not in ['w-', 'a', 'r']:
             raise DisallowedFilemodeError(filename, filemode)
+        if filemode == 'w-' and os.path.isfile(filename):
+            raise OverwriteFileError(filename)
+
         self.hdf5 = h5py.File(filename, filemode)
         self.filename = filename
 
@@ -69,7 +75,10 @@ class AcquisitionData():
             logger.info('Opened data file %s' % filename)
 
     def close(self):
-        """Closes the datafile, only one reference to a file may be open at one time."""
+        """Closes the datafile, only one reference to a file may be 
+        open at one time.
+
+        If there is no data in the file, it will delete itself"""
         # bad hack!
         if 'closed' in self.hdf5.__repr__().lower():
             return
@@ -91,9 +100,10 @@ class AcquisitionData():
             os.remove(fname)
         else:
             if self.needs_repack:
-                repack(fname)
+                _repack(fname)
 
     def close_data(self, key):
+        """deprecated"""
         pass
 
     def init_group(self, key, mode='finite'):
@@ -177,13 +187,22 @@ class AcquisitionData():
 
     def append(self, key, data, nested_name=None):
         """
-        Inserts data sequentially to structure in repeated calls.
+        Inserts data sequentially to structure in repeated calls. 
+        Depending on how the dataset was initialized:
+
+        * If mode == 'finite': If *nested_name* is ``None``, data is appended to the current automatically incremented *test_#* dataset under the given group. Otherwise data is appended to the group *key*, dataset *nested_name*.
+        * If mode == 'calibration': Must provide a *nested_name* for a dataset to append data to under group *key*
+        * If mode == 'open': Appends chunk to dataset *key*
+        * If mode == 'continuous': Appends to dataset *key* forever
+
+        For 'Finite' and 'calibration' modes, an attempt to append past the 
+        initialized dataset size will result in an error
 
         :param key: name of the dataset/group to append to
         :type key: str
         :param data: data to add to file
         :type data: numpy.ndarray
-        :param nested_name: If mode is calibration, then this will be the dataset name created under the group key. Ignored for other modes.
+        :param nested_name: If mode is 'calibration' or 'finite', then this will be the dataset name created under the group key. Ignored for other modes.
         :type nested_name: str
         """
         if self.hdf5.mode == 'r':
@@ -192,10 +211,12 @@ class AcquisitionData():
         data = np.array(data)
         mode = self.meta[key]['mode']
         if mode == 'finite' or mode == 'calibration':
-            if nested_name is None:
+            if nested_name is None and mode == 'finite':
                 setname = 'test_'+str(self.test_count)
-            else:
+            elif nested_name is not None:
                 setname = nested_name
+            else:
+                raise ValueError('Must provide a nested_name for calibration mode')
             current_location = self.meta[setname]['cursor']
             if data.shape == (1,):
                 index = current_location
@@ -239,8 +260,8 @@ class AcquisitionData():
 
     def insert(self, key, index, data):
         """
-        Inserts data to index location. For 'finite' mode only. Does not affect
-        appending location marker.
+        Inserts data to index location. For 'finite' mode only. Does not 
+        affect appending location marker. Will Overwrite existing data.
 
         :param key: Group name to insert to
         :type key: str
@@ -266,10 +287,9 @@ class AcquisitionData():
 
         :param key: name of the dataset to retrieve, may be nested
         :type key: str
-        :param index: slice of of the data to retrieve, ``None`` get whole data set.
+        :param index: slice of of the data to retrieve, ``None`` gets whole data set. Numpy style indexing.
         :type index: tuple
         """
-        print 'keys', self.hdf5.keys()
         if index is not None:
             index = tuple(index)
             data = self.hdf5[key][index]
@@ -331,8 +351,8 @@ class AcquisitionData():
 
     def consolidate(self, key):
         """
-        Collapses a 'continuous' acqusition into a single dataset.
-        This must be performed before calling get function for key in these 
+        Collapses a 'continuous' acquisition into a single dataset.
+        This must be performed before calling *get* function for *key* in these 
         modes.
 
         :param key: name of the dataset to consolidate.
@@ -444,7 +464,10 @@ class AcquisitionData():
             _append_stim(self.hdf5, key, stim_data)
 
     def keys(self):
-        """Returns the high-level keys for this file"""
+        """The high-level keys for this file
+
+        :returns: list<str> -- list of the keys
+        """
         return self.hdf5.keys()
 
 def _append_stim(container, key, stim_data):
@@ -459,8 +482,14 @@ def _append_stim(container, key, stim_data):
     container[key].attrs['stim'] = existing_stim + stim_data + ']'
 
 def increment(index, dims, data_shape):
-    """Increments a given index"""
-    data_shape = data_shape
+    """Increments a given index according to the shape of the data added
+
+    :param index: Current index to be incremented
+    :type index: list
+    :param dims: Shape of the data that the index is being incremented by
+    :type dims: tuple
+    :param data_shape: Shape of the data structure being incremented, this is check that incrementing is correct
+    """
 
     # check dimensions of data match structure
     inc_to_match = data_shape[1:]
@@ -484,7 +513,7 @@ def increment(index, dims, data_shape):
         inc_index -=1
     return index
 
-def repack(h5file):
+def _repack(h5file):
     """
     Repack archive to remove freespace.
                

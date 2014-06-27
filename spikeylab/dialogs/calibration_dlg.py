@@ -5,6 +5,7 @@ from caldialog_form import Ui_CalibrationDialog
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 class CalibrationDialog(QtGui.QDialog):
+    """Dialog to set current calibration and reference point for intensity-frequency-voltage"""
     def __init__(self, fscale, defaultVals=None, datafile=None):
         QtGui.QDialog.__init__(self, None)
         self.ui = Ui_CalibrationDialog()

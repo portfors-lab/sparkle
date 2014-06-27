@@ -9,7 +9,7 @@ from nose.tools import raises, assert_in, assert_equal
 
 from spikeylab.data.dataobjects import AcquisitionData, increment
 from spikeylab.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
-                                        ReadOnlyError
+                                        ReadOnlyError, OverwriteFileError
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 
@@ -96,7 +96,9 @@ class TestAcqusitionData():
                 pass
 
     def test_open_without_ext(self):
-
+        """
+        Test that file is created with the exact name specified
+        """
         fname = os.path.join(tempfolder, 'savetemp'+rand_id())
         acq_data = AcquisitionData(fname)
 
@@ -153,8 +155,30 @@ class TestAcqusitionData():
         acq_data = AcquisitionData(fname)
             
         try:
-            acq_data.init_data('fake', (nsets, nsets))
+            acq_data.init_data('fake', (nsets, npoints-1))
             for iset in range(nsets):
+                acq_data.append('fake', fakedata*iset)
+
+            np.testing.assert_array_equal(acq_data.get('fake', (2,)), fakedata*2)
+        finally:
+            acq_data.close()
+            
+    @raises(ValueError)
+    def test_finite_append_overflow_error(self):
+        """
+        Test that an attempt to append more data than the dataset 
+        initialized throws an error
+        """
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname)
+            
+        try:
+            acq_data.init_data('fake', (nsets, npoints))
+            for iset in range(nsets+1):
                 acq_data.append('fake', fakedata*iset)
 
             np.testing.assert_array_equal(acq_data.get('fake', (2,)), fakedata*2)
@@ -419,6 +443,13 @@ class TestAcqusitionData():
 
         reloaded_acq_data.close()
 
+    def test_empty_data_file_deleted(self):
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname)
+        acq_data.close()
+
+        assert not os.path.isfile(fname)
+
     @raises(ReadOnlyError)
     def test_read_only_write_error(self):
         nsets = 3
@@ -434,6 +465,15 @@ class TestAcqusitionData():
     def test_bad_filemode_error(self):
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname, filemode='w+')
+
+    @raises(OverwriteFileError)
+    def test_overwrite_error(self):
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
+        acq_data = AcquisitionData(fname)
+        acq_data.init_data('fake1', (1, 2))
+        acq_data.close()
+
+        AcquisitionData(fname, filemode='w-')
 
     def setup_calibration(self, calname, caldata):
 
