@@ -40,6 +40,7 @@ DEVNAME = config['device_name']
 
 
 class MainWindow(ControlWindow):
+    """Main GUI for the application"""
     def __init__(self, inputsFilename='', datafile=None, filemode='w-'):
         # set up model and stimlui first, 
         # as saved configuration relies on this
@@ -691,6 +692,7 @@ def log_uncaught(*exc_info):
     logger.error("Uncaught exception: ", exc_info=exc_info)
 
 if __name__ == "__main__":
+    # this is the entry point for the whole application
     app = QtGui.QApplication(sys.argv)
     sys.excepthook = log_uncaught
     dlg = SavingDialog()

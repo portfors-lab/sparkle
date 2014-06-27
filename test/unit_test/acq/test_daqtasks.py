@@ -101,9 +101,8 @@ class TestDAQTasks():
 
         assert len(self.data) > aonpts*len(amps)
 
-    def stashacq(self, task):
-        inbuffer = task.read()
-        self.data.extend(inbuffer.squeeze().tolist())
+    def stashacq(self, data):
+        self.data.extend(data.tolist())
 
 def test_get_ao_chans():
     chans = get_ao_chans("PCI-6259")

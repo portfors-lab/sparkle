@@ -17,7 +17,7 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 MAXV = config['max_voltage']
 
-class PlayerBase():
+class AbstractPlayerBase():
     """Holds state information for current acquisition/generation task"""
     def __init__(self):
 
@@ -41,12 +41,19 @@ class PlayerBase():
         self.connect_attenuator()        
 
     def start(self):
+        """Abstract, must be implemented by subclass"""
         raise NotImplementedError
 
     def stop(self):
+        """Abstract, must be implemented by subclass"""
         raise NotImplementedError
 
     def reset_generation(self, trigger):
+        """Re-arms the analog output according to current settings
+
+        :param trigger: name of the trigger terminal. ``None`` value means generation begins immediately on run
+        :type trigger: str
+        """
         self.tone_lock.acquire()
 
         npts =  self.stim.size
@@ -93,28 +100,59 @@ class PlayerBase():
 
 
     def get_samplerate(self):
+        """The current analog output(generation) samplerate 
+
+        :returns: int -- samplerate (Hz)
+        """
         return self.sr
 
     def get_aidur(self):
+        """The current input(recording) window duration 
+
+        :returns: float -- window length (seconds)"""
         return self.aitime
 
     def get_aisr(self):
+        """The current analog input (recording) samplerate 
+
+        :returns: int -- samplerate (Hz)
+        """
         return self.aisr
 
-    def set_aisr(self, aisr):
-        self.aisr = aisr
+    def set_aisr(self, fs):
+        """Sets the current analog input (recording) samplerate 
+
+        :param fs: recording samplerate (Hz)
+        :type fs: int
+        """
+        self.aisr = fs
 
     def set_aidur(self,dur):
+        """Sets the current input(recording) window duration
+
+        :param dur: window length (seconds)
+        :type dur: float
+        """
         self.aitime = dur
 
     def set_aochan(self, aochan):
+        """Sets the current analog output (generation) channel
+
+        :param aochan: AO channel name
+        :type aochan: str
+        """
         self.aochan = aochan
 
     def set_aichan(self, aichan):
+        """Sets the current analog input (recording) channel
+
+        :param aichan: AI channel name
+        :type aochan: str
+        """
         self.aichan = aichan
 
     def connect_attenuator(self):
-        # establish connection to the attenuator
+        """Establish a connection to the TDT PA5 attenuator"""
         try:
             pa5 = win32com.client.Dispatch("PA5.x")
             success = pa5.ConnectPA5('GB', 1)
@@ -134,15 +172,19 @@ class PlayerBase():
         return self.attenuator
 
     def attenuator_connected(self):
+        """Returns whether a connection to the attenuator has been established (bool)"""
         return self.attenuator is not None
 
-class FinitePlayer(PlayerBase):
+class FinitePlayer(AbstractPlayerBase):
     """For finite generation/acquisition tasks"""
     def __init__(self):
-        PlayerBase.__init__(self)
+        AbstractPlayerBase.__init__(self)
 
     def start(self):
-        """Write output buffer and settings to device"""
+        """Writes output buffer and settings to device
+
+        :returns: numpy.ndarray -- if the first presentation of a novel stimulus, or None if a repeat stimulus
+        """
 
         # this shouldn't actually be possible still...
         if self.aitask is not None:
@@ -157,7 +199,10 @@ class FinitePlayer(PlayerBase):
         return self.reset()
 
     def run(self):
-        """Begin simultaneous generation/acquisition, returns read samples"""
+        """Begins simultaneous generation/acquisition
+
+        :returns: numpy.ndarray -- read samples
+        """
         try:
             if self.aotask is None:
                 print u"You must arm the calibration first"
@@ -204,24 +249,32 @@ class FinitePlayer(PlayerBase):
         return new_gen
 
     def stop(self):
+        """Halts the acquisition, this must be called before resetting acquisition"""
         try:
             self.aitask.stop()
             self.aotask.stop()
+            pass
         except:     
             print u"No task running"
         self.aitask = None
         self.aotask = None
 
 
-class ContinuousPlayer(PlayerBase):
+class ContinuousPlayer(AbstractPlayerBase):
     """This is a continuous player for a chart acquitision operation"""
     def __init__(self):
-        PlayerBase.__init__(self)
+        AbstractPlayerBase.__init__(self)
         self.on_read = lambda x: x # placeholder
 
     def start_continuous(self, aichans, update_hz=10):
         """Begins a continuous analog generation, calling a provided function
-         at a rate of 10Hz"""
+         at a rate of 10Hz
+
+        :param aichans: name of channel(s) to record (analog input) from
+        :type aichans: list<str>
+        :param update_hz: Rate (Hz) at which to read data from the device input buffer
+        :type update_hz: int
+         """
         self.daq_lock.acquire()
 
         self.ngenerated = 0 # number of stimuli presented during chart run
@@ -232,22 +285,29 @@ class ContinuousPlayer(PlayerBase):
         self.aitask.start()
 
     def set_read_function(self, fun):
+        """Set the function to be executed for every read from the device buffer
+
+        :param fun: callable which must take a numpy.ndarray as the only positional argument
+        :type fun: function
+        """
         self.on_read = fun
 
-    def _read_continuous(self, task):
-        inbuffer = task.read().squeeze()
-        self.on_read(inbuffer)
+    def _read_continuous(self, data):
+        self.on_read(data)
 
     def run(self):
+        """Executes the stimulus generation, and returns when completed"""
         self.aotask.StartTask()
         self.aotask.wait() # don't return until generation finished
         self.aotask.stop()
         self.aotask = None
 
     def start(self):
+        """Arms the analog output (generation) for the current settings"""
         self.reset()
 
     def reset(self):
+        """Re-arms the analog output (generation) to be preseneted again, for the current settings"""
         try:
             new_gen = self.reset_generation(u"")
         except:
@@ -257,6 +317,7 @@ class ContinuousPlayer(PlayerBase):
         return new_gen
 
     def stop(self):
+        """Halts the analog output task"""
         try:
             self.aotask.stop()
         except:     
@@ -264,6 +325,7 @@ class ContinuousPlayer(PlayerBase):
         self.aotask = None
 
     def stop_all(self):
+        """Halts both the analog output and input tasks"""
         if self.aotask is not None:
             self.aotask.stop()
         self.aitask.stop()
@@ -272,5 +334,9 @@ class ContinuousPlayer(PlayerBase):
         self.aotask = None
 
     def generation_count(self):
+        """Number of stimulus presentations
+
+        :returns: int -- number of analog output events
+        """
         #not safe
         return self.ngenerated
