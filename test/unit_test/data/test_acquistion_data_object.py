@@ -95,6 +95,19 @@ class TestAcqusitionData():
             except:
                 pass
 
+    def test_open_without_ext(self):
+
+        fname = os.path.join(tempfolder, 'savetemp'+rand_id())
+        acq_data = AcquisitionData(fname)
+
+        acq_data.init_data('fake', (1,))
+        acq_data.append('fake', [1])
+
+        print 'filename', acq_data.filename
+        acq_data.close()
+
+        assert os.path.isfile(fname)
+
     def test_finite_dataset_append(self):
         """
         Test appending to the data structure when trace data has single
