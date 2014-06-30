@@ -260,7 +260,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="refDbSpnbx"/>
+               <widget class="QDoubleSpinBox" name="refDbSpnbx">
+                <property name="maximum">
+                 <double>120.000000000000000</double>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLabel" name="label_15">

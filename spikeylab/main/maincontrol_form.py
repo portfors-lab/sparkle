@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Jun 30 10:10:51 2014
+# Created: Mon Jun 30 11:35:13 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -158,6 +158,7 @@ class Ui_ControlWindow(object):
         self.refToneLbl.setObjectName(_fromUtf8("refToneLbl"))
         self.horizontalLayout_10.addWidget(self.refToneLbl)
         self.refDbSpnbx = QtGui.QDoubleSpinBox(self.tabCalibrate)
+        self.refDbSpnbx.setMaximum(120.0)
         self.refDbSpnbx.setObjectName(_fromUtf8("refDbSpnbx"))
         self.horizontalLayout_10.addWidget(self.refDbSpnbx)
         self.label_15 = QtGui.QLabel(self.tabCalibrate)
