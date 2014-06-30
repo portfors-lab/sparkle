@@ -23,6 +23,8 @@ class AcquisitionManager():
         self.bs_calibrator = CalibrationRunner(self.signals)
         self.tone_calibrator = CalibrationCurveRunner(self.signals)
         self.charter = ChartRunner(self.signals)
+        self.cal_toner = SearchRunner(self.signals)
+
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
@@ -35,6 +37,16 @@ class AcquisitionManager():
 
     def stimuli_list(self):
         return self.explorer.stimuli_list()
+
+    def set_cal_tone(self, freq, voltage, db):
+        stims = self.cal_toner.stimuli_list()
+        for stim in stims:
+            if stim.name == 'Pure Tone':
+                stim.set('frequency', freq)
+                stim.set('intensity', db)
+                idx = stims.index(stim)
+                self.cal_toner.set_stim_by_index(idx)
+                break
 
     def set_calibration(self, datakey, calf=None, frange=None):
         if datakey is None:
@@ -131,6 +143,7 @@ class AcquisitionManager():
         self.bs_calibrator.set_params(**kwargs)
         self.tone_calibrator.set_params(**kwargs)
         self.charter.set_params(**kwargs)
+        self.cal_toner.set_params(**kwargs)
 
     def set_stim_by_index(self, index):
         self.explorer.set_stim_by_index(index)
@@ -152,6 +165,9 @@ class AcquisitionManager():
 
     def run_protocol(self):
         return self.protocoler.run()
+
+    def run_caltone(self, interval):
+        return self.cal_toner.run(interval)
 
     def set_calibration_by_index(self, idx):
         self.selected_calibration_index = idx
@@ -197,6 +213,7 @@ class AcquisitionManager():
         self.bs_calibrator.halt()
         self.tone_calibrator.halt()
         self.charter.halt()
+        self.cal_toner.halt()
 
     def close_data(self):
         if self.datafile is not None:

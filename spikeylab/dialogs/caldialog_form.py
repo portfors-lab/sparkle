@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Thu Jun 19 11:21:12 2014
+# Created: Mon Jun 30 10:34:40 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,43 +87,6 @@ class Ui_CalibrationDialog(object):
         self.horizontalLayout_2.addWidget(self.rangeBtn)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addWidget(self.groupBox)
-        self.gridLayout = QtGui.QGridLayout()
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.label = QtGui.QLabel(CalibrationDialog)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
-        self.label_5 = QtGui.QLabel(CalibrationDialog)
-        self.label_5.setObjectName(_fromUtf8("label_5"))
-        self.gridLayout.addWidget(self.label_5, 2, 2, 1, 1)
-        self.calfSpnbx = SmartSpinBox(CalibrationDialog)
-        self.calfSpnbx.setMaximum(200000.0)
-        self.calfSpnbx.setObjectName(_fromUtf8("calfSpnbx"))
-        self.gridLayout.addWidget(self.calfSpnbx, 3, 1, 1, 1)
-        self.label_3 = QtGui.QLabel(CalibrationDialog)
-        self.label_3.setObjectName(_fromUtf8("label_3"))
-        self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
-        self.caldbSpnbx = QtGui.QSpinBox(CalibrationDialog)
-        self.caldbSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.caldbSpnbx.setMaximum(120)
-        self.caldbSpnbx.setObjectName(_fromUtf8("caldbSpnbx"))
-        self.gridLayout.addWidget(self.caldbSpnbx, 1, 1, 1, 1)
-        self.calvSpnbx = QtGui.QDoubleSpinBox(CalibrationDialog)
-        self.calvSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.calvSpnbx.setDecimals(3)
-        self.calvSpnbx.setMaximum(5.0)
-        self.calvSpnbx.setObjectName(_fromUtf8("calvSpnbx"))
-        self.gridLayout.addWidget(self.calvSpnbx, 2, 1, 1, 1)
-        self.funit_lbl = QtGui.QLabel(CalibrationDialog)
-        self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
-        self.gridLayout.addWidget(self.funit_lbl, 3, 2, 1, 1)
-        self.label_6 = QtGui.QLabel(CalibrationDialog)
-        self.label_6.setMaximumSize(QtCore.QSize(30, 16777215))
-        self.label_6.setObjectName(_fromUtf8("label_6"))
-        self.gridLayout.addWidget(self.label_6, 1, 2, 1, 1)
-        self.label_2 = QtGui.QLabel(CalibrationDialog)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
-        self.verticalLayout_2.addLayout(self.gridLayout)
         self.buttonBox = QtGui.QDialogButtonBox(CalibrationDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
@@ -153,15 +116,5 @@ class Ui_CalibrationDialog(object):
         self.funit_lbl_2.setText(_translate("CalibrationDialog", "kHz", None))
         self.rangeBtn.setToolTip(_translate("CalibrationDialog", "file max range", None))
         self.rangeBtn.setText(_translate("CalibrationDialog", "<>", None))
-        self.label.setToolTip(_translate("CalibrationDialog", "Maximum intensity", None))
-        self.label.setText(_translate("CalibrationDialog", "Reference intensity", None))
-        self.label_5.setText(_translate("CalibrationDialog", "V", None))
-        self.label_3.setText(_translate("CalibrationDialog", "Calibration frequency", None))
-        self.caldbSpnbx.setToolTip(_translate("CalibrationDialog", "Maximum intensity", None))
-        self.calvSpnbx.setToolTip(_translate("CalibrationDialog", "Maximum voltage output", None))
-        self.funit_lbl.setText(_translate("CalibrationDialog", "kHz", None))
-        self.label_6.setText(_translate("CalibrationDialog", "dB SPL", None))
-        self.label_2.setToolTip(_translate("CalibrationDialog", "Maximum voltage output", None))
-        self.label_2.setText(_translate("CalibrationDialog", "Reference DAC voltage", None))
 
 from spikeylab.stim.smart_spinbox import SmartSpinBox

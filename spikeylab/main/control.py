@@ -35,9 +35,10 @@ REDSS = "QLabel { background-color : transparent; color : red; }"
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-mphone_sensitivity = config['microphone_sensitivity']
+MPHONE_SENSITIVITY = config['microphone_sensitivity']
 DEVNAME = config['device_name']
-
+REFFREQ = config['reference_frequency']
+REFVOLTAGE = config['reference_voltage']
 
 class MainWindow(ControlWindow):
     """Main GUI for the application"""
@@ -139,6 +140,14 @@ class MainWindow(ControlWindow):
         logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
         self.ui.dataFileLbl.setText(fname)
 
+        self.calvals['calf'] = REFFREQ
+        self.calvals['calv'] = REFVOLTAGE
+        if self.fscale == 1000:
+            scale_lbl = 'kHz'
+        elif self.fscale == 1:
+            scale_lbl = 'Hz'
+        self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ, scale_lbl, REFVOLTAGE))
+        self.acqmodel.set_cal_tone(REFFREQ, REFVOLTAGE, self.calvals['caldb'])
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
 
@@ -169,7 +178,10 @@ class MainWindow(ControlWindow):
                 # disconnecting already disconnected signals throws TypeError
                 pass
 
-    def onStart(self):
+    def playCalTone(self):
+        self.onStart(calTone=True)
+
+    def onStart(self, calTone=False):
         # set plot axis to appropriate limits
         # first time set up data file
         if not self.verifyInputs('windowed'):
@@ -194,7 +206,9 @@ class MainWindow(ControlWindow):
             self.ui.runningLabel.setText(u"RECORDING")
             self.ui.runningLabel.setStyleSheet(GREENSS)
 
-        if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
+        if calTone:
+            self.runCalTone()
+        elif self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             self.runExplore()
         elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
             self.runProtocol()
@@ -274,6 +288,12 @@ class MainWindow(ControlWindow):
         reprate = self.ui.reprateSpnbx.setEnabled(True)
         self.ui.stopBtn.setEnabled(False)
         self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; } QProgressBar::chunk {background-color: grey; width: 10px; margin-top: 1px; margin-bottom: 1px}")
+
+    def stopCalTone(self):
+        self.onStop()
+        self.ui.calToneBtn.setText('Start')
+        self.ui.calToneBtn.clicked.disconnect()
+        self.ui.calToneBtn.clicked.connect(self.playCalTone)
 
     def onStopChart(self):
         self.acqmodel.stop_chart()
@@ -357,6 +377,24 @@ class MainWindow(ControlWindow):
         self.onUpdate()            
         self.acqmodel.run_explore(interval)
 
+    def runCalTone(self):
+        self.ui.calToneBtn.setText('Stop')
+        self.ui.calToneBtn.clicked.disconnect()
+        self.ui.calToneBtn.clicked.connect(self.stopCalTone)
+        self.ui.startBtn.setEnabled(False)
+        self.ui.stopBtn.setEnabled(False)
+
+        self.activeOperation = 'caltone'
+        reprate = self.ui.reprateSpnbx.value()
+        interval = (1/reprate)*1000
+
+        self.onUpdate()           
+        nreps = self.ui.exNrepsSpnbx.value()
+        self.acqmodel.set_params(nreps=nreps)
+        self.display.setNreps(nreps)
+
+        self.acqmodel.run_caltone(interval)
+
     def runProtocol(self):
         self.display.updateSpec(None)
 
@@ -436,10 +474,10 @@ class MainWindow(ControlWindow):
         elif self.ui.plotDock.current() == 'calexp':
             # convert voltage amplitudes into dB SPL    
             rms = np.sqrt(np.mean(pow(response,2))) / np.sqrt(2)
-            masterdb = 94 + (20.*np.log10(rms/(mphone_sensitivity)))
+            masterdb = 94 + (20.*np.log10(rms/(MPHONE_SENSITIVITY)))
             sr = self.ui.aisrSpnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
-            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/mphone_sensitivity))
+            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/MPHONE_SENSITIVITY))
             spectrum[0] = 0
             peakspl = np.amax(spectrum)
             self.ui.dblevelLbl.setNum(masterdb)
@@ -450,8 +488,8 @@ class MainWindow(ControlWindow):
 
     def displayCalibrationResponse(self, spectrum, freqs, rms):
 
-        masterdb = 94 + (20.*np.log10(rms/(mphone_sensitivity)))
-        spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/mphone_sensitivity))
+        masterdb = 94 + (20.*np.log10(rms/(MPHONE_SENSITIVITY)))
+        spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/MPHONE_SENSITIVITY))
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
         self.ui.dblevelLbl.setNum(masterdb)
@@ -563,17 +601,18 @@ class MainWindow(ControlWindow):
     def launchCalibrationDlg(self):
         dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
         if dlg.exec_():
-            values = dlg.values()
-            self.acqmodel.set_params(**values)
-            if values['use_calfile']:
+            results = dlg.values()
+            self.acqmodel.set_params(**results)
+            if results['use_calfile']:
                 ww = self.showWait()
-                self.acqmodel.set_calibration(values['calname'], values['calf'], values['frange'])
-                self.ui.currentCalLbl.setText(values['calname'])
+                self.acqmodel.set_calibration(results['calname'], self.calvals['calf'], results['frange'])
+                self.ui.currentCalLbl.setText(results['calname'])
                 ww.close()
             else:
                 self.ui.currentCalLbl.setText('None')
                 self.acqmodel.set_calibration(None)
-            self.calvals = values
+            for key, val in results.items():
+                self.calvals[key] = val
         dlg.deleteLater()
         
     def launchScaleDlg(self):
@@ -665,6 +704,9 @@ class MainWindow(ControlWindow):
 
     def clearProtocol(self):
         self.acqmodel.clear_protocol()
+
+    def updateCalDb(self):
+        self.calvals['caldb'] = self.ui.refDbSpnbx.value()
 
     def setStatusMsg(self, status):
         self.statusBar().showMessage(status)

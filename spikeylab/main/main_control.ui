@@ -63,7 +63,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -249,6 +249,40 @@
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="CalibrationWidget" name="calibrationWidget" native="true"/>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QLabel" name="refToneLbl">
+                <property name="text">
+                 <string>Intensity at ? kHz and ?V</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="refDbSpnbx"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>dB SPL</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="calToneBtn">
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Play</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_3">
@@ -1086,7 +1120,7 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>628</x>
+     <x>549</x>
      <y>117</y>
     </hint>
     <hint type="destinationlabel">
@@ -1223,6 +1257,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>calToneBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>playCalTone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>777</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1005</x>
+     <y>586</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>refDbSpnbx</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>updateCalDb()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>389</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>866</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1267,5 +1333,7 @@
   <slot>showLog()</slot>
   <slot>grabCal()</slot>
   <slot>clearProtocol()</slot>
+  <slot>playCalTone()</slot>
+  <slot>updateCalDb()</slot>
  </slots>
 </ui>

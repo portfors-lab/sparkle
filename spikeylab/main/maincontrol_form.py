@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Jun 27 11:06:33 2014
+# Created: Mon Jun 30 10:10:51 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -152,6 +152,22 @@ class Ui_ControlWindow(object):
         self.calibrationWidget = CalibrationWidget(self.tabCalibrate)
         self.calibrationWidget.setObjectName(_fromUtf8("calibrationWidget"))
         self.verticalLayout.addWidget(self.calibrationWidget)
+        self.horizontalLayout_10 = QtGui.QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(_fromUtf8("horizontalLayout_10"))
+        self.refToneLbl = QtGui.QLabel(self.tabCalibrate)
+        self.refToneLbl.setObjectName(_fromUtf8("refToneLbl"))
+        self.horizontalLayout_10.addWidget(self.refToneLbl)
+        self.refDbSpnbx = QtGui.QDoubleSpinBox(self.tabCalibrate)
+        self.refDbSpnbx.setObjectName(_fromUtf8("refDbSpnbx"))
+        self.horizontalLayout_10.addWidget(self.refDbSpnbx)
+        self.label_15 = QtGui.QLabel(self.tabCalibrate)
+        self.label_15.setObjectName(_fromUtf8("label_15"))
+        self.horizontalLayout_10.addWidget(self.label_15)
+        self.calToneBtn = QtGui.QPushButton(self.tabCalibrate)
+        self.calToneBtn.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.calToneBtn.setObjectName(_fromUtf8("calToneBtn"))
+        self.horizontalLayout_10.addWidget(self.calToneBtn)
+        self.verticalLayout.addLayout(self.horizontalLayout_10)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.dblevelLbl = QtGui.QLabel(self.tabCalibrate)
@@ -507,7 +523,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tabGroup.setCurrentIndex(0)
+        self.tabGroup.setCurrentIndex(2)
         self.parameterStack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchSaveDlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCalibrationDlg)
@@ -523,6 +539,8 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.clearProtocol)
         QtCore.QObject.connect(self.actionStimulus_Details, QtCore.SIGNAL(_fromUtf8("triggered()")), self.detail_dock.showNormal)
         QtCore.QObject.connect(self.actionView_Settings, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchViewDlg)
+        QtCore.QObject.connect(self.calToneBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.playCalTone)
+        QtCore.QObject.connect(self.refDbSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateCalDb)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -540,6 +558,9 @@ class Ui_ControlWindow(object):
         self.label_2.setText(_translate("ControlWindow", "Experiment Protocol:", None))
         self.pushButton.setText(_translate("ControlWindow", "clear protocol", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabProtocol), _translate("ControlWindow", "Experiment", None))
+        self.refToneLbl.setText(_translate("ControlWindow", "Intensity at ? kHz and ?V", None))
+        self.label_15.setText(_translate("ControlWindow", "dB SPL", None))
+        self.calToneBtn.setText(_translate("ControlWindow", "Play", None))
         self.dblevelLbl.setText(_translate("ControlWindow", "0", None))
         self.label_18.setText(_translate("ControlWindow", "absolute dB SPL level:", None))
         self.dblevelLbl2.setText(_translate("ControlWindow", "0", None))
