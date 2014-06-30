@@ -146,11 +146,12 @@ class MainWindow(ControlWindow):
             scale_lbl = 'kHz'
         elif self.fscale == 1:
             scale_lbl = 'Hz'
-        self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ, scale_lbl, REFVOLTAGE))
+        self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ/self.fscale, scale_lbl, REFVOLTAGE))
         self.acqmodel.set_cal_tone(REFFREQ, REFVOLTAGE, self.calvals['caldb'])
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
 
+        self.vscale = 0.001
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
 
@@ -383,6 +384,8 @@ class MainWindow(ControlWindow):
         self.ui.calToneBtn.clicked.connect(self.stopCalTone)
         self.ui.startBtn.setEnabled(False)
         self.ui.stopBtn.setEnabled(False)
+
+        self.connectUpdatable(True)
 
         self.activeOperation = 'caltone'
         reprate = self.ui.reprateSpnbx.value()

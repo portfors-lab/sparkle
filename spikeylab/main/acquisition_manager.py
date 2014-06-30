@@ -24,7 +24,10 @@ class AcquisitionManager():
         self.tone_calibrator = CalibrationCurveRunner(self.signals)
         self.charter = ChartRunner(self.signals)
         self.cal_toner = SearchRunner(self.signals)
-
+        stim_names = self.cal_toner.stim_names()
+        toneidx = stim_names.index("Pure Tone")
+        self.cal_toner.set_stim_by_index(toneidx)
+        self.cal_tone_idx = toneidx
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
@@ -44,9 +47,7 @@ class AcquisitionManager():
             if stim.name == 'Pure Tone':
                 stim.set('frequency', freq)
                 stim.set('intensity', db)
-                idx = stims.index(stim)
-                self.cal_toner.set_stim_by_index(idx)
-                break
+        self.cal_toner.set_stim_by_index(self.cal_tone_idx)
 
     def set_calibration(self, datakey, calf=None, frange=None):
         if datakey is None:
@@ -81,6 +82,9 @@ class AcquisitionManager():
     def set_calibration_duration(self, dur):
         self.bs_calibrator.set_duration(dur)
         self.tone_calibrator.set_duration(dur)
+        self.cal_toner.set_current_stim_parameter('duration', dur)
+        # resets the signal in player to output
+        self.cal_toner.set_stim_by_index(self.cal_tone_idx)
 
     def set_calibration_reps(self, reps):
         self.bs_calibrator.set_reps(reps)

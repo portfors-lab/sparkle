@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Jun 30 11:35:13 2014
+# Created: Mon Jun 30 12:04:20 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -157,17 +157,22 @@ class Ui_ControlWindow(object):
         self.refToneLbl = QtGui.QLabel(self.tabCalibrate)
         self.refToneLbl.setObjectName(_fromUtf8("refToneLbl"))
         self.horizontalLayout_10.addWidget(self.refToneLbl)
-        self.refDbSpnbx = QtGui.QDoubleSpinBox(self.tabCalibrate)
+        self.calToneBtn = QtGui.QPushButton(self.tabCalibrate)
+        self.calToneBtn.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.calToneBtn.setObjectName(_fromUtf8("calToneBtn"))
+        self.horizontalLayout_10.addWidget(self.calToneBtn)
+        self.label_4 = QtGui.QLabel(self.tabCalibrate)
+        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.horizontalLayout_10.addWidget(self.label_4)
+        self.refDbSpnbx = SmartSpinBox(self.tabCalibrate)
+        self.refDbSpnbx.setToolTip(_fromUtf8(""))
         self.refDbSpnbx.setMaximum(120.0)
         self.refDbSpnbx.setObjectName(_fromUtf8("refDbSpnbx"))
         self.horizontalLayout_10.addWidget(self.refDbSpnbx)
         self.label_15 = QtGui.QLabel(self.tabCalibrate)
         self.label_15.setObjectName(_fromUtf8("label_15"))
         self.horizontalLayout_10.addWidget(self.label_15)
-        self.calToneBtn = QtGui.QPushButton(self.tabCalibrate)
-        self.calToneBtn.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.calToneBtn.setObjectName(_fromUtf8("calToneBtn"))
-        self.horizontalLayout_10.addWidget(self.calToneBtn)
         self.verticalLayout.addLayout(self.horizontalLayout_10)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
@@ -560,8 +565,9 @@ class Ui_ControlWindow(object):
         self.pushButton.setText(_translate("ControlWindow", "clear protocol", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabProtocol), _translate("ControlWindow", "Experiment", None))
         self.refToneLbl.setText(_translate("ControlWindow", "Intensity at ? kHz and ?V", None))
-        self.label_15.setText(_translate("ControlWindow", "dB SPL", None))
         self.calToneBtn.setText(_translate("ControlWindow", "Play", None))
+        self.label_4.setText(_translate("ControlWindow", "=", None))
+        self.label_15.setText(_translate("ControlWindow", "dB SPL", None))
         self.dblevelLbl.setText(_translate("ControlWindow", "0", None))
         self.label_18.setText(_translate("ControlWindow", "absolute dB SPL level:", None))
         self.dblevelLbl2.setText(_translate("ControlWindow", "0", None))
@@ -576,7 +582,7 @@ class Ui_ControlWindow(object):
         self.label_10.setText(_translate("ControlWindow", "Window size", None))
         self.tunit_lbl.setText(_translate("ControlWindow", "ms", None))
         self.label_12.setText(_translate("ControlWindow", "Threshold", None))
-        self.label_13.setText(_translate("ControlWindow", "mV", None))
+        self.label_13.setText(_translate("ControlWindow", "V", None))
         self.label_43.setText(_translate("ControlWindow", "Spike bin size", None))
         self.tunit_lbl_2.setText(_translate("ControlWindow", "ms", None))
         self.label_35.setText(_translate("ControlWindow", "Rep rate", None))

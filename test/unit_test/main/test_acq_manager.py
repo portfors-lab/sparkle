@@ -34,6 +34,21 @@ class TestAcquisitionModel():
         for f in files:
             os.remove(f)
 
+    def test_cal_tone_duration(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        manager.set_cal_tone(15000, 2.0, 100)
+        manager.set_calibration_duration(winsz)
+
+        stims = manager.cal_toner.stimuli_list()
+        for stim in stims:
+            if stim.name == 'Pure Tone':
+                assert stim.duration() == winsz
+
+        manager.close_data()
+
     def test_tone_protocol(self):
         """Test a protocol with a single tone stimulus"""
         winsz = 0.2 #seconds

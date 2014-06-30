@@ -156,6 +156,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def data(self, index, role=QtCore.Qt.UserRole):
         if not index.isValid():
+            print 'returning invalid'
             return None
         if role == QtCore.Qt.DisplayRole:
             component = self._segments[index.row()][index.column()]
@@ -172,6 +173,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
             else:
                 component = None
             return component
+        print 'reached here !!!!'
 
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
@@ -182,6 +184,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if row < len(self._segments) and col < len(self._segments[row]):
             return self.createIndex(row, col, self._segments[row][col])
         else:
+            print 'invalid :(', self._segments
             return QtCore.QModelIndex()
 
     def parentForRow(self, row):
