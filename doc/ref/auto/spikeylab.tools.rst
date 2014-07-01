@@ -17,10 +17,34 @@ tools Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`qthreading` Module
+:mod:`exception_test` Module
+----------------------------
+
+.. automodule:: spikeylab.tools.exception_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`exceptions` Module
 ------------------------
 
-.. automodule:: spikeylab.tools.qthreading
+.. automodule:: spikeylab.tools.exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`log` Module
+-----------------
+
+.. automodule:: spikeylab.tools.log
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`qsignals` Module
+----------------------
+
+.. automodule:: spikeylab.tools.qsignals
     :members:
     :undoc-members:
     :show-inheritance:
@@ -37,6 +61,22 @@ tools Package
 ----------------------
 
 .. automodule:: spikeylab.tools.systools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`uihandler` Module
+-----------------------
+
+.. automodule:: spikeylab.tools.uihandler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`util` Module
+------------------
+
+.. automodule:: spikeylab.tools.util
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,26 +1,66 @@
 stim Package
 ============
 
-:mod:`auto_parameter` Module
-----------------------------
+:mod:`stim` Package
+-------------------
 
-.. automodule:: spikeylab.stim.auto_parameter
+.. automodule:: spikeylab.stim
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`auto_parameter_form` Module
+:mod:`abstract_editor` Module
+-----------------------------
+
+.. automodule:: spikeylab.stim.abstract_editor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`abstract_parameters` Module
 ---------------------------------
 
-.. automodule:: spikeylab.stim.auto_parameter_form
+.. automodule:: spikeylab.stim.abstract_parameters
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`auto_parameter_modelview` Module
---------------------------------------
+:mod:`abstract_stimulus` Module
+-------------------------------
 
-.. automodule:: spikeylab.stim.auto_parameter_modelview
+.. automodule:: spikeylab.stim.abstract_stimulus
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`auto_parameter_model` Module
+----------------------------------
+
+.. automodule:: spikeylab.stim.auto_parameter_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`auto_parameter_view` Module
+---------------------------------
+
+.. automodule:: spikeylab.stim.auto_parameter_view
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`auto_parameters_editor` Module
+------------------------------------
+
+.. automodule:: spikeylab.stim.auto_parameters_editor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`common_parameters` Module
+-------------------------------
+
+.. automodule:: spikeylab.stim.common_parameters
     :members:
     :undoc-members:
     :show-inheritance:
@@ -33,10 +73,58 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`component_detail` Module
+------------------------------
+
+.. automodule:: spikeylab.stim.component_detail
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`component_label` Module
 -----------------------------
 
 .. automodule:: spikeylab.stim.component_label
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`detail_form` Module
+-------------------------
+
+.. automodule:: spikeylab.stim.detail_form
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`detail_widget` Module
+---------------------------
+
+.. automodule:: spikeylab.stim.detail_widget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`dynamic_stacker` Module
+-----------------------------
+
+.. automodule:: spikeylab.stim.dynamic_stacker
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`factory` Module
+---------------------
+
+.. automodule:: spikeylab.stim.factory
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`generic_parameters` Module
+--------------------------------
+
+.. automodule:: spikeylab.stim.generic_parameters
     :members:
     :undoc-members:
     :show-inheritance:
@@ -57,10 +145,10 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`parameterwidget` Module
------------------------------
+:mod:`reorder` Module
+---------------------
 
-.. automodule:: spikeylab.stim.parameterwidget
+.. automodule:: spikeylab.stim.reorder
     :members:
     :undoc-members:
     :show-inheritance:
@@ -69,6 +157,14 @@ stim Package
 ----------------------------
 
 .. automodule:: spikeylab.stim.selectionmodel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`smart_spinbox` Module
+---------------------------
+
+.. automodule:: spikeylab.stim.smart_spinbox
     :members:
     :undoc-members:
     :show-inheritance:
@@ -89,6 +185,14 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`stimulus_label` Module
+----------------------------
+
+.. automodule:: spikeylab.stim.stimulus_label
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`stimulusmodel` Module
 ---------------------------
 
@@ -105,35 +209,26 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`tone_parameters` Module
------------------------------
+:mod:`tceditor` Module
+----------------------
 
-.. automodule:: spikeylab.stim.tone_parameters
+.. automodule:: spikeylab.stim.tceditor
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`tone_parameters_form` Module
-----------------------------------
+:mod:`tcform` Module
+--------------------
 
-.. automodule:: spikeylab.stim.tone_parameters_form
+.. automodule:: spikeylab.stim.tcform
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`vocal_parameters` Module
-------------------------------
+Subpackages
+-----------
 
-.. automodule:: spikeylab.stim.vocal_parameters
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. toctree::
 
-:mod:`vocal_parameters_form` Module
------------------------------------
-
-.. automodule:: spikeylab.stim.vocal_parameters_form
-    :members:
-    :undoc-members:
-    :show-inheritance:
+    spikeylab.stim.types
 

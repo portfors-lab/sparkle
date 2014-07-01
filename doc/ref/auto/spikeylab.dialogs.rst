@@ -1,18 +1,42 @@
 dialogs Package
 ===============
 
-:mod:`raster_bounds_dlg` Module
--------------------------------
+:mod:`dialogs` Package
+----------------------
 
-.. automodule:: spikeylab.dialogs.raster_bounds_dlg
+.. automodule:: spikeylab.dialogs
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`rasterform` Module
-------------------------
+:mod:`caldialog_form` Module
+----------------------------
 
-.. automodule:: spikeylab.dialogs.rasterform
+.. automodule:: spikeylab.dialogs.caldialog_form
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`calibration_dlg` Module
+-----------------------------
+
+.. automodule:: spikeylab.dialogs.calibration_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`comment_dlg` Module
+-------------------------
+
+.. automodule:: spikeylab.dialogs.comment_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`commentform` Module
+-------------------------
+
+.. automodule:: spikeylab.dialogs.commentform
     :members:
     :undoc-members:
     :show-inheritance:
@@ -21,14 +45,6 @@ dialogs Package
 ------------------------
 
 .. automodule:: spikeylab.dialogs.saving_dlg
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`savingform` Module
-------------------------
-
-.. automodule:: spikeylab.dialogs.savingform
     :members:
     :undoc-members:
     :show-inheritance:
@@ -45,6 +61,38 @@ dialogs Package
 -----------------------
 
 .. automodule:: spikeylab.dialogs.scaleform
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`specgram_dlg` Module
+--------------------------
+
+.. automodule:: spikeylab.dialogs.specgram_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`specgramform` Module
+--------------------------
+
+.. automodule:: spikeylab.dialogs.specgramform
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`view_dlg` Module
+----------------------
+
+.. automodule:: spikeylab.dialogs.view_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`viewdialog_form` Module
+-----------------------------
+
+.. automodule:: spikeylab.dialogs.viewdialog_form
     :members:
     :undoc-members:
     :show-inheritance:

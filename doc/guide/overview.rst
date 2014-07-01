@@ -83,6 +83,10 @@ Data Files
 ==========
 Recorded data is saved to data files in HDF5 format. Each protcol list is a group, and under the groups are tests, which are numbered sequentially, with numbers continuing across groups. Each test is a dataset with the dimensions no. of traces x no. of repetitions x samples. Stimulus data is saved as an attribute of each dataset, and is a JSON list of dictionarys, with each entry providing enough information to be able to recreate the stimulus. There will be a better description here in the future...
 
+Other Settings
+===============
+Semi-permanent setting loaded once at program start are located in the :ref:`settings`.
+
 Names
 =====
 Considering the following Names for the Program

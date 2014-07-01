@@ -1,66 +1,26 @@
 plotting Package
 ================
 
-:mod:`abstract_figures` Module
-------------------------------
-
-.. automodule:: spikeylab.plotting.abstract_figures
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`custom_plots` Module
---------------------------
-
-.. automodule:: spikeylab.plotting.custom_plots
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`custom_toolbar` Module
-----------------------------
-
-.. automodule:: spikeylab.plotting.custom_toolbar
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`datacursor` Module
-------------------------
-
-.. automodule:: spikeylab.plotting.datacursor
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`defined_plots` Module
----------------------------
-
-.. automodule:: spikeylab.plotting.defined_plots
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`mpl_spec_widget` Module
------------------------------
-
-.. automodule:: spikeylab.plotting.mpl_spec_widget
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`plottools` Module
+:mod:`plotting` Package
 -----------------------
 
-.. automodule:: spikeylab.plotting.plottools
+.. automodule:: spikeylab.plotting
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`plotz` Module
--------------------
+:mod:`calibration_display` Module
+---------------------------------
 
-.. automodule:: spikeylab.plotting.plotz
+.. automodule:: spikeylab.plotting.calibration_display
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`calibration_explore_display` Module
+-----------------------------------------
+
+.. automodule:: spikeylab.plotting.calibration_explore_display
     :members:
     :undoc-members:
     :show-inheritance:
@@ -69,6 +29,38 @@ plotting Package
 -----------------------------
 
 .. automodule:: spikeylab.plotting.protocoldisplay
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`pyqtgraph_widgets` Module
+-------------------------------
+
+.. automodule:: spikeylab.plotting.pyqtgraph_widgets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`raster_bounds_dlg` Module
+-------------------------------
+
+.. automodule:: spikeylab.plotting.raster_bounds_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`rasterform` Module
+------------------------
+
+.. automodule:: spikeylab.plotting.rasterform
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`viewbox` Module
+---------------------
+
+.. automodule:: spikeylab.plotting.viewbox
     :members:
     :undoc-members:
     :show-inheritance:

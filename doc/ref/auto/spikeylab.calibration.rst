@@ -1,42 +1,18 @@
 calibration Package
 ===================
 
-:mod:`calform` Module
----------------------
+:mod:`calibration_widget` Module
+--------------------------------
 
-.. automodule:: spikeylab.calibration.calform
+.. automodule:: spikeylab.calibration.calibration_widget
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`calibrationGUI` Module
+:mod:`calwidget_form` Module
 ----------------------------
 
-.. automodule:: spikeylab.calibration.calibrationGUI
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`calibration_datastructrues` Module
-----------------------------------------
-
-.. automodule:: spikeylab.calibration.calibration_datastructrues
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`disp_dlg` Module
-----------------------
-
-.. automodule:: spikeylab.calibration.disp_dlg
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`dispform` Module
-----------------------
-
-.. automodule:: spikeylab.calibration.dispform
+.. automodule:: spikeylab.calibration.calwidget_form
     :members:
     :undoc-members:
     :show-inheritance:

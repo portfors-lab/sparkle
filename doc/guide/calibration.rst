@@ -10,12 +10,13 @@ For the purposes of speaker frequency roll-off documentation and compensation.
     - Place the microphone exactly 10cm away from the speaker. The microphone is highly directional, it is important that it is directly in front of, and facing the speaker, with the shield off. Connect the microphone preamplifier (the wand that the little microphone is screwed on to), to the measuring amplifier. Then route the signal through the Bessel Filter, and then to an AI channel on the ADC/DAC BNC router. See settings for individual pieces of electronics.
 
 
-#. Get a verified decibel level at reference frequency. Using the decibel meter, pick a frequency (a lower one, e.g. 15kHz) and an appropriate voltage level (as yet undetermined, let's say 1.0V), and record the recieved intensity in dB SPL. Go to the *Calibration Parameters* menu, under the *Options* menu at the top menu bar on the program window. Input these settings into the fields here and click ok.
-#. Input these settings in the program under the menu *Options/Calibration Parameters...*. This is the voltage level that the program will consider as necessary to generate the specified dB level. This dialog is also where you can set previous calibrations. If you are saving a calibration, it does not matter if a file is selected or not, it will create a new one.
+#. Get a verified decibel level at reference frequency. Go to to the *calibration* tab, if you are not there already. In the center of the tab there will be a line that reads "Intensity of _kHz tone at _V". Press the *play* button located here. Read the value on the dB meter and put this into the field on the right. This sets a reference point for the program so that it knows what amplitude of a signal to output to recieve the correct loudness at the listener.
 
-# Go to the Calibration tab, if you are not there already. For saving a calibration most of the input values are fixed, so all you can change is the duration and number of repetions.
+#. For saving a calibration, most of the input values are fixed, so all you can change is the duration and number of repetitions.
 
 #. Press the start button, the plot display will update with the data from the ouput and recorded signals. After recording the program will take several seconds to calculate the filter it will be using. Finally a frequency roll-off plot of the speaker will appear.
+
+#. Get a look at the efficacy of the calibration, by choosing the *Test Calibration* button and selecting one of the options from the drop down menu that is enabled. The closer to a flat spectrum recorded, the better.
 
 * When you run a calibration it will be automatically set as the active calibration for the program.
 
@@ -23,6 +24,10 @@ For the purposes of speaker frequency roll-off documentation and compensation.
 
 * You can switch the calibration, or set the calibration to none under *Options/Calibration Parameters...*
 
+* To change the effective frequency range of a calibration, also see the 
+*Options/Calibration Parameters...* menu.
+
+* If you wish to change the calibration frequency or voltage, you will need to edit the :ref:`settings`.
 
 Calibration Tests
 -----------------
