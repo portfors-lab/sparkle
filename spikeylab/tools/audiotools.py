@@ -317,6 +317,10 @@ def attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
     y = resp - np.mean(resp)
     x = signal
 
+    # frequencies present in calibration spectrum
+    npts = len(y)
+    fq = np.arange(npts/2+1)/(float(npts)/fs)
+
     # convert time signals to frequency domain
     Y = np.fft.rfft(y)
     X = np.fft.rfft(x)
@@ -334,10 +338,6 @@ def attenuation_curve(signal, resp, fs, calf, smooth_pts=99):
 
     # may want to smooth results here?
     diffdB = smooth(diffdB, smooth_pts)
-
-    # frequencies present in calibration spectrum
-    npts = len(y)
-    fq = np.arange(npts/2+1)/(float(npts)/fs)
 
     # shift by the given calibration frequency to align attenutation
     # with reference point set by user

@@ -11,6 +11,7 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 
 class AcquisitionManager():
     """Handles all of the marshalling of different acquisition operations to the correct runner class.
+    
     Opens and closes shared data file.
     """
     def __init__(self):

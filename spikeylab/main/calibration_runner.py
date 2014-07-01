@@ -71,7 +71,6 @@ class CalibrationRunner(ListAcquisitionRunner):
         logger = logging.getLogger('main')
         logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
         
-        print 'initialize data signal size', self.stimulus.duration(), self.stimulus.samplerate(), (self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate())
         self.datafile.init_data(self.current_dataset_name, mode='calibration', 
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
                                 nested_name='signal')
@@ -105,7 +104,6 @@ class CalibrationRunner(ListAcquisitionRunner):
 
         diffdB = attenuation_curve(self.stimulus.signal()[0], avg_signal,
                                         self.stimulus.samplerate(), self.calf)
-
         logger = logging.getLogger('main')
         logger.debug('The maximum dB attenuation is {}, caldB {}'.format(max(diffdB), self.caldb))
 
@@ -273,7 +271,9 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 self.calpeak = mean_peak
                 self.trace_counter +=1
             else:
+                # use relative dB
                 # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
+                # dB according to microphone sensitivity
                 resultdb = calc_db(mean_peak)
                 self.signals.average_response.emit(f, db, resultdb)
 

@@ -148,6 +148,8 @@ class MainWindow(ControlWindow):
             scale_lbl = 'Hz'
         self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ/self.fscale, scale_lbl, REFVOLTAGE))
         self.acqmodel.set_cal_tone(REFFREQ, self.calvals['caldb'])
+        self.acqmodel.set_params(**self.calvals)
+        self.acqmodel.set_calibration(None, self.calvals['calf'], self.calvals['frange'])
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
 

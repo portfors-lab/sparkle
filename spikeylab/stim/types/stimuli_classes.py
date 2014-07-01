@@ -42,11 +42,6 @@ class PureTone(Tone):
     def setFrequency(self, freq):
         self._frequency = freq
 
-    # def showEditor(self):
-    #     editor = tone_parameters.ToneParameterWidget()
-    #     editor.setComponent(self)
-    #     return editor
-
     def paint(self, painter, rect, palette):
         if (self._frequency/self._scales[1]) - np.floor(self._frequency/self._scales[1]) > 0.0:
             freq = str(self._frequency/self._scales[1])
