@@ -132,6 +132,9 @@ class CalibrationRunner(ListAcquisitionRunner):
 # wether to use relative peak level (from FFT), or calculate from
 # microphone sensitivity level
 USE_FFT = True
+with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+USE_RMS = config['use_rms']
 
 class CalibrationCurveRunner(ListAcquisitionRunner):
     def __init__(self, signals):
@@ -195,7 +198,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                                 nested_name='fft_peaks')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
-                                nested_name='vmax')
+                                nested_name='vamp')
 
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata(self.current_dataset_name, info)
@@ -237,8 +240,10 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
             # self._halt = True
         peak_fft = spec_peak_at_f[0]
 
-        # vmax = np.amax(abs(response))
-        vmax = np.sqrt(np.mean(pow(response,2))) #/ np.sqrt(2) #rms
+        if USE_RMS:
+            vamp = np.sqrt(np.mean(pow(response,2))) #/ np.sqrt(2)
+        else:
+            vmax = np.amax(abs(response))
 
         if self.trace_counter >= 0:
             if irep == 0:
@@ -250,17 +255,17 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
 
             self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
                                  nested_name='fft_peaks')
-            self.datafile.append(self.current_dataset_name, np.array([vmax]), 
-                                 nested_name='vmax')
+            self.datafile.append(self.current_dataset_name, np.array([vamp]), 
+                                 nested_name='vamp')
             self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
-            self.signals.calibration_response_collected.emit(spectrum, freq, vmax)
+            self.signals.calibration_response_collected.emit(spectrum, freq, vamp)
         
         # calculate resultant dB and emit
         if USE_FFT:
             self.peak_avg.append(peak_fft)
         else:
-            self.peak_avg.append(vmax)
+            self.peak_avg.append(vamp)
         if irep == self.nreps-1:
             mean_peak = np.mean(self.peak_avg)
             if f == self.calf and db == self.caldb and self.trace_counter == -1:
