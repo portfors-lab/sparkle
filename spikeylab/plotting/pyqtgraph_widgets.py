@@ -266,7 +266,6 @@ class SimplePlotWidget(BasePlot):
     def __init__(self, xpoints, ypoints, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
         ypoints = np.squeeze(ypoints)
-        print 'ypoints shape', ypoints.shape
         if len(ypoints.shape) > 1:
             for row in ypoints:
                 self.appendData(xpoints, row)

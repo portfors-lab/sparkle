@@ -17,7 +17,8 @@ mphone_sensitivity = config['microphone_sensitivity']
 def calc_db(peak, cal_peak=None):
     u""" 
     Converts voltage difference into decibels : 20*log10(peak/cal_peak)
-    If calpeak not provided uses microphone sensitivity value from config file
+    If calpeak not provided uses microphone sensitivity value from config file,
+    and return value is dB SPL, instead of difference.
     """
     if cal_peak is not None:
         if cal_peak == 0:

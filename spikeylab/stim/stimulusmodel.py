@@ -17,7 +17,6 @@ src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 DEFAULT_SAMPLERATE = config['default_genrate']
-USE_RMS = config['use_rms']
 MAXV = config['max_voltage']
 
 class StimulusModel(QtCore.QAbstractItemModel):
@@ -156,7 +155,6 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
     def data(self, index, role=QtCore.Qt.UserRole):
         if not index.isValid():
-            print 'returning invalid'
             return None
         if role == QtCore.Qt.DisplayRole:
             component = self._segments[index.row()][index.column()]
@@ -173,18 +171,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
             else:
                 component = None
             return component
-        print 'reached here !!!!'
 
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
 
     def index(self, row, col, parent=QtCore.QModelIndex()):
         # need to convert row, col to correct element, however still have heirarchy?
-
         if row < len(self._segments) and col < len(self._segments[row]):
             return self.createIndex(row, col, self._segments[row][col])
         else:
-            print 'invalid :(', self._segments
             return QtCore.QModelIndex()
 
     def parentForRow(self, row):
@@ -443,7 +438,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         atten = 0
         # if max_db > self.caldb:
         #     raise Exception("Stimulus intensity over maxium")
-        # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten
+        # print 'caldb:', self.caldb, 'max db:', max_db, 'atten:', atten, 'calv', self.calv
         for track in self._segments:
             track_list = []
             for component in track:

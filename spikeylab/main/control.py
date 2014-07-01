@@ -14,7 +14,7 @@ from spikeylab.acq.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
             ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
-from spikeylab.tools.audiotools import calc_spectrum
+from spikeylab.tools.audiotools import calc_spectrum, calc_db
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
@@ -477,10 +477,11 @@ class MainWindow(ControlWindow):
         elif self.ui.plotDock.current() == 'calexp':
             # convert voltage amplitudes into dB SPL    
             rms = np.sqrt(np.mean(pow(response,2))) / np.sqrt(2)
-            masterdb = 94 + (20.*np.log10(rms/(MPHONE_SENSITIVITY)))
+            masterdb = calc_db(rms)
+
             sr = self.ui.aisrSpnbx.value()*self.fscale
             freq, signal_fft = calc_spectrum(response, sr)
-            spectrum = 94 + (20.*np.log10((signal_fft/np.sqrt(2))/MPHONE_SENSITIVITY))
+            spectrum = calc_db(signal_fft)
             spectrum[0] = 0
             peakspl = np.amax(spectrum)
             self.ui.dblevelLbl.setNum(masterdb)
@@ -491,8 +492,8 @@ class MainWindow(ControlWindow):
 
     def displayCalibrationResponse(self, spectrum, freqs, rms):
 
-        masterdb = 94 + (20.*np.log10(rms/(MPHONE_SENSITIVITY)))
-        spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/MPHONE_SENSITIVITY))
+        masterdb = calc_db(rms)
+        spectrum = calc_db(spectrum)
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
         self.ui.dblevelLbl.setNum(masterdb)
@@ -534,8 +535,7 @@ class MainWindow(ControlWindow):
     def displayStim(self, signal, fs):
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
-        spectrum = 20 * np.log10(spectrum/ self.calvals['calv']) + self.calvals['caldb']
-
+        spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
         # print 'spec max', np.amax(spectrum)
         
         timevals = np.arange(len(signal)).astype(float)/fs
@@ -710,6 +710,7 @@ class MainWindow(ControlWindow):
 
     def updateCalDb(self):
         self.calvals['caldb'] = self.ui.refDbSpnbx.value()
+        self.acqmodel.set_params(caldb=self.calvals['caldb'])
 
     def setStatusMsg(self, status):
         self.statusBar().showMessage(status)

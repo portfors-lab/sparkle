@@ -44,7 +44,6 @@ class SearchRunner(AbstractAcquisitionRunner):
 
     def set_current_stim_parameter(self, param, val):
         component = self.stimulus.data(self.stimulus.index(0,0))
-        print 'component', component, param, val
         component.set(param, val)
 
     def current_signal(self):

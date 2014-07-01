@@ -93,7 +93,6 @@ class CalibrationRunner(ListAcquisitionRunner):
         return
 
     def _process_response(self, response, trace_info, irep):
-        print 'size of response:', response.shape
         self.datafile.append(self.current_dataset_name, response, 
                              nested_name='signal')
 
@@ -133,10 +132,6 @@ class CalibrationRunner(ListAcquisitionRunner):
 # wether to use relative peak level (from FFT), or calculate from
 # microphone sensitivity level
 USE_FFT = True
-
-with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
-    config = yaml.load(yf)
-mphone_sensitivity = config['microphone_sensitivity']
 
 class CalibrationCurveRunner(ListAcquisitionRunner):
     def __init__(self, signals):
@@ -274,7 +269,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 self.trace_counter +=1
             else:
                 # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
-                resultdb = 94 + (20.*np.log10((mean_peak/np.sqrt(2))/mphone_sensitivity))
+                resultdb = calc_db(mean_peak)
                 self.signals.average_response.emit(f, db, resultdb)
 
     def process_calibration(self, save=True):
