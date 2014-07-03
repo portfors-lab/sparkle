@@ -157,7 +157,8 @@ class AbstractPlayerBase():
             pa5 = win32com.client.Dispatch("PA5.x")
             success = pa5.ConnectPA5('GB', 1)
             if success == 1:
-                print 'Connection to PA5 attenuator established'
+                # print 'Connection to PA5 attenuator established'
+                pass
             else:
                 print 'Connection to PA5 attenuator failed'
                 errmsg = pa5.GetError()

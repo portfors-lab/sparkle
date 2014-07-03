@@ -148,7 +148,7 @@ class MainWindow(ControlWindow):
             scale_lbl = 'Hz'
         self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ/self.fscale, scale_lbl, REFVOLTAGE))
         self.acqmodel.set_cal_tone(REFFREQ, self.calvals['caldb'])
-        self.acqmodel.set_params(**self.calvals)
+        self.acqmodel.set(**self.calvals)
         self.acqmodel.set_calibration(None, self.calvals['calf'], self.calvals['frange'])
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
@@ -249,7 +249,7 @@ class MainWindow(ControlWindow):
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
         self.ui.psth.setBins(bin_centers)
-        self.acqmodel.set_params(aochan=aochan, aichan=aichan,
+        self.acqmodel.set(aochan=aochan, aichan=aichan,
                                  acqtime=winsz, aisr=acq_rate,
                                  binsz=binsz)
         self.binsz = binsz
@@ -259,7 +259,7 @@ class MainWindow(ControlWindow):
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             nreps = self.ui.exNrepsSpnbx.value()
 
-            self.acqmodel.set_params(nreps=nreps)
+            self.acqmodel.set(nreps=nreps)
             
             # have model sort all signals stuff out?
             stim_index = self.ui.exploreStimTypeCmbbx.currentIndex()
@@ -394,7 +394,7 @@ class MainWindow(ControlWindow):
 
         self.onUpdate()           
         nreps = self.ui.exNrepsSpnbx.value()
-        self.acqmodel.set_params(nreps=nreps)
+        self.acqmodel.set(nreps=nreps)
         self.display.setNreps(nreps)
 
         self.acqmodel.run_caltone(interval)
@@ -606,7 +606,7 @@ class MainWindow(ControlWindow):
         dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
         if dlg.exec_():
             results = dlg.values()
-            self.acqmodel.set_params(**results)
+            self.acqmodel.set(**results)
             if results['use_calfile']:
                 ww = self.showWait()
                 self.acqmodel.set_calibration(results['calname'], self.calvals['calf'], results['frange'])
@@ -668,7 +668,6 @@ class MainWindow(ControlWindow):
 
     def setCalibrationDuration(self):
         winsz = float(self.ui.windowszSpnbx.value())
-        print 'setting calibration duration', winsz
         # I shouldn't have to do both of these...
         self.acqmodel.set_calibration_duration(winsz*self.tscale)
         self.ui.calibrationWidget.setDuration(winsz)
@@ -711,7 +710,7 @@ class MainWindow(ControlWindow):
 
     def updateCalDb(self):
         self.calvals['caldb'] = self.ui.refDbSpnbx.value()
-        self.acqmodel.set_params(caldb=self.calvals['caldb'])
+        self.acqmodel.set(caldb=self.calvals['caldb'])
 
     def setStatusMsg(self, status):
         self.statusBar().showMessage(status)

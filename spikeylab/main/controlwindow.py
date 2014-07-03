@@ -265,8 +265,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.calvals['use_calfile'] = False
         self.calvals['calname'] = ''
         self.ui.refDbSpnbx.setValue(self.calvals['caldb'])
-        self.acqmodel.set_params(**self.calvals)
-        self.acqmodel.set_calibration(None, self.calvals['calf'], self.calvals['frange'])
         tscale = inputsdict.get('tscale', 0.001)
         fscale = inputsdict.get('fscale', 1000)
 

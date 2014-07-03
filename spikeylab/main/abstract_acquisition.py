@@ -39,7 +39,11 @@ class AbstractAcquisitionRunner():
         """
         self.threshold = threshold
 
-    def set_params(self, **kwargs):
+    def set(self, **kwargs):
+        """Sets an internal setting for acquistion, using keywords.
+
+        Available parameters to set: acqtime, aisr, aochan, aichan, nreps, binsz, caldb, calv, datafile
+        """
         self.player_lock.acquire()
         if 'acqtime' in kwargs:
             self.player.set_aidur(kwargs['acqtime'])
@@ -81,6 +85,9 @@ class AbstractAcquisitionRunner():
         self._halt = True
 
     def interval_wait(self):
+        """Pauses the correct amount of time according to this 
+        acquisition object's interval setting, and the last time this 
+        function was called"""
         # calculate time since last interation and wait to acheive desired interval
         now = time.time()
         elapsed = (now - self.last_tick)*1000
@@ -94,9 +101,3 @@ class AbstractAcquisitionRunner():
             self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
         self.last_tick = now
 
-    def save_data(self, data, setname):
-        self.datafile.append(setname, data)
-        # save stimulu info
-        info = self.stimulus.doc()
-        info['samplerate_ad'] = self.player.aisr
-        self.datafile.append_trace_info(setname, info)

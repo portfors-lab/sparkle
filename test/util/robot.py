@@ -28,8 +28,6 @@ def click(point):
 
 def doubleclick(point):
     m = PyMouse()
-    m.move(*point)
-    time.sleep(0.1)
     m.press(*point)
     m.release(*point)
     m.press(*point)

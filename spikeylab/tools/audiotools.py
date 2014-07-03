@@ -11,7 +11,6 @@ VERBOSE = False
 
 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-print 'loaded config', config
 mphone_sensitivity = config['microphone_sensitivity']
 
 def calc_db(peak, cal_peak=None):
@@ -45,6 +44,7 @@ def calc_spectrum(signal,rate):
 def get_peak(y, idx, atfrequency=None):
     """ 
     Find the peak value for the input vector
+    
     :param y: data vector
     :type y: numpy.ndarray
     :param idx: index values for y
@@ -251,6 +251,7 @@ def impulse_response(genrate, fresponse, frequencies, frange, truncation_factor=
     """
     Calculate filter kernel from attenuation vector.
     Attenuation vector should represent magnitude frequency response of system
+    
     :param genrate: The generation samplerate at which the test signal was played
     :type genrate: int
     :param fresponse: Frequency response of the system in dB, i.e. relative attenuations of frequencies
@@ -377,7 +378,7 @@ def calibrate_signal(signal, resp, fs, frange):
     return np.fft.irfft(A)
 
 
-def multiply_frequencies(signal, fs, frange, calibration_frequencies, calvals):
+def multiply_frequencies(signal, fs, frange, calibration_frequencies, attendB):
     """Given a vector of dB attenuations, adjust signal by 
        multiplication in the frequency domain"""
     pad_factor = 1.2
@@ -386,14 +387,14 @@ def multiply_frequencies(signal, fs, frange, calibration_frequencies, calvals):
     X = np.fft.rfft(signal,  n=int(len(signal)*pad_factor))
 
     f = np.arange(len(X))/(float(npts)/fs*pad_factor)
-    f0 = (np.abs(f-frange[0])).argmin()
-    f1 = (np.abs(f-frange[1])).argmin()
+    fidx_low = (np.abs(f-frange[0])).argmin()
+    fidx_high = (np.abs(f-frange[1])).argmin()
 
-    cal_func = interp1d(calibration_frequencies, calvals)
-    frange = f[f0:f1]
-    Hroi = cal_func(frange)
+    cal_func = interp1d(calibration_frequencies, attendB)
+    roi = f[fidx_low:fidx_high]
+    Hroi = cal_func(roi)
     H = np.zeros((len(X),))
-    H[f0:f1] = Hroi
+    H[fidx_low:fidx_high] = Hroi
 
     H = smooth(H)
     print 'H dB max', np.amax(H)
@@ -402,7 +403,7 @@ def multiply_frequencies(signal, fs, frange, calibration_frequencies, calvals):
     print 'H amp max', np.amax(H)
 
     # Xadjusted = X.copy()
-    # Xadjusted[f0:f1] *= H
+    # Xadjusted[fidx_low:fidx_high] *= H
     # Xadjusted = smooth(Xadjusted)
 
     Xadjusted = X*H

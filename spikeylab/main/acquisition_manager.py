@@ -137,11 +137,11 @@ class AcquisitionManager():
         """
         self.datafile = AcquisitionData(fname)
 
-        self.explorer.set_params(datafile=self.datafile)
-        self.protocoler.set_params(datafile=self.datafile)
-        self.charter.set_params(datafile=self.datafile)
-        self.bs_calibrator.set_params(datafile=self.datafile)
-        self.tone_calibrator.set_params(datafile=self.datafile)
+        self.explorer.set(datafile=self.datafile)
+        self.protocoler.set(datafile=self.datafile)
+        self.charter.set(datafile=self.datafile)
+        self.bs_calibrator.set(datafile=self.datafile)
+        self.tone_calibrator.set(datafile=self.datafile)
 
         return fname
 
@@ -154,11 +154,11 @@ class AcquisitionManager():
         self.close_data()
         self.datafile = AcquisitionData(fname, filemode='a')
 
-        self.explorer.set_params(datafile=self.datafile)
-        self.protocoler.set_params(datafile=self.datafile)
-        self.charter.set_params(datafile=self.datafile)
-        self.bs_calibrator.set_params(datafile=self.datafile)
-        self.tone_calibrator.set_params(datafile=self.datafile)
+        self.explorer.set(datafile=self.datafile)
+        self.protocoler.set(datafile=self.datafile)
+        self.charter.set(datafile=self.datafile)
+        self.bs_calibrator.set(datafile=self.datafile)
+        self.tone_calibrator.set(datafile=self.datafile)
         self.set_calibration(None)
 
     def current_data_file(self):
@@ -177,14 +177,14 @@ class AcquisitionManager():
         self.explorer.set_threshold(threshold)
         self.protocoler.set_threshold(threshold)
 
-    def set_params(self, **kwargs):
+    def set(self, **kwargs):
         """Sets acquisition parameters for all acquisition types"""
-        self.explorer.set_params(**kwargs)
-        self.protocoler.set_params(**kwargs)
-        self.bs_calibrator.set_params(**kwargs)
-        self.tone_calibrator.set_params(**kwargs)
-        self.charter.set_params(**kwargs)
-        self.cal_toner.set_params(**kwargs)
+        self.explorer.set(**kwargs)
+        self.protocoler.set(**kwargs)
+        self.bs_calibrator.set(**kwargs)
+        self.tone_calibrator.set(**kwargs)
+        self.charter.set(**kwargs)
+        self.cal_toner.set(**kwargs)
 
     def set_stim_by_index(self, index):
         """Sets the current stimulus for search operation by it's index in the order of stim types

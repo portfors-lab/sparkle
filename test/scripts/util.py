@@ -1,6 +1,8 @@
 import sys, time
 import numpy as np
 
+from spikeylab.acq.players import FinitePlayer
+
 from PyQt4 import QtGui, QtCore
 
 class MyTableWidgetItem(QtGui.QTableWidgetItem):
@@ -56,6 +58,28 @@ def record(player, sig, fs, atten=0):
     nreps = 3
     reps = []
     player.set_stim(sig, fs, atten)
+    player.start()
+    # print 'stim shape', sig.shape, 'acq points', int(player.aitime*player.aisr)
+    # print 'samplerates', player.aisr, fs
+    for irep in range(nreps):
+        response = player.run()
+        reps.append(response)
+        player.reset()
+
+    player.stop()
+    return np.mean(reps, axis=0)
+
+def play_record(sig, fs):
+    dur = float(len(sig))/fs
+    player = FinitePlayer()
+    player.set_aochan(u"PCI-6259/ao0")
+    player.set_aichan(u"PCI-6259/ai0")
+    player.set_aidur(dur)
+    player.set_aisr(fs)
+
+    nreps = 3
+    reps = []
+    player.set_stim(sig, fs, 0)
     player.start()
     # print 'stim shape', sig.shape, 'acq points', int(player.aitime*player.aisr)
     # print 'samplerates', player.aisr, fs

@@ -7,7 +7,7 @@ from test.util import robot
 
 def center(widget, index=None):
     """Get the global position of the center of the widget. If index is
-    provided get the center at the index position"""
+    provided, widget is a view and get the center at the index position"""
     if index is not None:
         # widget is a subclass of QAbstractView
         rect = widget.visualRect(index)
