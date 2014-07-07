@@ -1,7 +1,5 @@
 import os, yaml
-import wave
 
-import scipy.io.wavfile as wv
 from scipy.signal import chirp, hann
 import numpy as np
 
@@ -157,10 +155,7 @@ class Vocalization(AbstractStimulusComponent):
 
     def samplerate(self):
         if self._filename is not None:
-            wf =  wave.open(self._filename)
-            fs= wf.getframerate()
-            wf.close()
-            return fs
+            return audiorate(self._filename)
 
     def stateDict(self):
         state = super(Vocalization, self).stateDict()
@@ -192,20 +187,13 @@ class Vocalization(AbstractStimulusComponent):
         if fname is not None:
             self._filename = fname
 
-            try:
-                sr, wavdata = wv.read(fname)
-            except:
-                print u"Problem reading wav file"
-                raise
-            # wavdata = wavdata.astype(float)
-            # nfft=512
-            # Pxx, freqs, bins, im = specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=int(nfft*0.9), pad_to=nfft*2)
+            sr, wavdata = audioread(self._filename)
+
+            # round to the nearest ms
             duration = np.trunc((float(len(wavdata))/sr)*1000)/1000
 
-            # self._duration = float(len(wavdata))/sr
             self._duration = duration
             self._cached_pixmap = None
-
 
     def paint(self, painter, rect, palette):
         if self._filename is not None:
@@ -246,16 +234,10 @@ class Vocalization(AbstractStimulusComponent):
         return editor
 
     def signal(self, fs, atten, caldb, calv):
-        try:
-            sr, wavdata = wv.read(self._filename)
-        except:
-            print u"Problem reading wav file"
-            raise
+        sr, wavdata = audioread(self._filename)
         if fs != sr:
             print 'specified', fs, 'wav file', sr
             raise Exception("specified samplerate does not match wav stimulus")
-        # normalize to calibration
-        wavdata = wavdata.astype(float)
 
         #truncate to nears ms
         duration = float(len(wavdata))/sr

@@ -46,18 +46,6 @@ class TestMainUI():
         self.explore_run('pure tone')
 
     def test_vocal_explore(self):
-        # We are going to cheat and set the vocal folders directly
-        fpath = sample.samplewav()
-        parentdir, fname = os.path.split(fpath)
-        self.form.exvocal.setRootDirs(parentdir, parentdir)
-        QtTest.QTest.qWait(PAUSE)    
-        QtTest.QTest.qWait(ALLOW)
-        idx = self.form.exvocal.filemodel.index(fpath)
-        print 'idx of vocal file', idx.row()
-        qtbot.click(self.form.exvocal.filelistView, idx)
-        # self.form.exvocal.currentWavFile = fname
-        QtTest.QTest.qWait(PAUSE)
-
         self.explore_run('vocalization')
 
     def test_save_calibration(self):
@@ -212,6 +200,17 @@ class TestMainUI():
         # scroll the mouse the number of ticks equal to it's index
         QtTest.QTest.qWait(1000)
         qtbot.wheel(-1*tone_idx)
+
+        if comptype == 'vocalization':
+            # We are going to cheat and set the vocal folders directly
+            fpath = sample.samplewav()
+            parentdir, fname = os.path.split(fpath)
+            self.form.exvocal.setRootDirs(parentdir, parentdir)
+            QtTest.QTest.qWait(200) # needs longer allow
+            idx = self.form.exvocal.filemodel.index(fpath)
+            print 'idx of vocal file', idx.row()
+            qtbot.click(self.form.exvocal.filelistView, idx)
+            QtTest.QTest.qWait(ALLOW)
 
         qtbot.click(self.form.ui.startBtn)
         QtTest.QTest.qWait(ALLOW)

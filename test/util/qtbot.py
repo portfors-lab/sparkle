@@ -10,6 +10,7 @@ def center(widget, index=None):
     provided, widget is a view and get the center at the index position"""
     if index is not None:
         # widget is a subclass of QAbstractView
+        print "its a view"
         rect = widget.visualRect(index)
         viewport = widget.viewport()
         midpoint = QtCore.QPoint(rect.x() + rect.width()/2, rect.y() + rect.height()/2)
@@ -27,6 +28,7 @@ def center(widget, index=None):
 
 def click(widget, index=None):
     pos = center(widget, index)
+    print 'global pos', pos
     robot.click(pos)
 
 def doubleclick(widget, index=None):

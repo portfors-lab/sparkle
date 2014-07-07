@@ -2,6 +2,7 @@ from __future__ import division
 
 import os, yaml
 import numpy as np
+import wave
 import scipy.io.wavfile as wv
 from scipy.interpolate import interp1d
 from matplotlib import mlab
@@ -125,12 +126,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
     :returns: spec -- 2D array of intensities, freqs -- yaxis labels, bins -- time bin labels, duration -- duration of signal
     """
     if isinstance(source, basestring):
-        try:
-            sr, wavdata = wv.read(source)
-        except:
-            print u"Problem reading wav file"
-            raise
-        wavdata = wavdata.astype(float)
+        sr, wavdata = audioread(source)
     else:
         sr, wavdata = source
         
@@ -429,3 +425,18 @@ def tukey(winlen, alpha):
     win = fftconvolve(taper, rect)
     win = win / np.amax(win)
     return win
+
+def audioread(filename):
+    try:
+        sr, wavdata = wv.read(filename)
+    except:
+        print u"Problem reading wav file"
+        raise
+    wavdata = wavdata.astype(float)
+    return sr, wavdata 
+
+def audiorate(filename):
+    wf =  wave.open(filename)
+    fs= wf.getframerate()
+    wf.close()
+    return fs

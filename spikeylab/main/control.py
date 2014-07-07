@@ -1,7 +1,6 @@
 import spikeylab
 
 import sys, os, yaml
-import scipy.io.wavfile as wv
 import numpy as np
 import logging
 import time
@@ -115,7 +114,7 @@ class MainWindow(ControlWindow):
 
         # set up wav file directory finder paths
         self.exvocal = self.ui.parameterStack.widgetForName("Vocalization")
-        self.exvocal.filelistView.doubleClicked.connect(self.wavfileSelected)
+        self.exvocal.filelistView.doubleClicked.connect(self.recordingSelected)
         self.selectedWavFile = self.exvocal.currentWavFile
 
         # always start in windowed mode
@@ -647,13 +646,13 @@ class MainWindow(ControlWindow):
             QtGui.QApplication.setFont(font)
         dlg.deleteLater()
 
-    def wavfileSelected(self, modelIndex):
+    def recordingSelected(self, modelIndex):
         """ On double click of wav file, load into display """
         # display spectrogram of file
         spath = self.exvocal.currentWavFile
 
-        sr, wavdata = wv.read(spath)
-        self.displayStim(wavdata, sr)
+        sr, audio_signal = audioread(spath)
+        self.displayStim(audio_signal, sr)
 
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             winsz = float(self.ui.windowszSpnbx.value())*self.tscale
