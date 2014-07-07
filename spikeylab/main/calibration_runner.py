@@ -241,7 +241,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         if USE_RMS:
             vamp = np.sqrt(np.mean(pow(response,2))) #/ np.sqrt(2)
         else:
-            vmax = np.amax(abs(response))
+            vamp = np.amax(abs(response))
 
         if self.trace_counter >= 0:
             if irep == 0:
@@ -286,7 +286,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         if USE_FFT:
             peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/fft_peaks')), axis=1)
         else:
-            peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/vmax')), axis=1)
+            peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/vamp')), axis=1)
 
         # print 'calibration frequencies', self.calibration_frequencies
         # cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]

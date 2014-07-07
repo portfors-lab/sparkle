@@ -56,7 +56,7 @@ class TestMainUI():
         print 'idx of vocal file', idx.row()
         qtbot.click(self.form.exvocal.filelistView, idx)
         # self.form.exvocal.currentWavFile = fname
-        QtTest.QTest.qWait(PAUSE)    
+        QtTest.QTest.qWait(PAUSE)
 
         self.explore_run('vocalization')
 

@@ -10,7 +10,7 @@ from PyQt4 import QtGui, QtCore
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.types.widgets import silence_parameters
 from spikeylab.stim.types.widgets import vocal_parameters
-from spikeylab.tools.audiotools import spectrogram, make_tone
+from spikeylab.tools.audiotools import spectrogram, make_tone, audioread, audiorate
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.exceptions import FileDoesNotExistError
 
@@ -58,7 +58,7 @@ class PureTone(Tone):
         # print 'before rms adjust', rms, 'max', np.amax(tone)
         if USE_RMS:
             tone = tone*1.414213562373
-        rms = np.sqrt(np.mean(pow(tone,2)))
+        # rms = np.sqrt(np.mean(pow(tone,2)))
         # print 'rms out of tone signal', rms, 'max', np.amax(tone)
         return tone
 
@@ -328,7 +328,7 @@ class WhiteNoise(AbstractStimulusComponent):
             amp_scale = np.amax(signal)
 
         signal = ((signal/amp_scale)*amp)
-        print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
+        # print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
         return signal
 
     def paint(self, painter, rect, palette):

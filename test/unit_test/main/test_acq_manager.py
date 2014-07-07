@@ -39,7 +39,7 @@ class TestAcquisitionModel():
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        manager.set_cal_tone(15000, 2.0, 100)
+        manager.set_cal_tone(15000, 100)
         manager.set_calibration_duration(winsz)
 
         stims = manager.cal_toner.stimuli_list()
@@ -260,7 +260,7 @@ class TestAcquisitionModel():
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
-        manager.set_params(nreps=2)
+        manager.set(nreps=2)
         stim_names = manager.explore_stim_names()
         manager.set_stim_by_index(stim_names.index('Pure Tone'))
         t = manager.run_explore(0.25)
@@ -281,7 +281,7 @@ class TestAcquisitionModel():
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
-        manager.set_params(nreps=2)
+        manager.set(nreps=2)
         stim_names = manager.explore_stim_names()
 
         # cheat - private access
@@ -303,7 +303,7 @@ class TestAcquisitionModel():
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
-        manager.set_params(nreps=2, save=True)
+        manager.set(nreps=2, save=True)
         stim_names = manager.explore_stim_names()
         manager.set_stim_by_index(stim_names.index('Pure Tone'))
         t = manager.run_explore(0.25)
@@ -373,7 +373,7 @@ class TestAcquisitionModel():
         winsz = 1.0 # this is actually ignored by manager in this case
         acq_rate = 100000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
-        manager.set_params(savechart=True)
+        manager.set(savechart=True)
         manager.start_chart()
         self.done = False
         self.timer = threading.Timer(1.0, self.stopchart, args=(manager, fname))
@@ -399,7 +399,7 @@ class TestAcquisitionModel():
         winsz = 0.1 #seconds
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
-        manager.set_params(savechart=True)
+        manager.set(savechart=True)
 
         #insert some stimuli
 
@@ -485,15 +485,13 @@ class TestAcquisitionModel():
 
     def create_acqmodel(self, winsz, acq_rate=None):
         manager = AcquisitionManager()
-
+        fname = os.path.join(self.tempfolder, 'testdata.hdf5')
+        manager.create_data_file(fname)
         if acq_rate is None:
             acq_rate = manager.calibration_genrate()
-        manager.set_params(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
+        manager.set(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
                            acqtime=winsz, aisr=acq_rate, caldb=100,
                            calv=1.0)
-
-        manager.set_save_params(self.tempfolder, 'testdata')
-        fname = manager.create_data_file()
 
         return manager, fname
 
