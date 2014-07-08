@@ -159,7 +159,7 @@ class SpecWidget(BasePlot):
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
 
-        self.img = pg.ImageItem()
+        self.img = pg.ImageItem(autoDownsample=True)
         self.addItem(self.img)
         self.imageArray = np.array([[0]])
 

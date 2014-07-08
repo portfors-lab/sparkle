@@ -13,7 +13,7 @@ from spikeylab.acq.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
             ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.main.acquisition_manager import AcquisitionManager
-from spikeylab.tools.audiotools import calc_spectrum, calc_db
+from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread
 from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
@@ -201,9 +201,6 @@ class MainWindow(ControlWindow):
                 self.acqmodel.set_save_params(self.savefolder, self.savename)
                 self.acqmodel.create_data_file()
             self.ui.aichanBox.setEnabled(False)
-            # FIX ME:
-            if self.ui.plotDock.current() == 'calibration':
-                self.ui.plotDock.switchDisplay('standard')
             self.ui.runningLabel.setText(u"RECORDING")
             self.ui.runningLabel.setStyleSheet(GREENSS)
 
@@ -372,6 +369,7 @@ class MainWindow(ControlWindow):
         self.connectUpdatable(True)
 
         self.activeOperation = 'explore'
+        self.ui.plotDock.switchDisplay('standard')
         reprate = self.ui.reprateSpnbx.value()
         interval = (1/reprate)*1000
 
@@ -404,6 +402,7 @@ class MainWindow(ControlWindow):
         self.ui.startBtn.setEnabled(False)
         self.ui.stopBtn.setText("Abort")
         self.activeOperation = 'protocol'
+        self.ui.plotDock.switchDisplay('standard')
 
         reprate = self.ui.reprateSpnbx.value()
         interval = (1/reprate)*1000
