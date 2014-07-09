@@ -6,11 +6,6 @@ class SpikeyViewBox(pg.ViewBox):
     def __init__(self, *args, **kwargs):
         super(SpikeyViewBox, self).__init__(*args, **kwargs)
 
-        # because of pyqtgraph internals, we can't just remove this action from menu
-        self.fakeAction = QtGui.QAction("", None)
-        self.fakeAction.setVisible(False)
-        self.fakeAction.setCheckable(True)
-
         self.menu = SpikeyViewBoxMenu(self)
 
         self._customMouse = True

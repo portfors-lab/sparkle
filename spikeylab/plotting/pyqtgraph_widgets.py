@@ -19,17 +19,18 @@ class BasePlot(pg.PlotWidget):
 
         # print 'scene', self.scene().contextMenu[0].text()
         # # self.scene().contextMenu = []
-        # print 'items', 
-        for act in self.getPlotItem().ctrlMenu.actions():
-            # print act.text()
-            if act.text() != 'Grid':
-                self.getPlotItem().ctrlMenu.removeAction(act)
         # print '-'*20
         # for act in self.getPlotItem().vb.menu.actions():
         #     if act.text() != 'View All':
         #         print 'removing', act.text()
         #         self.getPlotItem().vb.menu.removeAction(act)
         # print '-'*20
+
+        for act in self.getPlotItem().ctrlMenu.actions():
+            # print act.text()
+            if act.text() != 'Grid':
+                self.getPlotItem().ctrlMenu.removeAction(act)
+                
         self.setMouseEnabled(x=False,y=True)
 
     def setTscale(self, scale):
@@ -150,16 +151,23 @@ class TraceWidget(BasePlot):
     def update_thresh(self):
         self.thresholdUpdated.emit(self.threshLine.value())
 
+from multiprocessing.pool import ThreadPool
+
+def doSpectrogram(signal, *args, **kwargs):
+    spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)
+    signal.emit(spec, bins, f)
+
 class SpecWidget(BasePlot):
     specgramArgs = {u'nfft':512, u'window':u'hanning', u'overlap':90}
     imgArgs = {'lut':None, 'state':None, 'levels':None}
     resetImageScale = True
     imgScale = (1.,1.)
     colormapChanged = QtCore.pyqtSignal(object)
+    spec_done = QtCore.pyqtSignal(np.ndarray, np.ndarray, np.ndarray)
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
 
-        self.img = pg.ImageItem(autoDownsample=True)
+        self.img = pg.ImageItem()
         self.addItem(self.img)
         self.imageArray = np.array([[0]])
 
@@ -169,6 +177,10 @@ class SpecWidget(BasePlot):
 
         self.setLabel('bottom', 'Time', units='s')
         self.setLabel('left', 'Frequency', units='Hz')
+
+        # use a separate thread to calculate spectrogram so UI doesn't lag
+        self.pool = ThreadPool(processes=1)
+        self.spec_done.connect(self.updateImage)
 
     def fromFile(self, fname):
         spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgramArgs)
@@ -192,8 +204,12 @@ class SpecWidget(BasePlot):
         self.imgScale = (1.,1.)
 
     def updateData(self, signal, fs):
-        spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgramArgs)
-        self.updateImage(spec, bins, f)
+        self.pool.apply_async(doSpectrogram, (self.spec_done, (fs, signal),), self.specgramArgs)
+        # spec = np.random.uniform(size=(513, 4798))
+        # bins = np.arange(4798)
+        # f = np.arange(513)
+        # spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgramArgs)
+        # self.updateImage(spec, bins, f)
 
     def setSpecArgs(self, **kwargs):
         for key, value in kwargs.items():
@@ -243,6 +259,9 @@ class SpecWidget(BasePlot):
 
     def getColormap(self):
         return self.imgArgs
+
+    def closeEvent(self, event):
+        self.pool.terminate()
 
 class FFTWidget(BasePlot):
     def __init__(self, parent=None, rotation=90):

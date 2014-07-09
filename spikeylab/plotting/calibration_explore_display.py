@@ -1,6 +1,7 @@
+from spikeylab.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
+
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
 
 class ExtendedCalibrationDisplay(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -116,3 +117,40 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
     def autoRange(self):
         self.responseSignalPlot.autoRange()
         self.responseFftPlot.autoRange()
+
+if __name__ == "__main__":
+    import random, time, os, sys
+    import numpy as np
+    import spikeylab.tools.audiotools as audiotools
+    import scipy.io.wavfile as wv
+    import test.sample as sample
+    from scipy.io import loadmat
+    import cProfile
+    
+    sylpath = sample.samplewav()
+    fs, signal = audiotools.audioread(sylpath)
+    signal = np.hstack((signal, signal))
+    times = np.linspace(0,float(len(signal))/fs, len(signal))
+    freq, spec = audiotools.calc_spectrum(signal, fs)
+
+    app = QtGui.QApplication(sys.argv)
+
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    plot = ExtendedCalibrationDisplay()
+    plot.showMaximized()
+
+    plot.updateSpec(signal, fs, plot='response')
+    plot.updateSpec(signal, fs, plot='stim')
+
+    plot.updateFft(freq, spec, plot='response')
+    plot.updateFft(freq, spec, plot='stim')
+
+    plot.updateSignal(times, signal, plot='response')
+    plot.updateSignal(times, signal, plot='stim')
+    
+    profiler.disable()
+    profiler.dump_stats('caldisplay.profile')
+
+    sys.exit(app.exec_())
