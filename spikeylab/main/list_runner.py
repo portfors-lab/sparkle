@@ -1,6 +1,7 @@
 import time
 import threading
 import logging
+import numpy as np
 
 from spikeylab.main.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.main.protocol_model import ProtocolTabelModel
@@ -13,6 +14,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self.protocol_model = ProtocolTabelModel()
 
         AbstractAcquisitionRunner.__init__(self, signals)
+        self.silence_window = False
 
     def set_calibration(self, attenuations, freqs, frange, calname):
         self.protocol_model.setCalibration(attenuations, freqs, frange)
@@ -75,7 +77,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     test.setReferenceVoltage(self.caldb, self.calv)
 
                     self._initialize_test(test)
-                    profiler = cProfile.Profile()
+                    # profiler = cProfile.Profile()
                     # print 'profiling....'
                     # profiler.enable()
                     traces, docs, overs = self._cached_stims[itest]
@@ -86,6 +88,35 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     self.nreps = test.repCount() # not sure I like this
                     # print 'profiling....'
                     # profiler.enable()
+
+                    if self.silence_window:
+                        fs = test.samplerate()
+                        self.player.set_stim(np.array([0., 0.]), fs, 0)
+                        trace_doc = {'samplerate_da':fs, 'reps': nreps, 'user_tag': test.userTag(),
+                        'calv': test.calv, 'caldb':test.caldb, 'components': [{'start_s':0, 
+                        'stim_type':'Control Silence', 'duration':0}],
+                        'testtype': 'control', 'overloaded_attenuation':0}
+                        itrace = -1
+                        self.signals.stim_generated.emit(np.array([0]), fs)
+                        self.signals.current_trace.emit(itest,itrace,trace_doc)
+                        self.signals.over_voltage.emit(0)
+                        stamps = []
+                        self.player.start()
+                        for irep in range(nreps):
+                            self.interval_wait()
+                            if self._halt:
+                                raise Broken
+                            response = self.player.run()
+                            stamps.append(time.time())
+                            self._process_response(response, trace_doc, irep)
+                            self.signals.current_rep.emit(irep)
+
+                            self.player.reset()
+
+                        trace_doc['time_stamps'] = stamps
+                        self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                        self.player.stop()
+
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         signal, atten = trace
                         self.player.set_stim(signal, test.samplerate(), atten)

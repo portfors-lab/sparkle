@@ -69,7 +69,7 @@ class TestDAQPlayers():
         stim, response0 = self.run_finite(fs, dur, fs, dur, 11.0)
 
         assert len(stim) == len(response0)
-        assert np.round(np.amax(response0), 2) == MAXV
+        assert np.round(np.amax(response0), 1) == MAXV
 
     def test_continuous(self):
         player = ContinuousPlayer()

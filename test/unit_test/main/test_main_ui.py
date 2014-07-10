@@ -16,8 +16,33 @@ from test.util import qtbot
 PAUSE = 200
 ALLOW = 15
 
+from guppy import hpy
+start_heap = None
+h = None
+
+def setUp():
+    global h, start_heap
+    h = hpy()
+    print '\n ********MEMORY STATUS*************'
+    print h.heap()
+    h.setrelheap()
+    start_heap = h.heap()
+
+def tearDown():
+    global h, start_heap
+    end_heap = h.heap()
+    print 'START'
+    print start_heap
+    print 'END'
+    print end_heap
+    print 'HEAP DIFF'
+    print end_heap - start_heap
+
 class TestMainUI():
     def setUp(self):
+        
+        # print h.heap()
+
         self.app = QtGui.QApplication([])
 
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
@@ -84,7 +109,7 @@ class TestMainUI():
         assert_equal(stim[0]['samplerate_da'], hfile[calname].attrs['samplerate_ad'])
 
         npts = (self.form.ui.aisrSpnbx.value()*self.form.fscale)*(self.form.ui.windowszSpnbx.value()*self.form.tscale)
-        print 'data shape', signals.shape, (nreps, npts)
+        # print 'data shape', signals.shape, (nreps, npts)
         assert_equal(signals.shape,(nreps, npts))
         assert cal_vector.shape == ((npts/2+1),)
         hfile.close()
@@ -208,7 +233,7 @@ class TestMainUI():
             self.form.exvocal.setRootDirs(parentdir, parentdir)
             QtTest.QTest.qWait(200) # needs longer allow
             idx = self.form.exvocal.filemodel.index(fpath)
-            print 'idx of vocal file', idx.row()
+            # print 'idx of vocal file', idx.row()
             qtbot.click(self.form.exvocal.filelistView, idx)
             QtTest.QTest.qWait(ALLOW)
 

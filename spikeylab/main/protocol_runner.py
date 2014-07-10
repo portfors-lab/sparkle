@@ -13,6 +13,8 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.group_name = 'segment_'
         self.player = FinitePlayer()
 
+        self.silence_window = True
+        
     def _initialize_run(self):
         data_items = self.datafile.keys()
         self.current_dataset_name = next_str_num(self.group_name, data_items)
@@ -25,10 +27,14 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
 
+        # override defualt trace_counter intialization to make space for silence window
+        self.trace_counter = -1    
+
     def _initialize_test(self, test):
         recording_length = self.aitimes.shape[0]
+        # +1 to trace count for silence window
         self.datafile.init_data(self.current_dataset_name, 
-                                dims=(test.traceCount(), test.repCount(), recording_length),
+                                dims=(test.traceCount()+1, test.repCount(), recording_length),
                                 mode='finite')
         # check for special condition -- replace this with a generic
         if test.editor is not None and test.editor.name == "Tuning Curve":

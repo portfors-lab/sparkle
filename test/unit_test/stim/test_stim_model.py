@@ -22,13 +22,30 @@ MAXV = config['max_voltage']
 
 # get an error accessing class names if there is not a qapp running
 app = None
+
+from guppy import hpy
+start_heap = None
+h = None
+
 def setUp():
+    global h
+    h = hpy()
+    print '\n ********MEMORY STATUS*************'
+    print 'START'
+    print h.heap()
+    h.setrelheap()
+
     global app
     app = QtGui.QApplication([])
 
 def tearDown():
     global app
     app.exit(0)
+
+    global h
+    end_heap = h.heap()
+    print 'END'
+    print end_heap
 
 class TestStimModel():
     def test_insert_data(self):

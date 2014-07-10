@@ -316,15 +316,19 @@ class ProgressWidget(BasePlot):
         self.ypoints = ypoints
 
     def setPoint(self, x, y, value):
-        yindex = self.ypoints.index(y)
-        xdata, ydata = self.lines[yindex].getData()
-        if ydata is None:
-            xdata = [x]
-            ydata = [value]
+        if x == -1:
+            # silence window
+            self.plot([0],[value], symbol='o')
         else:
-            xdata = np.append(xdata, x)
-            ydata = np.append(ydata, value)
-        self.lines[yindex].setData(xdata, ydata)
+            yindex = self.ypoints.index(y)
+            xdata, ydata = self.lines[yindex].getData()
+            if ydata is None:
+                xdata = [x]
+                ydata = [value]
+            else:
+                xdata = np.append(xdata, x)
+                ydata = np.append(ydata, value)
+            self.lines[yindex].setData(xdata, ydata)
 
     def setLabels(self, name):
         if name == "calibration":

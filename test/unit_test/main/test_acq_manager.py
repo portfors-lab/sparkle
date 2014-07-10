@@ -142,10 +142,11 @@ class TestAcquisitionModel():
         test = hfile['segment_1']['test_1']
         stim = json.loads(test.attrs['stim'])
 
-        assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], gen_rate)
-        assert_equal(test.shape,(1,1,winsz*acq_rate))
-        assert stim[0]['overloaded_attenuation'] > 0
+        # stim 0 is control window
+        assert_in('components', stim[1])
+        assert_equal(stim[1]['samplerate_da'], gen_rate)
+        assert_equal(test.shape,(2,1,winsz*acq_rate))
+        assert stim[1]['overloaded_attenuation'] > 0
         hfile.close()
 
     def test_vocal_protocol(self):
@@ -509,11 +510,14 @@ class TestAcquisitionModel():
         manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
 
 def check_result(test_data, test_stim, winsz, acq_rate):
-    ntraces = test_stim.traceCount()
+    ntraces = test_stim.traceCount()+1
     nreps = test_stim.repCount()
     stim_doc = json.loads(test_data.attrs['stim'])
 
     print 'stim doc', stim_doc[0]
+    assert stim_doc[0]['testtype'] == 'control'
+    stim_doc = stim_doc[1:]
+
     # check everthing we can here
     for stim_info in stim_doc:
         assert len(stim_info['time_stamps']) == stim_info['reps']
@@ -532,6 +536,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
             assert 'intensity' in component_info
             assert 'duration' in component_info
 
+
     assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
 
     # to keep these tests simple, assume the altered component is at 
@@ -539,20 +544,20 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     if len(test_stim.autoParams().allData()) > 0:
         params = test_stim.autoParams().allData()
         value_ranges = test_stim.autoParamRanges()
-        print 'params', params, 'value_ranges', value_ranges
+        # print 'params', params, 'value_ranges', value_ranges
         if test_stim.reorder is None:
             for istim, stim_info in enumerate(stim_doc):
                 prevlen = 1
                 for ip, param in enumerate(params):
-                    print 'istim, ip', istim, ip, len(value_ranges[ip]), (istim / prevlen )% len(value_ranges[ip])
-                    print 'comparision', stim_info['components'][0][param['parameter']], value_ranges[ip][(istim / prevlen )% len(value_ranges[ip])]
+                    # print 'istim, ip', istim, ip, len(value_ranges[ip]), (istim / prevlen )% len(value_ranges[ip])
+                    # print 'comparision', stim_info['components'][0][param['parameter']], value_ranges[ip][(istim / prevlen )% len(value_ranges[ip])]
                     assert stim_info['components'][0][param['parameter']] == value_ranges[ip][(istim / prevlen )% len(value_ranges[ip])]
                     prevlen *= len(value_ranges[ip])
         else:
             # just make sure the correct values are present
             for ip, param in enumerate(params):
                 param_info = set([ stim_info['components'][0][param['parameter']] for stim_info in stim_doc])
-                print 'comparision', param_info , set(value_ranges[ip])
+                # print 'comparision', param_info , set(value_ranges[ip])
                 assert param_info == set(value_ranges[ip])
 
 

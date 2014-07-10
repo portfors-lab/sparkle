@@ -156,7 +156,6 @@ class AcquisitionData():
             setpath ='/'.join([key, setname])
             if not key in self.hdf5:
                 self.init_group(key)
-            print 'creating dataset', dims
             self.hdf5[key].create_dataset(setname, dims)
             self.meta[setname] = {'cursor':[0]*len(dims)}
             self.set_metadata(setpath, {'start': time.strftime('%H:%M:%S'), 

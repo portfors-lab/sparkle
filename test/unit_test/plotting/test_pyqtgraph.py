@@ -22,7 +22,20 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal
 PAUSE = 0.0
 
 app = None
+
+
+from guppy import hpy
+start_heap = None
+h = None
+
 def setUp():
+    global h
+    h = hpy()
+    print '\n ********MEMORY STATUS*************'
+    print 'START'
+    print h.heap()
+    h.setrelheap()
+
     global app
     app = QApplication(sys.argv)
 
@@ -30,6 +43,13 @@ def tearDown():
     QApplication.closeAllWindows()    
     global app
     app.exit(0)
+    del app
+    print 'ALL WIDGETS', len(QApplication.allWidgets())
+
+    global h
+    end_heap = h.heap()
+    print 'END'
+    print end_heap
 
 def data_func(f):
     t = np.arange(200)
@@ -52,7 +72,6 @@ class TestFFTWidget():
             time.sleep(PAUSE)
 
     def test_widget_rotation(self):
-        print 'label', self.fig.getLabel('left')
         assert self.fig.getLabel('left') == 'Frequency (Hz)'
         assert self.fig.getLabel('bottom') == ''
         fig1 = FFTWidget(rotation=0)

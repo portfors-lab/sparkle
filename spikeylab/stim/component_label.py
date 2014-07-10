@@ -30,7 +30,6 @@ class ComponentTemplateTable(QtGui.QWidget):
         return self.trashLbl
 
     def getLabelByName(self, name):
-        print 'stim labels', self.stimLabels
         name = name.lower()
         if name in self.stimLabels:
             return self.stimLabels[name]

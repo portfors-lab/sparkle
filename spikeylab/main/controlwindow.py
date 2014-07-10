@@ -276,14 +276,18 @@ class ControlWindow(QtGui.QMainWindow):
         if cal_template is not None:
             self.acqmodel.load_calibration_template(cal_template)
 
-        for stim in self.exploreStimuli:
-            try:
-                stim.loadState(inputsdict[stim.name])
+        if cal_template is not None:
+            for stim in self.exploreStimuli:
+                try:
+                    stim.loadState(inputsdict[stim.name])
 
-            except KeyError:
-                logger = logging.getLogger('main')
-                logger.exception('Unable to load saved inputs for {}'.format(stim.__class__))
-
+                except KeyError:
+                    logger = logging.getLogger('main')
+                    logger.exception('Unable to load saved inputs for {}'.format(stim.__class__))
+        else:
+            logger = logging.getLogger('main')
+            logger.debug('No saved stimului inputs')
+ 
         self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
