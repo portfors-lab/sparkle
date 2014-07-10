@@ -1,4 +1,12 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
+try:
+    from PyDAQmx import *
+    skip = False
+except:
+    skip = True
+import unittest
 
 from spikeylab.acq.players import FinitePlayer, ContinuousPlayer, MAXV
 class TestDAQPlayers():
@@ -63,6 +71,7 @@ class TestDAQPlayers():
         assert len(stim)/4/2 == len(response0)
         assert np.round(np.amax(response0), 2) == np.amax(stim)
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_stim_over_max_voltage(self):
         fs = 500000
         dur = 0.02

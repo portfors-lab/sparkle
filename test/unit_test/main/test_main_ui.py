@@ -125,7 +125,8 @@ class TestMainUI():
 
         qtbot.click(self.form.ui.calibrationWidget.ui.applycalCkbx)
         QtTest.QTest.qWait(ALLOW)
-        
+        QtTest.QTest.qWait(3000)
+
         # test for each option available
         for i in range(self.form.ui.calibrationWidget.ui.calTypeCmbbx.count()):
             self.run_apply_cal(withcal)
@@ -149,6 +150,7 @@ class TestMainUI():
 
         # make sure no calibration is present
         assert self.form.calvals['use_calfile'] == withcal
+        print 'calname', self.form.calvals['calname'], calname
         assert self.form.calvals['calname'] == calname
 
     def test_tuning_curve(self):

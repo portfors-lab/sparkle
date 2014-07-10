@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import yaml
 from PyQt4 import QtCore, QtGui
 
 import spikeylab.tools.systools as systools
@@ -9,6 +10,11 @@ from spikeylab.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.stimulusview import StimulusView
 from maincontrol_form import Ui_ControlWindow
+from spikeylab.tools.systools import get_src_directory
+
+with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+USE_ATTEN = config['use_attenuator']
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
@@ -113,7 +119,7 @@ class ControlWindow(QtGui.QMainWindow):
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
-            if not self.acqmodel.attenuator_connection():
+            if USE_ATTEN and not self.acqmodel.attenuator_connection():
                 failmsg = "Error Connection to attenuator, make sure it it turned on and connected, and try again"
                 QtGui.QMessageBox.warning(self, "Connection Error", failmsg)
                 return False

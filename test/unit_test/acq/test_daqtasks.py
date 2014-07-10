@@ -1,8 +1,14 @@
 import numpy as np
 from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
                                     get_ao_chans, get_ai_chans
-from PyDAQmx.DAQmxTypes import *
+try:
+    from PyDAQmx import *
+    skip = False
+except:
+    skip = True
+
 import time
+import unittest
 
 DEBUG = False
 
@@ -11,6 +17,7 @@ class TestDAQTasks():
         self.data = []
         self.sr = 1000000 # 1000000 is max for PCI-6259
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_sync_finite(self):
         u"""
         Test basic operation of DAQ and drivers
@@ -47,7 +54,8 @@ class TestDAQTasks():
             tolerance = max(amp*0.1, 0.005) #noise floor
 
             assert np.allclose(stim[10:],response[10:],rtol=0,atol=tolerance)
-
+            
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_sync_continuous(self):
 
         npts = 10000
@@ -76,6 +84,7 @@ class TestDAQTasks():
         expected = acqtime*self.sr
         assert expected*0.9 <= len(self.data) <= expected*1.1
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_asynch_continuous_finite(self):
         ainpts = 1000
 
@@ -104,10 +113,12 @@ class TestDAQTasks():
     def stashacq(self, data):
         self.data.extend(data.tolist())
 
+@unittest.skipIf(skip, 'No IO tests for dev mode')
 def test_get_ao_chans():
     chans = get_ao_chans("PCI-6259")
     assert len(chans) == 4
 
+@unittest.skipIf(skip, 'No IO tests for dev mode')
 def test_get_ai_chans():
     chans = get_ai_chans("PCI-6259")
     assert len(chans) == 32

@@ -1,4 +1,5 @@
 import numpy as np
+import threading, time
 
 DAQmx_Val_Rising = None
 DAQmx_Val_Cfg_Default = None
@@ -12,13 +13,13 @@ DAQmx_Val_GroupByScanNumber = None
 class Task(object):
 
 	def CreateAIVoltageChan(self, chan, name, p0, minv, maxv, units, p1):
-		pass
+		self._nchans = len(chan.split(','))
 
 	def CreateAOVoltageChan(self, chan, name, minv, maxv, units, p1):
-		pass
+		self._nchans = len(chan.split(','))
 
 	def CfgSampClkTiming(self, clk, fs, edge, acq_mode, bufsize):
-		pass
+		self.fs = fs
 
 	def AutoRegisterDoneEvent(self, p0):
 		pass
@@ -27,17 +28,25 @@ class Task(object):
 		pass
 
 	def AutoRegisterEveryNSamplesEvent(self, p0, npts, p1, name):
-		pass
+		self._halt = False
+		interval = float(npts)/self.fs
+		t = threading.Thread(target=self._autoread, args=(interval,name))
+		t.start()
+
+	def _autoread(self, interval, callback_name):
+		while not self._halt:
+			exec "self."+callback_name+"()"
+			time.sleep(interval)
 
 	def ReadAnalogF64(self, npts, maxv, groupby, inbuffer, total_samples, datatype, p0):
 		# populate contents of inbuffer with some fake data
-		t = np.arange(npts)
+		t = np.arange(npts*self._nchans)
 		f = 5
 		data = 2*np.sin(2*np.pi*f*t/len(t))
-		inbuffer[:] = data		
+		inbuffer[:] = data
 
 	def StopTask(self):
-		pass
+		self._halt = True
 
 	def ClearTask(self):
 		pass
@@ -49,7 +58,7 @@ class Task(object):
 		pass
 
 	def WaitUntilTaskDone(self, timeout):
-		pass	
+		time.sleep(0.1)	
 
 def DAQmxGetDevAIPhysicalChans(dev, buf, buflen):
 	fakechans = 'ai0,ai1,ai2,ai3'

@@ -111,8 +111,10 @@ class TestSavingDialog():
     def test_create_new_file_with_default(self):
         dlg = SavingDialog(sample.datafile())
         dlg.show()
+        QTest.qWait(100)
         self.hack_filename(dlg, 'newfile')
         fname, mode = dlg.getfile() 
+        print os.path.normpath(fname), os.path.join(sample.sampledir(), 'newfile.hdf5')
         assert os.path.normpath(fname) == os.path.join(sample.sampledir(), 'newfile.hdf5')
         assert mode == 'w-'
         dlg.close()

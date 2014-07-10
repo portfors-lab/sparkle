@@ -172,7 +172,7 @@ class Vocalization(AbstractStimulusComponent):
         # error will occur later if unset
         if os.path.isdir(browsedir):
             self._browsedir = browsedir
-        if os.path.isfile(fname):
+        if fname is not None and os.path.isfile(fname):
             self._filename = fname
             
         # if not os.path.isdir(browsedir):
