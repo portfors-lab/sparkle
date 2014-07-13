@@ -1,16 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from spikeylab.acq.players import FinitePlayer, ContinuousPlayer, MAXV
+
+DEVNAME = "PCI-6259"
+
 try:
     from PyDAQmx import *
-    skip = False
 except:
-    skip = True
-import unittest
-skip=True
-from spikeylab.acq.players import FinitePlayer, ContinuousPlayer, MAXV
+    from spikeylab.acq.daqmx_stub import *
+
 class TestDAQPlayers():
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
+    def setUp(self):
+        answer = bool32()
+        err = DAQmxGetDevIsSimulated(DEVNAME, answer)
+        self.devmode = answer.value
+
     def test_finite_acquisition_equal_dims(self):
         fs = 500000
         dur = 0.01
@@ -22,70 +27,72 @@ class TestDAQPlayers():
 
         amp = np.max(stim)
         tolerance = max(amp*0.1, 0.005) #noise floor
-        assert np.allclose(stim, response0,rtol=0,atol=tolerance)
+        assert stim.shape == response0.shape
+        if not self.devmode:
+            assert np.allclose(stim, response0,rtol=0,atol=tolerance)
 
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_slower_out_fs(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs/4, dur)
 
         assert len(stim) == len(response0)/4
-        assert np.round(np.amax(response0), 2) == np.amax(stim)
+        if not self.devmode:
+            assert np.round(np.amax(response0), 2) == np.amax(stim)
 
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_slower_in_fs(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs/4, dur, fs, dur)
 
         assert len(stim)/4 == len(response0)
-        assert np.round(np.amax(response0), 2) == np.amax(stim)
+        if not self.devmode:
+            assert np.round(np.amax(response0), 2) == np.amax(stim)
 
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_short_out_duration(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs, dur/4)
 
         assert len(stim) == len(response0)/4
-        assert np.round(np.amax(response0), 2) == np.amax(stim)
+        if not self.devmode:
+            assert np.round(np.amax(response0), 2) == np.amax(stim)
 
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_out_slow_fs_and_short_duration(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs/4, dur/2)
 
         assert len(stim) == len(response0)/4/2
-        assert np.round(np.amax(response0), 2) == np.round(np.amax(stim), 2)
+        if not self.devmode:
+            assert np.round(np.amax(response0), 2) == np.round(np.amax(stim), 2)
         
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_short_in_duration(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur/2, fs, dur)
 
         assert len(stim)/2 == len(response0)
-        assert np.round(np.amax(response0), 2) == np.amax(stim)
+        if not self.devmode:
+            assert np.round(np.amax(response0), 2) == np.amax(stim)
 
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_in_slow_fs_and_short_duration(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs/4, dur/2, fs, dur)
 
         assert len(stim)/4/2 == len(response0)
-        assert np.round(np.amax(response0), 2) == np.amax(stim)
+        if not self.devmode:
+            assert np.round(np.amax(response0), 2) == np.amax(stim)
 
-    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_stim_over_max_voltage(self):
         fs = 500000
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs, dur, 11.0)
 
         assert len(stim) == len(response0)
-        assert np.round(np.amax(response0), 1) == MAXV
+        if not self.devmode:
+            assert np.round(np.amax(response0), 1) == MAXV
 
     def test_continuous(self):
         player = ContinuousPlayer()
@@ -123,8 +130,8 @@ class TestDAQPlayers():
         player.set_stim(tone, outfs)
         player.set_aidur(indur)
         player.set_aisr(infs)
-        player.set_aichan(u"PCI-6259/ai0")
-        player.set_aochan(u"PCI-6259/ao0")
+        player.set_aichan(DEVNAME+"/ai0")
+        player.set_aochan(DEVNAME+"/ao0")
         player.start()
 
         response0 = player.run()

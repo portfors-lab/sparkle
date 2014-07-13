@@ -1,6 +1,8 @@
 import numpy as np
 import threading, time
 
+from ctypes import c_bool
+
 DAQmx_Val_Rising = None
 DAQmx_Val_Cfg_Default = None
 DAQmx_Val_Volts = None
@@ -67,3 +69,9 @@ def DAQmxGetDevAIPhysicalChans(dev, buf, buflen):
 def DAQmxGetDevAOPhysicalChans(dev, buf, buflen):
 	fakechans = 'ao0,ao1,ao2,ao3'
 	buf[0:len(fakechans)] = fakechans
+
+def DAQmxGetDevIsSimulated(devname, answerbuf):
+	answerbuf.value = True
+
+def bool32():
+	return c_bool()
