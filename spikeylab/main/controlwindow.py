@@ -210,8 +210,6 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['aisr'] = self.ui.aisrSpnbx.value()
         savedict['tscale'] = self.tscale
         savedict['fscale'] = self.fscale
-        savedict['savefolder'] = self.savefolder
-        savedict['savename'] = self.savename
         savedict['saveformat'] = self.saveformat
         savedict['ex_nreps'] = self.ui.exNrepsSpnbx.value()
         savedict['reprate'] = self.ui.reprateSpnbx.value()
@@ -243,16 +241,12 @@ class ControlWindow(QtGui.QMainWindow):
             logger.exception("Unable to load app data")
             inputsdict = {}
         
-        # set default values
-        homefolder = os.path.join(os.path.expanduser("~"), "audiolab_data")
 
         self.ui.threshSpnbx.setValue(inputsdict.get('threshold', 0.5))
         self.stashedAisr = inputsdict.get('aisr', 100)
         self.ui.aisrSpnbx.setValue(self.stashedAisr)
         self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 100))
         self.ui.binszSpnbx.setValue(inputsdict.get('binsz', 5))        
-        self.savefolder = inputsdict.get('savefolder', homefolder)
-        self.savename = inputsdict.get('savename', "untitled")
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.exNrepsSpnbx.setValue(inputsdict.get('ex_nreps', 5))
         self.ui.reprateSpnbx.setValue(inputsdict.get('reprate', 1))
@@ -280,9 +274,12 @@ class ControlWindow(QtGui.QMainWindow):
 
         cal_template = inputsdict.get('calparams', None)
         if cal_template is not None:
-            self.acqmodel.load_calibration_template(cal_template)
-
-        if cal_template is not None:
+            try:
+                self.acqmodel.load_calibration_template(cal_template)
+            except:
+                logger = logging.getLogger('main')
+                logger.exception("Unable to load previous calibration settings")
+                
             for stim in self.exploreStimuli:
                 try:
                     stim.loadState(inputsdict[stim.name])

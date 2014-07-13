@@ -16,26 +16,20 @@ from numpy.testing import assert_array_almost_equal, assert_almost_equal, assert
 import matplotlib.pyplot as plt
 
 from guppy import hpy
-start_heap = None
-h = None
 
 def setUp():
-    from PyQt4.QtGui import QApplication
-    print 'ALL WIDGETS', QApplication.allWidgets()
-    global h, start_heap
     h = hpy()
-    print '\n ********MEMORY STATUS*************'
-    print h.heap()
-    h.setrelheap()
-    start_heap = h.heap()
+    stats = h.heap()
+    with open('memuse.txt', 'a') as memfile:
+        memfile.write('\n\n')
+        memfile.write(stats.__str__())
 
 def tearDown():
-    global h, start_heap
-    end_heap = h.heap()
-    print 'END'
-    print end_heap
-    print 'HEAP DIFF'
-    print end_heap - start_heap
+    h = hpy()
+    stats = h.heap()
+    with open('memuse.txt', 'a') as memfile:
+        memfile.write('\n\n')
+        memfile.write(stats.__str__())
 
 def data_func(t, f):
     return 2*np.sin(2*np.pi*f*t/len(t))

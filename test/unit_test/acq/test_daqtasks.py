@@ -7,10 +7,19 @@ try:
 except:
     skip = True
 
+skip=True
 import time
 import unittest
 
+from guppy import hpy
+
 DEBUG = False
+
+def setUp():
+    h = hpy()
+    stats = h.heap()
+    with open('memuse.txt', 'w') as memfile:
+        memfile.write(stats.__str__())
 
 class TestDAQTasks():
     def setup(self):

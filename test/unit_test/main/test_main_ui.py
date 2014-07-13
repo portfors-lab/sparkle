@@ -4,6 +4,7 @@ from spikeylab.stim.abstract_parameters import AbstractParameterWidget
 
 import os, glob
 import json
+import random, string
 
 import h5py
 from nose.tools import assert_in, assert_equal
@@ -16,37 +17,35 @@ from test.util import qtbot
 PAUSE = 200
 ALLOW = 15
 
-from guppy import hpy
-start_heap = None
-h = None
+def rand_id():
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(chars) for x in range(4))
 
-def setUp():
-    global h, start_heap
-    h = hpy()
-    print '\n ********MEMORY STATUS*************'
-    print h.heap()
-    h.setrelheap()
-    start_heap = h.heap()
+class TestMainSetup():
+    def setUp(self):
+        self.app = QtGui.QApplication([])
+        self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 
-def tearDown():
-    global h, start_heap
-    end_heap = h.heap()
-    print 'START'
-    print start_heap
-    print 'END'
-    print end_heap
-    print 'HEAP DIFF'
-    print end_heap - start_heap
+    def tearDown(self):
+        files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
+        for f in files:
+            os.remove(f)
+        del self.app
+
+    def test_bad_inputs_file(self):
+        fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
+        inputsfile = sample.badinputs()
+        self.form = MainWindow(datafile=fname, filemode='w', inputsFilename=inputsfile)
+        self.form.close()
+        # so no errors?
 
 class TestMainUI():
     def setUp(self):
         
-        # print h.heap()
-
         self.app = QtGui.QApplication([])
 
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
-        fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
+        fname = os.path.join(self.tempfolder, 'testdatafile' +rand_id()+'.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w')
         self.form.ui.reprateSpnbx.setValue(10)
         self.form.show()
@@ -125,7 +124,6 @@ class TestMainUI():
 
         qtbot.click(self.form.ui.calibrationWidget.ui.applycalCkbx)
         QtTest.QTest.qWait(ALLOW)
-        QtTest.QTest.qWait(3000)
 
         # test for each option available
         for i in range(self.form.ui.calibrationWidget.ui.calTypeCmbbx.count()):

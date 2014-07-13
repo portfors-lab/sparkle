@@ -7,7 +7,7 @@ def sampleimage():
     return os.path.join(sampledir(), 'sample_image.jpg')
 
 def samplewav():
-    return os.path.join(sampledir(), 'sample_syl.wav')
+    return os.path.join(sampledir(), 'asample_syl.wav')
 
 def calibration_filename():
     return os.path.join(sampledir(), 'calibration.hdf5')
@@ -17,3 +17,6 @@ def datafile():
 
 def test_template():
     return os.path.join(sampledir(), 'multitone.json')
+
+def badinputs():
+    return os.path.join(sampledir(), 'controlinputs.json')

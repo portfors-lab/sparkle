@@ -7,9 +7,10 @@ try:
 except:
     skip = True
 import unittest
-
+skip=True
 from spikeylab.acq.players import FinitePlayer, ContinuousPlayer, MAXV
 class TestDAQPlayers():
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_equal_dims(self):
         fs = 500000
         dur = 0.01
@@ -23,6 +24,7 @@ class TestDAQPlayers():
         tolerance = max(amp*0.1, 0.005) #noise floor
         assert np.allclose(stim, response0,rtol=0,atol=tolerance)
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_slower_out_fs(self):
         fs = 500000
         dur = 0.02
@@ -31,6 +33,7 @@ class TestDAQPlayers():
         assert len(stim) == len(response0)/4
         assert np.round(np.amax(response0), 2) == np.amax(stim)
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_slower_in_fs(self):
         fs = 500000
         dur = 0.02
@@ -39,6 +42,7 @@ class TestDAQPlayers():
         assert len(stim)/4 == len(response0)
         assert np.round(np.amax(response0), 2) == np.amax(stim)
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_short_out_duration(self):
         fs = 500000
         dur = 0.02
@@ -47,6 +51,7 @@ class TestDAQPlayers():
         assert len(stim) == len(response0)/4
         assert np.round(np.amax(response0), 2) == np.amax(stim)
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_out_slow_fs_and_short_duration(self):
         fs = 500000
         dur = 0.02
@@ -54,7 +59,8 @@ class TestDAQPlayers():
 
         assert len(stim) == len(response0)/4/2
         assert np.round(np.amax(response0), 2) == np.round(np.amax(stim), 2)
-
+        
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_short_in_duration(self):
         fs = 500000
         dur = 0.02
@@ -63,6 +69,7 @@ class TestDAQPlayers():
         assert len(stim)/2 == len(response0)
         assert np.round(np.amax(response0), 2) == np.amax(stim)
 
+    @unittest.skipIf(skip, 'No IO tests for dev mode')
     def test_finite_acquisition_in_slow_fs_and_short_duration(self):
         fs = 500000
         dur = 0.02
