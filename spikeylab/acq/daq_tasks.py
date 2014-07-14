@@ -30,10 +30,10 @@ class AITask(Task):
         else:
             chan_str = ','.join(chans)
             self.nchans = len(chans)
-        self.CreateAIVoltageChan(chan_str,u"",DAQmx_Val_Cfg_Default,
-            -10.0,10.0,DAQmx_Val_Volts,None)
+        self.CreateAIVoltageChan(chan_str, u"", DAQmx_Val_Cfg_Default,
+                                -10.0, 10.0, DAQmx_Val_Volts, None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
-                              DAQmx_Val_ContSamps,bufsize)
+                              DAQmx_Val_ContSamps, bufsize)
         #self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,100,0)
         self.AutoRegisterDoneEvent(0)
 
@@ -52,7 +52,7 @@ class AITask(Task):
         self.callback_fun = fun
         self.n = npts
         self.AutoRegisterEveryNSamplesEvent(DAQmx_Val_Acquired_Into_Buffer,
-                                            npts,0,name=u"_run_callback")
+                                            npts, 0, name=u"_run_callback")
     def _run_callback(self):
         inbuffer = self._read().squeeze()
         self.callback_fun(inbuffer)
@@ -93,10 +93,10 @@ class AOTask(Task):
         self.CreateAOVoltageChan(chan,"",-10.0,10.0, 
             DAQmx_Val_Volts,None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
-                              DAQmx_Val_ContSamps,bufsize)
+                              DAQmx_Val_ContSamps, bufsize)
         #starts the AO and AI at the same time
         if len(trigsrc) > 0:
-            self.CfgDigEdgeStartTrig(trigsrc,DAQmx_Val_Rising)
+            self.CfgDigEdgeStartTrig(trigsrc, DAQmx_Val_Rising)
         self.AutoRegisterDoneEvent(0)
 
     def start(self):
@@ -111,8 +111,8 @@ class AOTask(Task):
         """
         w = c_int32()
         # print "output max", max(abs(output))
-        self.WriteAnalogF64(self.bufsize,0,10.0,DAQmx_Val_GroupByChannel,
-                            output,w,None);
+        self.WriteAnalogF64(self.bufsize, 0, 10.0, DAQmx_Val_GroupByChannel,
+                            output, w, None);
     def stop(self):
         """Halt the Generation"""
         self.StopTask()
@@ -130,14 +130,17 @@ class AITaskFinite(Task):
     :param clksrc: source terminal for the sample clock, default is internal clock
     :type clksrc: str
     """
-    def __init__(self, chan, samplerate, npts, clksrc=""):
+    def __init__(self, chan, samplerate, npts, clksrc="", trigsrc=u""):
         Task.__init__(self)
         self.CreateAIVoltageChan(chan,"",DAQmx_Val_Cfg_Default,
-                                 -10.0,10.0,DAQmx_Val_Volts,None)
-        self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
-                              DAQmx_Val_FiniteSamps,npts)
+                                 -10.0, 10.0, DAQmx_Val_Volts, None)
+        self.CfgSampClkTiming(clksrc, samplerate, DAQmx_Val_Rising, 
+                              DAQmx_Val_FiniteSamps, npts)
         #self.AutoRegisterDoneEvent(0)
         self.npts = npts
+
+        if len(trigsrc) > 0:
+            self.CfgDigEdgeStartTrig(trigsrc, DAQmx_Val_Rising)
 
     def start(self):
         """Begin acquistition"""
@@ -150,8 +153,8 @@ class AITaskFinite(Task):
         """
         r = c_int32()
         inbuffer = np.zeros(self.npts)
-        self.ReadAnalogF64(self.npts,10.0,DAQmx_Val_GroupByScanNumber,inbuffer,
-                      self.npts,byref(r),None)
+        self.ReadAnalogF64(self.npts, 10.0, DAQmx_Val_GroupByScanNumber, inbuffer,
+                           self.npts,byref(r), None)
         self.WaitUntilTaskDone(10.0)
         return inbuffer
 
@@ -186,7 +189,7 @@ class AOTaskFinite(Task):
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps, npoints)
         if len(trigsrc) > 0:
-            self.CfgDigEdgeStartTrig(trigsrc,DAQmx_Val_Rising)
+            self.CfgDigEdgeStartTrig(trigsrc, DAQmx_Val_Rising)
 
     def start(self):
         """Begins generation -- immediately, if not using a trigger"""
@@ -215,6 +218,56 @@ class AOTaskFinite(Task):
         except DAQError:
             pass
 
+class DigitalOutTask(Task):
+    def __init__(self, chan, rate, npoints=1000, clksrc=''):
+        Task.__init__(self)
+
+        self.CreateDOChan(chan, "", DAQmx_Val_ChanForAllLines)
+
+        if clksrc == '':
+            devname = chan.split('/')[0]
+            self.clock = CounterOutTask(devname+'/ctr0', rate, npoints)
+            clksrc = '/'+devname+'/Ctr0InternalOutput'
+        else:
+            self.clock = None
+
+        self.CfgSampClkTiming(clksrc, rate, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 
+                              npoints)
+        w = c_int32()
+        data = np.zeros(npoints, dtype=np.uint32)
+        self.WriteDigitalU32(len(value), 0, DAQmx_Val_WaitInfinitely, 
+                             DAQmx_Val_GroupByChannel, data, w, None)
+
+    def start(self):
+        self.StartTask()
+        if self.clock:
+            self.clock.StartTask()
+
+    def stop(self):
+        self.StopTask()
+        self.ClearTask()
+        if self.clock:
+            self.clock.StopTask()
+            self.clock.ClearTask()
+
+    def generated(self):
+        buf = c_uint64()
+        self.GetWriteTotalSampPerChanGenerated(buf)
+        return buf.value
+
+class CounterOutTask(Task):
+    def __init__(self, chan, rate, npoints=1000):
+        Task.__init__(self)
+        # chan e.g. 'Dev1/ctr0'
+        self.CreateCOPulseChanFreq(chan, '', DAQmx_Val_Hz, DAQmx_Val_Low, 0., rate , 0.5)
+        self.CfgImplicitTiming(DAQmx_Val_ContSamps, npoints)
+
+    def start(self):
+        self.StartTask()
+
+    def stop(self):
+        self.StopTask()
+        self.ClearTask()
 
 def get_ao_chans(dev):
     """Discover and return a list of the names of all analog output channels for the given device"""

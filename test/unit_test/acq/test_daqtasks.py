@@ -1,6 +1,6 @@
 import numpy as np
 from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
-                                    get_ao_chans, get_ai_chans
+                                    DigitalOutTask, get_ao_chans, get_ai_chans
 try:
     from PyDAQmx import *
 except:
@@ -61,9 +61,10 @@ class TestDAQTasks():
                 plt.plot(x, stim, x, response)
                 plt.show()
 
-            tolerance = max(amp*0.1, 0.005) #noise floor
+            assert stim.shape == response.shape
 
             if not self.devmode:
+                tolerance = max(amp*0.1, 0.005) #noise floor
                 assert np.allclose(stim[10:],response[10:],rtol=0,atol=tolerance)
             
     def test_sync_continuous(self):
@@ -118,6 +119,29 @@ class TestDAQTasks():
         ait.stop()
 
         assert len(self.data) > aonpts*len(amps)
+
+    def test_digital_output(self):
+        dur = 2
+        rate = 2
+        dout = DigitalOutTask(DEVNAME+'/port0', rate)
+        dout.start()
+        time.sleep(dur)
+        # print 'samples generated', dout.generated()
+        assert  dout.generated() == dur*rate
+        dout.stop()
+
+    def test_triggered_AI(self):
+        npts = 10000
+        # counter = CounterOutTask(DEVNAME+'/ctr0', 1.)
+        trigger = DigitalOutTask(DEVNAME+'/port0', 1)
+        ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        trigger.start()
+        ait.StartTask()
+        response = ait.read()
+        trigger.stop()
+        ait.stop()
+
+        assert len(response) == npts
 
     def stashacq(self, data):
         self.data.extend(data.tolist())
