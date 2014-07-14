@@ -219,7 +219,7 @@ class AOTaskFinite(Task):
             pass
 
 class DigitalOutTask(Task):
-    def __init__(self, chan, rate, npoints=1000, clksrc=''):
+    def __init__(self, chan, rate, npoints=100, clksrc=''):
         Task.__init__(self)
 
         self.CreateDOChan(chan, "", DAQmx_Val_ChanForAllLines)
@@ -234,9 +234,9 @@ class DigitalOutTask(Task):
         self.CfgSampClkTiming(clksrc, rate, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 
                               npoints)
         w = c_int32()
-        data = np.zeros(npoints, dtype=np.uint32)
-        self.WriteDigitalU32(len(value), 0, DAQmx_Val_WaitInfinitely, 
-                             DAQmx_Val_GroupByChannel, data, w, None)
+
+        data = np.array([0,1], dtype=np.uint8)
+        self.WriteDigitalLines(len(data), False, DAQmx_Val_WaitInfinitely, DAQmx_Val_GroupByChannel, data, w, None)
 
     def start(self):
         self.StartTask()
@@ -256,7 +256,7 @@ class DigitalOutTask(Task):
         return buf.value
 
 class CounterOutTask(Task):
-    def __init__(self, chan, rate, npoints=1000):
+    def __init__(self, chan, rate, npoints=100):
         Task.__init__(self)
         # chan e.g. 'Dev1/ctr0'
         self.CreateCOPulseChanFreq(chan, '', DAQmx_Val_Hz, DAQmx_Val_Low, 0., rate , 0.5)
