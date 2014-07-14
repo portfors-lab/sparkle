@@ -63,7 +63,8 @@ class Task(object):
 		time.sleep(0.1)	
 
 def DAQmxGetDevAIPhysicalChans(dev, buf, buflen):
-	fakechans = 'ai0,ai1,ai2,ai3'
+	fakechanlist = ['ai'+str(x) for x in range(32)]
+	fakechans = ','.join(fakechanlist)
 	buf[0:len(fakechans)] = fakechans
 
 def DAQmxGetDevAOPhysicalChans(dev, buf, buflen):

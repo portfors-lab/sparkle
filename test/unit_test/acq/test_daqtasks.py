@@ -63,7 +63,6 @@ class TestDAQTasks():
 
             tolerance = max(amp*0.1, 0.005) #noise floor
 
-            print 'in devmode', self.devmode
             if not self.devmode:
                 assert np.allclose(stim[10:],response[10:],rtol=0,atol=tolerance)
             
@@ -93,7 +92,7 @@ class TestDAQTasks():
         # print type(self.data[0])
 
         expected = acqtime*self.sr
-        assert expected*0.9 <= len(self.data) <= expected*1.1
+        assert expected*0.85 <= len(self.data) <= expected*1.1
 
     def test_asynch_continuous_finite(self):
         ainpts = 1000

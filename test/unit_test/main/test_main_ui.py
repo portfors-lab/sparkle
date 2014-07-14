@@ -53,6 +53,7 @@ class TestMainUI():
         # mouse movements
         self.form.ui.plotDock.close()
         self.form.showMaximized()
+        QtGui.QApplication.processEvents()
 
     def tearDown(self):
         self.form.close()
@@ -148,7 +149,6 @@ class TestMainUI():
 
         # make sure no calibration is present
         assert self.form.calvals['use_calfile'] == withcal
-        print 'calname', self.form.calvals['calname'], calname
         assert self.form.calvals['calname'] == calname
 
     def test_tuning_curve(self):
@@ -279,6 +279,8 @@ class TestMainUI():
 
         qtbot.click(stimEditor.ui.parametizer.hideBtn)
         QtGui.QApplication.processEvents()
+        QtTest.QTest.qWait(PAUSE)
+
         pztr = stimEditor.ui.parametizer.parametizer
 
         for i, param in enumerate(autoparams):
