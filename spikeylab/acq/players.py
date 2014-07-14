@@ -6,16 +6,10 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':
     pass
 
-from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask
-from spikeylab.tools.systools import get_src_directory
+from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, DigitalOutTask
 
 PRINT_WARNINGS = False
 VERBOSE = True
-
-src_dir = get_src_directory()
-with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
-    config = yaml.load(yf)
-MAXV = config['max_voltage']
 
 class AbstractPlayerBase():
     """Holds state information for current acquisition/generation task"""
@@ -34,11 +28,12 @@ class AbstractPlayerBase():
         self.aitask = None
         self.aotask = None
 
-        self.maxv = MAXV #Volts
-
         self.stim_changed = False
 
-        self.connect_attenuator()        
+        self.connect_attenuator()
+
+        self.trigger_src = "PCI-6259/port0/line1"  
+        self.trigger_dest = "/PCI-6259/PFI0"
 
     def start(self):
         """Abstract, must be implemented by subclass"""
@@ -84,11 +79,6 @@ class AbstractPlayerBase():
 
     def set_stim(self, signal, sr, attenuation=0):
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
-        
-        # in the interest of not blowing out the speakers I am going to set this to 5?
-        if max(abs(signal)) > self.maxv:
-            print("WARNING: OUTPUT VOLTAGE {:.2f} EXCEEDS MAXIMUM({}V), RECALULATING".format(max(abs(signal)), self.maxv))
-            signal = signal/max(abs(signal))*self.maxv
 
         self.tone_lock.acquire()
         self.stim = signal
@@ -176,6 +166,15 @@ class AbstractPlayerBase():
         """Returns whether a connection to the attenuator has been established (bool)"""
         return self.attenuator is not None
 
+    def start_timer(self, reprate):
+        """Start the digital output task that serves as the acquistion trigger"""
+        print 'starting digital output at rate {} Hz'.format(reprate)
+        self.trigger_task = DigitalOutTask(self.trigger_src, reprate)
+        self.trigger_task.start()
+
+    def stop_timer(self):
+        self.trigger_task.stop()
+
 class FinitePlayer(AbstractPlayerBase):
     """For finite generation/acquisition tasks"""
     def __init__(self):
@@ -238,7 +237,7 @@ class FinitePlayer(AbstractPlayerBase):
 
         response_npts = int(self.aitime*self.aisr)
         try:
-            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)
+            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts, trigsrc=self.trigger_dest)
             new_gen = self.reset_generation(u"ai/StartTrigger")
         except:
             print u'ERROR! TERMINATE!'

@@ -1,6 +1,7 @@
 import time
 import threading
 import logging
+import gc
 import numpy as np
 
 from spikeylab.main.abstract_acquisition import AbstractAcquisitionRunner
@@ -69,10 +70,13 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         raise NotImplementedError
 
     def _worker(self, stimuli):
-        t0=time.time()
-        timecollection=[]
+        t0 = time.time()
+        starttime = t0
+        timecollection = []
         try:
             logger = logging.getLogger('main')
+            gc.disable()
+            self.player.start_timer(self.reprate)
             try:
                 for itest, test in enumerate(stimuli):
                     # pull out signal from stim model
@@ -105,7 +109,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         stamps = []
                         self.player.start()
                         for irep in range(nreps):
-                            self.interval_wait()
+                            self.interval_wait()  
                             if self._halt:
                                 raise Broken
                             response = self.player.run()
@@ -121,50 +125,65 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         signal, atten = trace
+                        # t1 = time.time()
                         self.player.set_stim(signal, test.samplerate(), atten)
+                        # print 'player start time {:.3f}'.format(time.time()-t1)
 
                         stamps = []
-                        elapsed = time.time()-t0
-                        print 'down time', elapsed
-                        timecollection.append(elapsed)
                         self.player.start()
                         for irep in range(nreps):
-                            self.interval_wait()
+                            # self.interval_wait()
                             if self._halt:
                                 raise Broken
+                            elapsed = time.time()-t0
+                            print 'down time {:.3f}'.format(elapsed)
+                            # timecollection.append(elapsed)
                             response = self.player.run()
+                            s = time.time()
+                            self.player.reset()
+                            # print 'reset time {:.3f}'.format(time.time()-s)
+                            oldt = t0
                             t0=time.time()
+                            looplen = t0 - oldt
+                            print 'loop duration {:.3f}'.format(looplen)
+                            timecollection.append(looplen)
+
                             stamps.append(time.time())
-                            self._process_response(response, trace_doc, irep)
+                            # self._process_response(response, trace_doc, irep)
+                            self.signals.response_collected.emit(self.aitimes, response)
+                            
                             if irep == 0:
-                                # do this after collection so plots match details
+                            #     # do this after collection so plots match details
                                 self.signals.stim_generated.emit(signal, test.samplerate())
                                 self.signals.current_trace.emit(itest,itrace,trace_doc)
                                 self.signals.over_voltage.emit(over)
                             
                             self.signals.current_rep.emit(irep)
 
-                            self.player.reset()
                             
-                        trace_doc['time_stamps'] = stamps
-                        self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                        # trace_doc['time_stamps'] = stamps
+                        # self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
 
                     # log as well, test type and user tag will be the same across traces
-                    logger.info("Finished test type: {}, tag: {}".format(trace_doc['testtype'], trace_doc['user_tag']))
+                    # logger.info("Finished test type: {}, tag: {}".format(trace_doc['testtype'], trace_doc['user_tag']))
                     # profiler.disable()
                     # print 'finished profiling'
                     # profiler.dump_stats('test_run.profile')
             except Broken:
                 # save some abortion message
                 self.player.stop()
-                
+
+            self.player.stop_timer()
             self.datafile.close_data(self.current_dataset_name)
             self.signals.group_finished.emit(self._halt)
+            gc.enable()
         except:
             logger.exception("Uncaught Exception from Acq Thread: ")
 
-        print 'all elapsed', timecollection
+        # print 'all elapsed', timecollection
+        tc = np.array(timecollection[1:])
+        print 'deadlines missed {}/{}'.format(len(tc[tc > (1./self.reprate)+0.005]), len(tc))
 
     def _initialize_test(self, test):
         raise NotImplementedError

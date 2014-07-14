@@ -196,6 +196,8 @@ class MainWindow(ControlWindow):
         self.plotProgress = False
         self.ui.protocolProgressBar.setValue(0)
 
+        self.acqmodel.set(reprate=self.ui.reprateSpnbx.value())
+
         if self.currentMode == 'windowed':
             if self.acqmodel.datafile is None:
                 self.acqmodel.set_save_params(self.savefolder, self.savename)

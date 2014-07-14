@@ -221,6 +221,8 @@ class AOTaskFinite(Task):
 class DigitalOutTask(Task):
     def __init__(self, chan, rate, npoints=100, clksrc=''):
         Task.__init__(self)
+        # necessary to get the rising edge at the correct frequency
+        rate = rate*2
 
         self.CreateDOChan(chan, "", DAQmx_Val_ChanForAllLines)
 

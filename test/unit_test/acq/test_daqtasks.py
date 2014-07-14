@@ -121,12 +121,12 @@ class TestDAQTasks():
         assert len(self.data) > aonpts*len(amps)
 
     def test_digital_output(self):
-        dur = 2
+        dur = 1
         rate = 2
         dout = DigitalOutTask(DEVNAME+'/port0/line1', rate)
         dout.start()
         time.sleep(dur)
-        print 'samples generated', dout.generated()
+        # print 'samples generated', dout.generated()
         # this reading is haywire?
         # assert  dout.generated() == dur*rate
         dout.stop()
@@ -148,10 +148,43 @@ class TestDAQTasks():
         trigger.stop()
         ait.stop()
 
-        print "response shape", response1.shape
-        print "duration", duration
+        # print "response shape", response1.shape
+        # print "duration", duration
         assert len(response1) == npts
-        assert False
+
+    def test_triggered_and_sync_AI_AO(self):
+        npts = 10000
+        rate = 2.
+        trigger = DigitalOutTask(DEVNAME+'/port0/line1', rate)
+        ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        aot = AOTaskFinite(DEVNAME+"/ao0", self.sr, npts, trigsrc=u"ai/StartTrigger")
+        
+        frequency = 5
+        x = np.linspace(0,np.pi, npts)
+        stim = np.sin(frequency*x*2*np.pi)
+        aot.write(stim)
+
+        starttime = time.time()
+        trigger.start()
+        # aot.StartTask()
+        ait.StartTask()
+        response0 = ait.read()
+
+        aot.StopTask()
+        ait.StopTask()
+        aot.StartTask()
+        ait.start()
+        # ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        response1 = ait.read()
+        duration = time.time() - starttime
+
+        trigger.stop()
+        ait.stop()
+        aot.stop() 
+
+        # print "response shape", response1.shape
+        # print "duration", duration
+        assert len(response1) == npts
 
     def stashacq(self, data):
         self.data.extend(data.tolist())

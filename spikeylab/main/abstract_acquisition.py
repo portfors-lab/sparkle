@@ -76,6 +76,8 @@ class AbstractAcquisitionRunner():
             self.update_reference_voltage()
         if 'datafile' in kwargs:
             self.datafile = kwargs['datafile']
+        if 'reprate' in kwargs:
+            self.reprate = kwargs['reprate']
 
     def run(self, interval, **kwargs):
         raise NotImplementedError
