@@ -69,6 +69,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         raise NotImplementedError
 
     def _worker(self, stimuli):
+        t0=time.time()
+        timecollection=[]
         try:
             logger = logging.getLogger('main')
             try:
@@ -122,12 +124,16 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         self.player.set_stim(signal, test.samplerate(), atten)
 
                         stamps = []
+                        elapsed = time.time()-t0
+                        print 'down time', elapsed
+                        timecollection.append(elapsed)
                         self.player.start()
                         for irep in range(nreps):
                             self.interval_wait()
                             if self._halt:
                                 raise Broken
                             response = self.player.run()
+                            t0=time.time()
                             stamps.append(time.time())
                             self._process_response(response, trace_doc, irep)
                             if irep == 0:
@@ -157,6 +163,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
             self.signals.group_finished.emit(self._halt)
         except:
             logger.exception("Uncaught Exception from Acq Thread: ")
+
+        print 'all elapsed', timecollection
 
     def _initialize_test(self, test):
         raise NotImplementedError
