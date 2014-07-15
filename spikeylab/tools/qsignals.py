@@ -20,6 +20,27 @@ class ProtocolSignals(QtCore.QObject):
     tuning_curve_response = QtCore.pyqtSignal(int, int, float)
     over_voltage = QtCore.pyqtSignal(float)
 
+    def iteritems(self):
+        return {
+        'curve_finished' : self.curve_finished,
+        'ncollected' : self.ncollected,
+        'warning' : self.warning,
+        'response_collected' : self.response_collected,
+        'average_response' : self.average_response,
+        'calibration_response_collected' : self.calibration_response_collected,
+        'current_trace' : self.current_trace,
+        'current_rep' : self.current_rep,
+        'spikes_found' : self.spikes_found,
+        'stim_generated' : self.stim_generated,
+        'threshold_updated' : self.threshold_updated,
+        'trace_finished' : self.trace_finished,
+        'group_finished' : self.group_finished,
+        'calibration_file_changed' : self.calibration_file_changed,
+        'tuning_curve_started' : self.tuning_curve_started,
+        'tuning_curve_response' : self.tuning_curve_response,
+        'over_voltage' : self.over_voltage,
+        }.iteritems()
+
 class TestSignals(QtCore.QObject):
     update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
     done = QtCore.pyqtSignal()

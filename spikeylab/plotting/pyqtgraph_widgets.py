@@ -1,3 +1,4 @@
+import time
 from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
@@ -208,8 +209,10 @@ class SpecWidget(BasePlot):
         # spec = np.random.uniform(size=(513, 4798))
         # bins = np.arange(4798)
         # f = np.arange(513)
+        # start = time.time()
         # spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgramArgs)
         # self.updateImage(spec, bins, f)
+        # print 'spectrogram took {:3f}'.format(time.time()-start)
 
     def setSpecArgs(self, **kwargs):
         for key, value in kwargs.items():

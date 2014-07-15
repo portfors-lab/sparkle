@@ -96,10 +96,15 @@ class AbstractAcquisitionRunner():
         # print("interval %d, time from start %d \n" % (elapsed, (now - self.start_time)*1000))
         if elapsed < self.interval:
             # print('sleep ', (self.interval-elapsed))
-            self.signals.warning.emit('') # clear previous warning
+            # self.signals.warning.emit('') # clear previous warning
             time.sleep((self.interval-elapsed)/1000)
             now = time.time()
         elif elapsed > self.interval:
-            self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
+            pass
+            # self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
         self.last_tick = now
 
+    def down_the_shute(self, name, *args):
+        # self.signals[name][0].send(*args)
+        self.signals[name][0].put(*args)
+        self.signals[name][1].set()

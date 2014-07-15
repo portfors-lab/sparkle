@@ -1,8 +1,9 @@
 import logging
+import threading
+import multiprocessing as multip
 
 from spikeylab.tools.util import create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.main.search_runner import SearchRunner
 from spikeylab.main.protocol_runner import ProtocolRunner
 from spikeylab.main.chart_runner import ChartRunner
@@ -20,7 +21,55 @@ class AcquisitionManager():
         self.savefolder = None
         self.savename = None
 
-        self.signals = ProtocolSignals()
+        # self.signals = ProtocolSignals()
+        pipelist = ['curve_finished',
+                'ncollected',
+                'warning',
+                'response_collected',
+                'average_response',
+                'calibration_response_collected',
+                'current_trace',
+                'current_rep',
+                'spikes_found',
+                'stim_generated',
+                'threshold_updated',
+                'trace_finished',
+                'group_finished',
+                'calibration_file_changed',
+                'tuning_curve_started',
+                'tuning_curve_response',
+                'over_voltage',]
+        signals = {}
+        recieved_signals = {}
+        for p in pipelist:
+            # recvr, sendr = multip.Pipe()
+            sendr = multip.Queue()
+            recvr = sendr
+            waker = threading.Event()
+            signals[p] = (sendr, waker)
+            recieved_signals[p] = (recvr, waker)
+        self.signals = signals
+        self.recieved_signals = recieved_signals
+        self.acquisition_hooks = {}
+        # self.signals = {
+                # 'curve_finished' : Pipe(),
+                # 'ncollected' : Pipe(),
+                # 'warning' : Pipe(),
+                # 'response_collected' : Pipe(),
+                # 'average_response' : Pipe(),
+                # 'calibration_response_collected' : Pipe(),
+                # 'current_trace' : Pipe(),
+                # 'current_rep' : Pipe(),
+                # 'spikes_found' : Pipe(),
+                # 'stim_generated' : Pipe(),
+                # 'threshold_updated' : Pipe(),
+                # 'trace_finished' : Pipe(),
+                # 'group_finished' : Pipe(),
+                # 'calibration_file_changed': Pipe(),
+                # 'tuning_curve_started' : Pipe(),
+                # 'tuning_curve_response': Pipe(),
+                # 'over_voltage': Pipe(),
+        # }
 
         self.explorer = SearchRunner(self.signals)
         self.protocoler =  ProtocolRunner(self.signals)
@@ -35,9 +84,43 @@ class AcquisitionManager():
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
-        self.signals.samplerateChanged = self.explorer.stimulus.samplerateChanged
         self.selected_calibration_index = 0
         self.current_cellid = 0
+
+    def _pipe_listen(self):
+        # create listener threads for all acquisition hooks
+        self.pipe_threads = []
+        for name, pipe_waker in self.recieved_signals.items():
+            p, wake_event = pipe_waker
+            if name in self.acquisition_hooks:
+                print '{} hook established'.format(name)
+                t = threading.Thread(target=self._listen, args=(p, self.acquisition_hooks[name], wake_event))
+                t.daemon = True
+                self.pipe_threads.append(t)
+
+    def _listen(self, pipe, func, wake_event):
+        while not self._halt_threads:
+            # if pipe.poll():
+            if not pipe.empty():
+                # data = pipe.recv()
+                data = pipe.get()
+                func(*data)
+            wake_event.clear()
+            wake_event.wait()
+
+    def start_listening(self):
+        # clear any previous listers?
+        print "I'm listening"
+        self._pipe_listen()
+        self._halt_threads = False
+        for t in self.pipe_threads:
+            t.start()
+
+    def stop_listening(self):
+        self._halt_threads = True
+
+    def set_pipe_callback(self, name, func):
+        self.acquisition_hooks[name] = func
 
     def increment_cellid(self):
         """Increments the current cellid number that is saved for each test run"""
