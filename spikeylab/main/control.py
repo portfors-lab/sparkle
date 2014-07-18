@@ -18,6 +18,8 @@ from spikeylab.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
 from spikeylab.tools.systools import get_src_directory
+from spikeylab.main.qprotocol import QProtocolTabelModel
+from spikeylab.stim.qstimulus import QStimulusModel
 
 from controlwindow import ControlWindow
 
@@ -80,8 +82,8 @@ class MainWindow(ControlWindow):
         self.display.thresholdUpdated.connect(self.updateThresh)
         self.display.colormapChanged.connect(self.relayCMapChange)
 
-        self.ui.protocolView.setModel(self.acqmodel.protocol_model())
-        self.ui.calibrationWidget.setCurveModel(self.acqmodel.calibration_stimulus('tone'))
+        self.ui.protocolView.setModel(QProtocolTabelModel(self.acqmodel.protocol_model()))
+        self.ui.calibrationWidget.setCurveModel(QStimulusModel(self.acqmodel.calibration_stimulus('tone')))
 
         self.acqmodel.signals.response_collected.connect(self.displayResponse)
         self.acqmodel.signals.calibration_response_collected.connect(self.displayCalibrationResponse)
@@ -94,10 +96,10 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.current_trace.connect(self.reportProgress)
         self.acqmodel.signals.current_rep.connect(self.reportRep)
         self.acqmodel.signals.group_finished.connect(self.onGroupDone)
-        self.acqmodel.signals.samplerateChanged.connect(self.updateGenerationRate)
         self.acqmodel.signals.tuning_curve_started.connect(self.spawnTuningCurve)
         self.acqmodel.signals.tuning_curve_response.connect(self.displayTuningCurve)
         self.acqmodel.signals.over_voltage.connect(self.reportOverV)
+        # self.ui.protocolView.samplerateChanged.connect(self.updateGenerationRate)
 
         self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)

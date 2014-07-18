@@ -1,7 +1,7 @@
 from nose.tools import assert_in
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.qauto_parameter_model import QAutoParameterModel
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 
@@ -19,7 +19,8 @@ class TestAutoParameterModel():
         AbstractStimulusComponent().update_fscale(self.original_funits)
 
     def test_insert_rows(self):
-        param_model = AutoParameterModel()
+        data = AutoParameterModel()
+        param_model = QAutoParameterModel(data)
         param_model.insertRows(0, 1)
 
         param = param_model.data(param_model.index(0,0))
@@ -28,29 +29,11 @@ class TestAutoParameterModel():
             assert_in(item, param)
 
     def test_remove_rows(self):
-        model = AutoParameterModel()
+        data = AutoParameterModel()
+        model = QAutoParameterModel(data)
         model.insertRows(0, 1)
         model.removeRows(0, 1)
         assert model.rowCount() == 0
-
-    def test_get_detail_empty_selection(self):
-        model = AutoParameterModel()
-        model.insertRows(0, 1)
-        label = model.getDetail(model.index(0,0), 'label')
-        assert label == None
-
-    def test_get_detail_with_selection(self):
-        # need to create a stimulus model with component for this to work
-        component = PureTone()
-        model = self.create_model(component)
-
-        parameter = 'frequency'
-        model.setData(model.index(0,0), parameter, QtCore.Qt.EditRole)
-
-        details = ['label', 'multiplier', 'min', 'max']
-        for detail in details:
-            d = model.getDetail(model.index(0,0), detail)
-            assert d == component.auto_details()[parameter][detail]
 
     def test_data(self):
         component = PureTone()
@@ -135,23 +118,6 @@ class TestAutoParameterModel():
         assert values[3]*multiplier == model.data(model.index(0,3), QtCore.Qt.EditRole)
         assert nsteps0 == model.data(model.index(0,4), QtCore.Qt.EditRole)
 
-    def test_update_stim_model_start_value(self):
-        component = PureTone()
-        model = self.create_model(component)
-
-        values = ['duration', 8, 100, 10]
-        for i, value in enumerate(values):
-            model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
-
-        model.updateComponentStartVals()
-        # make sure it component is at orignal value
-        assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
-
-        model.setData(model.index(0,1), value, QtCore.Qt.EditRole)
-        model.updateComponentStartVals()
-
-        assert model.data(model.index(0,0), QtCore.Qt.UserRole)['start'] == component.duration()
-
     def test_change_param_type(self):
         component = PureTone()
         model = self.create_model(component)
@@ -162,7 +128,7 @@ class TestAutoParameterModel():
 
         # check that values are stored correctly inside model
         p = model.data(model.index(0,0))
-        mult = model.getDetail(model.index(0,0), 'multiplier')
+        mult = model.model.getDetail(0, 'multiplier')
         for i, value in enumerate(values[1:]):
             assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value*mult
 
@@ -173,7 +139,7 @@ class TestAutoParameterModel():
 
         # check that values are stored correctly inside model
         p = model.data(model.index(0,0))
-        mult = model.getDetail(model.index(0,0), 'multiplier')
+        mult = model.model.getDetail(0, 'multiplier')
         for i, value in enumerate(values[1:]):
             assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value*mult
 
@@ -256,21 +222,15 @@ class TestAutoParameterModel():
 
         vcomponent = Vocalization()
         vcomponent.setFile(sample.samplewav())
-        model.stimModel().insertComponent(vcomponent, (1,0))
-        selection_model = model.data(model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(model.stimModel().index(1,0))
+        model.toggleSelection(model.index(0,0), vcomponent)
 
         assert 'frequency not present' in model.verify()
 
     def create_model(self, component):
-        stim_model = StimulusModel()
-        stim_model.insertComponent(component, (0,0))
-
-        model = AutoParameterModel(stim_model)
-        model.insertRows(0, 1)
+        model = AutoParameterModel()
+        model.insertRow(0)
         
-        selection_model = model.data(model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
+        model.toggleSelection(0, component)
 
-        return model
+        return QAutoParameterModel(model)
 

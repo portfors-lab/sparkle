@@ -8,6 +8,7 @@ from spikeylab.main.drag_label import DragLabel
 
 from spikeylab.main.abstract_drag_view import AbstractDragView
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.selectionmodel import ComponentSelectionModel
 
 ROW_HEIGHT = 100
 ROW_SPACE = 25
@@ -25,6 +26,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     _height = ROW_HEIGHT
     _width = 10
     _componentDefaults = {}
+    componentSelected = QtCore.pyqtSignal(AbstractStimulusComponent)
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
         AbstractDragView.__init__(self)
@@ -47,9 +49,18 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.gridms = 25
 
     def rowReach(self):
+        """Row span in pixels
+
+        :returns: int -- row height + space between rows
+        """
         return ROW_HEIGHT + ROW_SPACE
 
     def setPixelScale(self, pxms):
+        """Sets the zoom scale
+
+        :param pxms: number of pixels per ms
+        :type pxms: int
+        """
         pxms = float(pxms)/2
         self.pixelsPerms = pxms
         if pxms*self.gridms < GRID_PIXEL_MIN:
@@ -62,12 +73,14 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return self.gridms
 
     def setModel(self, model):
+        """Sets the QStimulusModel for this view"""
         super(StimulusView, self).setModel(model)
+        self.setSelectionModel(ComponentSelectionModel(model))
         # initialize nested list to appropriate size
         self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
 
         self.hashIsDirty = True
-        self.calculateRects()
+        self._calculateRects()
 
     def indexXY(self, index):
         """Return the top left coordinates of the item for the given index"""
@@ -75,10 +88,11 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return rect.x(), rect.y()
 
     def indexAt(self, point):
+        """Returns the QModelIndex of the component at the specified QPoint relative to view coordinates"""
         # Transform the view coordinates into contents widget coordinates.
         wx = point.x() + self.horizontalScrollBar().value()
         wy = point.y() + self.verticalScrollBar().value()
-        self.calculateRects()
+        self._calculateRects()
         # naive search
         for row in range(self.model().rowCount(self.rootIndex())):
             for col in range(self.model().columnCountForRow(row)):
@@ -87,7 +101,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         return QtCore.QModelIndex()
 
-    def calculateRects(self):
+    def _calculateRects(self):
+        """Calculate the sizes of the different components present in this view"""
         if not self.hashIsDirty:
             return
 
@@ -205,7 +220,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         painter = QtGui.QPainter(self.viewport())
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
 
-        self.calculateRects()
+        self._calculateRects()
 
         viewrect = event.rect()
         painter.fillRect(viewrect, background)
@@ -274,6 +289,21 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             index = self.indexAt(event.pos())
             if index.isValid():
                 self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
+                comp = self.model().data(index, QtCore.Qt.UserRole)
+                self.componentSelected.emit(comp)
+
+    def emptySelection(self, empty):
+        self.setEnabled(not empty)
+        if empty:
+            self.clearSelection()
+
+    def updateSelectionModel(self, components):
+        # selmodel = self.selectionModel()
+        # selmodel.clearSelection()
+        selmodel = ComponentSelectionModel(self.model())
+        self.setSelectionModel(selmodel)
+        for comp in components:
+            selmodel.selectComponent(comp)
 
     def cursor(self, pos):
         index = self.splitAt(pos)
@@ -304,12 +334,12 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         component = self.dropAssist(event)
         if isinstance(component, AbstractStimulusComponent):
 
-            location = self.splitAt(event.pos())
+            row, col = self.splitAt(event.pos())
+            index = self.model().createIndex(row, col, component)
 
-            self.model().insertComponent(component, location)
+            self.model().insertComponent(index)
 
             if isinstance(event.source(), DragLabel):
-                index = self.model().index(location[0], location[1])
                 if component.__class__.__name__ in self._componentDefaults:
                     component.loadState(self._componentDefaults[component.__class__.__name__])
                 self.edit(index)
@@ -328,7 +358,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
             self.setSelectionModel(QtGui.QItemSelectionModel(self.model()))
             self.setEnabled(True)
+            self.model().updateComponentStartVals()
         else:
+            self.setSelectionModel(ComponentSelectionModel(self.model()))
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 
     def selectionChanged(self, selected, deselected):

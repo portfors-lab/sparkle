@@ -1,27 +1,30 @@
 from nose.tools import assert_equal
 
+from spikeylab.main.qprotocol import QProtocolTabelModel
 from spikeylab.main.protocol_model import ProtocolTabelModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone
 from PyQt4 import QtCore
 
-class TestProtocolModel():
+class TestQProtocolModel():
     def test_insert_emtpy_stim(self):
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         stim = StimulusModel()
-        model.insertNewTest(stim,0)        
+        model.insertTest(stim,0)        
 
-        assert_equal(stim, model.data(model.index(0,0), role=QtCore.Qt.UserRole))
+        assert_equal(stim, model.data(model.index(0,0), role=QtCore.Qt.UserRole+1))
         assert model.data(model.index(0,3), role=QtCore.Qt.DisplayRole) == 0
 
     def test_insert_remove_stim(self):
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         stim = StimulusModel()
         component = PureTone()
-        stim.insertComponent(component, (0,0))
-        model.insertNewTest(stim,0)        
+        stim.insertComponent(component, 0,0)
+        model.insertTest(stim,0)        
 
         headers = model.allHeaders()
         repidx = headers.index('Reps')
@@ -29,7 +32,7 @@ class TestProtocolModel():
         totalidx = headers.index('Total')
         fsidx = headers.index('Generation rate')
 
-        assert_equal(stim, model.data(model.index(0,0), role=QtCore.Qt.UserRole))
+        assert_equal(stim, model.data(model.index(0,0), role=QtCore.Qt.UserRole+1))
         assert_equal([stim], model.stimulusList())
         assert model.data(model.index(0,repidx), role=QtCore.Qt.DisplayRole) == 1
         assert model.data(model.index(0,lenidx), role=QtCore.Qt.DisplayRole) == 1
@@ -43,13 +46,13 @@ class TestProtocolModel():
         assert_equal([], model.stimulusList())
 
     def test_edit_model(self):
-
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         stim = StimulusModel()
         component = PureTone()
-        stim.insertComponent(component, (0,0))
-        model.insertNewTest(stim,0)
+        stim.insertComponent(component, 0,0)
+        model.insertTest(stim,0)
 
         assert stim.repCount() == 1
 
@@ -66,15 +69,16 @@ class TestProtocolModel():
         assert model.data(model.index(0,totalidx), role=QtCore.Qt.DisplayRole) == newreps
 
     def test_verify_no_tests(self):
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
 
         assert model.verify()
 
     def test_verify_no_refv(self):
-        model = ProtocolTabelModel()
+        model = QProtocolTabelModel()
         stim = StimulusModel()
-        model.insertNewTest(stim,0)
+        model.insertTest(stim,0)
 
         assert model.verify()
 
@@ -83,20 +87,22 @@ class TestProtocolModel():
         Verification from stimulus comes back invalid
         """
         # emtpy stim in this case
-        model = ProtocolTabelModel()
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         stim = StimulusModel()
-        model.insertNewTest(stim,0)
-        model.setReferenceVoltage(100, 0.1)
+        model.insertTest(stim,0)
 
         assert model.verify()
 
     def test_verify_success(self):
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         stim = StimulusModel()
         component = PureTone()
-        stim.insertComponent(component, (0,0))
-        model.insertNewTest(stim,0)
+        stim.insertComponent(component, 0,0)
+        model.insertTest(stim,0)
 
         assert model.verify() == 0
 

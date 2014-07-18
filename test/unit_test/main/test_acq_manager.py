@@ -63,7 +63,7 @@ class TestAcquisitionModel():
         tone0.setDuration(0.02)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        manager.protocol_model().insertNewTest(stim0,0)
+        manager.protocol_model().insert(stim0,0)
         gen_rate = stim0.samplerate()
 
         manager.setup_protocol(0.1)
@@ -94,7 +94,7 @@ class TestAcquisitionModel():
         tone0.setDuration(0.02)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        manager.protocol_model().insertNewTest(stim0,0)
+        manager.protocol_model().insert(stim0,0)
         gen_rate = stim0.samplerate()
 
         manager.setup_protocol(0.1)
@@ -129,7 +129,7 @@ class TestAcquisitionModel():
         tone0.setFrequency(90000)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        manager.protocol_model().insertNewTest(stim0,0)
+        manager.protocol_model().insert(stim0,0)
         gen_rate = stim0.samplerate()
 
         manager.setup_protocol(0.1)
@@ -160,7 +160,7 @@ class TestAcquisitionModel():
         vocal0.setFile(sample.samplewav())
         stim0 = StimulusModel()
         stim0.insertComponent(vocal0)
-        manager.protocol_model().insertNewTest(stim0,0)
+        manager.protocol_model().insert(stim0,0)
 
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
@@ -184,12 +184,13 @@ class TestAcquisitionModel():
 
         stim_model = create_tone_stim(nreps)
 
-        manager.protocol_model().insertNewTest(stim_model,0)
+        manager.protocol_model().insert(stim_model,0)
 
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
         t.join()
 
+        print 'RAN PROTOCOL'
         manager.close_data()
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -208,7 +209,7 @@ class TestAcquisitionModel():
         stim_model = create_tone_stim(nreps)
         stim_model.setReorderFunc(random_order, name='random')
 
-        manager.protocol_model().insertNewTest(stim_model,0)
+        manager.protocol_model().insert(stim_model,0)
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
         t.join()
@@ -231,7 +232,7 @@ class TestAcquisitionModel():
 
         stim_model = create_tone_stim(nreps)
 
-        manager.protocol_model().insertNewTest(stim_model,0)
+        manager.protocol_model().insert(stim_model,0)
 
         interval = 250
         manager.setup_protocol(interval)
@@ -349,7 +350,7 @@ class TestAcquisitionModel():
         nreps = tc.repCount()
         ntraces = tc.traceCount()
 
-        manager.protocol_model().insertNewTest(tc,0)
+        manager.protocol_model().insert(tc,0)
 
         manager.setup_protocol(0.1)
         t = manager.run_protocol()
@@ -410,7 +411,7 @@ class TestAcquisitionModel():
         tone0.setDuration(winsz)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
-        manager.protocol_model().insertNewTest(stim0,0)
+        manager.protocol_model().insert(stim0,0)
         gen_rate = stim0.samplerate()
 
         manager.start_chart()
@@ -529,7 +530,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
         assert stim_info['calv'] == test_stim.calv
         assert stim_info['caldb'] == test_stim.caldb
         assert stim_info['samplerate_da'] == test_stim.samplerate()
-        assert stim_info['testtype'] is None # no editor in these tests
+        assert stim_info['testtype'] == test_stim.stimType() # no editor in these tests
         assert len(stim_info['components']) == test_stim.componentCount()
         for component_info in stim_info['components']:
             # required fields
@@ -566,18 +567,17 @@ def check_result(test_data, test_stim, winsz, acq_rate):
 def create_tone_stim(nreps):
     component = PureTone()
     stim_model = StimulusModel()
-    stim_model.insertComponent(component, (0,0))
+    stim_model.insertComponent(component, 0,0)
     stim_model.setRepCount(nreps)
     auto_model = stim_model.autoParams()
-    auto_model.insertRows(0, 1)
+    auto_model.insertRow(0)
     
-    selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-    selection_model.select(stim_model.index(0,0))
+    auto_model.toggleSelection(0,component)
 
     # values = ['frequency', 0, 100, 10]
-    values = ['duration', 65, 165, 10] # had caused problem in past
-    for i, value in enumerate(values):
-        auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+    values = ['duration', 0.065, 0.165, 0.010] # had caused problem in past
+    auto_model.setParamValue(0, parameter=values[0], start=values[1], 
+                            stop=values[2], step=values[3])
 
     return stim_model
 
@@ -586,17 +586,16 @@ def create_vocal_stim(nreps):
     component.setFile(sample.samplewav())
     delay = Silence()
     stim_model = StimulusModel()
-    stim_model.insertComponent(component, (0,0))
-    stim_model.insertComponent(delay, (0,0))
+    stim_model.insertComponent(component, 0,0)
+    stim_model.insertComponent(delay, 0,0)
     stim_model.setRepCount(nreps)
     auto_model = stim_model.autoParams()
-    auto_model.insertRows(0, 1)
+    auto_model.insertRow(0)
 
-    selection_model = auto_model.data(auto_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-    selection_model.select(stim_model.index(0,0))
+    auto_model.toggleSelection(0,component)
 
-    values = ['duration', 65, 165, 10] # had caused problem in past
-    for i, value in enumerate(values):
-        auto_model.setData(auto_model.index(0,i), value, Qt.EditRole)
+    values = ['duration', 0.065, 0.165, 0.010] # had caused problem in past
+    auto_model.setParamValue(0, parameter=values[0], start=values[1], 
+                            stop=values[2], step=values[3])
 
     return stim_model

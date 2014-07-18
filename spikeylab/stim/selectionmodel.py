@@ -10,9 +10,14 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
     def select(self, index, command=QtGui.QItemSelectionModel.Toggle):
         """Changes the inclusion of the given index in the selection model"""
         component = self.model().data(index, QtCore.Qt.UserRole)
+        self.selectComponent(component, index)
+
+    def selectComponent(self, component, index=None, command=QtGui.QItemSelectionModel.Toggle):
         if command == QtGui.QItemSelectionModel.Toggle:
             if component in self._selectedComponents:
                 self._selectedComponents.remove(component)
+                if index is None:
+                    index = self.model().indexByComponent(component)
                 self.selectionChanged.emit(self.selection(), QtGui.QItemSelection(index, index))
                 if len(self._selectedComponents) == 0:
                     self.hintRequested.emit('Select Components in view to modify')

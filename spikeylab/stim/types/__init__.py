@@ -33,4 +33,4 @@ def get_stimuli_models():
     return stimuli
 
 if __name__ == '__main__':
-    get_stimuli_models()
+    print get_stimuli_models()

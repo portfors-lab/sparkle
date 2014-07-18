@@ -52,51 +52,45 @@ class TestStimModel():
         model = StimulusModel()
         fake_component0 = 'ducks'
         fake_component1 = 'frogs'
-        model.insertComponent(fake_component0, (0,0))
-        model.insertComponent(fake_component1, (0,0))
-        assert model.data(model.index(0,0), role=QtCore.Qt.UserRole) == fake_component1
-        assert model.data(model.index(0,1), role=QtCore.Qt.UserRole) == fake_component0
+        model.insertComponent(fake_component0, 0, 0)
+        model.insertComponent(fake_component1, 0, 0)
+        assert model.component(0,0) == fake_component1
+        assert model.component(0,1) == fake_component0
 
     def test_remove_data(self):
         model = StimulusModel()
         fake_component0 = 'ducks'
-        model.insertComponent(fake_component0, (0,0))
-        model.removeComponent((0,0))
-        assert model.data(model.index(0,0), role=QtCore.Qt.UserRole) == None
+        model.insertComponent(fake_component0, 0, 0)
+        model.removeComponent(0,0)
+        assert model.component(0,0) == None
 
     def test_component_index(self):
         model = StimulusModel()
         fake_component0 = 'ducks'
         # component will be added to the lowest index in row
-        model.insertComponent(fake_component0, (0,2))
+        model.insertComponent(fake_component0, 0, 2)
         index = model.indexByComponent(fake_component0)
-        assert (index.row(),index.column()) == (0,0)
+        assert index == (0,0)
 
     @raises(IndexError)
     def test_set_data(self):
         model = StimulusModel()
         fake_component0 = 'ducks'
-        model.setData(model.index(0,0), fake_component0)
+        model.overwriteComponent(fake_component0, 0, 0)
 
-    def test_column_count(self):
+    def test_row_column_count(self):
         model = StimulusModel()
         fake_component0 = 'ducks'
-        model.insertComponent(fake_component0, (0,0))
+        model.insertComponent(fake_component0, 0, 0)
         assert model.columnCountForRow(0) == 1
-
-    def test_row_count(self):
-        model = StimulusModel()
-        fake_component0 = 'ducks'
-        model.insertComponent(fake_component0, (0,0))
-        # there is always an extra empty row
-        assert model.rowCount() == 2
+        assert model.rowCount() == 1
 
     def test_trace_count_no_auto(self):
         model = StimulusModel()
         component0 = PureTone()
         component1 = PureTone()
-        model.insertComponent(component0, (0,0))
-        model.insertComponent(component1, (0,0))
+        model.insertComponent(component0, 0,0)
+        model.insertComponent(component1, 0,0)
 
         assert model.traceCount() == 1
 
@@ -109,7 +103,7 @@ class TestStimModel():
     def test_trace_count_with_auto(self):
         model = StimulusModel()
         component = PureTone()
-        model.insertComponent(component, (0,0))       
+        model.insertComponent(component, 0,0)     
 
         nsteps = self.add_auto_param(model)        
 
@@ -118,7 +112,7 @@ class TestStimModel():
     def test_model_contains(self):
         model = StimulusModel()
         component = PureTone()
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
 
         assert model.contains('PureTone')
 
@@ -126,7 +120,7 @@ class TestStimModel():
         """signal of a model without any auto parameters"""
         model = StimulusModel()
         component = PureTone()
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
         model.setReferenceVoltage(100, 0.1)
 
         signals, doc, ovld = model.expandedStim()
@@ -138,7 +132,7 @@ class TestStimModel():
     def test_expanded_stim_with_auto(self):
         model = StimulusModel()
         component = PureTone()
-        model.insertComponent(component, (0,0))       
+        model.insertComponent(component, 0,0)       
         model.setReferenceVoltage(100, 0.1)
         nsteps = self.add_auto_param(model)        
 
@@ -155,8 +149,8 @@ class TestStimModel():
         component1 = PureTone()
         component0.setIntensity(caldb)
         component1.setIntensity(80)
-        model.insertComponent(component0, (0,0))
-        model.insertComponent(component1, (0,0))
+        model.insertComponent(component0, 0, 0)
+        model.insertComponent(component1, 0, 0)
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
@@ -176,8 +170,8 @@ class TestStimModel():
         component1 = PureTone()
         component0.setIntensity(caldb-20)
         component1.setIntensity(70)
-        model.insertComponent(component0, (0,0))
-        model.insertComponent(component1, (0,0))
+        model.insertComponent(component0, 0,0)
+        model.insertComponent(component1, 0,0)
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
@@ -197,8 +191,8 @@ class TestStimModel():
         component1 = PureTone()
         component0.setIntensity(caldb+mod)
         component1.setIntensity(80)
-        model.insertComponent(component0, (0,0))
-        model.insertComponent(component1, (0,0))
+        model.insertComponent(component0, 0,0)
+        model.insertComponent(component1, 0,0)
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
@@ -217,7 +211,7 @@ class TestStimModel():
         model = StimulusModel()
         component0 = PureTone()
         component0.setIntensity(10)
-        model.insertComponent(component0, (0,0))
+        model.insertComponent(component0, 0,0)
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
@@ -233,8 +227,8 @@ class TestStimModel():
         component1 = PureTone()
         component0.setIntensity(caldb)
         component1.setIntensity(caldb)
-        model.insertComponent(component0, (0,0))
-        model.insertComponent(component1, (1,0))
+        model.insertComponent(component0, 0, 0)
+        model.insertComponent(component1, 1, 0)
         model.setReferenceVoltage(caldb, calv)
 
         signal, atten, ovld = model.signal()
@@ -250,10 +244,10 @@ class TestStimModel():
         model.setRepCount(7)
         component = PureTone()
         component.setIntensity(34)
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
         vocal = Vocalization()
         vocal.setFile(sample.samplewav())
-        model.insertComponent(vocal, (1,0))
+        model.insertComponent(vocal, 1,0)
 
         template = model.templateDoc()
 
@@ -274,9 +268,8 @@ class TestStimModel():
         model.setRepCount(7)
         component = PureTone()
         component.setIntensity(34)
-        model.insertComponent(component, (0,0)) 
+        model.insertComponent(component, 0,0)
         nsteps = self.add_auto_param(model) 
-        model.setEditor(StimulusEditor)
 
         template = model.templateDoc()
 
@@ -288,7 +281,6 @@ class TestStimModel():
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
-        assert clone.editor.name == model.editor.name
         for i in range(len(signals0)):
             signal0, atten0 = signals0[i]
             signal1, atten1 = signals1[i]
@@ -304,9 +296,8 @@ class TestStimModel():
         model.setRepCount(7)
         component = PureTone()
         component.setIntensity(34)
-        model.insertComponent(component, (0,0)) 
+        model.insertComponent(component, 0,0)
         nsteps = self.add_auto_param(model) 
-        model.setEditor(StimulusEditor)
         model.setReorderFunc(order_function('random'), 'random')
 
         template = model.templateDoc()
@@ -319,7 +310,6 @@ class TestStimModel():
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
-        assert clone.editor.name == model.editor.name
         assert clone.reorderName == model.reorderName
         # how to check if signal sets are the same?
 
@@ -331,7 +321,6 @@ class TestStimModel():
         tcf.init_stim(model)
         model.setReferenceVoltage(100, 0.1)
         model.setRepCount(7)
-        model.setEditor(tcf.editor())
 
         template = model.templateDoc()
 
@@ -343,7 +332,6 @@ class TestStimModel():
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
-        assert clone.editor.name == model.editor.name
         assert clone.repCount() == model.repCount()
         for i in range(len(signals0)):
             print 'comparing signal', i
@@ -359,7 +347,6 @@ class TestStimModel():
         ccf.init_stim(model)
         model.setReferenceVoltage(100, 0.1)
         model.setRepCount(7)
-        model.setEditor(ccf.editor())
 
         template = model.templateDoc()
 
@@ -371,7 +358,6 @@ class TestStimModel():
 
         assert clone.stimid != model.stimid
         assert len(signals0) == len(signals1)
-        assert clone.editor.name == model.editor.name
         assert clone.repCount() == model.repCount()
         for i in range(len(signals0)):
             print 'comparing signal', i
@@ -390,7 +376,7 @@ class TestStimModel():
     def test_verify_no_ref_voltage(self):
         model = StimulusModel()
         component = PureTone()
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
         
         assert model.verify()
 
@@ -401,7 +387,7 @@ class TestStimModel():
         component = PureTone()
         component.setDuration(0.003)
         component.setRisefall(0.002)
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
         
         invalid = model.verify()
         print 'msg', invalid
@@ -412,7 +398,7 @@ class TestStimModel():
         model.setReferenceVoltage(100, 0.1)
         component = PureTone()
         component.setDuration(0.3)
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
         
         assert model.verify(windowSize=0.2)
 
@@ -421,7 +407,7 @@ class TestStimModel():
         model = StimulusModel()
         model.setReferenceVoltage(100, 0.1)
         component = PureTone()
-        model.insertComponent(component, (0,0))
+        model.insertComponent(component, 0,0)
         
         assert model.verify() == 0
 
@@ -430,24 +416,16 @@ class TestStimModel():
         component.setRisefall(0.003)
         stim_model = StimulusModel()
         stim_model.setReferenceVoltage(100, 0.1)
-        stim_model.insertComponent(component, (0,0))
+        stim_model.insertComponent(component, 0,0)
 
         ap_model = stim_model.autoParams()
-        ap_model.insertRows(0, 1)
-        
-        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
+        ap_model.insertRow(0)
+        ap_model.toggleSelection(0, component)
 
-        # default value is in ms
-        values = ['duration', 20, 8, 1]
-
-        details = component.auto_details()
-        multiplier = details[values[0]]['multiplier']
-        unit0 = details[values[0]]['label']
-        print 'multiplier', multiplier, unit0
-
-        for i, value in enumerate(values):
-            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+        # values are in seconds
+        values = ['duration', 0.020, 0.008, 0.001]
+        ap_model.setParamValue(0, parameter=values[0], start=values[1],
+                               stop=values[2], step=values[3])
 
         invalid = stim_model.verify(windowSize=0.1)
         print 'msg', invalid
@@ -460,17 +438,15 @@ class TestStimModel():
         component.setRisefall(0.005)
         stim_model = StimulusModel()
         stim_model.setReferenceVoltage(100, 0.1)
-        stim_model.insertComponent(component, (0,0))
+        stim_model.insertComponent(component, 0,0)
 
         ap_model = stim_model.autoParams()
-        ap_model.insertRows(0, 1)
+        ap_model.insertRow(0)
+        ap_model.toggleSelection(0, component)
         
-        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
-
-        values = ['duration', 20, 4, 1]
-        for i, value in enumerate(values):
-            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+        values = ['duration', 0.020, 0.004, 0.001]
+        ap_model.setParamValue(0, parameter=values[0], start=values[1],
+                               stop=values[2], step=values[3])
 
         invalid = stim_model.verify()
         print 'msg', invalid
@@ -480,59 +456,43 @@ class TestStimModel():
         component = PureTone()
         stim_model = StimulusModel()
         stim_model.setReferenceVoltage(100, 0.1)
-        stim_model.insertComponent(component, (0,0))
+        stim_model.insertComponent(component, 0,0)
 
         ap_model = stim_model.autoParams()
-        ap_model.insertRows(0, 1)
-        
-        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
+        ap_model.insertRow(0)
+        ap_model.toggleSelection(0, component)
 
         # default value is in ms
-        values = ['duration', 50, 200, 25]
-
-        for i, value in enumerate(values):
-            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
+        values = ['duration', 0.050, 0.200, 0.025]
+        ap_model.setParamValue(0, parameter=values[0], start=values[1],
+                               stop=values[2], step=values[3])
 
         invalid = stim_model.verify(windowSize=0.1)
         print 'msg', invalid
         assert invalid
 
-    def test_verify_with_bad_frequency_auto_parameter_disallowed(self):
-        component = PureTone()
-        stim_model = StimulusModel()
-        stim_model.setReferenceVoltage(100, 0.1)
-        stim_model.insertComponent(component, (0,0))
-
-        ap_model = stim_model.autoParams()
-        ap_model.insertRows(0, 1)
-        
-        selection_model = ap_model.data(ap_model.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim_model.index(0,0))
-
-        # default value is in kHz
-        values = ['frequency', 100, 300, 25]
-        for i, value in enumerate(values):
-            ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
-
-        invalid = stim_model.verify(windowSize=0.1)
-        print 'msg', invalid
-        assert invalid == 0
-        assert stim_model.containsPval('frequency', 75000)
-
     def add_auto_param(self, model):
         # adds an autoparameter to the given model
+        ptype = 'intensity'
         start = 0
         step = 1
         stop = 3
 
         parameter_model = model.autoParams()
-        parameter_model.insertRows(0,1)
-        auto_parameter = parameter_model.data(parameter_model.index(0,0))
-        auto_parameter['start'] = start
-        auto_parameter['step'] = step
-        auto_parameter['stop'] = stop
-        parameter_model.setData(parameter_model.index(0,0), auto_parameter)
+        parameter_model.insertRow(0)
+        # select first component
+        parameter_model.toggleSelection(0, model.component(0,0))
+        # set values for autoparams
+        parameter_model.setParamValue(0, start=start, step=step, 
+                                      stop=stop, parameter=ptype)
+
+        # parameter_model = model.autoParams()
+        # parameter_model.insertRows(0,1)
+        # auto_parameter = parameter_model.data(parameter_model.index(0,0))
+        # auto_parameter['start'] = start
+        # auto_parameter['step'] = step
+        # auto_parameter['stop'] = stop
+        # parameter_model.setData(parameter_model.index(0,0), auto_parameter)
 
         return len(range(start,stop,step)) + 1
 

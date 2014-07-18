@@ -37,7 +37,8 @@ class ProtocolRunner(ListAcquisitionRunner):
                                 dims=(test.traceCount()+1, test.repCount(), recording_length),
                                 mode='finite')
         # check for special condition -- replace this with a generic
-        if test.editor is not None and test.editor.name == "Tuning Curve":
+        # if test.editor is not None and test.editor.name == "Tuning Curve":
+        if test.stimType() == "Tuning Curve":
             frequencies, intensities =  test.autoParamRanges()
             self.signals.tuning_curve_started.emit(list(frequencies), list(intensities), 'tuning')
         elif test.traceCount() > 1:

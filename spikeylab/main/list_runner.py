@@ -27,7 +27,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
     def count(self):
         """Total number of all tests/traces/reps currently in this protocol"""
         total = 0
-        for test in self.protocol_model.stimulusList():
+        for test in self.protocol_model.allTests():
             total += test.traceCount()*test.loopCount()*test.repCount()
         return total
 
@@ -48,7 +48,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
 
-        stimuli = self.protocol_model.stimulusList()
+        stimuli = self.protocol_model.allTests()
 
         self.acq_thread = threading.Thread(target=self._worker, 
                                            args=(stimuli,))
@@ -91,8 +91,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     # print 'profiling....'
                     # profiler.enable()
 
+                    fs = test.samplerate()
                     if self.silence_window:
-                        fs = test.samplerate()
                         self.player.set_stim(np.array([0., 0.]), fs, 0)
                         trace_doc = {'samplerate_da':fs, 'reps': nreps, 'user_tag': test.userTag(),
                         'calv': test.calv, 'caldb':test.caldb, 'components': [{'start_s':0, 
@@ -121,7 +121,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         signal, atten = trace
-                        self.player.set_stim(signal, test.samplerate(), atten)
+                        self.player.set_stim(signal, fs, atten)
 
                         stamps = []
                         elapsed = time.time()-t0

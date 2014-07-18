@@ -35,7 +35,7 @@ class AcquisitionManager():
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
-        self.signals.samplerateChanged = self.explorer.stimulus.samplerateChanged
+        # self.signals.samplerateChanged = self.explorer.stimulus.samplerateChanged
         self.selected_calibration_index = 0
         self.current_cellid = 0
 

@@ -2,15 +2,13 @@ import os, yaml
 import uuid
 import numpy as np
 import logging
+import copy
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import impulse_response, convolve_filter
 from spikeylab.stim.types import get_stimuli_models
-from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
-
-from PyQt4 import QtCore
 
 src_dir = get_src_directory()
 # print 'src_dir', src_dir
@@ -19,23 +17,21 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
 DEFAULT_SAMPLERATE = config['default_genrate']
 MAXV = config['max_voltage']
 
-class StimulusModel(QtCore.QAbstractItemModel):
+class StimulusModel():
     """
     Model to represent any stimulus the system will present. 
     Holds all relevant parameters
     """
-    samplerateChanged = QtCore.pyqtSignal(int)
     kernelCache = {} # persistent across all existing StimulusModels
-    def __init__(self, parent=None):
-        QtCore.QAbstractItemModel.__init__(self, parent)
+    def __init__(self):
         self._nreps = 1 # reps of each unique stimulus
         self._nloops = 1 # reps of entire expanded list of autoparams
 
         # 2D array of simulus components track number x component number
         self._segments = [[]]
         # add an empty place to place components into new track
-        self._autoParams = AutoParameterModel(self)
-
+        self._autoParams = AutoParameterModel()
+        
         # reference for what voltage == what intensity
         self.calv = None
         self.caldb = None
@@ -48,16 +44,22 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         self.stimid = uuid.uuid1()
 
-        self.editor = None
         self.reorder = None
         self.reorderName = None
         self._userTag = '' # user enter tag
+        self._stimType = None
 
     def setUserTag(self, tag):
         self._userTag = tag
 
     def userTag(self):
         return self._userTag
+
+    def setStimType(self, t):
+        self._stimType = t
+
+    def stimType(self):
+        return self._stimType
 
     def setReferenceVoltage(self, caldb, calv):
         # make sure these are python types, so json encoding doesn't get throw
@@ -136,93 +138,67 @@ class StimulusModel(QtCore.QAbstractItemModel):
     def headerData(self, section, orientation, role):
         return ''
 
-    def rowCount(self, parent=QtCore.QModelIndex()):
+    def rowCount(self):
         return len(self._segments)
 
-    def columnCount(self, parent=QtCore.QModelIndex()):
-        if parent.isValid():
-            wholerow = parent.internalPointer()
+    def columnCount(self, row=None):
+        if row is not None:
+            wholerow = self._segments[row]
             return len(wholerow)
         else:
             column_lengths = [len(x) for x in self._segments]
             return max(column_lengths)
 
     def columnCountForRow(self, row):
-        return len(self._segments[row])
+        try:
+            return len(self._segments[row])
+        except IndexError:
+            return None
 
     def componentCount(self):
         return sum([self.columnCountForRow(x) for x in range(self.rowCount())])
 
-    def data(self, index, role=QtCore.Qt.UserRole):
-        if not index.isValid():
+    def component(self, row, col):
+        try:
+            comp = self._segments[row][col]
+        except:
+            # invalid index
+            print 'Invalid index'
             return None
-        if role == QtCore.Qt.DisplayRole:
-            component = self._segments[index.row()][index.column()]
-            return component.__class__.__name__
-        elif role == QtCore.Qt.SizeHintRole:
-            component = self._segments[index.row()][index.column()]
-            return component.duration() #* PIXELS_PER_MS * 1000
-        elif role >= QtCore.Qt.UserRole:  #return the whole python object
-            if len(self._segments[index.row()]) > index.column():
-                component = self._segments[index.row()][index.column()]
-                if role == QtCore.Qt.UserRole +1:
-                    # filters out any qt classes to make serializable
-                    component.clean()
-            else:
-                component = None
-            return component
+        return comp
 
     def printStimulus(self):
         """This is for purposes of documenting what was presented"""
 
-    def index(self, row, col, parent=QtCore.QModelIndex()):
-        # need to convert row, col to correct element, however still have heirarchy?
-        if row < len(self._segments) and col < len(self._segments[row]):
-            return self.createIndex(row, col, self._segments[row][col])
-        else:
-            return QtCore.QModelIndex()
+    def insertComponent(self, comp, row=0, col=0):
+        if row > len(self._segments) -1:
+            self.insertEmptyRow()
+        self._segments[row].insert(col, comp)
 
-    def parentForRow(self, row):
-        # get the whole row
-        return self.createIndex(row, -1, self._segments[row])
+        if comp.__class__.__name__ == 'Vocalization':
+            if comp.samplerate() is not None:
+                # update calibration
+                self.updateCalibration()
 
-    def parent(self, index):
-        if index.column() == -1:
-            return QtCore.QModelIndex()
-        else:
-            return self.createIndex(index.row(), -1, self._segments[index.row()])
+    def overwriteComponent(self, comp, row, col):
+        self._segments[row][col] = comp
 
-    def insertComponent(self, comp, rowcol=(0,0)):
-        self._segments[rowcol[0]].insert(rowcol[1], None)
-        self.setData(self.index(rowcol[0],rowcol[1]), comp)
+        if comp.__class__.__name__ == 'Vocalization':
+            if comp.samplerate() is not None:
+                # update calibration
+                self.updateCalibration()
 
-        if len(self._segments[-1]) > 0:
-            self.beginInsertRows(QtCore.QModelIndex(), len(self._segments), len(self._segments))
-            self._segments.append([])
-            self.endInsertRows()
+    def insertEmptyRow(self):
+        self._segments.append([])
 
+    def removeLastRow(self):
+        self._segments.pop(len(self._segments)-1)
 
-    def removeComponent(self, rowcol):
-        parent = self.parentForRow(rowcol[0])
+    def removeComponent(self, row,col):
+        self._segments[row].pop(col)
 
-        self.beginRemoveRows(parent, rowcol[1], rowcol[1])
-        parent.internalPointer().pop(rowcol[1])
-        self.endRemoveRows()
-
-        if len(self._segments[-2]) == 0:
-            self.beginRemoveRows(QtCore.QModelIndex(), len(self._segments)-1, len(self._segments)-1)
+        if self.columnCountForRow(-2) == 0:
             self._segments.pop(len(self._segments)-1)
-            self.endRemoveRows()
-
-        # this could have affected the sample of this stimulus
-        self.samplerateChanged.emit(self.samplerate())
-
-
-    def insertItem(self, index, item):
-        self.insertComponent(item, (index.row(), index.column()))
-
-    def removeItem(self, index):
-        self.removeComponent((index.row(), index.column()))
 
     def clearComponents(self):
         self._segments = [[]]
@@ -235,21 +211,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         for row, rowcontents in enumerate(self._segments):
             if component in rowcontents:
                 column = rowcontents.index(component)
-                return self.index(row, column)
-
-    def setData(self, index, value, role=QtCore.Qt.UserRole):
-        # item must already exist at provided index
-        self._segments[index.row()][index.column()] = value
-
-        if value.__class__.__name__ == 'Vocalization':
-            if value.samplerate() is not None:
-                # print 'emitting samplerate change', value.samplerate()
-                # update calibration
-                self.updateCalibration()
-        self.samplerateChanged.emit(self.samplerate())
-
-    def flags(self, index):
-        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+                return (row, column)
 
     def traceCount(self):
         """The number of unique stimului for this stimulus object"""
@@ -337,16 +299,13 @@ class StimulusModel(QtCore.QAbstractItemModel):
                 idx = (itrace / x) % len(step_set)
                 varylist[itrace][iset] = step_set[idx]
             x = x*len(step_set)
-            
         # now create the stimuli according to steps
         # go through list of modifing parameters, update this stimulus,
         # and then save current state to list
         stim_list = []
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
-                comp_inds = self._autoParams.selection(param)
-                for index in comp_inds:
-                    component = self.data(index, QtCore.Qt.UserRole)
+                for component in param['selection']:
                     # print 'setting component parameter {} to {}'.format(param['parameter'], varylist[itrace][ip])
                     component.set(param['parameter'], np.around(varylist[itrace][ip],4))
             # copy of current stim state, or go ahead and turn it into a signal?
@@ -355,11 +314,8 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
         # now reset the components to start value
         for ip, param in enumerate(params):
-            comp_inds = self._autoParams.selection(param)
-            for index in comp_inds:
-                component = self.data(index, QtCore.Qt.UserRole)
+            for component in param['selection']:
                 component.set(param['parameter'], varylist[0][ip])
-
 
         return stim_list
 
@@ -374,6 +330,7 @@ class StimulusModel(QtCore.QAbstractItemModel):
         """
         logger = logging.getLogger('main')
         logger.debug("Generating Expanded Stimulus")
+
         # 3 loops now -- could be done in one...
         signals = self.expandFunction(self.signal)
         docs = self.expandFunction(self.doc)
@@ -398,8 +355,18 @@ class StimulusModel(QtCore.QAbstractItemModel):
         JSON/YAML/XML template to recreate this stimulus in another session
         """
         doc = self.doc(False)
-        auto_parameter_doc = self._autoParams.doc()
-        doc['autoparameters'] = auto_parameter_doc
+
+        # go through auto-parameter selected components and use location index
+        autoparams = copy.deepcopy(self._autoParams.allData())
+        for p in autoparams:
+            selection = p['selection']
+            serializable_selection = []
+            for component in selection:
+                idx = self.indexByComponent(component)
+                serializable_selection.append(idx)
+            p['selection'] = serializable_selection
+
+        doc['autoparameters'] = autoparams
         doc['reorder'] = self.reorderName
         return doc
 
@@ -410,16 +377,25 @@ class StimulusModel(QtCore.QAbstractItemModel):
         stim.setRepCount(template['reps'])
         stim.setUserTag(template.get('user_tag', ''))
         # don't set calibration details - this should be the same application wide
-        stim.setEditor(get_stimulus_editor(template['testtype']))
         component_classes = get_stimuli_models()
         for comp_doc in template['components']:
             comp = get_component(comp_doc['stim_type'], component_classes)
             comp.loadState(comp_doc) # ignore extra dict entries
-            stim.insertComponent(comp, comp_doc['index'])
+            stim.insertComponent(comp, *comp_doc['index'])
 
-        AutoParameterModel.loadFromTemplate(template['autoparameters'], stim)
+        # revert from location based selection to component list
+        autoparams = template['autoparameters']
+        for p in autoparams:
+            selection = p['selection']
+            component_selection = []
+            for index in selection:
+                component = stim.component(*index)
+                component_selection.append(component)
+            p['selection'] = component_selection
+
+        stim.autoParams().setParameterList(autoparams)
         stim.setReorderFunc(order_function(template['reorder']), template['reorder'])
-
+        stim.setStimType(template['testtype'])
         return stim
 
     def duration(self):
@@ -508,29 +484,15 @@ class StimulusModel(QtCore.QAbstractItemModel):
 
                 doc_list.append(info)
 
-        if self.editor is not None:
-            testtype = self.editor.name
-        else:
-            testtype = None
         return {'samplerate_da':samplerate, 'reps': self._nreps, 'user_tag': self._userTag,
                 'calv': self.calv, 'caldb':self.caldb, 'components': doc_list,
-                'testtype': testtype}
+                'testtype': self._stimType}
 
-    def stimType(self):
-        if self.editor is not None:
-            return self.editor.name
-
-    def setEditor(self, editor):
-        self.editor = editor
-
-    def showEditor(self):
-        if self.editor is not None:
-            editor = self.editor()
-            editor.setStimulusModel(self)
-            return editor
-        else:
-            logger = logging.getLogger('main')
-            logger.warning('Erm, no editor available :(')
+    def updateComponentStartVals(self):
+        """Go through selected components for each auto parameter and set the start value"""
+        for param in self._autoParams.allData():
+            for component in param['selection']:
+                component.set(param['parameter'], param['start'])
 
     def containsPval(self, paramName, value):
         """Returns true is the given value is in the auto parameters"""
@@ -577,6 +539,12 @@ class StimulusModel(QtCore.QAbstractItemModel):
         if self.caldb is None or self.calv is None:
             return "Test reference voltage not set"
         return 0
+
+    def __eq__(self, other):
+        if self.stimid == other.stimid:
+            return True
+        else:
+            return False
 
 
 def get_component(comp_name, class_list):
