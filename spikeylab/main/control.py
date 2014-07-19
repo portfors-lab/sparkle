@@ -99,7 +99,6 @@ class MainWindow(ControlWindow):
         self.acqmodel.signals.tuning_curve_started.connect(self.spawnTuningCurve)
         self.acqmodel.signals.tuning_curve_response.connect(self.displayTuningCurve)
         self.acqmodel.signals.over_voltage.connect(self.reportOverV)
-        # self.ui.protocolView.samplerateChanged.connect(self.updateGenerationRate)
 
         self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
@@ -534,11 +533,11 @@ class MainWindow(ControlWindow):
             self.ui.psth.appendData(bins, repnum)
             
     def displayStim(self, signal, fs):
+        self.ui.aosrSpnbx.setValue(fs/self.fscale)
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
         spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
         # print 'spec max', np.amax(spectrum)
-        
         timevals = np.arange(len(signal)).astype(float)/fs
         if self.activeOperation == 'calibration':
             if self.ui.plotDock.current() == 'calexp':
