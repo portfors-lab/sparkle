@@ -295,14 +295,15 @@ class TestMainUI():
                 qtbot.type(param_item)
                 QtTest.QTest.qWait(PAUSE)
 
+        qtbot.keypress('enter')
         QtGui.QApplication.processEvents()
         QtTest.QTest.qWait(PAUSE)
         # just use default tone settings, for now at least
         qtbot.click(stimEditor.ui.okBtn)
 
         # extract StimulusModel
-        stim = self.form.acqmodel.protocol_model().data(self.form.acqmodel.protocol_model().index(0,0), QtCore.Qt.UserRole)
-        assert stim.autoParams().rowCount() == len(autoparams)
+        stim = self.form.acqmodel.protocol_model().test(0)
+        assert stim.autoParams().nrows() == len(autoparams)
         
         # set the window size to stim len + 100ms
         qtbot.doubleclick(self.form.ui.windowszSpnbx)

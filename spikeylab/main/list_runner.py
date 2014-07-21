@@ -29,7 +29,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
     def count(self):
         """Total number of all tests/traces/reps currently in this protocol"""
         total = 0
-        for test in self.protocol_model.stimulusList():
+        for test in self.protocol_model.allTests():
             total += test.traceCount()*test.loopCount()*test.repCount()
         return total
 
@@ -50,7 +50,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
 
-        stimuli = self.protocol_model.stimulusList()
+        stimuli = self.protocol_model.allTests()
 
         # self.acq_thread = threading.Thread(target=self._worker, 
         #                                    args=(stimuli,))
@@ -145,6 +145,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     print 'Go for reals'
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         signal, atten = trace
+
                         # t1 = time.time()
                         self.player.set_stim(signal, fs, atten)
                         # print 'player start time {:.3f}'.format(time.time()-t1)

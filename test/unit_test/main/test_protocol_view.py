@@ -2,7 +2,8 @@ from nose.tools import assert_equal
 
 import cPickle
 
-from spikeylab.main.protocol_model import ProtocolTabelModel, ProtocolView
+from spikeylab.main.protocol_model import ProtocolTabelModel
+from spikeylab.main.qprotocol import QProtocolTabelModel, ProtocolView
 from spikeylab.stim.stimulusmodel import StimulusModel
 
 from spikeylab.stim.factory import BuilderFactory
@@ -25,8 +26,9 @@ class TestProtocolView():
 
     def test_drop_new_stim(self):
         view = ProtocolView()
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         view.setModel(model)
         builder_label = DragLabel(BuilderFactory)
         
@@ -42,16 +44,17 @@ class TestProtocolView():
 
     def test_drop_prev_stim(self):
         view = ProtocolView()
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         view.setModel(model)
         stim = StimulusModel()
-        model.insertNewTest(stim, 0)
+        model.insertTest(stim, 0)
 
         model.removeTest(0)
 
         mimeData = QtCore.QMimeData()
-        mimeData.setData("application/x-protocol", cPickle.dumps(stim.stimid))
+        mimeData.setData("application/x-protocol", cPickle.dumps(stim))
         drop = QtGui.QDropEvent(QtCore.QPoint(), QtCore.Qt.MoveAction,
                                 mimeData, QtCore.Qt.RightButton, 
                                 QtCore.Qt.NoModifier)
@@ -65,11 +68,12 @@ class TestProtocolView():
 
     def test_draw_view(self):
         view = ProtocolView()
-        model = ProtocolTabelModel()
-        model.setReferenceVoltage(100, 0.1)
+        tests = ProtocolTabelModel()
+        tests.setReferenceVoltage(100, 0.1)
+        model = QProtocolTabelModel(tests)
         view.setModel(model)
         stim = StimulusModel()
-        model.insertNewTest(stim, 0)
+        model.insertTest(stim, 0)
 
         view.show()
         # this will still work even if no test... 

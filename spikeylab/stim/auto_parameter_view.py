@@ -9,6 +9,7 @@ class AddLabel(object):
 class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     """List View which holds parameter widgets"""
     hintRequested = QtCore.pyqtSignal(str)
+    parameterChanged = QtCore.pyqtSignal(list)
     def __init__(self):
         QtGui.QTableView.__init__(self)
         AbstractDragView.__init__(self)
@@ -21,11 +22,11 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(100,100,255))
         self.setPalette(palette)
 
-    def edit(self, index, trigger, event):
-        "Sets editing widget for selected list item"
-        if index.isValid():
-            self.model().updateSelectionModel(index)
-        return super(AutoParameterTableView, self).edit(index, trigger, event)
+    # def edit(self, index, trigger, event):
+    #     "Sets editing widget for selected list item"
+    #     if index.isValid():
+    #         self.model().updateSelectionModel(index)
+    #     return super(AutoParameterTableView, self).edit(index, trigger, event)
 
     def grabImage(self, index):
         # grab an image of the cell we are moving
@@ -43,6 +44,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         index = self.indexAt(event.pos())
         if index.isValid():
             self.selectRow(index.row())
+            self.parameterChanged.emit(self.model().selection(index))
             self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
         super(AutoParameterTableView, self).mousePressEvent(event)
 
@@ -78,7 +80,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
                 if row == -1:
                     row = self.model().rowCount() - 1
                 self.selectRow(row)
-                self.model().updateSelectionModel(index)
+                self.parameterChanged.emit(self.model().selection(index))
 
         event.accept()
         
@@ -90,11 +92,18 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         y = self.rowHeight(0)*row
         return 0, y
 
+    def componentSelection(self, comp):
+        # current row which is selected in auto parameters to all component selection to
+        indexes = self.selectedIndexes()
+        index = indexes[0]
+        # if len(index) > 1:
+        #     print 'indexes', index
+        #     raise Exception("Multiple indexes selected per click")
+        self.model().toggleSelection(index, comp)
 
 class ComboboxDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        param = index.data(QtCore.Qt.UserRole)
-        parameter_types = index.model().selectionParameters(param)
+        parameter_types = index.model().selectedParameterTypes(index)
         editor = QtGui.QComboBox(parent)
         editor.addItems(parameter_types)
         return editor
@@ -102,8 +111,7 @@ class ComboboxDelegate(QtGui.QStyledItemDelegate):
     def setEditorData(self, editor, index):
         value = index.model().data(index, QtCore.Qt.EditRole)
         if value != '':
-            param = index.data(QtCore.Qt.UserRole)
-            parameter_types = index.model().selectionParameters(param)
+            parameter_types = index.model().selectedParameterTypes(index)
             typeidx = parameter_types.index(value)
             editor.setCurrentIndex(typeidx)
 
@@ -113,6 +121,7 @@ class ComboboxDelegate(QtGui.QStyledItemDelegate):
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
+
 
 class SmartDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):

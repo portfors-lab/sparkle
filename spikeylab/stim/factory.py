@@ -7,6 +7,7 @@ from spikeylab.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.tceditor import TuningCurveEditor
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+from spikeylab.stim import get_stimulus_editor
 
 class StimFactory():
     name = 'unknown'
@@ -22,7 +23,7 @@ class BuilderFactory(StimFactory):
         return StimulusEditor
 
     def init_stim(self, stim):
-        pass
+        stim.setStimType(StimulusEditor.name)
 
 class TCFactory(StimFactory):
     name = 'Tuning Curve' #name that shows up on drag label
@@ -40,21 +41,15 @@ class TCFactory(StimFactory):
         stim.insertComponent(tone)
 
         tuning_curve = stim.autoParams()
-        tuning_curve.insertRows(0,2)
 
-        selection_model = tuning_curve.data(tuning_curve.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim.index(0,0))
-        selection_model = tuning_curve.data(tuning_curve.index(1,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim.index(0,0))
-
-        tuning_curve.setData(tuning_curve.index(0,0), 'frequency', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,1), 1, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,2), 100, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,3), 20, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,1), 90, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)
+        tuning_curve.insertRow(0)
+        tuning_curve.toggleSelection(0, tone)
+        tuning_curve.setParamValue(0, parameter='frequency', start=1000, stop=100000, step=20000)
+        tuning_curve.insertRow(1)
+        tuning_curve.toggleSelection(1, tone)
+        tuning_curve.setParamValue(1, parameter='intensity', start=90, stop=100, step=10)
+        
+        stim.setStimType(TuningCurveEditor.name)
 
 class CCFactory(StimFactory):
     name = 'Calibration Curve'
@@ -72,21 +67,15 @@ class CCFactory(StimFactory):
         stim.insertComponent(tone)
 
         tuning_curve = stim.autoParams()
-        tuning_curve.insertRows(0,2)
 
-        selection_model = tuning_curve.data(tuning_curve.index(0,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim.index(0,0))
-        selection_model = tuning_curve.data(tuning_curve.index(1,0), role=AutoParameterModel.SelectionModelRole)
-        selection_model.select(stim.index(0,0))
+        tuning_curve.insertRow(0)
+        tuning_curve.toggleSelection(0, tone)
+        tuning_curve.setParamValue(0, parameter='frequency', start=1000, stop=100000, step=20000)
+        tuning_curve.insertRow(1)
+        tuning_curve.toggleSelection(1, tone)
+        tuning_curve.setParamValue(1, parameter='intensity', start=90, stop=100, step=10)
 
-        tuning_curve.setData(tuning_curve.index(0,0), 'frequency', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,1), 0, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,2), 100, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(0,3), 20, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,0), 'intensity', role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,1), 90, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,2), 100, role=QtCore.Qt.EditRole)
-        tuning_curve.setData(tuning_curve.index(1,3), 10, role=QtCore.Qt.EditRole)
+        stim.setStimType(TuningCurveEditor.name)
 
 class TemplateFactory(StimFactory):
     name = 'Saved'
@@ -103,6 +92,6 @@ class TemplateFactory(StimFactory):
             with open(fname, 'r') as jf:
                 state = json.load(jf)
             stim.loadFromTemplate(state, stim)
-            self._editor = stim.editor
+            self._editor = get_stimulus_editor(stim.stimType())
         else:
             return 1

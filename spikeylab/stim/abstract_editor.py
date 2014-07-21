@@ -23,12 +23,14 @@ class AbstractEditorWidget(QtGui.QWidget):
         if self.dialog.exec_():
             fname = self.dialog.selectedFiles()[0]
 
-        if fname is not None:
-            if not fname.endswith('.json'):
-                fname = fname + '.json'
-            template = self.model().templateDoc()
-            with open(fname, 'w') as jf:
-                json.dump(template, jf)
+            if fname is not None:
+                if not fname.endswith('.json'):
+                    fname = fname + '.json'
+                template = self.model().templateDoc()
+                with open(fname, 'w') as jf:
+                    json.dump(template, jf)
+        else:
+            print 'stim not saved'
 
     def model(self):
         """Return the model for which this editor is acting on """

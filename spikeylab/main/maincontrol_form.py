@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Jun 30 12:04:20 2014
+# Created: Fri Jul 18 13:29:18 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -529,7 +529,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tabGroup.setCurrentIndex(2)
+        self.tabGroup.setCurrentIndex(0)
         self.parameterStack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchSaveDlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCalibrationDlg)
@@ -637,8 +637,8 @@ class Ui_ControlWindow(object):
 from spikeylab.stim.dynamic_stacker import DynamicStackedWidget
 from spikeylab.stim.detail_widget import StimDetailWidget
 from spikeylab.stim.smart_spinbox import SmartSpinBox
+from spikeylab.main.qprotocol import ProtocolView
 from spikeylab.calibration.calibration_widget import CalibrationWidget
 from spikeylab.plotting.pyqtgraph_widgets import PSTHWidget
-from spikeylab.main.protocol_model import ProtocolView
 from spikeylab.main.plotdock import PlotDockWidget
 from spikeylab.stim.stimulus_label import StimulusLabelTable

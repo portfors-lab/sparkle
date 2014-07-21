@@ -21,7 +21,7 @@ class CalibrationRunner(ListAcquisitionRunner):
         # # insert stim component... either noise or chirp
         self.stim_components = [WhiteNoise(), FMSweep()]
         self.stimulus.insertComponent(self.stim_components[0])
-        self.protocol_model.insertNewTest(self.stimulus, 0)
+        self.protocol_model.insert(self.stimulus, 0)
 
         save_data = True
         self.group_name = 'calibration_'
@@ -84,7 +84,8 @@ class CalibrationRunner(ListAcquisitionRunner):
         if self.apply_cal:
             self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
         else:
-            self.stimulus.data(self.stimulus.index(0,0)).setIntensity(self.caldb)
+            self.stimulus.component(0,0).setIntensity(self.caldb)
+            # self.stimulus.data(self.stimulus.index(0,0)).setIntensity(self.caldb)
             self.calname = None
             self.protocol_model.setCalibration(None, None, None)
 
@@ -145,13 +146,13 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         self.stimulus = StimulusModel()
         CCFactory.init_stim(self.stimulus)
 
-        self.protocol_model.insertNewTest(self.stimulus, 0)
+        self.protocol_model.insert(self.stimulus, 0)
 
         # add in a tone at the calibration frequency and intensity
         control_stim = StimulusModel()
         self.control_tone = PureTone()
         control_stim.insertComponent(self.control_tone)
-        self.protocol_model.insertNewTest(control_stim, 0)
+        self.protocol_model.insert(control_stim, 0)
 
         save_data = True
 
@@ -178,7 +179,8 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         self.apply_cal = apply_cal
 
     def set_duration(self, dur):
-        self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
+        self.stimulus.component(0,0).setDuration(dur)
+        # self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
 
     def set_reps(self, reps):
         self.stimulus.setRepCount(reps)
@@ -204,8 +206,8 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
 
-        self.control_tone.setDuration(self.stimulus.data(self.stimulus.index(0,0)).duration())
-        self.control_tone.setRisefall(self.stimulus.data(self.stimulus.index(0,0)).risefall())
+        self.control_tone.setDuration(self.stimulus.component(0,0).duration())
+        self.control_tone.setRisefall(self.stimulus.component(0,0).risefall())
         
         logger = logging.getLogger('main')
         logger.debug('setting calibration frequency'.format(self.calf))

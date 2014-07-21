@@ -69,18 +69,15 @@ class ControlWindow(QtGui.QMainWindow):
             logger = logging.getLogger('main')
             logger.exception("Error Initializing main GUI")
 
-        # connect item models to trash can signal
-        self.ui.stimulusChoices.trash().itemTrashed.connect(self.ui.protocolView.purgeModel)
-
     def verifyInputs(self, mode):
         if mode == 'chart':
             if self.ui.aisrSpnbx.value()*self.fscale > 100000:
                 QtGui.QMessageBox.warning(self, "Invalid Input", "Recording samplerate cannot exceed 100kHz for chart acquisition")
                 return False
         elif mode is not None:
-            if (1./self.ui.reprateSpnbx.value()) < self.ui.windowszSpnbx.value()*self.tscale + 0.05:
-                QtGui.QMessageBox.warning(self, "Invalid Input", "A minimum of 50ms time between repetitions required. Current interval {}, required {}".format((1./self.ui.reprateSpnbx.value()), self.ui.windowszSpnbx.value()*self.tscale + 0.05))
-                return False
+            # if (1./self.ui.reprateSpnbx.value()) < self.ui.windowszSpnbx.value()*self.tscale + 0.05:
+            #     QtGui.QMessageBox.warning(self, "Invalid Input", "A minimum of 50ms time between repetitions required. Current interval {}, required {}".format((1./self.ui.reprateSpnbx.value()), self.ui.windowszSpnbx.value()*self.tscale + 0.05))
+            #     return False
             if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
                 # each widget should be in charge of putting its own stimulus together
                 stimIndex = self.ui.exploreStimTypeCmbbx.currentIndex()

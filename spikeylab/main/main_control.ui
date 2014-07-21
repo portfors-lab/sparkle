@@ -63,7 +63,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -1021,7 +1021,7 @@
   <customwidget>
    <class>ProtocolView</class>
    <extends>QTableView</extends>
-   <header>spikeylab.main.protocol_model</header>
+   <header>spikeylab.main.qprotocol</header>
   </customwidget>
   <customwidget>
    <class>StimulusLabelTable</class>

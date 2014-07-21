@@ -44,7 +44,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         return signal, overload
 
     def set_current_stim_parameter(self, param, val):
-        component = self.stimulus.data(self.stimulus.index(0,0))
+        component = self.stimulus.component(0,0)
         component.set(param, val)
 
     def current_signal(self):

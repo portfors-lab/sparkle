@@ -19,6 +19,8 @@ from spikeylab.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.main.wait_widget import WaitWidget
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.qsignals import ProtocolSignals
+from spikeylab.main.qprotocol import QProtocolTabelModel
+from spikeylab.stim.qstimulus import QStimulusModel
 
 from controlwindow import ControlWindow
 
@@ -81,8 +83,8 @@ class MainWindow(ControlWindow):
         self.display.thresholdUpdated.connect(self.updateThresh)
         self.display.colormapChanged.connect(self.relayCMapChange)
 
-        self.ui.protocolView.setModel(self.acqmodel.protocol_model())
-        self.ui.calibrationWidget.setCurveModel(self.acqmodel.calibration_stimulus('tone'))
+        self.ui.protocolView.setModel(QProtocolTabelModel(self.acqmodel.protocol_model()))
+        self.ui.calibrationWidget.setCurveModel(QStimulusModel(self.acqmodel.calibration_stimulus('tone')))
 
         self.signals = ProtocolSignals()
         self.signals.samplerateChanged = self.acqmodel.explorer.stimulus.samplerateChanged
@@ -540,11 +542,11 @@ class MainWindow(ControlWindow):
             self.ui.psth.appendData(bins, repnum)
             
     def displayStim(self, signal, fs):
+        self.ui.aosrSpnbx.setValue(fs/self.fscale)
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
         spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
         # print 'spec max', np.amax(spectrum)
-        
         timevals = np.arange(len(signal)).astype(float)/fs
         if self.activeOperation == 'calibration':
             if self.ui.plotDock.current() == 'calexp':
