@@ -12,10 +12,10 @@ from spikeylab.tools import spikestats
 from spikeylab.stim.types import get_stimuli_models
 
 class SearchRunner(AbstractAcquisitionRunner):
-    def __init__(self, signals):
+    def __init__(self, *args):
         self.stimulus = StimulusModel()
 
-        AbstractAcquisitionRunner.__init__(self, signals)
+        AbstractAcquisitionRunner.__init__(self, *args)
 
         self.player = FinitePlayer()
         self.save_data = False
@@ -39,7 +39,6 @@ class SearchRunner(AbstractAcquisitionRunner):
         self.stimulus.insertComponent(self._explore_stimuli[index])
         signal, atten, overload = self.stimulus.signal()
         self.player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
-        # self.signals.over_voltage.emit(overload)
         self.down_the_shute('over_voltage', (overload,))
         return signal, overload
 
@@ -89,18 +88,17 @@ class SearchRunner(AbstractAcquisitionRunner):
             spike_rates = []
             self.irep = 0
             times = self.aitimes
+            self.player.start_timer(self.reprate)
             stim = self.player.start()
             while not self._halt:
                 # print 'explore worker'
-                self.interval_wait()
+                # self.interval_wait()
 
                 response = self.player.run()
                 stamp = time.time()
 
-                # self.signals.response_collected.emit(times, response)
                 self.down_the_shute('response_collected', (times, response))
                 if stim is not None:
-                    # self.signals.stim_generated.emit(stim, self.player.get_samplerate())
                     self.down_the_shute('stim_generated', (stim, self.player.get_samplerate()))
                 # process response; calculate spike times
                 spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
@@ -112,7 +110,6 @@ class SearchRunner(AbstractAcquisitionRunner):
                 spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-                # self.signals.spikes_found.emit(response_bins, self.irep)
                 self.down_the_shute('spikes_found', (response_bins, self.irep))
 
                 #lock it so we don't get a times mismatch
@@ -132,7 +129,6 @@ class SearchRunner(AbstractAcquisitionRunner):
                     avg_latency = sum(spike_latencies)/len(spike_latencies)
                     avg_rate = sum(spike_rates)/len(spike_rates)
                     self.irep = 0
-                    # self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
                     self.down_the_shute('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
                     
                     spike_counts = []
@@ -140,6 +136,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                     spike_rates = []
 
             self.player.stop()
+            self.player.stop_timer()
             if self.save_data:
                 self.datafile.trim(self.current_dataset_name)
 

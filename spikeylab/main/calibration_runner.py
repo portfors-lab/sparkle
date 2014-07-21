@@ -12,8 +12,8 @@ from spikeylab.tools.util import next_str_num
 from spikeylab.tools.systools import get_src_directory
 
 class CalibrationRunner(ListAcquisitionRunner):
-    def __init__(self, signals):
-        ListAcquisitionRunner.__init__(self, signals)
+    def __init__(self, *args):
+        ListAcquisitionRunner.__init__(self, *args)
 
         self.player = FinitePlayer()
 
@@ -96,7 +96,7 @@ class CalibrationRunner(ListAcquisitionRunner):
         self.datafile.append(self.current_dataset_name, response, 
                              nested_name='signal')
 
-        self.signals.response_collected.emit(self.aitimes, response)
+        self.down_the_shute('response_collected', (self.aitimes, response))
         
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
@@ -136,8 +136,8 @@ with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
 USE_RMS = config['use_rms']
 
 class CalibrationCurveRunner(ListAcquisitionRunner):
-    def __init__(self, signals):
-        ListAcquisitionRunner.__init__(self, signals)
+    def __init__(self, *args):
+        ListAcquisitionRunner.__init__(self, *args)
 
         self.group_name = 'calibration_test_'
 
@@ -259,7 +259,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                                  nested_name='vamp')
             self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
-            self.signals.calibration_response_collected.emit(spectrum, freq, vamp)
+            self.down_the_shute('response_collected', (self.aitimes, response))
         
         # calculate resultant dB and emit
         if USE_FFT:
@@ -277,7 +277,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
                 # dB according to microphone sensitivity
                 resultdb = calc_db(mean_peak)
-                self.signals.average_response.emit(f, db, resultdb)
+                self.down_the_shute('average_response', (f, db, resultdb))
 
     def process_calibration(self, save=True):
         """processes the data gathered in a calibration run (does not work if multiple

@@ -5,8 +5,8 @@ import numpy as np
 
 class AbstractAcquisitionRunner():
     """Holds state information for an experimental session"""
-    def __init__(self, signals):
-        self.signals = signals
+    def __init__(self, queues):
+        self.queues = queues
         self.threshold = None
 
         self.player = None
@@ -16,6 +16,7 @@ class AbstractAcquisitionRunner():
         self.caldb = 100
         self.calv = 0.1
         self.calf = 20000
+        self.reprate = 2
 
         self.binsz = 0.005
 
@@ -106,5 +107,5 @@ class AbstractAcquisitionRunner():
 
     def down_the_shute(self, name, *args):
         # self.signals[name][0].send(*args)
-        self.signals[name][0].put(*args)
-        self.signals[name][1].set()
+        self.queues[name][0].put(*args)
+        self.queues[name][1].set()

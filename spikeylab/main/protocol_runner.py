@@ -6,8 +6,8 @@ from spikeylab.tools.util import next_str_num
 from spikeylab.acq.players import FinitePlayer
 
 class ProtocolRunner(ListAcquisitionRunner):
-    def __init__(self, signals):
-        ListAcquisitionRunner.__init__(self, signals)
+    def __init__(self, *args):
+        ListAcquisitionRunner.__init__(self, *args)
 
         save_data = True
         self.group_name = 'segment_'
@@ -40,10 +40,8 @@ class ProtocolRunner(ListAcquisitionRunner):
         # if test.editor is not None and test.editor.name == "Tuning Curve":
         if test.stimType() == "Tuning Curve":
             frequencies, intensities =  test.autoParamRanges()
-            # self.signals.tuning_curve_started.emit(list(frequencies), list(intensities), 'tuning')
             self.down_the_shute('tuning_curve_started', (list(frequencies), list(intensities), 'tuning'))
         elif test.traceCount() > 1:
-            # self.signals.tuning_curve_started.emit(range(test.traceCount()), [0], 'generic')
             self.down_the_shute('tuning_curve_started', (range(test.traceCount()), [0], 'generic'))
     
     def _process_response(self, response, trace_info, irep):
@@ -56,7 +54,6 @@ class ProtocolRunner(ListAcquisitionRunner):
             spike_latencies = self.spike_latencies
             spike_rates = self.spike_rates
 
-        # self.signals.response_collected.emit(self.aitimes, response)
         self.down_the_shute('response_collected', (self.aitimes, response))
 
         # process response; calculate spike times
@@ -69,7 +66,6 @@ class ProtocolRunner(ListAcquisitionRunner):
         spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
         response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-        # self.signals.spikes_found.emit(response_bins, irep)
         self.down_the_shute('spikes_found', (response_bins, irep))
 
         self.datafile.append(self.current_dataset_name, response)
@@ -79,15 +75,12 @@ class ProtocolRunner(ListAcquisitionRunner):
             avg_count = total_spikes/len(spike_counts)
             avg_latency = sum(spike_latencies)/len(spike_latencies)
             avg_rate = sum(spike_rates)/len(spike_rates)
-            # self.signals.trace_finished.emit(total_spikes, avg_count, avg_latency, avg_rate)
             self.down_the_shute('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
             if trace_info['testtype'] == 'Tuning Curve':
                 f = trace_info['components'][0]['frequency']
                 db = trace_info['components'][0]['intensity']
-                # self.signals.tuning_curve_response.emit(f, db, avg_count)
                 self.down_the_shute('tuning_curve_response', (f, db, avg_count))
             else:
-                # self.signals.tuning_curve_response.emit(self.trace_counter, 0, avg_count)
                 self.down_the_shute('tuning_curve_response', (self.trace_counter, 0, avg_count))
             self.trace_counter +=1
 

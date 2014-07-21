@@ -87,7 +87,6 @@ class MainWindow(ControlWindow):
         self.ui.calibrationWidget.setCurveModel(QStimulusModel(self.acqmodel.calibration_stimulus('tone')))
 
         self.signals = ProtocolSignals()
-        self.signals.samplerateChanged = self.acqmodel.explorer.stimulus.samplerateChanged
         self.signals.response_collected.connect(self.displayResponse)
         self.signals.calibration_response_collected.connect(self.displayCalibrationResponse)
         self.signals.average_response.connect(self.displayDbResult)
@@ -99,7 +98,6 @@ class MainWindow(ControlWindow):
         self.signals.current_trace.connect(self.reportProgress)
         self.signals.current_rep.connect(self.reportRep)
         self.signals.group_finished.connect(self.onGroupDone)
-        self.signals.samplerateChanged.connect(self.updateGenerationRate)
         self.signals.tuning_curve_started.connect(self.spawnTuningCurve)
         self.signals.tuning_curve_response.connect(self.displayTuningCurve)
         self.signals.over_voltage.connect(self.reportOverV)
@@ -369,9 +367,6 @@ class MainWindow(ControlWindow):
 
     def updateChart(self, stimData, responseData):
         self.scrollplot.appendData(stimData, responseData)
-
-    def updateGenerationRate(self, fs):
-        self.ui.aosrSpnbx.setValue(fs/self.fscale)
 
     def runExplore(self):
         self.ui.startBtn.setText('Update')

@@ -1,6 +1,7 @@
 import logging
 import threading
 import multiprocessing as multip
+import Queue
 
 from spikeylab.tools.util import create_unique_path
 from spikeylab.data.dataobjects import AcquisitionData
@@ -43,7 +44,8 @@ class AcquisitionManager():
         recieved_signals = {}
         for p in pipelist:
             # recvr, sendr = multip.Pipe()
-            sendr = multip.Queue()
+            # sendr = multip.Queue()
+            sendr = Queue.Queue()
             recvr = sendr
             waker = threading.Event()
             signals[p] = (sendr, waker)
@@ -99,12 +101,14 @@ class AcquisitionManager():
                 self.pipe_threads.append(t)
 
     def _listen(self, pipe, func, wake_event):
+        getcount = 0
         while not self._halt_threads:
             # if pipe.poll():
             if not pipe.empty():
                 # data = pipe.recv()
                 data = pipe.get()
                 func(*data)
+                getcount += 1
             wake_event.clear()
             wake_event.wait()
 
@@ -118,6 +122,11 @@ class AcquisitionManager():
 
     def stop_listening(self):
         self._halt_threads = True
+        # wake them up so that they can die
+        for name, pipe_waker in self.recieved_signals.items():
+            p, wake_event = pipe_waker
+            wake_event.set()
+
 
     def set_pipe_callback(self, name, func):
         self.acquisition_hooks[name] = func

@@ -294,6 +294,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
+        self.acqmodel.stop_listening()
         self.saveInputs(self.inputsFilename)
 
         # save GUI size

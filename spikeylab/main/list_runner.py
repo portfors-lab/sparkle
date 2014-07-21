@@ -12,10 +12,10 @@ import cProfile
 class Broken(Exception): pass
 
 class ListAcquisitionRunner(AbstractAcquisitionRunner):
-    def __init__(self, signals):
+    def __init__(self, *args):
         self.protocol_model = ProtocolTabelModel()
 
-        AbstractAcquisitionRunner.__init__(self, signals)
+        AbstractAcquisitionRunner.__init__(self, *args)
         self.silence_window = False
 
     def set_calibration(self, attenuations, freqs, frange, calname):
@@ -52,10 +52,10 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
         stimuli = self.protocol_model.allTests()
 
-        # self.acq_thread = threading.Thread(target=self._worker, 
+        self.acq_thread = threading.Thread(target=self._worker, 
+                                           args=(stimuli,), )
+        # self.acq_thread = multip.Process(target=self._worker, 
         #                                    args=(stimuli,))
-        self.acq_thread = multip.Process(target=self._worker, 
-                                           args=(stimuli,))
 
         # go through and get any overloads, this is not efficient since
         # I am going to be calculating the signals again later, so stash?
@@ -106,43 +106,29 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         'stim_type':'Control Silence', 'duration':0}],
                         'testtype': 'control', 'overloaded_attenuation':0}
                         itrace = -1
-                        # self.signals.stim_generated.emit(np.array([0]), fs)
-                        # self.signals.current_trace.emit(itest,itrace,trace_doc)
-                        # self.signals.over_voltage.emit(0)
-                        # self.signals['stim_generated'][0].send((np.array([0]), fs))
-                        # self.signals['current_trace'][0].send((itest,itrace,trace_doc))
-                        # self.signals['over_voltage'][0].send((0,))
-                        print 'piping silence stuff'
                         self.down_the_shute('stim_generated', (np.array([0]), fs))
                         self.down_the_shute('current_trace', (itest,itrace,trace_doc))
                         self.down_the_shute('over_voltage', (0,))
                 
-                        print 'recording silence...'
                         stamps = []
                         self.player.start()
                         for irep in range(nreps):
                             self.interval_wait()  
                             if self._halt:
                                 raise Broken
-                            print 'ready'
                             response = self.player.run()
                             stamps.append(time.time())
-                            print 'oh the silence'
-                            # self._process_response(response, trace_doc, irep)
+                            self._process_response(response, trace_doc, irep)
                             
-                            print 'size of response', response.nbytes
-                            self.down_the_shute('response_collected', (self.aitimes, response))
-                            # self.signals.current_rep.emit(irep)
-                            # self.signals['current_rep'][0].send((irep,))
+                            # print 'size of response len: {} bytes: {}'.format(len(response), response.nbytes)
+                            # self.down_the_shute('response_collected', (self.aitimes, response))
                             self.down_the_shute('current_rep', (irep,))
-                            print 'resetting'
                             self.player.reset()
 
                         trace_doc['time_stamps'] = stamps
                         self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
 
-                    print 'Go for reals'
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         signal, atten = trace
 
@@ -171,29 +157,15 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             timecollection.append(looplen)
 
                             stamps.append(time.time())
-                            # self._process_response(response, trace_doc, irep)
-                            # self.signals.response_collected.emit(self.aitimes, response)
-                            # self.signals['response_collected'][0].send((self.aitimes, response))
-                            # self.down_the_shute('response_collected', (self.aitimes, response))
-                            self.down_the_shute('response_collected', (self.aitimes,response))
+                            self._process_response(response, trace_doc, irep)
                             if irep == 0:
-                            #     # do this after collection so plots match details
-                                # self.signals.stim_generated.emit(signal, test.samplerate())
-                                # self.signals.current_trace.emit(itest,itrace,trace_doc)
-                                # self.signals.over_voltage.emit(over)
-
-                                # self.signals['stim_generated'][0].send((signal, fs))
-                                # self.signals['current_trace'][0].send((itest,itrace,trace_doc))
-                                # self.signals['over_voltage'][0].send((over,))
                                 self.down_the_shute('stim_generated', (signal, fs))
                                 self.down_the_shute('current_trace', (itest,itrace,trace_doc))
                                 self.down_the_shute('over_voltage', (over,))
-                            # self.signals.current_rep.emit(irep)
-                            # self.signals['current_rep'][0].send((irep,))
                             self.down_the_shute('current_rep', (irep,))
                             
-                        # trace_doc['time_stamps'] = stamps
-                        # self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                        trace_doc['time_stamps'] = stamps
+                        self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
 
                     # log as well, test type and user tag will be the same across traces
@@ -207,8 +179,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
             self.player.stop_timer()
             self.datafile.close_data(self.current_dataset_name)
-            # self.signals.group_finished.emit(self._halt)
-            # self.signals['group_finished'][0].send((self._halt,))
             self.down_the_shute('group_finished', (self._halt,))
             gc.enable()
         except:
