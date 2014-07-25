@@ -44,10 +44,11 @@ class AcquisitionManager():
         recieved_signals = {}
         for p in pipelist:
             # recvr, sendr = multip.Pipe()
-            # sendr = multip.Queue()
-            sendr = Queue.Queue()
+            sendr = multip.Queue()
+            # sendr = Queue.Queue()
             recvr = sendr
-            waker = threading.Event()
+            # waker = threading.Event()
+            waker = multip.Event()
             signals[p] = (sendr, waker)
             recieved_signals[p] = (recvr, waker)
         self.signals = signals
@@ -95,20 +96,16 @@ class AcquisitionManager():
         for name, pipe_waker in self.recieved_signals.items():
             p, wake_event = pipe_waker
             if name in self.acquisition_hooks:
-                print '{} hook established'.format(name)
+                # print '{} hook established'.format(name)
                 t = threading.Thread(target=self._listen, args=(p, self.acquisition_hooks[name], wake_event))
                 t.daemon = True
                 self.pipe_threads.append(t)
 
-    def _listen(self, pipe, func, wake_event):
-        getcount = 0
+    def _listen(self, q, func, wake_event):
         while not self._halt_threads:
-            # if pipe.poll():
-            if not pipe.empty():
-                # data = pipe.recv()
-                data = pipe.get()
+            if not q.empty():
+                data = q.get()
                 func(*data)
-                getcount += 1
             wake_event.clear()
             wake_event.wait()
 
@@ -505,3 +502,6 @@ class AcquisitionManager():
                 return True
         else:
             return True
+
+    def clear_child_process(self):
+        self.protocoler.clear_child_process()

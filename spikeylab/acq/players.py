@@ -1,5 +1,7 @@
 import os, yaml
 import threading
+import multiprocessing as multip
+
 import platform
 if platform.system() == 'Windows':
     import win32com.client
@@ -22,8 +24,10 @@ class AbstractPlayerBase():
 
         self.aitask = None
 
-        self.tone_lock = threading.Lock()
-        self.daq_lock = threading.Lock()
+        # self.tone_lock = threading.Lock()
+        # self.daq_lock = threading.Lock()
+        self.tone_lock = multip.Lock()
+        self.daq_lock = multip.Lock()
 
         self.aitask = None
         self.aotask = None

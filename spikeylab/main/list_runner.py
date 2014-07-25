@@ -7,6 +7,7 @@ import numpy as np
 
 from spikeylab.main.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.main.protocol_model import ProtocolTabelModel
+from spikeylab.main.acqprocess import getscience, AcqProcess
 import cProfile
 
 class Broken(Exception): pass
@@ -52,11 +53,23 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
         stimuli = self.protocol_model.allTests()
 
-        self.acq_thread = threading.Thread(target=self._worker, 
-                                           args=(stimuli,), )
-        # self.acq_thread = multip.Process(target=self._worker, 
-        #                                    args=(stimuli,))
+        # self.acq_thread = threading.Thread(target=self._worker, 
+        #                                    args=(stimuli,), )
+        # self.acq_thread = multip.Process(target=getscience, kwargs={"queues":self.queues, 
+        #                                                             "stimuli":stimuli,
+        #                                                             "reprate":self.reprate,
+        #                                                             "aifs":self.aisr,
+        #                                                             "aidur":self.aitimes[-1],
+        #                                                             "aichan":self.aichan,
+        #                                                             "aochan":self.aochan})
 
+        self.acq_thread = AcqProcess(queues=self.queues, 
+                                     stimuli=stimuli, 
+                                     reprate=self.reprate, 
+                                     aifs=self.aisr,
+                                     aidur=self.aitimes[-1], 
+                                     aichan=self.aichan, 
+                                     aochan=self.aochan)
         # go through and get any overloads, this is not efficient since
         # I am going to be calculating the signals again later, so stash?
         self._cached_stims = [stim.expandedStim() for stim in stimuli]
@@ -65,7 +78,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
     def run(self):
         self.acq_thread.start()
-
         return self.acq_thread
 
     def _initialize_run(self):
@@ -188,6 +200,9 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         tc = np.array(timecollection[1:])
         print 'deadlines missed {}/{}'.format(len(tc[tc > (1./self.reprate)+0.005]), len(tc))
 
+    def clear_child_process(self):
+        del self.acq_thread
+        
     def _initialize_test(self, test):
         raise NotImplementedError
 

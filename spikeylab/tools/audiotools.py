@@ -34,10 +34,15 @@ def calc_db(peak, cal_peak=None):
 def calc_spectrum(signal,rate):
     """Return the spectrum and frequency indexes for real-valued input signal"""
     npts = len(signal)
-    npts = npts - (npts % 2) # for odd length signals
+    # padto = 1<<(npts-1).bit_length()
+    padto = 60000
+    print 'length of signal {}, pad to {}'.format(npts, padto)
+
+    signal = np.hstack((signal, np.zeros(padto)))
+    npts = padto
+    # npts = npts - (npts % 2) # for odd length signals
     freq = np.arange((npts/2)+1)/(npts/rate)
     #print('freq len ', len(freq))
-
     sp = np.fft.rfft(signal)/npts
     #print('sp len ', len(sp))
     return freq, abs(sp)

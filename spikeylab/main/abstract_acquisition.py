@@ -50,6 +50,7 @@ class AbstractAcquisitionRunner():
             self.player.set_aidur(kwargs['acqtime'])
         if 'aisr' in kwargs:
             self.player.set_aisr(kwargs['aisr'])
+            self.aisr=kwargs['aisr']
         if 'aisr' in kwargs or 'acqtime' in kwargs:
             t = kwargs.get('acqtime', self.player.get_aidur())
             npoints = t*float(kwargs.get('aisr', self.player.get_aisr()))
