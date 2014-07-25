@@ -304,6 +304,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.setSelectionModel(selmodel)
         for comp in components:
             selmodel.selectComponent(comp)
+            self.viewport().update()
 
     def cursor(self, pos):
         index = self.splitAt(pos)
@@ -360,6 +361,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             self.setEnabled(True)
             self.model().updateComponentStartVals()
         else:
+            self.model().purgeAutoSelected()
             self.setSelectionModel(ComponentSelectionModel(self.model()))
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 

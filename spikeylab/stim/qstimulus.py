@@ -130,7 +130,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         self._stim.removeComponent(index.row(), index.column())
         # self.endRemoveRows()
 
-        if self.columnCountForRow(-2) == 0:
+        if self.columnCountForRow(-2) == 0 and self.columnCountForRow(-1) == 0:
             self.beginRemoveRows(QtCore.QModelIndex(), self._stim.rowCount()-1, self._stim.rowCount()-1)
             self._stim.removeLastRow()
             self.endRemoveRows()
@@ -208,3 +208,10 @@ class QStimulusModel(QtCore.QAbstractItemModel):
 
     def verify(self):
         return self._stim.verify()
+
+    def purgeAutoSelected(self):
+        self._stim.purgeAutoSelected()
+
+    def cleanComponents(self):
+        #removes any cache Qt classes in underlying data
+        self._stim.cleanComponents()

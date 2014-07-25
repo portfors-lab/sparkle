@@ -61,7 +61,7 @@ class AutoParameterModel():
         for comp in components:
             alldetails = comp.auto_details()
             if not param_type in alldetails:
-                self.hintRequested.emit('INCOMPATABLE COMPONENTS FOR PARAMETER TYPE {}'.format(param_type))
+                # self.hintRequested.emit('INCOMPATABLE COMPONENTS FOR PARAMETER TYPE {}'.format(param_type))
                 return None
             details = alldetails[param_type]
             matching_details.append(details[detail_field])

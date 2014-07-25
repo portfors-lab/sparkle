@@ -192,12 +192,13 @@ class StimulusModel():
         self._segments.append([])
 
     def removeLastRow(self):
+        print 'remove last row'
         self._segments.pop(len(self._segments)-1)
 
     def removeComponent(self, row,col):
         self._segments[row].pop(col)
 
-        if self.columnCountForRow(-2) == 0:
+        if self.columnCountForRow(-2) == 0 and self.columnCountForRow(-1) == 0:
             self._segments.pop(len(self._segments)-1)
 
     def clearComponents(self):
@@ -254,6 +255,21 @@ class StimulusModel():
                 if component.__class__.__name__ == stimtype:
                     return True
         return False
+
+    def purgeAutoSelected(self):
+        params = self._autoParams.allData()
+        for p in params:
+            comps_to_remove = []
+            for comp in p['selection']:
+                if self.indexByComponent(comp) is None:
+                    comps_to_remove.append(comp)
+            for orphaned in comps_to_remove:
+                p['selection'].remove(orphaned)
+
+    def cleanComponents(self):
+        for row in self._segments:
+            for comp in row:
+                comp.clean()
 
     def autoParamRanges(self, params=None):
         """Return the expanded auto parameters, individually"""

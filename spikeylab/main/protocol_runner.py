@@ -93,4 +93,4 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.datafile.set_metadata(self.current_dataset_name, info)
 
     def clear(self):
-        self.protocol_model.clearTests()
+        self.protocol_model.clear()

@@ -71,6 +71,8 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.hintTxedt.setText(message)
 
     def closeEvent(self, event):
+        self.ui.trackview.model().cleanComponents()
+        self.ui.trackview.model().purgeAutoSelected()
         msg = self.ui.trackview.model().verify()
         if msg:
             answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
