@@ -102,7 +102,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         'stim_type':'Control Silence', 'duration':0}],
                         'testtype': 'control', 'overloaded_attenuation':0}
                         itrace = -1
-                        self.putnotify('stim_generated', (np.array([0]), fs))
+                        self.putnotify('stim_generated', (np.array([0, 0]), fs))
                         self.putnotify('current_trace', (itest,itrace,trace_doc))
                         self.putnotify('over_voltage', (0,))
                 

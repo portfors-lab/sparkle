@@ -104,9 +104,10 @@ def test_calc_spectrum_even_len_signal():
     y = np.sin(2*np.pi*fq*t/fs)
 
     frequencies, spectrum = tools.calc_spectrum(y, fs)
+    # print len(spectrum) , len(y)/2 + 1 , len(frequencies)
 
-    assert len(spectrum) == len(y)/2 + 1 == len(frequencies)
-    assert frequencies[-1] == fs/2
+    assert len(spectrum) == len(frequencies)
+    assert np.around(frequencies[-1]) == fs/2
     assert (abs(spectrum - max(spectrum))).argmin() == (abs(frequencies - fq)).argmin()
 
 def test_calc_spectrum_odd_len_signal():
@@ -120,7 +121,7 @@ def test_calc_spectrum_odd_len_signal():
     print 'max freq control', max(freq_control)
     frequencies, spectrum = tools.calc_spectrum(y, fs)
     print 'frequencies', frequencies[0:10], frequencies[-10:], len(frequencies)
-    assert len(spectrum) == len(y)/2 + 1 == len(frequencies)
+    assert len(spectrum) == len(frequencies)
     print "Nyquist", frequencies[-1], fs/2
     assert np.around(frequencies[-1]) == fs/2
     peak_idx = (abs(spectrum - max(spectrum))).argmin()

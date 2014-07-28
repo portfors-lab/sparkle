@@ -39,7 +39,7 @@ def calc_spectrum(signal,rate):
     nzeros = padto - npts
 
     signal = np.hstack((signal, np.zeros(nzeros)))
-    npts = len(signal)
+    npts = padto
 
     freq = np.arange((npts/2)+1)/(npts/rate)
     #print('freq len ', len(freq))

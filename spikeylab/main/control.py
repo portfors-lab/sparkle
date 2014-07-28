@@ -541,7 +541,7 @@ class MainWindow(ControlWindow):
         self.ui.aosrSpnbx.setValue(fs/self.fscale)
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
-        # spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
+        spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
         # print 'spec max', np.amax(spectrum)
         timevals = np.arange(len(signal)).astype(float)/fs
         if self.activeOperation == 'calibration':
@@ -554,8 +554,8 @@ class MainWindow(ControlWindow):
         else:
             if self.ui.plotDock.current() == 'standard':
                 pass
-                # self.display.updateSignal(timevals, signal)
-                # self.display.updateFft(freq, spectrum)
+                self.display.updateSignal(timevals, signal)
+                self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(signal, fs)
             elif self.ui.plotDock.current() == 'calexp':
                 self.extendedDisplay.updateSignal(timevals, signal, plot='stim')

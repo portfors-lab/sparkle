@@ -109,7 +109,7 @@ class FMSweep(AbstractStimulusComponent):
             signal = signal*1.414213562373
 
         if self._risefall > 0:
-            rf_npts = self._risefall * fs
+            rf_npts = int(self._risefall * fs)
             wnd = hann(rf_npts*2) # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]

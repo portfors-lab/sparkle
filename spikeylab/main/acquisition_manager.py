@@ -85,8 +85,6 @@ class AcquisitionManager():
             wake_event.wait()
 
     def start_listening(self):
-        # clear any previous listers?
-        print "I'm listening"
         self._qlisten()
         self._halt_threads = False
         for t in self.queue_threads:

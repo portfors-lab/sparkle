@@ -49,7 +49,7 @@ class TestDAQPlayers():
 
         assert len(stim)/4 == len(response0)
         if not self.devmode:
-            assert np.round(np.amax(response0), 2) == np.amax(stim)
+            assert np.round(np.amax(response0), 1) == np.amax(stim)
 
     def test_finite_acquisition_short_out_duration(self):
         fs = 500000
@@ -58,7 +58,7 @@ class TestDAQPlayers():
 
         assert len(stim) == len(response0)/4
         if not self.devmode:
-            assert np.round(np.amax(response0), 2) == np.amax(stim)
+            assert np.round(np.amax(response0), 1) == np.amax(stim)
 
     def test_finite_acquisition_out_slow_fs_and_short_duration(self):
         fs = 500000
@@ -77,7 +77,7 @@ class TestDAQPlayers():
 
         assert len(stim)/2 == len(response0)
         if not self.devmode:
-            assert np.round(np.amax(response0), 2) == np.amax(stim)
+            assert np.round(np.amax(response0), 1) == np.amax(stim)
 
     def test_finite_acquisition_in_slow_fs_and_short_duration(self):
         fs = 500000
@@ -136,14 +136,14 @@ class TestDAQPlayers():
         player.set_aisr(infs)
         player.set_aichan(DEVNAME+"/ai0")
         player.set_aochan(DEVNAME+"/ao0")
-        player.start_timer(10)
+        # player.start_timer(10)
         player.start()
 
         response0 = player.run()
         player.reset()
         response1 = player.run()
         player.stop()
-        player.stop_timer()
+        # player.stop_timer()
 
         return tone, response0
 
