@@ -157,12 +157,15 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         return True
 
     def removeItem(self, index):
-        self.model.removeRow(index.row())
+        self.removeRows(index.row(), 1)
 
     def insertItem(self, index, item):
         """For reorder only, item must already have selectionModel in
         for its id"""
-        self.model.insertRow(index.row())
+        row = index.row()
+        self.beginInsertRows(QtCore.QModelIndex(), row, row)
+        self.model.insertRow(row)
+        self.endInsertRows()
         self.model.overwriteParam(index.row(), item)
 
     def flags(self, index):
