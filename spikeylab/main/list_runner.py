@@ -1,14 +1,12 @@
 import time
 import threading
-import multiprocessing as multip
 import logging
 import gc
 import numpy as np
 
 from spikeylab.main.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.main.protocol_model import ProtocolTabelModel
-from spikeylab.main.acqprocess import getscience, AcqProcess
-import cProfile
+# import cProfile
 
 class Broken(Exception): pass
 
@@ -53,23 +51,9 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
         stimuli = self.protocol_model.allTests()
 
-        # self.acq_thread = threading.Thread(target=self._worker, 
-        #                                    args=(stimuli,), )
-        # self.acq_thread = multip.Process(target=getscience, kwargs={"queues":self.queues, 
-        #                                                             "stimuli":stimuli,
-        #                                                             "reprate":self.reprate,
-        #                                                             "aifs":self.aisr,
-        #                                                             "aidur":self.aitimes[-1],
-        #                                                             "aichan":self.aichan,
-        #                                                             "aochan":self.aochan})
+        self.acq_thread = threading.Thread(target=self._worker, 
+                                           args=(stimuli,), )
 
-        self.acq_thread = AcqProcess(queues=self.queues, 
-                                     stimuli=stimuli, 
-                                     reprate=self.reprate, 
-                                     aifs=self.aisr,
-                                     aidur=self.aitimes[-1], 
-                                     aichan=self.aichan, 
-                                     aochan=self.aochan)
         # go through and get any overloads, this is not efficient since
         # I am going to be calculating the signals again later, so stash?
         self._cached_stims = [stim.expandedStim() for stim in stimuli]
@@ -91,14 +75,14 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         try:
             logger = logging.getLogger('main')
             gc.disable()
-            self.player.start_timer(self.reprate)
+            # self.player.start_timer(self.reprate)
             try:
                 for itest, test in enumerate(stimuli):
                     # pull out signal from stim model
                     test.setReferenceVoltage(self.caldb, self.calv)
 
                     self._initialize_test(test)
-                    profiler = cProfile.Profile()
+                    # profiler = cProfile.Profile()
                     # print 'profiling....'
                     # profiler.enable()
                     traces, docs, overs = self._cached_stims[itest]
@@ -107,8 +91,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     # profiler.dump_stats('stim_gen_cal.profile')
                     nreps = test.repCount()
                     self.nreps = test.repCount() # not sure I like this
-                    print 'profiling....'
-                    profiler.enable()
+                    # print 'profiling....'
+                    # profiler.enable()
 
                     fs = test.samplerate()
                     if self.silence_window:
@@ -118,9 +102,9 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         'stim_type':'Control Silence', 'duration':0}],
                         'testtype': 'control', 'overloaded_attenuation':0}
                         itrace = -1
-                        self.down_the_shute('stim_generated', (np.array([0]), fs))
-                        self.down_the_shute('current_trace', (itest,itrace,trace_doc))
-                        self.down_the_shute('over_voltage', (0,))
+                        self.putnotify('stim_generated', (np.array([0]), fs))
+                        self.putnotify('current_trace', (itest,itrace,trace_doc))
+                        self.putnotify('over_voltage', (0,))
                 
                         stamps = []
                         self.player.start()
@@ -133,8 +117,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             self._process_response(response, trace_doc, irep)
                             
                             # print 'size of response len: {} bytes: {}'.format(len(response), response.nbytes)
-                            # self.down_the_shute('response_collected', (self.aitimes, response))
-                            self.down_the_shute('current_rep', (irep,))
+                            self.putnotify('current_rep', (irep,))
                             self.player.reset()
 
                         trace_doc['time_stamps'] = stamps
@@ -151,11 +134,11 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         stamps = []
                         self.player.start()
                         for irep in range(nreps):
-                            # self.interval_wait()
+                            self.interval_wait()
                             if self._halt:
                                 raise Broken
                             elapsed = time.time()-t0
-                            print 'down time {:.3f}'.format(elapsed)
+                            print 'down time {:.3f}'.format(elapsed),
                             # timecollection.append(elapsed)
                             response = self.player.run()
                             s = time.time()
@@ -163,18 +146,17 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             t0=time.time()
                             looplen = t0 - oldt
                             self.player.reset()
-                            time.sleep(0.001)
                             # print 'reset time {:.3f}'.format(time.time()-s)
                             print 'loop duration {:.3f}'.format(looplen)
                             timecollection.append(looplen)
+                            stamps.append(s)
 
-                            stamps.append(time.time())
                             self._process_response(response, trace_doc, irep)
                             if irep == 0:
-                                self.down_the_shute('stim_generated', (signal, fs))
-                                self.down_the_shute('current_trace', (itest,itrace,trace_doc))
-                                self.down_the_shute('over_voltage', (over,))
-                            self.down_the_shute('current_rep', (irep,))
+                                self.putnotify('stim_generated', (signal, fs))
+                                self.putnotify('current_trace', (itest,itrace,trace_doc))
+                                self.putnotify('over_voltage', (over,))
+                            self.putnotify('current_rep', (irep,))
                             
                         trace_doc['time_stamps'] = stamps
                         self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
@@ -182,23 +164,23 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
                     # log as well, test type and user tag will be the same across traces
                     # logger.info("Finished test type: {}, tag: {}".format(trace_doc['testtype'], trace_doc['user_tag']))
-                    profiler.disable()
-                    print 'finished profiling'
-                    profiler.dump_stats('test_run.profile')
+                    # profiler.disable()
+                    # print 'finished profiling'
+                    # profiler.dump_stats('test_run.profile')
             except Broken:
                 # save some abortion message
                 self.player.stop()
 
-            self.player.stop_timer()
+            # self.player.stop_timer()
             self.datafile.close_data(self.current_dataset_name)
-            self.down_the_shute('group_finished', (self._halt,))
+            self.putnotify('group_finished', (self._halt,))
             gc.enable()
         except:
             logger.exception("Uncaught Exception from Acq Thread: ")
 
         # print 'all elapsed', timecollection
         tc = np.array(timecollection[1:])
-        print 'deadlines missed {}/{}'.format(len(tc[tc > (1./self.reprate)+0.005]), len(tc))
+        print 'deadlines missed {}/{}'.format(len(tc[tc > (1./self.reprate)+0.01]), len(tc))
 
     def clear_child_process(self):
         del self.acq_thread

@@ -241,7 +241,7 @@ class FinitePlayer(AbstractPlayerBase):
 
         response_npts = int(self.aitime*self.aisr)
         try:
-            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts, trigsrc=self.trigger_dest)
+            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)#, trigsrc=self.trigger_dest)
             new_gen = self.reset_generation(u"ai/StartTrigger")
         except:
             print u'ERROR! TERMINATE!'

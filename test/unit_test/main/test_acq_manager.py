@@ -223,7 +223,7 @@ class TestAcquisitionModel():
 
         hfile.close()
 
-    @unittest.skip("Grrrrrr")
+    # @unittest.skip("Grrrrrr")
     def test_protocol_timing(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
@@ -235,6 +235,42 @@ class TestAcquisitionModel():
         manager.protocol_model().insert(stim_model,0)
 
         interval = 250
+        manager.setup_protocol(interval)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+        stims = json.loads(test.attrs['stim'])
+
+        # aggregate all time intervals
+        intervals = []
+        for stim in stims:
+            intervals.extend(stim['time_stamps'])
+        intervals = np.diff(intervals)
+        intervals = abs(intervals*1000 - interval)
+        print 'all intervals', intervals.shape, intervals
+
+        # ms tolerance, not as good as I would like
+        assert all(map(lambda x: x < 10, intervals))
+
+        hfile.close()
+
+    def test_protocol_timing_vocal_batlab(self):
+        winsz = 0.280 #seconds
+        acq_rate = 100000
+        nreps = 4
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        with open(sample.batlabvocal(), 'r') as jf:
+            state = json.load(jf)
+
+        stim_model = StimulusModel.loadFromTemplate(state)
+        manager.protocol_model().insert(stim_model,0)
+
+        interval = 333
         manager.setup_protocol(interval)
         t = manager.run_protocol()
         t.join()

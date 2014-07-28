@@ -241,9 +241,9 @@ class Vocalization(AbstractStimulusComponent):
 
         #truncate to nears ms
         duration = float(len(wavdata))/sr
-        print 'duration {}, desired {}'.format(duration, np.trunc(duration*1000)/1000)
+        # print 'duration {}, desired {}'.format(duration, np.trunc(duration*1000)/1000)
         desired_npts = int((np.trunc(duration*1000)/1000)*sr)
-        print 'npts. desired', len(wavdata), desired_npts
+        # print 'npts. desired', len(wavdata), desired_npts
         wavdata = wavdata[:desired_npts]
 
         if USE_RMS:

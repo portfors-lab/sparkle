@@ -96,7 +96,7 @@ class CalibrationRunner(ListAcquisitionRunner):
         self.datafile.append(self.current_dataset_name, response, 
                              nested_name='signal')
 
-        self.down_the_shute('response_collected', (self.aitimes, response))
+        self.putnotify('response_collected', (self.aitimes, response))
         
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
@@ -259,7 +259,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                                  nested_name='vamp')
             self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
-            self.down_the_shute('response_collected', (self.aitimes, response))
+            self.putnotify('response_collected', (self.aitimes, response))
         
         # calculate resultant dB and emit
         if USE_FFT:
@@ -277,7 +277,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
                 # dB according to microphone sensitivity
                 resultdb = calc_db(mean_peak)
-                self.down_the_shute('average_response', (f, db, resultdb))
+                self.putnotify('average_response', (f, db, resultdb))
 
     def process_calibration(self, save=True):
         """processes the data gathered in a calibration run (does not work if multiple

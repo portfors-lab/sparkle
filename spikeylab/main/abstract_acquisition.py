@@ -106,7 +106,7 @@ class AbstractAcquisitionRunner():
             # self.signals.warning.emit("WARNING: PROVIDED INTERVAL EXCEEDED, ELAPSED TIME %d" % (elapsed))
         self.last_tick = now
 
-    def down_the_shute(self, name, *args):
+    def putnotify(self, name, *args):
         # self.signals[name][0].send(*args)
         self.queues[name][0].put(*args)
         self.queues[name][1].set()

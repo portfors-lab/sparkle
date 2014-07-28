@@ -39,7 +39,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         self.stimulus.insertComponent(self._explore_stimuli[index])
         signal, atten, overload = self.stimulus.signal()
         self.player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
-        self.down_the_shute('over_voltage', (overload,))
+        self.putnotify('over_voltage', (overload,))
         return signal, overload
 
     def set_current_stim_parameter(self, param, val):
@@ -97,9 +97,9 @@ class SearchRunner(AbstractAcquisitionRunner):
                 response = self.player.run()
                 stamp = time.time()
 
-                self.down_the_shute('response_collected', (times, response))
+                self.putnotify('response_collected', (times, response))
                 if stim is not None:
-                    self.down_the_shute('stim_generated', (stim, self.player.get_samplerate()))
+                    self.putnotify('stim_generated', (stim, self.player.get_samplerate()))
                 # process response; calculate spike times
                 spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
                 spike_counts.append(len(spike_times))
@@ -110,7 +110,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                 spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-                self.down_the_shute('spikes_found', (response_bins, self.irep))
+                self.putnotify('spikes_found', (response_bins, self.irep))
 
                 #lock it so we don't get a times mismatch
                 self.player_lock.acquire()
@@ -129,7 +129,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                     avg_latency = sum(spike_latencies)/len(spike_latencies)
                     avg_rate = sum(spike_rates)/len(spike_rates)
                     self.irep = 0
-                    self.down_the_shute('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
+                    self.putnotify('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
                     
                     spike_counts = []
                     spike_latencies = []

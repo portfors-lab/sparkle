@@ -20,3 +20,6 @@ def test_template():
 
 def badinputs():
     return os.path.join(sampledir(), 'controlinputs.json')
+
+def batlabvocal():
+    return os.path.join(sampledir(), 'batlabvocal.json')

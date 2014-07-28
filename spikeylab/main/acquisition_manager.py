@@ -1,6 +1,5 @@
 import logging
 import threading
-import multiprocessing as multip
 import Queue
 
 from spikeylab.tools.util import create_unique_path
@@ -22,8 +21,7 @@ class AcquisitionManager():
         self.savefolder = None
         self.savename = None
 
-        # self.signals = ProtocolSignals()
-        pipelist = ['curve_finished',
+        queue_names = ['curve_finished',
                 'ncollected',
                 'warning',
                 'response_collected',
@@ -42,37 +40,14 @@ class AcquisitionManager():
                 'over_voltage',]
         signals = {}
         recieved_signals = {}
-        for p in pipelist:
-            # recvr, sendr = multip.Pipe()
-            sendr = multip.Queue()
-            # sendr = Queue.Queue()
-            recvr = sendr
-            # waker = threading.Event()
-            waker = multip.Event()
-            signals[p] = (sendr, waker)
-            recieved_signals[p] = (recvr, waker)
+        for qname in queue_names:
+            q = Queue.Queue()
+            waker = threading.Event()
+            signals[qname] = (q, waker)
+            recieved_signals[qname] = (q, waker)
         self.signals = signals
         self.recieved_signals = recieved_signals
         self.acquisition_hooks = {}
-        # self.signals = {
-                # 'curve_finished' : Pipe(),
-                # 'ncollected' : Pipe(),
-                # 'warning' : Pipe(),
-                # 'response_collected' : Pipe(),
-                # 'average_response' : Pipe(),
-                # 'calibration_response_collected' : Pipe(),
-                # 'current_trace' : Pipe(),
-                # 'current_rep' : Pipe(),
-                # 'spikes_found' : Pipe(),
-                # 'stim_generated' : Pipe(),
-                # 'threshold_updated' : Pipe(),
-                # 'trace_finished' : Pipe(),
-                # 'group_finished' : Pipe(),
-                # 'calibration_file_changed': Pipe(),
-                # 'tuning_curve_started' : Pipe(),
-                # 'tuning_curve_response': Pipe(),
-                # 'over_voltage': Pipe(),
-        # }
 
         self.explorer = SearchRunner(self.signals)
         self.protocoler =  ProtocolRunner(self.signals)
@@ -90,16 +65,16 @@ class AcquisitionManager():
         self.selected_calibration_index = 0
         self.current_cellid = 0
 
-    def _pipe_listen(self):
+    def _qlisten(self):
         # create listener threads for all acquisition hooks
-        self.pipe_threads = []
-        for name, pipe_waker in self.recieved_signals.items():
-            p, wake_event = pipe_waker
+        self.queue_threads = []
+        for name, queue_waker in self.recieved_signals.items():
+            q, wake_event = queue_waker
             if name in self.acquisition_hooks:
                 # print '{} hook established'.format(name)
-                t = threading.Thread(target=self._listen, args=(p, self.acquisition_hooks[name], wake_event))
+                t = threading.Thread(target=self._listen, args=(q, self.acquisition_hooks[name], wake_event))
                 t.daemon = True
-                self.pipe_threads.append(t)
+                self.queue_threads.append(t)
 
     def _listen(self, q, func, wake_event):
         while not self._halt_threads:
@@ -112,16 +87,16 @@ class AcquisitionManager():
     def start_listening(self):
         # clear any previous listers?
         print "I'm listening"
-        self._pipe_listen()
+        self._qlisten()
         self._halt_threads = False
-        for t in self.pipe_threads:
+        for t in self.queue_threads:
             t.start()
 
     def stop_listening(self):
         self._halt_threads = True
         # wake them up so that they can die
-        for name, pipe_waker in self.recieved_signals.items():
-            p, wake_event = pipe_waker
+        for name, queue_waker in self.recieved_signals.items():
+            q, wake_event = queue_waker
             wake_event.set()
 
 
@@ -502,6 +477,3 @@ class AcquisitionManager():
                 return True
         else:
             return True
-
-    def clear_child_process(self):
-        self.protocoler.clear_child_process()
