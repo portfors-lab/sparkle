@@ -572,6 +572,7 @@ class MainWindow(ControlWindow):
         self.ui.stimDetails.setDoc(stimInfo)
 
     def reportRep(self, irep):
+        # print 'Rep {}/{}'.format(self.ui.protocolProgressBar.value(), self.ui.protocolProgressBar.maximum())
         self.ui.stimDetails.setRepNum(irep)
         self.ui.protocolProgressBar.setValue(self.ui.protocolProgressBar.value() + 1)
 

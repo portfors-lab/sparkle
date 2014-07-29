@@ -232,7 +232,10 @@ class StimulusModel():
                     step = 1
                 else:
                     return 0
-            ntraces = ntraces*(len(np.arange(p['start'], p['stop'], step)) + 1)
+            nsteps = int(np.ceil( np.around(abs(p['start'] - p['stop']), 4) / step) + 1)
+            # print 'nsteps0', len(np.arange(p['start'], p['stop'], step)) + 1
+            # print 'nsteps1', nsteps
+            ntraces = ntraces*nsteps
         return ntraces
 
     def loopCount(self):
