@@ -53,7 +53,6 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
                     if abs(param['start'] - param['stop']) < param['step']:
                         return 0
                     nsteps = np.around(abs(param['start'] - param['stop']), 4) / param['step']
-                    print 'nsteps', nsteps
                     item = int(np.ceil(nsteps)+1)
                 elif param['start'] == param['stop']:
                     item = 1

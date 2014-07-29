@@ -11,14 +11,6 @@ import time
 DEBUG = False
 DEVNAME = "PCI-6259"
 
-from guppy import hpy
-
-def setUp():
-    h = hpy()
-    stats = h.heap()
-    with open('memuse.txt', 'w') as memfile:
-        memfile.write(stats.__str__())
-
 class TestDAQTasks():
     def setup(self):
         self.data = []

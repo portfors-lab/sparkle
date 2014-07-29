@@ -97,7 +97,6 @@ class AcquisitionManager():
             q, wake_event = queue_waker
             wake_event.set()
 
-
     def set_pipe_callback(self, name, func):
         self.acquisition_hooks[name] = func
 

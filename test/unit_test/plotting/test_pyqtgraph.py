@@ -23,19 +23,7 @@ PAUSE = 0.0
 
 app = None
 
-
-from guppy import hpy
-start_heap = None
-h = None
-
 def setUp():
-    global h
-    h = hpy()
-    print '\n ********MEMORY STATUS*************'
-    print 'START'
-    print h.heap()
-    h.setrelheap()
-
     global app
     app = QApplication(sys.argv)
 
@@ -44,12 +32,6 @@ def tearDown():
     global app
     app.exit(0)
     del app
-    print 'ALL WIDGETS', len(QApplication.allWidgets())
-
-    global h
-    end_heap = h.heap()
-    print 'END'
-    print end_heap
 
 def data_func(f):
     t = np.arange(200)

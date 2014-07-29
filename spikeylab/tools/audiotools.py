@@ -138,6 +138,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
     #truncate to nears ms
     duration = float(len(wavdata))/sr
     desired_npts = int((np.trunc(duration*1000)/1000)*sr)
+    # print 'LENGTH {}, DESIRED {}'.format(len(wavdata), desired_npts)
     wavdata = wavdata[:desired_npts]
     duration = len(wavdata)/sr
 
@@ -146,7 +147,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
         print 'RMS of input signal to spectrogram', rms
 
     # normalize
-    if np.max(abs(wavdata)) != 0:
+    if len(wavdata) > 0 and np.max(abs(wavdata)) != 0:
         wavdata = wavdata/np.max(abs(wavdata))
 
     if window == 'hanning':

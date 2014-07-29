@@ -1,7 +1,9 @@
 import time
+
 from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
+import threading
 
 from spikeylab.plotting.viewbox import SpikeyViewBox
 from spikeylab.plotting.raster_bounds_dlg import RasterBoundsDialog
@@ -152,10 +154,11 @@ class TraceWidget(BasePlot):
     def update_thresh(self):
         self.thresholdUpdated.emit(self.threshLine.value())
 
-from multiprocessing.pool import ThreadPool
 
 def doSpectrogram(signal, *args, **kwargs):
     spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)
+    # return audiotools.spectrogram(*args, **kwargs)
+
     signal.emit(spec, bins, f)
 
 class SpecWidget(BasePlot):
@@ -179,8 +182,6 @@ class SpecWidget(BasePlot):
         self.setLabel('bottom', 'Time', units='s')
         self.setLabel('left', 'Frequency', units='Hz')
 
-        # use a separate thread to calculate spectrogram so UI doesn't lag
-        self.pool = ThreadPool(processes=1)
         self.spec_done.connect(self.updateImage)
 
     def fromFile(self, fname):
@@ -205,14 +206,9 @@ class SpecWidget(BasePlot):
         self.imgScale = (1.,1.)
 
     def updateData(self, signal, fs):
-        self.pool.apply_async(doSpectrogram, (self.spec_done, (fs, signal),), self.specgramArgs)
-        # spec = np.random.uniform(size=(513, 4798))
-        # bins = np.arange(4798)
-        # f = np.arange(513)
-        # start = time.time()
-        # spec, f, bins, dur = audiotools.spectrogram((fs, signal), **self.specgramArgs)
-        # self.updateImage(spec, bins, f)
-        # print 'spectrogram took {:3f}'.format(time.time()-start)
+        # use a separate thread to calculate spectrogram so UI doesn't lag
+        t = threading.Thread(target=doSpectrogram, args=(self.spec_done, (fs, signal),), kwargs=self.specgramArgs)
+        t.start()
 
     def setSpecArgs(self, **kwargs):
         for key, value in kwargs.items():
@@ -263,8 +259,10 @@ class SpecWidget(BasePlot):
     def getColormap(self):
         return self.imgArgs
 
-    def closeEvent(self, event):
-        self.pool.terminate()
+    # def closeEvent(self, event):
+    #     self.pool.close()
+    #     self.pool.join()
+        # self.pool.terminate()
 
 class FFTWidget(BasePlot):
     def __init__(self, parent=None, rotation=90):

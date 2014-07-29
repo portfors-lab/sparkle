@@ -474,7 +474,6 @@ class MainWindow(ControlWindow):
 
     def displayResponse(self, times, response):
         # print 'response signal', len(response)
-        return
         if len(times) != len(response):
             print "WARNING: times and response not equal"
         if self.ui.plotDock.current() == 'standard':

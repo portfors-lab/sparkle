@@ -15,22 +15,6 @@ from nose.tools import raises
 from numpy.testing import assert_array_almost_equal, assert_almost_equal, assert_array_equal
 import matplotlib.pyplot as plt
 
-from guppy import hpy
-
-def setUp():
-    h = hpy()
-    stats = h.heap()
-    with open('memuse.txt', 'a') as memfile:
-        memfile.write('\n\n')
-        memfile.write(stats.__str__())
-
-def tearDown():
-    h = hpy()
-    stats = h.heap()
-    with open('memuse.txt', 'a') as memfile:
-        memfile.write('\n\n')
-        memfile.write(stats.__str__())
-
 def data_func(t, f):
     return 2*np.sin(2*np.pi*f*t/len(t))
 
