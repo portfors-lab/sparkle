@@ -3,7 +3,7 @@ sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 sip.setdestroyonexit(0)
 
-from spikeylab.plotting.pyqtgraph_widgets import FFTWidget, \
+from spikeylab.gui.plotting.pyqtgraph_widgets import FFTWidget, \
         TraceWidget, SpecWidget, ProgressWidget, PSTHWidget, ChartWidget, \
         SimplePlotWidget, StackedPlot
 

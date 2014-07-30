@@ -1,4 +1,4 @@
-from spikeylab.plotting.raster_bounds_dlg import RasterBoundsDialog
+from spikeylab.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 
 from PyQt4 import QtGui
 

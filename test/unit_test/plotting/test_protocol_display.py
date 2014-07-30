@@ -8,7 +8,7 @@ import time
 from PyQt4.QtGui import QApplication
 import numpy as np
 
-from spikeylab.plotting.protocoldisplay import ProtocolDisplay
+from spikeylab.gui.plotting.protocoldisplay import ProtocolDisplay
 from test.sample import samplewav
 
 PAUSE = 0

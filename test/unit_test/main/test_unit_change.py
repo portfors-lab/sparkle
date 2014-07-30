@@ -1,6 +1,6 @@
 import os
 
-from spikeylab.main.control import MainWindow
+from spikeylab.gui.control import MainWindow
 
 from PyQt4.QtGui import QApplication
 

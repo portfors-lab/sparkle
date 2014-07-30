@@ -1,7 +1,7 @@
 import os, glob
 import threading, time
 
-from spikeylab.main.control import MainWindow
+from spikeylab.gui.control import MainWindow
 from test.util import robot
 
 from nose.tools import assert_equal

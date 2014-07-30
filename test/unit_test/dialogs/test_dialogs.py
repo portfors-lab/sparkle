@@ -1,6 +1,6 @@
 import os
 
-from spikeylab.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
+from spikeylab.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
                             CalibrationDialog, CellCommentDialog, ViewSettingsDialog
 from spikeylab.data.dataobjects import AcquisitionData
 

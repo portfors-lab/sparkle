@@ -1,6 +1,6 @@
-from spikeylab.main.control import MainWindow
+from spikeylab.gui.control import MainWindow
 from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 
 import os, glob
 import json

@@ -6,8 +6,8 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
-from spikeylab.stim.types.widgets import silence_parameters
-from spikeylab.stim.types.widgets import vocal_parameters
+from spikeylab.gui.stim.components import silence_parameters
+from spikeylab.gui.stim.components import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, make_tone, audioread, audiorate
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.exceptions import FileDoesNotExistError

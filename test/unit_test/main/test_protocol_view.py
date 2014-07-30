@@ -2,12 +2,12 @@ from nose.tools import assert_equal
 
 import cPickle
 
-from spikeylab.main.protocol_model import ProtocolTabelModel
-from spikeylab.main.qprotocol import QProtocolTabelModel, ProtocolView
+from spikeylab.run.protocol_model import ProtocolTabelModel
+from spikeylab.gui.qprotocol import QProtocolTabelModel, ProtocolView
 from spikeylab.stim.stimulusmodel import StimulusModel
 
-from spikeylab.stim.factory import BuilderFactory
-from spikeylab.main.drag_label import DragLabel
+from spikeylab.gui.stim.factory import BuilderFactory
+from spikeylab.gui.drag_label import DragLabel
 
 from PyQt4 import QtCore, QtGui
 

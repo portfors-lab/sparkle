@@ -5,10 +5,10 @@ from PyQt4.QtTest import QTest
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import Qt, QTimer
 
-from spikeylab.stim.qstimulus import QStimulusModel
+from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
-from spikeylab.stim.stimulus_editor import StimulusEditor
+from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 import test.sample as sample
 

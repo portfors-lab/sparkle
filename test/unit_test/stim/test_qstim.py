@@ -2,12 +2,12 @@ from nose.tools import raises, assert_equal
 
 import numpy as np
 
-from spikeylab.stim.qstimulus import QStimulusModel
+from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, USE_RMS
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.stim.stimulus_editor import StimulusEditor
-from spikeylab.stim.factory import TCFactory, CCFactory
+from spikeylab.gui.stim.stimulus_editor import StimulusEditor
+from spikeylab.gui.stim.factory import TCFactory, CCFactory
 from spikeylab.stim.reorder import order_function
 
 from PyQt4 import QtCore, QtGui

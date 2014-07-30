@@ -3,7 +3,7 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.stim.generic_parameters import GenericParameterWidget
+from spikeylab.gui.stim.generic_parameters import GenericParameterWidget
 
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""

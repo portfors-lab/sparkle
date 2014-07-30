@@ -1,7 +1,7 @@
 from nose.tools import assert_equal
 
-from spikeylab.main.qprotocol import QProtocolTabelModel
-from spikeylab.main.protocol_model import ProtocolTabelModel
+from spikeylab.gui.qprotocol import QProtocolTabelModel
+from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone
 from PyQt4 import QtCore

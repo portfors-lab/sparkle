@@ -1,4 +1,4 @@
-from spikeylab.plotting.pyqtgraph_widgets import ChartWidget
+from spikeylab.gui.plotting.pyqtgraph_widgets import ChartWidget
 
 import time
 import numpy as np

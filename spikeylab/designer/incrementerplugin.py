@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtDesigner
 
-from spikeylab.stim.incrementer import IncrementInput
+from spikeylab.gui.stim.incrementer import IncrementInput
 
 class IncrementInputPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def __init__(self, parent=None):

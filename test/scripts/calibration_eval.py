@@ -3,7 +3,7 @@ import numpy as np
 
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from spikeylab.plotting.pyqtgraph_widgets import StackedPlot
+from spikeylab.gui.plotting.pyqtgraph_widgets import StackedPlot
 from spikeylab.tools.audiotools import tukey, impulse_response, \
                 convolve_filter, smooth, attenuation_curve, multiply_frequencies, \
                 calc_db
