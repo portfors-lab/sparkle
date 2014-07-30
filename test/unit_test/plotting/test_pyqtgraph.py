@@ -198,7 +198,7 @@ class TestProgressWidget():
     def setUp(self):
         self.xs = range(10)
         self.ys = range(3)
-        self.fig = ProgressWidget(self.xs, self.ys)
+        self.fig = ProgressWidget(self.ys, (self.xs[0], self.xs[-1]))
         self.fig.show()
 
     def tearDown(self):

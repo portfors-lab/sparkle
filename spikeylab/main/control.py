@@ -454,7 +454,7 @@ class MainWindow(ControlWindow):
 
         if self.ui.calibrationWidget.ui.applycalCkbx.isChecked() and self.ui.calibrationWidget.isToneCal():
             frequencies, intensities = self.acqmodel.calibration_range()
-            self.livecurve = ProgressWidget(list(frequencies), list(intensities))
+            self.livecurve = ProgressWidget(list(intensities), (frequencies[0], frequencies[-1]))
             self.livecurve.setLabels('calibration')
             self.ui.progressDock.setWidget(self.livecurve)
             self.ui.plotDock.switchDisplay('calibration')
@@ -514,7 +514,7 @@ class MainWindow(ControlWindow):
             raise
 
     def spawnTuningCurve(self, frequencies, intensities, plotType):
-        self.livecurve = ProgressWidget(frequencies, intensities)
+        self.livecurve = ProgressWidget(intensities, (frequencies[0], frequencies[-1]))
         self.livecurve.setLabels(plotType)
 
         # self.livecurve.show()

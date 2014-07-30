@@ -17,6 +17,10 @@ pg.setConfigOption('foreground', 'k')
 pg.setConfigOptions(useWeave=False)
 
 class BasePlot(pg.PlotWidget):
+    """Abstract class meant to be subclassed by other plot types.
+
+    Handles some common user interaction to be the same across plots
+    """
     def __init__(self, parent=None):
         super(BasePlot, self).__init__(parent, viewBox=SpikeyViewBox())
 
@@ -56,6 +60,12 @@ class BasePlot(pg.PlotWidget):
         return axisItem.label.toPlainText()
 
 class TraceWidget(BasePlot):
+    """Main plot object for experimental data
+
+    Includes : recording electrode trace
+               stimulus signal
+               spike raster
+    """
     nreps = 20
     rasterYmin = 0.5
     rasterYmax = 1
@@ -85,6 +95,15 @@ class TraceWidget(BasePlot):
         self.setLabel('bottom', 'Time', units='s')
 
     def updateData(self, axeskey, x, y):
+        """Replaces the currently displayed data
+
+        :param axeskey: name of data plot to update. Valid options are 'stim' or 'response'
+        :type axeskey: str
+        :param x: index values associated with y to plot
+        :type x: numpy.ndarray
+        :param y: values to plot at x
+        :type y: numpy.ndarray
+        """
         if axeskey == 'stim':
             self.stimPlot.setData(x,y)
             # call manually to ajust placement of signal
@@ -94,6 +113,15 @@ class TraceWidget(BasePlot):
             self.tracePlot.setData(x,y)
 
     def appendData(self, axeskey, bins, ypoints):
+        """Appends data to existing plotted data
+
+        :param axeskey: name of data plot to update. Valid options are 'stim' or 'response'
+        :type axeskey: str
+        :param bins: bins to plot a point for
+        :type bin: numpy.ndarray
+        :param ypoints: iteration number of raster, *should* match bins dimension, but really takes the first value in array for iteration number and plot row at proper place for included bins
+        :type ypoints: numpy.ndarray
+        """
         if axeskey == 'raster':
             x, y = self.rasterPlot.getData()
             # don't plot overlapping points
@@ -105,32 +133,56 @@ class TraceWidget(BasePlot):
             self.rasterPlot.setData(x, y)
 
     def clearData(self, axeskey):
-        # if axeskey == 'response':
+        """Clears the raster plot"""
         self.rasterPlot.clear()
 
     def getThreshold(self):
+        """Current Threshold value
+
+        :returns: float -- y values of the threshold line
+        """
         y = self.threshLine.value()
         return y
 
     def setThreshold(self, threshold):
+        """Sets the current threshold
+
+        :param threshold: the y value to set the threshold line at
+        :type threshold: float
+        """
         self.threshLine.setValue(threshold) 
 
     def setNreps(self, nreps):
+        """Sets the number of reps user by raster plot to determine where to place data points
+
+        :param nreps: number of iterations before the raster will be cleared
+        :type nreps: int
+        """
         self.nreps = nreps
         self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
 
     def setRasterBounds(self,lims):
+        """Sets the raster plot y-axis bounds, where in the plot the raster will appear between
+
+        :param lims: the (min, max) y-values for the raster plot to be placed between
+        :type lims: (float, float)
+        """
         self.rasterYmin = lims[0]
         self.rasterYmax = lims[1]
         self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
 
     def askRasterBounds(self):
+        """Prompt the user to provide the raster bounds with a dialog. Saves the bounds to be applied to the plot"""
         dlg = RasterBoundsDialog(bounds= (self.rasterYmin, self.rasterYmax))
         if dlg.exec_():
             bounds = dlg.values()
             self.setRasterBounds(bounds)
 
     def getRasterBounds(self):
+        """Current raster y-axis plot limits
+
+        :retruns: (float, float) -- (min, max) of raster plot bounds
+        """
         return (self.rasterYmin, self.rasterYmax)
 
     def rangeChange(self, pw, ranges):
@@ -152,16 +204,16 @@ class TraceWidget(BasePlot):
                 self.stimPlot.setData(stim_x, stim_y)
 
     def update_thresh(self):
+        """Emits a Qt signal thresholdUpdated with the current threshold value"""
         self.thresholdUpdated.emit(self.threshLine.value())
 
 
-def doSpectrogram(signal, *args, **kwargs):
+def _doSpectrogram(signal, *args, **kwargs):
     spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)
-    # return audiotools.spectrogram(*args, **kwargs)
-
     signal.emit(spec, bins, f)
 
 class SpecWidget(BasePlot):
+    """Widget for displaying a spectrogram"""
     specgramArgs = {u'nfft':512, u'window':u'hanning', u'overlap':90}
     imgArgs = {'lut':None, 'state':None, 'levels':None}
     resetImageScale = True
@@ -185,11 +237,24 @@ class SpecWidget(BasePlot):
         self.spec_done.connect(self.updateImage)
 
     def fromFile(self, fname):
+        """Displays a spectrogram of an audio file. Supported formats see :mod:`spikeylab.audiolab`
+
+        :param fname: file path of the audiofile to display
+        :type fname: str
+        :returns: float -- duration of audio recording (seconds)
+        """
         spec, f, bins, dur = audiotools.spectrogram(fname, **self.specgramArgs)
         self.updateImage(spec, bins, f)
         return dur
 
     def updateImage(self, imgdata, xaxis=None, yaxis=None):
+        """Updates the Widget image directly
+
+        :param imgdata: array of image data to displayed see :func:`pyqtgraph.ImageItem.setImage`
+        :type imgdata: numpy.ndarray
+        :param xaxis: x-axis values, length should match dimension 1 of imgdata
+        :param yaxis: y-axis values, length should match dimension 0 of imgdata
+        """
         imgdata = imgdata.T
         self.img.setImage(imgdata)
         if xaxis is not None and yaxis is not None:
@@ -202,15 +267,35 @@ class SpecWidget(BasePlot):
         self.updateColormap()
 
     def resetScale(self):
+        """Resets the scale on this image"""
+        print 'RESET SCALCE EXLABORATE DOCSTRING'
         self.img.scale(1./self.imgScale[0], 1./self.imgScale[1])
         self.imgScale = (1.,1.)
 
     def updateData(self, signal, fs):
+        """Displays a spectrogram of the provided signal
+
+        :param signal: 1-D signal of audio
+        :type signal: numpy.ndarray
+        :param fs: samplerate of signal
+        :type fs: int
+        """
         # use a separate thread to calculate spectrogram so UI doesn't lag
-        t = threading.Thread(target=doSpectrogram, args=(self.spec_done, (fs, signal),), kwargs=self.specgramArgs)
+        t = threading.Thread(target=_doSpectrogram, args=(self.spec_done, (fs, signal),), kwargs=self.specgramArgs)
         t.start()
 
     def setSpecArgs(self, **kwargs):
+        """Sets optional arguments for the spectrogram appearance.
+
+        Available options:
+        :param nfft: size of FFT window to use
+        :type nfft: int
+        :param overlap: percent overlap of window
+        :type overlap: number
+        :param window: Type of window to use, choices are hanning, hamming, blackman, bartlett or none (rectangular)
+        :type window: string
+        :param colormap: see :mod:`some pyqtgraph class`
+        """
         for key, value in kwargs.items():
             if key == 'colormap':
                 self.imgArgs['lut'] = value['lut']
@@ -221,13 +306,16 @@ class SpecWidget(BasePlot):
                 self.specgramArgs[key] = value
 
     def clearImg(self):
+        """Clears the current image"""
         self.img.setImage(np.array([[0]]))
         self.img.image = None
 
     def hasImg(self):
+        """Whether an image is currently displayed"""
         return self.img.image is not None
 
     def editColormap(self):
+        """Prompts the user with a dialog to change colormap"""
         self.editor = pg.ImageView()
         # remove the ROI and Norm buttons
         self.editor.ui.roiBtn.setVisible(False)
@@ -237,10 +325,10 @@ class SpecWidget(BasePlot):
             self.editor.getHistogramWidget().item.gradient.restoreState(self.imgArgs['state'])
             self.editor.getHistogramWidget().item.setLevels(*self.imgArgs['levels'])
         
-        self.editor.closeEvent = self.editor_close
+        self.editor.closeEvent = self._editor_close
         self.editor.show()
 
-    def editor_close(self, event):
+    def _editor_close(self, event):
         lut = self.editor.getHistogramWidget().item.getLookupTable(n=512, alpha=True)
         state = self.editor.getHistogramWidget().item.gradient.saveState()
         levels = self.editor.getHistogramWidget().item.getLevels()
@@ -252,19 +340,17 @@ class SpecWidget(BasePlot):
         self.colormapChanged.emit(self.imgArgs)
 
     def updateColormap(self):
+        """Updates the currently colormap accoring to stored settings"""
         if self.imgArgs['lut'] is not None:
             self.img.setLookupTable(self.imgArgs['lut'])
             self.img.setLevels(self.imgArgs['levels'])
 
     def getColormap(self):
+        """Returns the currently stored colormap settings"""
         return self.imgArgs
 
-    # def closeEvent(self, event):
-    #     self.pool.close()
-    #     self.pool.join()
-        # self.pool.terminate()
-
 class FFTWidget(BasePlot):
+    """Widget for ploting an FFT. Does not perform an FFT, just labels axis"""
     def __init__(self, parent=None, rotation=90):
         super(FFTWidget, self).__init__(parent)
         
@@ -280,23 +366,51 @@ class FFTWidget(BasePlot):
             self.setLabel('bottom', 'Frequency', units='Hz')
 
     def updateData(self, indexData, valueData):
+        """Plot the given data
+
+        :param indexData: index point values to match valueData array, may be plotted on x or y axis, depending on plot orientation.
+        :type indexData: numpy.ndarray
+        :param valueData: values to plot at indexData points, may be plotted on x or y axis, depending on plot orientation.
+        :type valueData: numpy.ndarray
+        """
         self.fftPlot.setData(indexData, valueData)
 
 class SimplePlotWidget(BasePlot):
-    def __init__(self, xpoints, ypoints, parent=None):
+    """Generic Plot Widget"""
+    def __init__(self, xdata, ydata, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
-        ypoints = np.squeeze(ypoints)
-        if len(ypoints.shape) > 1:
-            for row in ypoints:
-                self.appendData(xpoints, row)
+        ydata = np.squeeze(ydata)
+        if len(ydata.shape) > 1:
+            for row in ydata:
+                self.appendData(xdata, row)
         else:
-            self.pdi = self.plot(xpoints, ypoints, pen='b')
+            self.pdi = self.plot(xdata, ydata, pen='b')
         self.resize(800,500)
 
-    def appendData(self, xpoints, ypoints):
-        self.plot(xpoints, ypoints, pen='b')
+    def appendData(self, xdata, ydata):
+        """Adds the data to the plot
+
+        :param xdata: index values for data, plotted on x-axis
+        :type xdata: numpy.ndarray
+        :param ydata: value data to plot, dimension must match xdata
+        :type ydata: numpy.ndarray
+        """
+        self.plot(xdata, ydata, pen='b')
 
     def setLabels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
+        """Sets the plot labels
+
+        :param xlabel: X-axis label (do not include units)
+        :type xlabel: str
+        :param ylabel: Y-axis label (do not include units)
+        :type ylabel: str
+        :param title: Plot title
+        :type title: str
+        :param xunit: SI units for the x-axis. An appropriate label will be appended according to scale
+        :type xunit: str
+        :param yunit: SI units for the y-axis. An appropriate label will be appended according to scale
+        :type yunit: str
+        """
         if xlabel is not None:
             self.setLabel('bottom', xlabel, units=xunits)
         if ylabel is not None:
@@ -305,33 +419,56 @@ class SimplePlotWidget(BasePlot):
             self.setTitle(title)
 
 class ProgressWidget(BasePlot):
-    def __init__(self, xpoints, ypoints, parent=None):
+    """Widget for plotting sequential points, one at a time, for any number of given lines(groups)
+
+    e.g. tuning curve spike counts
+
+    :param groups: expected groups
+    :type groups: list
+    :param xlims: expected range of x-axis data (min, max), scales plot appropriately
+    :type xlims: tuple
+    """
+    def __init__(self, groups, xlims=None, parent=None):
         super(ProgressWidget, self).__init__(parent)
         self.lines = []
-        for iline in range(len(ypoints)):
+        for iline in range(len(groups)):
             # give each line a different color
-            self.lines.append(self.plot(pen=pg.intColor(iline, hues=len(ypoints))))
+            self.lines.append(self.plot(pen=pg.intColor(iline, hues=len(groups))))
 
-        self.setXlim((xpoints[0], xpoints[-1]))
-        self.xpoints = xpoints
-        self.ypoints = ypoints
+        if xlims is not None:
+            self.setXlim((xlims[0], xlims[1]))
+        self.groups = groups
 
-    def setPoint(self, x, y, value):
+    def setPoint(self, x, group, y):
+        """Sets the given point, connects line to previous point in group
+
+        :param x: x value of point
+        :type x: float
+        :param group: group which plot point for
+        :type group: float
+        :param y: y value of point
+        :type y: float
+        """
         if x == -1:
             # silence window
-            self.plot([0],[value], symbol='o')
+            self.plot([0],[y], symbol='o')
         else:
-            yindex = self.ypoints.index(y)
+            yindex = self.groups.index(group)
             xdata, ydata = self.lines[yindex].getData()
             if ydata is None:
                 xdata = [x]
-                ydata = [value]
+                ydata = [y]
             else:
                 xdata = np.append(xdata, x)
-                ydata = np.append(ydata, value)
+                ydata = np.append(ydata, y)
             self.lines[yindex].setData(xdata, ydata)
 
     def setLabels(self, name):
+        """Sets plot labels, according to predefined options
+
+        :param name: The type of plot to create labels for. Options: calibration, tuning, anything else labels for spike counts
+        :type name: str
+        """
         if name == "calibration":
             self.setWindowTitle("Calibration Curve")
             self.setTitle("Calibration Curve")
@@ -349,6 +486,7 @@ class ProgressWidget(BasePlot):
             self.setLabel('left', "Spike Count (mean)", units='')
 
 class PSTHWidget(BasePlot):
+    """Post Stimulus Time Histogram plot widget, for plotting spike counts"""
     _bins = np.arange(5)
     _counts = np.zeros((5,))
     def __init__(self, parent=None):
@@ -363,7 +501,11 @@ class PSTHWidget(BasePlot):
         self.getPlotItem().vb.setZeroWheel()
 
     def setBins(self, bins):
-        """Set the bin centers (x values)"""
+        """Sets the bin centers (x values)
+
+        :param bins: time bin centers
+        :type bins: numpy.ndarray
+        """
         self._bins = bins
         self._counts = np.zeros_like(self._bins)
         bar_width = bins[0]*1.5
@@ -371,21 +513,30 @@ class PSTHWidget(BasePlot):
         self.setXlim((0, bins[-1]))
 
     def clearData(self):
-        """Clear all histograms (keep bins)"""
+        """Clears all histograms (keeps bins)"""
         self._counts = np.zeros_like(self._bins)
         self.histo.setOpts(height=self._counts)
 
     def appendData(self, bins, repnum=None):
-        """Increase the values at bins (indexes)"""
+        """Increases the values at bins (indexes)
+
+        :param bins: bin center values to increment counts for, to increment a time bin more than once include multiple items in list with that bin center value
+        :type bins: numpy.ndarray
+        """
         # self._counts[bins] +=1 # ignores dulplicates
         for b in bins:
             self._counts[b] += 1
         self.histo.setOpts(height=self._counts)
 
     def getData(self):
+        """Gets the heights of the histogram bars
+
+        :returns: list<int> -- the count values for each bin
+        """
         return self.histo.opts['height']
 
 class ChartWidget(QtGui.QWidget):
+    """Scrolling plot widget for continuous acquistiion display"""
     def __init__(self, parent=None):
         super(ChartWidget, self).__init__(parent)
         self.tracePlot = ScrollingWidget()
@@ -411,14 +562,17 @@ class ChartWidget(QtGui.QWidget):
         self.setLayout(layout)
 
     def setSr(self, sr):
+        """Sets the samplerate of the input operation being plotted"""
         self.tracePlot.setSr(sr)
         self.stimPlot.setSr(sr)
 
     def setWindowSize(self, winsz):
+        """Sets the size of scroll window"""
         self.tracePlot.setWindowSize(winsz)
         self.stimPlot.setWindowSize(winsz)
 
     def clearData(self):
+        """Clears all data from plot"""
         self.tracePlot.clearData()
         self.stimPlot.clearData()
 
@@ -489,6 +643,7 @@ class ScrollingWidget(BasePlot):
             self.setXlim(xlim)
 
 class StackedPlot(QtGui.QWidget):
+    """Stack a set of plots that may be flipped through using SimplePlotWidget"""
     def __init__(self, parent=None):
         super(StackedPlot, self).__init__(parent)
 
@@ -515,12 +670,28 @@ class StackedPlot(QtGui.QWidget):
         # self.plots = []
 
     def addPlot(self, xdata, ydata, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
+        """Adds a new plot for the given set of data and/or labels, Generates a SimplePlotWidget
+
+        :param xdata: index values for data, plotted on x-axis
+        :type xdata: numpy.ndarray
+        :param ydata: value data to plot, dimension must match xdata
+        :type ydata: numpy.ndarray
+        """
         p = SimplePlotWidget(xdata, ydata)
         p.setLabels(xlabel, ylabel, title, xunits, yunits)
         # self.plots.append(p)
         self.stacker.addWidget(p)
 
     def addSpectrogram(self, ydata, fs, title=None):
+        """Adds a new spectorgram plot for the given image. Generates a SpecWidget
+
+        :param ydata: 2-D array of the image to display
+        :type ydata: numpy.ndarray
+        :param fs: the samplerate of the signal in the image, used to set time/ frequency scale
+        :type fs: int
+        :param title: Plot title
+        :type title: str
+        """
         p = SpecWidget()
         p.updateData(ydata, fs)
         if title is not None:
@@ -528,15 +699,19 @@ class StackedPlot(QtGui.QWidget):
         self.stacker.addWidget(p)
 
     def nextPlot(self):
+        """Moves the displayed plot to the next one"""
         if self.stacker.currentIndex() < self.stacker.count():
             self.stacker.setCurrentIndex(self.stacker.currentIndex()+1)
 
     def prevPlot(self):
+        """Moves the displayed plot to the previous one"""
         if self.stacker.currentIndex() > 0:
             self.stacker.setCurrentIndex(self.stacker.currentIndex()-1)
 
     def firstPlot(self):
+        """Jumps display plot to the first one"""
         self.stacker.setCurrentIndex(0)
 
     def lastPlot(self):
+        """Jumps display plot to the last one"""
         self.stacker.setCurrentIndex(self.stacker.count()-1)
