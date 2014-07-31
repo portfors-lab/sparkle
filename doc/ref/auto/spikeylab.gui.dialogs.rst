@@ -4,7 +4,7 @@ dialogs Package
 :mod:`dialogs` Package
 ----------------------
 
-.. automodule:: spikeylab.dialogs
+.. automodule:: spikeylab.gui.dialogs
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +12,7 @@ dialogs Package
 :mod:`caldialog_form` Module
 ----------------------------
 
-.. automodule:: spikeylab.dialogs.caldialog_form
+.. automodule:: spikeylab.gui.dialogs.caldialog_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,7 +20,7 @@ dialogs Package
 :mod:`calibration_dlg` Module
 -----------------------------
 
-.. automodule:: spikeylab.dialogs.calibration_dlg
+.. automodule:: spikeylab.gui.dialogs.calibration_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -28,7 +28,7 @@ dialogs Package
 :mod:`comment_dlg` Module
 -------------------------
 
-.. automodule:: spikeylab.dialogs.comment_dlg
+.. automodule:: spikeylab.gui.dialogs.comment_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,7 +36,7 @@ dialogs Package
 :mod:`commentform` Module
 -------------------------
 
-.. automodule:: spikeylab.dialogs.commentform
+.. automodule:: spikeylab.gui.dialogs.commentform
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,7 +44,7 @@ dialogs Package
 :mod:`saving_dlg` Module
 ------------------------
 
-.. automodule:: spikeylab.dialogs.saving_dlg
+.. automodule:: spikeylab.gui.dialogs.saving_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -52,7 +52,7 @@ dialogs Package
 :mod:`scale_dlg` Module
 -----------------------
 
-.. automodule:: spikeylab.dialogs.scale_dlg
+.. automodule:: spikeylab.gui.dialogs.scale_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -60,7 +60,7 @@ dialogs Package
 :mod:`scaleform` Module
 -----------------------
 
-.. automodule:: spikeylab.dialogs.scaleform
+.. automodule:: spikeylab.gui.dialogs.scaleform
     :members:
     :undoc-members:
     :show-inheritance:
@@ -68,7 +68,7 @@ dialogs Package
 :mod:`specgram_dlg` Module
 --------------------------
 
-.. automodule:: spikeylab.dialogs.specgram_dlg
+.. automodule:: spikeylab.gui.dialogs.specgram_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -76,7 +76,7 @@ dialogs Package
 :mod:`specgramform` Module
 --------------------------
 
-.. automodule:: spikeylab.dialogs.specgramform
+.. automodule:: spikeylab.gui.dialogs.specgramform
     :members:
     :undoc-members:
     :show-inheritance:
@@ -84,7 +84,7 @@ dialogs Package
 :mod:`view_dlg` Module
 ----------------------
 
-.. automodule:: spikeylab.dialogs.view_dlg
+.. automodule:: spikeylab.gui.dialogs.view_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -92,7 +92,7 @@ dialogs Package
 :mod:`viewdialog_form` Module
 -----------------------------
 
-.. automodule:: spikeylab.dialogs.viewdialog_form
+.. automodule:: spikeylab.gui.dialogs.viewdialog_form
     :members:
     :undoc-members:
     :show-inheritance:

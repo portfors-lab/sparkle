@@ -9,27 +9,17 @@ spikeylab Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`rthook_pyqt4` Module
---------------------------
-
-.. automodule:: spikeylab.rthook_pyqt4
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Subpackages
 -----------
 
 .. toctree::
 
     spikeylab.acq
-    spikeylab.calibration
     spikeylab.data
     spikeylab.designer
-    spikeylab.dialogs
-    spikeylab.main
-    spikeylab.plotting
+    spikeylab.gui
     spikeylab.resources
+    spikeylab.run
     spikeylab.stim
     spikeylab.tools
 

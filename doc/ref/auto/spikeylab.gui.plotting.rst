@@ -4,7 +4,7 @@ plotting Package
 :mod:`plotting` Package
 -----------------------
 
-.. automodule:: spikeylab.plotting
+.. automodule:: spikeylab.gui.plotting
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +12,7 @@ plotting Package
 :mod:`calibration_display` Module
 ---------------------------------
 
-.. automodule:: spikeylab.plotting.calibration_display
+.. automodule:: spikeylab.gui.plotting.calibration_display
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,7 +20,7 @@ plotting Package
 :mod:`calibration_explore_display` Module
 -----------------------------------------
 
-.. automodule:: spikeylab.plotting.calibration_explore_display
+.. automodule:: spikeylab.gui.plotting.calibration_explore_display
     :members:
     :undoc-members:
     :show-inheritance:
@@ -28,7 +28,7 @@ plotting Package
 :mod:`protocoldisplay` Module
 -----------------------------
 
-.. automodule:: spikeylab.plotting.protocoldisplay
+.. automodule:: spikeylab.gui.plotting.protocoldisplay
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,7 +36,7 @@ plotting Package
 :mod:`pyqtgraph_widgets` Module
 -------------------------------
 
-.. automodule:: spikeylab.plotting.pyqtgraph_widgets
+.. automodule:: spikeylab.gui.plotting.pyqtgraph_widgets
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,7 +44,7 @@ plotting Package
 :mod:`raster_bounds_dlg` Module
 -------------------------------
 
-.. automodule:: spikeylab.plotting.raster_bounds_dlg
+.. automodule:: spikeylab.gui.plotting.raster_bounds_dlg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -52,7 +52,7 @@ plotting Package
 :mod:`rasterform` Module
 ------------------------
 
-.. automodule:: spikeylab.plotting.rasterform
+.. automodule:: spikeylab.gui.plotting.rasterform
     :members:
     :undoc-members:
     :show-inheritance:
@@ -60,7 +60,7 @@ plotting Package
 :mod:`viewbox` Module
 ---------------------
 
-.. automodule:: spikeylab.plotting.viewbox
+.. automodule:: spikeylab.gui.plotting.viewbox
     :members:
     :undoc-members:
     :show-inheritance:

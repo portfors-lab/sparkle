@@ -237,7 +237,7 @@ class SpecWidget(BasePlot):
         self.spec_done.connect(self.updateImage)
 
     def fromFile(self, fname):
-        """Displays a spectrogram of an audio file. Supported formats see :mod:`spikeylab.audiolab`
+        """Displays a spectrogram of an audio file. Supported formats see :func:`spikeylab.tools.audiotools.audioread`
 
         :param fname: file path of the audiofile to display
         :type fname: str
@@ -248,10 +248,9 @@ class SpecWidget(BasePlot):
         return dur
 
     def updateImage(self, imgdata, xaxis=None, yaxis=None):
-        """Updates the Widget image directly
+        """Updates the Widget image directly.
 
-        :param imgdata: array of image data to displayed see :func:`pyqtgraph.ImageItem.setImage`
-        :type imgdata: numpy.ndarray
+        :type imgdata: numpy.ndarray, see :meth:`pyqtgraph:pyqtgraph.ImageItem.setImage`
         :param xaxis: x-axis values, length should match dimension 1 of imgdata
         :param yaxis: y-axis values, length should match dimension 0 of imgdata
         """
@@ -288,13 +287,15 @@ class SpecWidget(BasePlot):
         """Sets optional arguments for the spectrogram appearance.
 
         Available options:
+
         :param nfft: size of FFT window to use
         :type nfft: int
         :param overlap: percent overlap of window
         :type overlap: number
         :param window: Type of window to use, choices are hanning, hamming, blackman, bartlett or none (rectangular)
         :type window: string
-        :param colormap: see :mod:`some pyqtgraph class`
+        :param colormap: Gets set by colormap editor. Holds the information to generate the colormap. Items: :meth:`lut<pyqtgraph:pyqtgraph.ImageItem.setLookupTable>`, :meth:`levels<pyqtgraph:pyqtgraph.ImageItem.setLevels>`, state (info for editor)
+        :type colormap: dict
         """
         for key, value in kwargs.items():
             if key == 'colormap':

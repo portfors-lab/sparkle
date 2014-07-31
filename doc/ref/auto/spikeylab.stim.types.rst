@@ -17,10 +17,3 @@ types Package
     :undoc-members:
     :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-
-    spikeylab.stim.types.widgets
-

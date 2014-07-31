@@ -1,5 +1,5 @@
 Hardware IO stuff
 
-.. autoclass:: spikelylab.acq.players.ContinuousPlayer
+.. autoclass:: spikeylab.acq.players.ContinuousPlayer
 
-.. automodule:: spikelylab.acq.players
+.. automodule:: spikeylab.acq.players

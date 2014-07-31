@@ -433,6 +433,14 @@ def tukey(winlen, alpha):
     return win
 
 def audioread(filename):
+    """Reads an audio signal from file.
+
+    Supported formats : wav
+
+    :param filename: filename of the audiofile to load
+    :type filename: str
+    :returns: int, numpy.ndarray -- samplerate, array containing the audio signal
+    """
     try:
         sr, wavdata = wv.read(filename)
     except:
@@ -442,6 +450,12 @@ def audioread(filename):
     return sr, wavdata 
 
 def audiorate(filename):
+    """Determines the samplerate of the given audio recording file
+
+    :param filename: filename of the audiofile
+    :type filename: str
+    :returns: int -- samplerate of the recording
+    """
     wf =  wave.open(filename)
     fs= wf.getframerate()
     wf.close()
