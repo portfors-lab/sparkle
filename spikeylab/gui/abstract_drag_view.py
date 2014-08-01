@@ -3,6 +3,7 @@ from PyQt4 import QtGui, QtCore
 import cPickle
 
 class AbstractDragView():
+    """Class to keep drag and drop behaviour consistent across UI"""
     DragRole = 33
     def __init__(self):
         self.setDragEnabled(True)
@@ -12,6 +13,7 @@ class AbstractDragView():
         self.dragStartPosition = None
 
     def grabImage(self, index):
+        # should return a QPixMap to represent the item at index
         raise NotImplementedError
 
     def cursor(self, index):
@@ -21,17 +23,21 @@ class AbstractDragView():
         raise NotImplementedError
 
     def mousePressEvent(self, event):
+        # saves the drag position, so we know when a drag should be initiated
         self.dragStartPosition = event.pos()
 
     def mouseMoveEvent(self, event):
         if self.dragStartPosition is None or \
             (event.pos() - self.dragStartPosition).manhattanLength() < QtGui.QApplication.startDragDistance():
             return
+        # mouse has been dragged past a threshold distance
+
         index = self.indexAt(event.pos())
         # grab the pixmap first, as it may be cleared from component,
         # and slows GUI due to redraw.
         pixmap = self.grabImage(index)
 
+        # get the item at the drug index
         selected = self.model().data(index, QtCore.Qt.UserRole+1)
 
         if selected is None:
@@ -42,11 +48,15 @@ class AbstractDragView():
         mimeData = QtCore.QMimeData()
         mimeData.setData("application/x-protocol", bstream)
 
+        # save this component in case the drag ends not in a droppable region, 
+        # and we want to return it to it's original place
         self.limbo_component = selected
+        self.originalPos = index
+        
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)
 
-        # below makes the pixmap half transparent
+        # this makes the pixmap half transparent
         painter = QtGui.QPainter(pixmap)
         painter.setCompositionMode(painter.CompositionMode_DestinationIn)
         painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
@@ -58,8 +68,6 @@ class AbstractDragView():
         drag.setHotSpot(QtCore.QPoint(event.x()-x, event.y()-y))
         # drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
         drag.setPixmap(pixmap)
-
-        self.originalPos = index
 
         self.model().removeItem(index)
         result = drag.exec_(QtCore.Qt.MoveAction)

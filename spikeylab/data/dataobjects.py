@@ -15,13 +15,13 @@ class AcquisitionData():
     Provides convenient access to data file; 
     each data file should represent an experimental session.
 
-    Three types of datasets: 
+    Data files may conatain any number of one of the three types of datasets: 
 
     1. Finite datasets, where the amount of data to be stored in known in advance
     2. Open-ended aquisition, where the size of the acqusition window is known, but the number of traces to acquire is not
     3. Continuous acquisition, this is a 'chart' function where data is acquired continuously without break until the user stops the operation
     
-    Upon new file creation the following attributes are saved to the file: *date*, *user*, *computer name*
+    | Upon new file creation the following attributes are saved to the file: *date*, *user*, *computer name*
 
     Finite datasets create sets with automatic naming of the scheme test_#, where the number starts with 1 and increments for the whole file, regardless of the group it is under.
 
@@ -31,7 +31,7 @@ class AcquisitionData():
     :type user: str
     :type filemode: str
     :param filemode: The mode in which to open this file. Allowed values are:
-    * 'w-' : Write to new file, without overwriting a file with the same name
+    * 'w-' : Write to new file, fails if file already exists
     * 'a' : Append to existing file
     * 'r' : Read only, no writing allowed
     Overwriting an exisiting file is not allowed, and will result in an error
@@ -134,11 +134,13 @@ class AcquisitionData():
         :param key: The dataset or group name. If finite, this will create a group (if none exists), and will sequentially name datasets under this group test_#
         :type key: str
         :type dims: tuple
-        :param dims: Dimensions of dataset,
-        * if mode == 'finite', this is the total size
-        * if mode == 'open', this is the dimension of a single trace
-        * if mode == 'continuous', this is ignored
-        * if mode == 'calibration', this is the total size
+        :param dims: 
+            Dimensions of dataset:
+            
+            * if mode == 'finite', this is the total size
+            * if mode == 'open', this is the dimension of a single trace
+            * if mode == 'continuous', this is ignored
+            * if mode == 'calibration', this is the total size
         :param mode: The kind of acquisition taking place
         :type mode: str
         :param nested_name: If mode is calibration, then this will be the dataset name created under the group key. Ignored for other modes.
@@ -297,7 +299,7 @@ class AcquisitionData():
         return data
 
     def get_info(self, key):
-        """Retrieves the saved attributes for the group or dataset
+        """Retrieves all saved attributes for the group or dataset
 
         :param key: The name of group or dataset to get info for
         :type key: str
@@ -305,7 +307,7 @@ class AcquisitionData():
         return self.hdf5[key].attrs.items()
 
     def get_calibration(self, key, reffreq):
-        """Gets a saved calibration, in attenuation and associated frequencies
+        """Gets a saved calibration, in attenuation from a refernece frequency point
 
         :param key: THe name of the calibraiton to retrieve
         :type key: str

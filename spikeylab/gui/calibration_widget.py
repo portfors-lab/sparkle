@@ -7,7 +7,9 @@ from spikeylab.gui.stim.tceditor import TuningCurveEditor
 from .calwidget_form import Ui_CalibrationWidget
 
 class CalibrationWidget(QtGui.QWidget):
-    """Widget to handle inputs the running and testing of speaker calibration"""
+    """Widget to handle inputs for the running and testing of speaker calibration. By default,
+        contains a calibraiton test curve, may add stimulus options.
+    """
     def __init__(self, parent=None):
         super(CalibrationWidget,self).__init__(parent)
         self.ui = Ui_CalibrationWidget()
@@ -23,7 +25,7 @@ class CalibrationWidget(QtGui.QWidget):
         """sets the stimulus model for the calibration curve test
 
         :param model: Stimulus model that has a tone curve configured
-        :type mode: StimulusModel
+        :type model: :class:`StimulusModel <spikeylab.stim.stimulusmodel.StimulusModel>`
         """
         self.stimModel = model
         self.ui.curveWidget.setStimulusModel(model)
@@ -41,7 +43,7 @@ class CalibrationWidget(QtGui.QWidget):
         """Add a stimulus to the list of stims to use for testing calibration
 
         :param stim: stimulus to add to drop-down list
-        :type stim: AbstractStimulusComponent
+        :type stim: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`
         """
         # set the editor widgets for noise and sweep
         self.ui.calTypeCmbbx.insertItem(0,stim.name)
@@ -77,7 +79,7 @@ class CalibrationWidget(QtGui.QWidget):
         return self.ui.calTypeCmbbx.currentText()
         
     def isToneCal(self):
-        """Whether the currently selected calibraiton stimulus type is the calibration curve
+        """Whether the currently selected calibration stimulus type is the calibration curve
 
         :returns: boolean -- if the current combo box selection is calibration curve
         """
@@ -86,6 +88,6 @@ class CalibrationWidget(QtGui.QWidget):
     def saveChecked(self):
         """Whether the UI is set to save the current calibration run
 
-        :returns: boolean -- if the save calibraiton box is checked
+        :returns: boolean -- if the save calibration box is checked
         """
         return self.ui.savecalCkbx.isChecked()

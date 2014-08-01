@@ -1,3 +1,4 @@
+"""Stand-in module for development when NI drivers are not available"""
 import numpy as np
 import threading, time
 
@@ -12,8 +13,8 @@ DAQmx_Val_GroupByChannel = None
 DAQmx_Val_FiniteSamps = None
 DAQmx_Val_GroupByScanNumber = None
 
-class Task(object):
 
+class Task(object):
 	def CreateAIVoltageChan(self, chan, name, p0, minv, maxv, units, p1):
 		self._nchans = len(chan.split(','))
 

@@ -17,7 +17,7 @@ class AITask(Task):
     :type chans: list<str>
     :param samplerate: Sampling frequency (Hz) at which data points are collected
     :type samplerate: int
-    :param bufsize: length (in samples) of the data buffer for each channel
+    :param bufsize: length (in samples) of the data buffer to allocate for each channel
     :type bufsize: int
     :param clksrc: source terminal for the sample clock, default is internal clock
     :type clksrc: str
@@ -38,11 +38,13 @@ class AITask(Task):
         self.AutoRegisterDoneEvent(0)
 
     def start(self):
-        """Begin acquistition"""
+        """Begins acquistition"""
         self.StartTask()
 
     def register_callback(self, fun, npts):
-        """ Provide a function that to be executed periodically on data collection
+        """ Provide a function to be executed periodically on 
+        data collection, every time after the specified number 
+        of points are collected.
         
         :param fun: the function that gets called, it must have a single positional argument that will be the data buffer read
         :type fun: function
@@ -66,7 +68,7 @@ class AITask(Task):
         return data
 
     def stop(self):
-        """Halt the acquisition"""
+        """Halts the acquisition"""
         try:
             self.StopTask()
             self.ClearTask()
@@ -78,7 +80,7 @@ class AOTask(Task):
     
     :param chans: Analog output channels to generate data on
     :type chans: list<str>
-    :param samplerate: Sampling frequency (Hz) at which data points generated
+    :param samplerate: Sampling frequency (Hz) at which data points are generated
     :type samplerate: int
     :param bufsize: length (in samples) of the data buffer for each channel
     :type bufsize: int
@@ -104,7 +106,7 @@ class AOTask(Task):
         self.StartTask()
 
     def write(self, output):
-        """ Write the data to be output to the device buffer
+        """Writes the data to be output to the device buffer, output will be looped when the data runs out
 
         :param output: data to output
         :type output: numpy.ndarray
@@ -114,12 +116,12 @@ class AOTask(Task):
         self.WriteAnalogF64(self.bufsize, 0, 10.0, DAQmx_Val_GroupByChannel,
                             output, w, None);
     def stop(self):
-        """Halt the Generation"""
+        """Halts the Generation"""
         self.StopTask()
         self.ClearTask()
 
 class AITaskFinite(Task):
-    """Class for managing continuous analog input with NI devices
+    """Class for managing finite duration analog input with NI devices
         
     :param chans: Analog Input channels to gather data from
     :type chans: list<str>
@@ -129,6 +131,8 @@ class AITaskFinite(Task):
     :type npts: int
     :param clksrc: source terminal for the sample clock, default is internal clock
     :type clksrc: str
+    :param trigsrc: source of a digital trigger to start the generation, default : no trigger, begin immediately on call of start method
+    :type trigsrc: str
     """
     def __init__(self, chan, samplerate, npts, clksrc="", trigsrc=u""):
         Task.__init__(self)
@@ -143,11 +147,11 @@ class AITaskFinite(Task):
             self.CfgDigEdgeStartTrig(trigsrc, DAQmx_Val_Rising)
 
     def start(self):
-        """Begin acquistition"""
+        """Begins acquistition -- immediately if not using a trigger"""
         self.StartTask()
 
     def read(self):
-        """ Read the data off of the device input buffer. Blocks with a timeout of 10 seconds
+        """Reads the data off of the device input buffer. Blocks for acquisition to finish with a timeout of 10 seconds
         
         :returns: numpy.ndarray -- the acquired data
         """
@@ -159,7 +163,7 @@ class AITaskFinite(Task):
         return inbuffer
 
     def stop(self):
-        """Halt the acquisition"""
+        """Halts the acquisition"""
         # attempts to stop task after already clear throw error
         try:
             self.StopTask()
@@ -172,7 +176,7 @@ class AOTaskFinite(Task):
     
     :param chans: Analog output channels to generate data on
     :type chans: list<str>
-    :param samplerate: Sampling frequency (Hz) at which data points generated
+    :param samplerate: Sampling frequency (Hz) at which data points are generated
     :type samplerate: int
     :param npts: number of data points to output
     :type npts: int
@@ -196,7 +200,7 @@ class AOTaskFinite(Task):
         self.StartTask()
 
     def write(self,output):
-        """ Write the data to be output to the device buffer
+        """Writes the data to be output to the device buffer
         
         :param output: data to output
         :type output: numpy.ndarray
@@ -210,7 +214,7 @@ class AOTaskFinite(Task):
         self.WaitUntilTaskDone(10.0)
 
     def stop(self):
-        """Halt the Generation"""
+        """Halts the Generation"""
         # attempts to stop task after already clear throw error
         try:
             self.StopTask()
@@ -219,6 +223,17 @@ class AOTaskFinite(Task):
             pass
 
 class DigitalOutTask(Task):
+    """Task to Generate Digital output on a port, generates a square pulse
+
+    :param chan: Digital port to ouput to
+    :type chan: str
+    :param rate: frequency of the pulses to generate
+    :type rate: int
+    :param npoints: number of pulses to generate
+    :type nponts: int
+    :param clksrc: source terminal for the sample clock, default is internal clock -- generated using counter channel
+    :type clksrc: str
+    """
     def __init__(self, chan, rate, npoints=100, clksrc=''):
         Task.__init__(self)
         # necessary to get the rising edge at the correct frequency
@@ -241,11 +256,13 @@ class DigitalOutTask(Task):
         self.WriteDigitalLines(len(data), False, DAQmx_Val_WaitInfinitely, DAQmx_Val_GroupByChannel, data, w, None)
 
     def start(self):
+        """Begins generation"""
         self.StartTask()
         if self.clock:
             self.clock.StartTask()
 
     def stop(self):
+        """Halts generation"""
         self.StopTask()
         self.ClearTask()
         if self.clock:
@@ -253,11 +270,22 @@ class DigitalOutTask(Task):
             self.clock.ClearTask()
 
     def generated(self):
+        """Reports the number of digital output pulses generated"""
         buf = c_uint64()
         self.GetWriteTotalSampPerChanGenerated(buf)
         return buf.value
 
 class CounterOutTask(Task):
+    """Task to create a pulse train internall on the device, 
+    for the purpose of syncing operations
+
+    :param chan: counter channel to use
+    :type chan: str
+    :param rate: frequency (Hz) to generate the pulse train at
+    :type rate: int
+    :param npoints: number of points to generate for the pulse train
+    :type npoints: int
+    """
     def __init__(self, chan, rate, npoints=100):
         Task.__init__(self)
         # chan e.g. 'Dev1/ctr0'
@@ -265,14 +293,20 @@ class CounterOutTask(Task):
         self.CfgImplicitTiming(DAQmx_Val_ContSamps, npoints)
 
     def start(self):
+        """Begins the pulse train generation"""
         self.StartTask()
 
     def stop(self):
+        """Halts the pulse train generation"""
         self.StopTask()
         self.ClearTask()
 
 def get_ao_chans(dev):
-    """Discover and return a list of the names of all analog output channels for the given device"""
+    """Discover and return a list of the names of all analog output channels for the given device
+
+    :param dev: the device name
+    :type dev: str
+    """
     buf = create_string_buffer(256)
     buflen = c_uint32(sizeof(buf))
     DAQmxGetDevAOPhysicalChans(dev, buf, buflen)
@@ -281,7 +315,11 @@ def get_ao_chans(dev):
     return chans  
 
 def get_ai_chans(dev):
-    """Discover and return a list of the names of all analog input channels for the given device"""
+    """Discover and return a list of the names of all analog input channels for the given device
+    
+    :param dev: the device name
+    :type dev: str
+    """
     buf = create_string_buffer(512)
     buflen = c_uint32(sizeof(buf))
     DAQmxGetDevAIPhysicalChans(dev, buf, buflen)

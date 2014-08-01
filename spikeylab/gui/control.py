@@ -43,7 +43,7 @@ REFFREQ = config['reference_frequency']
 REFVOLTAGE = config['reference_voltage']
 
 class MainWindow(ControlWindow):
-    """Main GUI for the application"""
+    """Main GUI for the application. Run the main fucntion of this file"""
     def __init__(self, inputsFilename='', datafile=None, filemode='w-'):
         # set up model and stimlui first, 
         # as saved configuration relies on this
