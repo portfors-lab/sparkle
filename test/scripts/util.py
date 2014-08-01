@@ -51,6 +51,10 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     # plt.plot(f[f0:f1], recorded_db)
     # plt.show()
 
+    mse = np.around(mse,2)
+    mse2 = np.around(mse2,2)
+    mae = np.around(mae,2)
+
     return mse, mse2, mae
 
 

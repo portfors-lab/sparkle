@@ -36,15 +36,12 @@ def calc_spectrum(signal,rate):
     npts = len(signal)
     padto = 1<<(npts-1).bit_length()
     # print 'length of signal {}, pad to {}'.format(npts, padto)
-    nzeros = padto - npts
-
-    signal = np.hstack((signal, np.zeros(nzeros)))
     npts = padto
 
+    sp = np.fft.rfft(signal, n=padto)/npts
+    #print('sp len ', len(sp))
     freq = np.arange((npts/2)+1)/(npts/rate)
     #print('freq len ', len(freq))
-    sp = np.fft.rfft(signal)/npts
-    #print('sp len ', len(sp))
     return freq, abs(sp)
 
 def get_peak(y, idx, atfrequency=None):
@@ -383,12 +380,14 @@ def calibrate_signal(signal, resp, fs, frange):
 def multiply_frequencies(signal, fs, frange, calibration_frequencies, attendB):
     """Given a vector of dB attenuations, adjust signal by 
        multiplication in the frequency domain"""
-    pad_factor = 1.2
     npts = len(signal)
+    padto = 1<<(npts-1).bit_length()
 
-    X = np.fft.rfft(signal,  n=int(len(signal)*pad_factor))
+    X = np.fft.rfft(signal, n=padto)
 
-    f = np.arange(len(X))/(float(npts)/fs*pad_factor)
+    npts = padto
+    f = np.arange((npts/2)+1)/(npts/fs)
+    
     fidx_low = (np.abs(f-frange[0])).argmin()
     fidx_high = (np.abs(f-frange[1])).argmin()
 
@@ -399,18 +398,18 @@ def multiply_frequencies(signal, fs, frange, calibration_frequencies, attendB):
     H[fidx_low:fidx_high] = Hroi
 
     H = smooth(H)
-    print 'H dB max', np.amax(H)
+    # print 'H dB max', np.amax(H)
 
     H = 10**((H).astype(float)/20)
-    print 'H amp max', np.amax(H)
+    # print 'H amp max', np.amax(H)
 
     # Xadjusted = X.copy()
     # Xadjusted[fidx_low:fidx_high] *= H
     # Xadjusted = smooth(Xadjusted)
 
     Xadjusted = X*H
-    print 'X max', np.amax(abs(X))
-    print 'Xadjusted max', np.amax(abs(Xadjusted))
+    # print 'X max', np.amax(abs(X))
+    # print 'Xadjusted max', np.amax(abs(Xadjusted))
 
     signal_calibrated = np.fft.irfft(Xadjusted)
     return signal_calibrated[:len(signal)]

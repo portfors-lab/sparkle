@@ -26,10 +26,12 @@ CONV_CAL = True
 NOISE_CAL = False
 CHIRP_CAL = True
 
-SMOOTHINGS = [99]
+# SMOOTHINGS = [99]
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
-TRUNCATIONS = [64]
+SMOOTHINGS = [0, 99, 199, 999]
+# TRUNCATIONS = [64]
 # TRUNCATIONS = [1, 4, 16, 32, 64, 100]
+TRUNCATIONS = [1, 4, 32, 100, 500]
 DURATIONS = [0.2]
 # DURATIONS = [0.1, 0.2, 0.5, 1.0]
 SAMPLERATES = [5e5]
@@ -215,23 +217,23 @@ if __name__ == "__main__":
     chirp.setIntensity(60)
     chirp.setStopFrequency(100000)
 
-    for cal_params in calibration_methods:
-        dur = cal_params['durfs'][0]
-        fs = cal_params['durfs'][1]
-        freqs = freqq[cal_params['durfs']]
-        wn.setDuration(dur)
-        wn_signal = wn.signal(fs, 0, refdb, refv)
-        player.set_aidur(dur)
-        player.set_aisr(fs)
+    # for cal_params in calibration_methods:
+    #     dur = cal_params['durfs'][0]
+    #     fs = cal_params['durfs'][1]
+    #     freqs = freqq[cal_params['durfs']]
+    #     wn.setDuration(dur)
+    #     wn_signal = wn.signal(fs, 0, refdb, refv)
+    #     player.set_aidur(dur)
+    #     player.set_aisr(fs)
 
-        start = time.time()
-        wn_signal_calibrated = apply_calibration(wn_signal, fs, frange, 
-                                                 freqs, cal_params['calibration'],
-                                                 cal_params['method'])
-        tdif = time.time() - start
-        mean_response = record(player, wn_signal_calibrated, fs)
-        cal_params['noise_response'] = mean_response
-        cal_params['time'] = tdif
+    #     start = time.time()
+    #     wn_signal_calibrated = apply_calibration(wn_signal, fs, frange, 
+    #                                              freqs, cal_params['calibration'],
+    #                                              cal_params['method'])
+    #     tdif = time.time() - start
+    #     mean_response = record(player, wn_signal_calibrated, fs)
+    #     cal_params['noise_response'] = mean_response
+    #     cal_params['time'] = tdif
 
     for cal_params in calibration_methods:
         dur = cal_params['durfs'][0]
@@ -254,6 +256,17 @@ if __name__ == "__main__":
 #####################################
 # Report results
 #####################################
+
+    # add uncalibrated to table
+    for durfs, signals in chirp_signals.items():
+        info = {'signal':'chrip', 'durfs': durfs, 'method': None, 
+                'truncation':None, 'len':0, 'smoothing':None,
+                'time':0}
+        info['chirp_response'] = signals[1]
+        info['noise_response'] = mean_control_noise
+        calibration_methods.append(info)
+
+
     app = QtGui.QApplication(sys.argv)
 
     if PLOT_RESULTS:
@@ -267,45 +280,45 @@ if __name__ == "__main__":
             fig0.setWindowTitle('Tone curve')
             fig0.show()
 
-        fig1 = StackedPlot()
-        spectrum = abs(np.fft.rfft(wn_signal)/npts)
-        spectrum = refdb + 20 * np.log10(spectrum/ refv)
-        fig1.addPlot(freqs, spectrum, title='desired')
-        for cal_params in calibration_methods:
-            dur = cal_params['durfs'][0]
-            fs = cal_params['durfs'][1]
-            npts = dur*fs
-            spectrum = abs(np.fft.rfft(cal_params['noise_response'])/npts)
-            spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
-            rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
-            masterdb = 94 + (20.*np.log10(rms/(0.004)))
-            print 'noise received overall db', masterdb
-            # spectrum[0] = 0
-            freqs = freqq[cal_params['durfs']]
-            fig1.addPlot(freqs, spectrum, title='{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
-                      cal_params['signal'], cal_params['smoothing'], 
-                      cal_params['truncation']))
-        fig1.setWindowTitle('Noise stim')
-        fig1.show()
+        # fig1 = StackedPlot()
+        # spectrum = abs(np.fft.rfft(wn_signal)/npts)
+        # spectrum = refdb + 20 * np.log10(spectrum/ refv)
+        # fig1.addPlot(freqs, spectrum, title='desired')
+        # for cal_params in calibration_methods:
+        #     dur = cal_params['durfs'][0]
+        #     fs = cal_params['durfs'][1]
+        #     npts = dur*fs
+        #     spectrum = abs(np.fft.rfft(cal_params['noise_response'])/npts)
+        #     spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
+        #     rms = np.sqrt(np.mean(pow(cal_params['noise_response'],2))) / np.sqrt(2)
+        #     masterdb = 94 + (20.*np.log10(rms/(0.004)))
+        #     print 'noise received overall db', masterdb
+        #     # spectrum[0] = 0
+        #     freqs = freqq[cal_params['durfs']]
+        #     fig1.addPlot(freqs, spectrum, title='{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
+        #               cal_params['signal'], cal_params['smoothing'], 
+        #               cal_params['truncation']))
+        # fig1.setWindowTitle('Noise stim')
+        # fig1.show()
 
         fig2 = StackedPlot()
         spectrum = abs(np.fft.rfft(chirp_signal)/npts)
         spectrum = refdb + 20 * np.log10(spectrum/ refv)
-        # fig2.addPlot(freqs, spectrum, title='desired')
-        fig2.addSpectrogram(chirp_signal, fs, title='desired')
+        fig2.addPlot(freqs, spectrum, title='desired')
+        # fig2.addSpectrogram(chirp_signal, fs, title='desired')
         for cal_params in calibration_methods:
             freqs = freqq[cal_params['durfs']]
             fs = cal_params['durfs'][1]
             ttl = '{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['truncation'])
-            fig2.addSpectrogram(cal_params['chirp_response'], fs, title=ttl)
-            # spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
-            # spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
-            # rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
-            # masterdb = 94 + (20.*np.log10(rms/(0.004)))
-            # spectrum[0] = 0
-            # fig2.addPlot(freqs, spectrum, title=ttl)
+            # fig2.addSpectrogram(cal_params['chirp_response'], fs, title=ttl)
+            spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
+            spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
+            rms = np.sqrt(np.mean(pow(cal_params['chirp_response'],2))) / np.sqrt(2)
+            masterdb = 94 + (20.*np.log10(rms/(0.004)))
+            spectrum[0] = 0
+            fig2.addPlot(freqs, spectrum, title=ttl)
             print 'chirp received overall db', masterdb
         fig2.setWindowTitle('Chirp stim')
         fig2.show()

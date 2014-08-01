@@ -25,7 +25,7 @@ CONV_CAL = True
 
 SMOOTHING = 99
 # TRUNCATIONS = [1, 2, 4, 8]
-TRUNCATIONS = [1, 4, 12, 100]
+TRUNCATIONS = [1, 2, 4, 12, 100]
 
 # method 1 Tone Curve
 nreps = 3
@@ -108,7 +108,7 @@ if __name__ == "__main__":
                                                      freqs, cal_params['calibration'],
                                                      cal_params['method'])
         tdif = time.time() - start
-        cal_params['chirp_time'] = tdif
+        cal_params['chirp_time'] = np.around(tdif,3)
 
     for cal_params in calibration_methods:
         start = time.time()
@@ -117,7 +117,7 @@ if __name__ == "__main__":
                                                  freqs, cal_params['calibration'],
                                                  cal_params['method'])
         tdif = time.time() - start
-        cal_params['vocal_time'] = tdif
+        cal_params['vocal_time'] = np.around(tdif,3)
 
 #####################################
 # Report results
