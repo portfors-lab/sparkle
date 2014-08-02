@@ -11,6 +11,7 @@ from spikeylab.tools.audiotools import tukey, impulse_response, \
 from test.scripts.util import calc_error, record, MyTableWidgetItem
 
 from PyQt4 import QtGui, QtCore
+import matplotlib.pyplot as plt
 
 
 def apply_calibration(sig, fs, frange, calfqs, calvals, method):
@@ -26,9 +27,9 @@ CONV_CAL = True
 NOISE_CAL = False
 CHIRP_CAL = True
 
-# SMOOTHINGS = [99]
+SMOOTHINGS = [99]
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
-SMOOTHINGS = [0, 99, 199, 999]
+# SMOOTHINGS = [0, 99, 199, 999]
 # TRUNCATIONS = [64]
 # TRUNCATIONS = [1, 4, 16, 32, 64, 100]
 TRUNCATIONS = [1, 4, 32, 100, 500]
@@ -41,8 +42,8 @@ TONE_CURVE = False
 PLOT_RESULTS = True
 
 # method 1 Tone Curve
-refv = 2.0 # Volts
-refdb = 91 # dB SPL
+refv = 1.0 # Volts
+refdb = 85 # dB SPL
 calf = 15000
 
 if __name__ == "__main__":
@@ -213,8 +214,8 @@ if __name__ == "__main__":
 
     print 'calibrating vf noise...'
 
-    wn.setIntensity(60)
-    chirp.setIntensity(60)
+    # wn.setIntensity(60)
+    # chirp.setIntensity(60)
     chirp.setStopFrequency(100000)
 
     # for cal_params in calibration_methods:
@@ -364,4 +365,5 @@ if __name__ == "__main__":
 
     table.setSortingEnabled(True)
     table.show()
+    plt.show()
     sys.exit(app.exec_())

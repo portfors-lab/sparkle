@@ -33,16 +33,17 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     recorded_roi = recorded_spectrum[f0:f1]
 
     # convert into dB scale
-    predicted_db = refdb + 20 * np.log10(predicted_roi/ refv)
+    predicted_db = 20. * np.log10(predicted_roi/ refv) + refdb  
     # recorded_db = calc_db(recorded_roi,0)
-    recorded_db = 94 + (20.*np.log10((recorded_roi/np.sqrt(2))/0.004))
+    recorded_db = (20.*np.log10((recorded_roi/np.sqrt(2))/0.004)) + 94
 
     mse = (np.sum((recorded_db - predicted_db)**2))/npts
     mae = abs(np.mean(recorded_db - predicted_db))
-    mse2 = np.sqrt(mse)
+    rmse = np.sqrt(mse)
+    nrmse = rmse/(np.mean(recorded_db))
 
     # plt.figure()
-    # plt.suptitle('{} {:.4f}'.format(title, mse2))
+    # plt.suptitle('{} {:.4f}'.format(title, rmse))
     # plt.subplot(211)
     # plt.plot(f[f0:f1], predicted_db)
     # plt.title("predicted")
@@ -51,11 +52,12 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     # plt.plot(f[f0:f1], recorded_db)
     # plt.show()
 
+    nrmse = np.around(nrmse, 2)
     mse = np.around(mse,2)
-    mse2 = np.around(mse2,2)
+    rmse = np.around(rmse,2)
     mae = np.around(mae,2)
 
-    return mse, mse2, mae
+    return mse, rmse, mae
 
 
 def record(player, sig, fs, atten=0):
