@@ -44,10 +44,42 @@ Visually, the hierarchy of Stimulus Assembly is as follows:
 
 The list of StimlusModels inside of a ProtocolModel, and the list of Components inside of a SimulusModel can, in fact, be empty (and are upon initialization), but cannot be when run by a runner class; i.e. an empty stimulus is considered an error. 
 
+Speaker Calibration
+++++++++++++++++++++
+
+This program uses a digital filter to compensate for high frequency speaker roll-off. A broad-spectrum control signal (frequency sweep) is generated and recorded back using :class:`CalibrationRunner<spikeylab.run.calibration_runner.CalibrationRunner>`, which also generates the system frequency response from this recorded signal.
+
+The frequency response for the system is derived via :func:`attenuation_curve<spikeylab.tools.audiotools.attenuation_curve>` function. The result of this is also presented to the user as an 'attenuation curve'. This frequency response is saved to file, and can used later to generate a new filter kernel. 
+
+The frequency response is given to the different acquisition runner classes which will pass it on to their :class:`StimulusModel<spikeylab.stim.stimulusmodel.setCalibration>`(s). The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<spikeylab.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals.
+
+Thus, after stimuli are prepared, but before they are generated, the StimulusModel applies the calibration to the signal by convolving the filter with the output signal using :func:`convolve_filter<spikeylab.tools.audiotools.convolve_filter>`.
+
+To see the effect of a calibration, the calibration procedure, or the calibration curve that :class:`CalibrationCurveRunner<spikeylab.run.calibration_runner.CalibrationCurveRunner>` runs will a calibration vector in place, will show stimuli with thier component frequencies corrected. Of course, it is also possible to see this in search mode with any stimuli. When using the GUI, a special interface is provided to examine the outgoing and recorded signal. Note that the CalibrationCurveRunner is used for testing only, it does not save a calibration.
+
+To compare calibration performance and effectiveness test scripts `calibration_performance.py` and `calibration_eval.py` generate tables to compare run times and error between desired and acheived output signals. These scripts can be found in the test/scripts project folder.
+
+For a more in depth narrative on how this procedure was developed, see this post_, and especially this post__
+
+.. _post: http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers/
+__ http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers-Cont/
+
 GUI Structure
 -------------
+The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. This files have the extention .ui. The main UI class :class:`MainWindow<spikeylab.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<spikeylab.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
 
+Stimulus widgets
++++++++++++++++++
 
+To interface with the stimuli classes, this program makes use of the Qt Model-View classes to wrap around the native python objects. This is the case with 3 classes, our stimuli classes are wrapped by :class:`QProtocolTableModel<spikeylab.gui.qprotocol.QProtocolTableModel>`,
+:class:`QStimulusModel<spikeylab.gui.stim.qstimulus.QStimulusModel>`, and :class:`QAutoParameterModel<spikeylab.gui.stim.qauto_parameter_model.QAutoParameterModel>`. Each of these models has a custom view, which inherits from a Qt view superclass, and also from :class:`AbstractDragView<spikeylab.gui.abstract_drag_view.AbstractDragView>`. This is to create some sort of continuity with the way the user interacts with the different parts of stimulus assembly.
+
+.. image:: stimviewsUML.png
+
+Plotting
++++++++++
+
+The plotting is built upon the `pyqtgraph <http://www.pyqtgraph.org/documentation/>`_ library.
 
 Reference API
 --------------
