@@ -1,5 +1,6 @@
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import tukey, impulse_response, \
                 convolve_filter, attenuation_curve, multiply_frequencies
@@ -24,8 +25,8 @@ MULT_CAL = True
 CONV_CAL = True
 
 SMOOTHING = 99
-# TRUNCATIONS = [1, 2, 4, 8]
-TRUNCATIONS = [1, 2, 4, 12, 100]
+# FILTER_LEN = [10.290, 10.291, 10.292, 10.293, 10.294, 10.295]
+# FILTER_LEN = range(24286, 24292)
 
 # method 1 Tone Curve
 nreps = 3
@@ -36,6 +37,8 @@ dur = 0.2 #seconds (window and stim)
 fs = 5e5
 nsignals = 200
 frange = [2000, 105000] # range to apply calibration to
+FILTER_LEN = [2**6, 2**7, 2**8, 2**9, 2**10, 2**11, 2**12, 2**14, 31072, 31074, 2**15, 2**16, dur*fs]
+# FILTER_LEN = range(1000, int(dur*fs), 1000)
 
 if __name__ == "__main__":
     npts = dur*fs
@@ -81,7 +84,7 @@ if __name__ == "__main__":
 
     if CONV_CAL:
         info['method'] =  'convolve'
-        for trunc in TRUNCATIONS:
+        for trunc in FILTER_LEN:
             info['truncation'] = trunc
             ir = impulse_response(fs, noise_curve_db, freqs, frange, trunc)
             info['len'] = len(ir)
@@ -93,6 +96,7 @@ if __name__ == "__main__":
     chirp.setIntensity(80)
     chirp_signal = chirp.signal(fs, 0, refdb, refv)
 
+    time_list = []
     vocal_fs = 375000
     tempfile = os.path.join(os.path.expanduser('~'), 'EjM_Vox_plus.json')
     with open(tempfile, 'r') as fh:
@@ -109,6 +113,7 @@ if __name__ == "__main__":
                                                      cal_params['method'])
         tdif = time.time() - start
         cal_params['chirp_time'] = np.around(tdif,3)
+        time_list.append(np.around(tdif,3))
 
     for cal_params in calibration_methods:
         start = time.time()
@@ -118,7 +123,6 @@ if __name__ == "__main__":
                                                  cal_params['method'])
         tdif = time.time() - start
         cal_params['vocal_time'] = np.around(tdif,3)
-
 #####################################
 # Report results
 #####################################
@@ -141,4 +145,6 @@ if __name__ == "__main__":
 
     table.setSortingEnabled(True)
     table.show()
+    trend_plot = SimplePlotWidget(FILTER_LEN, time_list[1:])
+    trend_plot.show()
     sys.exit(app.exec_())

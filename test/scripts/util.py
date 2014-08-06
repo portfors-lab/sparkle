@@ -1,5 +1,6 @@
 import sys, time
 import numpy as np
+import matplotlib.pyplot as plt
 
 from spikeylab.acq.players import FinitePlayer
 
@@ -37,10 +38,10 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     # recorded_db = calc_db(recorded_roi,0)
     recorded_db = (20.*np.log10((recorded_roi/np.sqrt(2))/0.004)) + 94
 
-    mse = (np.sum((recorded_db - predicted_db)**2))/npts
+    mse = (np.sum((recorded_db - predicted_db)**2))/len(predicted_db)
     mae = abs(np.mean(recorded_db - predicted_db))
     rmse = np.sqrt(mse)
-    nrmse = rmse/(np.mean(recorded_db))
+    # nrmse = rmse/(np.mean(recorded_db))
 
     # plt.figure()
     # plt.suptitle('{} {:.4f}'.format(title, rmse))
@@ -52,7 +53,7 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     # plt.plot(f[f0:f1], recorded_db)
     # plt.show()
 
-    nrmse = np.around(nrmse, 2)
+    # nrmse = np.around(nrmse, 2)
     mse = np.around(mse,2)
     rmse = np.around(rmse,2)
     mae = np.around(mae,2)
@@ -61,7 +62,7 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
 
 
 def record(player, sig, fs, atten=0):
-    nreps = 3
+    nreps = 16
     reps = []
     player.set_stim(sig, fs, atten)
     player.start()

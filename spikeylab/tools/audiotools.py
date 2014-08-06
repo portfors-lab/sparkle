@@ -246,7 +246,7 @@ def convolve_filter(signal, impulse_response):
         return signal
 
 
-def impulse_response(genrate, fresponse, frequencies, frange, truncation_factor=64, db=True):
+def impulse_response(genrate, fresponse, frequencies, frange, filter_len=2**14, db=True):
     """
     Calculate filter kernel from attenuation vector.
     Attenuation vector should represent magnitude frequency response of system
@@ -292,7 +292,11 @@ def impulse_response(genrate, fresponse, frequencies, frange, truncation_factor=
     impulse_response = np.roll(impulse_response, len(impulse_response)//2)
 
     # truncate
-    impulse_response = impulse_response[(len(impulse_response)//2)-(len(impulse_response)//truncation_factor//4)-1:(len(impulse_response)//2)+(len(impulse_response)//truncation_factor//4)+1]
+    if filter_len > len(impulse_response):
+        filter_len = len(impulse_response)
+    startidx = (len(impulse_response)//2)-(filter_len//2)
+    stopidx = (len(impulse_response)//2)+(filter_len//2)
+    impulse_response = impulse_response[startidx:stopidx]
     
     # should I also window the impulse response - by how much?
     impulse_response = impulse_response * tukey(len(impulse_response), 0.05)

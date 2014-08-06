@@ -3,7 +3,7 @@ import numpy as np
 
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from spikeylab.gui.plotting.pyqtgraph_widgets import StackedPlot
+from spikeylab.gui.plotting.pyqtgraph_widgets import StackedPlot, SimplePlotWidget
 from spikeylab.tools.audiotools import tukey, impulse_response, \
                 convolve_filter, smooth, attenuation_curve, multiply_frequencies, \
                 calc_db
@@ -11,8 +11,6 @@ from spikeylab.tools.audiotools import tukey, impulse_response, \
 from test.scripts.util import calc_error, record, MyTableWidgetItem
 
 from PyQt4 import QtGui, QtCore
-import matplotlib.pyplot as plt
-
 
 def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     if method == 'multiply':
@@ -29,13 +27,12 @@ CHIRP_CAL = True
 
 SMOOTHINGS = [99]
 # SMOOTHINGS = [0, 11, 55, 99, 155, 199]
-# SMOOTHINGS = [0, 99, 199, 999]
-# TRUNCATIONS = [64]
-# TRUNCATIONS = [1, 4, 16, 32, 64, 100]
-TRUNCATIONS = [1, 4, 32, 100, 500]
+# SMOOTHINGS = [0, 7, 63, 99]
 DURATIONS = [0.2]
 # DURATIONS = [0.1, 0.2, 0.5, 1.0]
 SAMPLERATES = [5e5]
+FILTER_LEN = [2**10, 2**11, 2**12, 2**14, 2**15, 2**16, 0.2*5e5]
+FILTER_LEN = range(50, 8500, 50)
 # SAMPLERATES = [2e5, 3e5, 4e5, 5e5]
 
 TONE_CURVE = False
@@ -50,7 +47,7 @@ if __name__ == "__main__":
     tone_frequencies = range(5000, 100000, 2000)
     # tone_frequencies = [5000, calf, 50000, 100000]
     tone_intensities = [50, 60, 70, 80, 90, 100]
-    frange = [2000, 105000] # range to apply calibration to
+    frange = [3750, 101250] # range to apply calibration to
 
     player = FinitePlayer()
     player.set_aochan(u"PCI-6259/ao0")
@@ -86,7 +83,8 @@ if __name__ == "__main__":
 
             chirp.setDuration(dur)
             chirp.setIntensity(refdb)
-            chirp.setStopFrequency(102000)
+            chirp.setStartFrequency(4000)
+            chirp.setStopFrequency(101000)
             chirp_signal = chirp.signal(fs, 0, refdb, refv)
 
             # control stim, witout calibration
@@ -123,7 +121,7 @@ if __name__ == "__main__":
                 for sm in SMOOTHINGS:
                     smoothed_attenuations = smooth(noise_curve_db, sm)
                     info['smoothing'] = sm
-                    for trunc in TRUNCATIONS:
+                    for trunc in FILTER_LEN:
                         info['truncation'] = trunc
                         ir = impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
                         info['len'] = len(ir)
@@ -154,7 +152,7 @@ if __name__ == "__main__":
                 for sm in SMOOTHINGS:
                     smoothed_attenuations = smooth(chirp_curve_db, sm)
                     info['smoothing'] = sm
-                    for trunc in TRUNCATIONS:
+                    for trunc in FILTER_LEN:
                         info['truncation'] = trunc
                         ir = impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
                         info['len'] = len(ir)
@@ -216,7 +214,7 @@ if __name__ == "__main__":
 
     # wn.setIntensity(60)
     # chirp.setIntensity(60)
-    chirp.setStopFrequency(100000)
+    # chirp.setStopFrequency(100000)
 
     # for cal_params in calibration_methods:
     #     dur = cal_params['durfs'][0]
@@ -326,10 +324,11 @@ if __name__ == "__main__":
 
 # Table of results error =======================
 
-    column_headers = ['method', 'signal', 'durfs', 'smoothing', 'truncation', 'len', 'MAE', 'NMSE', 'RMSE', 'time', 'test signal']
+    column_headers = ['method', 'signal', 'durfs', 'smoothing', 'truncation', 'len', 'MAE', 'MSE', 'RMSE', 'time', 'test signal']
     table = QtGui.QTableWidget(len(calibration_methods)*2, len(column_headers))
     table.setHorizontalHeaderLabels(column_headers)
 
+    errs_list = []
     print 'number of cal_params', len(calibration_methods)
     irow = 0
     for cal_params in calibration_methods:
@@ -340,7 +339,7 @@ if __name__ == "__main__":
             wn_signal = noise_signals[(dur, fs)][0]
             ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(wn_signal, cal_params['noise_response'], fs, frange, refdb, refv)
             cal_params['MAE'] = ctrl_mae
-            cal_params['NMSE'] = ctrl_err
+            cal_params['MSE'] = ctrl_err
             cal_params['RMSE'] = ctrl_err_sr
             for icol, col in enumerate(column_headers[:-1]):
                 item = MyTableWidgetItem(str(cal_params[col]))
@@ -354,8 +353,9 @@ if __name__ == "__main__":
 
             ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, cal_params['chirp_response'], fs, frange, refdb, refv)
             cal_params['MAE'] = ctrl_mae
-            cal_params['NMSE'] = ctrl_err
+            cal_params['MSE'] = ctrl_err
             cal_params['RMSE'] = ctrl_err_sr
+            errs_list.append(ctrl_err)
             for icol, col in enumerate(column_headers[:-1]):
                 item = MyTableWidgetItem(str(cal_params[col]))
                 table.setItem(irow, icol, item)
@@ -365,5 +365,6 @@ if __name__ == "__main__":
 
     table.setSortingEnabled(True)
     table.show()
-    plt.show()
+    trend_plot = SimplePlotWidget(FILTER_LEN, errs_list[1:-1])
+    trend_plot.show()
     sys.exit(app.exec_())

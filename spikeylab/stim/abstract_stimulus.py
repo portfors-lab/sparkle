@@ -72,7 +72,7 @@ class AbstractStimulusComponent(object):
         """A list of the parameter names that are available to
         be set using auto-paramter manipulation. Subclasses should
         reimplement and add to this list"""
-        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0., 'max':2.},
+        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0., 'max':3.},
                 'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':120}, 
                 'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 

@@ -278,8 +278,8 @@ class WhiteNoise(AbstractStimulusComponent):
     name = "White Noise"
     explore = True
     # keeps signal same to subsequent signal() calls
-    _noise = np.random.normal(0, 1.0, (5e5,))
-    _phase = np.random.uniform(0.0, 2.0*np.pi,size=5e5)
+    _noise = np.random.normal(0, 1.0, (15e5,))
+    _phase = np.random.uniform(0.0, 2.0*np.pi,size=15e5)
     transfer = None
     _start_f = float(5000)
     _stop_f = float(1e5)
