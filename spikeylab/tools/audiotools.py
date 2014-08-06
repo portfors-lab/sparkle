@@ -259,8 +259,8 @@ def impulse_response(genrate, fresponse, frequencies, frange, filter_len=2**14, 
     :type frequencies: numpy.ndarray
     :param frange: the min and max frequencies for which the filter kernel will affect
     :type frange: (int, int)
-    :param truncation_factor: the factor by which to reduce the size of the impluse repsonse. e.g. a factor of 4 will produce an impulse response that is 1/4 the length of the input signal.
-    :type truncation_factor: int
+    :param filter_len: the desired length for the resultant impulse response
+    :type filter_len: int
     :param db: whether the fresponse given is the a vector of multiplication or decibel factors
     :type db: bool
     :returns: numpy.ndarray -- the impulse response
@@ -277,7 +277,7 @@ def impulse_response(genrate, fresponse, frequencies, frange, filter_len=2**14, 
 
     f0 = (np.abs(freq-lowf)).argmin()
     f1 = (np.abs(freq-highf)).argmin()
-    fmax = (np.abs(freq-max_freq)).argmin()
+    fmax = (np.abs(freq-max_freq)).argmin() + 1
     attenuations[f0:f1] = fresponse[f0:f1]*tukey(len(fresponse[f0:f1]), winsz)
     if db:
         freq_response = 10**((attenuations).astype(float)/20)
@@ -292,11 +292,10 @@ def impulse_response(genrate, fresponse, frequencies, frange, filter_len=2**14, 
     impulse_response = np.roll(impulse_response, len(impulse_response)//2)
 
     # truncate
-    if filter_len > len(impulse_response):
-        filter_len = len(impulse_response)
-    startidx = (len(impulse_response)//2)-(filter_len//2)
-    stopidx = (len(impulse_response)//2)+(filter_len//2)
-    impulse_response = impulse_response[startidx:stopidx]
+    if filter_len < len(impulse_response):
+        startidx = (len(impulse_response)//2)-(filter_len//2)
+        stopidx = (len(impulse_response)//2)+(filter_len//2)
+        impulse_response = impulse_response[startidx:stopidx]
     
     # should I also window the impulse response - by how much?
     impulse_response = impulse_response * tukey(len(impulse_response), 0.05)

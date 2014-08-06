@@ -328,15 +328,17 @@ def test_impulse_response_truncation_length():
     atten = np.zeros(npts/2 + 1)
     atten[f0:f1] = np.linspace(0, 20, len(atten[f0:f1]))
 
-    ir = tools.impulse_response(fs, atten, freqs, frange, truncation_factor=64)
-    assert len(ir) == np.ceil((npts/2)/64.)
+    ir = tools.impulse_response(fs, atten, freqs, frange, filter_len=1024)
+    assert len(ir) == 1024
 
-    ir = tools.impulse_response(fs, atten, freqs, frange, truncation_factor=2)
-    assert len(ir) == np.ceil((npts/2)/2.)
+    ir = tools.impulse_response(fs, atten, freqs, frange, filter_len=10000)
+    assert len(ir) == 10000
 
-    ir = tools.impulse_response(fs, atten, freqs, frange, truncation_factor=1)
-    assert len(ir) == np.ceil((npts/2)/1.)
+    ir = tools.impulse_response(fs, atten, freqs, frange, filter_len=npts)
+    assert len(ir) == npts
 
+    ir = tools.impulse_response(fs, atten, freqs, frange, filter_len=npts+1000)
+    assert len(ir) == npts
 
 def test_impulse_response_high_pass():
     fs = 5e5
@@ -348,7 +350,7 @@ def test_impulse_response_high_pass():
     pass_band = np.zeros(npts/2 + 1)
     pass_band[len(pass_band)/2:] = 1
 
-    ir = tools.impulse_response(fs, pass_band, freqs, [freqs[0], freqs[-1]], truncation_factor=1, db=False)
+    ir = tools.impulse_response(fs, pass_band, freqs, [freqs[0], freqs[-1]], filter_len=2**14, db=False)
 
     # w, h = signal.freqz(ir)
     # plt.plot(w, abs(h))
@@ -371,7 +373,7 @@ def test_impulse_response_low_pass():
     pass_band = np.zeros(npts/2 + 1)
     pass_band[:len(pass_band)/2] = 1
 
-    ir = tools.impulse_response(fs, pass_band, freqs, [freqs[0], freqs[-1]], truncation_factor=1, db=False)
+    ir = tools.impulse_response(fs, pass_band, freqs, [freqs[0], freqs[-1]], filter_len=2**14, db=False)
 
     width = 0.05 # the width of the window used in impulse_response
     # Check the gain at a few samples where we know it should be approximately 0 or 1.
@@ -390,7 +392,7 @@ def test_impulse_db():
     pass_band = np.zeros(npts/2 + 1)
     pass_band[len(pass_band)/2:] = 20
 
-    ir = tools.impulse_response(fs, pass_band, freqs, [freqs[0], freqs[-1]], truncation_factor=1, db=True)
+    ir = tools.impulse_response(fs, pass_band, freqs, [freqs[0], freqs[-1]], filter_len=2**14, db=True)
 
     # w, h = signal.freqz(ir)
     # plt.plot(w, abs(h))
