@@ -88,11 +88,11 @@ class SearchRunner(AbstractAcquisitionRunner):
             spike_rates = []
             self.irep = 0
             times = self.aitimes
-            self.player.start_timer(self.reprate)
+            # self.player.start_timer(self.reprate)
             stim = self.player.start()
             while not self._halt:
                 # print 'explore worker'
-                # self.interval_wait()
+                self.interval_wait()
 
                 response = self.player.run()
                 stamp = time.time()
@@ -136,7 +136,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                     spike_rates = []
 
             self.player.stop()
-            self.player.stop_timer()
+            # self.player.stop_timer()
             if self.save_data:
                 self.datafile.trim(self.current_dataset_name)
 
