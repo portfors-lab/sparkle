@@ -304,7 +304,11 @@ class AcquisitionData():
         :param key: The name of group or dataset to get info for
         :type key: str
         """
-        return self.hdf5[key].attrs.items()
+        if key == '':
+            print self.hdf5.attrs.items()
+            return self.hdf5.attrs.items()
+        else:
+            return self.hdf5[key].attrs.items()
 
     def get_calibration(self, key, reffreq):
         """Gets a saved calibration, in attenuation from a refernece frequency point

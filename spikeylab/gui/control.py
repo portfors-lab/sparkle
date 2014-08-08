@@ -63,6 +63,8 @@ class MainWindow(ControlWindow):
         # auto generated code intialization
         ControlWindow.__init__(self, inputsFilename)
         
+        self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
+
         self.ui.startBtn.clicked.connect(self.onStart)
         self.ui.stopBtn.clicked.connect(self.onStop)
         self.ui.startChartBtn.clicked.connect(self.onStartChart)

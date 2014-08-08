@@ -222,6 +222,8 @@ class AcquisitionManager():
         self.tone_calibrator.set(datafile=self.datafile)
         self.set_calibration(None)
 
+        self.current_cellid = dict(self.datafile.get_info('')).get('total cells', 0)
+
     def current_data_file(self):
         """Name of the currently employed data file
 
@@ -381,7 +383,9 @@ class AcquisitionManager():
 
     def close_data(self):
         """Closes the current data file"""
+        # save the total number of cells to make re-loading convient
         if self.datafile is not None:
+            self.datafile.set_metadata('', {'total cells': self.current_cellid})
             self.datafile.close()
 
     def protocol_model(self):
