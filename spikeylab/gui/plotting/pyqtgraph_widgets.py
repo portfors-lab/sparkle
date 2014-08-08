@@ -266,8 +266,7 @@ class SpecWidget(BasePlot):
         self.updateColormap()
 
     def resetScale(self):
-        """Resets the scale on this image"""
-        print 'RESET SCALCE EXLABORATE DOCSTRING'
+        """Resets the scale on this image. Correctly aligns time scale, undoes manual scaling"""
         self.img.scale(1./self.imgScale[0], 1./self.imgScale[1])
         self.imgScale = (1.,1.)
 
