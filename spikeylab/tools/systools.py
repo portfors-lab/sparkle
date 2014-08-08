@@ -1,4 +1,6 @@
 import sys, os
+import ctypes
+import platform
 
 APPNAME = 'audiolab'
 
@@ -15,3 +17,14 @@ def get_project_directory():
 
 def get_src_directory():
     return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+def get_free_mb(folder):
+    """ Return folder/drive free space (in bytes)
+    """
+    if platform.system() == 'Windows':
+        free_bytes = ctypes.c_ulonglong(0)
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(folder), None, None, ctypes.pointer(free_bytes))
+        return free_bytes.value/1024/1024
+    else:
+        st = os.statvfs(folder)
+        return st.f_bavail * st.f_frsize/1024/1024
