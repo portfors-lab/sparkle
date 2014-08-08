@@ -332,22 +332,15 @@ class MainWindow(ControlWindow):
                 ww.close()
                 self.pw.show()
         elif self.activeOperation == 'protocol' and self.currentMode == 'windowed':
-            if self.acqmodel.current_cellid == 0:
-                # first acquisition, don't ask if it's a new cell
-                self.acqmodel.increment_cellid()
-            else:
-                answer = QtGui.QMessageBox.question(self, 'Cell ID', 'New cell?',
-                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-                if answer == QtGui.QMessageBox.Yes:
-                    self.acqmodel.increment_cellid()
-
             cellbox = CellCommentDialog(cellid=self.acqmodel.current_cellid)
+            cellbox.setComment(self.ui.commentTxtEdt.toPlainText())
             if cellbox.exec_():
                 comment = cellbox.comment()
                 self.acqmodel.set_group_comment(comment)
             else:
                 # save empty comment
                 self.acqmodel.set_group_comment('')
+            self.ui.commentTxtEdt.clear()
 
         self.onStop()
 
@@ -429,6 +422,16 @@ class MainWindow(ControlWindow):
             self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
             self.ui.protocolProgressBar.setMaximum(self.acqmodel.protocol_total_count())
 
+            if self.acqmodel.current_cellid == 0:
+                # first acquisition, don't ask if it's a new cell
+                self.acqmodel.increment_cellid()
+            else:
+                answer = QtGui.QMessageBox.question(self, 'Cell ID', 'New cell?',
+                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+                if answer == QtGui.QMessageBox.Yes:
+                    self.acqmodel.increment_cellid()
+            self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
+            
             self.acqmodel.run_protocol()
         else:
             self.acqmodel.run_chart_protocol(interval)

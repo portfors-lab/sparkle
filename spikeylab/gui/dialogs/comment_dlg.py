@@ -12,3 +12,8 @@ class CellCommentDialog(QtGui.QDialog):
 
     def comment(self):
         return self.ui.commentTxtedt.toPlainText()
+
+    def setComment(self, msg):
+        self.ui.commentTxtedt.setPlainText(msg)
+        # move text cursor to end
+        self.ui.commentTxtedt.moveCursor(QtGui.QTextCursor.End)

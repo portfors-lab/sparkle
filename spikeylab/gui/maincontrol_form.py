@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Jul 18 13:29:18 2014
+# Created: Fri Aug 08 09:26:57 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(1332, 803)
+        ControlWindow.resize(1274, 803)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -365,7 +365,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1332, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -484,6 +484,26 @@ class Ui_ControlWindow(object):
         self.verticalLayout_11.addWidget(self.stimDetails)
         self.detail_dock.setWidget(self.dockWidgetContents_5)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.detail_dock)
+        self.runComment = QtGui.QDockWidget(ControlWindow)
+        self.runComment.setObjectName(_fromUtf8("runComment"))
+        self.dockWidgetContents_6 = QtGui.QWidget()
+        self.dockWidgetContents_6.setObjectName(_fromUtf8("dockWidgetContents_6"))
+        self.verticalLayout_8 = QtGui.QVBoxLayout(self.dockWidgetContents_6)
+        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
+        self.horizontalLayout_11 = QtGui.QHBoxLayout()
+        self.horizontalLayout_11.setObjectName(_fromUtf8("horizontalLayout_11"))
+        self.label_21 = QtGui.QLabel(self.dockWidgetContents_6)
+        self.label_21.setObjectName(_fromUtf8("label_21"))
+        self.horizontalLayout_11.addWidget(self.label_21)
+        self.cellIDLbl = QtGui.QLabel(self.dockWidgetContents_6)
+        self.cellIDLbl.setObjectName(_fromUtf8("cellIDLbl"))
+        self.horizontalLayout_11.addWidget(self.cellIDLbl)
+        self.verticalLayout_8.addLayout(self.horizontalLayout_11)
+        self.commentTxtEdt = QtGui.QPlainTextEdit(self.dockWidgetContents_6)
+        self.commentTxtEdt.setObjectName(_fromUtf8("commentTxtEdt"))
+        self.verticalLayout_8.addWidget(self.commentTxtEdt)
+        self.runComment.setWidget(self.dockWidgetContents_6)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.runComment)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -618,6 +638,9 @@ class Ui_ControlWindow(object):
         self.progressDock.setWindowTitle(_translate("ControlWindow", "Progress", None))
         self.log_dock.setWindowTitle(_translate("ControlWindow", "Log", None))
         self.detail_dock.setWindowTitle(_translate("ControlWindow", "Stimulus Details", None))
+        self.runComment.setWindowTitle(_translate("ControlWindow", "Comment", None))
+        self.label_21.setText(_translate("ControlWindow", "Cell ID:", None))
+        self.cellIDLbl.setText(_translate("ControlWindow", "0", None))
         self.actionSave_Options.setText(_translate("ControlWindow", "Change Data File...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Calibration Parameters...", None))
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
@@ -634,11 +657,11 @@ class Ui_ControlWindow(object):
         self.actionLog.setText(_translate("ControlWindow", "Log", None))
         self.actionStimulus_Details.setText(_translate("ControlWindow", "Stimulus Details", None))
 
-from spikeylab.gui.stim.dynamic_stacker import DynamicStackedWidget
+from spikeylab.gui.qprotocol import ProtocolView
+from spikeylab.gui.plotting.pyqtgraph_widgets import PSTHWidget
 from spikeylab.gui.stim.detail_widget import StimDetailWidget
 from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
-from spikeylab.gui.qprotocol import ProtocolView
 from spikeylab.gui.calibration_widget import CalibrationWidget
-from spikeylab.gui.plotting.pyqtgraph_widgets import PSTHWidget
-from spikeylab.gui.plotdock import PlotDockWidget
 from spikeylab.gui.stim.stimulus_label import StimulusLabelTable
+from spikeylab.gui.plotdock import PlotDockWidget
+from spikeylab.gui.stim.dynamic_stacker import DynamicStackedWidget

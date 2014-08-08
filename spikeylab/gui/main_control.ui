@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1332</width>
+    <width>1274</width>
     <height>803</height>
    </rect>
   </property>
@@ -691,7 +691,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1332</width>
+     <width>1274</width>
      <height>21</height>
     </rect>
    </property>
@@ -924,6 +924,39 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="runComment">
+   <property name="windowTitle">
+    <string>Comment</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QVBoxLayout" name="verticalLayout_8">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <item>
+        <widget class="QLabel" name="label_21">
+         <property name="text">
+          <string>Cell ID:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="cellIDLbl">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPlainTextEdit" name="commentTxtEdt"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionSave_Options">
    <property name="text">
     <string>Change Data File...</string>
@@ -1004,47 +1037,47 @@
   <customwidget>
    <class>SmartSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>spikeylab.stim.smart_spinbox</header>
+   <header>spikeylab.gui.stim.smart_spinbox</header>
   </customwidget>
   <customwidget>
    <class>PSTHWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.plotting.pyqtgraph_widgets</header>
+   <header>spikeylab.gui.plotting.pyqtgraph_widgets</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>DynamicStackedWidget</class>
    <extends>QStackedWidget</extends>
-   <header>spikeylab.stim.dynamic_stacker</header>
+   <header>spikeylab.gui.stim.dynamic_stacker</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ProtocolView</class>
    <extends>QTableView</extends>
-   <header>spikeylab.main.qprotocol</header>
+   <header>spikeylab.gui.qprotocol</header>
   </customwidget>
   <customwidget>
    <class>StimulusLabelTable</class>
    <extends>QWidget</extends>
-   <header>spikeylab.stim.stimulus_label</header>
+   <header>spikeylab.gui.stim.stimulus_label</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>CalibrationWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.calibration.calibration_widget</header>
+   <header>spikeylab.gui.calibration_widget</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PlotDockWidget</class>
    <extends>QDockWidget</extends>
-   <header>spikeylab.main.plotdock</header>
+   <header>spikeylab.gui.plotdock</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>StimDetailWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.stim.detail_widget</header>
+   <header>spikeylab.gui.stim.detail_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
