@@ -223,6 +223,38 @@ class TestAcquisitionModel():
 
         hfile.close()
 
+    def test_abort_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set_calibration(None)
+        #insert some stimuli
+
+        tone0 = PureTone()
+        tone0.setDuration(0.02)
+        stim0 = StimulusModel()
+        stim0.insertComponent(tone0)
+        stim0.setRepCount(500) # set really high so we don't miss
+        manager.protocol_model().insert(stim0,0)
+        gen_rate = stim0.samplerate()
+
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        manager.halt()
+        t.join()
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        group = hfile['segment_1']
+
+        assert group.attrs.get('aborted') is not None
+        abort_msg = group.attrs['aborted']
+        assert abort_msg.startswith("test 1, trace 0, rep")
+
+        hfile.close()
+
     # @unittest.skip("Grrrrrr")
     def test_protocol_timing(self):
         winsz = 0.2 #seconds

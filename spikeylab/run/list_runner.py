@@ -76,6 +76,10 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
             logger = logging.getLogger('main')
             gc.disable()
             # self.player.start_timer(self.reprate)
+            # incase of early abortion...
+            itest = 0
+            itrace = -1
+            irep = 0
             try:
                 for itest, test in enumerate(stimuli):
                     # pull out signal from stim model
@@ -169,6 +173,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     # profiler.dump_stats('test_run.profile')
             except Broken:
                 # save some abortion message
+                self.datafile.set_metadata(self.current_dataset_name, {'aborted': 'test {}, trace {}, rep {}'.format(itest+1, itrace+1, irep+1)})
                 self.player.stop()
 
             # self.player.stop_timer()
