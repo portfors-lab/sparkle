@@ -305,10 +305,18 @@ class AcquisitionData():
         :type key: str
         """
         if key == '':
-            print self.hdf5.attrs.items()
             return self.hdf5.attrs.items()
         else:
             return self.hdf5[key].attrs.items()
+
+    def get_trace_info(self, key):
+        """Retrives the stimulus info saved to the given dataset. Works for finite dataset keys only
+
+        :param key: The name of dataset to get stimulus info for
+        :type key: str
+        """
+        # TODO: add error checking
+        return json.loads(self.hdf5[key].attrs['stim'])
 
     def get_calibration(self, key, reffreq):
         """Gets a saved calibration, in attenuation from a refernece frequency point
