@@ -20,7 +20,7 @@ class StimDetailWidget(QtGui.QWidget):
     def setDoc(self, doc):
         self.ui.overAtten.setNum(doc['overloaded_attenuation'])
         # also set composite stim type
-        self.ui.traceType.setText(doc['testtype'])
+        # self.ui.traceType.setText(doc['testtype'])
 
         self.ui.componentDetails.clearDoc()
         self.ui.componentDetails.setDoc(doc['components'])

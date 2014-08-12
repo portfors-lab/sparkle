@@ -435,7 +435,7 @@ class AcquisitionData():
         logger = logging.getLogger('main')
         logger.info('Deleted data group %s' % key)
 
-    def set_metadata(self, key, attrdict):
+    def set_metadata(self, key, attrdict, test=False):
         """Sets attributes for a dataset or group
 
         :param key: name of group or dataset
@@ -454,7 +454,11 @@ class AcquisitionData():
             for attr, val in attrdict.iteritems():
                 if val is None:
                     val = '' # can't save None attribute value to HDF5
-                self.hdf5[key].attrs[attr] = val
+                if test:
+                    setname = key + '/' + 'test_'+str(self.test_count)
+                    self.hdf5[setname].attrs[attr] = val
+                else:
+                    self.hdf5[key].attrs[attr] = val
  
     def append_trace_info(self, key, stim_data):
         """Sets the stimulus documentation for the given dataset/groupname. If key is for a finite group, sets for current test

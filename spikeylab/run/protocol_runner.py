@@ -38,6 +38,7 @@ class ProtocolRunner(ListAcquisitionRunner):
                                 mode='finite')
         # check for special condition -- replace this with a generic
         # if test.editor is not None and test.editor.name == "Tuning Curve":
+        self.current_test_type = test.stimType()
         if test.stimType() == "Tuning Curve":
             frequencies, intensities =  test.autoParamRanges()
             self.putnotify('tuning_curve_started', (list(frequencies), list(intensities), 'tuning'))
@@ -76,7 +77,7 @@ class ProtocolRunner(ListAcquisitionRunner):
             avg_latency = sum(spike_latencies)/len(spike_latencies)
             avg_rate = sum(spike_rates)/len(spike_rates)
             self.putnotify('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
-            if trace_info['testtype'] == 'Tuning Curve':
+            if self.current_test_type == 'Tuning Curve' and trace_info['components'][0]['stim_type'] != 'Control Silence':
                 f = trace_info['components'][0]['frequency']
                 db = trace_info['components'][0]['intensity']
                 self.putnotify('tuning_curve_response', (f, db, avg_count))

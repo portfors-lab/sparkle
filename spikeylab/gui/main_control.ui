@@ -63,7 +63,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>3</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">

@@ -352,7 +352,7 @@ class StimulusModel():
 
         # 3 loops now -- could be done in one...
         signals = self.expandFunction(self.signal)
-        docs = self.expandFunction(self.doc)
+        docs = self.expandFunction(self.componentDoc)
 
         overloads = []
         for s, d in zip(signals, docs):
@@ -373,7 +373,7 @@ class StimulusModel():
         """
         JSON/YAML/XML template to recreate this stimulus in another session
         """
-        doc = self.doc(False)
+        doc = dict(self.componentDoc(False).items() + self.testDoc().items())
 
         # go through auto-parameter selected components and use location index
         autoparams = copy.deepcopy(self._autoParams.allData())
@@ -487,7 +487,7 @@ class StimulusModel():
 
         return total_signal, atten, undesired_attenuation
 
-    def doc(self, starttime=True):
+    def componentDoc(self, starttime=True):
         samplerate = self.samplerate()
         doc_list = []
         for row, track in enumerate(self._segments):
@@ -503,9 +503,11 @@ class StimulusModel():
 
                 doc_list.append(info)
 
-        return {'samplerate_da':samplerate, 'reps': self._nreps, 'user_tag': self._userTag,
-                'calv': self.calv, 'caldb':self.caldb, 'components': doc_list,
-                'testtype': self._stimType}
+        return {'samplerate_da':samplerate, 'components' : doc_list}
+
+    def testDoc(self):
+        return {'reps': self._nreps, 'user_tag': self._userTag,
+                'calv': self.calv, 'caldb':self.caldb, 'testtype': self._stimType}
 
     def updateComponentStartVals(self):
         """Go through selected components for each auto parameter and set the start value"""
