@@ -722,7 +722,7 @@ class MainWindow(ControlWindow):
         self.saveExplore = save
 
     def clearProtocol(self):
-        self.acqmodel.clear_protocol()
+        self.ui.protocolView.model().clearTests()
 
     def updateCalDb(self):
         self.calvals['caldb'] = self.ui.refDbSpnbx.value()
