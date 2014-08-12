@@ -11,10 +11,15 @@ class QDataReviewer(QtGui.QWidget):
         layout = QtGui.QHBoxLayout(self)
 
         hsplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+
+        asplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         self.datatree = H5TreeWidget()
-        self.datatree.itemDoubleClicked.connect(self.setTestData)
-        # layout.addWidget(self.datatree)
-        hsplitter.addWidget(self.datatree)
+        self.datatree.itemClicked.connect(self.setCurrentData)
+        asplitter.addWidget(self.datatree)
+
+        self.attrtxt = QtGui.QPlainTextEdit()
+        asplitter.addWidget(self.attrtxt)
+        hsplitter.addWidget(asplitter)
 
         # traceLayout = QtGui.QVBoxLayout()
         traceSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -45,38 +50,39 @@ class QDataReviewer(QtGui.QWidget):
     def update(self):
         self.datatree.update(self.datafile.hdf5)
 
-    def setTestData(self, widgetitem, num):
-        # reset table
-        self.tracetable.setRowCount(0)
-        self.detailWidget.clearDoc()
-
-        dataset_name = widgetitem.data(0, QtCore.Qt.DisplayRole)
+    def setCurrentData(self, widgetitem, num):
         path = makepath(widgetitem)
-        print 'fullpath', path
-        trace_data = self.datafile.get(path)
-        print 'data shape', trace_data.shape
-        if self.datafile.get_trace_info(path) is not None:
-            stimuli = self.datafile.get_trace_info(path)
-            print 'no. of stim', len(stimuli)
-            self.tracetable.setRowCount(len(stimuli))
-            for row, stim in enumerate(stimuli):
-                # print stim
-                item =QtGui.QTableWidgetItem(stim['testtype'])
-                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-                self.tracetable.setItem(row, 0,  item)
-                item  = QtGui.QTableWidgetItem(stim['user_tag'])
-                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-                self.tracetable.setItem(row, 1,  item)
-                item =  QtGui.QTableWidgetItem(str(stim['reps']))
-                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-                self.tracetable.setItem(row, 2, item)
-                item =  QtGui.QTableWidgetItem(str(stim['samplerate_da']))
-                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-                self.tracetable.setItem(row, 3, item)
-            self.current_test = stimuli
-        else:
-            # other infos
-            pass
+        info = self.datafile.get_info(path)
+        self.attrtxt.clear()
+        for attr in info:
+            if attr[0] != 'stim':
+                self.attrtxt.appendPlainText(attr[0] + ' : ' + str(attr[1]))
+
+        setname = widgetitem.text(0)
+        self.tracetable.setRowCount(0)
+        if setname.startswith('test') or setname.startswith('signal'):
+            self.detailWidget.clearDoc()
+            trace_data = self.datafile.get(path)
+            print 'data shape', trace_data.shape
+            if self.datafile.get_trace_info(path) is not None:
+                stimuli = self.datafile.get_trace_info(path)
+                self.tracetable.setRowCount(len(stimuli))
+                for row, stim in enumerate(stimuli):
+                    # print stim
+                    item = QtGui.QTableWidgetItem(stim['testtype'])
+                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                    self.tracetable.setItem(row, 0,  item)
+                    item  = QtGui.QTableWidgetItem(stim['user_tag'])
+                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                    self.tracetable.setItem(row, 1,  item)
+                    item =  QtGui.QTableWidgetItem(str(stim['reps']))
+                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                    self.tracetable.setItem(row, 2, item)
+                    item =  QtGui.QTableWidgetItem(str(stim['samplerate_da']))
+                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                    self.tracetable.setItem(row, 3, item)
+                self.current_test = stimuli
+
 
     def setTraceData(self, row, column):
         self.detailWidget.clearDoc()
