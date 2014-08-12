@@ -255,6 +255,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.display.setSpecArgs(**self.specArgs)  
         self.viewSettings = inputsdict.get('viewSettings', {'fontsz': 10, 'display_attributes':{}})
         self.ui.stimDetails.setDisplayAttributes(self.viewSettings['display_attributes'])
+        self.ui.reviewer.setDisplayAttributes(self.viewSettings['display_attributes'])
         font = QtGui.QFont()
         font.setPointSize(self.viewSettings['fontsz'])
         QtGui.QApplication.setFont(font)

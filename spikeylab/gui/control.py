@@ -63,6 +63,8 @@ class MainWindow(ControlWindow):
         # auto generated code intialization
         ControlWindow.__init__(self, inputsFilename)
         
+        self.ui.reviewer.setDataObject(self.acqmodel.datafile)
+
         self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
 
         self.ui.startBtn.clicked.connect(self.onStart)
@@ -345,6 +347,9 @@ class MainWindow(ControlWindow):
             self.ui.commentTxtEdt.clear()
 
         self.onStop()
+
+        # add group to review data tree
+        self.ui.reviewer.update()
 
     def runChart(self):
         winsz, acq_rate = self.onUpdate()
@@ -652,6 +657,7 @@ class MainWindow(ControlWindow):
         if dlg.exec_():
             self.viewSettings = dlg.values()
             self.ui.stimDetails.setDisplayAttributes(self.viewSettings['display_attributes'])
+            self.ui.reviewer.setDisplayAttributes(self.viewSettings['display_attributes'])
             font = QtGui.QFont()
             font.setPointSize(self.viewSettings['fontsz'])
             QtGui.QApplication.setFont(font)
@@ -755,7 +761,6 @@ if __name__ == "__main__":
     drives = ['C:\\', 'D:\\']
     low_space = []
     plenty_space = []
-    # space = [get_free_mb(drive) for drive in drives]
     for drive in drives:
         space = get_free_mb(drive)
         if space < 1024:

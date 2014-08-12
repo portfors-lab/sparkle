@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Aug 08 09:26:57 2014
+# Created: Mon Aug 11 16:26:21 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -196,6 +196,14 @@ class Ui_ControlWindow(object):
         self.gridLayout_3.addWidget(self.label_9, 1, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.tabGroup.addTab(self.tabCalibrate, _fromUtf8(""))
+        self.tabReview = QtGui.QWidget()
+        self.tabReview.setObjectName(_fromUtf8("tabReview"))
+        self.verticalLayout_13 = QtGui.QVBoxLayout(self.tabReview)
+        self.verticalLayout_13.setObjectName(_fromUtf8("verticalLayout_13"))
+        self.reviewer = QDataReviewer(self.tabReview)
+        self.reviewer.setObjectName(_fromUtf8("reviewer"))
+        self.verticalLayout_13.addWidget(self.reviewer)
+        self.tabGroup.addTab(self.tabReview, _fromUtf8(""))
         self.verticalLayout_12.addWidget(self.tabGroup)
         self.protocolProgressBar = QtGui.QProgressBar(self.centralwidget)
         self.protocolProgressBar.setEnabled(True)
@@ -549,7 +557,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tabGroup.setCurrentIndex(0)
+        self.tabGroup.setCurrentIndex(3)
         self.parameterStack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchSaveDlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCalibrationDlg)
@@ -595,6 +603,7 @@ class Ui_ControlWindow(object):
         self.label_19.setText(_translate("ControlWindow", "undesired attenuation", None))
         self.label_9.setText(_translate("ControlWindow", "peak dB SPL level", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabCalibrate), _translate("ControlWindow", "Calibration", None))
+        self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabReview), _translate("ControlWindow", "Review", None))
         self.label_30.setText(_translate("ControlWindow", "AI channel", None))
         self.label_29.setText(_translate("ControlWindow", "Stim channel", None))
         self.label.setText(_translate("ControlWindow", "Acq. Sample rate", None))
@@ -657,6 +666,7 @@ class Ui_ControlWindow(object):
         self.actionLog.setText(_translate("ControlWindow", "Log", None))
         self.actionStimulus_Details.setText(_translate("ControlWindow", "Stimulus Details", None))
 
+from spikeylab.gui.data_review import QDataReviewer
 from spikeylab.gui.qprotocol import ProtocolView
 from spikeylab.gui.plotting.pyqtgraph_widgets import PSTHWidget
 from spikeylab.gui.stim.detail_widget import StimDetailWidget

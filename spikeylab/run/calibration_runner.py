@@ -72,8 +72,7 @@ class CalibrationRunner(ListAcquisitionRunner):
         logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
         
         self.datafile.init_data(self.current_dataset_name, mode='calibration', 
-                                dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()),
-                                nested_name='signal')
+                                dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
 
         info = {'samplerate_ad': self.player.aisr}
         self.datafile.set_metadata(self.current_dataset_name, info)

@@ -122,7 +122,7 @@ class AcquisitionData():
         self.meta[key] = {'mode': mode}
         if mode == 'calibration':
             self.set_metadata(key, {'start': time.strftime('%H:%M:%S'), 
-                              'mode':'calibration', 'stim': '[]'})
+                              'mode':'calibration'})
 
         logger = logging.getLogger('main')
         logger.info('Created data group %s' % key)
@@ -149,9 +149,13 @@ class AcquisitionData():
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         if mode == 'calibration':
+            if nested_name is None:
+                nested_name = 'signal'
             setname = nested_name
+            setpath ='/'.join([key, setname])
             self.hdf5[key].create_dataset(setname, dims)
             self.meta[nested_name] = {'cursor':[0]*len(dims)}
+            self.set_metadata(setpath, {'stim': '[]'})
         elif mode == 'finite':
             self.test_count +=1
             setname = 'test_'+str(self.test_count)
@@ -315,8 +319,10 @@ class AcquisitionData():
         :param key: The name of dataset to get stimulus info for
         :type key: str
         """
-        # TODO: add error checking
-        return json.loads(self.hdf5[key].attrs['stim'])
+        if key in self.hdf5 and 'stim' in self.hdf5[key].attrs:
+            return json.loads(self.hdf5[key].attrs['stim'])
+        else:
+            return None
 
     def get_calibration(self, key, reffreq):
         """Gets a saved calibration, in attenuation from a refernece frequency point
@@ -328,7 +334,7 @@ class AcquisitionData():
         :returns: (numpy.ndarray, numpy.ndarray) -- frequencies of the attenuation vector, attenuation values
         """
         cal_vector = self.hdf5[key]['calibration_intensities'].value
-        stim_info = json.loads(self.hdf5[key].attrs['stim'])
+        stim_info = json.loads(self.hdf5[key+'/signal'].attrs['stim'])
         fs = stim_info[0]['samplerate_da']
         npts = len(cal_vector)
         frequencies = np.arange(npts)/(float((npts-1)*2)/fs)
@@ -474,7 +480,8 @@ class AcquisitionData():
             setname = key+'_set'+str(setnum)
             _append_stim(self.hdf5, setname, stim_data)
         elif mode == 'calibration':
-            _append_stim(self.hdf5, key, stim_data)
+            setname = key + '/' + 'signal'
+            _append_stim(self.hdf5, setname, stim_data)
 
     def keys(self):
         """The high-level keys for this file

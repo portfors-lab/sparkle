@@ -4,7 +4,7 @@ from spikeylab.gui.stim.component_detail import ComponentsDetailWidget
 
 from PyQt4 import QtCore, QtGui
 
-class DataReviewer(QtGui.QWidget):
+class QDataReviewer(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -20,7 +20,7 @@ class DataReviewer(QtGui.QWidget):
         traceSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
         self.tracetable = QtGui.QTableWidget()
-        headers = ['Test Type', 'Tag', 'Reps']
+        headers = ['Test Type', 'Tag', 'Reps', 'Sample Rate']
         self.tracetable.setColumnCount(len(headers))
         self.tracetable.setHorizontalHeaderLabels(headers)
         self.tracetable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -42,30 +42,41 @@ class DataReviewer(QtGui.QWidget):
         self.datatree.addH5Handle(data.hdf5)
         self.datatree.expandItem(self.datatree.topLevelItem(0))
 
+    def update(self):
+        self.datatree.update(self.datafile.hdf5)
+
     def setTestData(self, widgetitem, num):
         # reset table
         self.tracetable.setRowCount(0)
+        self.detailWidget.clearDoc()
+
         dataset_name = widgetitem.data(0, QtCore.Qt.DisplayRole)
         path = makepath(widgetitem)
         print 'fullpath', path
         trace_data = self.datafile.get(path)
         print 'data shape', trace_data.shape
-        stimuli = self.datafile.get_trace_info(path)
-        print 'no. of stim', len(stimuli)
-        self.tracetable.setRowCount(len(stimuli))
-        for row, stim in enumerate(stimuli):
-            # print stim
-            item =QtGui.QTableWidgetItem(stim['testtype'])
-            item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-            self.tracetable.setItem(row, 0,  item)
-            item  = QtGui.QTableWidgetItem(stim['user_tag'])
-            item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-            self.tracetable.setItem(row, 1,  item)
-            item =  QtGui.QTableWidgetItem(str(stim['reps']))
-            item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-            self.tracetable.setItem(row, 2, item)
-        self.current_test = stimuli
-        self.detailWidget.clearDoc()
+        if self.datafile.get_trace_info(path) is not None:
+            stimuli = self.datafile.get_trace_info(path)
+            print 'no. of stim', len(stimuli)
+            self.tracetable.setRowCount(len(stimuli))
+            for row, stim in enumerate(stimuli):
+                # print stim
+                item =QtGui.QTableWidgetItem(stim['testtype'])
+                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                self.tracetable.setItem(row, 0,  item)
+                item  = QtGui.QTableWidgetItem(stim['user_tag'])
+                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                self.tracetable.setItem(row, 1,  item)
+                item =  QtGui.QTableWidgetItem(str(stim['reps']))
+                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                self.tracetable.setItem(row, 2, item)
+                item =  QtGui.QTableWidgetItem(str(stim['samplerate_da']))
+                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                self.tracetable.setItem(row, 3, item)
+            self.current_test = stimuli
+        else:
+            # other infos
+            pass
 
     def setTraceData(self, row, column):
         self.detailWidget.clearDoc()
@@ -87,7 +98,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
     data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
-    viewer = DataReviewer()
+    viewer = QDataReviewer()
     viewer.setDataObject(data)
     viewer.setDisplayAttributes({'Vocalization': [u'Vocalization', u'risefall', u'intensity', u'file', u'duration', 'start_s'], 'silence': [u'silence', u'duration', u'risefall', u'intensity'], 'Pure Tone': [u'Pure Tone', u'duration', u'risefall', u'intensity', u'frequency']})
     viewer.show()

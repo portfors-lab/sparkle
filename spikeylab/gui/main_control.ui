@@ -63,7 +63,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -346,6 +346,16 @@
                </widget>
               </item>
              </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabReview">
+           <attribute name="title">
+            <string>Review</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_13">
+            <item>
+             <widget class="QDataReviewer" name="reviewer" native="true"/>
             </item>
            </layout>
           </widget>
@@ -1078,6 +1088,12 @@
    <class>StimDetailWidget</class>
    <extends>QWidget</extends>
    <header>spikeylab.gui.stim.detail_widget</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QDataReviewer</class>
+   <extends>QWidget</extends>
+   <header>spikeylab.gui.data_review</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -38,6 +38,7 @@ class H5TreeWidget(QtGui.QTreeWidget):
     def __init__(self, *args):
         QtGui.QTreeWidget.__init__(self, *args)
         self.fhandles = {}
+        self.roots = {}
         self.header().hide()
         
     def addH5File(self, filename):
@@ -53,12 +54,11 @@ class H5TreeWidget(QtGui.QTreeWidget):
 
     def addH5Handle(self, handle):
         filename = handle.filename
-        if not filename.startswith('/'):
-            filename = os.path.abspath(filename)
         if not filename in self.fhandles.keys():
             self.fhandles[filename] = handle
             item = H5TreeWidgetItem(self, handle)
             self.addTopLevelItem(item)
+            self.roots[filename] = item
             item.setText(0, filename)
             self.addTree(item, handle)
             
@@ -67,6 +67,18 @@ class H5TreeWidget(QtGui.QTreeWidget):
             for child in node:
                 item = H5TreeWidgetItem(currentItem, node[child])
                 self.addTree(item, node[child])
+
+    def update(self, handle):
+        filename = handle.filename
+        handle = self.fhandles[filename]
+        top_groups = handle.keys()
+        root = self.roots[filename]
+        existing = [root.child(i).data(0, QtCore.Qt.DisplayRole) for i in range(root.childCount())]
+        for group in top_groups:
+            if group not in existing:
+                item = H5TreeWidgetItem(root, handle[group])
+                item.setText(0, group)
+                self.addTree(item, handle[group])
 
     def getData(self, path):
         path = str(path)
@@ -153,40 +165,6 @@ class H5TreeWidget(QtGui.QTreeWidget):
             if path.startswith(key):
                 return key
         return None
-    
-    def getTimeSeries(self, path):
-        h5f = self.fhandles[self.getOpenFileName(path)]
-        scheduling = h5f.get('/runconfig/scheduling')
-        if scheduling is not None:
-            for item in scheduling:
-                if item[0] == 'simtime':
-                    simtime = float(item[1])
-                if item[0] == 'plotdt':
-                    plotdt = float(item[1])
-        else:
-            try:
-                simtime = h5f.attrs['simtime']
-                plotdt = h5f.attrs['plotdt']
-            except KeyError:
-                simtime = None
-                plotdt = 1.0
-        data = self.getData(path)
-        num_points = len(data)
-        if simtime is not None:
-            ret = numpy.linspace(0, simtime, num_points)
-        else:
-            ret = numpy.linspace(0, num_points, 1)
-        return ret
-
-    def get_plotdt(self, path):
-        h5f = self.fhandles[self.getOpenFileName(path)]
-        scheduling = h5f.get('/runconfig/scheduling')
-        if scheduling is not None:
-            for item in scheduling:
-                if item[0] == 'plotdt':
-                    return float(item[1])
-        else:
-            return h5f.attrs['plotdt']
 
     def closeCurrentFile(self):
         to_delete = {}
