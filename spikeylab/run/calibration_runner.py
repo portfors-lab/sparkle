@@ -267,6 +267,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
             self.putnotify('response_collected', (self.aitimes, response))
+            self.putnotify('calibration_response_collected', (spectrum, freq, vamp))
 
         # calculate resultant dB and emit
         if USE_FFT:
