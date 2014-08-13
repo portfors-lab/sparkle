@@ -506,6 +506,7 @@ class TestAcquisitionModel():
         manager, fname = self.create_acqmodel(winsz)
         acq_rate = manager.calibration_genrate()
 
+        manager.set_calibration_by_index(2)
         tc = manager.calibration_stimulus('tone')
         ntraces = tc.traceCount()
         nreps = tc.repCount()
@@ -514,11 +515,11 @@ class TestAcquisitionModel():
         manager.set_calibration_duration(winsz)
         t = manager.run_calibration(0.1, False)
         t.join()
-        calname = manager.process_calibration(False)
+        # calname = manager.process_calibration(False)
         fname = manager.datafile.filename
         manager.close_data()
 
-        # tone calibration should never save
+        # tone calibration should never save -- datafile is deleted on close if empty
         assert not os.path.isfile(fname)
 
     def test_noise_calibration_protocol(self):
