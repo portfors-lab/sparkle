@@ -585,8 +585,6 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     stim_doc = json.loads(test_data.attrs['stim'])
 
     print 'stim doc', stim_doc[0]
-    assert stim_doc[0]['components'][0]['stim_type'] == 'silence' # control
-    stim_doc = stim_doc[1:]
 
     # check everthing we can here
     assert test_data.attrs['user_tag'] == ''
@@ -610,6 +608,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
             assert 'duration' in component_info
 
 
+    stim_doc = stim_doc[1:] # remove control stim
     assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
 
     # to keep these tests simple, assume the altered component is at 
