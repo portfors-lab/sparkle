@@ -483,6 +483,7 @@ class TestAcqusitionData():
         acq_data.init_group(calname, mode='calibration')
         acq_data.init_data(calname, mode='calibration', 
                             dims=caldata.shape, nested_name='calibration_intensities')
+        acq_data.init_data(calname, mode='calibration', dims=caldata.shape)
         acq_data.append(calname, caldata, nested_name='calibration_intensities')
         relevant_info = {'frequencies': 'all', 'calibration_dB':115,
                          'calibration_voltage': 1.0, 'calibration_frequency': 15000,

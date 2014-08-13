@@ -86,7 +86,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     test.setReferenceVoltage(self.caldb, self.calv)
 
                     self._initialize_test(test)
-                    self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), test=True)
+                    self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), signal=True)
                     # profiler = cProfile.Profile()
                     # print 'profiling....'
                     # profiler.enable()
@@ -98,12 +98,11 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     self.nreps = test.repCount() # not sure I like this
                     # print 'profiling....'
                     # profiler.enable()
-
                     fs = test.samplerate()
                     if self.silence_window:
                         self.player.set_stim(np.array([0., 0.]), fs, 0)
                         trace_doc = {'samplerate_da':fs, 'components': [{'start_s':0, 
-                        'stim_type':'Control Silence', 'duration':0}], 'overloaded_attenuation':0}
+                        'stim_type':'silence', 'duration':0}], 'overloaded_attenuation':0}
                         itrace = -1
                         self.putnotify('stim_generated', (np.array([0, 0]), fs))
                         self.putnotify('current_trace', (itest,itrace,trace_doc))
@@ -118,7 +117,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             response = self.player.run()
                             stamps.append(time.time())
                             self._process_response(response, trace_doc, irep)
-                            
                             # print 'size of response len: {} bytes: {}'.format(len(response), response.nbytes)
                             self.putnotify('current_rep', (irep,))
                             self.player.reset()

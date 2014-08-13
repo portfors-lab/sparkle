@@ -155,7 +155,8 @@ class AcquisitionData():
             setpath ='/'.join([key, setname])
             self.hdf5[key].create_dataset(setname, dims)
             self.meta[nested_name] = {'cursor':[0]*len(dims)}
-            self.set_metadata(setpath, {'stim': '[]'})
+            if nested_name == 'signal':
+                self.set_metadata(setpath, {'stim': '[]'})
         elif mode == 'finite':
             self.test_count +=1
             setname = 'test_'+str(self.test_count)
@@ -221,7 +222,7 @@ class AcquisitionData():
             elif nested_name is not None:
                 setname = nested_name
             else:
-                raise ValueError('Must provide a nested_name for calibration mode')
+                setname = 'signal'
             current_location = self.meta[setname]['cursor']
             if data.shape == (1,):
                 index = current_location
@@ -435,7 +436,7 @@ class AcquisitionData():
         logger = logging.getLogger('main')
         logger.info('Deleted data group %s' % key)
 
-    def set_metadata(self, key, attrdict, test=False):
+    def set_metadata(self, key, attrdict, signal=False):
         """Sets attributes for a dataset or group
 
         :param key: name of group or dataset
@@ -454,8 +455,12 @@ class AcquisitionData():
             for attr, val in attrdict.iteritems():
                 if val is None:
                     val = '' # can't save None attribute value to HDF5
-                if test:
-                    setname = key + '/' + 'test_'+str(self.test_count)
+                if signal:
+                    mode = self.meta[key]['mode']
+                    if mode == 'finite':
+                        setname = key + '/' + 'test_'+str(self.test_count)
+                    elif mode == 'calibration':
+                        setname = key + '/signal'
                     self.hdf5[setname].attrs[attr] = val
                 else:
                     self.hdf5[key].attrs[attr] = val
@@ -475,6 +480,7 @@ class AcquisitionData():
             stim_data = json.dumps(convert2native(stim_data))
         mode = self.meta[key]['mode']
         if mode == 'open':
+            print 'appending stim in open'
             _append_stim(self.hdf5, key, stim_data)
         if mode == 'finite':
             setname = key + '/' + 'test_'+str(self.test_count)

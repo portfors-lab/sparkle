@@ -62,8 +62,8 @@ class MainWindow(ControlWindow):
         
         # auto generated code intialization
         ControlWindow.__init__(self, inputsFilename)
-        
-        self.ui.reviewer.setDataObject(self.acqmodel.datafile)
+        if datafile is not None:
+            self.ui.reviewer.setDataObject(self.acqmodel.datafile)
 
         self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
 

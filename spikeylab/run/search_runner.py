@@ -147,7 +147,7 @@ class SearchRunner(AbstractAcquisitionRunner):
     def save_to_file(self, data, stamp):
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
-        info = self.stimulus.doc()
+        info = dict(self.stimulus.componentDoc().items() + self.stimulus.testDoc().items())
         print 'saving doc', info
         info['time_stamps'] = [stamp]
         info['samplerate_ad'] = self.player.aisr

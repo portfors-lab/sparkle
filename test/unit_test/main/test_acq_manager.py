@@ -125,7 +125,7 @@ class TestAcquisitionModel():
 
         tone0 = PureTone()
         tone0.setDuration(0.02)
-        tone0.setIntensity(manager.protocoler.caldb)
+        tone0.setIntensity(120)
         tone0.setFrequency(90000)
         stim0 = StimulusModel()
         stim0.insertComponent(tone0)
@@ -386,7 +386,7 @@ class TestAcquisitionModel():
         manager.explorer._explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
         manager.set_stim_by_index(stim_names.index('Vocalization'))
 
-        time.sleep(1)
+        time.sleep(2)
 
         manager.halt()
 
@@ -399,7 +399,6 @@ class TestAcquisitionModel():
         test = hfile['explore_1']
 
         # check_result(test, manager.explorer.stimulus, winsz, acq_rate)
-
         stim = json.loads(test.attrs['stim'])
 
         assert_in('components', stim[0])
@@ -543,7 +542,7 @@ class TestAcquisitionModel():
         print 'calname', calname
         hfile = h5py.File(fname, 'r')
         signals = hfile[calname]['signal']
-        stim = json.loads(hfile[calname].attrs['stim'])
+        stim = json.loads(signals.attrs['stim'])
         cal_vector = hfile[calname]['calibration_intensities']
 
         assert_in('components', stim[0])
@@ -586,19 +585,22 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     stim_doc = json.loads(test_data.attrs['stim'])
 
     print 'stim doc', stim_doc[0]
-    assert stim_doc[0]['testtype'] == 'control'
+    assert stim_doc[0]['components'][0]['stim_type'] == 'silence' # control
     stim_doc = stim_doc[1:]
 
     # check everthing we can here
+    assert test_data.attrs['user_tag'] == ''
+    assert test_data.attrs['reps'] == nreps
+    assert test_data.attrs['calv'] == test_stim.calv
+    assert test_data.attrs['caldb'] == test_stim.caldb
+    t = test_stim.stimType()
+    if t is None: t = ''
+    assert test_data.attrs['testtype'] == t
+    
     for stim_info in stim_doc:
-        assert len(stim_info['time_stamps']) == stim_info['reps']
-        assert stim_info['user_tag'] == ''
+        assert len(stim_info['time_stamps']) == test_data.attrs['reps']
         assert stim_info['overloaded_attenuation'] == 0
-        assert stim_info['reps'] == nreps
-        assert stim_info['calv'] == test_stim.calv
-        assert stim_info['caldb'] == test_stim.caldb
         assert stim_info['samplerate_da'] == test_stim.samplerate()
-        assert stim_info['testtype'] == test_stim.stimType() # no editor in these tests
         assert len(stim_info['components']) == test_stim.componentCount()
         for component_info in stim_info['components']:
             # required fields

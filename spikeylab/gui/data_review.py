@@ -78,7 +78,7 @@ class QDataReviewer(QtGui.QWidget):
             group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
             fsout = dict(group_data)['samplerate_ad']
             self.derivedtxt.appendPlainText("Dataset dimensions : "+str(trace_data.shape))
-            self.derivedtxt.appendPlainText("Recording window duration : "+str(float(trace_data.shape[2])/fsout) + ' s')
+            self.derivedtxt.appendPlainText("Recording window duration : "+str(float(trace_data.shape[-1])/fsout) + ' s')
             if self.datafile.get_trace_info(path) is not None:
                 stimuli = self.datafile.get_trace_info(path)
 

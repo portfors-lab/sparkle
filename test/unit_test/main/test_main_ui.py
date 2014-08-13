@@ -100,7 +100,7 @@ class TestMainUI():
         # now check saved data
         hfile = h5py.File(fname, 'r')
         signals = hfile[calname]['signal']
-        stim = json.loads(hfile[calname].attrs['stim'])
+        stim = json.loads(signals.attrs['stim'])
         cal_vector = hfile[calname]['calibration_intensities']
 
         # make sure displayed counts jive with saved file
@@ -343,7 +343,6 @@ class TestMainUI():
         cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
         calname = cal_data_file.calibration_list()[0]
         calibration_vector, calibration_freqs = cal_data_file.get_calibration(calname, reffreq=15000)
-        
         manager.explorer.set_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.protocoler.set_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.charter.set_calibration(calibration_vector, calibration_freqs, frange, calname)

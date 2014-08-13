@@ -30,7 +30,7 @@ class ProtocolRunner(ListAcquisitionRunner):
         # override defualt trace_counter intialization to make space for silence window
         self.trace_counter = -1    
 
-    def _initialize_test(self, test):
+    def _initialize_test(self, test):        
         recording_length = self.aitimes.shape[0]
         # +1 to trace count for silence window
         self.datafile.init_data(self.current_dataset_name, 
@@ -70,14 +70,13 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.putnotify('spikes_found', (response_bins, irep))
 
         self.datafile.append(self.current_dataset_name, response)
-
         if irep == self.nreps-1:
             total_spikes = float(sum(spike_counts))
             avg_count = total_spikes/len(spike_counts)
             avg_latency = sum(spike_latencies)/len(spike_latencies)
             avg_rate = sum(spike_rates)/len(spike_rates)
             self.putnotify('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
-            if self.current_test_type == 'Tuning Curve' and trace_info['components'][0]['stim_type'] != 'Control Silence':
+            if self.current_test_type == 'Tuning Curve' and trace_info['components'][0]['stim_type'] != 'silence':
                 f = trace_info['components'][0]['frequency']
                 db = trace_info['components'][0]['intensity']
                 self.putnotify('tuning_curve_response', (f, db, avg_count))

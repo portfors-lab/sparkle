@@ -92,8 +92,7 @@ class CalibrationRunner(ListAcquisitionRunner):
         return
 
     def _process_response(self, response, trace_info, irep):
-        self.datafile.append(self.current_dataset_name, response, 
-                             nested_name='signal')
+        self.datafile.append(self.current_dataset_name, response)
 
         self.putnotify('response_collected', (self.aitimes, response))
         
@@ -193,6 +192,8 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
 
         self.datafile.init_group(self.current_dataset_name, mode='calibration')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                dims=(self.stimulus.traceCount(), self.stimulus.repCount(), self.aitimes.shape[0]))
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
                                 dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
                                 nested_name='fft_peaks')
         self.datafile.init_data(self.current_dataset_name, mode='calibration',
@@ -252,6 +253,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 self.trace_counter +=1
                 self.peak_avg = []
 
+            self.datafile.append(self.current_dataset_name, response)
             self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
                                  nested_name='fft_peaks')
             self.datafile.append(self.current_dataset_name, np.array([vamp]), 
@@ -259,7 +261,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
             self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
             self.putnotify('response_collected', (self.aitimes, response))
-        
+
         # calculate resultant dB and emit
         if USE_FFT:
             self.peak_avg.append(peak_fft)
