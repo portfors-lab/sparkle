@@ -379,7 +379,6 @@ class TestAcqusitionData():
         calname ='calibration0'
 
         acq_data = self.setup_calibration(calname, caldata)
-        acq_data.close_data(calname)
         cal1 = acq_data.get_calibration(calname, reffreq=15000)[0]
 
         # subtract one because vector gets shifted by reffreq value

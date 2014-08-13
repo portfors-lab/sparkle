@@ -9,7 +9,7 @@ class ProtocolRunner(ListAcquisitionRunner):
     def __init__(self, *args):
         ListAcquisitionRunner.__init__(self, *args)
 
-        save_data = True
+        self.save_data = True # always
         self.group_name = 'segment_'
         self.player = FinitePlayer()
 

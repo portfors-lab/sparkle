@@ -322,8 +322,8 @@ class MainWindow(ControlWindow):
         if self.activeOperation == 'calibration':
             #maybe don't call this at all if save is false?
             save = self.ui.calibrationWidget.saveChecked() and not halted
-            calname = self.acqmodel.process_calibration(save)
             if save:
+                calname = self.acqmodel.process_calibration(save)
                 ww = self.showWait()
                 self.acqmodel.set_calibration(calname, self.calvals['calf'], self.calvals['frange'])
                 self.calvals['calname'] = calname

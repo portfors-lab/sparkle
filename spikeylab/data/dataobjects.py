@@ -102,10 +102,6 @@ class AcquisitionData():
             if self.needs_repack:
                 _repack(fname)
 
-    def close_data(self, key):
-        """deprecated"""
-        pass
-
     def init_group(self, key, mode='finite'):
         """Create a group hierarchy level
 

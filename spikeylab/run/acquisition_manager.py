@@ -367,7 +367,7 @@ class AcquisitionManager():
         :returns: str -- name of a saved calibration
         """
         if self.selected_calibration_index == 2:
-            results, calname, freq = self.tone_calibrator.process_calibration(save)
+            raise Exception("Calibration curve processing not currently supported")
         else:
             results, calname, freq = self.bs_calibrator.process_calibration(save)
         return calname

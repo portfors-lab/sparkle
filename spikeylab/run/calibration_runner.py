@@ -23,7 +23,7 @@ class CalibrationRunner(ListAcquisitionRunner):
         self.stimulus.insertComponent(self.stim_components[0])
         self.protocol_model.insert(self.stimulus, 0)
 
-        save_data = True
+        self.save_data = True
         self.group_name = 'calibration_'
 
         self.calibration_vector = None
@@ -152,7 +152,7 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         control_stim.insertComponent(self.control_tone)
         self.protocol_model.insert(control_stim, 0)
 
-        save_data = True
+        self.save_data = False
 
     def set_save_params(self, folder=None, name=None):
         """Folder and filename where raw experiment data will be saved to
@@ -187,21 +187,22 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         self.calibration_frequencies = []
         self.calibration_indexes = []
 
-        data_items = self.datafile.keys()
-        self.current_dataset_name = next_str_num(self.group_name, data_items)
+        if self.save_data:
+            data_items = self.datafile.keys()
+            self.current_dataset_name = next_str_num(self.group_name, data_items)
 
-        self.datafile.init_group(self.current_dataset_name, mode='calibration')
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
-                                dims=(self.stimulus.traceCount(), self.stimulus.repCount(), self.aitimes.shape[0]))
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
-                                dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
-                                nested_name='fft_peaks')
-        self.datafile.init_data(self.current_dataset_name, mode='calibration',
-                                dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
-                                nested_name='vamp')
+            self.datafile.init_group(self.current_dataset_name, mode='calibration')
+            self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                    dims=(self.stimulus.traceCount(), self.stimulus.repCount(), self.aitimes.shape[0]))
+            self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                    dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
+                                    nested_name='fft_peaks')
+            self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                    dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
+                                    nested_name='vamp')
 
-        info = {'samplerate_ad': self.player.aisr}
-        self.datafile.set_metadata(self.current_dataset_name, info)
+            info = {'samplerate_ad': self.player.aisr}
+            self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
@@ -232,13 +233,16 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         # print 'f', f, 'db', db
         
         # spec_max, max_freq = get_peak(spectrum, freq)
-        spec_peak_at_f = spectrum[freq == f]
-        if len(spec_peak_at_f) != 1:
-            print u"COULD NOT FIND TARGET FREQUENCY ",f
-            print 'target', f, 'freqs', freq
-            spec_peak_at_f = np.array([-1])
+        # get closest frequency to target
+        peak_fft = spectrum[(np.abs(freq-f)).argmin()]
+
+        # spec_peak_at_f = spectrum[freq==f]
+        # if len(spec_peak_at_f) != 1:
+        #     print u"COULD NOT FIND TARGET FREQUENCY ",f
+        #     print 'target', f, 'freqs', freq
+        #     spec_peak_at_f = np.array([-1])
             # self._halt = True
-        peak_fft = spec_peak_at_f[0]
+        # peak_fft = spec_peak_at_f[0]
 
         if USE_RMS:
             vamp = np.sqrt(np.mean(pow(response,2))) #/ np.sqrt(2)
@@ -253,12 +257,14 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 self.trace_counter +=1
                 self.peak_avg = []
 
-            self.datafile.append(self.current_dataset_name, response)
-            self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
-                                 nested_name='fft_peaks')
-            self.datafile.append(self.current_dataset_name, np.array([vamp]), 
-                                 nested_name='vamp')
-            self.datafile.append_trace_info(self.current_dataset_name, trace_info)
+            if self.save_data:
+
+                self.datafile.append(self.current_dataset_name, response)
+                self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
+                                     nested_name='fft_peaks')
+                self.datafile.append(self.current_dataset_name, np.array([vamp]), 
+                                     nested_name='vamp')
+                self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
             self.putnotify('response_collected', (self.aitimes, response))
 
@@ -280,9 +286,12 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
                 resultdb = calc_db(mean_peak)
                 self.putnotify('average_response', (f, db, resultdb))
 
-    def process_calibration(self, save=True):
+    def process_calibration(self, save=False):
         """processes the data gathered in a calibration run (does not work if multiple
             calibrations), returns resultant dB"""
+        
+        if not self.save_data:
+            raise Exception("Runner must be set to save when run, to be able to process")
 
         vfunc = np.vectorize(calc_db)
 
@@ -304,7 +313,6 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
         print 'attenuations', resultant_dB
 
         calibration_vector = resultant_dB[self.calibration_indexes].squeeze()
-        # save a vector of only the calibration intensity results
-            # delete the data saved to file thus far.
-        self.datafile.delete_group(self.current_dataset_name)
+        # Not currenly saving resultant intensity
+
         return resultant_dB, '', self.calf

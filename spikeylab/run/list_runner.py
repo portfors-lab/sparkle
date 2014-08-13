@@ -40,8 +40,9 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         setname = self._initialize_run()
 
         # save the current calibration to data file doc
-        info = {'calibration_used': self.calname, 'calibration_range': self.cal_frange}
-        self.datafile.set_metadata(self.current_dataset_name, info)
+        if self.save_data:
+            info = {'calibration_used': self.calname, 'calibration_range': self.cal_frange}
+            self.datafile.set_metadata(self.current_dataset_name, info)
 
         # save the start time and set last tick to expired, so first
         # acquisition loop iteration executes immediately
@@ -86,7 +87,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     test.setReferenceVoltage(self.caldb, self.calv)
 
                     self._initialize_test(test)
-                    self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), signal=True)
+                    if self.save_data:
+                        self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), signal=True)
                     # profiler = cProfile.Profile()
                     # print 'profiling....'
                     # profiler.enable()
@@ -122,7 +124,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             self.player.reset()
 
                         trace_doc['time_stamps'] = stamps
-                        self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                        if self.save_data:
+                            self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
 
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
@@ -160,7 +163,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             self.putnotify('current_rep', (irep,))
                             
                         trace_doc['time_stamps'] = stamps
-                        self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
+                        if self.save_data:
+                            self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
 
                     # log as well, test type and user tag will be the same across traces
@@ -170,11 +174,11 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     # profiler.dump_stats('test_run.profile')
             except Broken:
                 # save some abortion message
-                self.datafile.set_metadata(self.current_dataset_name, {'aborted': 'test {}, trace {}, rep {}'.format(itest+1, itrace+1, irep+1)})
+                if self.save_data:
+                    self.datafile.set_metadata(self.current_dataset_name, {'aborted': 'test {}, trace {}, rep {}'.format(itest+1, itrace+1, irep+1)})
                 self.player.stop()
 
             # self.player.stop_timer()
-            self.datafile.close_data(self.current_dataset_name)
             self.putnotify('group_finished', (self._halt,))
             gc.enable()
         except:
