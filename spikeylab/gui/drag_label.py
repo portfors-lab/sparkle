@@ -2,7 +2,6 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-
 class DragLabel(QtGui.QLabel):
     def __init__(self, factoryclass, parent=None):
         super(DragLabel, self).__init__(parent)

@@ -1,15 +1,13 @@
-from nose.tools import assert_equal
-
 import cPickle
+
+from nose.tools import assert_equal
+from PyQt4 import QtCore, QtGui
 
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.gui.qprotocol import QProtocolTabelModel, ProtocolView
 from spikeylab.stim.stimulusmodel import StimulusModel
-
 from spikeylab.gui.stim.factory import BuilderFactory
 from spikeylab.gui.drag_label import DragLabel
-
-from PyQt4 import QtCore, QtGui
 
 app = None
 def setUp():

@@ -1,12 +1,12 @@
 import os, glob
 import threading, time
 
-from spikeylab.gui.control import MainWindow
-from test.util import robot
-
+from PyQt4 import QtGui
 from nose.tools import assert_equal
 
-from PyQt4 import QtGui
+from spikeylab.gui.control import MainWindow
+
+from test.util import robot
 
 class TestMainDialogs():
     """Just trying to test the code which launches dialogs, and

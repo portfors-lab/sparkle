@@ -1,5 +1,4 @@
 from PyQt4 import QtCore, QtGui
-
 import numpy as np
 
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel

@@ -2,7 +2,6 @@ import os
 import json
 
 import sip
-
 from PyQt4 import QtGui, QtCore
 
 class AbstractEditorWidget(QtGui.QWidget):

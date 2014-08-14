@@ -1,4 +1,5 @@
 from PyQt4 import QtGui
+
 from specgramform import Ui_SpecDialog
 
 class SpecDialog(QtGui.QDialog):

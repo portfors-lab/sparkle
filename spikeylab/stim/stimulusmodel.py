@@ -1,8 +1,10 @@
-import os, yaml
+import os
 import uuid
-import numpy as np
 import logging
 import copy
+
+import yaml
+import numpy as np
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.tools.audiotools import impulse_response, convolve_filter

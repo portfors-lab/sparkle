@@ -2,7 +2,6 @@ import re
 import os
 
 import numpy as np
-
 from PyQt4 import QtCore
 
 def increment_title(title):

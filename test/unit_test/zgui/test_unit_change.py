@@ -1,8 +1,8 @@
 import os
 
-from spikeylab.gui.control import MainWindow
-
 from PyQt4.QtGui import QApplication
+
+from spikeylab.gui.control import MainWindow
 
 app = None
 def setUp():

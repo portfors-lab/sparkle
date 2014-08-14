@@ -1,4 +1,5 @@
 import os
+
 from PyQt4 import QtGui
 
 class SavingDialog(QtGui.QFileDialog):

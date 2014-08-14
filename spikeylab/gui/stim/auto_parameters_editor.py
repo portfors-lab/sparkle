@@ -6,7 +6,6 @@ from spikeylab.gui.trashcan import TrashWidget
 from spikeylab.gui.hidden_widget import WidgetHider
 from spikeylab.stim.reorder import order_function
 
-
 class Parametizer(QtGui.QWidget):
     hintRequested = QtCore.pyqtSignal(str)
     visibilityChanged = QtCore.pyqtSignal(bool)

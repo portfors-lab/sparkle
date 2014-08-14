@@ -1,5 +1,7 @@
-import os, yaml
+import os
 import logging
+
+import yaml
 import numpy as np
 
 from spikeylab.run.list_runner import ListAcquisitionRunner

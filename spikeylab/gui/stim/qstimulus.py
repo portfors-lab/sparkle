@@ -1,7 +1,10 @@
-import os, yaml
+import os
 import uuid
-import numpy as np
 import logging
+
+import yaml
+import numpy as np
+from PyQt4 import QtCore
 
 from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
 from spikeylab.tools.audiotools import impulse_response, convolve_filter
@@ -11,7 +14,6 @@ from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.stim.stimulusmodel import StimulusModel
 
-from PyQt4 import QtCore
 
 src_dir = get_src_directory()
 # print 'src_dir', src_dir

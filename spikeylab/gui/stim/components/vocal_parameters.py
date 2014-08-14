@@ -1,9 +1,10 @@
 from os.path import dirname
 
+from PyQt4 import QtGui, QtCore
+
 from vocal_parameters_form import Ui_VocalParameterWidget
 from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.audiotools import spectrogram
-from PyQt4 import QtGui, QtCore
 
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     def __init__(self, parent=None):

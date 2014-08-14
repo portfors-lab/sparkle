@@ -1,15 +1,14 @@
-from spikeylab.gui.control import MainWindow
-from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
-
 import os, glob
 import json
 import random, string
 
 import h5py
 from nose.tools import assert_in, assert_equal
-
 from PyQt4 import QtGui, QtCore, QtTest
+
+from spikeylab.gui.control import MainWindow
+from spikeylab.data.dataobjects import AcquisitionData
+from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 
 import test.sample as sample
 from test.util import qtbot

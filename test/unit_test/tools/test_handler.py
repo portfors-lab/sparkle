@@ -1,10 +1,10 @@
-from spikeylab.tools.uihandler import TextEditHandler
-
 import sys
 import logging
 import re
 
 from PyQt4 import QtCore, QtGui
+
+from spikeylab.tools.uihandler import TextEditHandler
 
 class TestUIHandler():
     def setUp(self):

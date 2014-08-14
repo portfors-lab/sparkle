@@ -1,7 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.gui.drag_label import DragLabel
-
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel
