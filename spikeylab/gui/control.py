@@ -64,6 +64,7 @@ class MainWindow(ControlWindow):
         ControlWindow.__init__(self, inputsFilename)
         if datafile is not None:
             self.ui.reviewer.setDataObject(self.acqmodel.datafile)
+            self.ui.dataFileLbl.setText(fname)
 
         self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
 
@@ -129,7 +130,7 @@ class MainWindow(ControlWindow):
 
         # always start in windowed mode
         self.modeToggled('Windowed')
-        self.prevTab = self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex()).lower()
+        self.prevTab = str(self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex())).lower()
         # always show plots on load
         self.ui.plotDock.setVisible(True)
         self.ui.psthDock.setVisible(True)
@@ -147,7 +148,6 @@ class MainWindow(ControlWindow):
                 break
 
         logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
-        self.ui.dataFileLbl.setText(fname)
 
         self.calvals['calf'] = REFFREQ
         self.calvals['calv'] = REFVOLTAGE
@@ -247,8 +247,8 @@ class MainWindow(ControlWindow):
     def onUpdate(self):
         if not self.verifyInputs(self.activeOperation):
             return
-        aochan = self.ui.aochanBox.currentText()
-        aichan = self.ui.aichanBox.currentText()
+        aochan = str(self.ui.aochanBox.currentText())
+        aichan = str(self.ui.aichanBox.currentText())
         acq_rate = self.ui.aisrSpnbx.value()*self.fscale
 
         winsz = float(self.ui.windowszSpnbx.value())*self.tscale
@@ -292,7 +292,7 @@ class MainWindow(ControlWindow):
         self.ui.stopBtn.clicked.disconnect()
         self.ui.stopBtn.clicked.connect(self.onStop)
 
-        if self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex()).lower() != 'calibration':
+        if str(self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex())).lower() != 'calibration':
             self.ui.aisrSpnbx.setEnabled(True)
         self.ui.aochanBox.setEnabled(True)
         reprate = self.ui.reprateSpnbx.setEnabled(True)
@@ -698,14 +698,14 @@ class MainWindow(ControlWindow):
         self.acqmodel.set_threshold(thresh)
 
     def tabChanged(self, tabIndex):
-        if self.ui.tabGroup.tabText(tabIndex).lower() == 'calibration':
+        if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'calibration':
             self.stashedAisr = self.ui.aisrSpnbx.value()
             self.ui.aisrSpnbx.setValue(self.acqmodel.calibration_genrate()/self.fscale)
             self.ui.aisrSpnbx.setEnabled(False)
         elif self.prevTab == 'calibration':
             self.ui.aisrSpnbx.setEnabled(True)
             self.ui.aisrSpnbx.setValue(self.stashedAisr)
-        self.prevTab = self.ui.tabGroup.tabText(tabIndex).lower()
+        self.prevTab = str(self.ui.tabGroup.tabText(tabIndex)).lower()
 
     def modeToggled(self, mode):
         self.currentMode = mode.lower()

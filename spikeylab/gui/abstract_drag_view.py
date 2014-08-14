@@ -101,7 +101,7 @@ class AbstractDragView():
         data = event.mimeData()
         stream = data.retrieveData("application/x-protocol",
             QtCore.QVariant.ByteArray)
-        return cPickle.loads(str(stream))
+        return cPickle.loads(str(stream.toByteArray()))
 
     def childEvent(self, event):
         if event.type() == QtCore.QEvent.ChildRemoved:

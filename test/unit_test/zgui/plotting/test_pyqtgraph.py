@@ -1,6 +1,4 @@
 import sip
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 2)
 sip.setdestroyonexit(0)
 
 from spikeylab.gui.plotting.pyqtgraph_widgets import FFTWidget, \

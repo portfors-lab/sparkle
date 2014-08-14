@@ -86,7 +86,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:
             if index.column() == 0 :
                 old_multiplier = self.model.getDetail(index.row(), 'multiplier')
-                self.model.setParamValue(index.row(), parameter=value)
+                self.model.setParamValue(index.row(), parameter=str(value))
                 # keep the displayed values the same, so multiply to ajust
                 # real underlying value
                 new_multiplier = self.model.getDetail(index.row(), 'multiplier')
@@ -99,6 +99,8 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             elif 1 <= index.column() <= 3:
                 # check that start and stop values are within limits
                 # specified by component type
+                if isinstance(value, QtCore.QVariant):
+                    value = value.toPyObject()
                 multiplier = self.model.getDetail(index.row(), 'multiplier')
                 if multiplier is not None:
                     if self.model.checkLimits(value*multiplier, self.model.param(index.row())):

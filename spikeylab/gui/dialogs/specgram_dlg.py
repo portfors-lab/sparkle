@@ -9,7 +9,7 @@ class SpecDialog(QtGui.QDialog):
 
         if defaultVals is not None:
             self.ui.nfftSpnbx.setValue(defaultVals[u'nfft'])
-            funcs = [self.ui.windowCmbx.itemText(i).lower() for i in xrange(self.ui.windowCmbx.count())]
+            funcs = [str(self.ui.windowCmbx.itemText(i)).lower() for i in xrange(self.ui.windowCmbx.count())]
             func_index = funcs.index(defaultVals[u'window'])
             self.ui.windowCmbx.setCurrentIndex(func_index)
             self.ui.overlapSpnbx.setValue(defaultVals['overlap'])
@@ -20,6 +20,6 @@ class SpecDialog(QtGui.QDialog):
 
     def values(self):
         self.vals['nfft'] = self.ui.nfftSpnbx.value()
-        self.vals['window'] = self.ui.windowCmbx.currentText().lower()
+        self.vals['window'] = str(self.ui.windowCmbx.currentText()).lower()
         self.vals['overlap'] = self.ui.overlapSpnbx.value()
         return self.vals

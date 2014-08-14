@@ -56,8 +56,8 @@ class ControlWindow(QtGui.QMainWindow):
         try:
             settings = QtCore.QSettings("audiolab")
             if settings is not None:
-                self.restoreGeometry(settings.value("geometry"))
-                self.restoreState(settings.value("windowState"))
+                self.restoreGeometry(settings.value("geometry").toByteArray())
+                self.restoreState(settings.value("windowState").toByteArray())
             else:
                 logger = logging.getLogger('main')
                 logger.warning('Unable to restore QSettings for audiolab')

@@ -218,7 +218,7 @@ class TestMainUI():
 
     def explore_run(self, comptype):
         self.form.ui.tabGroup.setCurrentIndex(0)
-        stimuli = [self.form.ui.exploreStimTypeCmbbx.itemText(i).lower() for i in xrange(self.form.ui.exploreStimTypeCmbbx.count())]
+        stimuli = [str(self.form.ui.exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimTypeCmbbx.count())]
         tone_idx = stimuli.index(comptype)
         qtbot.move(self.form.ui.exploreStimTypeCmbbx)
 

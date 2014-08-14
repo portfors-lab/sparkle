@@ -1,7 +1,3 @@
-import sip
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 2)
-
 import sys
 import time
 

@@ -86,7 +86,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def wavfileClicked(self, modelIndex):
         # display spectrogram of file
-        spath = self.dirmodel.fileInfo(modelIndex).absoluteFilePath()
+        spath = str(self.dirmodel.fileInfo(modelIndex).absoluteFilePath())
         if not any(map(spath.lower().endswith, self.audioExtentions)):
             return # not an audio file
 

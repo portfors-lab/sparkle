@@ -86,6 +86,7 @@ class FMSweep(AbstractStimulusComponent):
     _start_f = 5000
     _stop_f = 1e5
     explore = True
+    protocol = True
 
     def startFrequency(self):
         return self._start_f

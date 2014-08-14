@@ -25,7 +25,7 @@ class SavingDialog(QtGui.QFileDialog):
             self.setLabelText(QtGui.QFileDialog.Reject, 'Cancel')
 
     def update_label(self):
-        current_file = self.selectedFiles()[0]
+        current_file = str(self.selectedFiles()[0])
         if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
             current_file += '.hdf5'
         if os.path.isfile(current_file):
@@ -36,7 +36,7 @@ class SavingDialog(QtGui.QFileDialog):
             self.setLabelText(QtGui.QFileDialog.Accept, 'Create')
 
     def getfile(self):
-        current_file = self.selectedFiles()[0]
+        current_file = str(self.selectedFiles()[0])
         if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
             current_file += '.hdf5'
         if os.path.isfile(current_file):

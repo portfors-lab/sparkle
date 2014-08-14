@@ -29,7 +29,7 @@ class CalibrationDialog(QtGui.QDialog):
 
     def maxRange(self):
         try:
-            x, freqs = self.datafile.get_calibration(self.ui.calChoiceCmbbx.currentText(), self.calf)
+            x, freqs = self.datafile.get_calibration(str(self.ui.calChoiceCmbbx.currentText()), self.calf)
             self.ui.frangeLowSpnbx.setValue(freqs[0]/self.fscale)
             self.ui.frangeHighSpnbx.setValue(freqs[-1]/self.fscale)
             print 'set freq range', freqs[0], freqs[-1], freqs[0]/self.fscale, freqs[-1]/self.fscale
@@ -40,7 +40,7 @@ class CalibrationDialog(QtGui.QDialog):
            
     def plotCurve(self):
         try:
-            attenuations, freqs = self.datafile.get_calibration(self.ui.calChoiceCmbbx.currentText(), self.calf)
+            attenuations, freqs = self.datafile.get_calibration(str(self.ui.calChoiceCmbbx.currentText()), self.calf)
             self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
             self.pw.setWindowFlags(QtCore.Qt.Window)
             self.pw.setLabels('Frequency', 'Attenuation', 'Calibration Curve')
@@ -53,16 +53,16 @@ class CalibrationDialog(QtGui.QDialog):
     def values(self):
         results = {}
         results['use_calfile'] = self.ui.calfileRadio.isChecked()
-        results['calname'] = self.ui.calChoiceCmbbx.currentText()
+        results['calname'] = str(self.ui.calChoiceCmbbx.currentText())
         results['frange'] = (self.ui.frangeLowSpnbx.value()*self.fscale, self.ui.frangeHighSpnbx.value()*self.fscale)
         return results
 
     def conditional_accept(self):
-        if self.ui.calfileRadio.isChecked() and self.ui.calChoiceCmbbx.currentText() == '':
+        if self.ui.calfileRadio.isChecked() and str(self.ui.calChoiceCmbbx.currentText()) == '':
             self.ui.noneRadio.setChecked(True)
         if self.ui.calfileRadio.isChecked():
             try:
-                x, freqs = self.datafile.get_calibration(self.ui.calChoiceCmbbx.currentText(), self.calf)
+                x, freqs = self.datafile.get_calibration(str(self.ui.calChoiceCmbbx.currentText()), self.calf)
             except IOError:
                 QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
                 return

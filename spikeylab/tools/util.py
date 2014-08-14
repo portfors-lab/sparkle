@@ -3,6 +3,8 @@ import os
 
 import numpy as np
 
+from PyQt4 import QtCore
+
 def increment_title(title):
     """
     Increments a string that ends in a number
@@ -47,5 +49,7 @@ def convert2native(obj):
                 return objtype([convert2native(item) for item in obj])
     elif type(obj).__module__ == np.__name__:
         return np.asscalar(obj)
+    elif isinstance(obj, QtCore.QString):
+        return str(obj)
     else:
         return obj

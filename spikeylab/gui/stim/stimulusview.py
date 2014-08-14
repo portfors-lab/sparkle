@@ -1,7 +1,3 @@
-import sip
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 2)
-
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.gui.drag_label import DragLabel
@@ -334,7 +330,6 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     def dropEvent(self, event):
         component = self.dropAssist(event)
         if isinstance(component, AbstractStimulusComponent):
-
             row, col = self.splitAt(event.pos())
             index = self.model().createIndex(row, col, component)
 
@@ -395,7 +390,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
-        component = index.data(QtCore.Qt.UserRole)
+        component = index.internalPointer()
 
         painter.drawRect(option.rect)
 
@@ -403,14 +398,13 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         # calculate size by data component
-        component = index.data()
+        component = index.internalPointer()
         width = self.component.duration() * self.pixelsPerms*1000
         return QtCore.QSize(width, 50)
 
     def createEditor(self, parent, option, index):
         # bring up separate window for component parameters
-        component = index.data(QtCore.Qt.UserRole)
-
+        component = index.internalPointer()
         if component is not None:
             editor = component.showEditor()
         else:
