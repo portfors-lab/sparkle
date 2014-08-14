@@ -15,7 +15,6 @@ from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.reorder import random_order
 from spikeylab.gui.stim.factory import TCFactory
-from PyQt4.QtCore import Qt
 
 import test.sample as sample
 
