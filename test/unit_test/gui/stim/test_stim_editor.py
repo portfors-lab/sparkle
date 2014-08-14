@@ -4,6 +4,7 @@ import json
 from PyQt4.QtTest import QTest 
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import Qt, QTimer
+import unittest
 
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.stim.stimulusmodel import StimulusModel
@@ -11,8 +12,7 @@ from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 import test.sample as sample
-
-import unittest
+from test.util import qtbot
 
 app = None
 def setUp():
@@ -67,7 +67,8 @@ class TestStimulusEditor():
     def test_save(self):
         self.editor.show()
         QApplication.processEvents()
-        QTimer.singleShot(1000, self.close_dialog)
+        # QTimer.singleShot(1000, self.close_dialog)
+        # qtbot.listen_for_file_dialog(sample.test_template())
         QTest.mouseClick(self.editor.ui.saveBtn, Qt.LeftButton)
         
         # blocks until timer runs out

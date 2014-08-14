@@ -20,7 +20,7 @@ class AbstractEditorWidget(QtGui.QWidget):
         self.dialog.setLabelText(QtGui.QFileDialog.Accept, 'Save')
 
         if self.dialog.exec_():
-            fname = self.dialog.selectedFiles()[0]
+            fname = str(self.dialog.selectedFiles()[0])
 
             if fname is not None:
                 if not fname.endswith('.json'):

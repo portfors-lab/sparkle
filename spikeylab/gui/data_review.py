@@ -71,7 +71,7 @@ class QDataReviewer(QtGui.QWidget):
         setname = widgetitem.text(0)
         self.tracetable.setRowCount(0)
         self.derivedtxt.clear()
-        if setname.startswith('test') or setname.startswith('signal'):
+        if setname.startsWith('test') or setname.startsWith('signal'):
             self.detailWidget.clearDoc()
             trace_data = self.datafile.get(path)
             # input samplerate is stored in group attributes
@@ -116,10 +116,10 @@ class QDataReviewer(QtGui.QWidget):
 def makepath(item):
     if item is None:
         return ''
-    elif item.data(0, QtCore.Qt.DisplayRole).endswith('.hdf5'):
+    elif item.text(0).endsWith('.hdf5'):
         return ''
     else:
-        return makepath(item.parent()) + '/' +item.data(0, QtCore.Qt.DisplayRole)
+        return makepath(item.parent()) + '/' + str(item.text(0))
 
 if __name__ == '__main__':
     import sys
