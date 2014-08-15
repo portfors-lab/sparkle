@@ -339,7 +339,7 @@ class MainWindow(ControlWindow):
             cellbox = CellCommentDialog(cellid=self.acqmodel.current_cellid)
             cellbox.setComment(self.ui.commentTxtEdt.toPlainText())
             if cellbox.exec_():
-                comment = cellbox.comment()
+                comment = str(cellbox.comment())
                 self.acqmodel.set_group_comment(comment)
             else:
                 # save empty comment
