@@ -35,6 +35,7 @@ class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
             
 
 class H5TreeWidget(QtGui.QTreeWidget):
+    nodeChanged = QtCore.pyqtSignal(QtGui.QTreeWidgetItem)
     def __init__(self, *args):
         QtGui.QTreeWidget.__init__(self, *args)
         self.fhandles = {}
@@ -80,83 +81,6 @@ class H5TreeWidget(QtGui.QTreeWidget):
                 item.setText(0, group)
                 self.addTree(item, handle[group])
 
-    def getData(self, path):
-        path = str(path)
-        filename = None
-        h5f = None
-        for key, value in self.fhandles.items():
-            if path.startswith(key):
-                filename = key
-                path = path[len(filename):] # 1 for '/'
-                h5f = value
-                break
-        if filename is None:
-            raise Exception('No open file for path: %s', path)
-        node = h5f[path]
-        if isinstance(node, h5py.Dataset):
-            # print 'Warning - removing the 0 th element from data array as it is spurious in MOOSE table'
-            return node
-    
-    def getDataByRe(self, pattern):
-        """Select data items based on pattern.
-
-        Currently this will do just a regular expression match. It
-        checks through all the currently selected files.
-
-        """
-        try:
-            regex = re.compile(pattern)
-        except TypeError, e:
-            print e
-            print 'Received:', type(pattern), ': "', pattern, '"'
-            return
-        ret = {}
-        for item in self.selectedItems():
-            current = item
-            parent = current.parent()
-            while current.parent() != None:
-                current = parent
-                parent = current.parent()
-            filename = str(current.text(0))
-            filehandle = self.fhandles[filename]
-            path = item.path()
-            if current != item:
-                current_node = filehandle[path[len(filename)+1:]]
-            else:
-                current_node = filehandle
-            def check_n_select(name, obj):
-                if isinstance(obj, h5py.Dataset)  and regex.match(str(obj.name)):
-                    table_path = path + '/' + name
-                    ret[table_path] = obj
-                return None
-            if isinstance(current_node, h5py.Group):
-                current_node.visititems(check_n_select)
-        return ret
-                
-    def getAttribute(self, path, attribute=None):
-        h5f = None
-        ret = None
-        filename = self.getOpenFileName(path)
-        try:
-            h5f = self.fhandles[filename]
-        except KeyError:
-            return None
-        if path != filename:
-            path = path[len(filename)+1:] # 1 for '/'
-            node = h5f[path]        
-        else:
-            node = h5f
-            
-        if (attribute is not None) and isinstance(attribute, str):
-            try:
-                ret = node.attrs[attribute]
-            except KeyError:
-                ret = None
-        else:
-            ret = node.attrs
-        return ret
-
-
     def getOpenFileName(self, path):
         """Added this little function to avoid repetition.  It returns
         the filename part of a selected HDF5 path.
@@ -165,6 +89,10 @@ class H5TreeWidget(QtGui.QTreeWidget):
             if path.startswith(key):
                 return key
         return None
+
+    def selectionChanged(self, selected, deselected):
+        super(H5TreeWidget, self).selectionChanged(selected, deselected)
+        self.nodeChanged.emit(self.currentItem())
 
     def closeCurrentFile(self):
         to_delete = {}
