@@ -71,9 +71,7 @@ class QDataReviewer(QtGui.QWidget):
         setname = widgetitem.text(0)
         self.tracetable.setRowCount(0)
         self.derivedtxt.clear()
-        print 'got here', setname
         if setname.startsWith('test') or setname.startsWith('signal'):
-            print 'testy test test'
             self.detailWidget.clearDoc()
             trace_data = self.datafile.get(path)
             # input samplerate is stored in group attributes

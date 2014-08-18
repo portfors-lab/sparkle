@@ -18,7 +18,7 @@ from spikeylab.gui.stim.factory import TCFactory
 
 import test.sample as sample
 
-class TestAcquisitionModel():
+class TestAcquisitionManager():
 
     def setUp(self):
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
@@ -551,6 +551,42 @@ class TestAcquisitionModel():
         assert_equal(signals.shape,(nreps, npts))
         
         assert cal_vector.shape == ((npts/2+1),)
+
+        hfile.close()
+
+    def test_correct_data_groups_created_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        self.fake_calibration(manager)
+
+        #insert some stimuli
+        tone0 = PureTone()
+        tone0.setDuration(0.02)
+        stim0 = StimulusModel()
+        stim0.insertComponent(tone0)
+        manager.protocol_model().insert(stim0,0)
+        gen_rate = stim0.samplerate()
+
+        # two calls to setup should not leave and empty group
+        manager.setup_protocol(0.1)
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        groups = hfile.keys()
+        assert 'segment_1' in groups
+        assert 'segment_2' not in groups
+
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim0, winsz, acq_rate)
+
+        assert 'calibration_' in hfile['segment_1'].attrs['calibration_used'] 
 
         hfile.close()
 

@@ -36,18 +36,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self.trace_counter = 0
 
         self._halt = False
-
-        setname = self._initialize_run()
-
-        # save the current calibration to data file doc
-        if self.save_data:
-            info = {'calibration_used': self.calname, 'calibration_range': self.cal_frange}
-            self.datafile.set_metadata(self.current_dataset_name, info)
-
-        # save the start time and set last tick to expired, so first
-        # acquisition loop iteration executes immediately
-        self.start_time = time.time()
-        self.last_tick = self.start_time - (interval/1000)
         self.interval = interval
 
         stimuli = self.protocol_model.allTests()
@@ -62,6 +50,18 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         return undesired_attenuations
 
     def run(self):
+        # save the current calibration to data file doc        
+        self._initialize_run()
+
+        if self.save_data:
+            info = {'calibration_used': self.calname, 'calibration_range': self.cal_frange}
+            self.datafile.set_metadata(self.current_dataset_name, info)
+
+        # save the start time and set last tick to expired, so first
+        # acquisition loop iteration executes immediately
+        self.start_time = time.time()
+        self.last_tick = self.start_time - (self.interval/1000)
+
         self.acq_thread.start()
         return self.acq_thread
 
