@@ -73,12 +73,13 @@ class QDataReviewer(QtGui.QWidget):
         self.derivedtxt.clear()
         if setname.startsWith('test') or setname.startsWith('signal'):
             self.detailWidget.clearDoc()
-            trace_data = self.datafile.get(path)
+            # trace_data = self.datafile.get(path)
+            data_shape = self.datafile.hdf5[path].shape
             # input samplerate is stored in group attributes
             group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
             fsout = dict(group_data)['samplerate_ad']
-            self.derivedtxt.appendPlainText("Dataset dimensions : "+str(trace_data.shape))
-            self.derivedtxt.appendPlainText("Recording window duration : "+str(float(trace_data.shape[-1])/fsout) + ' s')
+            self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
+            self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
             if self.datafile.get_trace_info(path) is not None:
                 stimuli = self.datafile.get_trace_info(path)
 
