@@ -70,6 +70,8 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.trackview.model().cleanComponents()
         self.ui.trackview.model().purgeAutoSelected()
         msg = self.ui.trackview.model().verify()
+        if not msg:
+            msg = self.ui.trackview.model().warning()
         if msg:
             answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
                                 'Problem: {}. Do you want to deal with this?'.format(msg),

@@ -528,6 +528,15 @@ class StimulusModel():
         else:
             return False
 
+    def warning(self):
+        signals, docs, overs = self.expandedStim()
+        if np.any(np.array(overs) > 0):
+            msg = 'Stimuli in this test are over the maximum allowable \
+                voltage output. They will be rescaled with a maximum \
+                undesired attenuation of {:.2f}dB.'.format(np.amax(overs))
+            return msg
+        return 0
+
     def verifyExpanded(self, samplerate):
         results = self.expandFunction(self.verifyComponents, args=(samplerate,))
         msg = [x for x in results if x]

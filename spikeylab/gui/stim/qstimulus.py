@@ -208,6 +208,9 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         doc = self._stim.templateDoc()
         return doc
 
+    def warning(self):
+        return self._stim.warning()
+
     def verify(self):
         return self._stim.verify()
 
