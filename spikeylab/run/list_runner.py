@@ -45,9 +45,9 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
         # go through and get any overloads, this is not efficient since
         # I am going to be calculating the signals again later, so stash?
-        self._cached_stims = [stim.expandedStim() for stim in stimuli]
-        undesired_attenuations = [s[2] for s in self._cached_stims]
-        return undesired_attenuations
+        # self._cached_stims = [stim.expandedStim() for stim in stimuli]
+        # undesired_attenuations = [s[2] for s in self._cached_stims]
+        # return undesired_attenuations
 
     def run(self):
         # save the current calibration to data file doc        
@@ -93,7 +93,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     # profiler = cProfile.Profile()
                     # print 'profiling....'
                     # profiler.enable()
-                    traces, docs, overs = self._cached_stims[itest]
+                    # traces, docs, overs = self._cached_stims[itest]
+                    traces, docs, overs = test.expandedStim()
                     # profiler.disable()
                     # print 'finished profiling'
                     # profiler.dump_stats('stim_gen_cal.profile')
@@ -128,7 +129,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         if self.save_data:
                             self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
-
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         signal, atten = trace
 

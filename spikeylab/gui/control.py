@@ -415,15 +415,15 @@ class MainWindow(ControlWindow):
         self.onUpdate()
         if self.currentMode == 'windowed':
             overload = self.acqmodel.setup_protocol(interval)
-            overload = [item for sublist in overload for item in sublist] # flatten
-            if np.any(np.array(overload) > 0):
-                answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
-                                'Stimuli in test list are over the maximum allowable voltage output. They will be rescaled with a maximum undesired attenuation of {:.2f}dB.\n \
-                                Do you want to continue?'.format(np.amax(overload)),
-                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-                if answer == QtGui.QMessageBox.No:
-                    self.onStop()
-                    return
+            # overload = [item for sublist in overload for item in sublist] # flatten
+            # if np.any(np.array(overload) > 0):
+            #     answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
+            #                     'Stimuli in test list are over the maximum allowable voltage output. They will be rescaled with a maximum undesired attenuation of {:.2f}dB.\n \
+            #                     Do you want to continue?'.format(np.amax(overload)),
+            #                     QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            #     if answer == QtGui.QMessageBox.No:
+            #         self.onStop()
+            #         return
 
             # reset style sheet of progress bar
             self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
