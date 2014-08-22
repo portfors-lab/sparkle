@@ -75,7 +75,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         timecollection = []
         try:
             logger = logging.getLogger('main')
-            gc.disable()
+            # gc.disable()
             # self.player.start_timer(self.reprate)
             # incase of early abortion...
             itest = 0
@@ -181,7 +181,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
             # self.player.stop_timer()
             self.putnotify('group_finished', (self._halt,))
-            gc.enable()
+            # gc.enable()
         except:
             logger.exception("Uncaught Exception from Acq Thread: ")
 

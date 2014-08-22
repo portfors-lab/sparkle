@@ -2,10 +2,10 @@ from PyQt4 import QtGui
 
 from stimeditor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
-from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
+from spikeylab.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
 
-class StimulusEditor(AbstractEditorWidget):
+class StimulusEditor(AbstractStimulusWidget):
     """Interface for editing stimuli in any way possible. Assemble components,
         assign auto-tests"""
     name = 'Custom'

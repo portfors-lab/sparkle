@@ -1,6 +1,3 @@
-import os
-import json
-
 import sip
 from PyQt4 import QtGui, QtCore
 
@@ -11,33 +8,9 @@ class AbstractEditorWidget(QtGui.QWidget):
     funit_fields = []
     tunit_fields = []
     valueChanged = QtCore.pyqtSignal()
-    saveFolder = os.path.expanduser('~')
-
-    def saveStimulus(self):
-        # manually instead of static function for testing purposes
-        self.dialog = QtGui.QFileDialog(self, u"Save Stimulus Setup to File", 
-                                    self.saveFolder, "Stimulus Settings (*.json)")
-        self.dialog.setLabelText(QtGui.QFileDialog.Accept, 'Save')
-
-        if self.dialog.exec_():
-            fname = str(self.dialog.selectedFiles()[0])
-
-            if fname is not None:
-                if not fname.endswith('.json'):
-                    fname = fname + '.json'
-                template = self.model().templateDoc()
-                with open(fname, 'w') as jf:
-                    json.dump(template, jf)
-        else:
-            print 'stim not saved'
-
-    def model(self):
-        """Return the model for which this editor is acting on """
-        raise NotImplementedError
-
+    
     @staticmethod
     def purgeDeletedWidgets():
-
         toremove = []
         for label in AbstractEditorWidget.funit_labels:
             if sip.isdeleted(label):
@@ -66,18 +39,3 @@ class AbstractEditorWidget(QtGui.QWidget):
         for field in toremove:
             AbstractEditorWidget.tunit_fields.remove(field)
 
-    def closeEvent(self, event):
-        self.ok.setText("Checking...")
-        QtGui.QApplication.processEvents()
-        self.model().cleanComponents()
-        self.model().purgeAutoSelected()
-        msg = self.model().verify()
-        if not msg:
-            msg = self.model().warning()
-        if msg:
-            answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
-                                'Problem: {}. Do you want to deal with this?'.format(msg),
-                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            if answer == QtGui.QMessageBox.Yes:
-                event.ignore()
-        self.ok.setText("OK")

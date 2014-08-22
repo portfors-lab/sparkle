@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
+from spikeylab.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from spikeylab.gui.stim.tcform import Ui_TuningCurveEditor
 
 RED = QtGui.QPalette()
@@ -8,7 +8,7 @@ RED.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtCore.Qt.red)
 BLACK = QtGui.QPalette()
 BLACK.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text,QtCore.Qt.black)
 
-class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
+class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
     name = 'Tuning Curve' # name that show up in protocol list
     def __init__(self, parent=None):
         super(TuningCurveEditor, self).__init__(parent)
