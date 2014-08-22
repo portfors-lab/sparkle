@@ -126,7 +126,7 @@ class ComponentAttributerChecker(QtGui.QFrame):
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
             if w.isChecked():
-                attrs.append(w.text())
+                attrs.append(str(w.text()))
         return attrs
 
 def clearLayout(layout):
