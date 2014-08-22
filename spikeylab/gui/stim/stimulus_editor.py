@@ -23,7 +23,8 @@ class StimulusEditor(AbstractEditorWidget):
         self.ui.parametizer.visibilityChanged.connect(self.ui.trackview.setMode)
         
         # self.setWindowModality(2) # application modal
-    
+        self.ok = self.ui.okBtn
+
     def setStimulusModel(self, model):
         """Set the QStimulusModel for the StimulusView"""
         self.ui.trackview.setModel(model)
@@ -66,18 +67,7 @@ class StimulusEditor(AbstractEditorWidget):
     def setHint(self, message):
         self.ui.hintTxedt.setText(message)
 
-    def closeEvent(self, event):
-        self.ui.trackview.model().cleanComponents()
-        self.ui.trackview.model().purgeAutoSelected()
-        msg = self.ui.trackview.model().verify()
-        if not msg:
-            msg = self.ui.trackview.model().warning()
-        if msg:
-            answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
-                                'Problem: {}. Do you want to deal with this?'.format(msg),
-                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            if answer == QtGui.QMessageBox.Yes:
-                event.ignore()
+
 
 if __name__ == "__main__":
     import sys, os

@@ -21,6 +21,7 @@ class TuningCurveEditor(AbstractEditorWidget, Ui_TuningCurveEditor):
         # can't get mapper to map color
         self.ui.freqNstepsLbl.textChanged.connect(self.updateTextColor)
         self.ui.dbNstepsLbl.textChanged.connect(self.updateTextColor)
+        self.ok = self.ui.okBtn
 
     def setStimulusModel(self, model):
         self.stimModel = model

@@ -65,3 +65,19 @@ class AbstractEditorWidget(QtGui.QWidget):
                 toremove.append(field)
         for field in toremove:
             AbstractEditorWidget.tunit_fields.remove(field)
+
+    def closeEvent(self, event):
+        self.ok.setText("Checking...")
+        QtGui.QApplication.processEvents()
+        self.model().cleanComponents()
+        self.model().purgeAutoSelected()
+        msg = self.model().verify()
+        if not msg:
+            msg = self.model().warning()
+        if msg:
+            answer = QtGui.QMessageBox.question(self, 'Oh Dear!', 
+                                'Problem: {}. Do you want to deal with this?'.format(msg),
+                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if answer == QtGui.QMessageBox.Yes:
+                event.ignore()
+        self.ok.setText("OK")
