@@ -74,9 +74,9 @@ class AutoParameterModel():
     def checkLimits(self, value, param):
         # extract the selected component names
         components = param['selection']
-        ptype = param['parameter']
         if len(components) == 0:
             return False
+        ptype = param['parameter']
         mins = []
         maxs = []
         for comp in components:
@@ -118,6 +118,30 @@ class AutoParameterModel():
     def selectedParameterTypes(self, row):
         param = self._parameters[row]
         return self._selectionParameters(param)
+
+    def ranges(self):
+        steps = []
+        for p in self._parameters:
+            # inclusive range
+            if p['step'] > 0:
+                start = p['start']
+                stop = p['stop']
+                if start > stop:
+                    step = p['step']*-1
+                else:
+                    step = p['step']
+                nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
+                # print 'start, stop, steps', start, stop, nsteps
+                # print 'linspace inputs', start, start+step*(nsteps-1), nsteps
+                step_tmp = np.linspace(start, start+step*(nsteps-1), nsteps)
+                if step_tmp[-1] != stop:
+                    step_tmp = np.append(step_tmp,stop)
+                # print 'step range', step_tmp
+                steps.append(np.around(step_tmp,4))
+            else:
+                assert p['start'] == p['stop']
+                steps.append([p['start']])
+        return steps
 
     def _selectionParameters(self, param):
         components = param['selection']

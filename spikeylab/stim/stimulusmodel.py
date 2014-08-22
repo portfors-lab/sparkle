@@ -276,40 +276,17 @@ class StimulusModel():
             for comp in row:
                 comp.clean()
 
-    def autoParamRanges(self, params=None):
+    def autoParamRanges(self):
         """Return the expanded auto parameters, individually"""
-        if params is None:
-            params = self._autoParams.allData()
+        return self._autoParams.ranges()
+        # params = self._autoParams.allData()
 
-        steps = []
-        for p in params:
-            # inclusive range
-            if p['step'] > 0:
-                start = p['start']
-                stop = p['stop']
-                if start > stop:
-                    step = p['step']*-1
-                else:
-                    step = p['step']
-                nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
-                # print 'start, stop, steps', start, stop, nsteps
-                # print 'linspace inputs', start, start+step*(nsteps-1), nsteps
-                step_tmp = np.linspace(start, start+step*(nsteps-1), nsteps)
-                if step_tmp[-1] != stop:
-                    step_tmp = np.append(step_tmp,stop)
-                # print 'step range', step_tmp
-                steps.append(np.around(step_tmp,4))
-            else:
-                assert p['start'] == p['stop']
-                steps.append([p['start']])
-
-        return steps
         
     def expandFunction(self, func, args=[]):
         # initilize array to hold all varied parameters
         params = self._autoParams.allData()
 
-        steps = self.autoParamRanges(params)
+        steps = self.autoParamRanges()
         ntraces = 1
         for p in steps:
             ntraces = ntraces*len(p)
@@ -520,7 +497,7 @@ class StimulusModel():
     def containsPval(self, paramName, value):
         """Returns true is the given value is in the auto parameters"""
         params = self._autoParams.allData()
-        steps = self.autoParamRanges(params)
+        steps = self.autoParamRanges()
         pnames = [p['parameter'] for p in params]
         if paramName in pnames:
             pidx = pnames.index(paramName)
