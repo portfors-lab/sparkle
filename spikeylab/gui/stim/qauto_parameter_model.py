@@ -36,28 +36,16 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     def data(self, index, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             col = index.column()
-            param = self.model.param(index.row())
             if col == 0:
-                item = param[self.model.header(col)]            
+                return self.model.paramValue(index.row(), self.model.header(col))
             if 0 < col < 4:
-                item = param[self.model.header(col)]
-                # scale appropriately
+                val = self.model.paramValue(index.row(), self.model.header(col))
                 multiplier = self.model.getDetail(index.row(), 'multiplier')
                 if multiplier is not None:
-                    # return integers for whole numbers, floats otherwise
-                    # print 'data val', float(item)/multiplier
-                    return float(item)/multiplier
+                    return float(val)/multiplier
             elif col == 4:
-                if param['step'] > 0:
-                    if abs(param['start'] - param['stop']) < param['step']:
-                        return 0
-                    nsteps = np.around(abs(param['start'] - param['stop']), 4) / param['step']
-                    item = int(np.ceil(nsteps)+1)
-                elif param['start'] == param['stop']:
-                    item = 1
-                else:
-                    item = 0
-            return item
+                return self.model.numSteps(index.row())
+
         elif role == QtCore.Qt.ToolTipRole:
             if 1 <= index.column() <= 3:
                 label = self.model.getDetail(index.row(), 'label')

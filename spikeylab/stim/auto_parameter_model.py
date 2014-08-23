@@ -49,6 +49,19 @@ class AutoParameterModel():
     def overwriteParam(self, row, param):
         self._parameters[row] = param
 
+    def numSteps(self, row):
+        param = self._parameters[row]
+        if param['step'] > 0:
+            if abs(param['start'] - param['stop']) < param['step']:
+                return 0
+            nsteps = np.around(abs(param['start'] - param['stop']), 4) / param['step']
+            item = int(np.ceil(nsteps)+1)
+        elif param['start'] == param['stop']:
+            item = 1
+        else:
+            item = 0
+        return item
+        
     def getDetail(self, row, detail_field):
         param = self._parameters[row]
         param_type = param['parameter']
