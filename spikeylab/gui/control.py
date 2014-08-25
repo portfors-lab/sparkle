@@ -21,6 +21,7 @@ from spikeylab.tools.systools import get_src_directory, get_free_mb
 from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
+from spikeylab.resources import icons
 
 from controlwindow import ControlWindow
 
@@ -756,6 +757,7 @@ def log_uncaught(*exc_info):
 if __name__ == "__main__":
     # this is the entry point for the whole application
     app = QtGui.QApplication(sys.argv)
+    app.setWindowIcon(icons.windowicon())
     sys.excepthook = log_uncaught
     # check free drive space, issue warning if low
     drives = ['C:\\', 'D:\\']

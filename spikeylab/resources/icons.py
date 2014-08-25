@@ -9,3 +9,6 @@ def arrowup():
 
 def arrowdown():
     return QtGui.QIcon(os.path.join(thisfolder,'arrowdown.png'))
+
+def windowicon():
+    return QtGui.QIcon(os.path.join(thisfolder,'horsey.png'))
