@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\stimulus_editor.ui'
+# Form implementation generated from reading ui file 'stimulus_editor.ui'
 #
-# Created: Wed Jun 18 17:11:44 2014
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Mon Aug 25 14:50:48 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_StimulusEditor(object):
     def setupUi(self, StimulusEditor):
         StimulusEditor.setObjectName(_fromUtf8("StimulusEditor"))
-        StimulusEditor.resize(942, 634)
+        StimulusEditor.resize(941, 737)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -47,7 +47,7 @@ class Ui_StimulusEditor(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 643, 339))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 641, 386))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setMargin(0)
@@ -129,6 +129,7 @@ class Ui_StimulusEditor(object):
         self.verticalLayout.addWidget(self.okBtn)
         self.verticalLayout_2.addWidget(self.splitter)
         self.parametizer = HidableParameterEditor(StimulusEditor)
+        self.parametizer.setMinimumSize(QtCore.QSize(0, 50))
         self.parametizer.setObjectName(_fromUtf8("parametizer"))
         self.verticalLayout_2.addWidget(self.parametizer)
 
@@ -147,14 +148,14 @@ class Ui_StimulusEditor(object):
         self.hintTxedt.setHtml(_translate("StimulusEditor", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Drag Components onto view to Add. Double click to edit; right drag to move.</span></p></body></html>", None))
+"</style></head><body style=\" font-family:\'Cantarell\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt;\">Drag Components onto view to Add. Double click to edit; right drag to move.</span></p></body></html>", None))
         self.label.setText(_translate("StimulusEditor", "Grid scale(ms):", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
         self.previewBtn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
         self.saveBtn.setText(_translate("StimulusEditor", "Save As...", None))
         self.okBtn.setText(_translate("StimulusEditor", "Ok", None))
 
-from spikeylab.gui.stim.auto_parameters_editor import HidableParameterEditor
 from spikeylab.gui.stim.stimulusview import StimulusView
 from spikeylab.gui.stim.component_label import ComponentTemplateTable
+from spikeylab.gui.stim.auto_parameters_editor import HidableParameterEditor

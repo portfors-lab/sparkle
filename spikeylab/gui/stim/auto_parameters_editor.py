@@ -47,9 +47,6 @@ class Parametizer(QtGui.QWidget):
 
         model.hintRequested.connect(self.hintRequested)
 
-    def sizeHint(self):
-        return QtCore.QSize(560,200)
-
     def showEvent(self, event):
         selected = self.paramList.selectedIndexes()
         model = self.paramList.model()
