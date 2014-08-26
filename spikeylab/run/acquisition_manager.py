@@ -385,8 +385,10 @@ class AcquisitionManager():
         """Closes the current data file"""
         # save the total number of cells to make re-loading convient
         if self.datafile is not None:
-            self.datafile.set_metadata('', {'total cells': self.current_cellid})
+            if self.datafile.hdf5.mode != 'r':
+                self.datafile.set_metadata('', {'total cells': self.current_cellid})
             self.datafile.close()
+            self.datafile = None
 
     def protocol_model(self):
         """Gets the model for the protocol operation
