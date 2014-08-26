@@ -28,3 +28,9 @@ def get_free_mb(folder):
     else:
         st = os.statvfs(folder)
         return st.f_bavail * st.f_frsize/1024/1024
+
+def get_drives():
+    if platform.system() == 'Windows':
+        return ['C:\\', 'D:\\']
+    else:
+        return ['/home']

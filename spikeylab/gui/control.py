@@ -17,7 +17,7 @@ from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread
 from spikeylab.gui.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.gui.wait_widget import WaitWidget
-from spikeylab.tools.systools import get_src_directory, get_free_mb
+from spikeylab.tools.systools import get_src_directory, get_free_mb, get_drives
 from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
@@ -760,7 +760,7 @@ if __name__ == "__main__":
     app.setWindowIcon(icons.windowicon())
     sys.excepthook = log_uncaught
     # check free drive space, issue warning if low
-    drives = ['C:\\', 'D:\\']
+    drives = get_drives()
     low_space = []
     plenty_space = []
     for drive in drives:
