@@ -2,6 +2,7 @@ import sys, os, glob
 import json
 import time
 import threading, Queue
+import random, string
 
 import h5py
 import numpy as np
@@ -17,6 +18,10 @@ from spikeylab.stim.reorder import random_order
 from spikeylab.gui.stim.factory import TCFactory
 
 import test.sample as sample
+
+def rand_id():
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(chars) for x in range(4))
 
 class TestAcquisitionManager():
 
@@ -189,7 +194,6 @@ class TestAcquisitionManager():
         t = manager.run_protocol()
         t.join()
 
-        print 'RAN PROTOCOL'
         manager.close_data()
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
@@ -228,7 +232,6 @@ class TestAcquisitionManager():
         manager, fname = self.create_acqmodel(winsz, acq_rate)
         manager.set_calibration(None)
         #insert some stimuli
-
         tone0 = PureTone()
         tone0.setDuration(0.02)
         stim0 = StimulusModel()
@@ -241,7 +244,6 @@ class TestAcquisitionManager():
         t = manager.run_protocol()
         manager.halt()
         t.join()
-
         manager.close_data()
 
         # now check saved data
@@ -592,14 +594,13 @@ class TestAcquisitionManager():
 
     def create_acqmodel(self, winsz, acq_rate=None):
         manager = AcquisitionManager()
-        fname = os.path.join(self.tempfolder, 'testdata.hdf5')
+        fname = os.path.join(self.tempfolder, 'testdata' +rand_id()+ '.hdf5')
         manager.create_data_file(fname)
         if acq_rate is None:
             acq_rate = manager.calibration_genrate()
         manager.set(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
                            acqtime=winsz, aisr=acq_rate, caldb=100,
                            calv=1.0)
-
         return manager, fname
 
     def fake_calibration(self, manager):

@@ -197,7 +197,7 @@ class TestMainUI():
         qtbot.drag(self.form.ui.stimulusChoices.templateLbl, pv)
 
         qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(ALLOW*2)
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
