@@ -20,16 +20,15 @@ def rand_id():
     chars = string.ascii_uppercase + string.digits
     return ''.join(random.choice(chars) for x in range(4))
 
+
 class TestMainSetup():
     def setUp(self):
-        self.app = QtGui.QApplication([])
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 
     def tearDown(self):
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
-        del self.app
 
     def test_bad_inputs_file(self):
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
@@ -40,9 +39,6 @@ class TestMainSetup():
 
 class TestMainUI():
     def setUp(self):
-        
-        self.app = QtGui.QApplication([])
-
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         fname = os.path.join(self.tempfolder, 'testdatafile' +rand_id()+'.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w')
@@ -63,7 +59,6 @@ class TestMainUI():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
-        del self.app
 
     def test_tone_explore_defaults(self):
         """The defaults should combine to be a viable set-up"""

@@ -9,6 +9,7 @@ import sys, os, time
 import inspect
 import numpy as np
 
+from PyQt4.QtCore import Qt, QTimer
 from PyQt4.QtGui import QApplication
 
 import spikeylab.tools.audiotools as audiotools
@@ -16,20 +17,10 @@ import test.sample as sample
 
 from nose.tools import assert_equal
 from numpy.testing import assert_array_almost_equal, assert_array_equal
+from test.util import robot
 
 PAUSE = 0.0
 
-app = None
-
-def setUp():
-    global app
-    app = QApplication(sys.argv)
-
-def tearDown():
-    QApplication.closeAllWindows()    
-    global app
-    app.exit(0)
-    del app
 
 def data_func(f):
     t = np.arange(200)
@@ -76,6 +67,7 @@ class TestTraceWidget():
         assert self.fig.getRasterBounds() == (0.1, 0.4)
 
     def test_ask_raster_bounds(self):
+        QTimer.singleShot(1000, lambda : robot.keypress('enter'))
         self.fig.askRasterBounds()
 
     def test_spike(self):

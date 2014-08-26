@@ -21,17 +21,16 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
 MAXV = config['max_voltage']
 
 # get an error accessing class names if there is not a qapp running
-app = None
+# app = None
 
+# def setUp():
+#     global app
+#     app = QtGui.QApplication([])
 
-
-def setUp():
-    global app
-    app = QtGui.QApplication([])
-
-def tearDown():
-    global app
-    app.exit(0)
+# def tearDown():
+#     global app
+#     app.exit(0)
+#     app = None
 
 class TestStimModel():
     def test_insert_data(self):

@@ -21,18 +21,6 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 MAXV = config['max_voltage']
 
-# get an error accessing class names if there is not a qapp running
-app = None
-
-
-def setUp():
-    global app
-    app = QtGui.QApplication([])
-
-def tearDown():
-    global app
-    app.exit(0)
-
 class TestQStimModel():
     def test_insert_data(self):
         data = StimulusModel()

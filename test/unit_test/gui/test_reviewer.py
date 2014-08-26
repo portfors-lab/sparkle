@@ -5,15 +5,6 @@ from spikeylab.data.dataobjects import AcquisitionData
 
 from test import sample
 
-app = None
-def setUp():
-    global app
-    app = QtGui.QApplication([])
-
-def tearDown():
-    global app
-    app.exit(0)
-
 class TestDataReviewer():
     def setUp(self):
         self.ui = QDataReviewer()

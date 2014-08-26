@@ -76,6 +76,15 @@ def close_modal():
     # knowledge of CellCommentDialog Structure
     click(modalWidget.ui.okBtn)
 
+def close_dialog():
+    dialogs = []
+    while len(dialogs) == 0:
+        topWidgets = QtGui.QApplication.topLevelWidgets()
+        dialogs = [w for w in topWidgets if isinstance(w, QtGui.QDialog)]
+        time.sleep(1)
+        print 'waiting.....'
+    robot.keypress('enter')
+
 def listen_for_file_dialog(fpath):
     thread = threading.Thread(target=accept_modal, args=(fpath,))
     thread.start()

@@ -12,17 +12,6 @@ from PyQt4.QtTest import QTest
 from PyQt4.QtGui import QApplication, QLineEdit
 from PyQt4.QtCore import Qt
 
-app = None
-def setUp():
-    global app
-    app = QApplication([])
-
-def tearDown():
-    QApplication.closeAllWindows()
-    QApplication.processEvents()
-    global app
-    del app
-
 class TestCalibrationDialog():
     def setUp(self):
         self.fscale = 1000

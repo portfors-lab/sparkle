@@ -4,14 +4,6 @@ from PyQt4.QtGui import QApplication
 
 from spikeylab.gui.control import MainWindow
 
-app = None
-def setUp():
-    global app
-    app = QApplication([])
-
-def tearDown():
-    global app
-    app.exit(0)
 
 class TestUnitChanges():
 

@@ -9,14 +9,6 @@ from test.sample import samplewav
 
 PAUSE = 0
 
-app = None
-def setUp():
-    global app
-    app = QApplication(sys.argv)
-
-def tearDown():
-    global app
-    app.exit(0)
     
 class TestProtocolDisplay():
 

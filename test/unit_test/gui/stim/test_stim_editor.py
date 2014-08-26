@@ -14,16 +14,6 @@ from spikeylab.stim.auto_parameter_model import AutoParameterModel
 import test.sample as sample
 from test.util import qtbot
 
-app = None
-def setUp():
-    global app
-    app = QApplication([])
-
-def tearDown():
-    QApplication.closeAllWindows()
-    QApplication.processEvents()
-    global app
-    del app
 
 class TestStimulusEditor():
 

@@ -9,15 +9,6 @@ from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.gui.stim.factory import BuilderFactory
 from spikeylab.gui.drag_label import DragLabel
 
-app = None
-def setUp():
-    global app
-    app = QtGui.QApplication([])
-
-def tearDown():
-    global app
-    app.exit(0)
-
 class TestProtocolView():
     def setUp(self):
         pass
