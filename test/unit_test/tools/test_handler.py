@@ -6,19 +6,6 @@ from PyQt4 import QtCore, QtGui
 
 from spikeylab.tools.uihandler import TextEditHandler
 
-app = None
-
-def setUp(self):
-    global app
-    app = QtGui.QApplication([])
-
-def tearDown(self):
-    QtGui.QApplication.closeAllWindows()
-    QtGui.QApplication.processEvents()
-    global app
-    app.exit(0)
-    app = None
-
 class TestUIHandler():
 
     def test_info_message(self):        
