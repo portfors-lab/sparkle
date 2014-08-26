@@ -12,7 +12,10 @@ DAQmx_Val_Acquired_Into_Buffer = None
 DAQmx_Val_GroupByChannel = None
 DAQmx_Val_FiniteSamps = None
 DAQmx_Val_GroupByScanNumber = None
-
+DAQmx_Val_ChanForAllLines = None
+DAQmx_Val_WaitInfinitely = None
+DAQmx_Val_Hz = None
+DAQmx_Val_Low = None
 
 class Task(object):
 	def CreateAIVoltageChan(self, chan, name, p0, minv, maxv, units, p1):
@@ -20,6 +23,9 @@ class Task(object):
 
 	def CreateAOVoltageChan(self, chan, name, minv, maxv, units, p1):
 		self._nchans = len(chan.split(','))
+
+	def CreateDOChan(self, chan, name, groupby):
+		pass
 
 	def CfgSampClkTiming(self, clk, fs, edge, acq_mode, bufsize):
 		self.fs = fs
@@ -61,7 +67,19 @@ class Task(object):
 		pass
 
 	def WaitUntilTaskDone(self, timeout):
-		time.sleep(0.1)	
+		time.sleep(0.1)
+
+	def WriteDigitalLines(self, npts, autostart, timeout, groupby, data, wrote, p1):
+		pass
+
+	def GetWriteTotalSampPerChanGenerated(self, response_buffer):
+		response_buffer.value = 0
+
+	def CreateCOPulseChanFreq(self, chan, name, units, idle, somenum, rate, duty):
+		pass
+
+	def CfgImplicitTiming(self, mode, npoints):
+		pass	
 
 def DAQmxGetDevAIPhysicalChans(dev, buf, buflen):
 	fakechanlist = ['ai'+str(x) for x in range(32)]
