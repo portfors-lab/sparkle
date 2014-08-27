@@ -23,3 +23,6 @@ def badinputs():
 
 def batlabvocal():
     return os.path.join(sampledir(), 'batlabvocal.json')
+
+def reallylong():
+    return os.path.join(sampledir(), 'ohgodwhenwillitend.json')

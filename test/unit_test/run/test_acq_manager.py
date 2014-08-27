@@ -2,7 +2,6 @@ import sys, os, glob
 import json
 import time
 import threading, Queue
-import random, string
 
 import h5py
 import numpy as np
@@ -16,12 +15,9 @@ from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.stim.reorder import random_order
 from spikeylab.gui.stim.factory import TCFactory
+from spikeylab.tools.systools import rand_id
 
 import test.sample as sample
-
-def rand_id():
-    chars = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(chars) for x in range(4))
 
 class TestAcquisitionManager():
 

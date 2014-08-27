@@ -1,6 +1,5 @@
 import os, glob
 import json
-import random, string
 
 import h5py
 from nose.tools import assert_in, assert_equal
@@ -9,17 +8,13 @@ from PyQt4 import QtGui, QtCore, QtTest
 from spikeylab.gui.control import MainWindow
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.tools.systools import rand_id
 
 import test.sample as sample
 from test.util import qtbot
 
 PAUSE = 200
 ALLOW = 15
-
-def rand_id():
-    chars = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(chars) for x in range(4))
-
 
 class TestMainSetup():
     def setUp(self):

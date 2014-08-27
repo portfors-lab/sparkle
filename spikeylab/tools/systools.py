@@ -1,6 +1,7 @@
 import sys, os
 import ctypes
 import platform
+import random, string
 
 APPNAME = 'audiolab'
 
@@ -34,3 +35,7 @@ def get_drives():
         return ['C:\\', 'D:\\']
     else:
         return ['/home']
+
+def rand_id():
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(chars) for x in range(4))
