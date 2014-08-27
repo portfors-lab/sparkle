@@ -221,23 +221,9 @@ class StimulusModel():
         nsegs = sum([len(track) for track in self._segments])
         if nsegs == 0:
             return 0
-        params = self._autoParams.allData()
-        steps = []
         ntraces = 1
-        for p in params:
-            if p['start'] > p['stop']:
-                step = -1*p['step']
-            else:
-                step = p['step']
-            if step == 0:
-                if p['start'] == p['stop']:
-                    step = 1
-                else:
-                    return 0
-            nsteps = int(np.ceil( np.around(abs(p['start'] - p['stop']), 4) / step) + 1)
-            # print 'nsteps0', len(np.arange(p['start'], p['stop'], step)) + 1
-            # print 'nsteps1', nsteps
-            ntraces = ntraces*nsteps
+        for irow in range(self._autoParams.nrows()):
+            ntraces = ntraces*self._autoParams.numSteps(irow)
         return ntraces
 
     def loopCount(self):
