@@ -33,6 +33,35 @@ class AutoParameterModel():
         else:
             selection.append(component)
 
+    def setScaledValue(self, row, field, value):
+        if field == 'parameter':
+            old_multiplier = self.getDetail(row, 'multiplier')
+            self.setParamValue(row, parameter=value)
+            # keep the displayed values the same, so multiply to ajust
+            # real underlying value
+            new_multiplier = self.getDetail(row, 'multiplier')
+            if old_multiplier is not None and old_multiplier != new_multiplier:
+                new_multiplier = float(new_multiplier)
+                for f in ['start', 'stop', 'step']:
+                    self.setScaledValue(row, f, (self.paramValue(row, f)/new_multiplier)*(new_multiplier/old_multiplier))
+        elif field in ['start', 'stop', 'step']:
+            multiplier = self.getDetail(row, 'multiplier')
+            if multiplier is not None:
+                if self.checkLimits(row, value*multiplier):
+                    kwd = {field : value*multiplier}
+                    self.setParamValue(row, **kwd)
+
+    def scaledValue(self, row, field):
+        if field == 'parameter':            
+            return self.paramValue(row, field)
+        elif field in ['start', 'stop', 'step']:
+            val = self.paramValue(row, field)
+            multiplier = self.getDetail(row, 'multiplier')
+            if multiplier is not None:
+                return float(val)/multiplier
+        elif field == 'nsteps':
+            return self.numSteps(row)
+
     def setParamValue(self, row, **kwargs):
         # param_copy = self._parameters[row].copy()
         param = self._parameters[row]
@@ -84,8 +113,9 @@ class AutoParameterModel():
             return None
         return matching_details.pop()
 
-    def checkLimits(self, value, param):
+    def checkLimits(self, row, value):
         # extract the selected component names
+        param = self._parameters[row]
         components = param['selection']
         if len(components) == 0:
             return False
@@ -170,13 +200,15 @@ class AutoParameterModel():
         return list(editable_paramters)
 
     def verify(self):
-        for param in self._parameters:
-            result = self.verify_row(param)
+        # for param in self._parameters:
+        for row in range(self.nrows()):
+            result = self.verify_row(row)
             if result != 0:
                 return result
         return 0
 
-    def verify_row(self, param):
+    def verify_row(self, row):
+        param = self._parameters[row]
         if param['parameter'] == '':
             return "Auto-parameter type undefined"
         if param['parameter'] not in self._selectionParameters(param):
@@ -185,8 +217,8 @@ class AutoParameterModel():
             return "Auto-parameter step size of 0 not allowed"
         if abs(param['stop'] - param['start']) < param['step']:
             return "Auto-parameter step size larger than range"
-        if not self.checkLimits(param['start'], param):
+        if not self.checkLimits(row, param['start']):
             return "Auto-parameter start value invalid"
-        if not self.checkLimits(param['stop'], param):
+        if not self.checkLimits(row, param['stop']):
             return "Auto-parameter stop value invalid"
         return 0

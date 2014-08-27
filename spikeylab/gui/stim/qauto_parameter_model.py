@@ -35,17 +35,9 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            col = index.column()
-            if col == 0:
-                return self.model.paramValue(index.row(), self.model.header(col))
-            if 0 < col < 4:
-                val = self.model.paramValue(index.row(), self.model.header(col))
-                multiplier = self.model.getDetail(index.row(), 'multiplier')
-                if multiplier is not None:
-                    return float(val)/multiplier
-            elif col == 4:
-                return self.model.numSteps(index.row())
-
+            row = index.row()
+            field = self.model.header(index.column())
+            return self.model.scaledValue(row, field)
         elif role == QtCore.Qt.ToolTipRole:
             if 1 <= index.column() <= 3:
                 label = self.model.getDetail(index.row(), 'label')
@@ -71,32 +63,11 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
     def setData(self, index, value, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.EditRole:
-            if index.column() == 0 :
-                old_multiplier = self.model.getDetail(index.row(), 'multiplier')
-                self.model.setParamValue(index.row(), parameter=str(value))
-                # keep the displayed values the same, so multiply to ajust
-                # real underlying value
-                new_multiplier = self.model.getDetail(index.row(), 'multiplier')
-                if old_multiplier is not None and old_multiplier != new_multiplier:
-                    new_multiplier = float(new_multiplier)
-                    for col in range(1,4):
-                        i = self.index(index.row(), col)
-                        self.setData(i, self.data(i, QtCore.Qt.EditRole)*(new_multiplier/old_multiplier), QtCore.Qt.EditRole)
-
-            elif 1 <= index.column() <= 3:
-                # check that start and stop values are within limits
-                # specified by component type
-                if isinstance(value, QtCore.QVariant):
-                    value = value.toPyObject()
-                multiplier = self.model.getDetail(index.row(), 'multiplier')
-                if multiplier is not None:
-                    if self.model.checkLimits(value*multiplier, self.model.param(index.row())):
-                        kwd = {self.model.header(index.column()) : value*multiplier}
-                        self.model.setParamValue(index.row(), **kwd)
-            else:
-                kwd = {self.model.header(index.column()) : value}
-                self.model.setParamValue(index.row(), **kwd)
-
+            if isinstance(value, QtCore.QVariant):
+                value = value.toPyObject()
+            elif isinstance(value, QtCore.QString):
+                value = str(value)
+            self.model.setScaledValue(index.row(), self.model.header(index.column()), value)
 
         elif role == QtCore.Qt.UserRole:
             print "replace all values"
@@ -108,13 +79,15 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
     def checkValidCell(self, index):
         col = index.column()
+        row = index.row()
         param = self.model.param(index.row())
         if param['parameter'] == '':
             return False
-        if col == 1:
-            return self.model.checkLimits(param['start'], param)
-        if col == 2:
-            return self.model.checkLimits(param['stop'], param)
+        if col == 1 or col == 1:
+            return self.model.checkLimits(row, self.model.paramValue(row, self.model.header(col)))
+            # return self.model.checkLimits(param['start'], param)
+        # if col == 2:
+        #     return self.model.checkLimits(param['stop'], param)
         if col == 4:
             nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
             return nsteps != 0

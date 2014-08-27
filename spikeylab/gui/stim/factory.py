@@ -44,10 +44,10 @@ class TCFactory(StimFactory):
 
         tuning_curve.insertRow(0)
         tuning_curve.toggleSelection(0, tone)
-        tuning_curve.setParamValue(0, parameter='frequency', start=1000, stop=100000, step=1000)
+        tuning_curve.setParamValue(0, parameter='frequency', start=1000, stop=100000, step=10000)
         tuning_curve.insertRow(1)
         tuning_curve.toggleSelection(1, tone)
-        tuning_curve.setParamValue(1, parameter='intensity', start=40, stop=80, step=10)
+        tuning_curve.setParamValue(1, parameter='intensity', start=60, stop=70, step=10)
         
         stim.setStimType(TuningCurveEditor.name)
 
