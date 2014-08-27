@@ -80,16 +80,23 @@ class AutoParameterModel():
 
     def numSteps(self, row):
         param = self._parameters[row]
-        if param['step'] > 0:
-            if abs(param['start'] - param['stop']) < param['step']:
-                return 0
-            nsteps = np.around(abs(param['start'] - param['stop']), 4) / param['step']
-            item = int(np.ceil(nsteps)+1)
-        elif param['start'] == param['stop']:
-            item = 1
+        return self.nStepsForParam(param)
+
+    def nStepsForParam(self, param):
+        if param['parameter'] == 'filename':
+            return len(param['names'])
         else:
-            item = 0
-        return item
+            if param['step'] > 0:
+                if abs(param['start'] - param['stop']) < param['step']:
+                    return 0
+                print 'range', param['start'] - param['stop']
+                nsteps = np.around(abs(param['start'] - param['stop']), 4) / float(param['step'])
+                item = int(np.ceil(nsteps)+1)
+            elif param['start'] == param['stop']:
+                item = 1
+            else:
+                item = 0
+            return item
         
     def getDetail(self, row, detail_field):
         param = self._parameters[row]
@@ -166,24 +173,30 @@ class AutoParameterModel():
         steps = []
         for p in self._parameters:
             # inclusive range
-            if p['step'] > 0:
-                start = p['start']
-                stop = p['stop']
-                if start > stop:
-                    step = p['step']*-1
-                else:
-                    step = p['step']
-                nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
-                # print 'start, stop, steps', start, stop, nsteps
-                # print 'linspace inputs', start, start+step*(nsteps-1), nsteps
-                step_tmp = np.linspace(start, start+step*(nsteps-1), nsteps)
-                if step_tmp[-1] != stop:
-                    step_tmp = np.append(step_tmp,stop)
-                # print 'step range', step_tmp
-                steps.append(np.around(step_tmp,4))
+            if p['parameter'] == 'filename':
+                steps.append(p['names'])
             else:
-                assert p['start'] == p['stop']
-                steps.append([p['start']])
+                if p['step'] > 0:
+                    start = p['start']
+                    stop = p['stop']
+                    if start > stop:
+                        step = p['step']*-1
+                    else:
+                        step = p['step']
+                    # nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
+                    nsteps = self.nStepsForParam(p)
+                    # print 'nsteps', np.around(abs(start - stop), 4), p['step']
+                    print 'start, stop, steps', start, stop, nsteps
+                    step_tmp = np.linspace(start, start+step*(nsteps-2), nsteps-1)
+                    print 'step_tmp', step_tmp
+
+                    # if step_tmp[-1] != stop:
+                    step_tmp = np.append(step_tmp,stop)
+                    # print 'step range', step_tmp
+                    steps.append(np.around(step_tmp,4))
+                else:
+                    assert p['start'] == p['stop']
+                    steps.append([p['start']])
         return steps
 
     def _selectionParameters(self, param):
@@ -213,12 +226,16 @@ class AutoParameterModel():
             return "Auto-parameter type undefined"
         if param['parameter'] not in self._selectionParameters(param):
             return 'Parameter {} not present in all selected components'.format(param['parameter'])
-        if param['step'] == 0 and param['start'] != param['stop']:
-            return "Auto-parameter step size of 0 not allowed"
-        if abs(param['stop'] - param['start']) < param['step']:
-            return "Auto-parameter step size larger than range"
-        if not self.checkLimits(row, param['start']):
-            return "Auto-parameter start value invalid"
-        if not self.checkLimits(row, param['stop']):
-            return "Auto-parameter stop value invalid"
+        if param['parameter'] == 'filename':
+            if len(param['names']) < 1:
+                return "No filenames in filename auto-parameter list"
+        else:
+            if param['step'] == 0 and param['start'] != param['stop']:
+                return "Auto-parameter step size of 0 not allowed"
+            if abs(param['stop'] - param['start']) < param['step']:
+                return "Auto-parameter step size larger than range"
+            if not self.checkLimits(row, param['start']):
+                return "Auto-parameter start value invalid"
+            if not self.checkLimits(row, param['stop']):
+                return "Auto-parameter stop value invalid"
         return 0
