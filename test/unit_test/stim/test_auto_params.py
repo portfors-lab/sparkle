@@ -158,7 +158,7 @@ class TestAutoParameterModel():
         component = Vocalization()
         model = AutoParameterModel()
         model.insertRow(0)
-        p = {'parameter' : 'filename',
+        p = {'parameter' : 'file',
                 'names' : ['file0', 'file1', 'file2'],
                 'selection' : []
         }
@@ -178,7 +178,7 @@ class TestAutoParameterModel():
         vcomponent = Vocalization()
         vcomponent.setFile(sample.samplewav())
         model.insertRow(1)
-        p = {'parameter' : 'filename',
+        p = {'parameter' : 'file',
                 'names' : [sample.samplewav()],
                 'selection' : []
         }

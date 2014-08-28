@@ -114,6 +114,19 @@ class TestStimModel():
         assert len(doc) == nsteps
         assert doc[0]['samplerate_da'] == model.samplerate()
 
+    def test_expaned_stim_with_vocal_auto(self):
+        model = StimulusModel()
+        component = Vocalization()
+        component.setFile(sample.samplewav())
+        model.insertComponent(component, 0,0)       
+        model.setReferenceVoltage(100, 0.1)
+        nsteps = self.add_vocal_param(model)        
+
+        signals, doc, ovld = model.expandedStim()
+        assert len(signals) == nsteps
+        assert len(doc) == nsteps
+        assert doc[0]['samplerate_da'] == model.samplerate()
+
     def test_signal_eq_caldb(self):
         caldb = 100
         calv = 0.1
@@ -211,6 +224,12 @@ class TestStimModel():
         # do math to make this more accurate
         assert ovld > 0
 
+    def test_corrent_number_of_traces(self):
+        model = self.stim_with_double_auto()
+        n = model.traceCount()
+        sig, doc, over = model.expandedStim()
+        assert len(sig) == n
+
     def test_template_no_auto_params(self):
         model = StimulusModel()
         model.setReferenceVoltage(100, 0.1)
@@ -243,6 +262,28 @@ class TestStimModel():
         component.setIntensity(34)
         model.insertComponent(component, 0,0)
         nsteps = self.add_auto_param(model) 
+
+        template = model.templateDoc()
+
+        clone = StimulusModel.loadFromTemplate(template)
+        clone.setReferenceVoltage(100, 0.1)
+
+        signals0, docs0, ovld = model.expandedStim()
+        signals1, docs1, ovld = clone.expandedStim()
+
+        assert clone.stimid != model.stimid
+        assert len(signals0) == len(signals1)
+        for i in range(len(signals0)):
+            signal0, atten0 = signals0[i]
+            signal1, atten1 = signals1[i]
+            np.testing.assert_array_equal(signal0, signal1)
+            assert atten0 == atten1
+            assert_equal(docs0[i], docs1[i])
+
+        assert clone.repCount() == model.repCount()
+
+    def test_template_with_auto_params_vocal(self):
+        model = self.stim_with_double_auto()
 
         template = model.templateDoc()
 
@@ -459,15 +500,30 @@ class TestStimModel():
         parameter_model.setParamValue(0, start=start, step=step, 
                                       stop=stop, parameter=ptype)
 
-        # parameter_model = model.autoParams()
-        # parameter_model.insertRows(0,1)
-        # auto_parameter = parameter_model.data(parameter_model.index(0,0))
-        # auto_parameter['start'] = start
-        # auto_parameter['step'] = step
-        # auto_parameter['stop'] = stop
-        # parameter_model.setData(parameter_model.index(0,0), auto_parameter)
-
         return len(range(start,stop,step)) + 1
 
+    def add_vocal_param(self, model):
+        p = {'parameter' : 'file',
+                'names' : [sample.samplewav(), sample.samplewav()],
+                'selection' : []
+        }
+        parameter_model = model.autoParams()
+        parameter_model.insertRow(0)
+        parameter_model.overwriteParam(0,p)
+        # select first component
+        parameter_model.toggleSelection(0, model.component(0,0))
 
-        
+        return parameter_model.numSteps(0)
+
+    def stim_with_double_auto(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        model.setRepCount(7)
+        component = Vocalization()
+        component.setFile(sample.samplewav())
+        model.insertComponent(component, 0,0)
+        nsteps0 = self.add_vocal_param(model) 
+        nsteps1 = self.add_auto_param(model)
+        nsteps = nsteps0*nsteps1
+
+        return model

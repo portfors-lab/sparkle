@@ -83,7 +83,7 @@ class AutoParameterModel():
         return self.nStepsForParam(param)
 
     def nStepsForParam(self, param):
-        if param['parameter'] == 'filename':
+        if param['parameter'] == 'file':
             return len(param['names'])
         else:
             if param['step'] > 0:
@@ -173,7 +173,7 @@ class AutoParameterModel():
         steps = []
         for p in self._parameters:
             # inclusive range
-            if p['parameter'] == 'filename':
+            if p['parameter'] == 'file':
                 steps.append(p['names'])
             else:
                 if p['step'] > 0:
@@ -193,6 +193,7 @@ class AutoParameterModel():
                     # if step_tmp[-1] != stop:
                     step_tmp = np.append(step_tmp,stop)
                     # print 'step range', step_tmp
+
                     steps.append(np.around(step_tmp,4))
                 else:
                     assert p['start'] == p['stop']
@@ -226,9 +227,9 @@ class AutoParameterModel():
             return "Auto-parameter type undefined"
         if param['parameter'] not in self._selectionParameters(param):
             return 'Parameter {} not present in all selected components'.format(param['parameter'])
-        if param['parameter'] == 'filename':
+        if param['parameter'] == 'file':
             if len(param['names']) < 1:
-                return "No filenames in filename auto-parameter list"
+                return "No filenames in file auto-parameter list"
         else:
             if param['step'] == 0 and param['start'] != param['stop']:
                 return "Auto-parameter step size of 0 not allowed"

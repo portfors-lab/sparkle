@@ -290,8 +290,8 @@ class StimulusModel():
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
                 for component in param['selection']:
-                    # print 'setting component parameter {} to {}'.format(param['parameter'], varylist[itrace][ip])
-                    component.set(param['parameter'], np.around(varylist[itrace][ip],4))
+                    print 'setting component {} parameter {} to {}'.format(component.name, param['parameter'], varylist[itrace][ip])
+                    component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
             stim_list.append(func(*args))

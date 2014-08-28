@@ -222,6 +222,29 @@ class TestAcquisitionManager():
 
         hfile.close()
 
+    def test_auto_vocal_parameter_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        nreps = 3
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        stim_model = create_vocal_stim(nreps)
+
+        manager.protocol_model().insert(stim_model,0)
+
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim_model, winsz, acq_rate)
+
+        hfile.close()
+
     def test_abort_protocol(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
@@ -628,11 +651,12 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     if t is None: t = ''
     assert test_data.attrs['testtype'] == t
     
+    assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
+
     for stim_info in stim_doc:
         assert len(stim_info['time_stamps']) == test_data.attrs['reps']
         assert stim_info['overloaded_attenuation'] == 0
         assert stim_info['samplerate_da'] == test_stim.samplerate()
-        assert len(stim_info['components']) == test_stim.componentCount()
         for component_info in stim_info['components']:
             # required fields
             assert 'risefall' in component_info
@@ -642,8 +666,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
 
 
     stim_doc = stim_doc[1:] # remove control stim
-    assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
-
+    print stim_doc
     # to keep these tests simple, assume the altered component is at 
     # index 0,0 and there is only a single auto parameter
     if len(test_stim.autoParams().allData()) > 0:
@@ -653,6 +676,8 @@ def check_result(test_data, test_stim, winsz, acq_rate):
         if test_stim.reorder is None:
             for istim, stim_info in enumerate(stim_doc):
                 prevlen = 1
+                # make sure the right number of components
+                assert len(stim_info['components']) == test_stim.componentCount()
                 for ip, param in enumerate(params):
                     # print 'istim, ip', istim, ip, len(value_ranges[ip]), (istim / prevlen )% len(value_ranges[ip])
                     # print 'comparision', stim_info['components'][0][param['parameter']], value_ranges[ip][(istim / prevlen )% len(value_ranges[ip])]
@@ -688,16 +713,17 @@ def create_vocal_stim(nreps):
     component.setFile(sample.samplewav())
     delay = Silence()
     stim_model = StimulusModel()
-    stim_model.insertComponent(component, 0,0)
     stim_model.insertComponent(delay, 0,0)
+    stim_model.insertComponent(component, 0,0)
     stim_model.setRepCount(nreps)
+
     auto_model = stim_model.autoParams()
     auto_model.insertRow(0)
-
+    p = {'parameter' : 'file',
+         'names' : [sample.samplewav(), sample.samplewav()],
+         'selection' : []
+        }
+    auto_model.overwriteParam(0,p)
     auto_model.toggleSelection(0,component)
-
-    values = ['duration', 0.065, 0.165, 0.010] # had caused problem in past
-    auto_model.setParamValue(0, parameter=values[0], start=values[1], 
-                            stop=values[2], step=values[3])
 
     return stim_model

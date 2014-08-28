@@ -265,7 +265,7 @@ class Vocalization(AbstractStimulusComponent):
     def auto_details(self):
         details = super(Vocalization, self).auto_details()
         del details['duration']
-        details['filename'] = {}
+        details['file'] = {}
         return details
 
     def verify(self, **kwargs):
@@ -275,6 +275,14 @@ class Vocalization(AbstractStimulusComponent):
 
     def clean(self):
         self._cached_pixmap = None
+
+    def setDuration(self, dur):
+        raise Exception("Duration not settable on recordings")
+
+    def set(self, param, value):
+        if param == 'duration':
+            raise Exception("Duration not settable on recordings")
+        super(Vocalization, self).set(param, value)
 
 class WhiteNoise(AbstractStimulusComponent):
     name = "White Noise"
