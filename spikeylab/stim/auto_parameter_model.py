@@ -58,7 +58,7 @@ class AutoParameterModel():
             return self.paramValue(row, field)
         elif field in ['start', 'stop', 'step']:
             if self._parameters[row]['parameter'] == 'file':
-                return 0
+                return '-'
             else:
                 val = self.paramValue(row, field)
                 multiplier = self.getDetail(row, 'multiplier')
@@ -83,7 +83,6 @@ class AutoParameterModel():
     def overwriteParam(self, row, param):
         if row == -1:
             row = self.nrows() - 1
-        print 'parameters', self._parameters, row
         self._parameters[row] = param
 
     def numSteps(self, row):
@@ -238,6 +237,7 @@ class AutoParameterModel():
             details = comp.auto_details()
             editable_sets.append(set(details.keys()))
         editable_paramters = set.intersection(*editable_sets)
+        # do not allow selecting of file from here
         return list(editable_paramters)
 
     def updateComponentStartVals(self):

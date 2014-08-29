@@ -265,7 +265,7 @@ class Vocalization(AbstractStimulusComponent):
     def auto_details(self):
         details = super(Vocalization, self).auto_details()
         del details['duration']
-        details['file'] = {'label':':)'}
+        details['file'] = {'label':'Edit from component dialog'}
         return details
 
     def verify(self, **kwargs):
