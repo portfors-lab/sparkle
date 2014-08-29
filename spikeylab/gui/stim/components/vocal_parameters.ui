@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>427</height>
+    <width>535</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,6 +69,19 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Files selected:</string>
@@ -79,6 +92,13 @@
       <widget class="QLabel" name="nfiles">
        <property name="text">
         <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="orderBtn">
+       <property name="text">
+        <string>Order...</string>
        </property>
       </widget>
      </item>
@@ -115,7 +135,7 @@
      <y>86</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-3</x>
+     <x>0</x>
      <y>142</y>
     </hint>
    </hints>
@@ -127,7 +147,7 @@
    <slot>browseWavdirs()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>534</x>
+     <x>524</x>
      <y>32</y>
     </hint>
     <hint type="destinationlabel">
@@ -136,16 +156,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>orderBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>VocalParameterWidget</receiver>
+   <slot>setOrder()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>501</x>
+     <y>593</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>518</x>
+     <y>612</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>wavfile_selected()</slot>
-  <slot>wavdir_selected()</slot>
-  <slot>browse_wavdirs()</slot>
-  <slot>wavfile_clicked()</slot>
-  <slot>folder_expanded()</slot>
   <slot>wafileSelected()</slot>
   <slot>wavdirSelected()</slot>
   <slot>browseWavdirs()</slot>
   <slot>wavfileClicked()</slot>
+  <slot>setOrder()</slot>
  </slots>
 </ui>

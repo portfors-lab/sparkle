@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 from vocal_parameters_form import Ui_VocalParameterWidget
 from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.audiotools import spectrogram
+from spikeylab.gui.stim.components.order_dlg import OrderDialog
 
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     vocalFilesChanged = QtCore.pyqtSignal(object, list)
@@ -20,6 +21,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.inputWidgets = {'intensity': self.common.dbSpnbx}
         self.audioExtentions = ['wav']
         self.filelistView.selectionChanged = self.wavfileClicked
+        self.fileorder = []
 
     def setComponent(self, component):
         self.common.setFields(component)
@@ -46,6 +48,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         for path in paths:
             idx = self.filemodel.index(path)
             selection.select(idx, QtGui.QItemSelectionModel.Select)
+        self.fileorder = paths
 
     def setRootDirs(self, treeroot, listroot):
         # set up wav file directory finder paths
@@ -103,9 +106,9 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     def wavfileClicked(self, selected, deselected):
 
         allselected = self.filelistView.selectedIndexes()
-        first = allselected[0]
         # display spectrogram of file
-        spath = str(self.dirmodel.fileInfo(first).absoluteFilePath())
+        allpaths = [str(self.dirmodel.fileInfo(idx).absoluteFilePath()) for idx in allselected]
+        spath = allpaths[0]
         if not any(map(spath.lower().endswith, self.audioExtentions)):
             return # not an audio file
 
@@ -113,6 +116,19 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.common.setDuration(dur)
         self.currentWavFile = spath
         self.nfiles.setNum(len(allselected))
+
+        if len(allselected) < 2:
+            self.orderBtn.setEnabled(False)
+        else:
+            self.orderBtn.setEnabled(True)
+
+        #remove deselected files from order
+        self.fileorder = [x for x in self.fileorder if x in allpaths]
+
+        # add any to file order not in it already
+        for path in allpaths:
+            if path not in self.fileorder:
+                self.fileorder.append(path)
 
     def setContentFocus(self):
         pass
@@ -122,3 +138,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def updateColormap(self):
         self.specPreview.updateColormap()
+
+    def setOrder(self):
+        dlg = OrderDialog(self.fileorder)
+        if dlg.exec_():
+            self.fileorder = dlg.order()
