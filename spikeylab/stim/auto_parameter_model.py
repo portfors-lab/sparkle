@@ -253,8 +253,8 @@ class AutoParameterModel():
         for row in range(self.nrows()):
             p = self._parameters[row]
             if p['parameter'] == 'file':
-                # ASSUMES EXACTLY ONE COMPONENT IN SELECTION
-                if p['selection'][0] == comp:
+                # ASSUMES COMPONENT IN ONE SELECTION
+                if comp in p['selection']:
                     return row
 
     def editableRow(self, row):
