@@ -104,6 +104,9 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
 class ComboboxDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         parameter_types = index.model().selectedParameterTypes(index)
+        # tight couple hack to remove disallowed selection of file from table
+        if 'file' in parameter_types:
+            parameter_types.remove('file')
         editor = QtGui.QComboBox(parent)
         editor.addItems(parameter_types)
         return editor
