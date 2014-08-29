@@ -7,6 +7,7 @@ from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.audiotools import spectrogram
 
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
+    vocalFilesChanged = QtCore.pyqtSignal(object, list)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
@@ -71,6 +72,12 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self._component.setBrowseDir(str(self.dirmodel.rootPath()))
 
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
+
+        selected = self.filelistView.selectedIndexes()
+        paths = []
+        for idx in selected:
+            paths.append(self.filemodel.filePath(idx))
+        self.vocalFilesChanged.emit(self._component, paths)
 
     def component(self):
         return self._component

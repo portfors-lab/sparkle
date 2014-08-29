@@ -76,6 +76,9 @@ class AutoParameterModel():
         return param[field]
 
     def overwriteParam(self, row, param):
+        if row == -1:
+            row = self.nrows() - 1
+        print 'parameters', self._parameters, row
         self._parameters[row] = param
 
     def numSteps(self, row):
@@ -212,6 +215,23 @@ class AutoParameterModel():
             editable_sets.append(set(details.keys()))
         editable_paramters = set.intersection(*editable_sets)
         return list(editable_paramters)
+
+    def updateComponentStartVals(self):
+        """Go through selected components for each auto parameter and set the start value"""
+        for param in self._parameters:
+            for component in param['selection']:
+                if param['parameter'] == 'file':
+                    component.set(param['parameter'], param['names'][0])
+                else:
+                    component.set(param['parameter'], param['start'])
+
+    def fileParameter(self, comp):
+        for row in range(self.nrows()):
+            p = self._parameters[row]
+            if p['parameter'] == 'file':
+                # ASSUMES EXACTLY ONE COMPONENT IN SELECTION
+                if p['selection'][0] == comp:
+                    return row
 
     def verify(self):
         # for param in self._parameters:

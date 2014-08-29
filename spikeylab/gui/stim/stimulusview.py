@@ -386,6 +386,23 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.hashIsDirty = True
         super(StimulusView, self).resizeEvent(event)
 
+    def updateVocalAuto(self, component, files):
+        auto_model = self.model().autoParams()
+        row = auto_model.fileParameter(component)
+        if len(files) > 1:
+            p = {'parameter' : 'file',
+                 'names' : files,
+                 'selection' : [component]
+            }
+            if row is None:
+                auto_model.insertItem(auto_model.index(0,0), p)
+            else:
+                auto_model.setData(auto_model.index(row,0),p)
+        elif row is not None:
+            # remove the autoparameter
+            auto_model.removeRow(row)
+        # if row is none and len(files) == 1 then we don't need to do anything
+
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
@@ -413,6 +430,9 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         # connect editor to update defaults
         view = parent.parentWidget()
         editor.attributesSaved.connect(view.updateDefaults)
+
+        if component.name == 'Vocalization':
+            editor.vocalFilesChanged.connect(view.updateVocalAuto)
 
         return editor
 

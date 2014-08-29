@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
-# Created: Wed Jun 18 17:25:42 2014
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Thu Aug 28 12:35:00 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -52,6 +52,7 @@ class Ui_VocalParameterWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.filelistView.sizePolicy().hasHeightForWidth())
         self.filelistView.setSizePolicy(sizePolicy)
+        self.filelistView.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.filelistView.setObjectName(_fromUtf8("filelistView"))
         self.specPreview = SpecWidget(self.splitter_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)

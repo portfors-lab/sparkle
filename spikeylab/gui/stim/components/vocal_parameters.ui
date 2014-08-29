@@ -45,6 +45,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
       </widget>
      </widget>
      <widget class="SpecWidget" name="specPreview" native="true">
@@ -72,12 +75,12 @@
   <customwidget>
    <class>CommonParameterWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.stim.common_parameters</header>
+   <header>spikeylab.gui.stim.common_parameters</header>
   </customwidget>
   <customwidget>
    <class>SpecWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.plotting.pyqtgraph_widgets</header>
+   <header>spikeylab.gui.plotting.pyqtgraph_widgets</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

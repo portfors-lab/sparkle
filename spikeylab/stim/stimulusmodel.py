@@ -283,6 +283,7 @@ class StimulusModel():
                 idx = (itrace / x) % len(step_set)
                 varylist[itrace][iset] = step_set[idx]
             x = x*len(step_set)
+        print 'VARYLIST', varylist
         # now create the stimuli according to steps
         # go through list of modifing parameters, update this stimulus,
         # and then save current state to list
@@ -476,9 +477,10 @@ class StimulusModel():
 
     def updateComponentStartVals(self):
         """Go through selected components for each auto parameter and set the start value"""
-        for param in self._autoParams.allData():
-            for component in param['selection']:
-                component.set(param['parameter'], param['start'])
+        self._autoParams.updateComponentStartVals()
+        # for param in self._autoParams.allData():
+        #     for component in param['selection']:
+        #         component.set(param['parameter'], param['start'])
 
     def containsPval(self, paramName, value):
         """Returns true is the given value is in the auto parameters"""

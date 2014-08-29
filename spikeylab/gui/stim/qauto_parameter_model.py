@@ -155,5 +155,8 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     def selectedParameterTypes(self, index):
         return self.model.selectedParameterTypes(index.row())
 
+    def fileParameter(self, comp):
+        return self.model.fileParameter(comp)
+
     def verify(self):
         return self.model.verify()
