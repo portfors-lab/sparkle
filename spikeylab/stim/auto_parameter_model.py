@@ -212,9 +212,9 @@ class AutoParameterModel():
                     # nsteps = np.ceil(np.around(abs(start - stop), 4) / p['step'])
                     nsteps = self.nStepsForParam(p)
                     # print 'nsteps', np.around(abs(start - stop), 4), p['step']
-                    print 'start, stop, steps', start, stop, nsteps
+                    # print 'start, stop, steps', start, stop, nsteps
                     step_tmp = np.linspace(start, start+step*(nsteps-2), nsteps-1)
-                    print 'step_tmp', step_tmp
+                    # print 'step_tmp', step_tmp
 
                     # if step_tmp[-1] != stop:
                     step_tmp = np.append(step_tmp,stop)
