@@ -34,6 +34,8 @@ class AutoParameterModel():
             selection.append(component)
 
     def setScaledValue(self, row, field, value):
+        if self._parameters[row]['parameter'] == 'file':
+            return # cannot be set this way?
         if field == 'parameter':
             old_multiplier = self.getDetail(row, 'multiplier')
             self.setParamValue(row, parameter=value)
@@ -55,10 +57,13 @@ class AutoParameterModel():
         if field == 'parameter':            
             return self.paramValue(row, field)
         elif field in ['start', 'stop', 'step']:
-            val = self.paramValue(row, field)
-            multiplier = self.getDetail(row, 'multiplier')
-            if multiplier is not None:
-                return float(val)/multiplier
+            if self._parameters[row]['parameter'] == 'file':
+                return 0
+            else:
+                val = self.paramValue(row, field)
+                multiplier = self.getDetail(row, 'multiplier')
+                if multiplier is not None:
+                    return float(val)/multiplier
         elif field == 'nsteps':
             return self.numSteps(row)
 
@@ -92,7 +97,7 @@ class AutoParameterModel():
             if param['step'] > 0:
                 if abs(param['start'] - param['stop']) < param['step']:
                     return 0
-                print 'range', param['start'] - param['stop']
+                # print 'range', param['start'] - param['stop']
                 nsteps = np.around(abs(param['start'] - param['stop']), 4) / float(param['step'])
                 item = int(np.ceil(nsteps)+1)
             elif param['start'] == param['stop']:
@@ -122,6 +127,25 @@ class AutoParameterModel():
             print 'Components with mis-matched units!'
             return None
         return matching_details.pop()
+
+    def isFieldValid(self, row, field):
+        param = self._parameters[row]
+        if param['parameter'] == '':
+            return False
+        if field == 'nsteps':
+            return self.numSteps(row) != 0
+        if param['parameter'] == 'file':
+            # do something here... check filenames?
+            return True
+        if field == 'parameter':
+            return True
+        # else check that value is between min and max allowed
+        return self.checkLimits(row, param[field])
+
+    def findFileParam(self, comp):
+        for p in self._parameters:
+            if p['parameter'] == 'file' and comp in p['selection']:
+                return p['names']
 
     def checkLimits(self, row, value):
         # extract the selected component names
@@ -232,6 +256,9 @@ class AutoParameterModel():
                 # ASSUMES EXACTLY ONE COMPONENT IN SELECTION
                 if p['selection'][0] == comp:
                     return row
+
+    def editableRow(self, row):
+        return self._parameters[row]['parameter'] != 'file'
 
     def verify(self):
         # for param in self._parameters:

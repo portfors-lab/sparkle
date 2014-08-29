@@ -432,6 +432,10 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         editor.attributesSaved.connect(view.updateDefaults)
 
         if component.name == 'Vocalization':
+            # find any associated file auto-parameters
+            files = view.model().autoParams().findFileParam(component)
+            if files is not None:
+                editor.selectMany(files)
             editor.vocalFilesChanged.connect(view.updateVocalAuto)
 
         return editor

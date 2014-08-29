@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
-# Created: Thu Aug 28 12:35:00 2014
+# Created: Fri Aug 29 12:00:18 2014
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -63,12 +63,20 @@ class Ui_VocalParameterWidget(object):
         self.specPreview.setMinimumSize(QtCore.QSize(0, 150))
         self.specPreview.setObjectName(_fromUtf8("specPreview"))
         self.verticalLayout.addWidget(self.splitter_2)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.label = QtGui.QLabel(VocalParameterWidget)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.horizontalLayout.addWidget(self.label)
+        self.nfiles = QtGui.QLabel(VocalParameterWidget)
+        self.nfiles.setObjectName(_fromUtf8("nfiles"))
+        self.horizontalLayout.addWidget(self.nfiles)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.common = CommonParameterWidget(VocalParameterWidget)
         self.common.setObjectName(_fromUtf8("common"))
         self.verticalLayout.addWidget(self.common)
 
         self.retranslateUi(VocalParameterWidget)
-        QtCore.QObject.connect(self.filelistView, QtCore.SIGNAL(_fromUtf8("clicked(QModelIndex)")), VocalParameterWidget.wavfileClicked)
         QtCore.QObject.connect(self.filetreeView, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), VocalParameterWidget.wavdirSelected)
         QtCore.QObject.connect(self.wavrootdirBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), VocalParameterWidget.browseWavdirs)
         QtCore.QMetaObject.connectSlotsByName(VocalParameterWidget)
@@ -76,6 +84,8 @@ class Ui_VocalParameterWidget(object):
     def retranslateUi(self, VocalParameterWidget):
         VocalParameterWidget.setWindowTitle(_translate("VocalParameterWidget", "Vocalization", None))
         self.wavrootdirBtn.setText(_translate("VocalParameterWidget", "change", None))
+        self.label.setText(_translate("VocalParameterWidget", "Files selected:", None))
+        self.nfiles.setText(_translate("VocalParameterWidget", "0", None))
 
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
 from spikeylab.gui.stim.common_parameters import CommonParameterWidget

@@ -54,7 +54,10 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
                 return f
 
         elif role == QtCore.Qt.UserRole or role == AbstractDragView.DragRole:  #return the whole python object
-            return self.model.param(index.row())
+            param = self.model.param(index.row())
+            for comp in param['selection']:
+                comp.clean()
+            return param
 
         elif role == self.SelectionModelRole:
             # may need to translate to QModelIndexes
@@ -80,18 +83,23 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     def checkValidCell(self, index):
         col = index.column()
         row = index.row()
-        param = self.model.param(index.row())
-        if param['parameter'] == '':
-            return False
-        if col == 1 or col == 1:
-            return self.model.checkLimits(row, self.model.paramValue(row, self.model.header(col)))
-            # return self.model.checkLimits(param['start'], param)
-        # if col == 2:
-        #     return self.model.checkLimits(param['stop'], param)
-        if col == 4:
-            nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
-            return nsteps != 0
-        return True
+        return self.model.isFieldValid(row, self.model.header(col))
+
+        # param = self.model.param(index.row())
+        # if param['parameter'] == '':
+        #     return False
+        # if col == 1 or col == 1:
+        #     return self.model.checkLimits(row, self.model.paramValue(row, self.model.header(col)))
+        #     # return self.model.checkLimits(param['start'], param)
+        # # if col == 2:
+        # #     return self.model.checkLimits(param['stop'], param)
+        # if col == 4:
+        #     nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
+        #     return nsteps != 0
+        # return True
+
+    def findFileParam(self, comp):
+        return self.model.findFileParam(comp)
 
     def setParameterList(self, paramlist):
         self._parameters = paramlist
@@ -131,7 +139,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         if index.isValid():
-            if index.column() < 4:
+            if self.model.editableRow(index.row()) and index.column() < 4:
                 return QtCore.Qt.ItemIsDragEnabled | \
                        QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
                        QtCore.Qt.ItemIsEditable

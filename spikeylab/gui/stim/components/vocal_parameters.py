@@ -19,6 +19,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.common.valueChanged.connect(self.valueChanged.emit)
         self.inputWidgets = {'intensity': self.common.dbSpnbx}
         self.audioExtentions = ['wav']
+        self.filelistView.selectionChanged = self.wavfileClicked
 
     def setComponent(self, component):
         self.common.setFields(component)
@@ -38,6 +39,13 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
             self.common.setDuration(dur)
 
         self._component = component
+
+    def selectMany(self, paths):
+        selection = self.filelistView.selectionModel()
+
+        for path in paths:
+            idx = self.filemodel.index(path)
+            selection.select(idx, QtGui.QItemSelectionModel.Select)
 
     def setRootDirs(self, treeroot, listroot):
         # set up wav file directory finder paths
@@ -76,7 +84,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         selected = self.filelistView.selectedIndexes()
         paths = []
         for idx in selected:
-            paths.append(self.filemodel.filePath(idx))
+            paths.append(str(self.filemodel.filePath(idx)))
         self.vocalFilesChanged.emit(self._component, paths)
 
     def component(self):
@@ -92,15 +100,19 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         spath = self.dirmodel.fileInfo(modelIndex).absoluteFilePath()
         self.filelistView.setRootIndex(self.filemodel.setRootPath(spath))
 
-    def wavfileClicked(self, modelIndex):
+    def wavfileClicked(self, selected, deselected):
+
+        allselected = self.filelistView.selectedIndexes()
+        first = allselected[0]
         # display spectrogram of file
-        spath = str(self.dirmodel.fileInfo(modelIndex).absoluteFilePath())
+        spath = str(self.dirmodel.fileInfo(first).absoluteFilePath())
         if not any(map(spath.lower().endswith, self.audioExtentions)):
             return # not an audio file
 
         dur = self.specPreview.fromFile(spath)
         self.common.setDuration(dur)
         self.currentWavFile = spath
+        self.nfiles.setNum(len(allselected))
 
     def setContentFocus(self):
         pass

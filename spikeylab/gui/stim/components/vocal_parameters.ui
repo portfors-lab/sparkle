@@ -67,6 +67,24 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Files selected:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="nfiles">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="CommonParameterWidget" name="common" native="true"/>
    </item>
   </layout>
@@ -86,22 +104,6 @@
  </customwidgets>
  <resources/>
  <connections>
-  <connection>
-   <sender>filelistView</sender>
-   <signal>clicked(QModelIndex)</signal>
-   <receiver>VocalParameterWidget</receiver>
-   <slot>wavfileClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>490</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>505</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>filetreeView</sender>
    <signal>doubleClicked(QModelIndex)</signal>
