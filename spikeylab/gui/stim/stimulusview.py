@@ -22,6 +22,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     _width = 10
     _componentDefaults = {}
     componentSelected = QtCore.pyqtSignal(AbstractStimulusComponent)
+    countChanged = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
         AbstractDragView.__init__(self)
@@ -402,7 +403,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             # remove the autoparameter
             auto_model.removeRow(row)
         # if row is none and len(files) == 1 then we don't need to do anything
-
+        self.countChanged.emit()
+        
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):

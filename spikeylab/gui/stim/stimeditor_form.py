@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'stimulus_editor.ui'
+# Form implementation generated from reading ui file '.\stimulus_editor.ui'
 #
-# Created: Mon Aug 25 14:50:48 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Fri Aug 29 15:01:01 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -47,7 +47,7 @@ class Ui_StimulusEditor(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 641, 386))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 642, 358))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setMargin(0)
@@ -117,6 +117,12 @@ class Ui_StimulusEditor(object):
         self.label_2.setWordWrap(False)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 1)
+        self.label_3 = QtGui.QLabel(self.frame)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout_3.addWidget(self.label_3, 1, 0, 1, 1)
+        self.ntracesLbl = QtGui.QLabel(self.frame)
+        self.ntracesLbl.setObjectName(_fromUtf8("ntracesLbl"))
+        self.gridLayout_3.addWidget(self.ntracesLbl, 1, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_3)
         self.previewBtn = QtGui.QPushButton(self.frame)
         self.previewBtn.setObjectName(_fromUtf8("previewBtn"))
@@ -148,10 +154,12 @@ class Ui_StimulusEditor(object):
         self.hintTxedt.setHtml(_translate("StimulusEditor", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Cantarell\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt;\">Drag Components onto view to Add. Double click to edit; right drag to move.</span></p></body></html>", None))
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Drag Components onto view to Add. Double click to edit; right drag to move.</span></p></body></html>", None))
         self.label.setText(_translate("StimulusEditor", "Grid scale(ms):", None))
         self.label_2.setText(_translate("StimulusEditor", "Reps", None))
+        self.label_3.setText(_translate("StimulusEditor", "Traces", None))
+        self.ntracesLbl.setText(_translate("StimulusEditor", "1", None))
         self.previewBtn.setText(_translate("StimulusEditor", "Preview Spectrogram", None))
         self.saveBtn.setText(_translate("StimulusEditor", "Save As...", None))
         self.okBtn.setText(_translate("StimulusEditor", "Ok", None))

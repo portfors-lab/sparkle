@@ -11,7 +11,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     SelectionModelRole = 34
     emptied = QtCore.pyqtSignal(bool)
     hintRequested = QtCore.pyqtSignal(str)
-    # stimChanged = QtCore.pyqtSignal(QtCore.QModelIndex, QtCore.QModelIndex)
+    countChanged = QtCore.pyqtSignal()
     def __init__(self, model):
         super(QAutoParameterModel, self).__init__()
         self.model = model
@@ -62,7 +62,6 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         elif role == self.SelectionModelRole:
             # may need to translate to QModelIndexes
             return self.model.selection(self.model.param(index.row()))
-            # return self._selectionmap[self._parameters[index.row()]['paramid']]
 
     def setData(self, index, value, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.EditRole:
@@ -71,7 +70,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             elif isinstance(value, QtCore.QString):
                 value = str(value)
             self.model.setScaledValue(index.row(), self.model.header(index.column()), value)
-
+            self.countChanged.emit()
         elif role == QtCore.Qt.UserRole:
             print "replace all values"
             row = index.row()
@@ -84,19 +83,6 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         col = index.column()
         row = index.row()
         return self.model.isFieldValid(row, self.model.header(col))
-
-        # param = self.model.param(index.row())
-        # if param['parameter'] == '':
-        #     return False
-        # if col == 1 or col == 1:
-        #     return self.model.checkLimits(row, self.model.paramValue(row, self.model.header(col)))
-        #     # return self.model.checkLimits(param['start'], param)
-        # # if col == 2:
-        # #     return self.model.checkLimits(param['stop'], param)
-        # if col == 4:
-        #     nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
-        #     return nsteps != 0
-        # return True
 
     def findFileParam(self, comp):
         return self.model.findFileParam(comp)

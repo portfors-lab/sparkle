@@ -18,6 +18,7 @@ class StimulusEditor(AbstractStimulusWidget):
         # component selection update connections
         self.ui.trackview.componentSelected.connect(self.ui.parametizer.view().componentSelection)
         self.ui.parametizer.view().parameterChanged.connect(self.ui.trackview.updateSelectionModel)
+        self.ui.trackview.countChanged.connect(self.updateTraceCount)
 
         # when the auto-parameter editor is toggled show/hide changes the edit mode of the StimulusView
         self.ui.parametizer.visibilityChanged.connect(self.ui.trackview.setMode)
@@ -41,9 +42,14 @@ class StimulusEditor(AbstractStimulusWidget):
         # whether the auto parameters are emtpy 
         # affects the enable-ness of the StimlusView
         autoParamModel.emptied.connect(self.ui.trackview.emptySelection)
+        autoParamModel.countChanged.connect(self.updateTraceCount)
+        self.updateTraceCount()
 
     def setRepCount(self, count):
         self.ui.trackview.model().setRepCount(count)
+
+    def updateTraceCount(self):
+        self.ui.ntracesLbl.setNum(self.ui.trackview.model().traceCount())
 
     def preview(self):
         """Assemble the current components in the QStimulusModel and generate a spectrogram 
