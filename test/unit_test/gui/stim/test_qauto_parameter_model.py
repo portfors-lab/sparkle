@@ -47,6 +47,12 @@ class TestAutoParameterModel():
         for i, value in enumerate(values):
             assert value == model.data(model.index(0,i), QtCore.Qt.EditRole)
 
+    def test_file_item(self):
+        model = self.create_model_vocal()
+
+        param = model.data(model.index(0,0))
+        assert param['names'] == [sample.samplewav()]
+
     def test_data_out_of_range(self):
         component = PureTone()
         model = self.create_model(component)
@@ -226,6 +232,17 @@ class TestAutoParameterModel():
 
         assert 'frequency not present' in model.verify()
 
+    def test_verify_with_vocal_success(self):
+        model = self.create_model_vocal()
+        assert model.verify() == 0
+
+    def test_verify_with_vocal_no_selection(self):
+        model = self.create_model_vocal()
+        param = model.data(model.index(0,0))
+        param['selection'] = []
+
+        assert "At least one component" in model.verify()
+
     def create_model(self, component):
         model = AutoParameterModel()
         model.insertRow(0)
@@ -234,3 +251,13 @@ class TestAutoParameterModel():
 
         return QAutoParameterModel(model)
 
+    def create_model_vocal(self):
+        component = Vocalization()
+        model = QAutoParameterModel(AutoParameterModel())
+
+        p = {'parameter': 'file',
+             'names': [sample.samplewav()],
+             'selection': [component]
+        }
+        model.insertItem(model.index(0,0), p)
+        return model

@@ -272,6 +272,8 @@ class AutoParameterModel():
         param = self._parameters[row]
         if param['parameter'] == '':
             return "Auto-parameter type undefined"
+        if len(param['selection']) == 0:
+            return "At least one component must be selected for each auto-parameter"
         if param['parameter'] not in self._selectionParameters(param):
             return 'Parameter {} not present in all selected components'.format(param['parameter'])
         if param['parameter'] == 'file':
