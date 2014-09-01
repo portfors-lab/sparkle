@@ -5,6 +5,9 @@ from PyQt4 import QtCore, QtGui, QtTest
 
 from test.util import robot
 
+class QObj(QtCore.QObject):
+    somethingHappened = QtCore.pyqtSignal()
+
 def center(widget, view_index=None):
     """
     Gets the global position of the center of the widget. If index is
@@ -115,50 +118,20 @@ def drag(src, dest, src_index=None, dest_index=None):
     while thread.is_alive():
         QtTest.QTest.qWait(500)
 
-def wait_for_dialog(cls=QtGui.QDialog):
-    """
-    Listens for a modal dialog, and closes it
-    """
-    thread = threading.Thread(target=close_modal)
-    thread.start()
-    while thread.is_alive():
-        QtTest.QTest.qWait(500)
-
-def close_modal():
-    """
-    Endlessly waits for a modal widget, clicks ok button when found
-    """
-    modalWidget = None
-    while modalWidget is None:
-        modalWidget = QtGui.QApplication.activeModalWidget()
-        time.sleep(1)
-    # knowledge of CellCommentDialog Structure
-    click(modalWidget.ui.okBtn)
-
-def close_dialog():
+def close_toplevel(cls=QtGui.QDialog):
     """
     Endlessly waits for a QDialog widget, presses enter when found
     """
     dialogs = []
     while len(dialogs) == 0:
         topWidgets = QtGui.QApplication.topLevelWidgets()
-        dialogs = [w for w in topWidgets if isinstance(w, QtGui.QDialog)]
+        dialogs = [w for w in topWidgets if isinstance(w, cls)]
         time.sleep(1)
     robot.keypress('enter')
 
-def listen_for_file_dialog(fpath):
+def _close_modal(fpath=None, enter=True):
     """
-    Listens for a modal widget, and accepts when found
-
-    :param fpath: string to type in the default focus location of widget
-    :type fpath: str
-    """
-    thread = threading.Thread(target=accept_modal, args=(fpath,))
-    thread.start()
-
-def accept_modal(fpath=None):
-    """
-    Endlessly waits for a modal widget, types given filepath and presses enter when found
+    Endlessly waits for a modal widget, clicks ok button when found. Safe to be run from inside thread.
     
     :param fpath: string to type in the default focus location of widget
     :type fpath: str
@@ -169,7 +142,23 @@ def accept_modal(fpath=None):
         time.sleep(1)
     if fpath is not None:
         robot.type(fpath)
-    robot.keypress('enter')
+    if enter:
+        robot.keypress('enter')
+    else:
+        # cannot call any slots on widget from inside thread
+        obj = QObj()
+        obj.somethingHappened.connect(modalWidget.accept)
+        obj.somethingHappened.emit()
+
+def handle_dialog(fpath=None, wait=True, press_enter=True):
+    """
+    Listens for a modal dialog, and closes it
+    """
+    thread = threading.Thread(target=_close_modal, args=(fpath, press_enter))
+    thread.start()
+    if wait:
+        while thread.is_alive():
+            QtTest.QTest.qWait(500)
 
 def reorder_view(view, start_idx, end_idx):
     """
