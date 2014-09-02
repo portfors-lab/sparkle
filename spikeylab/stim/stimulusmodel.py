@@ -375,7 +375,7 @@ class StimulusModel():
         for itrace in range(ntraces):
             for ip, param in enumerate(params):
                 for component in param['selection']:
-                    print 'setting component {} parameter {} to {}'.format(component.name, param['parameter'], varylist[itrace][ip])
+                    # print 'setting component {} parameter {} to {}'.format(component.name, param['parameter'], varylist[itrace][ip])
                     component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
@@ -572,9 +572,10 @@ class StimulusModel():
 
     def updateComponentStartVals(self):
         """Go through selected components for each auto parameter and set the start value"""
-        for param in self._autoParams.allData():
-            for component in param['selection']:
-                component.set(param['parameter'], param['start'])
+        self._autoParams.updateComponentStartVals()
+        # for param in self._autoParams.allData():
+        #     for component in param['selection']:
+        #         component.set(param['parameter'], param['start'])
 
     def containsPval(self, paramName, value):
         """Returns true is the given value is in the auto parameters"""

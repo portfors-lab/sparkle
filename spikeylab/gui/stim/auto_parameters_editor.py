@@ -9,6 +9,7 @@ from spikeylab.stim.reorder import order_function
 class Parametizer(QtGui.QWidget):
     hintRequested = QtCore.pyqtSignal(str)
     visibilityChanged = QtCore.pyqtSignal(bool)
+    titleChange = QtCore.pyqtSignal(str)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -44,8 +45,15 @@ class Parametizer(QtGui.QWidget):
 
     def setModel(self, model):
         self.paramList.setModel(model)
-
         model.hintRequested.connect(self.hintRequested)
+        model.rowsInserted.connect(self.updateTitle)
+        model.rowsRemoved.connect(self.updateTitle)
+        self.updateTitle(0,0,0)
+        
+    def updateTitle(self, a, b, c):
+        title = 'Auto Parameters ({})'.format(self.paramList.model().rowCount())
+        self.titleChange.emit(title)
+        self.setWindowTitle(title)
 
     def showEvent(self, event):
         selected = self.paramList.selectedIndexes()
@@ -85,10 +93,14 @@ class HidableParameterEditor(WidgetHider):
         self.parametizer = Parametizer()
         WidgetHider.__init__(self, self.parametizer, parent=parent)
 
+        self.parametizer.titleChange.connect(self.updateTitle)
         # wrap methods from parametizer
         for m in ['setModel', 'hintRequested', 'visibilityChanged', 
                     'view', 'randomizeCkbx']:
             setattr(self, m, getattr(self.parametizer, m))
+
+    def updateTitle(self, title):
+        self.title.setText(title)
 
     def sizeHint(self):
         return QtCore.QSize(560,40)

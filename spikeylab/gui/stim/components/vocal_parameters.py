@@ -5,8 +5,10 @@ from PyQt4 import QtGui, QtCore
 from vocal_parameters_form import Ui_VocalParameterWidget
 from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.audiotools import spectrogram
+from spikeylab.gui.stim.components.order_dlg import OrderDialog
 
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
+    vocalFilesChanged = QtCore.pyqtSignal(object, list)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
@@ -18,6 +20,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.common.valueChanged.connect(self.valueChanged.emit)
         self.inputWidgets = {'intensity': self.common.dbSpnbx}
         self.audioExtentions = ['wav']
+        self.filelistView.selectionChanged = self.wavfileClicked
+        self.fileorder = []
 
     def setComponent(self, component):
         self.common.setFields(component)
@@ -37,6 +41,14 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
             self.common.setDuration(dur)
 
         self._component = component
+
+    def selectMany(self, paths):
+        selection = self.filelistView.selectionModel()
+
+        for path in paths:
+            idx = self.filemodel.index(path)
+            selection.select(idx, QtGui.QItemSelectionModel.Select)
+        self.fileorder = paths
 
     def setRootDirs(self, treeroot, listroot):
         # set up wav file directory finder paths
@@ -72,6 +84,12 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
+        selected = self.filelistView.selectedIndexes()
+        paths = []
+        for idx in selected:
+            paths.append(str(self.filemodel.filePath(idx)))
+        self.vocalFilesChanged.emit(self._component, paths)
+
     def component(self):
         return self._component
 
@@ -85,15 +103,32 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         spath = self.dirmodel.fileInfo(modelIndex).absoluteFilePath()
         self.filelistView.setRootIndex(self.filemodel.setRootPath(spath))
 
-    def wavfileClicked(self, modelIndex):
+    def wavfileClicked(self, selected, deselected):
+
+        allselected = self.filelistView.selectedIndexes()
         # display spectrogram of file
-        spath = str(self.dirmodel.fileInfo(modelIndex).absoluteFilePath())
+        allpaths = [str(self.dirmodel.fileInfo(idx).absoluteFilePath()) for idx in allselected]
+        spath = allpaths[0]
         if not any(map(spath.lower().endswith, self.audioExtentions)):
             return # not an audio file
 
         dur = self.specPreview.fromFile(spath)
         self.common.setDuration(dur)
         self.currentWavFile = spath
+        self.nfiles.setNum(len(allselected))
+
+        if len(allselected) < 2:
+            self.orderBtn.setEnabled(False)
+        else:
+            self.orderBtn.setEnabled(True)
+
+        #remove deselected files from order
+        self.fileorder = [x for x in self.fileorder if x in allpaths]
+
+        # add any to file order not in it already
+        for path in allpaths:
+            if path not in self.fileorder:
+                self.fileorder.append(path)
 
     def setContentFocus(self):
         pass
@@ -103,3 +138,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def updateColormap(self):
         self.specPreview.updateColormap()
+
+    def setOrder(self):
+        dlg = OrderDialog(self.fileorder)
+        if dlg.exec_():
+            self.fileorder = dlg.order()

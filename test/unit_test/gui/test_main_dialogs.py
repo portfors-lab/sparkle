@@ -6,7 +6,7 @@ from nose.tools import assert_equal
 
 from spikeylab.gui.control import MainWindow
 
-from test.util import qtbot
+import qtbot
 
 class TestMainDialogs():
     """Just trying to test the code which launches dialogs, and
@@ -31,36 +31,32 @@ class TestMainDialogs():
 
     def test_save_dlg(self):
         # modal dialog will block qt methods in main thread
-        dialogthread = threading.Thread(target=qtbot.close_dialog)
-        dialogthread.start()
+        qtbot.handle_dialog()
         self.form.launchSaveDlg()
         assert self.form.ui.dataFileLbl.text() == os.path.basename(self.form.acqmodel.current_data_file())
 
     def test_calibration_dlg(self):
-        dialogthread = threading.Thread(target=qtbot.close_dialog)
-        dialogthread.start()
+
+        qtbot.handle_dialog()
         self.form.launchCalibrationDlg()
         assert self.form.ui.currentCalLbl.text() == 'None'
 
     def test_scale_dlg(self):
         fscale = self.form.fscale
         tscale = self.form.tscale
-        dialogthread = threading.Thread(target=qtbot.close_dialog)
-        dialogthread.start()
+        qtbot.handle_dialog()
         self.form.launchScaleDlg()
         assert fscale == self.form.fscale
         assert tscale == self.form.tscale
 
     def test_specgram_dlg(self):
         sargs = self.form.specArgs.copy()
-        dialogthread = threading.Thread(target=qtbot.close_dialog)
-        dialogthread.start()
+        qtbot.handle_dialog()
         self.form.launchSpecgramDlg()
         assert_equal(sargs, self.form.specArgs)
 
     def test_view_dlg(self):
         vsettings = self.form.viewSettings.copy()
-        dialogthread = threading.Thread(target=qtbot.close_dialog)
-        dialogthread.start()
+        qtbot.handle_dialog()
         self.form.launchViewDlg()
         assert vsettings['fontsz'] == self.form.viewSettings['fontsz']

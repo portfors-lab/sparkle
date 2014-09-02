@@ -127,6 +127,7 @@ class MainWindow(ControlWindow):
         # set up wav file directory finder paths
         self.exvocal = self.ui.parameterStack.widgetForName("Vocalization")
         self.exvocal.filelistView.doubleClicked.connect(self.recordingSelected)
+        self.exvocal.filelistView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.selectedWavFile = self.exvocal.currentWavFile
 
         # always start in windowed mode

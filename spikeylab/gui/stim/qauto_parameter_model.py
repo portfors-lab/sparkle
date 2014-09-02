@@ -11,7 +11,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     SelectionModelRole = 34
     emptied = QtCore.pyqtSignal(bool)
     hintRequested = QtCore.pyqtSignal(str)
-    # stimChanged = QtCore.pyqtSignal(QtCore.QModelIndex, QtCore.QModelIndex)
+    countChanged = QtCore.pyqtSignal()
     def __init__(self, model):
         super(QAutoParameterModel, self).__init__()
         self.model = model
@@ -54,12 +54,14 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
                 return f
 
         elif role == QtCore.Qt.UserRole or role == AbstractDragView.DragRole:  #return the whole python object
-            return self.model.param(index.row())
+            param = self.model.param(index.row())
+            for comp in param['selection']:
+                comp.clean()
+            return param
 
         elif role == self.SelectionModelRole:
             # may need to translate to QModelIndexes
             return self.model.selection(self.model.param(index.row()))
-            # return self._selectionmap[self._parameters[index.row()]['paramid']]
 
     def setData(self, index, value, role=QtCore.Qt.UserRole):
         if role == QtCore.Qt.EditRole:
@@ -68,7 +70,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             elif isinstance(value, QtCore.QString):
                 value = str(value)
             self.model.setScaledValue(index.row(), self.model.header(index.column()), value)
-
+            self.countChanged.emit()
         elif role == QtCore.Qt.UserRole:
             print "replace all values"
             row = index.row()
@@ -80,18 +82,10 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     def checkValidCell(self, index):
         col = index.column()
         row = index.row()
-        param = self.model.param(index.row())
-        if param['parameter'] == '':
-            return False
-        if col == 1 or col == 1:
-            return self.model.checkLimits(row, self.model.paramValue(row, self.model.header(col)))
-            # return self.model.checkLimits(param['start'], param)
-        # if col == 2:
-        #     return self.model.checkLimits(param['stop'], param)
-        if col == 4:
-            nsteps = self.data(index, role=QtCore.Qt.DisplayRole)
-            return nsteps != 0
-        return True
+        return self.model.isFieldValid(row, self.model.header(col))
+
+    def findFileParam(self, comp):
+        return self.model.findFileParam(comp)
 
     def setParameterList(self, paramlist):
         self._parameters = paramlist
@@ -131,7 +125,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         if index.isValid():
-            if index.column() < 4:
+            if self.model.editableRow(index.row()) and index.column() < 4:
                 return QtCore.Qt.ItemIsDragEnabled | \
                        QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
                        QtCore.Qt.ItemIsEditable
@@ -154,6 +148,9 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
     def selectedParameterTypes(self, index):
         return self.model.selectedParameterTypes(index.row())
+
+    def fileParameter(self, comp):
+        return self.model.fileParameter(comp)
 
     def verify(self):
         return self.model.verify()

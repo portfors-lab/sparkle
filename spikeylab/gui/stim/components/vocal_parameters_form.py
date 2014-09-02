@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
-# Created: Wed Jun 18 17:25:42 2014
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Fri Aug 29 13:57:41 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_VocalParameterWidget(object):
     def setupUi(self, VocalParameterWidget):
         VocalParameterWidget.setObjectName(_fromUtf8("VocalParameterWidget"))
-        VocalParameterWidget.resize(545, 427)
+        VocalParameterWidget.resize(535, 620)
         self.verticalLayout = QtGui.QVBoxLayout(VocalParameterWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
@@ -52,6 +52,7 @@ class Ui_VocalParameterWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.filelistView.sizePolicy().hasHeightForWidth())
         self.filelistView.setSizePolicy(sizePolicy)
+        self.filelistView.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.filelistView.setObjectName(_fromUtf8("filelistView"))
         self.specPreview = SpecWidget(self.splitter_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
@@ -62,19 +63,36 @@ class Ui_VocalParameterWidget(object):
         self.specPreview.setMinimumSize(QtCore.QSize(0, 150))
         self.specPreview.setObjectName(_fromUtf8("specPreview"))
         self.verticalLayout.addWidget(self.splitter_2)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.label = QtGui.QLabel(VocalParameterWidget)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.horizontalLayout.addWidget(self.label)
+        self.nfiles = QtGui.QLabel(VocalParameterWidget)
+        self.nfiles.setObjectName(_fromUtf8("nfiles"))
+        self.horizontalLayout.addWidget(self.nfiles)
+        self.orderBtn = QtGui.QPushButton(VocalParameterWidget)
+        self.orderBtn.setObjectName(_fromUtf8("orderBtn"))
+        self.horizontalLayout.addWidget(self.orderBtn)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.common = CommonParameterWidget(VocalParameterWidget)
         self.common.setObjectName(_fromUtf8("common"))
         self.verticalLayout.addWidget(self.common)
 
         self.retranslateUi(VocalParameterWidget)
-        QtCore.QObject.connect(self.filelistView, QtCore.SIGNAL(_fromUtf8("clicked(QModelIndex)")), VocalParameterWidget.wavfileClicked)
         QtCore.QObject.connect(self.filetreeView, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), VocalParameterWidget.wavdirSelected)
         QtCore.QObject.connect(self.wavrootdirBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), VocalParameterWidget.browseWavdirs)
+        QtCore.QObject.connect(self.orderBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), VocalParameterWidget.setOrder)
         QtCore.QMetaObject.connectSlotsByName(VocalParameterWidget)
 
     def retranslateUi(self, VocalParameterWidget):
         VocalParameterWidget.setWindowTitle(_translate("VocalParameterWidget", "Vocalization", None))
         self.wavrootdirBtn.setText(_translate("VocalParameterWidget", "change", None))
+        self.label.setText(_translate("VocalParameterWidget", "Files selected:", None))
+        self.nfiles.setText(_translate("VocalParameterWidget", "0", None))
+        self.orderBtn.setText(_translate("VocalParameterWidget", "Order...", None))
 
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
 from spikeylab.gui.stim.common_parameters import CommonParameterWidget

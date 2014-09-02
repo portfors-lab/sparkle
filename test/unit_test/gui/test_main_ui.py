@@ -11,7 +11,7 @@ from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.systools import rand_id
 
 import test.sample as sample
-from test.util import qtbot
+import qtbot
 
 PAUSE = 200
 ALLOW = 15
@@ -111,6 +111,7 @@ class TestMainUI():
 
     def run_all_apply_cal(self, withcal):
         self.form.ui.tabGroup.setCurrentIndex(2)
+        QtTest.QTest.qWait(ALLOW)
 
         qtbot.click(self.form.ui.calibrationWidget.ui.applycalCkbx)
         QtTest.QTest.qWait(ALLOW)
@@ -151,7 +152,7 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.wait_for_dialog()
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
     def xtest_chart(self):
         # doesnt work, will fix it when I get back to chart dev
@@ -169,7 +170,7 @@ class TestMainUI():
         assert self.form.ui.stopBtn.isEnabled()
 
         # modal dialog will block qt methods in main thread
-        qtbot.wait_for_dialog()
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
         assert not self.form.ui.stopBtn.isEnabled()
 
@@ -187,16 +188,17 @@ class TestMainUI():
         
 
         # modal dialog will block qt methods in main thread
-        qtbot.listen_for_file_dialog(sample.test_template())
+        qtbot.handle_modal_widget(sample.test_template(), wait=False)
 
         qtbot.drag(self.form.ui.stimulusChoices.templateLbl, pv)
 
+        QtTest.QTest.qWait(ALLOW)
         qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW*2)
+        QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.wait_for_dialog()
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
     def test_tone_protocol(self):
         self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
@@ -281,7 +283,7 @@ class TestMainUI():
             for j, param_item in enumerate(param):
                 # click the field
                 qtbot.click(pztr.paramList, pztr.paramList.model().index(i,j))
-                qtbot.type(param_item)
+                qtbot.type_msg(param_item)
                 QtTest.QTest.qWait(PAUSE)
 
         qtbot.keypress('enter')
@@ -296,14 +298,14 @@ class TestMainUI():
         
         # set the window size to stim len + 100ms
         qtbot.doubleclick(self.form.ui.windowszSpnbx)
-        qtbot.type(stim.duration()*1000+100)
+        qtbot.type_msg(stim.duration()*1000+100)
 
         qtbot.click(self.form.ui.startBtn)
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.wait_for_dialog()
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
@@ -322,7 +324,7 @@ class TestMainUI():
             # robot.doubleclick(input_pos)
             # robot.type(str(val))
             qtbot.doubleclick(editor.inputWidgets[field])
-            qtbot.type(val)
+            qtbot.type_msg(val)
             QtTest.QTest.qWait(PAUSE)
 
     def set_fake_calibration(self):
