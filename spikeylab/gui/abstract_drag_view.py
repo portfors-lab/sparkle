@@ -32,7 +32,9 @@ class AbstractDragView():
             return
         # mouse has been dragged past a threshold distance
 
-        index = self.indexAt(event.pos())
+        index = self.indexAt(self.dragStartPosition)
+        if not index.isValid():
+            return
         # grab the pixmap first, as it may be cleared from component,
         # and slows GUI due to redraw.
         pixmap = self.grabImage(index)

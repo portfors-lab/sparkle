@@ -99,8 +99,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    # test_file = os.path.join(os.path.expanduser('~'),r'Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
-    # vocal0.setFile(test_file)
+    test_file = os.path.join(os.path.expanduser('~'),r'Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(test_file)
 
     silence0 = Silence()
     silence0.setDuration(0.025)
@@ -118,6 +118,19 @@ if __name__ == "__main__":
 
     stim.insertComponent(tone3, 1,0)
     # stim.insertComponent(silence0, (2,0))
+
+    ptype = 'duration'
+    start = .1
+    step = .2
+    stop = 1.0
+
+    parameter_model = stim.autoParams()
+    parameter_model.insertRow(0)
+    # select first component
+    parameter_model.toggleSelection(0, stim.component(0,0))
+    # set values for autoparams
+    parameter_model.setParamValue(0, start=start, step=step, 
+                                  stop=stop, parameter=ptype)
 
     qstim = QStimulusModel(stim)
     editor = StimulusEditor()
