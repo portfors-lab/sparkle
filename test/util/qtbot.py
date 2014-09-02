@@ -118,7 +118,7 @@ def drag(src, dest, src_index=None, dest_index=None):
     while thread.is_alive():
         QtTest.QTest.qWait(500)
 
-def close_toplevel(cls=QtGui.QDialog):
+def _close_toplevel(cls=QtGui.QDialog):
     """
     Endlessly waits for a QDialog widget, presses enter when found
     """
@@ -150,9 +150,29 @@ def _close_modal(fpath=None, enter=True):
         obj.somethingHappened.connect(modalWidget.accept)
         obj.somethingHappened.emit()
 
-def handle_dialog(fpath=None, wait=True, press_enter=True):
+def handle_dialog(wait=False):
+    """
+    Listens for a top level dialog, and then simulates a return keypress e.g. to close it
+
+    :param wait: whether to (non-blocking) wait until dialog is closed to return
+    :type wait: bool
+    """
+    thread = threading.Thread(target=_close_toplevel)
+    thread.start()
+    if wait:
+        while thread.is_alive():
+            QtTest.QTest.qWait(500)
+
+def handle_modal_widget(fpath=None, wait=True, press_enter=True):
     """
     Listens for a modal dialog, and closes it
+
+    :param fpath: string to type in the default focus location of widget
+    :type fpath: str
+    :param wait: whether to (non-blocking) wait until dialog is closed to return
+    :type wait: bool
+    :param press_enter: Whether to attempt to close the dialog with a simulated return key press. If False a signal is sent to the accept slot of the modal target widget.
+    :type press_enter: bool
     """
     thread = threading.Thread(target=_close_modal, args=(fpath, press_enter))
     thread.start()

@@ -152,7 +152,7 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_dialog(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
     def xtest_chart(self):
         # doesnt work, will fix it when I get back to chart dev
@@ -170,7 +170,7 @@ class TestMainUI():
         assert self.form.ui.stopBtn.isEnabled()
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_dialog(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
         assert not self.form.ui.stopBtn.isEnabled()
 
@@ -188,7 +188,7 @@ class TestMainUI():
         
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_dialog(sample.test_template(), wait=False)
+        qtbot.handle_modal_widget(sample.test_template(), wait=False)
 
         qtbot.drag(self.form.ui.stimulusChoices.templateLbl, pv)
 
@@ -198,7 +198,7 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_dialog(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
     def test_tone_protocol(self):
         self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
@@ -305,7 +305,7 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_dialog(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True, press_enter=False)
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
