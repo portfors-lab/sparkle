@@ -11,7 +11,7 @@ from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
 from spikeylab.tools.systools import rand_id
 
 import test.sample as sample
-from test.util import qtbot
+import qtbot
 
 PAUSE = 200
 ALLOW = 15

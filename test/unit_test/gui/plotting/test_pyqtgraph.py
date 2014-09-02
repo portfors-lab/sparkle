@@ -17,7 +17,7 @@ import test.sample as sample
 
 from nose.tools import assert_equal
 from numpy.testing import assert_array_almost_equal, assert_array_equal
-from test.util import robot
+import robouser
 
 PAUSE = 0.0
 
@@ -67,7 +67,7 @@ class TestTraceWidget():
         assert self.fig.getRasterBounds() == (0.1, 0.4)
 
     def test_ask_raster_bounds(self):
-        QTimer.singleShot(1000, lambda : robot.keypress('enter'))
+        QTimer.singleShot(1000, lambda : robouser.keypress('enter'))
         self.fig.askRasterBounds()
 
     def test_spike(self):

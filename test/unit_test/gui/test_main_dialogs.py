@@ -6,7 +6,7 @@ from nose.tools import assert_equal
 
 from spikeylab.gui.control import MainWindow
 
-from test.util import qtbot
+import qtbot
 
 class TestMainDialogs():
     """Just trying to test the code which launches dialogs, and

@@ -12,7 +12,7 @@ from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 import test.sample as sample
-from test.util import qtbot
+import qtbot
 
 
 class TestStimulusEditor():
@@ -57,8 +57,8 @@ class TestStimulusEditor():
     def test_save(self):
         self.editor.show()
         QApplication.processEvents()
-        # QTimer.singleShot(1000, self.close_dialog)
-        # qtbot.listen_for_file_dialog(sample.test_template())
+        QTimer.singleShot(1000, self.close_dialog)
+        # qtbot.handle_modal_widget(sample.test_template(), wait=False)
         QTest.mouseClick(self.editor.ui.saveBtn, Qt.LeftButton)
         
         # blocks until timer runs out
