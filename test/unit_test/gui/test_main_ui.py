@@ -283,7 +283,7 @@ class TestMainUI():
             for j, param_item in enumerate(param):
                 # click the field
                 qtbot.click(pztr.paramList, pztr.paramList.model().index(i,j))
-                qtbot.type(param_item)
+                qtbot.type_msg(param_item)
                 QtTest.QTest.qWait(PAUSE)
 
         qtbot.keypress('enter')
@@ -298,7 +298,7 @@ class TestMainUI():
         
         # set the window size to stim len + 100ms
         qtbot.doubleclick(self.form.ui.windowszSpnbx)
-        qtbot.type(stim.duration()*1000+100)
+        qtbot.type_msg(stim.duration()*1000+100)
 
         qtbot.click(self.form.ui.startBtn)
         QtTest.QTest.qWait(ALLOW)
@@ -324,7 +324,7 @@ class TestMainUI():
             # robot.doubleclick(input_pos)
             # robot.type(str(val))
             qtbot.doubleclick(editor.inputWidgets[field])
-            qtbot.type(val)
+            qtbot.type_msg(val)
             QtTest.QTest.qWait(PAUSE)
 
     def set_fake_calibration(self):
