@@ -394,6 +394,18 @@ class TestStimModel():
         
         assert model.verify()
 
+    def test_verify_conflicting_samplerates(self):
+        model = StimulusModel()
+        model.setReferenceVoltage(100, 0.1)
+        component = Vocalization()
+        component.setFile(sample.samplewav())
+        model.insertComponent(component)
+        component = Vocalization()
+        component.setFile(sample.samplewav333())
+        model.insertComponent(component)
+
+        assert 'conflicting samplerate' in model.verify()
+
     def test_verify_short_duration(self):
 
         model = StimulusModel()

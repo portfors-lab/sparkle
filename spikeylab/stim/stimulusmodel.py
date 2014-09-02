@@ -148,7 +148,9 @@ class StimulusModel():
                         rates.append(component.samplerate())
 
         if len(set(rates)) > 1:
-            raise Exception("Wav files with different sample rates in same stimulus")
+            # raise Exception("Wav files with different sample rates in same stimulus")
+            print("Wav files with different sample rates in same stimulus")
+            return None
         elif len(set(rates)) == 1:
             return rates[0]
         else:
@@ -629,6 +631,8 @@ class StimulusModel():
         """Checks the stimulus, including expanded parameters for invalidating conditions
 
         :returns: str -- error message, if any, 0 otherwise"""
+        if self.samplerate() is None:
+            return "Multiple recording files with conflicting samplerates"
         msg = self._autoParams.verify()
         if msg:
             return msg
