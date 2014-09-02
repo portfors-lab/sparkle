@@ -20,7 +20,10 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         self.common.valueChanged.connect(self.valueChanged.emit)
         self.inputWidgets = {'intensity': self.common.dbSpnbx}
         self.audioExtentions = ['wav']
-        self.filelistView.selectionChanged = self.wavfileClicked
+        # save old function so we can call it
+        self.stashedSelectionChanged = self.filelistView.selectionChanged
+        # but I want to hook up to this slot, as there is no signal
+        self.filelistView.selectionChanged = self.fileSelectionChanged
         self.fileorder = []
 
     def setComponent(self, component):
@@ -103,7 +106,9 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         spath = self.dirmodel.fileInfo(modelIndex).absoluteFilePath()
         self.filelistView.setRootIndex(self.filemodel.setRootPath(spath))
 
-    def wavfileClicked(self, selected, deselected):
+    def fileSelectionChanged(self, selected, deselected):
+        # like super kinda
+        self.stashedSelectionChanged(selected, deselected)
 
         allselected = self.filelistView.selectedIndexes()
         # display spectrogram of file
