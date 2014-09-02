@@ -1,13 +1,17 @@
 import cPickle
 
 from nose.tools import assert_equal
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtTest
 
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.gui.qprotocol import QProtocolTabelModel, ProtocolView
 from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.gui.stim.factory import BuilderFactory
 from spikeylab.gui.drag_label import DragLabel
+
+import qtbot
+
+ALLOW = 15
 
 class TestProtocolView():
     def setUp(self):
@@ -32,15 +36,9 @@ class TestProtocolView():
         assert model.rowCount() == 1
 
     def test_drop_prev_stim(self):
-        view = ProtocolView()
-        tests = ProtocolTabelModel()
-        tests.setReferenceVoltage(100, 0.1)
-        model = QProtocolTabelModel(tests)
-        view.setModel(model)
-        stim = StimulusModel()
-        model.insertTest(stim, 0)
+        view, stim = self.createView()
 
-        model.removeTest(0)
+        view.model().removeTest(0)
 
         mimeData = QtCore.QMimeData()
         mimeData.setData("application/x-protocol", cPickle.dumps(stim))
@@ -52,10 +50,33 @@ class TestProtocolView():
         drop.source = lambda: view
         view.dropEvent(drop)
 
-        assert model.rowCount() == 1
-        assert_equal([stim], model.stimulusList())
+        assert view.model().rowCount() == 1
+        assert_equal([stim], view.model().stimulusList())
 
     def test_draw_view(self):
+        view, stim = self.createView()
+
+        view.show()
+        # this will still work even if no test... 
+        assert view.grabImage(view.model().index(0,0)) is not None
+
+    def test_set_user_tag(self):
+        tag = 'sparkles'
+        view, stim = self.createView()
+        view.show()
+        qtbot.click(view, view.model().index(0,0))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.type_msg(tag)
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.keypress('enter')
+        QtTest.QTest.qWait(ALLOW)
+
+        assert view.model().data(view.model().index(0,0), QtCore.Qt.DisplayRole) == tag
+        assert stim.userTag() == tag
+
+        view.close()
+
+    def createView(self):
         view = ProtocolView()
         tests = ProtocolTabelModel()
         tests.setReferenceVoltage(100, 0.1)
@@ -63,9 +84,4 @@ class TestProtocolView():
         view.setModel(model)
         stim = StimulusModel()
         model.insertTest(stim, 0)
-
-        view.show()
-        # this will still work even if no test... 
-        assert view.grabImage(model.index(0,0)) is not None
-
-        
+        return view, stim

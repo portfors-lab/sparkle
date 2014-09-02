@@ -65,9 +65,10 @@ class QProtocolTabelModel(QtCore.QAbstractTableModel):
 
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:
+            value = value.toPyObject()
             if index.column() == 0:
                 test = self._testmodel.test(index.row())
-                test.setUserTag(str(value))
+                test.setUserTag(value)
                 return True
             if index.column() == 2:
                 test = self._testmodel.test(index.row())
