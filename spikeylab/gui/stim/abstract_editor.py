@@ -8,7 +8,11 @@ class AbstractEditorWidget(QtGui.QWidget):
     funit_fields = []
     tunit_fields = []
     valueChanged = QtCore.pyqtSignal()
-    
+
+    def __init__(self, parent=None):
+        super(AbstractEditorWidget, self).__init__(parent)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+
     @staticmethod
     def purgeDeletedWidgets():
         toremove = []
