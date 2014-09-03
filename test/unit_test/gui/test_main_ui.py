@@ -152,7 +152,8 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_modal_widget(wait=True, press_enter=False)
+        # qtbot.handle_modal_widget(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True)
 
     def xtest_chart(self):
         # doesnt work, will fix it when I get back to chart dev
@@ -170,7 +171,8 @@ class TestMainUI():
         assert self.form.ui.stopBtn.isEnabled()
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_modal_widget(wait=True, press_enter=False)
+        # qtbot.handle_modal_widget(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True)
 
         assert not self.form.ui.stopBtn.isEnabled()
 
@@ -188,7 +190,8 @@ class TestMainUI():
         
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_modal_widget(sample.test_template(), wait=False)
+        # qtbot.handle_modal_widget(sample.test_template(), wait=False)
+        qtbot.handle_modal_widget(wait=False, func=msg_enter, args=(sample.test_template(),))
 
         qtbot.drag(self.form.ui.stimulusChoices.templateLbl, pv)
 
@@ -198,7 +201,8 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_modal_widget(wait=True, press_enter=False)
+        # qtbot.handle_modal_widget(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True)
 
     def test_tone_protocol(self):
         self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
@@ -305,7 +309,8 @@ class TestMainUI():
         assert self.form.ui.runningLabel.text() == "RECORDING"
 
         # modal dialog will block qt methods in main thread
-        qtbot.handle_modal_widget(wait=True, press_enter=False)
+        # qtbot.handle_modal_widget(wait=True, press_enter=False)
+        qtbot.handle_modal_widget(wait=True)
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
@@ -343,3 +348,7 @@ class TestMainUI():
         # append a string so that we can tell if a new calibration with the same name is saved
         self.form.calvals['calname'] = calname + 'fake'
         self.form.calvals['use_calfile'] = True
+
+def msg_enter(widget, msg):
+    qtbot.type_msg(msg)
+    qtbot.keypress('enter')
