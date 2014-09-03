@@ -14,6 +14,7 @@ class OrderDialog(QtGui.QDialog):
         okBtn.clicked.connect(self.accept)
         layout.addWidget(okBtn)
         self.setLayout(layout)
+        self.okBtn = okBtn
 
     def order(self):
         allitems  = [str(self.orderlist.item(i).text()) for i in range(self.orderlist.count())]

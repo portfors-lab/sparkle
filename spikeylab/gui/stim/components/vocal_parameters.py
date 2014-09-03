@@ -82,7 +82,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
     def saveToObject(self):
         self._component.setIntensity(self.common.intensityValue())
-        self._component.setFile(self.currentWavFile)
+        if len(self.fileorder) > 0:
+            self._component.setFile(self.fileorder[0])
         self._component.setBrowseDir(str(self.dirmodel.rootPath()))
 
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
@@ -91,7 +92,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         paths = []
         for idx in selected:
             paths.append(str(self.filemodel.filePath(idx)))
-        self.vocalFilesChanged.emit(self._component, paths)
+
+        self.vocalFilesChanged.emit(self._component, self.fileorder)
 
     def component(self):
         return self._component
@@ -112,7 +114,7 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
 
         allselected = self.filelistView.selectedIndexes()
         # display spectrogram of file
-        allpaths = [str(self.dirmodel.fileInfo(idx).absoluteFilePath()) for idx in allselected]
+        allpaths = [str(self.filemodel.fileInfo(idx).absoluteFilePath()) for idx in allselected]
         spath = allpaths[0]
         if not any(map(spath.lower().endswith, self.audioExtentions)):
             return # not an audio file

@@ -3,14 +3,17 @@ import os
 def sampledir():
     return os.path.abspath(os.path.dirname(__file__))
 
+def wavdir():
+    return os.path.join(sampledir(), 'wavs')
+
 def sampleimage():
     return os.path.join(sampledir(), 'sample_image.jpg')
 
 def samplewav():
-    return os.path.join(sampledir(), 'asample_syl.wav')
+    return os.path.join(wavdir(), 'asample_syl.wav')
 
 def samplewav333():
-    return os.path.join(sampledir(), 'asample_syl333.wav')
+    return os.path.join(wavdir(), 'asample_syl333.wav')
 
 def calibration_filename():
     return os.path.join(sampledir(), 'calibration.hdf5')
