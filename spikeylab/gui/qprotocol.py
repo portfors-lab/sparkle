@@ -118,6 +118,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         AbstractDragView.__init__(self)
 
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.horizontalHeader().setMovable(True)
 
     def paintEvent(self, event):
         super(ProtocolView, self).paintEvent(event)
