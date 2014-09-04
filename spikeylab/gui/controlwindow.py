@@ -25,21 +25,30 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
+        # get references to the different plot displays, for easier access
         self.calibrationDisplay = self.ui.plotDock.displays['calibration']
         self.extendedDisplay = self.ui.plotDock.displays['calexp']
         self.scrollplot = self.ui.plotDock.displays['chart']
         self.display = self.ui.plotDock.displays['standard']
+        # show default display
         self.ui.plotDock.switchDisplay('standard')
+
         # make a list of which widgets should be updated when scales are changed
         self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx]
         self.frequencyInputs = [self.ui.aisrSpnbx, self.ui.aosrSpnbx]
         self.timeLabels = [self.ui.tunit_lbl, self.ui.tunit_lbl_2]
         self.frequencyLabels = [self.ui.funit_lbl, self.ui.funit_lbl_2]
 
+        # Allow items from the the procotol view to be thrown in trash located
+        # on different widget
         self.ui.protocolView.installEventFilter(self.ui.stimulusChoices.trash())
+        # load user inputs save from last time GUI was ran
         self.loadInputs(inputsFilename)
         self.inputsFilename = inputsFilename
 
+        # Add available calibration stimuli options to GUI
+        # Order matters, in the acquisition manager is hardcoded to expect
+        # calibration tone curve at index 2 :(
         for calstim in self.acqmodel.bs_calibrator.get_stims()[::-1]: #tsk
             self.ui.calibrationWidget.addOption(calstim)
 
@@ -51,10 +60,12 @@ class ControlWindow(QtGui.QMainWindow):
             editor.attributesSaved.connect(self.dummyview.updateDefaults)
             # intial from saved values
             self.dummyview.updateDefaults(stim.__class__.__name__, stim.stateDict())
+            # add this editor to the expore list of stims
             self.ui.parameterStack.addWidget(editor)
             self.ui.exploreStimTypeCmbbx.addItem(stim.name)
 
         try:
+            # reload previous window geometry
             settings = QtCore.QSettings("audiolab")
             if settings is not None:
                 self.restoreGeometry(settings.value("geometry").toByteArray())
@@ -71,6 +82,15 @@ class ControlWindow(QtGui.QMainWindow):
             logger.exception("Error Initializing main GUI")
 
     def verifyInputs(self, mode):
+        """Goes through and checks all stimuli and input settings are valid
+        and consistent. Prompts user with a message if there is a condition
+        that would prevent acquisition.
+
+        :param mode: The mode of acquisition trying to be run. Options are
+            'chart', or anthing else ('explore', 'protocol', 'calibration')
+        :type mode: str
+        :returns: bool -- Whether all inputs and stimuli are valid
+        """
         if mode == 'chart':
             if self.ui.aisrSpnbx.value()*self.fscale > 100000:
                 QtGui.QMessageBox.warning(self, "Invalid Input", "Recording samplerate cannot exceed 100kHz for chart acquisition")
@@ -85,6 +105,7 @@ class ControlWindow(QtGui.QMainWindow):
                 stimWidget = self.ui.parameterStack.widget(stimIndex)
                 stimWidget.saveToObject()
                 selectedStim = self.exploreStimuli[stimIndex]
+                # have the stim check itself and report
                 failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
@@ -99,11 +120,13 @@ class ControlWindow(QtGui.QMainWindow):
                 #     return False
             elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
                 protocol_model = self.acqmodel.protocol_model()
+                # protocol delegates to each test to verify itself and report
                 failure = protocol_model.verify(float(self.ui.windowszSpnbx.value())*self.tscale)
                 if failure:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failure)
                     return False
             elif self.ui.tabGroup.currentWidget().objectName() == 'tabCalibrate':
+                # get what stimulus is about to be presented
                 if self.ui.calibrationWidget.ui.savecalCkbx.isChecked() or not self.ui.calibrationWidget.currentSelection() == 'Tone Curve':
                     calibration_stimulus = self.acqmodel.calibration_stimulus('noise')
                     self.ui.calibrationWidget.saveToObject()
@@ -127,19 +150,43 @@ class ControlWindow(QtGui.QMainWindow):
         return True
 
     def updateUnitLabels(self, tscale, fscale, setup=False):
+        """When the GUI unit scale changes, it is neccessary to update
+        the unit labels on all fields throughout the GUI. This handles
+        The main window, and also notifys other windows to update
 
+        Only supports for conversion between two values :
+            
+            * seconds and miliseconds for time
+            * Hz and kHz for frequency
+
+        :param tscale: Time scale to update to, either 1 (seconds) or 0.1 (ms)
+        :type tscale: float
+        :param fscale: Frequency scale to update to, either 1 (Hz) or 1000 (kHz)
+        :type fscale: float
+        :param setup: Whether this is the first call after GUI creation. Does
+            not perform field value conversion
+        :type setup: bool
+        """
         AbstractEditorWidget.scales = [tscale, fscale]
 
+        # purges stored label references from deleted parent widgets
+        AbstractEditorWidget.purgeDeletedWidgets()
+
         if tscale != self.tscale:
+            # time conversion necessary
             self.tscale = tscale
 
+            # updates labels for components
             AbstractStimulusComponent.update_tscale(self.tscale)
-            AbstractEditorWidget.purgeDeletedWidgets()
+            # add the list of all time unit labels out there to our update
+            # list here
             time_inputs = self.timeInputs + AbstractEditorWidget.tunit_fields
             time_labels = self.timeLabels + AbstractEditorWidget.tunit_labels
 
+            # plot display handles unit update itself
             self.display.setTscale(self.tscale)
             
+            # now go through our list of labels and fields and scale/update
             if self.tscale == 0.001:
                 for field in time_inputs:
                     field.setMaximum(3000)
@@ -165,13 +212,18 @@ class ControlWindow(QtGui.QMainWindow):
         if fscale != self.fscale:
             self.fscale = fscale
 
+            # updates labels for components
             AbstractStimulusComponent.update_fscale(self.fscale)
+            # add the list of all time unit labels out there to our update
+            # list here
             frequency_inputs = self.frequencyInputs + AbstractEditorWidget.funit_fields
             frequency_labels = self.frequencyLabels + AbstractEditorWidget.funit_labels
 
+            # plot displays handle unit update themselves
             self.display.setFscale(self.fscale)
             self.calibrationDisplay.setFscale(self.fscale)
 
+            # now go through our list of labels and fields and scale/update
             if self.fscale == 1000:
                 for field in frequency_inputs:
                     field.setDecimals(3)
@@ -196,6 +248,12 @@ class ControlWindow(QtGui.QMainWindow):
                 raise Exception(u"Invalid frequency scale")
             
     def saveInputs(self, fname):
+        """Save the values in the input fields so they can be loaded
+        next time the GUI is run
+
+        :param fname: file path of location to store values at
+        :type fname: str
+        """
         # save current inputs to file for loading next time
         if not fname:
             return
@@ -228,11 +286,17 @@ class ControlWindow(QtGui.QMainWindow):
             editor.saveToObject()
             savedict[stim.name] = stim.stateDict()
 
+        # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
         with open(fname, 'w') as jf:
             json.dump(savedict, jf)
 
     def loadInputs(self, fname):
+        """Load previsouly saved input values, and load them to GUI widgets
+
+        :param fname: file path where stashed input values are stored
+        :type fname: str
+        """
         inputsfname = os.path.join(systools.get_appdir(), fname)
         try:
             with open(inputsfname, 'r') as jf:
@@ -267,9 +331,13 @@ class ControlWindow(QtGui.QMainWindow):
         self.calvals['use_calfile'] = False
         self.calvals['calname'] = ''
         self.ui.refDbSpnbx.setValue(self.calvals['caldb'])
+
+        # load the previous sessions scaling
         tscale = inputsdict.get('tscale', 0.001)
         fscale = inputsdict.get('fscale', 1000)
 
+        # do not convert values in fields though, because they are stored 
+        #just as they were last entered, just update unit labels
         self.tscale = 0
         self.fscale = 0
         self.updateUnitLabels(tscale, fscale, setup=True)
@@ -296,7 +364,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
-        self.acqmodel.stop_listening()
+        """Closes listening threads and saves GUI data for later use"""
+        self.acqmodel.stop_listening() # close listener threads
         self.saveInputs(self.inputsFilename)
 
         # save GUI size
