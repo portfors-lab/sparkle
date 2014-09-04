@@ -211,7 +211,40 @@ class TestMainUI():
         self.protocol_run([('pure tone',{'duration': 66, 'frequency': 22}), ('pure tone',{'duration': 33})],
             [['duration', 10, 50, 10]])
 
-    def explore_run(self, comptype):
+    def test_stim_detail_sharing(self):
+        # set a value on an explore stimulus
+        self.explore_setup('pure tone')
+
+        val = 33
+        editor = self.form.ui.parameterStack.widgetForName('Pure Tone')
+        editor.inputWidgets['intensity'].setValue(val)
+
+        # get it to save by running
+        self.explore_run()
+
+        # check that a stim component in builder now has the value as 
+        # default
+        self.form.ui.tabGroup.setCurrentIndex(1)
+        pv = self.form.ui.protocolView
+
+        qtbot.drag(self.form.ui.stimulusChoices.builderLbl, pv)
+        qtbot.doubleclick(pv, pv.model().index(0,1))
+        QtTest.QTest.qWait(PAUSE)
+
+        stimEditor = pv.stimEditor
+        qtbot.drag(stimEditor.ui.templateBox.getLabelByName('Pure Tone'),
+                   stimEditor.ui.trackview)
+        qtbot.keypress('enter')
+
+        stimModel = stimEditor.ui.trackview.model()
+        tone = stimModel.data(stimModel.index(0,0))
+        print tone.intensity(), val
+        assert tone.intensity() == val
+
+        qtbot.click(stimEditor.ui.okBtn)
+
+
+    def explore_setup(self, comptype):
         self.form.ui.tabGroup.setCurrentIndex(0)
         stimuli = [str(self.form.ui.exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimTypeCmbbx.count())]
         tone_idx = stimuli.index(comptype)
@@ -231,6 +264,10 @@ class TestMainUI():
             # print 'idx of vocal file', idx.row()
             qtbot.click(self.form.exvocal.filelistView, idx)
             QtTest.QTest.qWait(ALLOW)
+
+    def explore_run(self, comptype=None):
+        if comptype is not None:
+            self.explore_setup(comptype)
 
         qtbot.click(self.form.ui.startBtn)
         QtTest.QTest.qWait(ALLOW)

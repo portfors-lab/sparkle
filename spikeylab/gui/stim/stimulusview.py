@@ -370,9 +370,10 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         return region
 
-    def updateDefaults(self, sender, state):
-        self._componentDefaults[sender] = state
-        self.hashIsDirty = True
+    @staticmethod
+    def updateDefaults(sender, state):
+        # keep all defaults the same across instances
+        StimulusView._componentDefaults[str(sender)] = state
 
     def updateGeometries(self,a=None, b=None):
         self.horizontalScrollBar().setSingleStep(self.pixelsPerms)

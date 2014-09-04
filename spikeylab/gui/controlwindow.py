@@ -51,15 +51,15 @@ class ControlWindow(QtGui.QMainWindow):
         # calibration tone curve at index 2 :(
         for calstim in self.acqmodel.bs_calibrator.get_stims()[::-1]: #tsk
             self.ui.calibrationWidget.addOption(calstim)
-
-        # keep a reference to a dummy stimulus view, to be able to update
-        # default attributes in stimulus builder from explore components
-        self.dummyview = StimulusView()
+            
         for stim in self.exploreStimuli:
             editor = stim.showEditor()
-            editor.attributesSaved.connect(self.dummyview.updateDefaults)
+            # connect signal to static class method to be able to share
+            # default attributes in stimulus builder from explore components
+            # using class variables
+            editor.attributesSaved.connect(StimulusView.updateDefaults)
             # intial from saved values
-            self.dummyview.updateDefaults(stim.__class__.__name__, stim.stateDict())
+            StimulusView.updateDefaults(stim.__class__.__name__, stim.stateDict())
             # add this editor to the expore list of stims
             self.ui.parameterStack.addWidget(editor)
             self.ui.exploreStimTypeCmbbx.addItem(stim.name)
