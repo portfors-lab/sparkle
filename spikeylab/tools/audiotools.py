@@ -101,7 +101,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
               
     # print 'tone max', np.amax(tone)  
     if risefall > 0:
-        rf_npts = int(risefall * samplerate)
+        rf_npts = int(risefall * samplerate) // 2
         # print('amp {}, freq {}, npts {}, rf_npts {}'.format(amp,freq,npts,rf_npts))
         wnd = hann(rf_npts*2) # cosine taper
         tone[:rf_npts] = tone[:rf_npts] * wnd[:rf_npts]

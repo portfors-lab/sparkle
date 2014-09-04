@@ -220,7 +220,7 @@ class TestStimModel():
         signal, atten, ovld = model.signal()
         assert atten == 0
         print 'maxv', MAXV, 'signal max', np.amax(signal), 'overload', ovld
-        assert np.amax(signal) == MAXV
+        assert round(np.amax(signal),2) == MAXV
         # do math to make this more accurate
         assert ovld > 0
 

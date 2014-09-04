@@ -110,7 +110,7 @@ class FMSweep(AbstractStimulusComponent):
             signal = signal*1.414213562373
 
         if self._risefall > 0:
-            rf_npts = int(self._risefall * fs)
+            rf_npts = int(self._risefall * fs) / 2
             wnd = hann(rf_npts*2) # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
@@ -255,7 +255,7 @@ class Vocalization(AbstractStimulusComponent):
         signal = ((wavdata/amp_scale)*amp)
 
         if self._risefall > 0:
-            rf_npts = int(self._risefall * fs)
+            rf_npts = int(self._risefall * fs) / 2
             wnd = hann(rf_npts*2) # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
@@ -320,6 +320,13 @@ class WhiteNoise(AbstractStimulusComponent):
             amp_scale = np.amax(signal)
 
         signal = ((signal/amp_scale)*amp)
+
+        if self._risefall > 0:
+            rf_npts = int(self._risefall * fs) / 2
+            wnd = hann(rf_npts*2) # cosine taper
+            signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
+            signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
+            
         # print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
         return signal
 
