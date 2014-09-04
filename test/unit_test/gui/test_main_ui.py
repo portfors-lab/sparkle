@@ -295,6 +295,7 @@ class TestMainUI():
         QtTest.QTest.qWait(PAUSE)
         # just use default tone settings, for now at least
         qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
 
         # extract StimulusModel
         stim = self.form.acqmodel.protocol_model().test(0)
