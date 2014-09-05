@@ -106,12 +106,12 @@ class TestDAQPlayers():
         player.set_stim(tone, fs)
         player.set_aidur(0.02)
         player.set_aisr(fs/4) 
-        player.set_aochan(u"PCI-6259/ao0")   
+        player.set_aochan(u"PCI-6259/ao2")   
         #start the acquisition
         self.data = []
         self.single = []
         player.set_read_function(self.stash_acq)
-        player.start_continuous([u"PCI-6259/ai0",u"PCI-6259/ai1"])
+        player.start_continuous([u"PCI-6259/ai16",u"PCI-6259/ai1"])
 
         # now start a generation
         player.reset()
@@ -134,8 +134,8 @@ class TestDAQPlayers():
         player.set_stim(tone, outfs)
         player.set_aidur(indur)
         player.set_aisr(infs)
-        player.set_aichan(DEVNAME+"/ai0")
-        player.set_aochan(DEVNAME+"/ao0")
+        player.set_aichan(DEVNAME+"/ai16")
+        player.set_aochan(DEVNAME+"/ao2")
         # player.start_timer(10)
         player.start()
 

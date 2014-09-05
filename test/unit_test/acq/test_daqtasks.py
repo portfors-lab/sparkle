@@ -31,8 +31,8 @@ class TestDAQTasks():
         npts = 10000
         x = np.linspace(0,np.pi, npts)
         for amp in amps:
-            aot = AOTaskFinite(DEVNAME+"/ao0", self.sr, npts, trigsrc=u"ai/StartTrigger")
-            ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts)
+            aot = AOTaskFinite(DEVNAME+"/ao2", self.sr, npts, trigsrc=u"ai/StartTrigger")
+            ait = AITaskFinite(DEVNAME+"/ai16", self.sr, npts)
 
             stim = amp * np.sin(frequency*x*2*np.pi)
 
@@ -67,8 +67,8 @@ class TestDAQTasks():
         x = np.linspace(0, np.pi, npts)
         stim = amp * np.sin(frequency*x*2*np.pi)
 
-        aot = AOTask(DEVNAME+"/ao0", self.sr, npts, trigsrc=b"ai/StartTrigger")
-        ait = AITask(DEVNAME+"/ai0", self.sr, npts)
+        aot = AOTask(DEVNAME+"/ao2", self.sr, npts, trigsrc=b"ai/StartTrigger")
+        ait = AITask(DEVNAME+"/ai16", self.sr, npts)
 
         ait.register_callback(self.stashacq,npts)
 
@@ -90,7 +90,7 @@ class TestDAQTasks():
     def test_asynch_continuous_finite(self):
         ainpts = 1000
 
-        ait = AITask(DEVNAME+"/ai0", self.sr, ainpts)
+        ait = AITask(DEVNAME+"/ai16", self.sr, ainpts)
         ait.register_callback(self.stashacq, ainpts)
         ait.start()
         
@@ -99,7 +99,7 @@ class TestDAQTasks():
         aonpts = 10000
         x = np.linspace(0, np.pi, aonpts)
         for amp in amps:
-            aot = AOTaskFinite(DEVNAME+"/ao0", self.sr, aonpts, trigsrc=u"")
+            aot = AOTaskFinite(DEVNAME+"/ao2", self.sr, aonpts, trigsrc=u"")
 
             stim = amp * np.sin(frequency*x*2*np.pi)
 
@@ -127,14 +127,14 @@ class TestDAQTasks():
         npts = 10000
         rate = 2.
         trigger = DigitalOutTask(DEVNAME+'/port0/line1', rate)
-        ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        ait = AITaskFinite(DEVNAME+"/ai16", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
         starttime = time.time()
         trigger.start()
         ait.StartTask()
         response0 = ait.read()
         ait.StopTask()
         ait.start()
-        # ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        # ait = AITaskFinite(DEVNAME+"/ai16", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
         response1 = ait.read()
         duration = time.time() - starttime
         trigger.stop()
@@ -148,8 +148,8 @@ class TestDAQTasks():
         npts = 10000
         rate = 2.
         trigger = DigitalOutTask(DEVNAME+'/port0/line1', rate)
-        ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
-        aot = AOTaskFinite(DEVNAME+"/ao0", self.sr, npts, trigsrc=u"ai/StartTrigger")
+        ait = AITaskFinite(DEVNAME+"/ai16", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        aot = AOTaskFinite(DEVNAME+"/ao2", self.sr, npts, trigsrc=u"ai/StartTrigger")
         
         frequency = 5
         x = np.linspace(0,np.pi, npts)
@@ -166,7 +166,7 @@ class TestDAQTasks():
         ait.StopTask()
         aot.StartTask()
         ait.start()
-        # ait = AITaskFinite(DEVNAME+"/ai0", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
+        # ait = AITaskFinite(DEVNAME+"/ai16", self.sr, npts, trigsrc='/'+DEVNAME+'/PFI0')
         response1 = ait.read()
         duration = time.time() - starttime
 
