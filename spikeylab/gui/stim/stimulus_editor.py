@@ -23,7 +23,6 @@ class StimulusEditor(AbstractStimulusWidget):
         # when the auto-parameter editor is toggled show/hide changes the edit mode of the StimulusView
         self.ui.parametizer.visibilityChanged.connect(self.ui.trackview.setMode)
         
-        # self.setWindowModality(2) # application modal
         self.ok = self.ui.okBtn
 
     def setStimulusModel(self, model):
@@ -59,8 +58,8 @@ class StimulusEditor(AbstractStimulusWidget):
             answer = QtGui.QMessageBox.warning(self, "Bummer", 'Problem: {}.'.format(msg))
             return
         stim_signal, atten, ovld = self.ui.trackview.model().signal()
-
         fig = SpecWidget()
+        fig.setWindowModality(2) # application modal
         fig.updateData(stim_signal, self.ui.trackview.model().samplerate())
         fig.setTitle('Stimulus Preview')
         fig.show()

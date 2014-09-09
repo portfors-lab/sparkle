@@ -10,7 +10,7 @@ from spikeylab.gui.stim.components.order_dlg import OrderDialog
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     vocalFilesChanged = QtCore.pyqtSignal(object, list)
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(VocalParameterWidget, self).__init__(parent)
         self.setupUi(self)
 
         # grey out parameters determined by file, not to be altered by user
