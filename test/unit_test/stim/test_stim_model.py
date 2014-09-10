@@ -412,7 +412,7 @@ class TestStimModel():
         model.setReferenceVoltage(100, 0.1)
         component = PureTone()
         component.setDuration(0.003)
-        component.setRisefall(0.002)
+        component.setRisefall(0.004)
         model.insertComponent(component, 0,0)
         
         invalid = model.verify()

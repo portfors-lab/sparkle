@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 import spikeylab.tools.systools as systools
 from spikeylab.tools.util import convert2native
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
+from spikeylab.gui.stim.components.qcomponents import wrapComponent
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
 from spikeylab.gui.stim.stimulusview import StimulusView
 from maincontrol_form import Ui_ControlWindow
@@ -50,7 +51,7 @@ class ControlWindow(QtGui.QMainWindow):
         # Order matters, in the acquisition manager is hardcoded to expect
         # calibration tone curve at index 2 :(
         for calstim in self.acqmodel.bs_calibrator.get_stims()[::-1]: #tsk
-            self.ui.calibrationWidget.addOption(calstim)
+            self.ui.calibrationWidget.addOption(wrapComponent(calstim))
             
         for stim in self.exploreStimuli:
             editor = stim.showEditor()
@@ -106,13 +107,9 @@ class ControlWindow(QtGui.QMainWindow):
                 stimWidget.saveToObject()
                 selectedStim = self.exploreStimuli[stimIndex]
                 # have the stim check itself and report
-                failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale)
+                failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale, duration=self.ui.windowszSpnbx.value()*self.tscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
-                    return False
-                if selectedStim.duration() > self.ui.windowszSpnbx.value()*self.tscale:
-                    QtGui.QMessageBox.warning(self, "Invalid Input",
-                            "Window size must equal or exceed stimulus length")
                     return False
                 # if selectedStim.intensity() > self.calvals['caldb']:
                 #     QtGui.QMessageBox.warning(self, "Invalid Input",

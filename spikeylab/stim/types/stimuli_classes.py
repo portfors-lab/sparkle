@@ -3,52 +3,26 @@ import os, yaml
 from scipy.signal import chirp, hann
 import numpy as np
 
-from PyQt4 import QtGui, QtCore
-
 from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
-from spikeylab.gui.stim.components import silence_parameters
-from spikeylab.gui.stim.components import vocal_parameters
-from spikeylab.tools.audiotools import spectrogram, make_tone, audioread, audiorate
+from spikeylab.tools.audiotools import make_tone, audioread, audiorate
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.exceptions import FileDoesNotExistError
-
-from pyqtgraph import GradientEditorItem
 
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 USE_RMS = config['use_rms']
 
-COLORTABLE=[]
-for i in reversed(range(256)): COLORTABLE.append(QtGui.qRgb(i,i,i))
-
-class Tone(AbstractStimulusComponent):
-    foo = None
-
-class PureTone(Tone):
+class PureTone(AbstractStimulusComponent):
     name = "Pure Tone"
     explore = True
     protocol = True
     _frequency = 5000
-    def update_fscale(self, scale):
-        print '!updating tone scale'
-        self._frequency_details['multiplier'] = scale
-
     def frequency(self):
         return self._frequency
 
     def setFrequency(self, freq):
         self._frequency = freq
-
-    def paint(self, painter, rect, palette):
-        if (self._frequency/self._scales[1]) - np.floor(self._frequency/self._scales[1]) > 0.0:
-            freq = str(self._frequency/self._scales[1])
-        else:
-            freq = str(int(self._frequency/self._scales[1]))
-        painter.fillRect(rect, palette.base())
-        painter.drawText(rect.x()+5, rect.y()+12, rect.width()-5, rect.height()-12, QtCore.Qt.AlignLeft, "Pure Tone")
-        painter.fillRect(rect.x()+5, rect.y()+35, rect.width()-10, 20, QtCore.Qt.black)
-        painter.drawText(rect.x()+5, rect.y()+80,  freq+ " "+self._labels[1])
 
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
@@ -116,10 +90,6 @@ class FMSweep(AbstractStimulusComponent):
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
         return signal
 
-    def paint(self, painter, rect, palette):
-        mid = rect.y() + (rect.height()/2)
-        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
-
     def auto_details(self):
         details = super(FMSweep, self).auto_details()
         details['start_f'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000, 'text': "Start Frequency"}
@@ -143,7 +113,6 @@ class Vocalization(AbstractStimulusComponent):
     protocol = True
     _filename = None
     _browsedir = os.path.expanduser('~')
-    _cached_pixmap = None # for faster drawing
 
     def browsedir(self):
         return self._browsedir
@@ -194,45 +163,6 @@ class Vocalization(AbstractStimulusComponent):
             duration = np.trunc((float(len(wavdata))/sr)*1000)/1000
 
             self._duration = duration
-            self._cached_pixmap = None
-
-    def paint(self, painter, rect, palette):
-        if self._filename is not None:
-            if self._cached_pixmap is None:
-                spec, f, bins, fs = spectrogram(self._filename)
-                spec = spec.T
-                spec = abs(np.fliplr(spec))
-                spec_max = np.amax(spec)
-                # print np.amax(scaled), np.amin(scaled), scaled.shape, spec_max
-                scaled = np.around(spec/(spec_max/255)).astype(int)
-
-                width, height = scaled.shape
-                image = QtGui.QImage(width, height, QtGui.QImage.Format_RGB32)
-                for x in xrange(width):
-                    for y in xrange(height):
-                        image.setPixel(x,y, COLORTABLE[scaled[x,y]])
-
-                pixmap = QtGui.QPixmap.fromImage(image)
-                self._cached_pixmap = pixmap
-            else:
-                pixmap = self._cached_pixmap
-            painter.drawPixmap(rect.x(), rect.y(), rect.width(), rect.height(), pixmap)
-        else:
-            painter.save()
-            # draw a warning symbol
-            smallrect = QtCore.QRect(rect.x()+10, rect.y()+10, rect.width()-20, rect.height()-20)
-            painter.setPen(QtGui.QPen(QtCore.Qt.red, 8))
-            painter.drawEllipse(smallrect)
-            rad = smallrect.width()/2
-            x = rad - (np.cos(np.pi/4)*rad)
-            painter.drawLine(smallrect.x()+x, smallrect.y()+x, smallrect.x()+smallrect.width()-x, smallrect.y()+smallrect.height()-x)
-
-            painter.restore()
-            
-    def showEditor(self):
-        editor = vocal_parameters.VocalParameterWidget()
-        editor.setComponent(self)
-        return editor
 
     def signal(self, fs, atten, caldb, calv):
         sr, wavdata = audioread(self._filename)
@@ -272,9 +202,6 @@ class Vocalization(AbstractStimulusComponent):
         if self._filename is None:
             return "Vocalization stimulus without a specified file"
         return 0
-
-    def clean(self):
-        self._cached_pixmap = None
 
     def setDuration(self, dur):
         raise Exception("Duration not settable on recordings")
@@ -330,10 +257,6 @@ class WhiteNoise(AbstractStimulusComponent):
         # print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
         return signal
 
-    def paint(self, painter, rect, palette):
-        mid = rect.y() + (rect.height()/2)
-        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
-
     def setTransfer(self, H):
         self.transfer = H
 
@@ -342,9 +265,6 @@ class Silence(AbstractStimulusComponent):
     protocol = True
     _risefall = 0
     _intensity = 0
-    def paint(self, painter, rect, palette):
-        mid = rect.y() + (rect.height()/2)
-        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
 
     def auto_details(self):
         details = super(Silence, self).auto_details()

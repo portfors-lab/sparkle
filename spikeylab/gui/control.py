@@ -22,6 +22,7 @@ from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.resources import icons
+from spikeylab.gui.stim.components.qcomponents import wrapComponent
 
 from controlwindow import ControlWindow
 
@@ -58,8 +59,8 @@ class MainWindow(ControlWindow):
         else:
             fname = None
             
-        # get stimuli editor widgets
-        self.exploreStimuli = self.acqmodel.stimuli_list()
+        # get stimuli components, they must be wrapped to get editor
+        self.exploreStimuli = [wrapComponent(x) for x in self.acqmodel.stimuli_list()]
         
         # auto generated code intialization
         ControlWindow.__init__(self, inputsFilename)

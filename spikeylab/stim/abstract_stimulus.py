@@ -3,8 +3,6 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-from spikeylab.gui.stim.generic_parameters import GenericParameterWidget
-
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     name = 'unknown'
@@ -39,24 +37,6 @@ class AbstractStimulusComponent(object):
 
     def set(self, param, value):
         setattr(self, '_'+param, value)
-        
-    def paint(self, painter, rect, palette):
-        painter.save()
-
-        image = QtGui.QImage("./default.jpg")
-        painter.drawImage(rect,image)
-
-        # set text color
-        painter.setPen(QtGui.QPen(QtCore.Qt.black)) 
-        painter.drawText(rect, QtCore.Qt.AlignLeft, self.__class__.__name__)
-
-        painter.restore()
-
-    def showEditor(self):
-        """ Generate a default editor that creates fields based on this
-        components auto-details. Override this method to use custom editor"""
-        editor = GenericParameterWidget(self)
-        return editor
 
     def signal(self, **kwargs):
         """kwargs must include: fs and optionally include 
@@ -64,7 +44,10 @@ class AbstractStimulusComponent(object):
         raise NotImplementedError
 
     def verify(self, **kwargs):
-        if self._risefall > self._duration/2:
+        if 'duration' in kwargs:
+            if kwargs['duration'] < self._duration:
+                return "Window size must equal or exceed stimulus length"
+        if self._risefall > self._duration:
             return "Rise and fall times exceed component duration"
         return 0
 
@@ -109,6 +92,14 @@ class AbstractStimulusComponent(object):
             AbstractStimulusComponent._labels[0] = 's'
         else:
             raise Exception(u"Invalid time scale")
+
+    @staticmethod
+    def get_fscale():
+        return AbstractStimulusComponent._scales[1], AbstractStimulusComponent._labels[1]
+
+    @staticmethod
+    def get_tscale():
+        return AbstractStimulusComponent._scales[0], AbstractStimulusComponent._labels[0]
 
     def serialize(self):
         return cPickle.dumps(self)

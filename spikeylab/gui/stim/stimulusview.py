@@ -166,6 +166,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.hashIsDirty = True
         super(StimulusView, self).rowsAboutToBeRemoved(parent, start, end)
 
+    def somethingChanged(self):
+        self.hashIsDirty = True
+
     def verticalOffset(self):
         return self.verticalScrollBar().value()
 
@@ -285,7 +288,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             index = self.indexAt(event.pos())
             if index.isValid():
                 self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
-                comp = self.model().data(index, QtCore.Qt.UserRole)
+                comp = self.model().data(index, QtCore.Qt.UserRole+1)
                 self.componentSelected.emit(comp)
 
     def emptySelection(self, empty):
@@ -332,8 +335,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         if isinstance(component, AbstractStimulusComponent):
             row, col = self.splitAt(event.pos())
             index = self.model().createIndex(row, col, component)
-
-            self.model().insertComponent(index)
+            
+            self.model().insertComponent(index, component)
 
             if isinstance(event.source(), DragLabel):
                 if component.__class__.__name__ in self._componentDefaults:
@@ -423,7 +426,9 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def createEditor(self, parent, option, index):
         # bring up separate window for component parameters
-        component = index.internalPointer()
+        view = parent.parentWidget()
+        component = view.model().data(index)
+
         if component is not None:
             editor = component.showEditor()
         else:
@@ -431,8 +436,8 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
             raise Exception('UnknownDelegateType')
 
         # connect editor to update defaults
-        view = parent.parentWidget()
         editor.attributesSaved.connect(view.updateDefaults)
+        editor.attributesSaved.connect(view.somethingChanged)
 
         if component.name == 'Vocalization':
             # find any associated file auto-parameters

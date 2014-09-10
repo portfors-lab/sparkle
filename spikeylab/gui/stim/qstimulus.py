@@ -13,6 +13,7 @@ from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.gui.stim.components.qcomponents import wrapComponent, unwrapComponent
 
 
 src_dir = get_src_directory()
@@ -37,6 +38,14 @@ class QStimulusModel(QtCore.QAbstractItemModel):
             self.setEditor(get_stimulus_editor(stim.stimType()))
         else:
             self.editor = None
+
+        # Go through and wrap components, if not already wrapped,
+        # so that they may be painted and have GUI editors
+        for row in range(stim.rowCount()):
+            for col in range(stim.columnCount(row)):
+                comp = stim.component(row, col)
+                if not hasattr(comp, 'paint'):
+                    stim.overwriteComponent(wrapComponent(comp), row, col)
 
     def setAutoParams(self, params):
         self._autoParams = params
@@ -84,8 +93,8 @@ class QStimulusModel(QtCore.QAbstractItemModel):
             if self._stim.columnCountForRow(index.row()) > index.column():
                 component = self._stim.component(index.row(),index.column())
                 if role == QtCore.Qt.UserRole +1:
-                    # filters out any qt classes to make serializable
-                    component.clean()
+                    # wrapped class is not serializable
+                    component = unwrapComponent(component)
             else:
                 component = None
             return component
@@ -114,12 +123,13 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         #     raise Exception("No parents allowed!")
             # return self.createIndex(index.row(), -1, self._segments[index.row()])
 
-    def insertComponent(self, index):
-        comp = index.internalPointer()
-        self._stim.insertComponent(comp, index.row(), index.column())
+    def insertComponent(self, index, comp):
+        # new component needs to be wrapped
+        self._stim.insertComponent(wrapComponent(comp), index.row(), index.column())
 
         if self.columnCountForRow(-1) > 0:
-            self.beginInsertRows(QtCore.QModelIndex(), self._stim.rowCount(), self._stim.rowCount())
+            self.beginInsertRows(QtCore.QModelIndex(), self._stim.rowCount(), 
+                                 self._stim.rowCount())
             self._stim.insertEmptyRow()
             self.endInsertRows()
 
@@ -133,16 +143,13 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         # self.endRemoveRows()
 
         if self.columnCountForRow(-2) == 0 and self.columnCountForRow(-1) == 0:
-            self.beginRemoveRows(QtCore.QModelIndex(), self._stim.rowCount()-1, self._stim.rowCount()-1)
+            self.beginRemoveRows(QtCore.QModelIndex(), self._stim.rowCount()-1, 
+                                 self._stim.rowCount()-1)
             self._stim.removeLastRow()
             self.endRemoveRows()
 
         # this could have affected the sample of this stimulus
         self.samplerateChanged.emit(self._stim.samplerate())
-
-
-    def insertItem(self, index, item):
-        self._stim.insertComponent(item, index.row(), index.column())
 
     def removeItem(self, index):
         self._stim.removeComponent(index.row(), index.column())

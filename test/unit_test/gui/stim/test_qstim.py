@@ -25,29 +25,29 @@ class TestQStimModel():
     def test_insert_data(self):
         data = StimulusModel()
         model = QStimulusModel(data)
-        fake_component0 = 'ducks'
-        fake_component1 = 'frogs'
+        fake_component0 = PureTone()
+        fake_component1 = Vocalization()
 
-        model.insertComponent(model.createIndex(0, 0, fake_component0))
-        model.insertComponent(model.createIndex(0, 0, fake_component1))
-        assert model.data(model.index(0,0), role=QtCore.Qt.UserRole) == fake_component1
-        assert model.data(model.index(0,1), role=QtCore.Qt.UserRole) == fake_component0
+        model.insertComponent(model.createIndex(0, 0, fake_component0), fake_component0)
+        model.insertComponent(model.createIndex(0, 0, fake_component1), fake_component1)
+        assert model.data(model.index(0,0), role=QtCore.Qt.UserRole+1) == fake_component1
+        assert model.data(model.index(0,1), role=QtCore.Qt.UserRole+1) == fake_component0
 
     def test_remove_data(self):
         data = StimulusModel()
         model = QStimulusModel(data)
-        fake_component0 = 'ducks'
+        fake_component0 = PureTone()
         index = model.createIndex(0, 0, fake_component0)
-        model.insertComponent(index)
+        model.insertComponent(index, fake_component0)
         model.removeComponent(index)
         assert model.data(model.index(0,0), role=QtCore.Qt.UserRole) == None
 
     def test_component_index(self):
         data = StimulusModel()
         model = QStimulusModel(data)
-        fake_component0 = 'ducks'
+        fake_component0 = PureTone()
         # component will be added to the lowest index in row
-        model.insertComponent(model.createIndex(0, 2, fake_component0))
+        model.insertComponent(model.createIndex(0, 2, fake_component0), fake_component0)
         index = model.indexByComponent(fake_component0)
         assert (index.row(),index.column()) == (0,0)
 
@@ -55,16 +55,16 @@ class TestQStimModel():
     def test_set_data(self):
         data = StimulusModel()
         model = QStimulusModel(data)
-        fake_component0 = 'ducks'
+        fake_component0 = PureTone()
         model.setData(model.index(0,0), fake_component0)
 
     def test_row_column_count(self):
         data = StimulusModel()
         model = QStimulusModel(data)
-        fake_component0 = 'ducks'
+        fake_component0 = PureTone()
         assert model.columnCountForRow(0) == 0
         assert model.rowCount() == 1
-        model.insertComponent(model.createIndex(0, 0, fake_component0))
+        model.insertComponent(model.createIndex(0, 0, fake_component0), fake_component0)
         assert model.columnCountForRow(0) == 1
         assert model.rowCount() == 2
 
@@ -73,8 +73,8 @@ class TestQStimModel():
         model = QStimulusModel(data)
         component0 = PureTone()
         component1 = PureTone()
-        model.insertComponent(model.createIndex(0, 0, component0))
-        model.insertComponent(model.createIndex(0, 0, component1))
+        model.insertComponent(model.createIndex(0, 0, component0), component0)
+        model.insertComponent(model.createIndex(0, 0, component1), component1)
 
         assert model.traceCount() == 1
 
@@ -89,7 +89,7 @@ class TestQStimModel():
         data = StimulusModel()
         model = QStimulusModel(data)
         component =  PureTone()
-        model.insertComponent(model.createIndex(0, 0, component))
+        model.insertComponent(model.createIndex(0, 0, component), component)
         self.add_auto_param(data) 
 
         model.setEditor(StimulusEditor)

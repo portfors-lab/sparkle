@@ -40,7 +40,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.fmapper.toFirst()
         self.dbmapper.setCurrentIndex(1)
 
-        tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole)
+        tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole+1)
         info = tone.auto_details()
         self.ui.durSpnbx.setValue(tone.duration()/info['duration']['multiplier'])
         self.ui.nrepsSpnbx.setValue(self.stimModel.repCount())

@@ -9,7 +9,7 @@ from spikeylab.gui.stim.components.order_dlg import OrderDialog
 
 class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
     vocalFilesChanged = QtCore.pyqtSignal(object, list)
-    def __init__(self, parent=None):
+    def __init__(self, component, parent=None):
         super(VocalParameterWidget, self).__init__(parent)
         self.setupUi(self)
 
@@ -25,7 +25,8 @@ class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
         # but I want to hook up to this slot, as there is no signal
         self.filelistView.selectionChanged = self.fileSelectionChanged
         self.fileorder = []
-
+        self.setComponent(component)
+        
     def setComponent(self, component):
         self.common.setFields(component)
 

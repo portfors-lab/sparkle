@@ -225,6 +225,64 @@ class TestMainUI():
         # check that a stim component in builder now has the value as 
         # default
         self.form.ui.tabGroup.setCurrentIndex(1)
+        stimEditor = self.add_builder_tone()
+
+        stimModel = stimEditor.ui.trackview.model()
+        tone = stimModel.data(stimModel.index(0,0))
+        print tone.intensity(), val
+        assert tone.intensity() == val
+
+        qtbot.click(stimEditor.ui.okBtn)
+
+    def test_reedit_custom_stim(self):
+        self.form.ui.tabGroup.setCurrentIndex(1)
+        pv = self.form.ui.protocolView
+
+        stimEditor = self.add_builder_tone()
+        # edit the same tone again
+        qtbot.doubleclick(stimEditor.ui.trackview, stimEditor.ui.trackview.model().index(0,0))
+        QtTest.QTest.qWait(ALLOW)
+        # change something -- default is duration
+        val = 22
+        qtbot.type_msg(str(val))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.keypress('enter')
+        QtTest.QTest.qWait(ALLOW)
+        
+        stimModel = stimEditor.ui.trackview.model()
+        tone = stimModel.data(stimModel.index(0,0))
+        assert tone.duration() == val*self.form.tscale
+
+        # close editor
+        qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
+
+        # re-open builder, make sure everything is as left it
+        qtbot.doubleclick(pv, pv.model().index(0,1))
+        QtTest.QTest.qWait(ALLOW)
+        # need to get new reference to editor -- different instance
+        stimEditor = pv.stimEditor
+
+        qtbot.doubleclick(stimEditor.ui.trackview, stimEditor.ui.trackview.model().index(0,0))
+        QtTest.QTest.qWait(ALLOW)
+
+        # assert the same value as we last set
+        tone = stimModel.data(stimModel.index(0,0))
+        assert tone.duration() == val*self.form.tscale
+
+        # set a new value to make sure no errors occured
+        val = 11
+        qtbot.type_msg(str(val))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.keypress('enter')
+        QtTest.QTest.qWait(ALLOW)
+
+        tone = stimModel.data(stimModel.index(0,0))
+        assert tone.duration() == val*self.form.tscale
+
+        qtbot.click(stimEditor.ui.okBtn)
+
+    def add_builder_tone(self):
         pv = self.form.ui.protocolView
 
         qtbot.drag(self.form.ui.stimulusChoices.builderLbl, pv)
@@ -235,14 +293,7 @@ class TestMainUI():
         qtbot.drag(stimEditor.ui.templateBox.getLabelByName('Pure Tone'),
                    stimEditor.ui.trackview)
         qtbot.keypress('enter')
-
-        stimModel = stimEditor.ui.trackview.model()
-        tone = stimModel.data(stimModel.index(0,0))
-        print tone.intensity(), val
-        assert tone.intensity() == val
-
-        qtbot.click(stimEditor.ui.okBtn)
-
+        return stimEditor
 
     def explore_setup(self, comptype):
         self.form.ui.tabGroup.setCurrentIndex(0)
