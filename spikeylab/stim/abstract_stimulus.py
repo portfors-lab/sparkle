@@ -1,8 +1,6 @@
 import uuid
 import cPickle
 
-from PyQt4 import QtGui, QtCore
-
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""
     name = 'unknown'

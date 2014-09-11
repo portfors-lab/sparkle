@@ -282,6 +282,9 @@ class TestMainUI():
 
         qtbot.click(stimEditor.ui.okBtn)
 
+        # make sure that the underlying stim class is consistent
+        assert tone.duration() == tone.baseStim().duration()
+
     def add_builder_tone(self):
         pv = self.form.ui.protocolView
 
