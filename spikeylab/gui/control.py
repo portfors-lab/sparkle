@@ -1,6 +1,4 @@
-import spikeylab
-
-import sys, os, yaml
+import os, yaml
 import numpy as np
 import logging
 import time
@@ -17,11 +15,10 @@ from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread
 from spikeylab.gui.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.gui.wait_widget import WaitWidget
-from spikeylab.tools.systools import get_src_directory, get_free_mb, get_drives
+from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
-from spikeylab.resources import icons
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
 
 from controlwindow import ControlWindow
@@ -752,52 +749,5 @@ class MainWindow(ControlWindow):
         super(MainWindow, self).closeEvent(event)
 
 
-def log_uncaught(*exc_info):
-    logger = logging.getLogger('main')
-    logger.error("Uncaught exception: ", exc_info=exc_info)
 
-if __name__ == "__main__":
-    # this is the entry point for the whole application
-    app = QtGui.QApplication(sys.argv)
-    app.setWindowIcon(icons.windowicon())
-    sys.excepthook = log_uncaught
-    # check free drive space, issue warning if low
-    drives = get_drives()
-    low_space = []
-    plenty_space = []
-    for drive in drives:
-        space = get_free_mb(drive)
-        if space < 1024:
-            low_space.append((drive, space))
-        else:
-            plenty_space.append((drive, space))
-    if len(low_space) > 0:
-        if len(plenty_space) > 0:
-            msg = "Waring: At least one Hard disk has low free space:\n\nDrives with low space:\n"
-            for drive in low_space:
-                msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
-            msg = msg + "\nDrives with more space:\n"
-            for drive in plenty_space:
-                msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
-            msg = msg + "\nYou are advised to only save data to a drive with enough available space"
-            QtGui.QMessageBox.warning(None, "Drive space low", msg)
-        else:
-            msg = "Waring: All Hard disks have low free space:\n\n"
-            for drive in low_space:
-                msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
-            msg = msg + "\nIt is recommended that you free up space on a drive before conducting experiments"
-            QtGui.QMessageBox.warning(None, "Drive space low", msg)
-
-    dlg = SavingDialog()
-    if dlg.exec_():
-        fname, fmode = dlg.getfile()
-        myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
-        app.setActiveWindow(myapp)
-        myapp.show()
-        status = app.exec_()
-    else:
-        status = 0
-        print 'canceled'
-    dlg.deleteLater()
-    sys.exit(status)
 
