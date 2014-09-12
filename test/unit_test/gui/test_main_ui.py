@@ -68,10 +68,8 @@ class TestMainUI():
 
         qtbot.click(self.form.ui.calibrationWidget.ui.savecalCkbx)
         QtTest.QTest.qWait(ALLOW)
-        
-        qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
+
+        self.start_acq()
 
         self.wait_until_done()
 
@@ -131,9 +129,7 @@ class TestMainUI():
         calname = self.form.calvals['calname']
         assert self.form.calvals['use_calfile'] == withcal
 
-        qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
+        self.start_acq()
 
         self.wait_until_done()
 
@@ -146,13 +142,10 @@ class TestMainUI():
         self.setup_tc()
 
         assert self.form.acqmodel.protocol_model().rowCount() == 1
-
-        qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
+        
+        self.start_acq()
 
         # modal dialog will block qt methods in main thread
-        # qtbot.handle_modal_widget(wait=True, press_enter=False)
         qtbot.handle_modal_widget(wait=True)
 
     def xtest_chart(self):
@@ -164,10 +157,8 @@ class TestMainUI():
         qtbot.wheel(-1)
         QtTest.QTest.qWait(100)
 
-        qtbot.click(self.form.ui.startBtn)
+        self.start_acq()
 
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
         assert self.form.ui.stopBtn.isEnabled()
 
         # modal dialog will block qt methods in main thread
@@ -196,9 +187,7 @@ class TestMainUI():
         qtbot.drag(self.form.ui.stimulusChoices.templateLbl, pv)
 
         QtTest.QTest.qWait(ALLOW)
-        qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
+        self.start_acq()
 
         # modal dialog will block qt methods in main thread
         # qtbot.handle_modal_widget(wait=True, press_enter=False)
@@ -285,6 +274,22 @@ class TestMainUI():
         # make sure that the underlying stim class is consistent
         assert tone.duration() == tone.baseStim().duration()
 
+    def test_abort_protocol(self):
+
+        self.setup_tc()
+
+        assert self.form.acqmodel.protocol_model().rowCount() == 1
+
+        self.start_acq()
+
+        # make sure we still get a comment box
+        t = qtbot.handle_modal_widget(wait=False, func=assert_not_none)
+
+        qtbot.click(self.form.ui.stopBtn)
+        
+        while t.is_alive():
+            QtTest.QTest.qWait(500)
+
     def add_builder_tone(self):
         pv = self.form.ui.protocolView
 
@@ -323,9 +328,8 @@ class TestMainUI():
         if comptype is not None:
             self.explore_setup(comptype)
 
-        qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
+        self.start_acq()
+
         QtTest.QTest.qWait(1000)
         qtbot.click(self.form.ui.stopBtn)
         QtTest.QTest.qWait(ALLOW)
@@ -396,9 +400,7 @@ class TestMainUI():
         qtbot.doubleclick(self.form.ui.windowszSpnbx)
         qtbot.type_msg(stim.duration()*1000+100)
 
-        qtbot.click(self.form.ui.startBtn)
-        QtTest.QTest.qWait(ALLOW)
-        assert self.form.ui.runningLabel.text() == "RECORDING"
+        self.start_acq()
 
         # modal dialog will block qt methods in main thread
         # qtbot.handle_modal_widget(wait=True, press_enter=False)
@@ -441,6 +443,14 @@ class TestMainUI():
         self.form.calvals['calname'] = calname + 'fake'
         self.form.calvals['use_calfile'] = True
 
+    def start_acq(self):
+        qtbot.click(self.form.ui.startBtn)
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.ui.runningLabel.text() == "RECORDING"
+        
 def msg_enter(widget, msg):
     qtbot.type_msg(msg)
     qtbot.keypress('enter')
+
+def assert_not_none(item):
+    assert item is not None
