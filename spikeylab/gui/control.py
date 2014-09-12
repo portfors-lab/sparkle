@@ -335,7 +335,7 @@ class MainWindow(ControlWindow):
                 self.pw.setLabels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
                 ww.close()
                 self.pw.show()
-        elif self.activeOperation == 'protocol' and self.currentMode == 'windowed':
+        elif self.currentMode == 'windowed':
             cellbox = CellCommentDialog(cellid=self.acqmodel.current_cellid)
             cellbox.setComment(self.ui.commentTxtEdt.toPlainText())
             if cellbox.exec_():

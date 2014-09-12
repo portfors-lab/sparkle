@@ -454,3 +454,4 @@ def msg_enter(widget, msg):
 
 def assert_not_none(item):
     assert item is not None
+    qtbot.click(item.ui.okBtn)
