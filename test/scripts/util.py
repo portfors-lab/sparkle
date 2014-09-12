@@ -61,8 +61,7 @@ def calc_error(predicted, recorded, fs, frange, refdb, refv, title=None):
     return mse, rmse, mae
 
 
-def record(player, sig, fs, atten=0):
-    nreps = 16
+def record(player, sig, fs, atten=0, nreps=16):
     reps = []
     player.set_stim(sig, fs, atten)
     player.start()

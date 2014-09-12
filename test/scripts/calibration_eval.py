@@ -50,8 +50,8 @@ if __name__ == "__main__":
     frange = [3750, 101250] # range to apply calibration to
 
     player = FinitePlayer()
-    player.set_aochan(u"PCI-6259/ao0")
-    player.set_aichan(u"PCI-6259/ai0")
+    player.set_aochan(u"PCI-6259/ao2")
+    player.set_aichan(u"PCI-6259/ai16")
 
     if not CONV_CAL and not MULT_CAL:
         print 'Must choose at lease one calibration type'
