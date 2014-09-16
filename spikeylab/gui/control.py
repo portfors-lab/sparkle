@@ -17,6 +17,7 @@ from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.gui.wait_widget import WaitWidget
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.qsignals import ProtocolSignals
+from spikeylab.tools.uihandler import assign_uihandler_slot
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
@@ -139,13 +140,7 @@ class MainWindow(ControlWindow):
         self.ui.stopChartBtn.setEnabled(False)
 
         logger = logging.getLogger('main')
-        handlers = logger.handlers
-        # dig out the UI handler to assign text edit ... a better way?
-        for h in handlers:
-            if h.get_name() == 'ui':
-                # h.signal.message.connect(self.ui.logTxedt.appendPlainText)
-                h.signal.message.connect(self.ui.logTxedt.appendHtml)
-                break
+        assign_uihandler_slot(logger, self.ui.logTxedt.appendHtml)
 
         logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
 

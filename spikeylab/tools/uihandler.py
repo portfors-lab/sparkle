@@ -29,3 +29,11 @@ class TextEditHandler(logging.Handler):
             colored_message = m.msg
 
         self.signal.message.emit(colored_message)
+
+def assign_uihandler_slot(logger, slot):
+    handlers = logger.handlers
+    # dig out the UI handler to assign text edit ... a better way?
+    for h in handlers:
+        if h.get_name() == 'ui':
+            h.signal.message.connect(slot)
+            break

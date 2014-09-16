@@ -1,10 +1,15 @@
 import sys
+import os
 import logging
 import re
 
+import yaml
 from PyQt4 import QtCore, QtGui
 
+from spikeylab.tools.log import init_logging
 from spikeylab.tools.uihandler import TextEditHandler
+from spikeylab.tools.uihandler import assign_uihandler_slot
+from spikeylab import tools
 
 class TestUIHandler():
 
@@ -43,3 +48,40 @@ class TestUIHandler():
 
         match = re.match('.*This is an error.*', w.toPlainText())
         assert match is not None
+
+        
+class MockLogWindow(object):
+    def __init__(self):
+        self.messages = [];
+
+    def log_slot(self, msg):
+        self.messages.append(msg)
+
+def test_logging_config_uihandler():
+    init_logging()
+    win = MockLogWindow()
+
+    logger = logging.getLogger('main')
+    
+    assign_uihandler_slot(logger, win.log_slot)
+
+    logger.exception('an exception') 
+    logger.warning('a warning')
+    logger.info('some info')
+    logger.debug('extra stuff')
+    config_file = os.path.join(os.path.dirname(tools.__file__), 'logging.conf')
+    with open(config_file, 'r') as yf:
+        config = yaml.load(yf)
+    print config
+
+    level = config['handlers']['ui']['level']
+    # assume we alway log error and warnings
+    assert 'exception' in win.messages[0]
+    assert 'color="Red"' in win.messages[0]
+    assert 'warning' in win.messages[1]
+    assert 'color="Orange"' in win.messages[1]
+
+    if level in ['INFO', 'DEBUG']:
+        assert 'info' in win.messages[2]
+    if level == 'DEBUG':
+        assert 'stuff' in win.messages[3]
