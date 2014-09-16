@@ -13,9 +13,53 @@ from spikeylab.gui.stim.factory import CCFactory
 from spikeylab.tools.util import next_str_num
 from spikeylab.tools.systools import get_src_directory
 
-class CalibrationRunner(ListAcquisitionRunner):
+class AbstractCalibrationRunner(ListAcquisitionRunner):
+    """Provides some common fucntionality for calibration presentation"""
+    def stash_calibration(self, attenuations, freqs, frange, calname):
+        """Save it for later"""
+        self.calibration_vector = attenuations
+        self.calibration_freqs = freqs
+        self.calibration_frange = frange
+        self.calname = calname
+
+    def stashed_calibration(self):
+        """Gets a stashed calibration
+
+        :returns: numpy.ndarray, numpy.ndarray -- frequency response values, frequencies
+        """
+        return self.calibration_vector, self.calibration_freqs
+
+    def apply_calibration(self, apply_cal):
+        """Whether to apply a stashed calibration to the outgoing stimulus
+
+        :param apply_cal: True if calibration should be applied
+        :type apply_cal: bool
+        """
+        self.apply_cal = apply_cal
+
+    def set_duration(self, dur):
+        """Sets the duration of the stimulus (seconds)
+
+        :param dur: desired duration of the stimulus
+        :type dur: float
+        """
+        raise NotImplementedError
+
+    def set_reps(self, reps):
+        """set the number of repetitions for the stimul(us/i)
+
+        :param reps: number of times to present the same stimulus
+        :type reps: int
+        """
+        self.stimulus.setRepCount(reps)
+
+class CalibrationRunner(AbstractCalibrationRunner):
+    """Handles Calibration acquistion, where there is a single unique 
+    stimulus used to capture the frequency response of the system.
+    This class may hold many different types of stimuli (currently 2),
+    but only one is presented per calibration run."""
     def __init__(self, *args):
-        ListAcquisitionRunner.__init__(self, *args)
+        AbstractCalibrationRunner.__init__(self, *args)
 
         self.player = FinitePlayer()
 
@@ -33,35 +77,29 @@ class CalibrationRunner(ListAcquisitionRunner):
         self.calibration_frange = None
 
     def get_stims(self):
+        """Gets the stimuli available for setting as the current calibration stimulus
+        
+        :returns: list<:class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`>
+        """
         return self.stim_components
 
     def set_stim_by_index(self, index):
+        """Sets the stimulus to be generated to the one referenced by index
+
+        :param index: index number of stimulus to set from this class's internal list of stimuli
+        :type index: int
+        """
         # remove any current components
         self.stimulus.clearComponents()
         # add one to index because of tone curve
         self.stimulus.insertComponent(self.stim_components[index])
 
-    def stash_calibration(self, attenuations, freqs, frange, calname):
-        self.calibration_vector = attenuations
-        self.calibration_freqs = freqs
-        self.calibration_frange = frange
-        self.calname = calname
-
-    def stashed_calibration(self):
-        return self.calibration_vector, self.calibration_freqs
-
-    def apply_calibration(self, apply_cal):
-        self.apply_cal = apply_cal
-
     def set_duration(self, dur):
-        # self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
+        """See :meth:`AbstractCalibrationRunner<spikeylab.run.calibration_runner.AbstractCalibrationRunner.set_duration>`"""
         # this may be set at any time, and is not checked before run, so set
         # all stim components
         for comp in self.stim_components:
             comp.setDuration(dur)
-
-    def set_reps(self, reps):
-        self.stimulus.setRepCount(reps)
 
     def _initialize_run(self):
        
@@ -100,7 +138,12 @@ class CalibrationRunner(ListAcquisitionRunner):
         
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
-        of speaker to get frequency vs. attenuation curve."""
+        of speaker to get frequency vs. attenuation curve.
+
+        :param save: Wheter to save this calibration data to file
+        :type save: bool
+        :returns: numpy.ndarray, str, int -- frequency response (in dB), dataset name, calibration reference frequency
+        """
         avg_signal = np.mean(self.datafile.get(self.current_dataset_name + '/signal'), axis=0)
 
         diffdB = attenuation_curve(self.stimulus.signal()[0], avg_signal,
@@ -135,9 +178,12 @@ with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 USE_RMS = config['use_rms']
 
-class CalibrationCurveRunner(ListAcquisitionRunner):
+class CalibrationCurveRunner(AbstractCalibrationRunner):
+    """Handles the presentaion of a 'traditional' style calibration
+    curve. Loops over a set of tones of different frequencies and 
+    intensities. Currently just used for testing"""
     def __init__(self, *args):
-        ListAcquisitionRunner.__init__(self, *args)
+        AbstractCalibrationRunner.__init__(self, *args)
 
         self.group_name = 'calibration_test_'
 
@@ -156,34 +202,23 @@ class CalibrationCurveRunner(ListAcquisitionRunner):
 
         self.save_data = False
 
-    def set_save_params(self, folder=None, name=None):
-        """Folder and filename where raw experiment data will be saved to
+    # def set_save_params(self, folder=None, name=None):
+    #     """Folder and filename where raw experiment data will be saved to
 
-        :param savefolder: folder for experiment data
-        :type savefolder: str
-        :param samename: filename template, without extention for individal experiment files
-        :type savename: str
-        """
-        if folder is not None:
-            self.savefolder = folder
-        if name is not None:
-            self.savename = name
-
-    def stash_calibration(self, attenuations, freqs, frange, calname):
-        self.calibration_vector = attenuations
-        self.calibration_freqs = freqs
-        self.calibration_frange = frange
-        self.calname = calname
-
-    def apply_calibration(self, apply_cal):
-        self.apply_cal = apply_cal
+    #     :param savefolder: folder for experiment data
+    #     :type savefolder: str
+    #     :param samename: filename template, without extention for individal experiment files
+    #     :type savename: str
+    #     """
+    #     if folder is not None:
+    #         self.savefolder = folder
+    #     if name is not None:
+    #         self.savename = name
 
     def set_duration(self, dur):
+        """See :meth:`AbstractCalibrationRunner<spikeylab.run.calibration_runner.AbstractCalibrationRunner.set_duration>`"""
         self.stimulus.component(0,0).setDuration(dur)
         # self.stimulus.data(self.stimulus.index(0,0)).setDuration(dur)
-
-    def set_reps(self, reps):
-        self.stimulus.setRepCount(reps)
 
     def _initialize_run(self):
         self.calibration_frequencies = []

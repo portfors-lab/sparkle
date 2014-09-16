@@ -27,9 +27,25 @@ class AbstractAcquisitionRunner():
         self.current_dataset_name = None
         
     def update_reference_voltage(self):
+        """Updates the voltage intensity combination used to calculate
+        the appropriate amplitude for outgoing signals. Uses internal
+        values to class that may have changed"""
         raise NotImplementedError
 
-    def set_calibration(self, attenuations, freqs, frange):
+    def set_calibration(self, attenuations, freqs, frange, calname):
+        """Sets the calibration for all tests controlled by this class.
+
+        :param attenuations: Vector of frequency attenuations in dB.
+                            i.e. the frequency response of the system.
+        :type attenuations: list or numpy.ndarray
+        :param freqs: Matching frequencyes for the attenuation vector
+        :type freqs: list or numpy.ndarray
+        :param frange: Frequency range (min, max) to restrict the application of the 
+                        calibration to (in Hz)
+        :type frange: (int, int)
+        :param calname: Name of the calibration, for documentation purposes
+        :type calname: str
+        """
         raise NotImplementedError
 
     def set_threshold(self, threshold):
@@ -43,7 +59,26 @@ class AbstractAcquisitionRunner():
     def set(self, **kwargs):
         """Sets an internal setting for acquistion, using keywords.
 
-        Available parameters to set: acqtime, aisr, aochan, aichan, nreps, binsz, caldb, calv, datafile
+        Available parameters to set: 
+        
+        :param acqtime: duration of recording (input) window (seconds)
+        :type acqtime: float
+        :param aisr: sample rate of the recording (input) operation (Hz)
+        :type aisr: int
+        :param aochan: AO (generation) channel name
+        :type aochan: str
+        :param aichan: AI (recording) channel name
+        :type aichan: str
+        :param nreps: number of repetitions for each unique stimulus
+        :type nreps: int
+        :param binsz: time bin duration for spike sorting (seconds)
+        :type binsz: float
+        :param caldb: See :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setReferenceVoltage>`
+        :type caldb: float
+        :param calv: See :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setReferenceVoltage>`
+        :type calv: float
+        :param datafile: a reference to an open file to save data to
+        :type datafile: :class:`AcquisitionData<spikeylab.data.dataobjects.AcquisitionData>`
         """
         self.player_lock.acquire()
         if 'acqtime' in kwargs:
@@ -82,6 +117,12 @@ class AbstractAcquisitionRunner():
             self.reprate = kwargs['reprate']
 
     def run(self, interval, **kwargs):
+        """Runs the acquisiton
+
+        :param interval: time between the start of each acquistion sweep (seconds)
+        :type interval: float
+
+        """
         raise NotImplementedError
 
     def halt(self):
@@ -107,6 +148,7 @@ class AbstractAcquisitionRunner():
         self.last_tick = now
 
     def putnotify(self, name, *args):
+        """Puts data into queue and alerts listeners"""
         # self.signals[name][0].send(*args)
         self.queues[name][0].put(*args)
         self.queues[name][1].set()

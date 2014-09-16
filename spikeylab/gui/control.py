@@ -106,7 +106,7 @@ class MainWindow(ControlWindow):
         self.signals.tuning_curve_response.connect(self.displayTuningCurve)
         self.signals.over_voltage.connect(self.reportOverV)
         for name, signal in self.signals.iteritems():
-            self.acqmodel.set_pipe_callback(name, signal.emit)
+            self.acqmodel.set_queue_callback(name, signal.emit)
         self.acqmodel.start_listening()
 
         self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        

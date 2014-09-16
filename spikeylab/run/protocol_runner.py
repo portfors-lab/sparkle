@@ -6,6 +6,7 @@ from spikeylab.tools.util import next_str_num
 from spikeylab.acq.players import FinitePlayer
 
 class ProtocolRunner(ListAcquisitionRunner):
+    """Handles the presentation of data for an experimental protocol"""
     def __init__(self, *args):
         ListAcquisitionRunner.__init__(self, *args)
 
@@ -89,8 +90,16 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.spike_rates = spike_rates
 
     def set_comment(self, cellid, comment):
+        """Saves the provided comment to the current dataset.
+
+        :param cellid: number of the current cell
+        :type cellid: int
+        :param comment: a message to add documentation to data
+        :type comment: str
+        """
         info = {'cellid': cellid, 'comment': comment}
         self.datafile.set_metadata(self.current_dataset_name, info)
 
     def clear(self):
+        """Clears all tests from protocol list"""
         self.protocol_model.clear()

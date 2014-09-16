@@ -85,19 +85,29 @@ class AcquisitionManager():
             wake_event.wait()
 
     def start_listening(self):
+        """Start listener threads for acquistion callback queues"""
         self._qlisten()
         self._halt_threads = False
         for t in self.queue_threads:
             t.start()
 
     def stop_listening(self):
+        """Stop listener threads for acquistion queues"""
         self._halt_threads = True
         # wake them up so that they can die
         for name, queue_waker in self.recieved_signals.items():
             q, wake_event = queue_waker
             wake_event.set()
 
-    def set_pipe_callback(self, name, func):
+    def set_queue_callback(self, name, func):
+        """Sets a function to execute when the named acquistion queue 
+        has data placed in it.
+
+        :param name: name of the queue to pull data from
+        :type name: str
+        :param func: function reference to execute, expects queue contents as argument(s)
+        :type func: callable
+        """
         self.acquisition_hooks[name] = func
 
     def increment_cellid(self):
@@ -107,7 +117,7 @@ class AcquisitionManager():
     def stimuli_list(self):
         """Get a list of the stimuli for search operation
 
-        :returns: list<AbstractStimulusComponent> -- list of the stimuli classes instances in the search operation
+        :returns: list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`> -- list of the stimuli classes instances in the search operation
         """
         return self.explorer.stimuli_list()
 
@@ -116,7 +126,7 @@ class AcquisitionManager():
 
         :param freq: Frequency of the tone to be played
         :type freq: int
-        :param db: Intensity of the tone to be played
+        :param db: Intensity of the tone to be played (dBSPL)
         :type db: float
         """
         stims = self.cal_toner.stimuli_list()
@@ -127,7 +137,8 @@ class AcquisitionManager():
         self.cal_toner.set_stim_by_index(self.cal_tone_idx)
 
     def set_calibration(self, datakey, calf=None, frange=None):
-        """Sets a calibration for all of the acquisition operations
+        """Sets a calibration for all of the acquisition operations,
+        from an already gathered calibration data set.
 
         :param datakey: name of the calibration to set. This key must be present in the current data file. A value of ``None`` clears calibration.
         :type datakey: str
@@ -241,7 +252,10 @@ class AcquisitionManager():
         self.protocoler.set_threshold(threshold)
 
     def set(self, **kwargs):
-        """Sets acquisition parameters for all acquisition types"""
+        """Sets acquisition parameters for all acquisition types
+
+        See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.set>`
+        """
         self.explorer.set(**kwargs)
         self.protocoler.set(**kwargs)
         self.bs_calibrator.set(**kwargs)
@@ -276,7 +290,7 @@ class AcquisitionManager():
 
         :param interval: The repetition interval between stimuli presentations (seconds)
         :type interval: float
-        :returns: threading.thread -- the acquisition thread
+        :returns: :py:class:`threading.Thread` -- the acquisition thread
         """
         return self.explorer.run(interval)
 
@@ -298,12 +312,12 @@ class AcquisitionManager():
     def run_protocol(self):
         """Runs the protocol operation with the current settings
 
-        :returns: threading.thread -- the acquisition thread
+        :returns: :py:class:`threading.Thread` -- the acquisition thread
         """
         return self.protocoler.run()
 
     def run_caltone(self, interval):
-        """Runs continuous reptition of the calibration tone"""
+        """Runs a continuous repetition of the calibration tone"""
         return self.cal_toner.run(interval)
 
     def set_calibration_by_index(self, idx):
@@ -325,9 +339,9 @@ class AcquisitionManager():
         
         :param interval: The repetition interval between stimuli presentations (seconds)
         :type interval: float
-        :param applycal: Wether to apply a previous saved calibration to this run
+        :param applycal: Whether to apply a previous saved calibration to this run
         :type applycal: bool
-        :returns: threading.thread -- the acquisition thread
+        :returns: :py:class:`threading.Thread` -- the acquisition thread
         """
         if self.selected_calibration_index == 2:
             self.tone_calibrator.apply_calibration(applycal)
@@ -352,7 +366,7 @@ class AcquisitionManager():
 
         :param interval: The repetition interval between stimuli presentations (seconds)
         :type interval: float
-        :returns: threading.thread -- the acquisition thread
+        :returns: :py:class:`threading.Thread` -- the acquisition thread
         """
         self.charter.setup(interval)
         return self.charter.run()
@@ -393,7 +407,7 @@ class AcquisitionManager():
     def protocol_model(self):
         """Gets the model for the protocol operation
 
-        :returns: ProtocolModel
+        :returns: :class:`ProtocolModel<spikeylab.run.protocol_model.ProtocolTabelModel>`
         """
         return self.protocoler.protocol_model
 
@@ -402,7 +416,7 @@ class AcquisitionManager():
 
         :param mode: Type of stimulus to get: tone or noise
         :type mode: str
-        :returns: StimulusModel
+        :returns: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
         """
         if mode == 'tone':
             return self.tone_calibrator.stimulus
@@ -426,7 +440,7 @@ class AcquisitionManager():
     def calibration_range(self):
         """Gets the range of the frequencies and intensities in the calibration tone curve
 
-        :returns: list -- the auto 
+        :returns: list -- nested list of frequencies and intensities
         """
         return self.tone_calibrator.stimulus.autoParamRanges()
 
@@ -460,13 +474,15 @@ class AcquisitionManager():
         self.protocoler.clear()
 
     def set_group_comment(self, comment):
-        """Sets a comment for the last executed protocol group"""
+        """Sets a comment for the last executed protocol group, to be saved
+        as doc to the appropriate place in the data file.
+        """
         self.protocoler.set_comment(self.current_cellid, comment)
 
     def attenuator_connection(self):
         """Checks the connection to the attenuator, and attempts to connect if not connected.
 
-        :returns: bool - wether there is a connection
+        :returns: bool - whether there is a connection
         """
         # all or none will be connected
         acquisition_modules = [self.explorer, self.protocoler, self.bs_calibrator, self.tone_calibrator, self.charter]

@@ -51,7 +51,7 @@ This program uses a digital filter to compensate for high frequency speaker roll
 
 The frequency response for the system is derived via :func:`attenuation_curve<spikeylab.tools.audiotools.attenuation_curve>` function. The result of this is also presented to the user as an 'attenuation curve'. This frequency response is saved to file, and can used later to generate a new filter kernel. 
 
-The frequency response is given to the different acquisition runner classes which will pass it on to their :class:`StimulusModel<spikeylab.stim.stimulusmodel.setCalibration>`(s). The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<spikeylab.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals.
+The frequency response is given to the different acquisition runner classes which will pass it on to their :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setCalibration>`(s). The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<spikeylab.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals.
 
 Thus, after stimuli are prepared, but before they are generated, the StimulusModel applies the calibration to the signal by convolving the filter with the output signal using :func:`convolve_filter<spikeylab.tools.audiotools.convolve_filter>`.
 

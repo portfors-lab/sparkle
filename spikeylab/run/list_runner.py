@@ -6,11 +6,13 @@ import numpy as np
 
 from spikeylab.run.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.run.protocol_model import ProtocolTabelModel
-# import cProfile
+from spikeylab.tools.doc import doc_inherit
 
 class Broken(Exception): pass
 
 class ListAcquisitionRunner(AbstractAcquisitionRunner):
+    """Provides a common interface and some facilitatory functions for
+    the presentation of data with a pre-determined order"""
     def __init__(self, *args):
         self.protocol_model = ProtocolTabelModel()
 
@@ -18,21 +20,27 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self.silence_window = False
 
     def set_calibration(self, attenuations, freqs, frange, calname):
+        """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.set_calibration>`"""
         self.protocol_model.setCalibration(attenuations, freqs, frange)
         self.calname = calname
         self.cal_frange = frange
 
     def update_reference_voltage(self):
+        """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.update_reference_voltage>`"""
         self.protocol_model.setReferenceVoltage(self.caldb, self.calv)
 
     def count(self):
-        """Total number of all tests/traces/reps currently in this protocol"""
+        """Total number of all tests/traces/reps currently in this protocol
+
+        :returns: int -- the total
+        """
         total = 0
         for test in self.protocol_model.allTests():
             total += test.traceCount()*test.loopCount()*test.repCount()
         return total
 
     def setup(self, interval):
+        """Prepares the tests for execution"""
         self.trace_counter = 0
 
         self._halt = False
@@ -50,6 +58,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         # return undesired_attenuations
 
     def run(self):
+        """Runs the acquisiton"""
         # save the current calibration to data file doc        
         self._initialize_run()
 
@@ -64,9 +73,11 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
         self.acq_thread.start()
         return self.acq_thread
-
+ 
     def _initialize_run(self):
         """ This needs to set up data structures """
+        # should set the current_dataset_name
+        # Any settings that the player should have
         raise NotImplementedError
 
     def _worker(self, stimuli):

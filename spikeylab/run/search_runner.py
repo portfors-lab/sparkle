@@ -12,6 +12,8 @@ from spikeylab.tools import spikestats
 from spikeylab.stim.types import get_stimuli_models
 
 class SearchRunner(AbstractAcquisitionRunner):
+    """Handles the presentation of data where changes are allowed to
+    be made to the stimulus while running"""
     def __init__(self, *args):
         self.stimulus = StimulusModel()
 
@@ -25,15 +27,27 @@ class SearchRunner(AbstractAcquisitionRunner):
         self._explore_stimuli = [x() for x in stimuli_types if x.explore]
 
     def stimuli_list(self):
+        """Gets a list of all the stimuli this runner has access to. Order
+        of the list matches the index order which stimuli can be set by.
+
+        :returns: (subclasses of) list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`>
+        """
         return self._explore_stimuli
 
     def set_calibration(self, attenuations, freqs, frange, calname):
+        """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.set_calibration>`"""
         self.stimulus.setCalibration(attenuations, freqs, frange)
 
     def update_reference_voltage(self):
+        """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.update_reference_voltage>`"""
         self.stimulus.setReferenceVoltage(self.caldb, self.calv)
 
     def set_stim_by_index(self, index):
+        """Sets the stimulus to be generated to the one referenced by index
+
+        :param index: index number of stimulus to set from this class's internal list of stimuli
+        :type index: int
+        """
         # remove any current components
         self.stimulus.clearComponents()
         self.stimulus.insertComponent(self._explore_stimuli[index])
@@ -43,19 +57,34 @@ class SearchRunner(AbstractAcquisitionRunner):
         return signal, overload
 
     def set_current_stim_parameter(self, param, val):
+        """Sets a parameter on the current stimulus
+
+        :param param: name of the parameter of the stimulus to set
+        :type param: str
+        :param val: new value to set the parameter to
+        """
         component = self.stimulus.component(0,0)
         component.set(param, val)
 
     def current_signal(self):
+        """Signal of the currently set stimulus
+
+        :returns: numpy.ndarray
+        """
         return self.stimulus.signal()
 
     def stim_names(self):
+        """The names of the all the stimuli this class can generate, in order
+
+        :returns: list<str>
+        """
         stim_names = []
         for stim in self._explore_stimuli:
             stim_names.append(stim.name)
         return stim_names
 
     def run(self, interval):
+        """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.run>`"""
         self._halt = False
         
         # TODO: some error checking to make sure valid paramenters are set
@@ -145,6 +174,13 @@ class SearchRunner(AbstractAcquisitionRunner):
             logger.exception("Uncaught Exception from Explore Thread:")
 
     def save_to_file(self, data, stamp):
+        """Saves data to current dataset.
+
+        :param data: data to save to file
+        :type data: numpy.ndarray
+        :param stamp: time stamp of when the data was acquired
+        :type stamp: str
+        """
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
         info = dict(self.stimulus.componentDoc().items() + self.stimulus.testDoc().items())
