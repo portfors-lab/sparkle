@@ -6,7 +6,7 @@ from caldialog_form import Ui_CalibrationDialog
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 class CalibrationDialog(QtGui.QDialog):
-    """Dialog to set current calibration and reference point for intensity-frequency-voltage"""
+    """Dialog to set current calibration, and the frequency range to apply it to"""
     def __init__(self, fscale, defaultVals=None, datafile=None):
         QtGui.QDialog.__init__(self, None)
         self.ui = Ui_CalibrationDialog()
@@ -29,6 +29,9 @@ class CalibrationDialog(QtGui.QDialog):
         self.calf = defaultVals['calf']
 
     def maxRange(self):
+        """Sets the maximum range for the currently selection calibration,
+        determined from its range of values store on file
+        """
         try:
             x, freqs = self.datafile.get_calibration(str(self.ui.calChoiceCmbbx.currentText()), self.calf)
             self.ui.frangeLowSpnbx.setValue(freqs[0]/self.fscale)
@@ -40,6 +43,7 @@ class CalibrationDialog(QtGui.QDialog):
             QtGui.QMessageBox.warning(self, "File Data Error", "Unable to find data in file")
            
     def plotCurve(self):
+        """Shows a calibration curve, in a separate window, of the currently selected calibration"""
         try:
             attenuations, freqs = self.datafile.get_calibration(str(self.ui.calChoiceCmbbx.currentText()), self.calf)
             self.pw = SimplePlotWidget(freqs, attenuations, parent=self)
@@ -52,6 +56,13 @@ class CalibrationDialog(QtGui.QDialog):
             QtGui.QMessageBox.warning(self, "File Data Error", "Unable to find data in file")
 
     def values(self):
+        """Gets the values the user input to this dialog
+
+        :returns: dict of inputs:
+        |               *'use_calfile'*: bool, -- whether to apply calibration at all
+        |               *'calname'*: str, -- the name of the calibration dataset to use
+        |               *'frange'*: (int, int), -- (min, max) of the frequency range to apply calibration to
+        """
         results = {}
         results['use_calfile'] = self.ui.calfileRadio.isChecked()
         results['calname'] = str(self.ui.calChoiceCmbbx.currentText())
@@ -59,6 +70,8 @@ class CalibrationDialog(QtGui.QDialog):
         return results
 
     def conditional_accept(self):
+        """Accepts the inputs if all values are valid and congruent.
+        i.e. Valid datafile and frequency range within the given calibration dataset."""
         if self.ui.calfileRadio.isChecked() and str(self.ui.calChoiceCmbbx.currentText()) == '':
             self.ui.noneRadio.setChecked(True)
         if self.ui.calfileRadio.isChecked():

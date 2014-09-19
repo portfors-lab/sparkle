@@ -25,7 +25,11 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc', 
+              'sphinx.ext.doctest', 
+              'sphinx.ext.viewcode', 
+              'sphinx.ext.intersphinx',
+              'spikeylab.tools.qtdoc',]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -241,6 +245,7 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
 
-intersphinx_mapping = {'pyqtgraph': ('http://pyqtgraph.daffodil.uk.com/', None),
+intersphinx_mapping = {'pyqtgraph': ('http://www.pyqtgraph.org/documentation', None),
     'python': ('http://docs.python.org/2.7', None),
 }
+

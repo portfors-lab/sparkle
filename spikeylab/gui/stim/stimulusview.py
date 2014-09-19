@@ -330,8 +330,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return QtCore.QLine(x,y0,x,y1)
 
 
-    def dropEvent(self, event):
-        component = self.dropAssist(event)
+    def dropped(self, component, event):
         if isinstance(component, AbstractStimulusComponent):
             row, col = self.splitAt(event.pos())
             index = self.model().createIndex(row, col, component)
@@ -345,8 +344,6 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
             self.hashIsDirty = True
             self.viewport().update()
-
-            event.accept()
 
     def sizeHint(self):
         return QtCore.QSize(self.width(), self._height)

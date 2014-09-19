@@ -13,20 +13,46 @@ class AbstractDragView():
         self.dragStartPosition = None
 
     def grabImage(self, index):
+        """Gets a pixmap image of the item located at index
+
+        Must be implemented by subclass.
+
+        :param index: index of the item
+        :type index: :qtdoc:`QModelIndex`
+        :returns: :qtdoc:`QPixMap`
+        """
         # should return a QPixMap to represent the item at index
         raise NotImplementedError
 
     def cursor(self, index):
+        """Gets a line to draw to indicate where a drop will occur
+
+        Must be implemented by subclass.
+
+        :param index: index of the item
+        :type index: :qtdoc:`QModelIndex`
+        :returns: :qtdoc:`QLine`
+        """
         raise NotImplementedError
 
     def indexXY(self, index):
+        """Return the top left coordinates for the given *index*, relative
+        to self.
+
+        Must be implemented by subclass.
+
+        :param index: index of the item
+        :type index: :qtdoc:`QModelIndex`
+        :returns: (int, int) -- (x, y) coordinates
+        """
         raise NotImplementedError
 
     def mousePressEvent(self, event):
-        # saves the drag position, so we know when a drag should be initiated
+        """saves the drag position, so we know when a drag should be initiated"""
         self.dragStartPosition = event.pos()
 
     def mouseMoveEvent(self, event):
+        """Determines if a drag is taking place, and initiates it"""
         if self.dragStartPosition is None or \
             (event.pos() - self.dragStartPosition).manhattanLength() < QtGui.QApplication.startDragDistance():
             return
@@ -75,6 +101,7 @@ class AbstractDragView():
         result = drag.exec_(QtCore.Qt.MoveAction)
 
     def dragEnterEvent(self, event):
+        """Determines if the widget under the mouse can recieve the drop"""
         if event.mimeData().hasFormat("application/x-protocol"):
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()
@@ -82,6 +109,7 @@ class AbstractDragView():
             event.ignore()
 
     def dragMoveEvent(self, event):
+        """Determines if the widget under the mouse can recieve the drop"""
         if event.mimeData().hasFormat("application/x-protocol"):
             # find the nearest break to cursor
             self.dragline = self.cursor(event.pos())
@@ -92,20 +120,45 @@ class AbstractDragView():
             event.ignore()
 
     def dragLeaveEvent(self, event):
+        """Clears drop cursor line"""
         self.dragline = None
         self.viewport().update()
         event.accept()
 
-    def dropAssist(self, event):
+    def dropped(self, item, event):
+        """Deals with an item dropped on the view
+
+        Must be implemented by subclass
+
+        :param item: same item that was selected, and removed at the start of drag
+        :param event: Qt event obect passed from dropEvent
+        :type event: :qtdoc:`QDropEvent`
+        """
+        raise NotImplementedError
+
+    def dropEvent(self, event):
+        """Handles an item being dropped onto view, calls
+        dropped -- implemented by subclass
+        """
         self.dragStartPosition = None
         self.dragline = None
         self.originalPos = None
         data = event.mimeData()
         stream = data.retrieveData("application/x-protocol",
             QtCore.QVariant.ByteArray)
-        return cPickle.loads(str(stream.toByteArray()))
+        item = cPickle.loads(str(stream.toByteArray()))
 
-    def childEvent(self, event):
+        self.dropped(item, event)
+
+        event.accept()
+
+    def childEvent(self, event):    
+        """Catches items dropped off edge of view, 
+        reinserts at original position
+
+        :param event: contains event parameters for child object events
+        :type event: :qtdoc:`QChildEvent`
+        """
         if event.type() == QtCore.QEvent.ChildRemoved:
             # hack to catch drop offs   
             if self.originalPos is not None:
@@ -115,4 +168,5 @@ class AbstractDragView():
                 self.viewport().update()
 
     def mouseReleaseEvent(self, event):
+        """Resets the drag start position"""
         self.dragStartPosition = None

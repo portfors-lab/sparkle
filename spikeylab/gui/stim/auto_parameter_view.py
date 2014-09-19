@@ -66,8 +66,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         x = self.width()
         return QtCore.QLine(0,y,x,y)
 
-    def dropEvent(self, event):
-        param = self.dropAssist(event)
+    def dropped(self, param, event):
         if event.source() == self or isinstance(param, AddLabel):
             index = self.indexAt(event.pos())
             self.model().insertRows(index.row(),1)
@@ -82,8 +81,6 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
                 self.selectRow(row)
                 self.parameterChanged.emit(self.model().selection(index))
 
-        event.accept()
-        
     def indexXY(self, index):
         """Return the top left coordinates of the row for the given index"""
         row = index.row()

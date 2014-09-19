@@ -49,8 +49,6 @@ class TestProtocolDisplay():
         display.addRasterPoints(bin_centers, points*2)
 
         display.setXlimits((self.t[0], self.t[-1]))
-        display.setTscale(0.001)
-        display.setFscale(1000)
 
         QApplication.processEvents()
 

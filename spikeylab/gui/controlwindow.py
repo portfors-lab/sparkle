@@ -180,9 +180,6 @@ class ControlWindow(QtGui.QMainWindow):
             time_inputs = self.timeInputs + AbstractEditorWidget.tunit_fields
             time_labels = self.timeLabels + AbstractEditorWidget.tunit_labels
 
-            # plot display handles unit update itself
-            self.display.setTscale(self.tscale)
-            
             # now go through our list of labels and fields and scale/update
             if self.tscale == 0.001:
                 for field in time_inputs:
@@ -215,10 +212,6 @@ class ControlWindow(QtGui.QMainWindow):
             # list here
             frequency_inputs = self.frequencyInputs + AbstractEditorWidget.funit_fields
             frequency_labels = self.frequencyLabels + AbstractEditorWidget.funit_labels
-
-            # plot displays handle unit update themselves
-            self.display.setFscale(self.fscale)
-            self.calibrationDisplay.setFscale(self.fscale)
 
             # now go through our list of labels and fields and scale/update
             if self.fscale == 1000:
@@ -361,7 +354,10 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
-        """Closes listening threads and saves GUI data for later use"""
+        """Closes listening threads and saves GUI data for later use.
+
+        Re-implemented from :qtdoc:`QWidget`
+        """
         self.acqmodel.stop_listening() # close listener threads
         self.saveInputs(self.inputsFilename)
 

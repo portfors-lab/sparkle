@@ -1,6 +1,7 @@
 from PyQt4 import QtGui
 
 class PlotMenuBar(QtGui.QMenuBar):
+    """Menu bar for the plot dock widget"""
     def __init__(self, dock, parent=None):
         super(PlotMenuBar, self).__init__(parent)
 
@@ -19,9 +20,11 @@ class PlotMenuBar(QtGui.QMenuBar):
         self.dock = dock
 
     def switchDisplay(self, display):
+        """See :meth:`PlotDockWidget<spikeylab.gui.plotdock.PlotDockWidget.switchDisplay>`"""
         self.dock.switchDisplay(display)
 
     def mousePressEvent(self, event):
+        """Marshalls behaviour depending on location of the mouse click"""
         if event.x() < 50:
             super(PlotMenuBar, self).mousePressEvent(event)
         else:
@@ -29,7 +32,9 @@ class PlotMenuBar(QtGui.QMenuBar):
             event.ignore()
 
     def mouseMoveEvent(self, event):
+        """Passes event on to allow dragging of window"""
         event.ignore()
 
     def mouseReleaseEvent(self, event):
+        """Passes event on to allow dragging of window"""
         event.ignore()

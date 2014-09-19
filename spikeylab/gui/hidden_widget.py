@@ -2,6 +2,11 @@ from PyQt4 import QtGui
 from spikeylab.resources.icons import arrowup, arrowdown
 
 class WidgetHider(QtGui.QWidget):   
+    """Takes a widget and places it into a collapsable container widget
+
+    :param content: widget to form the hidable contents of this container
+    :type content: :qtdoc:`QWidget`
+    """
     def __init__(self, content, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -33,6 +38,7 @@ class WidgetHider(QtGui.QWidget):
         self.setLayout(layout)
 
     def hide(self, event):
+        """Toggles the visiblity of the content widget"""
         if self.content.isHidden():
             self.content.show()
             self.hideBtn.setIcon(self.hideIcon)

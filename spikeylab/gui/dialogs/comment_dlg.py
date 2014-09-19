@@ -2,6 +2,7 @@ from PyQt4 import QtGui
 from commentform import Ui_CellCommentDialog
 
 class CellCommentDialog(QtGui.QDialog):
+    """Dialog for collecting user comments per protocol run"""
     def __init__(self, cellid=0):
         QtGui.QDialog.__init__(self, None)
         self.ui = Ui_CellCommentDialog()
@@ -11,9 +12,18 @@ class CellCommentDialog(QtGui.QDialog):
         self.ui.cellidLbl.setNum(cellid)
 
     def comment(self):
+        """Get the comment enters in this widget
+
+        :returns: str -- user entered comment
+        """
         return self.ui.commentTxtedt.toPlainText()
 
     def setComment(self, msg):
+        """Sets the widget text to *msg*
+
+        :param msg: overwrites any existing text with *msg*
+        :type msg: str
+        """
         self.ui.commentTxtedt.setPlainText(msg)
         # move text cursor to end
         self.ui.commentTxtedt.moveCursor(QtGui.QTextCursor.End)

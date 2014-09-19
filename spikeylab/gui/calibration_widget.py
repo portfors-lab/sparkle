@@ -8,7 +8,7 @@ from .calwidget_form import Ui_CalibrationWidget
 
 class CalibrationWidget(QtGui.QWidget):
     """Widget to handle inputs for the running and testing of speaker calibration. By default,
-        contains a calibraiton test curve, may add stimulus options.
+        contains a calibration test curve, may add stimulus options.
     """
     def __init__(self, parent=None):
         super(CalibrationWidget,self).__init__(parent)
@@ -22,7 +22,7 @@ class CalibrationWidget(QtGui.QWidget):
         self.durationWidgets = [self.ui.curveWidget.ui.durSpnbx]
 
     def setCurveModel(self, model):
-        """sets the stimulus model for the calibration curve test
+        """Sets the stimulus model for the calibration curve test
 
         :param model: Stimulus model that has a tone curve configured
         :type model: :class:`StimulusModel <spikeylab.stim.stimulusmodel.StimulusModel>`
@@ -40,7 +40,7 @@ class CalibrationWidget(QtGui.QWidget):
             w.setValue(dur)
 
     def addOption(self, stim):
-        """Add a stimulus to the list of stims to use for testing calibration
+        """Adds a stimulus to the list of stims to use for testing calibration
 
         :param stim: stimulus to add to drop-down list
         :type stim: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`
@@ -56,7 +56,7 @@ class CalibrationWidget(QtGui.QWidget):
         self.ui.calTypeCmbbx.setCurrentIndex(0)
 
     def saveToObject(self):
-        """Save the current UI setting to the model"""
+        """Saves the current UI setting to the model"""
         for i in range(self.ui.caleditorStack.count()):
             try:
                 self.ui.caleditorStack.widget(i).saveToObject()

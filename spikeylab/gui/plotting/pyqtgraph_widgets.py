@@ -40,22 +40,36 @@ class BasePlot(pg.PlotWidget):
                 
         self.setMouseEnabled(x=False,y=True)
 
-    def setTscale(self, scale):
-        pass
-
-    def setFscale(self, scale):
-        pass
-
     def setXlim(self, lim):
+        """Sets the visible x-axis bounds to *lim*
+
+        :param lim: (min, max) for x-axis
+        :type lim: (float, float)
+        """
         self.setXRange(*lim, padding=0)
 
     def setYlim(self, lim):
+        """Sets the visible y-axis bounds to *lim*
+
+        :param lim: (min, max) for y-axis
+        :type lim: (float, float)
+        """
         self.setYRange(*lim)
 
     def setTitle(self, title):
+        """Sets a title for the plot
+
+        :param title: Title for top of plot
+        :type title: str
+        """
         self.getPlotItem().setTitle(title)
 
     def getLabel(self, key):
+        """Gets the label assigned to an axes
+
+        :param key:???
+        :type key: str
+        """
         axisItem = self.getPlotItem().axes[key]['item']
         return axisItem.label.toPlainText()
 
@@ -186,6 +200,17 @@ class TraceWidget(BasePlot):
         return (self.rasterYmin, self.rasterYmax)
 
     def rangeChange(self, pw, ranges):
+        """Adjusts the stimulus signal to keep it at the top of a plot,
+        after any ajustment to the axes ranges takes place.
+
+        This is a slot for the undocumented pyqtgraph signal sigRangeChanged.
+        From what I can tell the arguments are:
+
+        :param pw: reference to the emitting object (plot widget in my case)
+        :type pw: object
+        :param ranges: I am only interested when this turns out to be a nested list of axis bounds
+        :type ranges: object
+        """
         if hasattr(ranges, '__iter__'):
             # adjust the stim signal so that it falls in the correct range
             stim_x, stim_y = self.stimPlot.getData()
@@ -329,6 +354,7 @@ class SpecWidget(BasePlot):
         self.editor.show()
 
     def _editor_close(self, event):
+        # on closing of the editor, apply new settings
         lut = self.editor.getHistogramWidget().item.getLookupTable(n=512, alpha=True)
         state = self.editor.getHistogramWidget().item.gradient.saveState()
         levels = self.editor.getHistogramWidget().item.getLevels()

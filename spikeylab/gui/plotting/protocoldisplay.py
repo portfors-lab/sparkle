@@ -5,6 +5,7 @@ from spikeylab.gui.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FF
 from PyQt4 import QtGui, QtCore
 
 class ProtocolDisplay(QtGui.QWidget):
+    """Data display intended for use during brain recording"""
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -58,6 +59,11 @@ class ProtocolDisplay(QtGui.QWidget):
         self.badbadbad = 0
 
     def updateSpec(self, *args, **kwargs):
+        """Updates the spectrogram. First argument can be a filename, 
+        or a data array. If no arguments are given, clears the spectrograms.
+
+        For other arguments, see: :meth:`SpecWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.updateData>`
+        """
         if args[0] == None:
             self.specPlot.clearImg()
         elif isinstance(args[0], basestring):
@@ -66,34 +72,63 @@ class ProtocolDisplay(QtGui.QWidget):
             self.specPlot.updateData(*args,**kwargs)
             
     def showSpec(self, fname):
-        """ Draw image if none present """
+        """Draws the spectrogram if it is currently None"""
         if not self.specPlot.hasImg() and fname is not None:
             self.specPlot.fromFile(fname)
 
     def setSpecArgs(self, *args, **kwargs):
+        """Sets the parameters for the spectrogram calculation/drawing,
+        chosen by the user.
+
+        For arguments, see: :meth:`SpecWidget.setSpecArgs<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.setSpecArgs>`
+        """
         self.specPlot.setSpecArgs(*args, **kwargs)
 
     def updateFft(self, *args, **kwargs):
+        """Updates the FFT plot with new data
+
+        For arguments, see: :meth:`FFTWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.FFTWidget.updateData>`
+        """
         self.fftPlot.updateData(*args, **kwargs)
 
     def updateSpiketrace(self, xdata, ydata):
+        """Updates the spike trace
+
+        :param xdata: index values
+        :type xdata: numpy.ndarray
+        :param ydata: values to plot
+        :type ydata: numpy.ndarray
+        """
         self.spiketracePlot.updateData(axeskey='response', x=xdata, y=ydata)
 
     def clearRaster(self):
+        """Clears data from the raster plot"""
         self.spiketracePlot.clearData('raster')
 
     def addRasterPoints(self, xdata, repnum):
         """Add a list (or numpy array) of points to raster plot, 
-           in any order.
-           xdata: bin centers
-           ydata: rep number """
+       in any order.
+
+       :param xdata: bin centers
+       :param ydata: rep number 
+        """
         ydata = np.ones_like(xdata)*repnum
         self.spiketracePlot.appendData('raster', xdata, ydata)
 
     def updateSignal(self, xdata, ydata):
+        """Updates the trace of the outgoing signal
+
+        :param xdata: time points of recording
+        :param ydata: brain potential at time points
+        """
         self.spiketracePlot.updateData(axeskey='stim', x=xdata, y=ydata)
 
     def setXlimits(self, lims):
+        """Sets the X axis limits of the trace plot
+
+        :param lims: (min, max) of x axis, in same units as data
+        :type lims: (float, float)
+        """
         self.spiketracePlot.setXlim(lims)
         # ridiculous...
         sizes = self.splittersw.sizes()
@@ -107,20 +142,15 @@ class ProtocolDisplay(QtGui.QWidget):
         self.splittersw.setSizes(sizes)
 
     def setNreps(self, nreps):
+        """Sets the number of reps before the raster plot resets"""
         self.spiketracePlot.setNreps(nreps)
 
     def sizeHint(self):
+        """default size?"""
         return QtCore.QSize(500,300)
 
-    def setTscale(self, scale):
-        self.spiketracePlot.setTscale(scale)
-        self.specPlot.setTscale(scale)
-
-    def setFscale(self, scale):
-        self.fftPlot.setFscale(scale)
-        self.specPlot.setFscale(scale)
-
     def specAutoRange(self):
+        """Auto adjusts the visable range of the spectrogram"""
         trace_range = self.spiketracePlot.viewRange()[0]
         vb = self.specPlot.getViewBox()
         vb.autoRange(padding=0)

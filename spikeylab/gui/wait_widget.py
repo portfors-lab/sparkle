@@ -1,6 +1,8 @@
 from PyQt4 import QtCore, QtGui
 
 class WaitWidget(QtGui.QLabel):
+    """Simple wiget that only contains a label "Loading..." So the user
+    doesn't think the GUI has frozen."""
     def __init__(self, message= "Loading...", parent=None):
         QtGui.QLabel.__init__(self, parent)
 

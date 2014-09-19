@@ -66,7 +66,11 @@ __ http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers-Cont/
 
 GUI Structure
 -------------
-The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. This files have the extention .ui. The main UI class :class:`MainWindow<spikeylab.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<spikeylab.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
+The Qt_ framework was chosen to build the GUI for this project. The project was developed using the PyQt package for the Python bindings. The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. This files have the extention .ui. The main UI class :class:`MainWindow<spikeylab.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<spikeylab.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
+
+An example of a Qt class :qtdoc:`QAbstractItemView`
+
+.. _Qt: http://qt-project.org/doc/qt-4.8
 
 Stimulus widgets
 +++++++++++++++++
@@ -79,7 +83,9 @@ To interface with the stimuli classes, this program makes use of the Qt Model-Vi
 Plotting
 +++++++++
 
-The plotting is built upon the `pyqtgraph <http://www.pyqtgraph.org/documentation/>`_ library.
+The plotting is built upon the pyqtgraph_ library.
+
+.. _pyqtgraph: http://www.pyqtgraph.org/documentation
 
 Reference API
 --------------

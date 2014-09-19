@@ -3,6 +3,8 @@ from spikeylab.gui.plotting.pyqtgraph_widgets import FFTWidget
 from PyQt4 import QtGui, QtCore
 
 class CalibrationDisplay(QtGui.QWidget):
+    """Widget container with two FFT plots, of outgoing and incoming signal,
+    intending for use with calibration operation"""
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -31,11 +33,15 @@ class CalibrationDisplay(QtGui.QWidget):
         self.setLayout(layout)
 
     def updateOutFft(self, *args, **kwargs):
+        """Sets new data for outgoing FFT
+
+        for arguments, see :meth:`FFTWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.FFTWidget.updateData>`
+        """
         self.outFft.updateData(*args, **kwargs)
 
     def updateInFft(self, *args, **kwargs):
-        self.inFft.updateData(*args, **kwargs)
+        """Sets new data for recorded FFT
 
-    def setFscale(self, scale):
-        self.outFft.setFscale(scale)
-        self.inFft.setFscale(scale)
+        for arguments, see :meth:`FFTWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.FFTWidget.updateData>`
+        """
+        self.inFft.updateData(*args, **kwargs)

@@ -12,15 +12,21 @@ class DragLabel(QtGui.QLabel):
         self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
     def setClass(self, factoryclass):
-        """Constructor for the component type this label is to represent"""
+        """Sets the constructor for the component type this label is to 
+        represent
+
+        :param factoryclass: a class that, when called, results in an instance of the desired class
+        :type factoryclass: callable
+        """
         self.factoryclass = factoryclass
         self.setText(str(factoryclass.name))
 
     def mousePressEvent(self, event):
-        # create a new component with default values
+        """saves the drag position, so we know when a drag should be initiated"""
         self.dragStartPosition = event.pos()
         
     def mouseMoveEvent(self, event):
+        """Determines if a drag is taking place, and initiates it"""
         if (event.pos() - self.dragStartPosition).manhattanLength() < 10:
             return
         factory = self.factoryclass()

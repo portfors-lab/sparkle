@@ -5,6 +5,7 @@ from viewdialog_form import Ui_ViewSettingsDialog
 from spikeylab.stim.types import get_stimuli_models
 
 class ViewSettingsDialog(QtGui.QDialog):
+    """Dialog for setting GUI options"""
     def __init__(self, defaultVals=None):
         QtGui.QDialog.__init__(self, None)
         self.ui = Ui_ViewSettingsDialog()
@@ -19,6 +20,12 @@ class ViewSettingsDialog(QtGui.QDialog):
             self.ui.detailWidget.setCheckedDetails(defaultVals['display_attributes'])
 
     def values(self):
+        """Gets user inputs
+
+        :returns: dict of inputs:
+        | *'fontsz'*: int -- font size for text throughout the GUI
+        | *'display_attributes'*: dict -- what attributes of stimuli to report as they are being presented
+        """
         result = {}
         result['fontsz'] = self.ui.fontszSpnbx.value()
         result['display_attributes'] = self.ui.detailWidget.getCheckedDetails()

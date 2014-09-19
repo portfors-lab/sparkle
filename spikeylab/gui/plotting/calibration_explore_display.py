@@ -4,6 +4,8 @@ from PyQt4 import QtGui, QtCore
 
 
 class ExtendedCalibrationDisplay(QtGui.QWidget):
+    """Display Widget for intended for use with calibration operation with 
+    plots for signal, FFT, and spectrogram of output and incoming signals"""
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -82,10 +84,21 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         self.colormapChanged = self.responseSpecPlot.colormapChanged
 
     def setSpecArgs(self, *args, **kwargs):
+        """Sets the parameters for the spectrogram calculation/drawing,
+        chosen by the user.
+
+        For arguments, see: :meth:`SpecWidget.setSpecArgs<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.setSpecArgs>`
+        """
         self.stimSpecPlot.setSpecArgs(*args, **kwargs)
         self.responseSpecPlot.setSpecArgs(*args, **kwargs)
 
     def updateSpec(self, *args, **kwargs):
+        """Updates the spectrogram given by kwarg *'plot'*, which is
+        either 'response' or (well actually anything). If no arguments 
+        are given, clears both spectrograms.
+
+        For other arguments, see: :meth:`SpecWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.updateData>`
+        """
         if args[0] == None:
             self.stimSpecPlot.clearImg()
             self.responseSpecPlot.clearImg()
@@ -97,6 +110,11 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
                 self.stimSpecPlot.updateData(*args, **kwargs)
 
     def updateSignal(self, *args, **kwargs):
+        """Updates the signal plots kwarg *'plot'*, which is
+        either 'response' or (well actually anything).
+
+        For other arguments, see: :meth:`FFTWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.FFTWidget.updateData>`
+        """
         p = kwargs.pop('plot')
         if p == 'response':
             self.responseSignalPlot.updateData(*args, **kwargs)
@@ -104,6 +122,11 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
             self.stimSignalPlot.updateData(*args, **kwargs)
 
     def updateFft(self, *args, **kwargs):
+        """Updates the FFT plots kwarg *'plot'*, which is
+        either 'response' or (well actually anything).
+
+        For other arguments, see: :meth:`FFTWidget.updateData<spikeylab.gui.plotting.pyqtgraph_widgets.FFTWidget.updateData>`
+        """
         p = kwargs.pop('plot')
         if p == 'response': 
             self.responseFftPlot.updateData(*args, **kwargs)
@@ -111,10 +134,17 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
             self.stimFftPlot.updateData(*args, **kwargs)
 
     def setXlimits(self, lims):
+        """Sets the X axis limits of the signal plots
+
+        :param lims: (min, max) of x axis, in same units as data
+        :type lims: (float, float)
+        """
         self.responseSignalPlot.setXlim(lims)
         self.stimSignalPlot.setXlim(lims)
 
     def autoRange(self):
+        """Automatically adjust the visiable region of the response
+        signal and FFT plots"""
         self.responseSignalPlot.autoRange()
         self.responseFftPlot.autoRange()
 

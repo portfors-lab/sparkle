@@ -3,6 +3,7 @@ from PyQt4 import QtGui
 from specgramform import Ui_SpecDialog
 
 class SpecDialog(QtGui.QDialog):
+    """Dialog for setting parameters for spectrogram calculation"""
     def __init__(self, parent=None, defaultVals=None):
         QtGui.QDialog.__init__(self,parent)
         self.ui = Ui_SpecDialog()
@@ -20,6 +21,13 @@ class SpecDialog(QtGui.QDialog):
         self.vals = defaultVals
 
     def values(self):
+        """Gets the parameter values
+
+        :returns: dict of inputs:
+        |        *'nfft'*: int -- length, in samples, of FFT chunks
+        |        *'window'*: str -- name of window to apply to FFT chunks
+        |        *'overlap'*: float -- percent overlap of windows 
+        """
         self.vals['nfft'] = self.ui.nfftSpnbx.value()
         self.vals['window'] = str(self.ui.windowCmbx.currentText()).lower()
         self.vals['overlap'] = self.ui.overlapSpnbx.value()

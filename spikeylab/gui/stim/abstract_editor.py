@@ -2,8 +2,13 @@ import sip
 from PyQt4 import QtGui, QtCore
 
 class AbstractEditorWidget(QtGui.QWidget):
+    """Abstract class to share class variables for all editor widgets,
+    mainly for the purpose of managing scaling changes across the GUI"""
     scales = [0.001, 1000] # time, frequency scaling factors
-    funit_labels = []
+    """Default values for time, frequency"""
+    # holds a reference to all frequency and time fields and labels
+    # so they can be updated if a scaling change occurs
+    funit_labels = [] 
     tunit_labels = []
     funit_fields = []
     tunit_fields = []
@@ -15,6 +20,7 @@ class AbstractEditorWidget(QtGui.QWidget):
 
     @staticmethod
     def purgeDeletedWidgets():
+        """Finds old references to unit labels and deletes them"""
         toremove = []
         for label in AbstractEditorWidget.funit_labels:
             if sip.isdeleted(label):
