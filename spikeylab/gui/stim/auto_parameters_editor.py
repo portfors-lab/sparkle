@@ -7,6 +7,7 @@ from spikeylab.gui.hidden_widget import WidgetHider
 from spikeylab.stim.reorder import order_function
 
 class Parametizer(QtGui.QWidget):
+    """Container widget for the auto parameters"""
     hintRequested = QtCore.pyqtSignal(str)
     visibilityChanged = QtCore.pyqtSignal(bool)
     titleChange = QtCore.pyqtSignal(str)
@@ -41,28 +42,41 @@ class Parametizer(QtGui.QWidget):
         self.setWindowTitle('Auto Parameters')
 
     def view(self):
+        """Gets the AutoParameter View
+
+        :returns: :class:`AutoParameterTableView<spikeylab.gui.stim.auto_parameter_view.AutoParameterTableView>`
+        """
         return self.paramList
 
     def setModel(self, model):
+        """sets the model for the auto parameters
+
+        :param model: The data stucture for this editor to provide access to
+        :type model: :class:`QAutoParameterModel<spikeylab.gui.stim.qauto_parameter_model.QAutoParameterModel>`
+        """
         self.paramList.setModel(model)
         model.hintRequested.connect(self.hintRequested)
         model.rowsInserted.connect(self.updateTitle)
         model.rowsRemoved.connect(self.updateTitle)
-        self.updateTitle(0,0,0)
+        self.updateTitle()
         
-    def updateTitle(self, a, b, c):
+    def updateTitle(self):
+        """Updates the Title of this widget according to how many parameters are currently in the model"""
         title = 'Auto Parameters ({})'.format(self.paramList.model().rowCount())
         self.titleChange.emit(title)
         self.setWindowTitle(title)
 
     def showEvent(self, event):
+        """When this widget is shown it has an effect of putting
+        other widgets in the parent widget into different editing modes, emits
+        signal to notify other widgets. Restores the previous selection the last
+        time this widget was visible"""
         selected = self.paramList.selectedIndexes()
         model = self.paramList.model()
 
-        # model.stimView().setMode(1)
         self.visibilityChanged.emit(1)
         if len(selected) > 0:
-            # model.updateSelectionModel(selected[0])
+            # select the correct components in the StimulusView
             self.paramList.parameterChanged.emit(model.selection(selected[0]))
             self.hintRequested.emit('Select parameter to edit. \
                 Parameter must have selected components in order to edit fields')
@@ -70,25 +84,24 @@ class Parametizer(QtGui.QWidget):
             # just select first item
             self.paramList.selectRow(0)
             self.paramList.parameterChanged.emit(model.selection(model.index(0,0)))
-            # model.updateSelectionModel(model.index(0,0))
+            self.hintRequested.emit('Select parameter to edit. \
+                Parameter must have selected components in order to edit fields')
         else:
             model.emptied.emit(True)
-            # model.stimView().setEnabled(False)
             self.hintRequested.emit('Drag to add parameter first')
 
     def hideEvent(self, event):
+        """notifies other widgets this editor is not longer visible"""
         self.visibilityChanged.emit(0)
-        # self.paramModel.stimView().setMode(0)
-        # change stimulus components to reflect auto-parameter start values
-        # self.paramModel.updateComponentStartVals()
         self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; right drag to move.')
 
     def closeEvent(self, event):
-        self.paramModel.stimView().setMode(0)
-        self.paramModel.updateComponentStartVals()
+        """Emits a signal to update start values on components"""
+        self.visibilityChanged.emit(0)
 
 
 class HidableParameterEditor(WidgetHider):
+    """A hidable container for the parameter widget. Wraps some of it methods"""
     def __init__(self, parent=None):
         self.parametizer = Parametizer()
         WidgetHider.__init__(self, self.parametizer, parent=parent)
@@ -100,6 +113,7 @@ class HidableParameterEditor(WidgetHider):
             setattr(self, m, getattr(self.parametizer, m))
 
     def updateTitle(self, title):
+        """Updates the title of this widget"""
         self.title.setText(title)
 
     def sizeHint(self):

@@ -1,6 +1,14 @@
 gui Package
 ===========
 
+:mod:`gui` Package
+------------------
+
+.. automodule:: spikeylab.gui
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`abstract_drag_view` Module
 --------------------------------
 
@@ -41,10 +49,26 @@ gui Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`data_review` Module
+-------------------------
+
+.. automodule:: spikeylab.gui.data_review
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`drag_label` Module
 ------------------------
 
 .. automodule:: spikeylab.gui.drag_label
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`hdftree` Module
+---------------------
+
+.. automodule:: spikeylab.gui.hdftree
     :members:
     :undoc-members:
     :show-inheritance:
@@ -85,6 +109,14 @@ gui Package
 -----------------------
 
 .. automodule:: spikeylab.gui.qprotocol
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`run` Module
+-----------------
+
+.. automodule:: spikeylab.gui.run
     :members:
     :undoc-members:
     :show-inheritance:

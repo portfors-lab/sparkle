@@ -17,6 +17,14 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`abstract_stim_editor` Module
+----------------------------------
+
+.. automodule:: spikeylab.gui.stim.abstract_stim_editor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`auto_parameter_view` Module
 ---------------------------------
 

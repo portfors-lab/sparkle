@@ -1,6 +1,22 @@
 components Package
 ==================
 
+:mod:`order_dlg` Module
+-----------------------
+
+.. automodule:: spikeylab.gui.stim.components.order_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`qcomponents` Module
+-------------------------
+
+.. automodule:: spikeylab.gui.stim.components.qcomponents
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`silence_parameters` Module
 --------------------------------
 

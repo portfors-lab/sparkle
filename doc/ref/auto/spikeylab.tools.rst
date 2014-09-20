@@ -17,6 +17,14 @@ tools Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`doc` Module
+-----------------
+
+.. automodule:: spikeylab.tools.doc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`exception_test` Module
 ----------------------------
 
@@ -45,6 +53,14 @@ tools Package
 ----------------------
 
 .. automodule:: spikeylab.tools.qsignals
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`qtdoc` Module
+-------------------
+
+.. automodule:: spikeylab.tools.qtdoc
     :members:
     :undoc-members:
     :show-inheritance:

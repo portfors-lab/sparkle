@@ -158,7 +158,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         self.horizontalHeader().setMovable(True)
 
     def paintEvent(self, event):
-        """Adds cursor line for view if drag active. 
+        """Adds cursor line for view if drag active.  Passes event to superclass
         see :qtdoc:`qtdocs<qabstractscrollarea.paintEvent>`"""
         super(ProtocolView, self).paintEvent(event)
 

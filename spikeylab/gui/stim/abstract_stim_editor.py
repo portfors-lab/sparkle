@@ -6,7 +6,7 @@ from PyQt4 import QtGui
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 
 class AbstractStimulusWidget(AbstractEditorWidget):
-
+    """Abstract class for editors for :class:`QStimulusModels<spikeylab.gui.stim.qstimulus.QStimulusModel>`"""
     saveFolder = os.path.expanduser('~')
 
     def saveStimulus(self):
@@ -28,10 +28,15 @@ class AbstractStimulusWidget(AbstractEditorWidget):
             print 'stim not saved'
 
     def model(self):
-        """Return the model for which this editor is acting on """
+        """Returns the model for which this editor is acting on
+
+        Must be implemented by subclass
+        """
         raise NotImplementedError
 
     def closeEvent(self, event):
+        """Verifies the stimulus before closing, warns user with a
+        dialog if there are any problems"""
         self.ok.setText("Checking...")
         QtGui.QApplication.processEvents()
         self.model().cleanComponents()

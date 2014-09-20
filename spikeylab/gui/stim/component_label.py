@@ -5,6 +5,7 @@ from spikeylab.gui.trashcan import TrashWidget
 from spikeylab.gui.drag_label import DragLabel
 
 class ComponentTemplateTable(QtGui.QWidget):
+    """A container filled with draggable labels that drop stimulus components"""
     def __init__(self, parent=None):
         super(ComponentTemplateTable, self).__init__(parent)
 
@@ -27,9 +28,19 @@ class ComponentTemplateTable(QtGui.QWidget):
         self.setLayout(layout)
 
     def trash(self):
+        """Returns the trash widget for this container
+
+        :returns: :class:`TrashWidget<spikeylab.gui.trashcan.TrashWidget>`
+        """
         return self.trashLbl
 
     def getLabelByName(self, name):
+        """Gets a label widget by it component name
+
+        :param name: name of the AbstractStimulusComponent which this label is named after
+        :type name: str
+        :returns: :class:`DragLabel<spikeylab.gui.drag_label.DragLabel>`
+        """
         name = name.lower()
         if name in self.stimLabels:
             return self.stimLabels[name]

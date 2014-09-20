@@ -16,12 +16,28 @@ class ComponentsDetailWidget(QtGui.QWidget):
         self.setFont(font)
 
     def setDisplayTable(self, table):
+        """Sets the table that determines what attributes to display
+
+        :param table: keys of stimulus names, and values of a list of attribute names to display
+        :type table: dict
+        """
         self.displayTable = table
 
     def setDefaultAttributes(self, defaults):
+        """Sets the default attributes to display, if a stimulus type is not in 
+        the display table
+
+        :param defaults: names of attributes to show
+        :type defaults: list<str>
+        """
         self.defaultAttributes = defaults
 
     def setDoc(self, docs):
+        """Sets the documentation to display
+
+        :param docs: a list of the stimuli doc, which are dicts
+        :type docs: list<dict>
+        """
         # sort stim by start time
         docs = sorted(docs, key=lambda k: k['start_s'])
 
@@ -36,9 +52,11 @@ class ComponentsDetailWidget(QtGui.QWidget):
             self.lyt.addWidget(ComponentDetailFrame(doc, display_attributes))
 
     def clearDoc(self):
+        """Clears the widget"""
         clearLayout(self.lyt)
 
 class ComponentDetailFrame(QtGui.QFrame):
+    """Displays the given *displayAttributes* in a stimulus component's documentation *comp_doc*"""
     def __init__(self, comp_doc, displayAttributes, parent=None):
         QtGui.QFrame.__init__(self)
 
@@ -65,6 +83,7 @@ class ComponentDetailFrame(QtGui.QFrame):
         self.setLayout(glay)
 
 class ComponentsDetailSelector(QtGui.QWidget):
+    """Container for ComponentAttributerCheckers"""
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self)
 
@@ -72,12 +91,22 @@ class ComponentsDetailSelector(QtGui.QWidget):
         self.setLayout(layout)
 
     def setComponents(self, components):
+        """Clears and sets the components contained in this widget
+
+        :param components: list of documentation for subclasses of AbStractStimulusComponents
+        :type Components: list<dict>
+        """
         layout = self.layout()
         for comp in components:
             attrWidget = ComponentAttributerChecker(comp)
             layout.addWidget(attrWidget)
 
     def setCheckedDetails(self, checked):
+        """Sets which components are checked
+
+        :param checked: dictionary of stimtype:list<attribute names> for which components and their attributes should be checked
+        :type checked: dict
+        """
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
@@ -85,6 +114,10 @@ class ComponentsDetailSelector(QtGui.QWidget):
                 w.setChecked(checked[w.stimType])
 
     def getCheckedDetails(self):
+        """Gets the currently checked components and checked attributes
+
+        :returns: dict -- of members with stimtype:list<attribute names>
+        """
         attrs = {}
         layout = self.layout()
         for i in range(layout.count()):
@@ -93,6 +126,7 @@ class ComponentsDetailSelector(QtGui.QWidget):
         return attrs
 
 class ComponentAttributerChecker(QtGui.QFrame):
+    """Allows a user to select attributes from a components's doc"""
     def __init__(self, compAttributes, parent=None):
         QtGui.QFrame.__init__(self)
 
@@ -114,6 +148,11 @@ class ComponentAttributerChecker(QtGui.QFrame):
 
 
     def setChecked(self, tocheck):
+        """Sets the attributes *tocheck* as checked
+
+        :param tocheck: attributes names to check
+        :type tocheck: list<str>
+        """
         layout = self.layout()
         for i in range(layout.count()):
             w = layout.itemAt(i).widget()
@@ -121,6 +160,10 @@ class ComponentAttributerChecker(QtGui.QFrame):
                 w.setChecked(True)
 
     def getChecked(self):
+        """Gets the checked attributes
+
+        :returns: list<str> -- checked attribute names
+        """
         attrs = []
         layout = self.layout()
         for i in range(layout.count()):
@@ -130,6 +173,7 @@ class ComponentAttributerChecker(QtGui.QFrame):
         return attrs
 
 def clearLayout(layout):
+    """Clears widgets from the given *layout*"""
     if layout is not None:
         while layout.count():
             item = layout.takeAt(0)
