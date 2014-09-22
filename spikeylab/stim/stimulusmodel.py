@@ -51,6 +51,8 @@ class StimulusModel():
         self._userTag = '' # user enter tag
         self._stimType = None
 
+        self._calibration_fs = None
+
     def setUserTag(self, tag):
         """Sets a string, significant to the user"""
         self._userTag = tag
@@ -112,6 +114,9 @@ class StimulusModel():
                 # mutable type so will affect data structure persistently
                 StimulusModel.kernelCache[fs] = self.impulseResponse
 
+            # store this so we can quickly check if a calibration needs to be re-done    
+            self._calibration_fs = fs
+            
             # calculate for the default samplerate, if not already, since
             # we are very likely to need it, and it's better to have this done
             # up front, than cause lag in the UI later
@@ -129,7 +134,8 @@ class StimulusModel():
     def updateCalibration(self):
         """Updates the current calibration according to intenal values. For example, if the stimulus samplerate changes
         the calibration needs to be recalculated."""
-        self.setCalibration(self._attenuationVector, self._calFrequencies, self._calFrange)
+        if self.samplerate() != self._calibration_fs:
+            self.setCalibration(self._attenuationVector, self._calFrequencies, self._calFrange)
 
     @staticmethod
     def clearCache():

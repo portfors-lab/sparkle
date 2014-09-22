@@ -67,7 +67,6 @@ class AbstractDragView():
 
         # get the item at the drug index
         selected = self.model().data(index, QtCore.Qt.UserRole+1)
-
         if selected is None:
             return
             

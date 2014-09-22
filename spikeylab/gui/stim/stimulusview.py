@@ -409,8 +409,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 class ComponentDelegate(QtGui.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
-        component = index.internalPointer()
-
+        component = index.model().data(index, role=QtCore.Qt.UserRole)
         painter.drawRect(option.rect)
 
         component.paint(painter, option.rect, option.palette)
@@ -449,7 +448,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         """Saves the input from the editor widget to the model component"""
         editor.saveToObject()
         # need to save over component object in stimulus model
-        model.setData(index, editor.component())
+        model.dataEdited()
 
     def updateEditorGeometry(self, editor, option, index):
         # center the widget

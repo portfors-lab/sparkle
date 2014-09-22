@@ -266,13 +266,10 @@ class TestMainUI():
         qtbot.keypress('enter')
         QtTest.QTest.qWait(ALLOW)
 
-        tone = stimModel.data(stimModel.index(0,0))
+        tone = stimModel.data(stimModel.index(0,0), role=QtCore.Qt.UserRole+1)
         assert tone.duration() == val*self.form.tscale
 
         qtbot.click(stimEditor.ui.okBtn)
-
-        # make sure that the underlying stim class is consistent
-        assert tone.duration() == tone.baseStim().duration()
 
     def test_abort_protocol(self):
 
@@ -289,6 +286,22 @@ class TestMainUI():
         
         while t.is_alive():
             QtTest.QTest.qWait(500)
+
+    def test_reorder_protocol(self):
+        # I was recieving a pickling error from wrapping the 
+        # stimulus components
+        self.form.ui.tabGroup.setCurrentIndex(1)
+        stimEditor = self.add_builder_tone()
+        qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
+        self.setup_tc()
+
+        # now drag the builder to the top
+        pv = self.form.ui.protocolView
+        qtbot.drag_view(pv, (0,1), (1,1))
+        tests = pv.model().stimulusList()
+        print tests[1].stimType()
+        assert tests[1].stimType() == 'Custom'
 
     def add_builder_tone(self):
         pv = self.form.ui.protocolView
@@ -335,7 +348,8 @@ class TestMainUI():
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "OFF"
 
-    def protocol_run(self, components, autoparams={}):
+    def setup_builder_components(self, components):
+
         self.form.ui.tabGroup.setCurrentIndex(1)
 
         QtGui.QApplication.processEvents()
@@ -366,6 +380,11 @@ class TestMainUI():
         if len(components) == 2:
             qtbot.reorder_view(stimEditor.ui.trackview, (1,0), (0,1))
             assert stimEditor.ui.trackview.model().duration() == sum([x[1]['duration'] for x in components])/1000.
+
+        return stimEditor
+
+    def protocol_run(self, components, autoparams={}):
+        stimEditor = self.setup_builder_components(components)
 
         qtbot.click(stimEditor.ui.parametizer.hideBtn)
         QtGui.QApplication.processEvents()

@@ -13,7 +13,7 @@ from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.stim.stimulusmodel import StimulusModel
-from spikeylab.gui.stim.components.qcomponents import wrapComponent, unwrapComponent
+from spikeylab.gui.stim.components.qcomponents import wrapComponent
 
 
 src_dir = get_src_directory()
@@ -35,14 +35,6 @@ class QStimulusModel(QtCore.QAbstractItemModel):
             self.setEditor(get_stimulus_editor(stim.stimType()))
         else:
             self.editor = None
-
-        # Go through and wrap components, if not already wrapped,
-        # so that they may be painted and have GUI editors
-        for row in range(stim.rowCount()):
-            for col in range(stim.columnCount(row)):
-                comp = stim.component(row, col)
-                if not hasattr(comp, 'paint'):
-                    stim.overwriteComponent(wrapComponent(comp), row, col)
 
     def setAutoParams(self, params):
         """Sets the QAutoParameterModel for this stimulus"""
@@ -110,9 +102,8 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         elif role >= QtCore.Qt.UserRole:  #return the whole python object
             if self._stim.columnCountForRow(index.row()) > index.column():
                 component = self._stim.component(index.row(),index.column())
-                if role == QtCore.Qt.UserRole +1:
-                    # wrapped class is not serializable
-                    component = unwrapComponent(component)
+                if role == QtCore.Qt.UserRole:
+                    component = wrapComponent(component)
             else:
                 component = None
             return component
@@ -135,7 +126,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
     def insertComponent(self, index, comp):
         """Inserts new component *comp* at index"""
         # new component needs to be wrapped
-        self._stim.insertComponent(wrapComponent(comp), index.row(), index.column())
+        self._stim.insertComponent(comp, index.row(), index.column())
 
         if self.columnCountForRow(-1) > 0:
             self.beginInsertRows(QtCore.QModelIndex(), self._stim.rowCount(), 
@@ -174,6 +165,10 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         self._stim.overwriteComponent(value, index.row(), index.column())
 
         self.samplerateChanged.emit(self.samplerate())
+
+    def dataEdited(self):
+        self.samplerateChanged.emit(self.samplerate())
+        self._stim.updateCalibration()
 
     def flags(self, index):
         """"Determines interaction allowed with table cells.

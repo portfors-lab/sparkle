@@ -26,29 +26,18 @@ def wrapComponent(comp):
     :type comp: subclass of AbstractStimulusComponent
     :returns: sublass of AbstractStimulusComponent and QStimulusComponent
     """
+    # if already wrapped, return object
+    if hasattr(comp, 'paint'):
+        return comp
     # to avoid manually creating a mapping, get all classes in 
     # this module, assume they are the class name appended with Q
     current_module = sys.modules[__name__]
     module_classes = {name[1:]: obj for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ == __name__}
     # print __name__, module_classes
     stimclass = comp.__class__.__name__
-    if stimclass in module_classes:
-        return module_classes[stimclass](comp)
-    else:
-        return QStimulusComponent(comp)
+    qclass = module_classes.get(stimclass, QStimulusComponent)
+    return qclass(comp)
 
-def unwrapComponent(comp):
-    """Gets back the original AbstractStimulusComponent, passes through
-    if already unwrapped.
-
-    :param: component to unwrap
-    :type: QStimulusComponent
-    :returns: sub class of AbstractStimulusComponent
-    """
-    if hasattr(comp, 'baseStim'):
-        return comp.baseStim()
-    else:
-        return comp
 
 class QStimulusComponent(object):
     """Wraps around a stimulus component by reassigning this class as a
@@ -61,10 +50,6 @@ class QStimulusComponent(object):
                               (self.__class__, basestim.__class__),
                               {})
         self.__dict__ = basestim.__dict__
-        self._base = basestim
-
-    def baseStim(self):
-        return self._base
         
     def paint(self, painter, rect, palette):
         """Draws a generic visual representation for this component"""
