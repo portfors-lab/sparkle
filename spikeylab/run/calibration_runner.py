@@ -189,8 +189,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
 
         self.player = FinitePlayer()
 
-        self.stimulus = StimulusModel()
-        CCFactory.init_stim(self.stimulus)
+        self.stimulus = CCFactory.create()
 
         self.protocol_model.insert(self.stimulus, 0)
 

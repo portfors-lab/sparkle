@@ -3,7 +3,6 @@ import spikeylab
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.gui.stim.factory import StimFactory
-from spikeylab.stim.stimulusmodel import StimulusModel
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.gui.stim.qstimulus import QStimulusModel
@@ -178,9 +177,8 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         if isinstance(item, StimFactory):
             factory = item
             # create new stimulus then!
-            stim = StimulusModel()
-            cancel = factory.init_stim(stim)
-            if not cancel:
+            stim = factory.create()
+            if stim is not None:
                 self.model().insertTest(stim, location)
         elif event.source() == self:
             self.model().insertTest(item, location)
@@ -247,6 +245,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
 if __name__ == '__main__': # pragma: no cover
     
     import sys, os
+    from spikeylab.stim.stimulusmodel import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)
 

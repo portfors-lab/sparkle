@@ -101,9 +101,8 @@ class TestQStimModel():
         assert clone.traceCount() == model.traceCount()
 
     def test_template_tuning_curve(self):
-        data = StimulusModel()
         tcf = TCFactory()
-        tcf.init_stim(data)
+        data = tcf.create()
         model = QStimulusModel(data)
         model.setEditor(tcf.editor())
 

@@ -432,9 +432,7 @@ class TestAcquisitionManager():
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        tc = StimulusModel()
-        TCFactory().init_stim(tc)
-        nreps = tc.repCount()
+        tc = TCFactory().create()
         ntraces = tc.traceCount()
 
         manager.protocol_model().insert(tc,0)

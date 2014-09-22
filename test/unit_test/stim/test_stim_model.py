@@ -330,9 +330,8 @@ class TestStimModel():
         assert clone.repCount() == model.repCount()
 
     def test_template_tuning_curve(self):
-        model = StimulusModel()
         tcf = TCFactory()
-        tcf.init_stim(model)
+        model = tcf.create()
         model.setReferenceVoltage(100, 0.1)
         model.setRepCount(7)
 
@@ -356,9 +355,8 @@ class TestStimModel():
             assert_equal(docs0[i], docs1[i])
 
     def test_calibration_template(self):
-        model = StimulusModel()
         ccf = CCFactory()
-        ccf.init_stim(model)
+        model = ccf.create()
         model.setReferenceVoltage(100, 0.1)
         model.setRepCount(7)
 

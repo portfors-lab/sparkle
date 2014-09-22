@@ -12,6 +12,7 @@ from spikeylab.gui.stim.tceditor import TuningCurveEditor
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim import get_stimulus_editor
+from spikeylab.stim.stimulusmodel import StimulusModel
 
 class StimFactory():
     """Abstract Class for all factories to re-implement"""
@@ -25,10 +26,10 @@ class StimFactory():
         """
         raise NotImplementedError
 
-    def init_stim(self, stim):
-        """Initializes *stim*
+    def create(self):
+        """create a new stimulus model object
 
-        :param stim: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
+        :returns: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
         """
         raise NotImplementedError
 
@@ -38,8 +39,10 @@ class BuilderFactory(StimFactory):
     def editor(self):
         return StimulusEditor
 
-    def init_stim(self, stim):
+    def create(self):
+        stim = StimulusModel()
         stim.setStimType(StimulusEditor.name)
+        return stim
 
 class TCFactory(StimFactory):
     """Intializes stimulus to have a single tone with frequency
@@ -49,11 +52,9 @@ class TCFactory(StimFactory):
         return TuningCurveEditor
 
     @staticmethod
-    def init_stim(stim):
-        """
-        takes and inital empty stim and populates 
-        it with a default tuning curve
-        """
+    def create():
+        stim = StimulusModel()
+
         tone = PureTone()
         tone.setDuration(0.1)
         stim.insertComponent(tone)
@@ -68,6 +69,7 @@ class TCFactory(StimFactory):
         tuning_curve.setParamValue(1, parameter='intensity', start=60, stop=70, step=10)
         
         stim.setStimType(TuningCurveEditor.name)
+        return stim
 
 class CCFactory(StimFactory):
     """Intializes stimulus to have a single tone with frequency
@@ -77,11 +79,8 @@ class CCFactory(StimFactory):
         return TuningCurveEditor
 
     @staticmethod
-    def init_stim(stim):
-        """
-        takes and inital empty stim and populates 
-        it with a default tuning curve
-        """
+    def create():
+        stim = StimulusModel()
         tone = PureTone()
         tone.setDuration(0.1)
         stim.insertComponent(tone)
@@ -96,6 +95,7 @@ class CCFactory(StimFactory):
         tuning_curve.setParamValue(1, parameter='intensity', start=90, stop=100, step=10)
 
         stim.setStimType(TuningCurveEditor.name)
+        return stim
 
 class TemplateFactory(StimFactory):
     """Initializes stimulus to load values and editor type that
@@ -106,7 +106,8 @@ class TemplateFactory(StimFactory):
     def editor(self):
         return self._editor
 
-    def init_stim(self, stim):
+    def create(self):
+        stim = StimulusModel()
         # load saved settings into stimulus
         fname = QtGui.QFileDialog.getOpenFileName(None, u"Load Stimulus from File", 
                                     self.save_folder, "Stimulus Settings (*.json)")
@@ -116,4 +117,5 @@ class TemplateFactory(StimFactory):
             stim.loadFromTemplate(state, stim)
             self._editor = get_stimulus_editor(stim.stimType())
         else:
-            return 1
+            return None
+        return stim
