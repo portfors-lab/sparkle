@@ -5,6 +5,8 @@ from incrementer_form import Ui_IncrementInput
 from spikeylab.resources.icons import arrowup, arrowdown
 
 class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
+    """Input widget with buttons to increment the value in the 
+    field by 1,5, or 10"""
     numtype = float
     minimum = 0
     maximum = 200000
@@ -59,6 +61,8 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
             self.valueLnedt.setText(str(int(val)))
 
     def checkInput(self):
+        """Checks that that the input is not empty, changes
+        to 0"""
         if self.valueLnedt.text() == '':
             self.setValue(0)
 

@@ -9,6 +9,7 @@ BLACK = QtGui.QPalette()
 BLACK.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text,QtCore.Qt.black)
 
 class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
+    """Editor Widget for tuning curve StimulusModel"""
     name = 'Tuning Curve' # name that show up in protocol list
     def __init__(self, parent=None):
         super(TuningCurveEditor, self).__init__(parent)
@@ -24,6 +25,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.ok = self.ui.okBtn
 
     def setStimulusModel(self, model):
+        """Sets the StimulusModel for this editor"""
         self.stimModel = model
         self.parameterModel = model.autoParams()
 
@@ -55,21 +57,28 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.dbmapper.setCurrentIndex(1)
 
     def setStimDuration(self):
+        """Sets the duration of the StimulusModel from values pulled from
+        this widget"""
         duration = self.ui.durSpnbx.value()
         info = self.tone.auto_details()
         self.tone.setDuration(duration*info['duration']['multiplier'])
         # self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole).setDuration(duration)
 
     def setStimReps(self):
+        """Sets the reps of the StimulusModel from values pulled from
+        this widget"""
         reps = self.ui.nrepsSpnbx.value()
         self.stimModel.setRepCount(reps)
 
     def setStimRisefall(self):
+        """Sets the Risefall of the StimulusModel's tone from values pulled from
+        this widget"""
         rf = self.ui.risefallSpnbx.value()
         info = self.tone.auto_details()
         self.tone.setRisefall(rf*info['risefall']['multiplier'])
 
     def model(self):
+        """Gets this editor's StimulusModel"""
         return self.stimModel
 
     def updateTextColor(self, txt):
@@ -80,6 +89,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
             w.setPalette(BLACK)
 
     def durationInputWidget(self):
+        """Gets the input widget that handles duration"""
         return self.ui.durSpnbx
 
 if __name__ == "__main__":

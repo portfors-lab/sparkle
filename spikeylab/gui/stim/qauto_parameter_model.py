@@ -8,6 +8,8 @@ from spikeylab.stim.auto_parameter_model import AutoParameterModel
 ERRCELL = QtGui.QColor('firebrick')
 
 class QAutoParameterModel(QtCore.QAbstractTableModel):
+    """PyQt wrapper for AutoParameterModel, for it to be able to 
+    interface with the :class:`AutoParameterTableView<spikeylab.gui.stim.auto_parameter_view.AutoParameterTableView>`"""
     SelectionModelRole = 34
     emptied = QtCore.pyqtSignal(bool)
     hintRequested = QtCore.pyqtSignal(str)
@@ -18,22 +20,43 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         self._selectionmap = {}
 
     def headerData(self, section, orientation, role):
+        """Gets the Header for the columns in the table
+
+        Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+
+        :param section: column of header to return
+        :type section: int
+        """
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.model.header(section)
 
     def rowCount(self, parent=QtCore.QModelIndex()):
+        """Determines the numbers of rows the view will draw
+
+        Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         return self.model.nrows()
 
     def columnCount(self, parent=QtCore.QModelIndex()):
+        """Determines the numbers of columns the view will draw
+
+        Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         return self.model.ncols()
 
     def clearParameters(self):
+        """Removes all parameters from model"""
         self.beginRemoveRows(QtCore.QModelIndex(), 0, self.rowCount())
         self.model.clear_parameters()
         self.endRemoveRows()
 
     def data(self, index, role=QtCore.Qt.UserRole):
+        """Used by the view to determine data to present
+
+        See :qtdoc:`QAbstractItemModel<QAbstractItemModel.data>`, 
+        and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             row = index.row()
             field = self.model.header(index.column())
@@ -64,6 +87,11 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             return self.model.selection(self.model.param(index.row()))
 
     def setData(self, index, value, role=QtCore.Qt.UserRole):
+        """Sets data at *index* to *value* in underlying data structure
+
+        See :qtdoc:`QAbstractItemModel<QAbstractItemModel.setData>`, 
+        and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         if role == QtCore.Qt.EditRole:
             if isinstance(value, QtCore.QVariant):
                 value = value.toPyObject()
@@ -80,17 +108,31 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         return True
 
     def checkValidCell(self, index):
+        """Asks the model if the value at *index* is valid
+
+        See :meth:`isFieldValid<spikeylab.stim.auto_parameter_model.AutoParameterModel.isFieldValid>`
+        """
         col = index.column()
         row = index.row()
         return self.model.isFieldValid(row, self.model.header(col))
 
     def findFileParam(self, comp):
+        """wrapper for :meth:`findFileParam<spikeylab.stim.auto_parameter_model.AutoParameterModel.findFileParam>`"""
         return self.model.findFileParam(comp)
 
     def setParameterList(self, paramlist):
+        """clears parameter list and assigns *paramlist*"""
         self._parameters = paramlist
 
     def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
+        """Inserts new parameters and emits an emptied False signal
+
+        :param position: row location to insert new parameter
+        :type position: int
+        :param rows: number of new parameters to insert
+        :type rows: int
+        :param parent: Required by QAbstractItemModel, can be safely ignored
+        """
         self.beginInsertRows(parent, position, position + rows - 1)
         for i in range(rows):
             self.model.insertRow(position)
@@ -101,6 +143,14 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         return True
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
+        """Removes parameters from the model. Emits and emptied True signal, if there are no parameters left.
+
+        :param position: row location of parameters to remove
+        :type position: int
+        :param rows: number of parameters to remove
+        :type rows: int
+        :param parent: Required by QAbstractItemModel, can be safely ignored
+        """
         self.beginRemoveRows(parent, position, position + rows - 1)
         for i in range(rows):
             self.model.removeRow(position)
@@ -112,11 +162,11 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         return True
 
     def removeItem(self, index):
+        """Removes the parameters at *index*"""
         self.removeRows(index.row(), 1)
 
     def insertItem(self, index, item):
-        """For reorder only, item must already have selectionModel in
-        for its id"""
+        """Inserts parameter *item* at index"""
         row = index.row()
         self.beginInsertRows(QtCore.QModelIndex(), row, row)
         self.model.insertRow(row)
@@ -124,6 +174,11 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         self.model.overwriteParam(index.row(), item)
 
     def flags(self, index):
+        """"Determines interaction allowed with table cells.
+
+        See :qtdoc:`QAbstractItemModel<QAbstractItemModel.flags>`, 
+        and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         if index.isValid():
             if self.model.editableRow(index.row()) and index.column() < 4:
                 return QtCore.Qt.ItemIsDragEnabled | \
@@ -138,19 +193,27 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         return QtCore.Qt.MoveAction
 
     def toggleSelection(self, index, comp):
+        """Toggles a component in or out of the currently 
+        selected parameter's compnents list"""
         self.model.toggleSelection(index.row(), comp)
 
     def selection(self, index):
-        """
-        Return the selected Indexes for the given parameter
-        """
+        """Returns the selected Indexes of components for 
+        the given parameter"""
         return self.model.selection(index.row())
 
     def selectedParameterTypes(self, index):
+        """Returns a list of the parameter types valid as
+        options for the parameter field for parameter at *index*"""
         return self.model.selectedParameterTypes(index.row())
 
     def fileParameter(self, comp):
+        """Returns the row which comp is found in
+
+        wrapper for :meth:`findFileParam<spikeylab.stim.auto_parameter_model.AutoParameterModel.findFileParam>`
+        """
         return self.model.fileParameter(comp)
 
     def verify(self):
+        """Wrapper for :meth:`verify<spikeylab.stim.auto_parameter_model.AutoParameterModel.verify>`"""
         return self.model.verify()

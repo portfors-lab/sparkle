@@ -26,7 +26,7 @@ class StimulusEditor(AbstractStimulusWidget):
         self.ok = self.ui.okBtn
 
     def setStimulusModel(self, model):
-        """Set the QStimulusModel for the StimulusView"""
+        """Sets the QStimulusModel *model* for the StimulusView"""
         self.ui.trackview.setModel(model)
         self.ui.nrepsSpnbx.setValue(model.repCount())
 
@@ -45,9 +45,11 @@ class StimulusEditor(AbstractStimulusWidget):
         self.updateTraceCount()
 
     def setRepCount(self, count):
+        """Sets the repetition *count* for the stimulus model"""
         self.ui.trackview.model().setRepCount(count)
 
     def updateTraceCount(self):
+        """Updates the trace count label with the data from the model"""
         self.ui.ntracesLbl.setNum(self.ui.trackview.model().traceCount())
 
     def preview(self):
@@ -70,6 +72,7 @@ class StimulusEditor(AbstractStimulusWidget):
         return self.ui.trackview.model()
 
     def setHint(self, message):
+        """Sets the hint text to *message*"""
         self.ui.hintTxedt.setText(message)
 
 

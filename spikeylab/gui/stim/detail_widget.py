@@ -10,12 +10,15 @@ class StimDetailWidget(QtGui.QWidget):
         self.ui.setupUi(self)
 
     def setTestNum(self, num):
+        """Sets the Test number to display"""
         self.ui.testNum.setNum(num+1)
 
     def setTraceNum(self, num):
+        """Sets the Trace number to display"""
         self.ui.traceNum.setNum(num+1)
 
     def setRepNum(self, num):
+        """Sets the Repetition number to display"""
         self.ui.repNum.setNum(num+1)
 
     def setDoc(self, doc):

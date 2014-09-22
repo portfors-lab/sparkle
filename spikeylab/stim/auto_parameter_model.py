@@ -227,6 +227,11 @@ class AutoParameterModel():
         return steps
 
     def _selectionParameters(self, param):
+        """Gets a list of the intersection of the editable properties in the parameteter *param*'s
+        component selection. E.g. ['frequency', 'intensity']
+
+        :returns: list<str> -- a list of AbstractStimulusComponent attribute names
+        """
         components = param['selection']
         if len(components) == 0:
             return []
@@ -250,6 +255,8 @@ class AutoParameterModel():
                     component.set(param['parameter'], param['start'])
 
     def fileParameter(self, comp):
+        """Returns the row which component *comp* can be found in the 
+        selections of, and is also a file parameter"""
         for row in range(self.nrows()):
             p = self._parameters[row]
             if p['parameter'] == 'file':

@@ -24,10 +24,7 @@ DEFAULT_SAMPLERATE = config['default_genrate']
 MAXV = config['max_voltage']
 
 class QStimulusModel(QtCore.QAbstractItemModel):
-    """
-    Model to represent any stimulus the system will present. 
-    Holds all relevant parameters
-    """
+    """Qt wrapper for :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`"""
     samplerateChanged = QtCore.pyqtSignal(int)
     def __init__(self, stim, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
@@ -48,39 +45,60 @@ class QStimulusModel(QtCore.QAbstractItemModel):
                     stim.overwriteComponent(wrapComponent(comp), row, col)
 
     def setAutoParams(self, params):
+        """Sets the QAutoParameterModel for this stimulus"""
         self._autoParams = params
 
     def autoParams(self):
+        """Gets the QAutoParameterModel for this stimulus"""
         return self._autoParams
 
     def headerData(self, section, orientation, role):
+        """Returns empty string. Required by view see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`"""
         return ''
 
     def rowCount(self, parent=QtCore.QModelIndex()):
+        """Determines the numbers of rows the view will draw
+
+        Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         return self._stim.rowCount()
 
     def columnCount(self, parent=QtCore.QModelIndex()):
+        """Determines the numbers of columns the view will draw
+
+        Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         if parent.isValid():
             return self._stim.columnCount(parent.row())
         else:
             return self._stim.columnCount()
 
     def columnCountForRow(self, row):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.columnCountForRow>`"""
         return self._stim.columnCountForRow(row)
 
     def componentCount(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.componentCount>`"""
         return self._stim.componentCount()
 
     def repCount(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.repCount>`"""
         return self._stim.repCount()
 
     def setRepCount(self, count):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setRepCount>`"""
         self._stim.setRepCount(count)
 
     def traceCount(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.traceCount>`"""
         return self._stim.traceCount()
 
     def data(self, index, role=QtCore.Qt.UserRole):
+        """Used by the view to determine data to present
+
+        See :qtdoc:`QAbstractItemModel<QAbstractItemModel.data>`, 
+        and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         if not index.isValid():
             return None
         if role == QtCore.Qt.DisplayRole:
@@ -99,31 +117,23 @@ class QStimulusModel(QtCore.QAbstractItemModel):
                 component = None
             return component
 
-    def printStimulus(self):
-        """This is for purposes of documenting what was presented"""
-
     def index(self, row, col, parent=QtCore.QModelIndex()):
+        """Creates an index. An item must exist for the given *row* 
+        and *col*
+
+        :returns: :qtdoc:`QModelIndex`
+        """ 
         if row < self._stim.rowCount() and col < self._stim.columnCountForRow(row):
             component = self._stim.component(row, col)
             return self.createIndex(row, col, component)
         else:
             return QtCore.QModelIndex()
 
-    # def parentForRow(self, row):
-    #     # get the whole row
-    #     return self.createIndex(row, -1, self._segments[row])
-
     def parent(self, index):
         return QtCore.QModelIndex()
         
-        # if index.column() == -1:
-        #     return QtCore.QModelIndex()
-        # else:
-        #     print 'index', index.row(), index.column()
-        #     raise Exception("No parents allowed!")
-            # return self.createIndex(index.row(), -1, self._segments[index.row()])
-
     def insertComponent(self, index, comp):
+        """Inserts new component *comp* at index"""
         # new component needs to be wrapped
         self._stim.insertComponent(wrapComponent(comp), index.row(), index.column())
 
@@ -136,11 +146,9 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         self.samplerateChanged.emit(self._stim.samplerate())
 
     def removeComponent(self, index):
-        # parent = self.parentForRow(rowcol[0])
-
-        # self.beginRemoveRows(parent, rowcol[1], rowcol[1])
+        """Removes the component at *index* from the model. If the two last
+        rows are now empty, trims the last row."""
         self._stim.removeComponent(index.row(), index.column())
-        # self.endRemoveRows()
 
         if self.columnCountForRow(-2) == 0 and self.columnCountForRow(-1) == 0:
             self.beginRemoveRows(QtCore.QModelIndex(), self._stim.rowCount()-1, 
@@ -152,27 +160,36 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         self.samplerateChanged.emit(self._stim.samplerate())
 
     def removeItem(self, index):
+        """Alias for removeComponent"""
         self._stim.removeComponent(index.row(), index.column())
 
     def indexByComponent(self, component):
-        """return a QModelIndex for the given component, or None if
+        """return a QModelIndex for the given *component*, or None if
         it is not in the model"""
         return self.index(*self._stim.indexByComponent(component))
 
     def setData(self, index, value, role=QtCore.Qt.UserRole):
+        """Sets the component at *index* to *value*"""
         # item must already exist at provided index
         self._stim.overwriteComponent(value, index.row(), index.column())
 
         self.samplerateChanged.emit(self.samplerate())
 
     def flags(self, index):
+        """"Determines interaction allowed with table cells.
+
+        See :qtdoc:`QAbstractItemModel<QAbstractItemModel.flags>`, 
+        and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
+        """
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def setEditor(self, editor):
+        """Sets the editor class for this Stimulus"""
         self.editor = editor
         self._stim.setStimType(editor.name)
 
     def showEditor(self):
+        """Creates and shows an editor for this Stimulus"""
         if self.editor is not None:
             editor = self.editor()
             editor.setStimulusModel(self)
@@ -182,48 +199,65 @@ class QStimulusModel(QtCore.QAbstractItemModel):
             logger.warning('Erm, no editor available :(')
 
     def signal(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.signal>`"""
         return self._stim.signal()
 
     def samplerate(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.samplerate>`"""
         return self._stim.samplerate()
 
     def duration(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.duration>`"""
         return self._stim.duration()
 
     def randomToggle(self, randomize):
+        """Sets the reorder function on this StimulusModel to a randomizer
+        or none, alternately"""
         if randomize:
             self._stim.setReorderFunc(order_function('random'), 'random')
         else:
             self._stim.reorder = None
 
     def reorder(self):
+        """Returns the reorder fucntion for this stimulus"""
         return self._stim.reorder
 
     def updateComponentStartVals(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.updateComponentStartVals>`"""
         self._stim.updateComponentStartVals()
         # emit data changed signal
         # model.stimChanged.connect(view.dataChanged)
 
     @staticmethod
     def loadFromTemplate(template, stim=None):
+        """Initialized this stimulus from a saved *template*
+
+        :param template: doc from a previously stored stimulus via :class:`templateDoc`
+        :type template: dict
+        """
         stim = StimulusModel.loadFromTemplate(template, stim=stim)
         qstim = QStimulusModel(stim)
         qstim.setEditor(get_stimulus_editor(template['testtype']))
         return qstim
 
     def templateDoc(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.templateDoc>`"""
         doc = self._stim.templateDoc()
         return doc
 
     def warning(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.warning>`"""
         return self._stim.warning()
 
     def verify(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.verify>`"""
         return self._stim.verify()
 
     def purgeAutoSelected(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.purgeAutoSelected>`"""
         self._stim.purgeAutoSelected()
 
     def cleanComponents(self):
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.cleanComponents>`"""
         #removes any cache Qt classes in underlying data
         self._stim.cleanComponents()

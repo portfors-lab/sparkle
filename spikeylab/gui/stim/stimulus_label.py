@@ -5,6 +5,7 @@ from spikeylab.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactor
 from spikeylab.gui.trashcan import TrashWidget
 
 class StimulusLabelTable(QtGui.QWidget):
+    """A Container with draggable Stimulus labels that drop StimulusModels"""
     def __init__(self, parent=None):
         super(StimulusLabelTable, self).__init__(parent)
 
@@ -25,6 +26,7 @@ class StimulusLabelTable(QtGui.QWidget):
         self.setToolTip("Drag to list")
 
     def trash(self):
+        """Returns the trash widget"""
         return self.trashLbl
 
 
