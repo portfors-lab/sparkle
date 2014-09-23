@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui, QtTest
 
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.gui.qprotocol import QProtocolTabelModel, ProtocolView
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.factory import BuilderFactory
 from spikeylab.gui.drag_label import DragLabel
 

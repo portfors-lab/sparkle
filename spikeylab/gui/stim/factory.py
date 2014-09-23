@@ -1,5 +1,5 @@
 """
-Factory classes for intializing :class:`StimulusModels<spikeylab.stim.stimulusmodel.StimulusModel>`
+Factory classes for intializing :class:`StimulusModels<spikeylab.stim.stimulus_model.StimulusModel>`
 and assigning editors to them
 """
 import os
@@ -12,7 +12,7 @@ from spikeylab.gui.stim.tceditor import TuningCurveEditor
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim import get_stimulus_editor
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 
 class StimFactory():
     """Abstract Class for all factories to re-implement"""
@@ -29,7 +29,7 @@ class StimFactory():
     def create(self):
         """create a new stimulus model object
 
-        :returns: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
+        :returns: :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`
         """
         raise NotImplementedError
 

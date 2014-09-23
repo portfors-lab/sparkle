@@ -1,6 +1,6 @@
 import glob, os
 
-from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.abstract_component import AbstractStimulusComponent
 
 def get_stimuli_models():
     """

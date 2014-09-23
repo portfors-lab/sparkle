@@ -2,7 +2,7 @@ from PyQt4 import QtGui, QtCore
 
 from spikeylab.gui.drag_label import DragLabel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
-from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel
 
 ROW_HEIGHT = 100
@@ -469,7 +469,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 
 if __name__ == "__main__":
     import sys
-    from spikeylab.stim.stimulusmodel import *
+    from spikeylab.stim.stimulus_model import *
     app  = QtGui.QApplication(sys.argv)
 
     tone0 = PureTone()

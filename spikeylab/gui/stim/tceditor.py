@@ -95,7 +95,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
 if __name__ == "__main__":
     import sys
     from spikeylab.stim.auto_parameter_model import AutoParameterModel
-    from spikeylab.stim.stimulusmodel import StimulusModel
+    from spikeylab.stim.stimulus_model import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)
 

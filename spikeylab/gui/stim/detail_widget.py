@@ -25,8 +25,8 @@ class StimDetailWidget(QtGui.QWidget):
         """Presents the documentation
 
         :param doc: documentation for StimulusModel. i.e. returned from 
-        :meth:`componentDoc<spikeylab.stim.stimulusmodel.StimulusModel.componentDoc>`
-        or :meth:`templateDoc<spikeylab.stim.stimulusmodel.StimulusModel.templateDoc>`
+        :meth:`componentDoc<spikeylab.stim.stimulus_model.StimulusModel.componentDoc>`
+        or :meth:`templateDoc<spikeylab.stim.stimulus_model.StimulusModel.templateDoc>`
         """
         self.ui.overAtten.setNum(doc['overloaded_attenuation'])
         # also set composite stim type

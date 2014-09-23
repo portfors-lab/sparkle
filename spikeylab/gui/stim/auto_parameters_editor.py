@@ -123,7 +123,7 @@ class HidableParameterEditor(WidgetHider):
 if __name__ == '__main__':
     import sys
     from spikeylab.gui.stim.stimulusview import *
-    from spikeylab.stim.stimulusmodel import *
+    from spikeylab.stim.stimulus_model import *
 
     app  = QtGui.QApplication(sys.argv)
 

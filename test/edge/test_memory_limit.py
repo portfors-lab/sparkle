@@ -1,4 +1,4 @@
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 
 acqrate = 5e5

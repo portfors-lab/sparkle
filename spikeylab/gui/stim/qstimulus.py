@@ -12,7 +12,7 @@ from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim import get_stimulus_editor
 from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
 
 
@@ -24,7 +24,7 @@ DEFAULT_SAMPLERATE = config['default_genrate']
 MAXV = config['max_voltage']
 
 class QStimulusModel(QtCore.QAbstractItemModel):
-    """Qt wrapper for :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`"""
+    """Qt wrapper for :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`"""
     samplerateChanged = QtCore.pyqtSignal(int)
     def __init__(self, stim, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
@@ -66,23 +66,23 @@ class QStimulusModel(QtCore.QAbstractItemModel):
             return self._stim.columnCount()
 
     def columnCountForRow(self, row):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.columnCountForRow>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.columnCountForRow>`"""
         return self._stim.columnCountForRow(row)
 
     def componentCount(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.componentCount>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.componentCount>`"""
         return self._stim.componentCount()
 
     def repCount(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.repCount>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.repCount>`"""
         return self._stim.repCount()
 
     def setRepCount(self, count):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setRepCount>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setRepCount>`"""
         self._stim.setRepCount(count)
 
     def traceCount(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.traceCount>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.traceCount>`"""
         return self._stim.traceCount()
 
     def data(self, index, role=QtCore.Qt.UserRole):
@@ -194,15 +194,15 @@ class QStimulusModel(QtCore.QAbstractItemModel):
             logger.warning('Erm, no editor available :(')
 
     def signal(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.signal>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.signal>`"""
         return self._stim.signal()
 
     def samplerate(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.samplerate>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.samplerate>`"""
         return self._stim.samplerate()
 
     def duration(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.duration>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.duration>`"""
         return self._stim.duration()
 
     def randomToggle(self, randomize):
@@ -218,7 +218,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         return self._stim.reorder
 
     def updateComponentStartVals(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.updateComponentStartVals>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.updateComponentStartVals>`"""
         self._stim.updateComponentStartVals()
         # emit data changed signal
         # model.stimChanged.connect(view.dataChanged)
@@ -236,23 +236,23 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         return qstim
 
     def templateDoc(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.templateDoc>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.templateDoc>`"""
         doc = self._stim.templateDoc()
         return doc
 
     def warning(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.warning>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.warning>`"""
         return self._stim.warning()
 
     def verify(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.verify>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.verify>`"""
         return self._stim.verify()
 
     def purgeAutoSelected(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.purgeAutoSelected>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.purgeAutoSelected>`"""
         self._stim.purgeAutoSelected()
 
     def cleanComponents(self):
-        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.cleanComponents>`"""
+        """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.cleanComponents>`"""
         #removes any cache Qt classes in underlying data
         self._stim.cleanComponents()

@@ -9,7 +9,7 @@ class ProtocolTabelModel():
         self.calibrationFrange = None
 
     def setReferenceVoltage(self, caldb, calv):
-        """See :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setReferenceVoltage>`"""
+        """See :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setReferenceVoltage>`"""
         self.caldb = caldb
         self.calv = calv
         for test in self._tests:
@@ -18,7 +18,7 @@ class ProtocolTabelModel():
     def setCalibration(self, db_boost_array, frequencies, frange):
         """Sets calibration for all tests
 
-        See :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setCalibration>`"""
+        See :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setCalibration>`"""
         self.calibrationVector = db_boost_array
         self.calibrationFrequencies = frequencies
         self.calibrationFrange = frange
@@ -37,14 +37,14 @@ class ProtocolTabelModel():
 
         :param row: index number of test
         :type row: int
-        :returns: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
+        :returns: :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`
         """
         return self._tests[row]
 
     def allTests(self):
         """Gets all tests
 
-        :returns: list<:class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`>
+        :returns: list<:class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`>
         """
         return self._tests
 
@@ -60,7 +60,7 @@ class ProtocolTabelModel():
         """Inserts a new stimulus into the list at the given position
 
         :param stim: stimulus to insert into protocol
-        :type stim: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
+        :type stim: :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`
         :param position: index (row) of location to insert to
         :type position: int
         """

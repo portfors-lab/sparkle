@@ -9,7 +9,7 @@ from nose.tools import assert_in, assert_equal, nottest
 import unittest
 
 from spikeylab.run.acquisition_manager import AcquisitionManager
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.data.dataobjects import AcquisitionData

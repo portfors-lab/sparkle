@@ -8,7 +8,7 @@ from spikeylab.run.list_runner import ListAcquisitionRunner
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep, PureTone
 from spikeylab.tools.audiotools import attenuation_curve, calc_spectrum, get_peak, calc_db
 from spikeylab.acq.players import FinitePlayer
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.factory import CCFactory
 from spikeylab.tools.util import next_str_num
 from spikeylab.tools.systools import get_src_directory
@@ -79,7 +79,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
     def get_stims(self):
         """Gets the stimuli available for setting as the current calibration stimulus
         
-        :returns: list<:class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`>
+        :returns: list<:class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`>
         """
         return self.stim_components
 

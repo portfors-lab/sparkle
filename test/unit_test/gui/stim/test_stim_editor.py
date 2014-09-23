@@ -7,7 +7,7 @@ from PyQt4.QtCore import Qt, QTimer
 import unittest
 
 from spikeylab.gui.stim.qstimulus import QStimulusModel
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.auto_parameter_model import AutoParameterModel

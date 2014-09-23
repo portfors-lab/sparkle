@@ -8,7 +8,7 @@ from spikeylab.run.search_runner import SearchRunner
 from spikeylab.run.protocol_runner import ProtocolRunner
 from spikeylab.run.chart_runner import ChartRunner
 from spikeylab.run.calibration_runner import CalibrationRunner, CalibrationCurveRunner
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 
 class AcquisitionManager():
     """Handles all of the marshalling of different acquisition operations to the correct runner class.
@@ -117,7 +117,7 @@ class AcquisitionManager():
     def stimuli_list(self):
         """Get a list of the stimuli for search operation
 
-        :returns: list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`> -- list of the stimuli classes instances in the search operation
+        :returns: list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`> -- list of the stimuli classes instances in the search operation
         """
         return self.explorer.stimuli_list()
 
@@ -416,7 +416,7 @@ class AcquisitionManager():
 
         :param mode: Type of stimulus to get: tone or noise
         :type mode: str
-        :returns: :class:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel>`
+        :returns: :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`
         """
         if mode == 'tone':
             return self.tone_calibrator.stimulus

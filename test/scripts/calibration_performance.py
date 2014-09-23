@@ -1,5 +1,5 @@
 from spikeylab.acq.players import FinitePlayer
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import tukey, impulse_response, \

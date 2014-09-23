@@ -1,9 +1,9 @@
 from PyQt4 import QtGui
 from tone_parameters_form import Ui_ToneParameterWidget
 
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 
-class ToneParameterWidget(AbstractParameterWidget, Ui_ToneParameterWidget):
+class ToneParameterWidget(AbstractComponentWidget, Ui_ToneParameterWidget):
     def __init__(self, parent=None):
         super(ToneParameterWidget, self).__init__(parent)
         self.setupUi(self)

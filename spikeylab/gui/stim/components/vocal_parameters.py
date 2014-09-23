@@ -3,11 +3,11 @@ from os.path import dirname
 from PyQt4 import QtGui, QtCore
 
 from vocal_parameters_form import Ui_VocalParameterWidget
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 from spikeylab.tools.audiotools import spectrogram
 from spikeylab.gui.stim.components.order_dlg import OrderDialog
 
-class VocalParameterWidget(AbstractParameterWidget, Ui_VocalParameterWidget):
+class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
     vocalFilesChanged = QtCore.pyqtSignal(object, list)
     def __init__(self, component, parent=None):
         super(VocalParameterWidget, self).__init__(parent)

@@ -9,7 +9,7 @@ import spikeylab.tools.systools as systools
 from spikeylab.tools.util import convert2native
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
-from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.gui.stim.stimulusview import StimulusView
 from maincontrol_form import Ui_ControlWindow
 from spikeylab.tools.systools import get_src_directory

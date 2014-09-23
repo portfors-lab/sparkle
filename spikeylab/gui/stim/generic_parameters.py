@@ -1,10 +1,10 @@
 from PyQt4 import QtGui
 
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
 from spikeylab.gui.stim.incrementer import IncrementInput
 
-class GenericParameterWidget(AbstractParameterWidget):
+class GenericParameterWidget(AbstractComponentWidget):
     """Editor widget intended to work with (almost) any possible 
     stimulus component (well, or create a custom one if it doesn't)"""
     def __init__(self, component, parent=None):
@@ -51,7 +51,7 @@ class GenericParameterWidget(AbstractParameterWidget):
         self.setComponent(component)
 
     def setComponent(self, component):
-        """Re-implemented from :meth:`AbstractParameterWidget<spikeylab.gui.stim.abstract_parameters.AbstractParameterWidget.setComponent>`"""
+        """Re-implemented from :meth:`AbstractComponentWidget<spikeylab.gui.stim.abstract_component_editor.AbstractComponentWidget.setComponent>`"""
         details = component.auto_details()
         state = component.stateDict()
         for field, detail in details.items():
@@ -60,7 +60,7 @@ class GenericParameterWidget(AbstractParameterWidget):
         self._component = component
 
     def saveToObject(self):
-        """Re-implemented from :meth:`AbstractParameterWidget<spikeylab.gui.stim.abstract_parameters.AbstractParameterWidget.saveToObject>`"""
+        """Re-implemented from :meth:`AbstractComponentWidget<spikeylab.gui.stim.abstract_component_editor.AbstractComponentWidget.saveToObject>`"""
         details = self._component.auto_details()
         for field, widget in self.inputWidgets.items():
             self._component.set(field, widget.value()*details[field]['multiplier'])

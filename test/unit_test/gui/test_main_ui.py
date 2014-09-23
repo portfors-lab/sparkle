@@ -7,7 +7,7 @@ from PyQt4 import QtGui, QtCore, QtTest
 
 from spikeylab.gui.control import MainWindow
 from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 from spikeylab.tools.systools import rand_id
 
 import test.sample as sample
@@ -434,7 +434,7 @@ class TestMainUI():
     def set_paramters(self, name, vals):
         # find an editor and set the parameters
         topWidgets = QtGui.QApplication.topLevelWidgets()
-        editors = [w for w in topWidgets if isinstance(w, AbstractParameterWidget)]
+        editors = [w for w in topWidgets if isinstance(w, AbstractComponentWidget)]
         assert len(editors) == 1
         editor = editors[0]
         for field, val in vals.items():

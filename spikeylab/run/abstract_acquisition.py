@@ -73,9 +73,9 @@ class AbstractAcquisitionRunner():
         :type nreps: int
         :param binsz: time bin duration for spike sorting (seconds)
         :type binsz: float
-        :param caldb: See :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setReferenceVoltage>`
+        :param caldb: See :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setReferenceVoltage>`
         :type caldb: float
-        :param calv: See :meth:`StimulusModel<spikeylab.stim.stimulusmodel.StimulusModel.setReferenceVoltage>`
+        :param calv: See :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setReferenceVoltage>`
         :type calv: float
         :param datafile: a reference to an open file to save data to
         :type datafile: :class:`AcquisitionData<spikeylab.data.dataobjects.AcquisitionData>`

@@ -25,7 +25,7 @@ class CalibrationWidget(QtGui.QWidget):
         """Sets the stimulus model for the calibration curve test
 
         :param model: Stimulus model that has a tone curve configured
-        :type model: :class:`StimulusModel <spikeylab.stim.stimulusmodel.StimulusModel>`
+        :type model: :class:`StimulusModel <spikeylab.stim.stimulus_model.StimulusModel>`
         """
         self.stimModel = model
         self.ui.curveWidget.setStimulusModel(model)
@@ -43,7 +43,7 @@ class CalibrationWidget(QtGui.QWidget):
         """Adds a stimulus to the list of stims to use for testing calibration
 
         :param stim: stimulus to add to drop-down list
-        :type stim: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`
+        :type stim: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`
         """
         # set the editor widgets for noise and sweep
         self.ui.calTypeCmbbx.insertItem(0,stim.name)

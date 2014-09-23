@@ -245,7 +245,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
 if __name__ == '__main__': # pragma: no cover
     
     import sys, os
-    from spikeylab.stim.stimulusmodel import StimulusModel
+    from spikeylab.stim.stimulus_model import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)
 

@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 
 from pyqtgraph import GradientEditorItem
 
-from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.stim.types.stimuli_classes import *
 from spikeylab.gui.stim.generic_parameters import GenericParameterWidget
 from spikeylab.gui.stim.components import vocal_parameters

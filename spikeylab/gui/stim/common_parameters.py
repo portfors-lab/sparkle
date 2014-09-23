@@ -1,9 +1,9 @@
 from PyQt4 import QtGui, QtCore
 
 from common_parametersform import Ui_ParameterWidget
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 
-class CommonParameterWidget(AbstractParameterWidget,Ui_ParameterWidget):
+class CommonParameterWidget(AbstractComponentWidget,Ui_ParameterWidget):
     """Widget that accepts input for parameters that all stimuli
      types have in common"""
     valueChanged = QtCore.pyqtSignal()

@@ -6,7 +6,7 @@ from PyQt4 import QtGui, QtCore, QtTest
 import h5py
 
 from spikeylab.gui.control import MainWindow
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.factory import TCFactory
 from spikeylab.tools.systools import rand_id
 

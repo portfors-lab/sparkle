@@ -3,7 +3,7 @@ import os, yaml
 from scipy.signal import chirp, hann
 import numpy as np
 
-from spikeylab.stim.abstract_stimulus import AbstractStimulusComponent
+from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.tools.audiotools import make_tone, audioread, audiorate
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.exceptions import FileDoesNotExistError

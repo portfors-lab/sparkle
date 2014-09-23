@@ -6,7 +6,7 @@ import numpy as np
 
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.run.abstract_acquisition import AbstractAcquisitionRunner
-from spikeylab.stim.stimulusmodel import StimulusModel
+from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.tools.util import increment_title
 from spikeylab.tools import spikestats
 from spikeylab.stim.types import get_stimuli_models
@@ -30,7 +30,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         """Gets a list of all the stimuli this runner has access to. Order
         of the list matches the index order which stimuli can be set by.
 
-        :returns: (subclasses of) list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus.AbstractStimulusComponent>`>
+        :returns: (subclasses of) list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`>
         """
         return self._explore_stimuli
 

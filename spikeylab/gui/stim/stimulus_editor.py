@@ -81,7 +81,7 @@ if __name__ == "__main__":
     import sys, os
     from PyQt4 import QtGui
     from spikeylab.gui.stim.qstimulus import QStimulusModel
-    from spikeylab.stim.stimulusmodel import StimulusModel
+    from spikeylab.stim.stimulus_model import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *
     app = QtGui.QApplication(sys.argv)
 

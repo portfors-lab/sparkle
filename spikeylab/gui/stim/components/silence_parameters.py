@@ -1,10 +1,10 @@
 from PyQt4 import QtGui
             
-from spikeylab.gui.stim.abstract_parameters import AbstractParameterWidget
+from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 from spikeylab.gui.stim.incrementer import IncrementInput
 from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
             
-class SilenceParameterWidget(AbstractParameterWidget):
+class SilenceParameterWidget(AbstractComponentWidget):
     include_in_stack = False
     def __init__(self, parent=None):
         super(SilenceParameterWidget, self).__init__(parent)
