@@ -9,11 +9,19 @@ This doc is very drafty!!!
 
 User Guide
 =================
-:doc:`Instructions for use <guide/index>`
+
+.. toctree::
+   :maxdepth: 2
+
+   guide/index.rst
 
 Programming Reference
 =====================
-:doc:`Interface API <ref/api>`
+
+.. toctree::
+   :maxdepth: 2
+
+   ref/api.rst
 
 
 Indices and tables
