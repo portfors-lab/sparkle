@@ -4,7 +4,7 @@ from scipy.signal import chirp, hann
 import numpy as np
 
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
-from spikeylab.tools.audiotools import make_tone, audioread, audiorate
+from spikeylab.tools.audiotools import make_tone, audioread, audiorate, rms
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.exceptions import FileDoesNotExistError
 
@@ -26,7 +26,6 @@ class PureTone(AbstractStimulusComponent):
 
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
-        rms = np.sqrt(np.mean(pow(tone,2)))
         # print 'before rms adjust', rms, 'max', np.amax(tone)
         if USE_RMS:
             tone = tone*1.414213562373
@@ -75,7 +74,7 @@ class FMSweep(AbstractStimulusComponent):
         self._stop_f = f
 
     def signal(self, fs, atten, caldb, calv):
-        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
+        amp = self.amplitude(caldb, calv)
         npts = self._duration*fs
         t = np.arange(npts).astype(float)/fs
         signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
@@ -178,11 +177,10 @@ class Vocalization(AbstractStimulusComponent):
         wavdata = wavdata[:desired_npts]
 
         if USE_RMS:
-            amp_scale = np.sqrt(np.mean(pow(wavdata,2)))
+            amp_scale = rms(wavdata)
         else:
             amp_scale = np.amax(wavdata)
-        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
-        signal = ((wavdata/amp_scale)*amp)
+        signal = ((wavdata/amp_scale)*self.amplitude(caldb, calv))
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
@@ -240,9 +238,9 @@ class WhiteNoise(AbstractStimulusComponent):
 
         signal = self._noise[:npts]
         
-        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
+        amp = self.amplitude(caldb, calv)
         if USE_RMS:
-            amp_scale = np.sqrt(np.mean(pow(signal,2)))
+            amp_scale = rms(signal)
         else:
             amp_scale = np.amax(signal)
 

@@ -1,18 +1,18 @@
 stim Package
 ============
 
-:mod:`abstract_editor` Module
------------------------------
+:mod:`abstract_component_editor` Module
+---------------------------------------
 
-.. automodule:: spikeylab.gui.stim.abstract_editor
+.. automodule:: spikeylab.gui.stim.abstract_component_editor
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`abstract_parameters` Module
----------------------------------
+:mod:`abstract_editor` Module
+-----------------------------
 
-.. automodule:: spikeylab.gui.stim.abstract_parameters
+.. automodule:: spikeylab.gui.stim.abstract_editor
     :members:
     :undoc-members:
     :show-inheritance:

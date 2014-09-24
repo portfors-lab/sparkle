@@ -36,12 +36,41 @@ class AbstractStimulusComponent(object):
     def set(self, param, value):
         setattr(self, '_'+param, value)
 
-    def signal(self, **kwargs):
-        """kwargs must include: fs and optionally include 
-        atten, caldb, calv depending on stimulus type"""
+    def amplitude(self, caldb, calv, atten=0):
+        """Calculates the voltage amplitude for this stimulus, using
+        internal intensity value and the given reference intensity & voltage
+
+        :param caldb: calibration intensity in dbSPL
+        :type caldb: float
+        :param calv: calibration voltage that was used to record the intensity provided
+        :type calv: float
+        """
+        amp = (10 ** (float(self._intensity+atten-caldb)/20)*calv)
+        return amp
+
+    def signal(self, fs, atten, caldb, calv):
+        """Creates a signal representation of this stimulus, in the
+        form of a vector of numbers representing electric potential.
+        caldb and calv are used to determine the amplitude of the
+        signal.
+
+        Must be implemented by subclass
+
+        :param fs: Generation samplerate (Hz) at which this signal will be output
+        :type fs: int
+        :param atten: actually just 0 for now?
+        :param caldb: calibration intensity in dbSPL
+        :type caldb: float
+        :param calv: calibration voltage that was used to record the intensity provided
+        :type calv: float
+        """
         raise NotImplementedError
 
     def verify(self, **kwargs):
+        """Checks this component for invalidating conditions
+
+        :returns: str -- message if error, 0 otherwise
+        """
         if 'duration' in kwargs:
             if kwargs['duration'] < self._duration:
                 return "Window size must equal or exceed stimulus length"
@@ -50,14 +79,22 @@ class AbstractStimulusComponent(object):
         return 0
 
     def auto_details(self):
-        """A list of the parameter names that are available to
-        be set using auto-paramter manipulation. Subclasses should
-        reimplement and add to this list"""
+        """A collection of the parameter names that are available to
+        be set using auto-paramter manipulation. 
+
+        Subclasses should re-implement and add to this list
+
+        :returns: dict<dict> -- {'parametername': {'label':str, 'multiplier':float, 'min':float, 'max':float},}
+        """
         return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0., 'max':3.},
                 'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':120}, 
                 'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 
     def stateDict(self):
+        """Saves internal values to be loaded later
+
+        :returns: dict -- {'parametername': value, ...}
+        """
         state = {
                 'duration' : self._duration,
                 'intensity' : self._intensity,
@@ -67,6 +104,11 @@ class AbstractStimulusComponent(object):
         return state
 
     def loadState(self, state):
+        """Loads previously saved values to this component. 
+
+        :param state: return value from `stateDict`
+        :type state: dict
+        """
         self._duration = state['duration']
         self._intensity = state['intensity']
         self._risefall = state['risefall']

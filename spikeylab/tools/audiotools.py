@@ -462,3 +462,12 @@ def audiorate(filename):
     fs= wf.getframerate()
     wf.close()
     return fs
+
+def rms(signal):
+    """Returns the root mean square (RMS) of the given *signal*
+
+    :param signal: a vector of electric potential
+    :type signal: numpy.ndarray
+    :returns: float -- the RMS value of the signal
+    """
+    return np.sqrt(np.mean(pow(signal,2)))

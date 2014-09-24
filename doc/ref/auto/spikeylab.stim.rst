@@ -9,10 +9,10 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`abstract_stimulus` Module
--------------------------------
+:mod:`abstract_component` Module
+--------------------------------
 
-.. automodule:: spikeylab.stim.abstract_stimulus
+.. automodule:: spikeylab.stim.abstract_component
     :members:
     :undoc-members:
     :show-inheritance:
@@ -33,10 +33,10 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`stimulusmodel` Module
----------------------------
+:mod:`stimulus_model` Module
+----------------------------
 
-.. automodule:: spikeylab.stim.stimulusmodel
+.. automodule:: spikeylab.stim.stimulus_model
     :members:
     :undoc-members:
     :show-inheritance:

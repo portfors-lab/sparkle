@@ -1,3 +1,5 @@
+spikeylab Package
+=================
 
 :mod:`spikeylab` Package
 ------------------------
@@ -6,6 +8,9 @@
     :members:
     :undoc-members:
     :show-inheritance:
+
+Subpackages
+-----------
 
 .. toctree::
 
