@@ -28,7 +28,7 @@ class CalibrationWidget(QtGui.QWidget):
         :type model: :class:`StimulusModel <spikeylab.stim.stimulus_model.StimulusModel>`
         """
         self.stimModel = model
-        self.ui.curveWidget.setStimulusModel(model)
+        self.ui.curveWidget.setModel(model)
 
     def setDuration(self, dur):
         """Sets the duration for the all of the calibration stimuli

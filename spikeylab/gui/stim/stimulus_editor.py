@@ -25,7 +25,7 @@ class StimulusEditor(AbstractStimulusWidget):
         
         self.ok = self.ui.okBtn
 
-    def setStimulusModel(self, model):
+    def setModel(self, model):
         """Sets the QStimulusModel *model* for the StimulusView"""
         self.ui.trackview.setModel(model)
         self.ui.nrepsSpnbx.setValue(model.repCount())
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     qstim = QStimulusModel(stim)
     editor = StimulusEditor()
-    editor.setStimulusModel(qstim)
+    editor.setModel(qstim)
 
     # editor.ui.trackview.setModel(stim)
 

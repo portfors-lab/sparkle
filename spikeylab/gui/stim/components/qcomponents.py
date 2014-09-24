@@ -52,7 +52,17 @@ class QStimulusComponent(object):
         self.__dict__ = basestim.__dict__
         
     def paint(self, painter, rect, palette):
-        """Draws a generic visual representation for this component"""
+        """Draws a generic visual representation for this component
+
+        Re-implement this to get a custom graphic in builder editor
+
+        :param painter: Use this class to do the drawing
+        :type painter: :qtdoc:`QPainter`
+        :param rect: boundary of the delegate for this component, painting should be done inside this boundary
+        :type rect: :qtdoc:`QRect`
+        :param palette: contains color groups to use, if wanted
+        :type palette: :qtdoc:`QPalette`
+        """
         painter.save()
 
         image = QtGui.QImage("./default.jpg")
@@ -66,7 +76,12 @@ class QStimulusComponent(object):
 
     def showEditor(self):
         """Generates a default editor that creates fields based on this
-        components auto-details. Override this method to use custom editor"""
+        components auto_details. 
+
+        Re-implement this method to use custom editor, subclassing :class:`AbstractComponentWidget<spikeylab.gui.stim.abstract_component_editor.AbstractComponentWidget>`
+
+        :returns: :class:`GenericParameterWidget<spikeylab.gui.stim.generic_parameters.GenericParameterWidget>`
+        """
         editor = GenericParameterWidget(self)
         return editor
 

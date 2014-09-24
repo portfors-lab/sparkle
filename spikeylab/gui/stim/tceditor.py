@@ -24,7 +24,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.ui.dbNstepsLbl.textChanged.connect(self.updateTextColor)
         self.ok = self.ui.okBtn
 
-    def setStimulusModel(self, model):
+    def setModel(self, model):
         """Sets the StimulusModel for this editor"""
         self.stimModel = model
         self.parameterModel = model.autoParams()

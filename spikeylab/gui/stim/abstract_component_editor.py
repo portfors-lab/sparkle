@@ -26,6 +26,9 @@ class AbstractComponentWidget(AbstractEditorWidget):
         appropriately.
 
         Must be implemented by subclass
+
+        :param component: component this editor is acting on
+        :type component: (sublcass of) :class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`
         """
         raise NotImplementedError
 

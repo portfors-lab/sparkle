@@ -8,7 +8,7 @@ from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 class AbstractStimulusWidget(AbstractEditorWidget):
     """Abstract class for editors for :class:`QStimulusModels<spikeylab.gui.stim.qstimulus.QStimulusModel>`"""
     saveFolder = os.path.expanduser('~')
-
+    ok = None # must be implemented as a QPushButton to accept the edits
     def saveStimulus(self):
         # manually instead of static function for testing purposes
         self.dialog = QtGui.QFileDialog(self, u"Save Stimulus Setup to File", 
@@ -31,8 +31,20 @@ class AbstractStimulusWidget(AbstractEditorWidget):
         """Returns the model for which this editor is acting on
 
         Must be implemented by subclass
+
+        :returns: :class:`QStimulusModel<spikeylab.gui.stim.qstimulus.QStimulusModel>`
         """
         raise NotImplementedError
+
+
+    def setModel(self, model):
+        """Sets the model for this editor
+        
+        Must be implemented by subclass
+
+        :param model: Stimulus to edit
+        :type model: :class:`QStimulusModel<spikeylab.gui.stim.qstimulus.QStimulusModel>`
+        """
 
     def closeEvent(self, event):
         """Verifies the stimulus before closing, warns user with a

@@ -21,8 +21,7 @@ class StimFactory():
         """Returns an implemented AbstractStimulusWidget class appropriate
         for this stimulus
 
-        :returns: class:`AbstractStimulusWidget<spikeylab.gui.stim.abstract_stim_editor.AbstractStimulusWidget>`
-        (subclass of)
+        :returns: (subclass of) :class:`AbstractStimulusWidget<spikeylab.gui.stim.abstract_stim_editor.AbstractStimulusWidget>`      
         """
         raise NotImplementedError
 

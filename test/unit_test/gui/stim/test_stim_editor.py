@@ -38,7 +38,7 @@ class TestStimulusEditor():
         model.insertComponent(silence, 1,0)
         nsteps = self.add_auto_param(model)
         editor = StimulusEditor()
-        editor.setStimulusModel(QStimulusModel(model))
+        editor.setModel(QStimulusModel(model))
         self.editor = editor
 
     def tearDown(self):

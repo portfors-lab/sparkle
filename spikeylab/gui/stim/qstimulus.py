@@ -187,7 +187,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         """Creates and shows an editor for this Stimulus"""
         if self.editor is not None:
             editor = self.editor()
-            editor.setStimulusModel(self)
+            editor.setModel(self)
             return editor
         else:
             logger = logging.getLogger('main')
