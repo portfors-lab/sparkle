@@ -45,6 +45,7 @@ class AbstractStimulusWidget(AbstractEditorWidget):
         :param model: Stimulus to edit
         :type model: :class:`QStimulusModel<spikeylab.gui.stim.qstimulus.QStimulusModel>`
         """
+        raise NotImplementedError
 
     def closeEvent(self, event):
         """Verifies the stimulus before closing, warns user with a
