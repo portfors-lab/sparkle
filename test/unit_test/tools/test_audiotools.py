@@ -185,7 +185,7 @@ def test_tone_bad_risefall():
     db = 100
     fs = 100000
     dur = 0.1
-    risefall = 0.06
+    risefall = 0.11
     calv = 0.1
     caldb = 100
 

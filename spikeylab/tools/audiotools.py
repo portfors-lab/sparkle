@@ -83,7 +83,7 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     :type calv: float
     :returns: tone, timevals -- the signal and the time index values
     """
-    if risefall*2 > dur:
+    if risefall > dur:
         raise ValueError('Duration must be greater than risefall time')
     if samplerate <= 0:
         raise ValueError("Samplerate must be greater than 0")

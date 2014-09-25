@@ -163,6 +163,7 @@ class MainWindow(ControlWindow):
             self.ui.startBtn.clicked.disconnect()
             self.ui.startBtn.clicked.connect(self.onUpdate)
             self.ui.binszSpnbx.valueChanged.connect(self.onUpdate)
+            self.ui.windowszSpnbx.valueChanged.disconnect()
             self.ui.windowszSpnbx.valueChanged.connect(self.onUpdate)
             self.ui.exNrepsSpnbx.valueChanged.connect(self.onUpdate)
             for editor in self.ui.parameterStack.widgets():
@@ -172,7 +173,7 @@ class MainWindow(ControlWindow):
                 self.ui.exNrepsSpnbx.valueChanged.disconnect()
                 self.ui.binszSpnbx.valueChanged.disconnect()
                 self.ui.windowszSpnbx.valueChanged.disconnect()
-                # this should always remain connected 
+                # this should be connected when search ISN'T running
                 self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
                 self.ui.startBtn.clicked.disconnect()
                 self.ui.startBtn.clicked.connect(self.onStart)
@@ -375,6 +376,9 @@ class MainWindow(ControlWindow):
         self.acqmodel.run_explore(interval)
 
     def runCalTone(self):
+        winsz = float(self.ui.windowszSpnbx.value())
+        self.acqmodel.set_calibration_duration(winsz*self.tscale)
+        
         self.ui.calToneBtn.setText('Stop')
         self.ui.calToneBtn.clicked.disconnect()
         self.ui.calToneBtn.clicked.connect(self.stopCalTone)
@@ -437,6 +441,9 @@ class MainWindow(ControlWindow):
             self.acqmodel.run_chart_protocol(interval)
 
     def runCalibration(self):
+        winsz = float(self.ui.windowszSpnbx.value())
+        self.acqmodel.set_calibration_duration(winsz*self.tscale)
+        
         self.ui.startBtn.setEnabled(False)
         self.ui.stopBtn.setText("Abort")
         self.activeOperation = 'calibration'
@@ -677,8 +684,6 @@ class MainWindow(ControlWindow):
 
     def setCalibrationDuration(self):
         winsz = float(self.ui.windowszSpnbx.value())
-        # I shouldn't have to do both of these...
-        self.acqmodel.set_calibration_duration(winsz*self.tscale)
         self.ui.calibrationWidget.setDuration(winsz)
 
     def updateThresh(self, thresh):
@@ -695,6 +700,7 @@ class MainWindow(ControlWindow):
             self.stashedAisr = self.ui.aisrSpnbx.value()
             self.ui.aisrSpnbx.setValue(self.acqmodel.calibration_genrate()/self.fscale)
             self.ui.aisrSpnbx.setEnabled(False)
+            self.setCalibrationDuration()
         elif self.prevTab == 'calibration':
             self.ui.aisrSpnbx.setEnabled(True)
             self.ui.aisrSpnbx.setValue(self.stashedAisr)
