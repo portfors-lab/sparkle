@@ -44,7 +44,7 @@ NI provides simulated devices so that it is possible to develop applications wit
 Stimulus Classes
 ++++++++++++++++
 
-The main container for an individual stimulus is the :class:`StimulusModel<spikeylab.stim.stimulusmodel>`. The stimulus is composed of a 2D array (nested lists) of components which are any subclass of :class:`AbstractStimulusComponent<spikeylab.stim.abstract_stimulus>`. These classes are required to implement a `signal` function (not to be confused with signals/slots of Qt), which is used by StimulusModel to sum its components to get the total signal for the desired stimulus. This allows for creation of any stimulus imaginable through the ability to overlap components, and to define custom component classes.
+The main container for an individual stimulus is the :class:`StimulusModel<spikeylab.stim.stimulus_model>`. The stimulus is composed of a 2D array (nested lists) of components which are any subclass of :class:`AbstractStimulusComponent<spikeylab.stim.abstract_component>`. These classes are required to implement a `signal` function (not to be confused with signals/slots of Qt), which is used by StimulusModel to sum its components to get the total signal for the desired stimulus. This allows for creation of any stimulus imaginable through the ability to overlap components, and to define custom component classes.
 
 On its own, a StimulusModel represents a single stimlulus signal (the sum of it's components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The StimlulusModel uses the information held in its :class:`AutoParameterModel<spikeylab.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
 
@@ -56,9 +56,9 @@ Visually, the hierarchy of Stimulus Assembly is as follows:
 
 The list of StimlusModels inside of a ProtocolModel, and the list of Components inside of a SimulusModel can, in fact, be empty (and are upon initialization), but cannot be when run by a runner class; i.e. an empty stimulus is considered an error. 
 
-Discovery of the stimulus component classes is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `spikeylab/stim/types` are searched for subclasses of `AbstractStimulusComponent`. Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations.
+Discovery of the stimulus component classes is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `spikeylab/stim/types` are searched for subclasses of :code:`AbstractStimulusComponent`. Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations.
 
-For further information related to adding additional Stimulus Component classes see <Extending the program>
+For further information related to adding additional Stimulus Component classes see :doc:`Extending spikey<extending>`
 
 Speaker Calibration
 ++++++++++++++++++++
@@ -67,7 +67,7 @@ This program uses a digital filter to compensate for high frequency speaker roll
 
 The frequency response for the system is derived via :func:`attenuation_curve<spikeylab.tools.audiotools.attenuation_curve>` function. The result of this is also presented to the user as an 'attenuation curve'. This frequency response is saved to file, and can used later to generate a new filter kernel. 
 
-The frequency response is given to the different acquisition runner classes which will pass it on to their :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setCalibration>`(s). The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<spikeylab.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals.
+The frequency response is given to the different acquisition runner classes which will pass it on to their :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setCalibration>`. The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<spikeylab.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals.
 
 Thus, after stimuli are prepared, but before they are generated, the StimulusModel applies the calibration to the signal by convolving the filter with the output signal using :func:`convolve_filter<spikeylab.tools.audiotools.convolve_filter>`.
 
