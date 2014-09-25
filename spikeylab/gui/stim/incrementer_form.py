@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\incrementer.ui'
 #
-# Created: Wed Jun 18 16:49:26 2014
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Thu Sep 25 14:29:45 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -33,19 +33,39 @@ class Ui_IncrementInput(object):
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setContentsMargins(0, 1, 1, 0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.valueLnedt = QtGui.QLineEdit(IncrementInput)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.valueSpnbx = SmartSpinBox(IncrementInput)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.valueLnedt.sizePolicy().hasHeightForWidth())
-        self.valueLnedt.setSizePolicy(sizePolicy)
-        self.valueLnedt.setMinimumSize(QtCore.QSize(0, 0))
-        self.valueLnedt.setObjectName(_fromUtf8("valueLnedt"))
-        self.horizontalLayout.addWidget(self.valueLnedt)
+        sizePolicy.setHeightForWidth(self.valueSpnbx.sizePolicy().hasHeightForWidth())
+        self.valueSpnbx.setSizePolicy(sizePolicy)
+        self.valueSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.valueSpnbx.setObjectName(_fromUtf8("valueSpnbx"))
+        self.horizontalLayout.addWidget(self.valueSpnbx)
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setSpacing(0)
         self.gridLayout.setContentsMargins(-1, 1, 1, 1)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.up5 = QtGui.QPushButton(IncrementInput)
+        self.up5.setMinimumSize(QtCore.QSize(20, 0))
+        self.up5.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.up5.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
+        self.up5.setObjectName(_fromUtf8("up5"))
+        self.gridLayout.addWidget(self.up5, 1, 1, 1, 1)
+        self.down5 = QtGui.QPushButton(IncrementInput)
+        self.down5.setMinimumSize(QtCore.QSize(20, 0))
+        self.down5.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.down5.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
+        self.down5.setText(_fromUtf8(""))
+        self.down5.setObjectName(_fromUtf8("down5"))
+        self.gridLayout.addWidget(self.down5, 2, 1, 1, 1)
+        self.down1 = QtGui.QPushButton(IncrementInput)
+        self.down1.setMinimumSize(QtCore.QSize(20, 0))
+        self.down1.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.down1.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
+        self.down1.setText(_fromUtf8(""))
+        self.down1.setObjectName(_fromUtf8("down1"))
+        self.gridLayout.addWidget(self.down1, 2, 2, 1, 1)
         self.down10 = QtGui.QPushButton(IncrementInput)
         self.down10.setMinimumSize(QtCore.QSize(20, 0))
         self.down10.setMaximumSize(QtCore.QSize(50, 16777215))
@@ -70,26 +90,6 @@ class Ui_IncrementInput(object):
         self.up1.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
         self.up1.setObjectName(_fromUtf8("up1"))
         self.gridLayout.addWidget(self.up1, 1, 2, 1, 1)
-        self.down1 = QtGui.QPushButton(IncrementInput)
-        self.down1.setMinimumSize(QtCore.QSize(20, 0))
-        self.down1.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.down1.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
-        self.down1.setText(_fromUtf8(""))
-        self.down1.setObjectName(_fromUtf8("down1"))
-        self.gridLayout.addWidget(self.down1, 2, 2, 1, 1)
-        self.up5 = QtGui.QPushButton(IncrementInput)
-        self.up5.setMinimumSize(QtCore.QSize(20, 0))
-        self.up5.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.up5.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
-        self.up5.setObjectName(_fromUtf8("up5"))
-        self.gridLayout.addWidget(self.up5, 1, 1, 1, 1)
-        self.down5 = QtGui.QPushButton(IncrementInput)
-        self.down5.setMinimumSize(QtCore.QSize(20, 0))
-        self.down5.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.down5.setStyleSheet(_fromUtf8("QWidget { background-color:rgb(234, 234, 234); }"))
-        self.down5.setText(_fromUtf8(""))
-        self.down5.setObjectName(_fromUtf8("down5"))
-        self.gridLayout.addWidget(self.down5, 2, 1, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
 
         self.retranslateUi(IncrementInput)
@@ -103,8 +103,8 @@ class Ui_IncrementInput(object):
 
     def retranslateUi(self, IncrementInput):
         IncrementInput.setWindowTitle(_translate("IncrementInput", "Form", None))
-        self.valueLnedt.setText(_translate("IncrementInput", "0", None))
+        self.up5.setText(_translate("IncrementInput", "5", None))
         self.up10.setText(_translate("IncrementInput", "10", None))
         self.up1.setText(_translate("IncrementInput", "1", None))
-        self.up5.setText(_translate("IncrementInput", "5", None))
 
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox

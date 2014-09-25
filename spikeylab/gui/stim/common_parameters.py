@@ -6,7 +6,6 @@ from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 class CommonParameterWidget(AbstractComponentWidget,Ui_ParameterWidget):
     """Widget that accepts input for parameters that all stimuli
      types have in common"""
-    valueChanged = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)

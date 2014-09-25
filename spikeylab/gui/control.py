@@ -112,8 +112,6 @@ class MainWindow(ControlWindow):
 
         self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
-        self.ui.binszSpnbx.setKeyboardTracking(False)
-        self.ui.windowszSpnbx.setKeyboardTracking(False)
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
         self.ui.threshSpnbx.setKeyboardTracking(False)
 

@@ -21,9 +21,12 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.down10.setIcon(arrowdown())
         self.down5.setIcon(arrowdown())
         self.down1.setIcon(arrowdown())
-        # this will emit on partial values -- not what I want ideally
-        self.valueLnedt.editingFinished.connect(self.checkInput)
-        self.valueLnedt.editingFinished.connect(self.valueChanged.emit)
+
+        self.valueSpnbx.valueChanged.connect(self.valueChanged.emit)
+
+        # shortcut to propagate methods for spinbox
+        for m in ['setValue', 'setMaximum', 'setMinimum', 'value']:
+            setattr(self, m, getattr(self.valueSpnbx, m))
 
     def increment1(self):
         self.incrementn(1)
@@ -44,39 +47,14 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.incrementn(-10)
 
     def incrementn(self, n):
-        val = self.numtype(self.valueLnedt.text())
-        if self.minimum <= (val + n) <= self.maximum:
-            val += n
-            self.setValue(val)
-        self.valueChanged.emit()
-
-    def value(self):
-        return self.numtype(self.valueLnedt.text())
-
-    def setValue(self, val):
-        # type and range checking here!
-        if val - floor(val) > 0.0:
-            self.valueLnedt.setText(str(val))
-        else:
-            self.valueLnedt.setText(str(int(val)))
-
-    def checkInput(self):
-        """Checks that that the input is not empty, changes
-        to 0"""
-        if self.valueLnedt.text() == '':
-            self.setValue(0)
+        self.valueSpnbx.setValue(self.valueSpnbx.value() + n)
 
     def setDecimals(self, val):
         pass
 
-    def setMaximum(self, val):
-        self.maximum = val
-
-    def setMinimum(self, val):
-        self.minimum = val
-
     def sizeHint(self):
         return QtCore.QSize(450,45)
+
 
 if __name__ == '__main__':
     import sys

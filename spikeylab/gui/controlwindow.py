@@ -107,7 +107,8 @@ class ControlWindow(QtGui.QMainWindow):
                 stimWidget.saveToObject()
                 selectedStim = self.exploreStimuli[stimIndex]
                 # have the stim check itself and report
-                failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale, duration=self.ui.windowszSpnbx.value()*self.tscale)
+                failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale, 
+                            duration=self.ui.windowszSpnbx.value()*self.tscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False

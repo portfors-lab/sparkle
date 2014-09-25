@@ -150,4 +150,5 @@ class SmartDelegate(QtGui.QStyledItemDelegate):
         # parameter specific max and mins
         spnbox.setMinimum(0)
         spnbox.setMaximum(2000)
+        spnbox.setKeyboardTracking(True)
         return spnbox
