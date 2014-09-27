@@ -6,7 +6,6 @@ import numpy as np
 
 from spikeylab.run.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.run.protocol_model import ProtocolTabelModel
-from spikeylab.tools.doc import doc_inherit
 
 class Broken(Exception): pass
 

@@ -1,16 +1,46 @@
+"""Evaluates the calibration procedure for execution time for different 
+algorithms and parameter values
+"""
+
+import sys, time, os, json
+
+import numpy as np
+from PyQt4 import QtGui, QtCore
+import pyqtgraph as pg
+
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
+# from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from spikeylab.tools.audiotools import tukey, impulse_response, \
                 convolve_filter, attenuation_curve, multiply_frequencies
 from test.scripts.util import calc_error, record, MyTableWidgetItem
 
+pg.setConfigOption('background', 'w')
+pg.setConfigOption('foreground', 'k')
+############################################################
+# Edit these values as desired
 
-import sys, time, os, json
-import numpy as np
+MULT_CAL = True # include the multiplication calibration method
+CONV_CAL = True # include the convolution calibration method
 
-from PyQt4 import QtGui, QtCore
+SMOOTHING = 99 # number of points of a signal to smooth over
+
+nreps = 3 # no. of repetition for each outgoing signal (results will be averaged)
+refv = 1.2 # Volts, output amplitdue of the outgoing signal
+refdb = 115 # dB SPL that the above voltage produces
+calf = 15000 # the frequency that was used for refv and refdb
+dur = 0.2 # duration of signal and window (seconds)
+fs = 5e5 # input and output samplerate
+nsignals = 200 # number of signals to run calibration on per sample time
+
+frange = [2000, 105000] # range to apply calibration to
+
+# FILTER_LEN = [10.290, 10.291, 10.292, 10.293, 10.294, 10.295]
+# FILTER_LEN = range(24286, 24292)
+FILTER_LEN = [2**6, 2**7, 2**8, 2**9, 2**10, 2**11, 2**12, 2**14, 31072, 31074, 2**15, 2**16, dur*fs]
+# FILTER_LEN = range(1000, int(dur*fs), 1000)
+
 
 def apply_calibration(sig, fs, frange, calfqs, calvals, method):
     if method == 'multiply':
@@ -19,26 +49,6 @@ def apply_calibration(sig, fs, frange, calfqs, calvals, method):
         return convolve_filter(sig, calvals)
     else:
         raise Exception("Unknown calibration method: {}".format(method))
-
-
-MULT_CAL = True
-CONV_CAL = True
-
-SMOOTHING = 99
-# FILTER_LEN = [10.290, 10.291, 10.292, 10.293, 10.294, 10.295]
-# FILTER_LEN = range(24286, 24292)
-
-# method 1 Tone Curve
-nreps = 3
-refv = 1.2 # Volts
-refdb = 115 # dB SPL
-calf = 15000
-dur = 0.2 #seconds (window and stim)
-fs = 5e5
-nsignals = 200
-frange = [2000, 105000] # range to apply calibration to
-FILTER_LEN = [2**6, 2**7, 2**8, 2**9, 2**10, 2**11, 2**12, 2**14, 31072, 31074, 2**15, 2**16, dur*fs]
-# FILTER_LEN = range(1000, int(dur*fs), 1000)
 
 if __name__ == "__main__":
     npts = dur*fs
@@ -53,9 +63,7 @@ if __name__ == "__main__":
         print 'Must choose at lease one calibration type'
         sys.exit()
 
-
-    ##################################
-    # white noise test
+    # record the intital sound to determine the frequency response from
     wn = WhiteNoise()
     wn.setDuration(dur)
     wn.setIntensity(refdb)
@@ -70,9 +78,12 @@ if __name__ == "__main__":
 
     # set up calibration parameters to test
     calibration_methods = []
-    # generate unsmoothed calibration attenuation vector
+    # generate smoothed calibration attenuation vector
     noise_curve_db = attenuation_curve(wn_signal, mean_control_noise, fs, calf, SMOOTHING)
 
+    # create dicts that collect all the test run parameters that we can then
+    # just loop through and time the execution for calibrations with the contained parameters
+    # makes for simpler reporting later
     info = {'signal':'noise'}
     if MULT_CAL:
         info['method'] =  'multiply'
@@ -82,6 +93,8 @@ if __name__ == "__main__":
         calibration_methods.append(info.copy())
 
 
+    # because the impulse response is calculated once in advance, do that now for each
+    # filter length, and save for timed test
     if CONV_CAL:
         info['method'] =  'convolve'
         for trunc in FILTER_LEN:
@@ -91,12 +104,15 @@ if __name__ == "__main__":
             info['calibration'] = ir
             calibration_methods.append(info.copy())
 
+    # get a signal to apply the calibration to
     chirp = FMSweep()
     chirp.setDuration(dur)
     chirp.setIntensity(80)
     chirp_signal = chirp.signal(fs, 0, refdb, refv)
 
-    time_list = []
+    # use another type of stimulus to apply calibration to
+    # really could just try this against the same signal witha different
+    # samplerate, but I like to use the vocal file anyways
     vocal_fs = 375000
     tempfile = os.path.join(os.path.expanduser('~'), 'EjM_Vox_plus.json')
     with open(tempfile, 'r') as fh:
@@ -105,6 +121,8 @@ if __name__ == "__main__":
     stim.setReferenceVoltage(110, 1.0)
     vocal_signal = stim.signal()[0]
 
+    # Run the timed calibration executions for each test stimulus
+    time_list = []
     for cal_params in calibration_methods:
         start = time.time()
         for i in range(nsignals):
@@ -123,13 +141,14 @@ if __name__ == "__main__":
                                                  cal_params['method'])
         tdif = time.time() - start
         cal_params['vocal_time'] = np.around(tdif,3)
-#####################################
-# Report results
-#####################################
+
+    #####################################
+    # Report results
+    #####################################
     app = QtGui.QApplication(sys.argv)
 
     
-# Table of results error =======================
+    # Table of results times =======================
 
     column_headers = ['method', 'signal', 'truncation', 'len', 'vocal_time', 'chirp_time']
     table = QtGui.QTableWidget(len(calibration_methods), len(column_headers))
@@ -145,6 +164,22 @@ if __name__ == "__main__":
 
     table.setSortingEnabled(True)
     table.show()
-    trend_plot = SimplePlotWidget(FILTER_LEN, time_list[1:])
-    trend_plot.show()
+
+    # show a plot for the times results for the calibrated chirp
+    # trend_plot = SimplePlotWidget(FILTER_LEN, time_list[1:])
+    # trend_plot.show()
+
+    pw = pg.PlotWidget()
+    pw.plot(FILTER_LEN, time_list[1:], pen={'color':'b', 'width':3})
+    pw.plot([FILTER_LEN[-1]], [time_list[0]], symbol='x', symbolPen='b')
+    style = {'font-size':'16pt'}
+    pw.setLabel('left', 'Execution time (s)', **style)
+    pw.setLabel('bottom', 'Filter Length (no. of samples)', **style)
+    pw.setTitle('<span style="font-size:20pt">Filter Length Effect on Calibration Performance</span>', **style)
+    font = QtGui.QFont()
+    font.setPointSize(12)
+    pw.getAxis('bottom').setTickFont(font)
+    pw.getAxis('left').setTickFont(font)
+    pw.show()
+
     sys.exit(app.exec_())
