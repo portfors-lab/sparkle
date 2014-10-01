@@ -1,3 +1,7 @@
+"""Runs a super long protocol acquisition (longer than should be 
+expected really), to check that no errors happen and data gets recorded
+"""
+
 import os
 import json
 import glob

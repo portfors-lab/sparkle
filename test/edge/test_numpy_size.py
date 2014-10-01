@@ -1,3 +1,5 @@
+"""Sanity test to check different RAM limits for 32 or
+64-bit python with numpy arrays with a size of a reasonable stimulus"""
 import numpy as np
 
 if __name__ == "__main__":

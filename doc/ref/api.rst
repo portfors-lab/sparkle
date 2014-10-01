@@ -65,7 +65,7 @@ Speaker Calibration
 
 This program uses a digital filter to compensate for high frequency speaker roll-off. A broad-spectrum control signal (frequency sweep) is generated and recorded back using :class:`CalibrationRunner<spikeylab.run.calibration_runner.CalibrationRunner>`, which also generates the system frequency response from this recorded signal.
 
-The frequency response for the system is derived via :func:`attenuation_curve<spikeylab.tools.audiotools.attenuation_curve>` function. The result of this is also presented to the user as an 'attenuation curve'. This frequency response is saved to file, and can used later to generate a new filter kernel. 
+The frequency response for the system is derived via :func:`attenuation_curve<spikeylab.tools.audiotools.attenuation_curve>` function. The result of this is also presented to the user as an 'attenuation curve'. This frequency response is saved to file, and can be used later to generate a new filter kernel. 
 
 The frequency response is given to the different acquisition runner classes which will pass it on to their :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.setCalibration>`. The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<spikeylab.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals.
 
@@ -76,6 +76,16 @@ To see the effect of a calibration, the calibration procedure, or the calibratio
 To compare calibration performance and effectiveness test scripts `calibration_performance.py` and `calibration_eval.py` generate tables to compare run times and error between desired and acheived output signals. These scripts can be found in the test/scripts project folder.
 
 For a more in depth narrative on how this procedure was developed, see this post_, and especially this post__
+
+There are scripts that were used in aid of evaluating the calibration procedure that can be found in the source under *test/scripts*:
+
+    * `calibration_eval.py` : Compares the efficacy of the calibration with varying parameters, such as filter length or smoothing points
+
+    * `calibration_performance.py` : Compares the execution time taken primarily for differing filter length
+
+    * `hardware_attenuation.py` : This simple script just compares the output signal to the input to determine amplitude loss across pure tone frequencies. Intended to be used so that we may determine the signal loss from a signal piece of harware such as an attenuator or amplifier. Another way to investigate this is to analysize the output vs input of a FM sweep signal.
+
+Filter length turned out to be the most influential factor on both filter effectiveness and performance. It is possible to choose a filter length that executes in a shorter amount of time, that still has very good ability to properly adjust signals.
 
 .. _post: http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers/
 __ http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers-Cont/

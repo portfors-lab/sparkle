@@ -1,3 +1,7 @@
+"""Finds the longest protcol length possible for a given
+window size for the current RAM usage -- therefore you get different 
+limits if you are using 64-bit python or 32-bit.
+"""
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 
