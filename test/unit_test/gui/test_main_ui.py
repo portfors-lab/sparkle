@@ -24,6 +24,7 @@ class TestMainSetup():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
+        sample.reset_input_file()
 
     def test_bad_inputs_file(self):
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')

@@ -1,4 +1,5 @@
 import os
+import shutil
 
 def sampledir():
     return os.path.abspath(os.path.dirname(__file__))
@@ -32,3 +33,8 @@ def batlabvocal():
 
 def reallylong():
     return os.path.join(sampledir(), 'ohgodwhenwillitend.json')
+
+def reset_input_file():
+    src = os.path.join(sampledir(), 'inputsstash.json')
+    dest = os.path.join(sampledir(), 'controlinputs.json')
+    shutil.copyfile(src, dest)
