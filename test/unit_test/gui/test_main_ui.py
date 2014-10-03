@@ -30,7 +30,9 @@ class TestMainSetup():
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
         inputsfile = sample.badinputs()
         self.form = MainWindow(datafile=fname, filemode='w', inputsFilename=inputsfile)
+        self.form.ui.plotDock.close()
         self.form.close()
+        QtTest.QTest.qWait(ALLOW)
         # so no errors?
 
 class TestMainUI():
@@ -229,6 +231,7 @@ class TestMainUI():
         pv = self.form.ui.protocolView
 
         stimEditor = self.add_builder_tone()
+        QtTest.QTest.qWait(ALLOW)
         # edit the same tone again
         qtbot.doubleclick(stimEditor.ui.trackview, stimEditor.ui.trackview.model().index(0,0))
         QtTest.QTest.qWait(ALLOW)
@@ -236,6 +239,7 @@ class TestMainUI():
         val = 22
         qtbot.type_msg(str(val))
         QtTest.QTest.qWait(ALLOW)
+
         qtbot.keypress('enter')
         QtTest.QTest.qWait(ALLOW)
         
@@ -249,12 +253,12 @@ class TestMainUI():
 
         # re-open builder, make sure everything is as left it
         qtbot.doubleclick(pv, pv.model().index(0,1))
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(ALLOW*2)
         # need to get new reference to editor -- different instance
         stimEditor = pv.stimEditor
 
         qtbot.doubleclick(stimEditor.ui.trackview, stimEditor.ui.trackview.model().index(0,0))
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(ALLOW*2)
 
         # assert the same value as we last set
         tone = stimModel.data(stimModel.index(0,0))

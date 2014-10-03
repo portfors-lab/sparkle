@@ -64,6 +64,7 @@ class TestProtocolView():
         tag = 'sparkles'
         view, stim = self.createView()
         view.show()
+        QtTest.QTest.qWait(500)
         qtbot.click(view, view.model().index(0,0))
         QtTest.QTest.qWait(ALLOW)
         qtbot.type_msg(tag)
