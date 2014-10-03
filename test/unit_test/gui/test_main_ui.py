@@ -297,6 +297,7 @@ class TestMainUI():
         # stimulus components
         self.form.ui.tabGroup.setCurrentIndex(1)
         stimEditor = self.add_builder_tone()
+        QtTest.QTest.qWait(ALLOW)
         qtbot.click(stimEditor.ui.okBtn)
         QtTest.QTest.qWait(ALLOW)
         self.setup_tc()
