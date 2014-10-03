@@ -18,6 +18,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         super(QAutoParameterModel, self).__init__()
         self.model = model
         self._selectionmap = {}
+        self._headers = ['parameter', 'start', 'stop', 'step', 'nsteps']
 
     def headerData(self, section, orientation, role):
         """Gets the Header for the columns in the table
@@ -29,7 +30,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         """
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
-                return self.model.header(section)
+                return self._headers[section]
 
     def rowCount(self, parent=QtCore.QModelIndex()):
         """Determines the numbers of rows the view will draw
@@ -43,7 +44,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
 
         Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
         """
-        return self.model.ncols()
+        return len(self._headers)
 
     def clearParameters(self):
         """Removes all parameters from model"""
@@ -59,7 +60,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         """
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             row = index.row()
-            field = self.model.header(index.column())
+            field = self._headers[index.column()]
             return self.model.scaledValue(row, field)
         elif role == QtCore.Qt.ToolTipRole:
             if 1 <= index.column() <= 3:
@@ -97,7 +98,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
                 value = value.toPyObject()
             elif isinstance(value, QtCore.QString):
                 value = str(value)
-            self.model.setScaledValue(index.row(), self.model.header(index.column()), value)
+            self.model.setScaledValue(index.row(), self._headers[index.column()], value)
             self.countChanged.emit()
         elif role == QtCore.Qt.UserRole:
             print "replace all values"
@@ -114,7 +115,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         """
         col = index.column()
         row = index.row()
-        return self.model.isFieldValid(row, self.model.header(col))
+        return self.model.isFieldValid(row, self._headers[index.column()])
 
     def findFileParam(self, comp):
         """wrapper for :meth:`findFileParam<spikeylab.stim.auto_parameter_model.AutoParameterModel.findFileParam>`"""

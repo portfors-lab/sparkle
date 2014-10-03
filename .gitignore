@@ -4,8 +4,6 @@
 
 # user specification files
 inputs.cfg
-calibration_dbdata.npy
-calibration_frq.npy
 *.log
 *.log.*
 

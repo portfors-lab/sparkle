@@ -1,32 +1,58 @@
 import numpy as np
 
 class AutoParameterModel():
+    """Model to hold all the necessary information to generate
+    auto-tests, where parameters of components are systematically
+    manipulated
+    """
     def __init__(self):
         self._parameters = []
-        self._headers = ['parameter', 'start', 'stop', 'step', 'nsteps']
-
-    def header(self, column):
-        return self._headers[column]
 
     def nrows(self):
+        """The number of auto-parameters
+
+        :returns: int -- parameter count
+        """
         return len(self._parameters)
 
-    def ncols(self):
-        return 5
-
     def clearParameters(self):
+        """Clears all parameters out of this model"""
         self._parameters = []
 
     def param(self, row):
+        """Gets the parameter indexed by *row*
+
+        :param row: the ith parameter number
+        :type row: int
+        :returns: dict -- the parameter
+        """
         return self._parameters[row]
 
     def selection(self, row):
+        """Gets the component selection for parameter number *row*
+        
+        :param row: the ith parameter number
+        :type row: int
+        :returns: list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`>
+        """
         return self._parameters[row]['selection']
 
     def allData(self):
+        """Gets a list of all the parameters in this model
+
+        :returns: list<dict> -- all parameters
+        """
         return self._parameters
 
     def toggleSelection(self, row, component):
+        """Toggles the *component* in or out of the selection 
+        for parameter *row*
+
+        :param row: the ith parameter number
+        :type row: int
+        :param component: the component to toggle its selection membership
+        :type component: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`
+        """
         selection = self._parameters[row]['selection']
         if component in selection:
             selection.remove(component)
@@ -34,6 +60,17 @@ class AutoParameterModel():
             selection.append(component)
 
     def setScaledValue(self, row, field, value):
+        """Converts the *value* for *field* in the parameter
+        indexed by *row*, according to that parameters internally
+        stored multiplier and assigns the converted value to that
+        parameter
+
+        :param row: the ith parameter number
+        :type row: int
+        :param field: detail of the parameter to set
+        :type field: str
+        :param value: pre-scaled value to assign to field
+        """
         if self._parameters[row]['parameter'] == 'file':
             return # cannot be set this way?
         if field == 'parameter':
@@ -54,6 +91,16 @@ class AutoParameterModel():
                     self.setParamValue(row, **kwd)
 
     def scaledValue(self, row, field):
+        """Scales the value in *field* in the parameter
+        indexed by *row*, according to that parameters internally
+        stored multiplier and returns it
+
+        :param row: the ith parameter number
+        :type row: int
+        :param field: detail of the parameter to set
+        :type field: str
+        :returns: value -- type appropriate to parameter
+        """
         if field == 'parameter':            
             return self.paramValue(row, field)
         elif field in ['start', 'stop', 'step']:
@@ -68,28 +115,56 @@ class AutoParameterModel():
             return self.numSteps(row)
 
     def setParamValue(self, row, **kwargs):
-        # param_copy = self._parameters[row].copy()
+        """Sets the arguments as field=val for parameter
+        indexed by *row*. No scaling applied.
+
+        :param row: the ith parameter number
+        :type row: int
+        """
         param = self._parameters[row]
         for key, val in kwargs.items():
             param[key] = val
-        #     param_copy[key] = val
-        # if self.verify_row(param_copy):
-        #     self._parameters[row] = param_copy
 
     def paramValue(self, row, field):
+        """Gets the value for *field* for parameter indexed by
+        *row*. No scaling appplied.
+        
+        :param row: the ith parameter number
+        :type row: int
+        :param field: detail of the parameter to set
+        :type field: str
+        :returns: value -- type appropriate to parameter
+        """
+
         param = self._parameters[row]
         return param[field]
 
     def overwriteParam(self, row, param):
+        """Assigns *param* to index *row*, overwritting the
+        parameter at that location
+
+        :param row: the ith parameter number
+        :type row: int
+        :param param: parameter to set
+        :type param: dict
+        """
         if row == -1:
             row = self.nrows() - 1
         self._parameters[row] = param
 
     def numSteps(self, row):
+        """Gets the number of steps for the parameter at 
+        index *row* will yeild
+        """
         param = self._parameters[row]
         return self.nStepsForParam(param)
 
     def nStepsForParam(self, param):
+        """Gets the number of steps *parameter* will yeild
+
+        :param param: parameter to get the expansion count for
+        :type param: dict
+        """
         if param['parameter'] == 'file':
             return len(param['names'])
         else:
@@ -106,6 +181,17 @@ class AutoParameterModel():
             return item
         
     def getDetail(self, row, detail_field):
+        """Gets the value of the detail *detail_field* of paramter
+        at index *row* from its selected components `auto_details`.
+        All of the selected components value for *detail_field* must
+        match
+
+        :param row: the ith parameter number
+        :type row: int
+        :param detail_field: auto_details member key
+        :type detail_field: str
+        :returns: value type appropriate for parameter
+        """
         param = self._parameters[row]
         param_type = param['parameter']
         components = param['selection']
@@ -128,6 +214,15 @@ class AutoParameterModel():
         return matching_details.pop()
 
     def isFieldValid(self, row, field):
+        """Verifies the value in *field* for parameter at index 
+        *row*
+
+        :param row: the ith parameter number
+        :type row: int
+        :param field: detail of the parameter to check
+        :type field: str
+        :returns: bool -- True if valid
+        """
         param = self._parameters[row]
         if param['parameter'] == '':
             return False
@@ -142,11 +237,27 @@ class AutoParameterModel():
         return self.checkLimits(row, param[field])
 
     def findFileParam(self, comp):
+        """Finds the filename auto-parameter that component *comp* is
+        in, and returns all the filenames for that parameter. Notes this
+        assumes that *comp* will only be in a single filename auto-parameter.
+
+        :param comp: Component to search parameter membership for
+        :type comp: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`
+        :returns: list<str> -- filenames the found parameter will loop through
+        """
         for p in self._parameters:
             if p['parameter'] == 'file' and comp in p['selection']:
                 return p['names']
 
     def checkLimits(self, row, value):
+        """Check that *value* is within the minimum and maximum allowable 
+        range for the parameter at index *row*
+
+        :param row: the ith parameter number
+        :type row: int
+        :param value: the candidate value to for start or stop fields
+        :returns: bool -- True if *value* within range
+        """
         # extract the selected component names
         param = self._parameters[row]
         components = param['selection']
@@ -174,9 +285,19 @@ class AutoParameterModel():
             return False 
 
     def setParameterList(self, paramlist):
+        """Clears and sets all parameters to *paramlist*
+
+        :param paramlist: all parameters for this model to have
+        :type paramlist: list<dict>
+        """
         self._parameters = paramlist
 
     def insertRow(self, position):
+        """Inserts an empty parameter at index *position*
+
+        :param position: order to insert new parameter to
+        :type position: int
+        """
         if position == -1:
             position = self.nrows()
         defaultparam = { 'start': 0,
@@ -188,14 +309,32 @@ class AutoParameterModel():
         self._parameters.insert(position, defaultparam)
 
     def removeRow(self, position):
+        """Removes the parameter at index *position*
+
+        :param position: the parameter index
+        :type position: int
+        :returns: dict -- the removed parameter
+        """
         p = self._parameters.pop(position)
         return p
 
     def selectedParameterTypes(self, row):
+        """Gets a list of the intersection of the editable properties in the parameteter *param*'s
+        component selection. E.g. ['frequency', 'intensity']
+
+        :param row: the ith parameter number
+        :type row: int
+        :returns: list<str> -- a list of AbstractStimulusComponent attribute names
+        """
         param = self._parameters[row]
         return self._selectionParameters(param)
 
     def ranges(self):
+        """The expanded lists of values generated from the parameter fields
+
+        :returns: list<list>, outer list is for each parameter, inner loops are that
+        parameter's values to loop through
+        """
         steps = []
         for p in self._parameters:
             # inclusive range
@@ -227,11 +366,7 @@ class AutoParameterModel():
         return steps
 
     def _selectionParameters(self, param):
-        """Gets a list of the intersection of the editable properties in the parameteter *param*'s
-        component selection. E.g. ['frequency', 'intensity']
-
-        :returns: list<str> -- a list of AbstractStimulusComponent attribute names
-        """
+        """see docstring for selectedParameterTypes"""
         components = param['selection']
         if len(components) == 0:
             return []
@@ -256,7 +391,10 @@ class AutoParameterModel():
 
     def fileParameter(self, comp):
         """Returns the row which component *comp* can be found in the 
-        selections of, and is also a file parameter"""
+        selections of, and is also a file parameter
+
+        :returns: int -- the index of the (filename) parameter *comp* is a member of 
+        """
         for row in range(self.nrows()):
             p = self._parameters[row]
             if p['parameter'] == 'file':
@@ -265,10 +403,17 @@ class AutoParameterModel():
                     return row
 
     def editableRow(self, row):
+        """Returns whether parameter at index *row* is editable
+
+        :returns: bool -- True if values can be manipulated
+        """
         return self._parameters[row]['parameter'] != 'file'
 
     def verify(self):
-        # for param in self._parameters:
+        """Checks all parameters for invalidating conditions
+
+        :returns: str -- message if error, 0 otherwise
+        """
         for row in range(self.nrows()):
             result = self.verify_row(row)
             if result != 0:
@@ -276,6 +421,10 @@ class AutoParameterModel():
         return 0
 
     def verify_row(self, row):
+        """Checks parameter at index *row* for invalidating conditions
+
+        :returns: str -- message if error, 0 otherwise
+        """
         param = self._parameters[row]
         if param['parameter'] == '':
             return "Auto-parameter type undefined"
