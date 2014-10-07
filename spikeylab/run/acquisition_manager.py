@@ -134,6 +134,8 @@ class AcquisitionManager():
             if stim.name == 'Pure Tone':
                 stim.set('frequency', freq)
                 stim.set('intensity', db)
+                # make it so that we output the target voltage regardless
+                self.cal_toner.set(caldb=stim.intensity())
         self.cal_toner.set_stim_by_index(self.cal_tone_idx)
 
     def set_calibration(self, datakey, calf=None, frange=None):
@@ -261,6 +263,8 @@ class AcquisitionManager():
         self.bs_calibrator.set(**kwargs)
         self.tone_calibrator.set(**kwargs)
         self.charter.set(**kwargs)
+        if 'caldb' in kwargs:
+            kwargs.pop('caldb')
         self.cal_toner.set(**kwargs)
 
     def set_stim_by_index(self, index):

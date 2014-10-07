@@ -13,6 +13,9 @@ VERBOSE = False
 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 mphone_sensitivity = config['microphone_sensitivity']
+if not config['use_rms']:
+    # we are using peak amplitude, mphone sensitivity is in RMS
+    mphone_sensitivity = mphone_sensitivity/0.70710678118654757
 
 def calc_db(peak, cal_peak=None):
     u""" 
