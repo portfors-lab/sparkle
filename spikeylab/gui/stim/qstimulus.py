@@ -136,6 +136,10 @@ class QStimulusModel(QtCore.QAbstractItemModel):
 
         self.samplerateChanged.emit(self._stim.samplerate())
 
+    def insertItem(self, index, comp):
+        """Alias for `insertComponent`, as required by AbstractDragView"""
+        self.insertComponent(index, comp)
+
     def removeComponent(self, index):
         """Removes the component at *index* from the model. If the two last
         rows are now empty, trims the last row."""
