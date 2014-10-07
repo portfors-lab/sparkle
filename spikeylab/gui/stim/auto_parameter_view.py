@@ -49,6 +49,9 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         index = self.indexAt(event.pos())
         if index.isValid():
             self.selectRow(index.row())
+            # selecting the row sets the current index to 0,0 for tab
+            # order to work correctly, we must set the current index
+            self.setCurrentIndex(index)
             self.parameterChanged.emit(self.model().selection(index))
             self.edit(index, QtGui.QAbstractItemView.DoubleClicked, event)
         super(AutoParameterTableView, self).mousePressEvent(event)
