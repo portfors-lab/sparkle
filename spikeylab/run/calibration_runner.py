@@ -6,7 +6,7 @@ import numpy as np
 
 from spikeylab.run.list_runner import ListAcquisitionRunner
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep, PureTone
-from spikeylab.tools.audiotools import attenuation_curve, calc_spectrum, get_peak, calc_db
+from spikeylab.tools.audiotools import attenuation_curve, calc_spectrum, get_peak, calc_db, rms
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.factory import CCFactory
@@ -281,7 +281,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         # peak_fft = spec_peak_at_f[0]
 
         if USE_RMS:
-            vamp = np.sqrt(np.mean(pow(response,2))) #/ np.sqrt(2)
+            vamp = rms(response, self.player.get_aisr())
         else:
             vamp = np.amax(abs(response))
 

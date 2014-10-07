@@ -463,11 +463,23 @@ def audiorate(filename):
     wf.close()
     return fs
 
-def rms(signal):
+def rms(signal, fs):
     """Returns the root mean square (RMS) of the given *signal*
 
     :param signal: a vector of electric potential
     :type signal: numpy.ndarray
+    :param fs: samplerate of the signal (Hz)
+    :type fs: int
     :returns: float -- the RMS value of the signal
     """
-    return np.sqrt(np.mean(pow(signal,2)))
+    # if a signal contains a some silence, taking the RMS of the whole
+    # signal will be calculated as less loud as a signal without a silent
+    # period. I don't like this, so I am going to chunk the signals, and
+    # take the value of the most intense chunk
+    chunk_time = 0.001 # 1 ms chunk
+    chunk_samps = int(chunk_time*fs)
+    amps = []
+    for i in range(0, len(signal)-chunk_samps, chunk_samps):
+        amps.append(np.sqrt(np.mean(pow(signal[i:i+chunk_samps],2))))
+    amps.append(np.sqrt(np.mean(pow(signal[len(signal)-chunk_samps:],2))))
+    return np.amax(amps)

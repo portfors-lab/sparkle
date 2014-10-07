@@ -177,7 +177,7 @@ class Vocalization(AbstractStimulusComponent):
         wavdata = wavdata[:desired_npts]
 
         if USE_RMS:
-            amp_scale = rms(wavdata)
+            amp_scale = rms(wavdata, sr)
         else:
             amp_scale = np.amax(wavdata)
         signal = ((wavdata/amp_scale)*self.amplitude(caldb, calv))
@@ -240,7 +240,7 @@ class WhiteNoise(AbstractStimulusComponent):
         
         amp = self.amplitude(caldb, calv)
         if USE_RMS:
-            amp_scale = rms(signal)
+            amp_scale = rms(signal, fs)
         else:
             amp_scale = np.amax(signal)
 

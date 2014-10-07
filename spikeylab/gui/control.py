@@ -11,7 +11,7 @@ from spikeylab.acq.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
             ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.run.acquisition_manager import AcquisitionManager
-from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread
+from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread, rms
 from spikeylab.gui.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.gui.wait_widget import WaitWidget
@@ -490,10 +490,10 @@ class MainWindow(ControlWindow):
             self.display.updateSpiketrace(times, response)
         elif self.ui.plotDock.current() == 'calexp':
             # convert voltage amplitudes into dB SPL    
-            rms = np.sqrt(np.mean(pow(response,2))) / np.sqrt(2)
-            masterdb = calc_db(rms)
-
             sr = self.ui.aisrSpnbx.value()*self.fscale
+            amp = rms(response, sr)
+            masterdb = calc_db(amp)
+
             freq, signal_fft = calc_spectrum(response, sr)
             spectrum = calc_db(signal_fft)
             spectrum[0] = 0
@@ -504,9 +504,9 @@ class MainWindow(ControlWindow):
             self.extendedDisplay.updateFft(freq, spectrum, plot='response')
             self.extendedDisplay.updateSpec(response, sr, plot='response')
 
-    def displayCalibrationResponse(self, spectrum, freqs, rms):
+    def displayCalibrationResponse(self, spectrum, freqs, amp):
 
-        masterdb = calc_db(rms)
+        masterdb = calc_db(amp)
         spectrum = calc_db(spectrum)
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
