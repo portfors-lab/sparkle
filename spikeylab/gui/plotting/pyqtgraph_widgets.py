@@ -351,6 +351,7 @@ class SpecWidget(BasePlot):
             self.editor.getHistogramWidget().item.setLevels(*self.imgArgs['levels'])
         
         self.editor.closeEvent = self._editor_close
+        self.editor.setWindowModality(QtCore.Qt.ApplicationModal)
         self.editor.show()
 
     def _editor_close(self, event):
