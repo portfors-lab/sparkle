@@ -2,9 +2,12 @@ import sys, time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from spikeylab.acq.players import FinitePlayer
-
 from PyQt4 import QtGui, QtCore
+
+from spikeylab.acq.players import FinitePlayer
+from spikeylab.stim.types.stimuli_classes import PureTone
+from spikeylab.tools.audiotools import calc_db, calc_spectrum, \
+                            convolve_filter, multiply_frequencies
 
 class MyTableWidgetItem(QtGui.QTableWidgetItem):
     def __lt__(self, other):
@@ -97,3 +100,44 @@ def play_record(sig, fs):
     player.stop()
     return np.mean(reps, axis=0)
 
+
+def apply_calibration(sig, fs, frange, calibration):
+    """Takes the given *calibration* and applies to to signal *sig*, 
+    implicitly determining calibration method by type of *calibration*
+    """
+    if isinstance(calibration, tuple):
+        calfqs, calvals = calibration
+        return multiply_frequencies(sig, fs, frange, calfqs, calvals)
+    elif calibration is not None:
+        return convolve_filter(sig, calibration)
+    else:
+        # calibration is none, means use uncalibrated signal
+        return sig
+
+def run_tone_curve(frequencies, intensities, player, fs, duration, 
+               refdb, refv, calibration, frange):
+    """Runs a calibration tone curve"""
+    tone = PureTone()
+    tone.setRisefall(0.003)
+    vfunc = np.vectorize(calc_db)
+
+    player.set_aidur(duration)
+    player.set_aisr(fs)
+    tone.setDuration(duration)
+
+    testpeaks = np.zeros((len(intensities), len(frequencies)))
+
+    for db_idx, ti in enumerate(intensities):
+        tone.setIntensity(ti)
+        for freq_idx, tf in enumerate(frequencies):
+            sys.stdout.write('.') # print without spaces
+            tone.setFrequency(tf)
+            calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
+                                                fs, frange, calibration)
+            mean_response = record(player, calibrated_tone, fs)
+            freqs, spectrum = calc_spectrum(mean_response, fs)
+            mag = spectrum[(np.abs(freqs-tf)).argmin()]
+            testpeaks[db_idx, freq_idx] = mag
+
+    testcurve_db = vfunc(testpeaks)
+    return testcurve_db

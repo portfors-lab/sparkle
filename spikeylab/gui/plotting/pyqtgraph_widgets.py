@@ -406,15 +406,18 @@ class SimplePlotWidget(BasePlot):
     """Generic Plot Widget"""
     def __init__(self, xdata, ydata, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
+        self.appendRows(xdata, ydata)
+        self.resize(800,500)
+
+    def appendRows(self, xdata, ydata, color='b'):
         ydata = np.squeeze(ydata)
         if len(ydata.shape) > 1:
             for row in ydata:
-                self.appendData(xdata, row)
+                self.appendData(xdata, row, color=color)
         else:
-            self.pdi = self.plot(xdata, ydata, pen='b')
-        self.resize(800,500)
+            self.appendData(xdata, ydata, color=color)
 
-    def appendData(self, xdata, ydata):
+    def appendData(self, xdata, ydata, color='b'):
         """Adds the data to the plot
 
         :param xdata: index values for data, plotted on x-axis
@@ -422,7 +425,7 @@ class SimplePlotWidget(BasePlot):
         :param ydata: value data to plot, dimension must match xdata
         :type ydata: numpy.ndarray
         """
-        self.plot(xdata, ydata, pen='b')
+        self.plot(xdata, ydata, pen=color)
 
     def setLabels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         """Sets the plot labels

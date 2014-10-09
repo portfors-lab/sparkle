@@ -6,7 +6,8 @@ import numpy as np
 
 from spikeylab.run.list_runner import ListAcquisitionRunner
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep, PureTone
-from spikeylab.tools.audiotools import attenuation_curve, calc_spectrum, get_peak, calc_db, rms
+from spikeylab.tools.audiotools import attenuation_curve, calc_spectrum, \
+                                         calc_db, signal_amplitude
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.factory import CCFactory
@@ -164,19 +165,15 @@ class CalibrationRunner(AbstractCalibrationRunner):
                              }
             self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
                                        relevant_info)
-
         else:
             # delete the data saved to file thus far.
             self.datafile.delete_group(self.current_dataset_name)
         return diffdB, self.current_dataset_name, self.calf
 
 
-# wether to use relative peak level (from FFT), or calculate from
+# whether to use relative peak level (from FFT), or calculate from
 # microphone sensitivity level
 USE_FFT = True
-with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
-    config = yaml.load(yf)
-USE_RMS = config['use_rms']
 
 class CalibrationCurveRunner(AbstractCalibrationRunner):
     """Handles the presentaion of a 'traditional' style calibration
@@ -262,28 +259,16 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         self.peak_avg = []
 
     def _process_response(self, response, trace_info, irep):
-        freq, spectrum = calc_spectrum(response, self.player.aisr)
-
         f = trace_info['components'][0]['frequency'] #only the one component (PureTone)
         db = trace_info['components'][0]['intensity']
         # print 'f', f, 'db', db
         
-        # spec_max, max_freq = get_peak(spectrum, freq)
-        # get closest frequency to target
+        # target frequency amplitude
+        freq, spectrum = calc_spectrum(response, self.player.get_aisr())
         peak_fft = spectrum[(np.abs(freq-f)).argmin()]
 
-        # spec_peak_at_f = spectrum[freq==f]
-        # if len(spec_peak_at_f) != 1:
-        #     print u"COULD NOT FIND TARGET FREQUENCY ",f
-        #     print 'target', f, 'freqs', freq
-        #     spec_peak_at_f = np.array([-1])
-            # self._halt = True
-        # peak_fft = spec_peak_at_f[0]
-
-        if USE_RMS:
-            vamp = rms(response, self.player.get_aisr())
-        else:
-            vamp = np.amax(abs(response))
+        # signal amplitude
+        vamp = signal_amplitude(response, self.player.get_aisr())
 
         if self.trace_counter >= 0:
             if irep == 0:
@@ -296,7 +281,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
             if self.save_data:
 
                 self.datafile.append(self.current_dataset_name, response)
-                self.datafile.append(self.current_dataset_name, spec_peak_at_f, 
+                self.datafile.append(self.current_dataset_name, peak_fft, 
                                      nested_name='fft_peaks')
                 self.datafile.append(self.current_dataset_name, np.array([vamp]), 
                                      nested_name='vamp')
@@ -312,7 +297,8 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
             self.peak_avg.append(vamp)
         if irep == self.nreps-1:
             mean_peak = np.mean(self.peak_avg)
-            if f == self.calf and db == self.caldb and self.trace_counter == -1:
+            print 'peak fft', mean_peak
+            if self.trace_counter == -1:
                 # this always is the first trace
                 self.calpeak = mean_peak
                 self.trace_counter +=1

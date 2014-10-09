@@ -13,7 +13,8 @@ VERBOSE = False
 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 mphone_sensitivity = config['microphone_sensitivity']
-if not config['use_rms']:
+USE_RMS = config['use_rms']
+if not USE_RMS:
     # we are using peak amplitude, mphone sensitivity is in RMS
     mphone_sensitivity = mphone_sensitivity/0.70710678118654757
 
@@ -47,25 +48,6 @@ def calc_spectrum(signal,rate):
     #print('freq len ', len(freq))
     return freq, abs(sp)
 
-def get_peak(y, idx, atfrequency=None):
-    """ 
-    Find the peak value for the input vector
-    
-    :param y: data vector
-    :type y: numpy.ndarray
-    :param idx: index values for y
-    :type y: numpy.ndarray
-    :returns: (int, int) peak value and the value of the index it was found at
-    """
-    if atfrequency is None:
-        maxidx = y.argmax(axis=0)
-        f = idx[maxidx]
-        spec_peak = np.amax(y)
-    else:
-        f = atfrequency
-        spec_peak = y[idx==f]
-    return spec_peak, f
-
 def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
     """
     Produce a pure tone signal 
@@ -95,6 +77,8 @@ def make_tone(freq,db,dur,risefall,samplerate, caldb=100, calv=0.1):
 
     npts = int(dur * samplerate)
     amp = (10 ** ((db-caldb)/20)*calv)
+    if USE_RMS:
+        amp = amp*1.414213562373
 
     if VERBOSE:
         print("current dB: {}, fs: {}, current frequency: {} kHz, AO Amp: {:.6f}".format(db, samplerate, freq/1000, amp))
@@ -143,8 +127,8 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
     duration = len(wavdata)/sr
 
     if VERBOSE:
-        rms = np.sqrt(np.mean(pow(wavdata,2))) / np.sqrt(2)
-        print 'RMS of input signal to spectrogram', rms
+        amp = rms(wavdata, sr)
+        print 'RMS of input signal to spectrogram', amp
 
     # normalize
     if len(wavdata) > 0 and np.max(abs(wavdata)) != 0:
@@ -486,3 +470,10 @@ def rms(signal, fs):
         amps.append(np.sqrt(np.mean(pow(signal[i:i+chunk_samps],2))))
     amps.append(np.sqrt(np.mean(pow(signal[len(signal)-chunk_samps:],2))))
     return np.amax(amps)
+
+def signal_amplitude(signal, fs):
+    if USE_RMS:
+        amp = rms(signal, fs)
+    else:
+        amp = np.amax(abs(signal))
+    return amp

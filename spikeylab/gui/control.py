@@ -11,7 +11,7 @@ from spikeylab.acq.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
             ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.run.acquisition_manager import AcquisitionManager
-from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread, rms
+from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread, signal_amplitude
 from spikeylab.gui.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.gui.wait_widget import WaitWidget
@@ -491,7 +491,7 @@ class MainWindow(ControlWindow):
         elif self.ui.plotDock.current() == 'calexp':
             # convert voltage amplitudes into dB SPL    
             sr = self.ui.aisrSpnbx.value()*self.fscale
-            amp = rms(response, sr)
+            amp = signal_amplitude(response, sr)
             masterdb = calc_db(amp)
 
             freq, signal_fft = calc_spectrum(response, sr)

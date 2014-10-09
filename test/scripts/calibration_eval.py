@@ -1,3 +1,9 @@
+"""Evalues the calibration procedure for efficacy, allowing manipulation
+of many different parameter that could affect this. Measures the error
+betweent the desired and recorded signals. Produces a table and plots of 
+results.
+"""
+
 import sys, time
 import numpy as np
 
@@ -8,10 +14,10 @@ from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
 from spikeylab.gui.plotting.pyqtgraph_widgets import StackedPlot, SimplePlotWidget
 from spikeylab.tools.audiotools import tukey, impulse_response, \
-                convolve_filter, smooth, attenuation_curve, multiply_frequencies, \
-                calc_db, rms
+                smooth, attenuation_curve, calc_db, signal_amplitude, calc_spectrum
 
-from test.scripts.util import calc_error, record, MyTableWidgetItem
+from test.scripts.util import calc_error, record, MyTableWidgetItem, \
+                              apply_calibration, run_tone_curve
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -31,31 +37,27 @@ DURATIONS = [0.2]
 SAMPLERATES = [5e5]
 # FILTER_LEN = [2**10, 2**11, 2**12, 2**14, 2**15, 2**16, 0.2*5e5]
 FILTER_LEN = range(50, 8500, 50)
+FILTER_LEN = [2**14]
 # SAMPLERATES = [2e5, 3e5, 4e5, 5e5]
 
-TONE_CURVE = False
+TONE_CURVE = True
 PLOT_RESULTS = True
 
 # method 1 Tone Curve
-refv = 0.5 # Volts
-refdb = 83 # dB SPL
-calf = 15000
+refv = 2.0 # Volts
+refdb = 99.6 # dB SPL
+calf = 17000
 
-def apply_calibration(sig, fs, frange, calfqs, calvals, method):
-    if method == 'multiply':
-        return multiply_frequencies(sig, fs, frange, calfqs, calvals)
-    elif method == 'convolve':
-        return convolve_filter(sig, calvals)
-    else:
-        raise Exception("Unknown calibration method: {}".format(method))
-
+test_intensity = 70
+    
 if __name__ == "__main__":
 
     # for running a manual calibration curve. Gets a measure of how
-    # acurate the intensity calculation is
-    tone_frequencies = range(5000, 100000, 2000)
-    # tone_frequencies = [5000, calf, 50000, 100000]
-    tone_intensities = [50, 60, 70, 80, 90, 100]
+    # acurate the intensity calculation is (for pure tones at least)
+    # tone_frequencies = range(5000, 100000, 2000)
+    tone_frequencies = [5000, calf, 50000, 100000]
+    # tone_intensities = [50, 60, 70, 80, 90, 100]
+    tone_intensities = [70, 80]
     frange = [3750, 101250] # range to apply calibration to
 
     player = FinitePlayer()
@@ -83,7 +85,7 @@ if __name__ == "__main__":
 
             # White Noise
             wn.setDuration(dur)
-            wn.setIntensity(refdb)
+            wn.setIntensity(test_intensity)
             wn_signal = wn.signal(fs, 0, refdb, refv)
 
             # control stim, witout calibration
@@ -95,7 +97,7 @@ if __name__ == "__main__":
 
             # Frequency Modulated Sweep
             chirp.setDuration(dur)
-            chirp.setIntensity(refdb)
+            chirp.setIntensity(test_intensity)
             chirp.setStartFrequency(4000)
             chirp.setStopFrequency(101000)
             chirp_signal = chirp.signal(fs, 0, refdb, refv)
@@ -114,14 +116,15 @@ if __name__ == "__main__":
             freqq[(dur, fs)] = freqs
 
     # create dicts that collect all the test run parameters that we can then
-    # just loop through and time the execution for calibrations with the contained parameters
-    # makes for simpler reporting later
+    # just loop through and time the execution for calibrations with the 
+    # contained parameters makes for simpler reporting later
     calibration_methods = []
     # using noise to determine the frequency response 
     if NOISE_CAL:
         for durfs, signals in noise_signals.items():
             # generate unsmoothed calibration attenuation vector
-            noise_curve_db = attenuation_curve(signals[0], signals[1], durfs[1], calf, smooth_pts=0)
+            noise_curve_db = attenuation_curve(signals[0], signals[1], 
+                                        durfs[1], calf, smooth_pts=0)
             freqs = freqq[durfs]
             noise_curve_db -= noise_curve_db[freqs == calf]
             info = {'signal':'noise', 'durfs': durfs}
@@ -150,11 +153,20 @@ if __name__ == "__main__":
                         info['calibration'] = ir
                         calibration_methods.append(info.copy())
 
+            # control : no calibration
+            info['method'] = None
+            info['truncation'] = None
+            info['len'] = 0
+            info['smoothing'] = None
+            info['time'] = 0
+            info['calibration'] = None
+            calibration_methods.append(info.copy())
 
     # do the same thing using the chirp signal to determine the frequency response
     if CHIRP_CAL:
         for durfs, signals in chirp_signals.items():
-            chirp_curve_db = attenuation_curve(signals[0], signals[1], durfs[1], calf, smooth_pts=0)
+            chirp_curve_db = attenuation_curve(signals[0], signals[1], 
+                                        durfs[1], calf, smooth_pts=0)
             freqs = freqq[durfs]    
             chirp_curve_db -= chirp_curve_db[freqs == calf]
             info = {'signal':'chirp', 'durfs': durfs}
@@ -176,17 +188,23 @@ if __name__ == "__main__":
                     info['smoothing'] = sm
                     for trunc in FILTER_LEN:
                         info['truncation'] = trunc
-                        ir = impulse_response(fs, smoothed_attenuations, freqs, frange, trunc)
+                        ir = impulse_response(fs, smoothed_attenuations, freqs,
+                                              frange, trunc)
                         info['len'] = len(ir)
                         info['calibration'] = ir
                         calibration_methods.append(info.copy())
 
+            # control : no calibration
+            info['method'] = None
+            info['truncation'] = None
+            info['len'] = 0
+            info['smoothing'] = None
+            info['calibration'] = None
+            info['time'] = 0
+            calibration_methods.append(info.copy())
+
     print 'number of cals to perform', len(calibration_methods)
     if TONE_CURVE:
-
-        tone = PureTone()
-        tone.setRisefall(0.003)
-        vfunc = np.vectorize(calc_db)
 
         print 'testing calibration curve...'
         counter = 0
@@ -194,45 +212,22 @@ if __name__ == "__main__":
             dur = cal_params['durfs'][0]
             fs = cal_params['durfs'][1]
             freqs = freqq[cal_params['durfs']]
-            npts = dur*fs
-            player.set_aidur(dur)
-            player.set_aisr(fs)
-            tone.setDuration(dur)
 
-            testpeaks = np.zeros((len(tone_intensities), len(tone_frequencies)))
-            print 'running tone curve {}/{}'.format(counter, len(cal_params)),
+            print 'running tone curve {}/{}'.format(counter, len(calibration_methods)-1),
             counter +=1
 
-            # run the calibration frequency tone to get a reference
-            # peak of it's FFT to measure all others against
-            tone.setIntensity(refdb)
-            tone.setFrequency(calf)
-            tone_signal = tone.signal(fs, 0, refdb, refv)
-            mean_response = record(player, tone_signal, fs)
-            spectrum = np.fft.rfft(mean_response)/npts
-            ftp = spectrum[freqs == calf][0]
-            test_peak= abs(ftp)
-            
-            for db_idx, ti in enumerate(tone_intensities):
-                tone.setIntensity(ti)
-                for freq_idx, tf in enumerate(tone_frequencies):
-                    sys.stdout.write('.') # print without spaces
-                    reps = []
-                    tone.setFrequency(tf)
-                    calibrated_tone = apply_calibration(tone.signal(fs, 0, refdb, refv), 
-                                            fs, frange, freqs, cal_params['calibration'],
-                                            cal_params['method'])
-                    mean_response = record(player, calibrated_tone, fs)
-                    spectrum = np.fft.rfft(mean_response)/npts
-                    ftp = spectrum[freqs == tf][0]
-                    mag = abs(ftp)
-                    testpeaks[db_idx, freq_idx] = mag
+            if cal_params['method'] == 'multiply':
+                cal = (freqs, cal_params['calibration'])
+            else: # convolve or none
+                cal = cal_params['calibration']
+            testcurve_db = run_tone_curve(tone_frequencies, tone_intensities, 
+                                          player, fs, dur, refdb, refv, cal,
+                                          frange)
 
-            testcurve_db = vfunc(testpeaks, test_peak) + refdb
             cal_params['tone_curve'] = testcurve_db
-            print
+            print #newline
 
-        print '\ntest curves finished'
+        print 'test curves finished\n'
 
     errs_list = []
     # run each calibration on a chirp signal
@@ -245,36 +240,24 @@ if __name__ == "__main__":
         player.set_aidur(dur)
         player.set_aisr(fs)
 
+        if cal_params['method'] == 'multiply':
+            cal = (freqs, cal_params['calibration'])
+        else: # convolve or none
+            cal = cal_params['calibration']
+
         start = time.time()
-        chirp_signal_calibrated = apply_calibration(chirp_signal, fs, frange, 
-                                                 freqs, cal_params['calibration'],
-                                                 cal_params['method'])
+        chirp_signal_calibrated = apply_calibration(chirp_signal, fs, frange, cal)
         tdif = time.time() - start
         # print 'signal maxes', np.max(abs(chirp_signal)), np.amax(abs(chirp_signal_calibrated))
         mean_response = record(player, chirp_signal_calibrated, fs)
         cal_params['chirp_response'] = mean_response
         cal_params['time'] = tdif
-        ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, cal_params['chirp_response'], fs, frange, refdb, refv)
+        ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, 
+                                            cal_params['chirp_response'], 
+                                            fs, frange, refdb, refv)
         cal_params['MAE'] = ctrl_mae
         cal_params['MSE'] = ctrl_err
         cal_params['RMSE'] = ctrl_err_sr
-        errs_list.append(ctrl_err)
-
-    # add uncalibrated to results
-    for durfs, signals in chirp_signals.items():
-        cal_params = {'signal':'chrip', 'durfs': durfs, 'method': None, 
-                'truncation':None, 'len':0, 'smoothing':None,
-                'time':0}
-        dur = durfs[0]
-        fs = durfs[1]
-        cal_params['chirp_response'] = signals[1]
-        chirp.setDuration(dur)
-        chirp_signal = chirp.signal(fs, 0, refdb, refv)
-        ctrl_err, ctrl_err_sr, ctrl_mae = calc_error(chirp_signal, cal_params['chirp_response'], fs, frange, refdb, refv)
-        cal_params['MAE'] = ctrl_mae
-        cal_params['MSE'] = ctrl_err
-        cal_params['RMSE'] = ctrl_err_sr
-        calibration_methods.append(cal_params)
         errs_list.append(ctrl_err)
 
 
@@ -295,29 +278,28 @@ if __name__ == "__main__":
             fig0.setWindowTitle('Tone curve')
             fig0.show()
 
-
         # show all of the chirp results in either signal or spectrogram representation
         fig2 = StackedPlot()
         # just show one desired control signal... whatever the last one was
-        spectrum = abs(np.fft.rfft(chirp_signal)/npts)
-        spectrum = refdb + 20 * np.log10(spectrum/ refv)
+        freqs, spectrum = calc_spectrum(chirp_signal, fs)
+        spectrum = calc_db(spectrum)
         fig2.addPlot(freqs, spectrum, title='desired')
         # fig2.addSpectrogram(chirp_signal, fs, title='desired')
+
         for cal_params in calibration_methods:
             # add a plot for each recorded calibrated signal
-            freqs = freqq[cal_params['durfs']]
             fs = cal_params['durfs'][1]
             ttl = '{}, {}, sm:{}, trunc:{}'.format(cal_params['method'], 
                       cal_params['signal'], cal_params['smoothing'], 
                       cal_params['truncation'])
+
             # fig2.addSpectrogram(cal_params['chirp_response'], fs, title=ttl)
-            spectrum = abs(np.fft.rfft(cal_params['chirp_response'])/npts)
+
+            freqs, spectrum = calc_spectrum(cal_params['chirp_response'], fs)
             # convert spectrum into dB
-            # spectrum = 94 + (20.*np.log10((spectrum/np.sqrt(2))/0.004))
             spectrum = calc_db(spectrum)
-            mag = rms(cal_params['chirp_response'])
+            mag = signal_amplitude(cal_params['chirp_response'], fs)
             masterdb = calc_db(mag)
-            # masterdb = 94 + (20.*np.log10(mag/(0.004)))
             spectrum[0] = 0
             fig2.addPlot(freqs, spectrum, title=ttl)
             print 'chirp received overall db', masterdb
@@ -326,7 +308,8 @@ if __name__ == "__main__":
 
     # Table of results error =======================
 
-    column_headers = ['method', 'signal', 'durfs', 'smoothing', 'truncation', 'len', 'MAE', 'MSE', 'RMSE', 'time', 'test signal']
+    column_headers = ['method', 'signal', 'durfs', 'smoothing', 'truncation',
+                      'len', 'MAE', 'MSE', 'RMSE', 'time', 'test signal']
     table = QtGui.QTableWidget(len(calibration_methods)*2, len(column_headers))
     table.setHorizontalHeaderLabels(column_headers)
 

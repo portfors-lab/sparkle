@@ -12,9 +12,9 @@ from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.stimulus_model import StimulusModel
 # from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from spikeylab.tools.audiotools import tukey, impulse_response, \
-                convolve_filter, attenuation_curve, multiply_frequencies
-from test.scripts.util import calc_error, record, MyTableWidgetItem
+from spikeylab.tools.audiotools import impulse_response, attenuation_curve
+from test.scripts.util import calc_error, record, MyTableWidgetItem, \
+                                apply_calibration
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -36,19 +36,9 @@ nsignals = 200 # number of signals to run calibration on per sample time
 
 frange = [2000, 105000] # range to apply calibration to
 
-# FILTER_LEN = [10.290, 10.291, 10.292, 10.293, 10.294, 10.295]
-# FILTER_LEN = range(24286, 24292)
-FILTER_LEN = [2**6, 2**7, 2**8, 2**9, 2**10, 2**11, 2**12, 2**14, 31072, 31074, 2**15, 2**16, dur*fs]
-# FILTER_LEN = range(1000, int(dur*fs), 1000)
-
-
-def apply_calibration(sig, fs, frange, calfqs, calvals, method):
-    if method == 'multiply':
-        return multiply_frequencies(sig, fs, frange, calfqs, calvals)
-    elif method == 'convolve':
-        return convolve_filter(sig, calvals)
-    else:
-        raise Exception("Unknown calibration method: {}".format(method))
+# FILTER_LENS = range(24286, 24292)
+FILTER_LENS = [2**6, 2**7, 2**8, 2**9, 2**10, 2**11, 2**12, 2**14, 31072, 31074, 2**15, 2**16, dur*fs]
+# FILTER_LENS = range(1000, int(dur*fs), 1000)
 
 if __name__ == "__main__":
     npts = dur*fs
@@ -97,9 +87,9 @@ if __name__ == "__main__":
     # filter length, and save for timed test
     if CONV_CAL:
         info['method'] =  'convolve'
-        for trunc in FILTER_LEN:
-            info['truncation'] = trunc
-            ir = impulse_response(fs, noise_curve_db, freqs, frange, trunc)
+        for filter_len in FILTER_LENS:
+            info['truncation'] = filter_len
+            ir = impulse_response(fs, noise_curve_db, freqs, frange, filter_len)
             info['len'] = len(ir)
             info['calibration'] = ir
             calibration_methods.append(info.copy())
@@ -124,21 +114,28 @@ if __name__ == "__main__":
     # Run the timed calibration executions for each test stimulus
     time_list = []
     for cal_params in calibration_methods:
+        if cal_params['method'] == 'multiply':
+            cal = (freqs, cal_params['calibration'])
+        else: # convolve
+            cal = cal_params['calibration']
         start = time.time()
         for i in range(nsignals):
             wn_signal_calibrated = apply_calibration(chirp_signal, fs, frange, 
-                                                     freqs, cal_params['calibration'],
-                                                     cal_params['method'])
+                                                     cal)
         tdif = time.time() - start
         cal_params['chirp_time'] = np.around(tdif,3)
         time_list.append(np.around(tdif,3))
 
     for cal_params in calibration_methods:
+        if cal_params['method'] == 'multiply':
+            cal = (freqs, cal_params['calibration'])
+        else: # convolve
+            cal = cal_params['calibration']
+        start = time.time()
         start = time.time()
         for i in range(nsignals):
-            chirp_signal_calibrated = apply_calibration(vocal_signal, vocal_fs, frange, 
-                                                 freqs, cal_params['calibration'],
-                                                 cal_params['method'])
+            chirp_signal_calibrated = apply_calibration(vocal_signal, vocal_fs,
+                                                        frange, cal)
         tdif = time.time() - start
         cal_params['vocal_time'] = np.around(tdif,3)
 
@@ -166,12 +163,12 @@ if __name__ == "__main__":
     table.show()
 
     # show a plot for the times results for the calibrated chirp
-    # trend_plot = SimplePlotWidget(FILTER_LEN, time_list[1:])
+    # trend_plot = SimplePlotWidget(FILTER_LENS, time_list[1:])
     # trend_plot.show()
 
     pw = pg.PlotWidget()
-    pw.plot(FILTER_LEN, time_list[1:], pen={'color':'b', 'width':3})
-    pw.plot([FILTER_LEN[-1]], [time_list[0]], symbol='x', symbolPen='b')
+    pw.plot(FILTER_LENS, time_list[1:], pen={'color':'b', 'width':3})
+    pw.plot([FILTER_LENS[-1]], [time_list[0]], symbol='x', symbolPen='b')
     style = {'font-size':'16pt'}
     pw.setLabel('left', 'Execution time (s)', **style)
     pw.setLabel('bottom', 'Filter Length (no. of samples)', **style)

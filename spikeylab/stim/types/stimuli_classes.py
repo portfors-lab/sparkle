@@ -4,14 +4,9 @@ from scipy.signal import chirp, hann
 import numpy as np
 
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
-from spikeylab.tools.audiotools import make_tone, audioread, audiorate, rms
-from spikeylab.tools.systools import get_src_directory
+from spikeylab.tools.audiotools import make_tone, audioread, audiorate, \
+                                        signal_amplitude
 from spikeylab.tools.exceptions import FileDoesNotExistError
-
-src_dir = get_src_directory()
-with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
-    config = yaml.load(yf)
-USE_RMS = config['use_rms']
 
 class PureTone(AbstractStimulusComponent):
     name = "Pure Tone"
@@ -26,11 +21,6 @@ class PureTone(AbstractStimulusComponent):
 
     def signal(self, fs, atten, caldb, calv):
         tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
-        # print 'before rms adjust', rms, 'max', np.amax(tone)
-        if USE_RMS:
-            tone = tone*1.414213562373
-        # rms = np.sqrt(np.mean(pow(tone,2)))
-        # print 'rms out of tone signal', rms, 'max', np.amax(tone)
         return tone
 
     def stateDict(self):
@@ -78,9 +68,8 @@ class FMSweep(AbstractStimulusComponent):
         npts = self._duration*fs
         t = np.arange(npts).astype(float)/fs
         signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
-        signal = ((signal/np.amax(signal))*amp)
-        if USE_RMS:
-            signal = signal*1.414213562373
+        amp_scale = signal_amplitude(signal, fs)
+        signal = ((signal/amp_scale)*amp)
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
@@ -176,10 +165,8 @@ class Vocalization(AbstractStimulusComponent):
         # print 'npts. desired', len(wavdata), desired_npts
         wavdata = wavdata[:desired_npts]
 
-        if USE_RMS:
-            amp_scale = rms(wavdata, sr)
-        else:
-            amp_scale = np.amax(wavdata)
+        amp_scale = signal_amplitude(wavdata, sr)
+
         signal = ((wavdata/amp_scale)*self.amplitude(caldb, calv))
 
         if self._risefall > 0:
@@ -239,10 +226,7 @@ class WhiteNoise(AbstractStimulusComponent):
         signal = self._noise[:npts]
         
         amp = self.amplitude(caldb, calv)
-        if USE_RMS:
-            amp_scale = rms(signal, fs)
-        else:
-            amp_scale = np.amax(signal)
+        amp_scale = signal_amplitude(signal, fs)
 
         signal = ((signal/amp_scale)*amp)
 
