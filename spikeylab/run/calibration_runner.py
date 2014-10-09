@@ -297,7 +297,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
             self.peak_avg.append(vamp)
         if irep == self.nreps-1:
             mean_peak = np.mean(self.peak_avg)
-            print 'peak fft', mean_peak
+            # print 'peak fft', mean_peak
             if self.trace_counter == -1:
                 # this always is the first trace
                 self.calpeak = mean_peak

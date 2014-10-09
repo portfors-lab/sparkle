@@ -1,3 +1,7 @@
+"""This test makes sure we get the same results for RMS and peak amplitude for
+tones. Calibrations and tone curves should match.
+"""
+
 import sys
 
 import numpy as np
@@ -54,12 +58,11 @@ cal = atools.impulse_response(fs, chirp_curve_rms, freqs, frange, filter_len)
 
 print 'Running RMS curve'
 testcurve_rms = run_tone_curve(tone_frequencies, tone_intensities,
-                           player, fs, dur, refdb_rms, refv, cal,
-                           frange)
+                               player, fs, dur, refdb_rms, refv, cal,
+                               frange)
 
 # Run for peak amplitude
 atools.USE_RMS = False
-atools.mphone_sensitivity = atools.mphone_sensitivity/0.70710678118654757
 chirp_signal = chirp.signal(fs, 0, refdb_peak, refv)
 recorded_chirp = record(player, chirp_signal, fs)
 chirp_curve_peak = atools.attenuation_curve(chirp_signal, recorded_chirp, 
@@ -68,8 +71,8 @@ cal = atools.impulse_response(fs, chirp_curve_peak, freqs, frange, filter_len)
 
 print "\nRunning Peak curve"
 testcurve_peak = run_tone_curve(tone_frequencies, tone_intensities,
-               player, fs, dur, refdb_peak, refv, cal,
-                                          frange)
+                                player, fs, dur, refdb_peak, refv, cal,
+                                frange)
 
 print "\nDone."
 # Plot calibrations
