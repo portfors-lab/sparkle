@@ -138,6 +138,8 @@ class SearchRunner(AbstractAcquisitionRunner):
                     spike_latencies.append(np.nan)
                 spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
+                # produces erroneous results if threshold is None (this is 
+                # the case in cal toner, but we don't really care then)
                 response_bins = spikestats.bin_spikes(spike_times, self.binsz)
                 self.putnotify('spikes_found', (response_bins, self.irep))
 
