@@ -5,7 +5,6 @@ from spikeylab.tools.systools import get_src_directory
 
 import test.sample as sample
 
-
 import numpy as np
 import scipy.io.wavfile as wv
 from scipy import signal
@@ -35,29 +34,6 @@ def test_calc_db_positive_gain():
     val = 1.0
     result = tools.calc_db(val, ref)
     assert result == 20
-
-def test_get_peak():
-    x = np.zeros((10,))
-    x[3] = 1
-    peak_val, peak_idx = tools.get_peak(x,range(10))
-    assert peak_val == 1
-    assert peak_idx == 3
-
-def test_get_peak_plateau():
-    x = np.zeros((10,))
-    x[3] = 1
-    x[4] = 1
-    peak_val, peak_idx = tools.get_peak(x,range(10))
-    assert peak_val == 1
-    assert peak_idx == 3
-
-def test_peak_at_frequency():
-    x = np.zeros((10,))
-    x[3] = 2
-    x[4] = 1
-    peak_val, peak_idx = tools.get_peak(x, np.arange(10), 4)
-    assert peak_val == 1
-    assert peak_idx == 4
 
 def test_calc_db_SPL():
     with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
@@ -133,8 +109,11 @@ def test_make_tone_regular_at_caldb():
     freq_idx = np.around(fq*(float(npts)/fs))
     assert peak_idx == freq_idx
 
-    print 'tone max', np.around(np.amax(tone), 5), calv
-    assert np.around(np.amax(tone), 5) == calv
+    if tools.USE_RMS is True:
+        print 'tone max', np.around(np.amax(tone), 5), calv*np.sqrt(2)
+        assert np.around(np.amax(tone), 5) == np.around(calv*np.sqrt(2),5)
+    else:
+        assert np.around(np.amax(tone), 5) == calv
 
     assert timevals[-1] == dur - (1./fs)
 
@@ -159,8 +138,8 @@ def test_make_tone_irregular():
     freq_idx = np.around(fq*(float(npts)/fs))
     assert peak_idx == freq_idx
 
-    print 'intensities', (20 * np.log10(np.amax(tone)/calv)) + caldb, db
-    assert np.around((20 * np.log10(np.amax(tone)/calv)) + caldb, 5) == db
+    print 'intensities', (20 * np.log10(tools.signal_amplitude(tone, fs)/calv)) + caldb, db
+    assert np.around((20 * np.log10(tools.signal_amplitude(tone, fs)/calv)) + caldb, 1) == db
 
     print 'durs', np.around(timevals[-1], 5), dur - (1./fs)
     assert dur - 2*(1./fs) < timevals[-1] <= dur - (1./fs)

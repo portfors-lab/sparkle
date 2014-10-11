@@ -4,7 +4,7 @@ import numpy as np
 
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, USE_RMS
+from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.gui.stim.factory import TCFactory, CCFactory
@@ -20,6 +20,7 @@ src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 MAXV = config['max_voltage']
+USE_RMS = config['use_rms']
 
 class TestQStimModel():
     def test_insert_data(self):
