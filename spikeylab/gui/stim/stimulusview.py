@@ -17,7 +17,7 @@ AUTOPARAMMODE = 1
 
 class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     """View for building/editing stimulus components"""
-    hashIsDirty = False
+    _viewIsDirty = False
     _height = ROW_HEIGHT
     _width = 10
     _componentDefaults = {}
@@ -56,6 +56,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         :param pxms: number of pixels per ms
         :type pxms: int
+        :returns: float -- the miliseconds between grid lines
         """
         pxms = float(pxms)/2
         self.pixelsPerms = pxms
@@ -63,28 +64,43 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             self.gridms = self.gridms*2
         elif pxms*self.gridms > GRID_PIXEL_MAX:
             self.gridms = self.gridms/2
-        self.hashIsDirty = True
+        self._viewIsDirty = True
         self.viewport().update()
 
         return self.gridms
 
     def setModel(self, model):
-        """Sets the QStimulusModel for this view"""
+        """Sets the model this view represents. :qtdoc:`Re-implemented<QAbstractItemView.setModel>`
+
+        :param model: model to set
+        :type model: :class:`QStimulusModel<spikeylab.gui.stim.stimulus_model.QStimulusModel>`
+        """
         super(StimulusView, self).setModel(model)
         self.setSelectionModel(ComponentSelectionModel(model))
         # initialize nested list to appropriate size
         self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
 
-        self.hashIsDirty = True
+        self._viewIsDirty = True
         self._calculateRects()
 
     def indexXY(self, index):
-        """Return the top left coordinates of the item for the given index"""
+        """Returns the top left coordinates of the item for the given index
+
+        :param index: index for the item
+        :type index: :qtdoc:`QModelIndex`
+        :returns: (int, int) -- (x, y) view coordinates of item
+        """
         rect = self.visualRect(index)
         return rect.x(), rect.y()
 
     def indexAt(self, point):
-        """Returns the QModelIndex of the component at the specified QPoint relative to view coordinates"""
+        """Returns the index of the component at *point* relative to view coordinates.
+        If there is None, and empty index is returned. :qtdoc:`Re-implemented<QAbstractItemView.indexAt>`
+
+        :param point: the point, in view coordinates, to find an index for
+        :type point: :qtdoc:`QPoint`
+        :returns: :qtdoc:`QModelIndex`
+        """
         # Transform the view coordinates into contents widget coordinates.
         wx = point.x() + self.horizontalScrollBar().value()
         wy = point.y() + self.verticalScrollBar().value()
@@ -98,8 +114,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return QtCore.QModelIndex()
 
     def _calculateRects(self):
-        """Calculate the sizes of the different components present in this view"""
-        if not self.hashIsDirty:
+        # calculates the size of each component, a rectangle representative of the relative
+        # duration of the component
+        if not self._viewIsDirty:
             return
 
         self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
@@ -121,9 +138,16 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self._height = y+ROW_HEIGHT
         self.viewport().update()
         self.updateGeometries()
-        self.hashIsDirty = False
+        self._viewIsDirty = False
 
     def splitAt(self, point):
+        """Gets the nearest index to *point*, *point* does not have to be over 
+        an item. index can be +1 more in row and/or column than existing items
+
+        :param point: any point within the view, in view coordinates
+        :type point: :qtdoc:`QPoint`
+        :returns: (int, int) -- (row, column) of the nearest index
+        """
         wx = point.x() + self.horizontalScrollBar().value()
         wy = point.y() + self.verticalScrollBar().value()
 
@@ -136,9 +160,19 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return row, self.model().columnCountForRow(row)
 
     def isIndexHidden(self, index):
+        """Items are never hidden. :qtdoc:`Re-implemented<QAbstractItemView.isIndexHidden>`
+        
+        :returns: bool -- False
+        """
         return False
 
     def visualRect(self, index):
+        """The rectangle for the bounds of the item at *index*. :qtdoc:`Re-implemented<QAbstractItemView.visualRect>`
+
+        :param index: index for the rect you want
+        :type index: :qtdoc:`QModelIndex`
+        :returns: :qtdoc:`QRect` -- rectangle of the borders of the item
+        """
         if len(self._rects[index.row()]) -1 < index.column() or index.row() == -1:
             #Er, so I don't know why this was getting called with index -1
             return QtCore.QRect()
@@ -146,6 +180,14 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return self.visualRectRC(index.row(),index.column())
 
     def visualRectRC(self, row, column):
+        """The rectangle for the bounds of the item at *row*, *column*
+
+        :param row: row of the item
+        :type row: int
+        :param column: column of the item
+        :type column: int
+        :returns: :qtdoc:`QRect` -- rectangle of the borders of the item
+        """
         rect = self._rects[row][column]
         if rect.isValid():
             return QtCore.QRect(rect.x() - self.horizontalScrollBar().value(),
@@ -155,27 +197,40 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             return rect
 
     def dataChanged(self, topleft, bottomright):
-        self.hashIsDirty = True
+        """Marks view for repaint. :qtdoc:`Re-implemented<QAbstractItemView.dataChanged>`"""
+        self._viewIsDirty = True
         super(StimulusView, self).dataChanged(topleft, bottomright)
 
     def rowsInserted(self, parent, start, end):
-        self.hashIsDirty = True
+        """Marks view for repaint. :qtdoc:`Re-implemented<QAbstractItemView.rowsInserted>`"""
+        self._viewIsDirty = True
         super(StimulusView, self).rowsInserted(parent, start, end)
 
     def rowsAboutToBeRemoved(self, parent, start, end):
-        self.hashIsDirty = True
+        """Marks view for repaint. :qtdoc:`Re-implemented<QAbstractItemView.rowsAboutToBeRemoved>`"""
+        self._viewIsDirty = True
         super(StimulusView, self).rowsAboutToBeRemoved(parent, start, end)
 
     def somethingChanged(self):
-        self.hashIsDirty = True
+        """Marks view for repaint"""
+        self._viewIsDirty = True
 
     def verticalOffset(self):
+        """Offset caused by vertical scrollbar. :qtdoc:`Re-implemented<QAbstractItemView.verticalOffset>`
+
+        :returns: int -- number of increments (pixels) down in scroll bar
+        """
         return self.verticalScrollBar().value()
 
     def horizontalOffset(self):
+        """Offset caused by horizontal scrollbar. :qtdoc:`Re-implemented<QAbstractItemView.horizontalOffset>`
+
+        :returns: int -- number of increments (pixels) over in scroll bar
+        """
         return self.horizontalScrollBar().value()
 
     def scrollTo(self, index, ScrollHint):
+        """:qtdoc:`Re-implemented<QAbstractItemView.scrollTo>`"""
         # copied verbatim from chart example
         area = self.viewport().rect()
         rect = self.visualRect(index)
@@ -199,10 +254,12 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.viewport().update()
 
     def scrollContentsBy(self, dx, dy):
+        """Scrolls the viewport. :qtdoc:`Re-implemented<QAbstractScrollArea.scrollContentsBy>`"""
         # self.scrollDirtyRegion(dx,dy) #in web example
         self.viewport().scroll(dx, dy)
 
     def paintEvent(self, event):
+        """All custom painting, draws the entire view. :qtdoc:`Re-implemented<qabstractscrollarea.paintEvent>`"""
         selections = self.selectionModel()
         option = self.viewOptions()
         state = option.state
@@ -263,17 +320,23 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             painter.drawLine(self.dragline)
 
     def moveCursor(self, cursorAction, modifiers):
-        # print "I done care about cursors!"
+        """Returns an empty index. :qtdoc:`Re-implemented<QAbstractItemView.moveCursor>`"""
         return QtCore.QModelIndex()
 
     def mouseDoubleClickEvent(self, event):
+        """Launches an editor for the component, if the mouse cursor is over an item"""
         if self.mode == BUILDMODE:
             if event.button() == QtCore.Qt.LeftButton:
                 index = self.indexAt(event.pos())
                 self.edit(index)
 
     def grabImage(self, index):
-        # grab an image of the cell  we are moving
+        """Gets an image of the item at *index*
+
+        :param index: index of an item in the view
+        :type index: :qtdoc:`QModelIndex`
+        :returns: :qtdoc:`QPixmap`
+        """
         # rect = self._rects[index.row()][index.column()]
         rect = self.visualRect(index)
         pixmap = QtGui.QPixmap()
@@ -281,6 +344,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         return pixmap
 
     def mousePressEvent(self, event):
+        """In Auto-parameter selection mode, mouse press over an item emits
+        `componentSelected`"""
         if self.mode == BUILDMODE:
             super(StimulusView, self).mousePressEvent(event)
         else:
@@ -292,11 +357,22 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                 self.componentSelected.emit(comp)
 
     def emptySelection(self, empty):
+        """Enables the view if not *empty*, clears the current selection and
+        disables view if is *emtpy*
+
+        :param emtpy: whether there are any components in the view
+        :type emtpy: bool
+        """
         self.setEnabled(not empty)
         if empty:
             self.clearSelection()
 
     def updateSelectionModel(self, components):
+        """Creates a new selection model and adds *components* to it
+
+        :param components: components in this view to add to the selection
+        :type components: list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`
+        """
         # selmodel = self.selectionModel()
         # selmodel.clearSelection()
         selmodel = ComponentSelectionModel(self.model())
@@ -306,6 +382,12 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.viewport().update()
 
     def cursor(self, pos):
+        """Returns a line for the cursor as position *pos*
+
+        :param pos: mouse cursor position
+        :type pos: :qtdoc:`QPoint`
+        :returns: :qtdoc:`QLine` -- position between items (indicates where drops will go)
+        """
         index = self.splitAt(pos)
 
         if len(self._rects[index[0]])-1 < index[1]:
@@ -331,6 +413,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
 
     def dropped(self, component, event):
+        """Adds the dropped *component* into the model. 
+        :meth:`Re-implemented<spikeylab.gui.abstract_drag_view.AbstractDragView.dropped>`
+        """
         if isinstance(component, AbstractStimulusComponent):
             row, col = self.splitAt(event.pos())
             index = self.model().createIndex(row, col, component)
@@ -342,13 +427,24 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                     component.loadState(self._componentDefaults[component.__class__.__name__])
                 self.edit(index)
 
-            self.hashIsDirty = True
+            self._viewIsDirty = True
             self.viewport().update()
 
     def sizeHint(self):
         return QtCore.QSize(self.width(), self._height)
 
     def setMode(self, mode):
+        """Sets the "mode" for this view:
+
+        BUILDMODE 0: Allowing adding, moving and editing of component items
+
+        AUTOPARAMMODE 1: For adding components to a selection of an 
+        auto-parameter. clicks toggle membership in selection. Moving and 
+        editing of components disabled.
+        
+        :param mode: which mode to set
+        :type mode: int
+        """
         self.mode = mode
         if mode == BUILDMODE:
             self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
@@ -360,10 +456,13 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             self.setSelectionModel(ComponentSelectionModel(self.model()))
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 
-    def selectionChanged(self, selected, deselected):
-        super(StimulusView, self).selectionChanged(selected, deselected)
-
     def visualRegionForSelection(self, selection):
+        """Gets the region of all of the components in selection
+
+        :param selection: a selection model for this view
+        :type selection: :qtdoc:`QItemSelectionModel`
+        :returns: :qtdoc:`QRegion` -- union of rects of the selected components
+        """
         region = QtGui.QRegion()
         for index in selection.indexes():
             region = region.united(self._rects[index.row()][index.column()])
@@ -372,6 +471,13 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
     @staticmethod
     def updateDefaults(sender, state):
+        """Updates the input defaults for the component fields
+
+        :param sender: Component (:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`) class name to set the defaults for
+        :type sender: str
+        :param state: the return value from that component's :meth:`stateDict<spikeylab.stim.abstract_component.AbstractStimulusComponent.stateDict>` method
+        :type state: dict
+        """
         # keep all defaults the same across instances
         StimulusView._componentDefaults[str(sender)] = state
 
@@ -385,10 +491,21 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.verticalScrollBar().setRange(0, max(0, self._height - self.viewport().height()))
         
     def resizeEvent(self, event):
-        self.hashIsDirty = True
+        """Mark repaint needed. :qtdoc:`Re-implemented<QWidget.resizeEvent>`"""
+        self._viewIsDirty = True
         super(StimulusView, self).resizeEvent(event)
 
     def updateVocalAuto(self, component, files):
+        """Updates the auto-parameter with selected *component* to have
+        *files*. Adds auto-parameter if not already present. The auto-parameter is expected to have only one selected
+        component (the one given). If length of files < 1, removes the
+        auto-parameter from the model.
+
+        :param component: Component that the auto-parameter is modifying
+        :type component: :class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`
+        :param files: list of file names to act as the auto-parameter list
+        :type files: list<str>
+        """
         auto_model = self.model().autoParams()
         row = auto_model.fileParameter(component)
         if len(files) > 1:
@@ -407,20 +524,26 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.countChanged.emit()
         
 class ComponentDelegate(QtGui.QStyledItemDelegate):
-
+    """Delegate to represent stimulus components"""
     def paint(self, painter, option, index):
+        """Uses the :meth:`paint<spikeylab.gui.stim.components.qcomponents.QStimulusComponent.paint>` 
+        method of the component it represents to fill in an appropriately 
+        sized rectange. :qtdoc:`Re-implemented<QStyledItemDelegate.paint>`"""
         component = index.model().data(index, role=QtCore.Qt.UserRole)
         painter.drawRect(option.rect)
 
         component.paint(painter, option.rect, option.palette)
 
     def sizeHint(self, option, index):
+        """Size based on component duration and a fixed height"""
         # calculate size by data component
         component = index.internalPointer()
         width = self.component.duration() * self.pixelsPerms*1000
         return QtCore.QSize(width, 50)
 
     def createEditor(self, parent, option, index):
+        """Creates an editor in a separate window, specific for the component
+        type this delegate represents. :qtdoc:`Re-implemented<QStyledItemDelegate.createEditor>`"""
         # bring up separate window for component parameters
         view = parent.parentWidget()
         component = view.model().data(index)
@@ -445,13 +568,14 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         return editor
 
     def setModelData(self, editor, model, index):
-        """Saves the input from the editor widget to the model component"""
+        """Saves the input from the editor widget to the model component.
+        :qtdoc:`Re-implemented<QStyledItemDelegate.setModelData>`"""
         editor.saveToObject()
         # need to save over component object in stimulus model
         model.dataEdited()
 
     def updateEditorGeometry(self, editor, option, index):
-        # center the widget
+        """centers the editor widget. :qtdoc:`Re-implemented<QStyledItemDelegate.updateEditorGeometry>`"""
         qr = editor.frameGeometry()
         cp = QtGui.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
@@ -459,6 +583,7 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         editor.move(qr.topLeft())
 
     def eventFilter(self, editor, event):
+        """Sets focus to the editor. :qtdoc:`Re-implemented<QStyledItemDelegate.eventFilter>`"""
         if event.type() == QtCore.QEvent.FocusIn:
             editor.setContentFocus()
             return True
