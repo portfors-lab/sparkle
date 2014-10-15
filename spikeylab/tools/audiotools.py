@@ -32,6 +32,17 @@ def calc_db(peak, cal_peak=None):
         pbdB = 94 + (20.*np.log10((peak)/mphone_sensitivity))
     return pbdB
 
+def calc_summed_db(spectrum):
+    x = sum(spectrum ** 2)
+    pbdB = 94 + (10.*np.log10(x/(mphone_sensitivity**2)))
+    return pbdB
+
+def sum_db(x):
+    power = x/10
+    tmp = [10**i for i in power]
+    s = 10.*np.log10(sum(tmp))    
+    return s
+
 def calc_spectrum(signal,rate):
     """Return the spectrum and frequency indexes for real-valued input signal"""
     npts = len(signal)

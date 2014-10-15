@@ -11,13 +11,16 @@ from spikeylab.acq.daq_tasks import get_ao_chans, get_ai_chans
 from spikeylab.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
             ViewSettingsDialog, CalibrationDialog, CellCommentDialog
 from spikeylab.run.acquisition_manager import AcquisitionManager
-from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread, signal_amplitude
+from spikeylab.tools.audiotools import calc_spectrum, calc_db, audioread, \
+                                       signal_amplitude, calc_summed_db, \
+                                       sum_db, rms
 from spikeylab.gui.plotting.pyqtgraph_widgets import ProgressWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from spikeylab.gui.wait_widget import WaitWidget
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.tools.qsignals import ProtocolSignals
 from spikeylab.tools.uihandler import assign_uihandler_slot
+from spikeylab.tools.util import clearLayout
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
@@ -483,23 +486,38 @@ class MainWindow(ControlWindow):
         self.acqmodel.run_calibration(interval, self.ui.calibrationWidget.ui.applycalCkbx.isChecked())
 
     def displayResponse(self, times, response):
-        # print 'response signal', len(response)
         if len(times) != len(response):
             print "WARNING: times and response not equal"
+        # print 'response signal', len(response)
+        # convert voltage amplitudes into dB SPL    
+        sr = self.ui.aisrSpnbx.value()*self.fscale
+        # amp = signal_amplitude(response, sr)
+        amp_signal = calc_db(np.amax(response))
+        amp_signal_rms = calc_db(rms(response, sr))
+
+        freq, signal_fft = calc_spectrum(response, sr)
+        idx = np.where((freq > 5000) & (freq < 100000))
+        summed_db0 = calc_summed_db(signal_fft[idx])
+        spectrum = calc_db(signal_fft)
+        spectrum[spectrum < 30] = 0
+        spectrum[0] = 0
+        summed_db1 = sum_db(spectrum[idx])
+        peakspl = np.amax(spectrum)
+        clearLayout(self.ui.splLayout)
+        self.ui.splLayout.addWidget(QtGui.QLabel("summed spectrum 1 step"), 0,0)    
+        self.ui.splLayout.addWidget(QtGui.QLabel("{:5.1f}".format(summed_db0)), 0,1)
+        self.ui.splLayout.addWidget(QtGui.QLabel("summed spectrum db first"), 1,0)    
+        self.ui.splLayout.addWidget(QtGui.QLabel("{:5.1f}".format(summed_db1)), 1,1)
+        self.ui.splLayout.addWidget(QtGui.QLabel("Peak spectrum"), 2,0)    
+        self.ui.splLayout.addWidget(QtGui.QLabel("{:5.1f}".format(peakspl)), 2,1)
+        self.ui.splLayout.addWidget(QtGui.QLabel("Max signal (peak)"), 3,0)    
+        self.ui.splLayout.addWidget(QtGui.QLabel("{:5.1f}".format(amp_signal)), 3,1)
+        self.ui.splLayout.addWidget(QtGui.QLabel("Max signal (rms)"), 4,0)    
+        self.ui.splLayout.addWidget(QtGui.QLabel("{:5.1f}".format(amp_signal_rms)), 4,1)
+
         if self.ui.plotDock.current() == 'standard':
             self.display.updateSpiketrace(times, response)
         elif self.ui.plotDock.current() == 'calexp':
-            # convert voltage amplitudes into dB SPL    
-            sr = self.ui.aisrSpnbx.value()*self.fscale
-            amp = signal_amplitude(response, sr)
-            masterdb = calc_db(amp)
-
-            freq, signal_fft = calc_spectrum(response, sr)
-            spectrum = calc_db(signal_fft)
-            spectrum[0] = 0
-            peakspl = np.amax(spectrum)
-            self.ui.dblevelLbl.setNum(masterdb)
-            self.ui.dblevelLbl2.setNum(peakspl)
             self.extendedDisplay.updateSignal(times, response, plot='response')
             self.extendedDisplay.updateFft(freq, spectrum, plot='response')
             self.extendedDisplay.updateSpec(response, sr, plot='response')
@@ -514,7 +532,6 @@ class MainWindow(ControlWindow):
         self.ui.dblevelLbl2.setNum(peakspl)
 
         self.calibrationDisplay.updateInFft(freqs, spectrum)
-
 
     def displayDbResult(self, f, db, resultdb):
         try:

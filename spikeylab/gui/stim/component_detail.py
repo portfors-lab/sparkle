@@ -1,4 +1,7 @@
+
 from PyQt4 import QtGui
+
+from spikeylab.tools.util import clearLayout
 
 class ComponentsDetailWidget(QtGui.QWidget):
     """class that presents the stimulus doc in a clear and useful way"""
@@ -171,14 +174,3 @@ class ComponentAttributerChecker(QtGui.QFrame):
             if w.isChecked():
                 attrs.append(str(w.text()))
         return attrs
-
-def clearLayout(layout):
-    """Clears widgets from the given *layout*"""
-    if layout is not None:
-        while layout.count():
-            item = layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-            else:
-                clearLayout(item.layout())
