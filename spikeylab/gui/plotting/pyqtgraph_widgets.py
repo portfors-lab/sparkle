@@ -81,9 +81,10 @@ class TraceWidget(BasePlot):
                spike raster
     """
     nreps = 20
-    rasterYmin = 0.5
-    rasterYmax = 1
-    rasterYslots = np.linspace(rasterYmin, rasterYmax, nreps)
+    rasterTop = 0.9 # top of raster plot (proportion)
+    rasterBottom = 0.5 # bottom of raster plot
+    # this will be set automatically
+    rasterYslots = None
     thresholdUpdated = QtCore.pyqtSignal(float)
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
@@ -109,6 +110,7 @@ class TraceWidget(BasePlot):
         self.setLabel('bottom', 'Time', units='s')
 
         self.hideButtons() # hides the 'A' Auto-scale button
+        self.updateRasterBounds()
 
     def updateData(self, axeskey, x, y):
         """Replaces the currently displayed data
@@ -169,27 +171,38 @@ class TraceWidget(BasePlot):
         self.threshLine.setValue(threshold) 
 
     def setNreps(self, nreps):
-        """Sets the number of reps user by raster plot to determine where to place data points
+        """Sets the number of reps user by raster plot to determine where to 
+        place data points
 
         :param nreps: number of iterations before the raster will be cleared
         :type nreps: int
         """
         self.nreps = nreps
-        self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
+        self.updateRasterBounds()
 
-    def setRasterBounds(self,lims):
+    def setRasterBounds(self, lims):
         """Sets the raster plot y-axis bounds, where in the plot the raster will appear between
 
         :param lims: the (min, max) y-values for the raster plot to be placed between
         :type lims: (float, float)
         """
-        self.rasterYmin = lims[0]
-        self.rasterYmax = lims[1]
-        self.rasterYslots = np.linspace(self.rasterYmin, self.rasterYmax, self.nreps)
+        self.rasterBottom = lims[0]
+        self.rasterTop = lims[1]
+        self.updateRasterBounds()
+
+    def updateRasterBounds(self):
+        """Updates the y-coordinate slots where the raster points 
+        are plotted, according to the current limits of the y-axis"""
+        yrange = self.viewRange()[1]
+        yrange_size = yrange[1] - yrange[0]
+        rmax = self.rasterTop*yrange_size + yrange[0]
+        rmin = self.rasterBottom*yrange_size + yrange[0]
+        self.rasterYslots = np.linspace(rmin, rmax, self.nreps)
 
     def askRasterBounds(self):
-        """Prompt the user to provide the raster bounds with a dialog. Saves the bounds to be applied to the plot"""
-        dlg = RasterBoundsDialog(bounds= (self.rasterYmin, self.rasterYmax))
+        """Prompts the user to provide the raster bounds with a dialog. 
+        Saves the bounds to be applied to the plot"""
+        dlg = RasterBoundsDialog(bounds= (self.rasterBottom, self.rasterTop))
         if dlg.exec_():
             bounds = dlg.values()
             self.setRasterBounds(bounds)
@@ -197,9 +210,9 @@ class TraceWidget(BasePlot):
     def getRasterBounds(self):
         """Current raster y-axis plot limits
 
-        :retruns: (float, float) -- (min, max) of raster plot bounds
+        :returns: (float, float) -- (min, max) of raster plot bounds
         """
-        return (self.rasterYmin, self.rasterYmax)
+        return (self.rasterBottom, self.rasterTop)
 
     def rangeChange(self, pw, ranges):
         """Adjusts the stimulus signal to keep it at the top of a plot,
@@ -215,9 +228,9 @@ class TraceWidget(BasePlot):
         """
         if hasattr(ranges, '__iter__'):
             # adjust the stim signal so that it falls in the correct range
+            yrange_size = ranges[1][1] - ranges[1][0]
             stim_x, stim_y = self.stimPlot.getData()
             if stim_y is not None:
-                yrange_size = ranges[1][1] - ranges[1][0]
                 stim_height = yrange_size*STIM_HEIGHT
                 # take it to 0
                 stim_y = stim_y - np.amin(stim_y)
@@ -229,11 +242,13 @@ class TraceWidget(BasePlot):
                 # raise to right place in plot
                 stim_y = stim_y + (ranges[1][1] - (stim_height*1.1 + (stim_height*0.2)))
                 self.stimPlot.setData(stim_x, stim_y)
+            # rmax = self.rasterTop*yrange_size + ranges[1][0]
+            # rmin = self.rasterBottom*yrange_size + ranges[1][0]
+            self.updateRasterBounds()
 
     def update_thresh(self):
         """Emits a Qt signal thresholdUpdated with the current threshold value"""
         self.thresholdUpdated.emit(self.threshLine.value())
-
 
 def _doSpectrogram(signal, *args, **kwargs):
     spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)
