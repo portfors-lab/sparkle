@@ -23,9 +23,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="upperLnedt"/>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -33,8 +30,31 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="1">
+      <widget class="QDoubleSpinBox" name="upperSpnbx">
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.010000000000000</double>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="lowerLnedt"/>
+      <widget class="QDoubleSpinBox" name="lowerSpnbx">
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.010000000000000</double>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

@@ -9,8 +9,8 @@ class RasterBoundsDialog(QtGui.QDialog, Ui_RasterBoundsDialog):
         self.setupUi(self)
 
         if bounds is not None:
-            self.lowerLnedt.setText(str(bounds[0]))
-            self.upperLnedt.setText(str(bounds[1]))
+            self.lowerSpnbx.setValue(bounds[0])
+            self.upperSpnbx.setValue(bounds[1])
 
     def values(self):
         """Gets the user enter max and min values of where the 
@@ -18,6 +18,6 @@ class RasterBoundsDialog(QtGui.QDialog, Ui_RasterBoundsDialog):
 
         :returns: (float, float) -- (min, max) y-values to bound the raster plot by
         """
-        lower = float(self.lowerLnedt.text())
-        upper = float(self.upperLnedt.text())
+        lower = float(self.lowerSpnbx.value())
+        upper = float(self.upperSpnbx.value())
         return (lower, upper)

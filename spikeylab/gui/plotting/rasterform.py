@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\raster_bounds_dlg.ui'
 #
-# Created: Thu Jun 19 13:01:50 2014
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Thu Oct 16 14:50:47 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -34,15 +34,21 @@ class Ui_RasterBoundsDialog(object):
         self.label = QtGui.QLabel(RasterBoundsDialog)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.upperLnedt = QtGui.QLineEdit(RasterBoundsDialog)
-        self.upperLnedt.setObjectName(_fromUtf8("upperLnedt"))
-        self.gridLayout.addWidget(self.upperLnedt, 0, 1, 1, 1)
         self.label_2 = QtGui.QLabel(RasterBoundsDialog)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
-        self.lowerLnedt = QtGui.QLineEdit(RasterBoundsDialog)
-        self.lowerLnedt.setObjectName(_fromUtf8("lowerLnedt"))
-        self.gridLayout.addWidget(self.lowerLnedt, 1, 1, 1, 1)
+        self.upperSpnbx = QtGui.QDoubleSpinBox(RasterBoundsDialog)
+        self.upperSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.upperSpnbx.setMaximum(1.0)
+        self.upperSpnbx.setSingleStep(0.01)
+        self.upperSpnbx.setObjectName(_fromUtf8("upperSpnbx"))
+        self.gridLayout.addWidget(self.upperSpnbx, 0, 1, 1, 1)
+        self.lowerSpnbx = QtGui.QDoubleSpinBox(RasterBoundsDialog)
+        self.lowerSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.lowerSpnbx.setMaximum(1.0)
+        self.lowerSpnbx.setSingleStep(0.01)
+        self.lowerSpnbx.setObjectName(_fromUtf8("lowerSpnbx"))
+        self.gridLayout.addWidget(self.lowerSpnbx, 1, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         self.buttonBox = QtGui.QDialogButtonBox(RasterBoundsDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
