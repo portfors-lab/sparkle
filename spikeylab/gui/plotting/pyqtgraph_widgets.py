@@ -404,20 +404,23 @@ class FFTWidget(BasePlot):
 
 class SimplePlotWidget(BasePlot):
     """Generic Plot Widget"""
-    def __init__(self, xdata, ydata, parent=None):
+    def __init__(self, xdata, ydata, color='b', legendstr=None, parent=None):
         super(SimplePlotWidget, self).__init__(parent)
-        self.appendRows(xdata, ydata)
+        self.legend = self.addLegend()
+        self.appendRows(xdata, ydata, color=color, legendstr=legendstr)
         self.resize(800,500)
 
-    def appendRows(self, xdata, ydata, color='b'):
+    def appendRows(self, xdata, ydata, color='b', legendstr=None):
         ydata = np.squeeze(ydata)
         if len(ydata.shape) > 1:
             for row in ydata:
-                self.appendData(xdata, row, color=color)
+                item = self.appendData(xdata, row, color=color)
         else:
-            self.appendData(xdata, ydata, color=color)
+            item = self.appendData(xdata, ydata, color=color)
+        if legendstr is not None:
+            self.legend.addItem(item, legendstr)
 
-    def appendData(self, xdata, ydata, color='b'):
+    def appendData(self, xdata, ydata, color='b', legendstr=None):
         """Adds the data to the plot
 
         :param xdata: index values for data, plotted on x-axis
@@ -425,7 +428,10 @@ class SimplePlotWidget(BasePlot):
         :param ydata: value data to plot, dimension must match xdata
         :type ydata: numpy.ndarray
         """
-        self.plot(xdata, ydata, pen=color)
+        item = self.plot(xdata, ydata, pen=color)
+        if legendstr is not None:
+            self.legend.addItem(item, legendstr)
+        return item
 
     def setLabels(self, xlabel=None, ylabel=None, title=None, xunits=None, yunits=None):
         """Sets the plot labels

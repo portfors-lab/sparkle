@@ -222,7 +222,7 @@ if __name__ == "__main__":
                 cal = cal_params['calibration']
             testcurve_db = run_tone_curve(tone_frequencies, tone_intensities, 
                                           player, fs, dur, refdb, refv, cal,
-                                          frange)
+                                          frange)[0]
 
             cal_params['tone_curve'] = testcurve_db
             print #newline

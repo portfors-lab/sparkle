@@ -7,7 +7,8 @@ from PyQt4 import QtGui, QtCore
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.tools.audiotools import calc_db, calc_spectrum, \
-                            convolve_filter, multiply_frequencies
+                            convolve_filter, multiply_frequencies, \
+                            signal_amplitude, calc_summed_db, rms
 
 class MyTableWidgetItem(QtGui.QTableWidgetItem):
     def __lt__(self, other):
@@ -116,7 +117,14 @@ def apply_calibration(sig, fs, frange, calibration):
 
 def run_tone_curve(frequencies, intensities, player, fs, duration, 
                refdb, refv, calibration, frange):
-    """Runs a calibration tone curve"""
+    """Runs a calibration tone curve, spits out arrays with a bunch
+    of different methods to calculate the dB SPL:
+
+    * dB SPL calculated from the peak value of the response spectrum
+    * dB SPL calculated from the RMS value of the signal
+    * dB SPL calculated from the peak value of the signal
+    * dB SPL calculated from the summed values of the spectrum
+    """
     tone = PureTone()
     tone.setRisefall(0.003)
     vfunc = np.vectorize(calc_db)
@@ -125,7 +133,10 @@ def run_tone_curve(frequencies, intensities, player, fs, duration,
     player.set_aisr(fs)
     tone.setDuration(duration)
 
-    testpeaks = np.zeros((len(intensities), len(frequencies)))
+    specpeaks = np.zeros((len(intensities), len(frequencies)))
+    toneamps_rms = np.zeros((len(intensities), len(frequencies)))
+    toneamps_peak = np.zeros((len(intensities), len(frequencies)))
+    tone_summed_curve_db = np.zeros((len(intensities), len(frequencies)))
 
     for db_idx, ti in enumerate(intensities):
         tone.setIntensity(ti)
@@ -137,7 +148,14 @@ def run_tone_curve(frequencies, intensities, player, fs, duration,
             mean_response = record(player, calibrated_tone, fs)
             freqs, spectrum = calc_spectrum(mean_response, fs)
             mag = spectrum[(np.abs(freqs-tf)).argmin()]
-            testpeaks[db_idx, freq_idx] = mag
+            specpeaks[db_idx, freq_idx] = mag
+            toneamps_rms[db_idx, freq_idx] = rms(mean_response, fs)
+            toneamps_peak[db_idx, freq_idx] = np.amax(mean_response)
+            idx = np.where((freqs > 5000) & (freqs < 100000))
+            tone_summed_curve_db[db_idx, freq_idx] = calc_summed_db(spectrum[idx])
 
-    testcurve_db = vfunc(testpeaks)
-    return testcurve_db
+    spec_peak_curve_db = vfunc(specpeaks)
+    tone_amp_rms_curve_db = vfunc(toneamps_rms)
+    tone_amp_peak_curve_db = vfunc(toneamps_peak)
+
+    return spec_peak_curve_db, tone_amp_rms_curve_db, tone_amp_peak_curve_db, tone_summed_curve_db
