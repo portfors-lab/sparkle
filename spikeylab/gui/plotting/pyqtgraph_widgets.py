@@ -108,6 +108,8 @@ class TraceWidget(BasePlot):
         self.setLabel('left', 'Potential', units='V')
         self.setLabel('bottom', 'Time', units='s')
 
+        self.hideButtons() # hides the 'A' Auto-scale button
+
     def updateData(self, axeskey, x, y):
         """Replaces the currently displayed data
 
@@ -260,6 +262,7 @@ class SpecWidget(BasePlot):
         self.setLabel('left', 'Frequency', units='Hz')
 
         self.spec_done.connect(self.updateImage)
+        self.hideButtons() # hides the 'A' Auto-scale button
 
     def fromFile(self, fname):
         """Displays a spectrogram of an audio file. Supported formats see :func:`spikeylab.tools.audiotools.audioread`
