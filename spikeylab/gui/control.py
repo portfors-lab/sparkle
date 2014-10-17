@@ -528,8 +528,6 @@ class MainWindow(ControlWindow):
         spectrum = calc_db(spectrum)
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
-        self.ui.dblevelLbl.setNum(masterdb)
-        self.ui.dblevelLbl2.setNum(peakspl)
 
         self.calibrationDisplay.updateInFft(freqs, spectrum)
 
