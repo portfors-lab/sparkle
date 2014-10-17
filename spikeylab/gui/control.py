@@ -171,6 +171,9 @@ class MainWindow(ControlWindow):
             self.ui.exNrepsSpnbx.valueChanged.connect(self.onUpdate)
             for editor in self.ui.parameterStack.widgets():
                 editor.valueChanged.connect(self.onUpdate)
+            self.ui.actionSet_Scale.setEnabled(False)
+            self.ui.actionSave_Options.setEnabled(False)
+            self.ui.actionSet_Calibration.setEnabled(False)
         else:
             try:
                 self.ui.exNrepsSpnbx.valueChanged.disconnect()
@@ -182,6 +185,10 @@ class MainWindow(ControlWindow):
                 self.ui.startBtn.clicked.connect(self.onStart)
                 for editor in self.ui.parameterStack.widgets():
                     editor.valueChanged.disconnect()
+                self.ui.actionSet_Scale.setEnabled(True)
+                self.ui.actionSave_Options.setEnabled(True)
+                self.ui.actionSet_Calibration.setEnabled(True)
+
             except TypeError:
                 # disconnecting already disconnected signals throws TypeError
                 pass
