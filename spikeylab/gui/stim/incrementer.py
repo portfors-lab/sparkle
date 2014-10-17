@@ -8,8 +8,6 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     """Input widget with buttons to increment the value in the 
     field by 1,5, or 10"""
     numtype = float
-    minimum = 0
-    maximum = 200000
     valueChanged = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -25,7 +23,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.valueSpnbx.valueChanged.connect(self.valueChanged.emit)
 
         # shortcut to propagate methods for spinbox
-        for m in ['setValue', 'setMaximum', 'setMinimum', 'value']:
+        for m in ['setValue', 'setMaximum', 'maximum', 'setMinimum', 'minimum', 'value', 'setDecimals', 'decimals']:
             setattr(self, m, getattr(self.valueSpnbx, m))
 
     def increment1(self):
@@ -48,9 +46,6 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
 
     def incrementn(self, n):
         self.valueSpnbx.setValue(self.valueSpnbx.value() + n)
-
-    def setDecimals(self, val):
-        pass
 
     def sizeHint(self):
         return QtCore.QSize(450,45)

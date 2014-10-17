@@ -52,7 +52,11 @@ class ControlWindow(QtGui.QMainWindow):
         # calibration tone curve at index 2 :(
         for calstim in self.acqmodel.bs_calibrator.get_stims()[::-1]: #tsk
             self.ui.calibrationWidget.addOption(wrapComponent(calstim))
-            
+        
+        # update now so that multipliers will be correct when values are
+        # set for new component editors
+        self.updateUnitLabels(self.tscale, self.fscale)
+
         for stim in self.exploreStimuli:
             editor = stim.showEditor()
             # connect signal to static class method to be able to share
@@ -64,6 +68,9 @@ class ControlWindow(QtGui.QMainWindow):
             # add this editor to the expore list of stims
             self.ui.parameterStack.addWidget(editor)
             self.ui.exploreStimTypeCmbbx.addItem(stim.name)
+
+        # rerun to set decimal places correctly for newly added editors
+        self.updateUnitLabels(self.tscale, self.fscale)
 
         try:
             # reload previous window geometry
@@ -147,7 +154,7 @@ class ControlWindow(QtGui.QMainWindow):
                 return False
         return True
 
-    def updateUnitLabels(self, tscale, fscale, setup=False):
+    def updateUnitLabels(self, tscale, fscale):
         """When the GUI unit scale changes, it is neccessary to update
         the unit labels on all fields throughout the GUI. This handles
         The main window, and also notifys other windows to update
@@ -172,71 +179,79 @@ class ControlWindow(QtGui.QMainWindow):
 
         if tscale != self.tscale:
             # time conversion necessary
-            self.tscale = tscale
+            scale_time = True
+        else:
+            scale_time = False
+            
+        self.tscale = tscale
 
-            # updates labels for components
-            AbstractStimulusComponent.update_tscale(self.tscale)
-            # add the list of all time unit labels out there to our update
-            # list here
-            time_inputs = self.timeInputs + AbstractEditorWidget.tunit_fields
-            time_labels = self.timeLabels + AbstractEditorWidget.tunit_labels
+        # updates labels for components
+        AbstractStimulusComponent.update_tscale(self.tscale)
+        # add the list of all time unit labels out there to our update
+        # list here
+        time_inputs = self.timeInputs + AbstractEditorWidget.tunit_fields
+        time_labels = self.timeLabels + AbstractEditorWidget.tunit_labels
 
-            # now go through our list of labels and fields and scale/update
-            if self.tscale == 0.001:
-                for field in time_inputs:
-                    field.setMaximum(3000)
-                    if not setup:
-                        field.setValue(field.value()/0.001)
-                    field.setDecimals(0)
-                    field.setMinimum(1)
-                for lbl in time_labels:
-                    lbl.setText(u'ms')
-            elif self.tscale == 1:
-                for field in time_inputs:
-                    field.setDecimals(3)
-                    field.setMinimum(0.001)
-                    if not setup:
-                        field.setValue(field.value()*0.001)
-                    field.setMaximum(20)
-                for lbl in time_labels:
-                    lbl.setText(u's')
-            else:
-                print self.tscale
-                raise Exception(u"Invalid time scale")
+        # now go through our list of labels and fields and scale/update
+        if self.tscale == 0.001:
+            for field in time_inputs:
+                field.setMaximum(3000)
+                if scale_time:
+                    field.setValue(field.value()/0.001)
+                field.setDecimals(0)
+                field.setMinimum(1)
+            for lbl in time_labels:
+                lbl.setText(u'ms')
+        elif self.tscale == 1:
+            for field in time_inputs:
+                field.setDecimals(3)
+                field.setMinimum(0.001)
+                if scale_time:
+                    field.setValue(field.value()*0.001)
+                field.setMaximum(20)
+            for lbl in time_labels:
+                lbl.setText(u's')
+        else:
+            print self.tscale
+            raise Exception(u"Invalid time scale")
 
         if fscale != self.fscale:
-            self.fscale = fscale
+            scale_freq = True
+        else:
+            scale_freq = False
 
-            # updates labels for components
-            AbstractStimulusComponent.update_fscale(self.fscale)
-            # add the list of all time unit labels out there to our update
-            # list here
-            frequency_inputs = self.frequencyInputs + AbstractEditorWidget.funit_fields
-            frequency_labels = self.frequencyLabels + AbstractEditorWidget.funit_labels
+        self.fscale = fscale
 
-            # now go through our list of labels and fields and scale/update
-            if self.fscale == 1000:
-                for field in frequency_inputs:
-                    field.setDecimals(3)
-                    field.setMinimum(0.001)
-                    if not setup:
-                        field.setValue(field.value()/1000)
-                    field.setMaximum(500)
-                for lbl in frequency_labels:
-                    lbl.setText(u'kHz')
+        # updates labels for components
+        AbstractStimulusComponent.update_fscale(self.fscale)
+        # add the list of all time unit labels out there to our update
+        # list here
+        frequency_inputs = self.frequencyInputs + AbstractEditorWidget.funit_fields
+        frequency_labels = self.frequencyLabels + AbstractEditorWidget.funit_labels
 
-            elif self.fscale == 1:
-                for field in frequency_inputs:
-                    field.setMaximum(500000)
-                    if not setup:
-                        field.setValue(field.value()*1000)
-                    field.setDecimals(0)
-                    field.setMinimum(1)
-                for lbl in frequency_labels:
-                    lbl.setText(u'Hz')
-            else:
-                print self.fscale
-                raise Exception(u"Invalid frequency scale")
+        # now go through our list of labels and fields and scale/update
+        if self.fscale == 1000:
+            for field in frequency_inputs:
+                field.setDecimals(3)
+                field.setMinimum(0.001)
+                if scale_freq:
+                    field.setValue(field.value()/1000)
+                field.setMaximum(500)
+            for lbl in frequency_labels:
+                lbl.setText(u'kHz')
+
+        elif self.fscale == 1:
+            for field in frequency_inputs:
+                field.setMaximum(500000)
+                if scale_freq:
+                    field.setValue(field.value()*1000)
+                field.setDecimals(0)
+                field.setMinimum(1)
+            for lbl in frequency_labels:
+                lbl.setText(u'Hz')
+        else:
+            print self.fscale
+            raise Exception(u"Invalid frequency scale")
             
     def saveInputs(self, fname):
         """Save the values in the input fields so they can be loaded
@@ -324,14 +339,8 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.refDbSpnbx.setValue(self.calvals['caldb'])
 
         # load the previous sessions scaling
-        tscale = inputsdict.get('tscale', 0.001)
-        fscale = inputsdict.get('fscale', 1000)
-
-        # do not convert values in fields though, because they are stored 
-        #just as they were last entered, just update unit labels
-        self.tscale = 0
-        self.fscale = 0
-        self.updateUnitLabels(tscale, fscale, setup=True)
+        self.tscale = inputsdict.get('tscale', 0.001)
+        self.fscale = inputsdict.get('fscale', 1000)
 
         cal_template = inputsdict.get('calparams', None)
         if cal_template is not None:
