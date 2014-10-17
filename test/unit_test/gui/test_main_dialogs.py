@@ -4,7 +4,7 @@ import threading, time
 from PyQt4 import QtGui
 from nose.tools import assert_equal
 
-from spikeylab.gui.control import MainWindow
+from spikeylab.gui.main_control import MainWindow
 
 import qtbot
 

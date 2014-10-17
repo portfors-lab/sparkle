@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
 
-from spikeylab.gui.stim.detail_form import Ui_StimDetailWidget
+from spikeylab.gui.stim.stim_detail_form import Ui_StimDetailWidget
 
 class StimDetailWidget(QtGui.QWidget):
     """Container widget for presenting Stimulus details from the doc"""

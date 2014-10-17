@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
-from common_parametersform import Ui_ParameterWidget
+from common_parameters_form import Ui_ParameterWidget
 from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 
 class CommonParameterWidget(AbstractComponentWidget,Ui_ParameterWidget):

@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from rasterform import Ui_RasterBoundsDialog
+from raster_bounds_dlg_form import Ui_RasterBoundsDialog
 
 class RasterBoundsDialog(QtGui.QDialog, Ui_RasterBoundsDialog):
     """Dialog for setting where the raster plot should appear in relation

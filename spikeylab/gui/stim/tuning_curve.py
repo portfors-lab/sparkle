@@ -1,7 +1,7 @@
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.gui.stim.abstract_stim_editor import AbstractStimulusWidget
-from spikeylab.gui.stim.tcform import Ui_TuningCurveEditor
+from spikeylab.gui.stim.tuning_curve_form import Ui_TuningCurveEditor
 
 RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtCore.Qt.red)

@@ -2,7 +2,7 @@ import re
 
 from PyQt4 import QtGui, QtCore
 
-from caldialog_form import Ui_CalibrationDialog
+from calibration_dlg_form import Ui_CalibrationDialog
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 class CalibrationDialog(QtGui.QDialog):

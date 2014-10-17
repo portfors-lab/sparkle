@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
 
-from stimeditor_form import Ui_StimulusEditor
+from stimulus_editor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
 from spikeylab.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget

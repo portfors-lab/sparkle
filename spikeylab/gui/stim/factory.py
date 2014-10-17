@@ -8,7 +8,7 @@ import json
 from PyQt4 import QtGui, QtCore
 
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
-from spikeylab.gui.stim.tceditor import TuningCurveEditor
+from spikeylab.gui.stim.tuning_curve import TuningCurveEditor
 from spikeylab.stim.types.stimuli_classes import PureTone
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.stim import get_stimulus_editor

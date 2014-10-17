@@ -5,7 +5,7 @@ import h5py
 from nose.tools import assert_in, assert_equal
 from PyQt4 import QtGui, QtCore, QtTest
 
-from spikeylab.gui.control import MainWindow
+from spikeylab.gui.main_control import MainWindow
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
 from spikeylab.tools.systools import rand_id

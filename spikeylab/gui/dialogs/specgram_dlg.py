@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
 
-from specgramform import Ui_SpecDialog
+from specgram_dlg_form import Ui_SpecDialog
 
 class SpecDialog(QtGui.QDialog):
     """Dialog for setting parameters for spectrogram calculation"""

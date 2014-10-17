@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Wed Jun 18 16:57:47 2014
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Fri Oct 17 15:18:33 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -106,4 +106,4 @@ class Ui_CalibrationWidget(object):
         self.testTypeGrp.setTitle(_translate("CalibrationWidget", "Test type", None))
         self.calTypeCmbbx.setItemText(0, _translate("CalibrationWidget", "Tone Curve", None))
 
-from spikeylab.gui.stim.tceditor import TuningCurveEditor
+from spikeylab.gui.stim.tuning_curve import TuningCurveEditor

@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
 
-from viewdialog_form import Ui_ViewSettingsDialog
+from view_dlg_form import Ui_ViewSettingsDialog
 
 from spikeylab.stim.types import get_stimuli_models
 

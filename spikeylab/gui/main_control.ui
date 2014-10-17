@@ -1074,7 +1074,7 @@
   <customwidget>
    <class>StimDetailWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.detail_widget</header>
+   <header>spikeylab.gui.stim.stim_detail</header>
    <container>1</container>
   </customwidget>
   <customwidget>

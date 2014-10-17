@@ -3,7 +3,7 @@ import logging
 
 from PyQt4 import QtCore, QtGui
 
-from spikeylab.gui.control import MainWindow
+from spikeylab.gui.main_control import MainWindow
 from spikeylab.gui.dialogs import SavingDialog
 from spikeylab.tools.systools import get_free_mb, get_drives
 from spikeylab.resources import icons

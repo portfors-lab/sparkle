@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from scaleform import Ui_ScaleDlg
+from scale_dlg_form import Ui_ScaleDlg
 
 class ScaleDialog(QtGui.QDialog):
     """Dialog for setting the time and frequency scaling for the GUI"""

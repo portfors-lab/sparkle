@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from commentform import Ui_CellCommentDialog
+from comment_dlg_form import Ui_CellCommentDialog
 
 class CellCommentDialog(QtGui.QDialog):
     """Dialog for collecting user comments per protocol run"""
