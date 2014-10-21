@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from spikeylab.gui.drag_label import DragLabel
 from spikeylab.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory

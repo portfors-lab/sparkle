@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 from tone_parameters_form import Ui_ToneParameterWidget
 
 from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget

@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel

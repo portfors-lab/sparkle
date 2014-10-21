@@ -3,7 +3,7 @@ import test.sample as sample
 
 from nose.tools import assert_equal
 
-from PyQt4.QtGui import QApplication
+from QtWrapper.QtGui import QApplication
 
 class TestStimuliTypes():
 

@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from stimulus_editor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
@@ -79,7 +79,7 @@ class StimulusEditor(AbstractStimulusWidget):
 
 if __name__ == "__main__":
     import sys, os
-    from PyQt4 import QtGui
+    from QtWrapper import QtGui
     from spikeylab.gui.stim.qstimulus import QStimulusModel
     from spikeylab.stim.stimulus_model import StimulusModel
     from spikeylab.stim.types.stimuli_classes import *

@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 from spikeylab.gui.main_control import MainWindow
 from spikeylab.gui.dialogs import SavingDialog

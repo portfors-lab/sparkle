@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui, QtTest
+from QtWrapper import QtCore, QtGui, QtTest
 
 from spikeylab.gui.data_review import QDataReviewer
 from spikeylab.data.dataobjects import AcquisitionData

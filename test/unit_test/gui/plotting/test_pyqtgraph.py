@@ -9,8 +9,8 @@ import sys, os, time
 import inspect
 import numpy as np
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QApplication
+from QtWrapper.QtCore import Qt, QTimer
+from QtWrapper.QtGui import QApplication
 
 import spikeylab.tools.audiotools as audiotools
 import test.sample as sample

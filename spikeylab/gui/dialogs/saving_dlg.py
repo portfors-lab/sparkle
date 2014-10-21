@@ -1,6 +1,6 @@
 import os
 
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 class SavingDialog(QtGui.QFileDialog):
     """Dialog for setting the current data file"""

@@ -3,7 +3,7 @@ import json
 
 import h5py
 from nose.tools import assert_in, assert_equal
-from PyQt4 import QtGui, QtCore, QtTest
+from QtWrapper import QtGui, QtCore, QtTest
 
 from spikeylab.gui.main_control import MainWindow
 from spikeylab.data.dataobjects import AcquisitionData
@@ -319,7 +319,9 @@ class TestMainUI():
         stimEditor = pv.stimEditor
         qtbot.drag(stimEditor.ui.templateBox.getLabelByName('Pure Tone'),
                    stimEditor.ui.trackview)
+        QtTest.QTest.qWait(ALLOW)
         qtbot.keypress('enter')
+
         return stimEditor
 
     def explore_setup(self, comptype):

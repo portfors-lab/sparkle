@@ -1,6 +1,6 @@
 import logging
 
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from .calibration_widget_form import Ui_CalibrationWidget

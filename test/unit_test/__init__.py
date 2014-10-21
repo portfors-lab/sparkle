@@ -1,6 +1,6 @@
 import sip
 sip.setdestroyonexit(0)
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 app = None
 
 # executes once before all tests

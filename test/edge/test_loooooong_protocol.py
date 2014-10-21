@@ -6,7 +6,7 @@ import os
 import json
 import glob
 
-from PyQt4 import QtGui, QtCore, QtTest
+from QtWrapper import QtGui, QtCore, QtTest
 import h5py
 
 from spikeylab.gui.control import MainWindow

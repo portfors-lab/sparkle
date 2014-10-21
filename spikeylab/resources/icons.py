@@ -1,6 +1,6 @@
 import os
 
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 thisfolder = os.path.dirname(os.path.realpath(__file__))
 

@@ -5,7 +5,7 @@ tones. Calibrations and tone curves should match.
 import sys
 
 import numpy as np
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import FMSweep

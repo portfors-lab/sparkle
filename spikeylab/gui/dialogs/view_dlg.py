@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from view_dlg_form import Ui_ViewSettingsDialog
 

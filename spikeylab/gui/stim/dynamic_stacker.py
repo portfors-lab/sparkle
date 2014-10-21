@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 class DynamicStackedWidget(QtGui.QStackedWidget):
     """Adds a couple methods for getting child widgets to 

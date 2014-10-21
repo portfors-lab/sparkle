@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from spikeylab.gui.stim.tuning_curve_form import Ui_TuningCurveEditor

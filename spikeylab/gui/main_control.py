@@ -4,7 +4,7 @@ import logging
 import time
 import getpass
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 from spikeylab.acq.daq_tasks import get_ao_chans, get_ai_chans
 

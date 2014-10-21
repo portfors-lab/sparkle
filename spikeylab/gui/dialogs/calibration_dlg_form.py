@@ -3,11 +3,11 @@
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
 # Created: Mon Jun 30 10:34:40 2014
-#      by: PyQt4 UI code generator 4.9.6
+#      by: QtWrapper UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

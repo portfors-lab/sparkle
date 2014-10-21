@@ -1,8 +1,8 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 class ComponentSelectionModel(QtGui.QItemSelectionModel):
     """Stores items in the selection model by object, not by position"""
-    hintRequested = QtCore.pyqtSignal(str)
+    hintRequested = QtCore.Signal(str)
     def __init__(self, model):
         QtGui.QItemSelectionModel.__init__(self, model)
         self._selectedComponents = []

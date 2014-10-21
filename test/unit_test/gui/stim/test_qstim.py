@@ -10,7 +10,7 @@ from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.gui.stim.factory import TCFactory, CCFactory
 from spikeylab.stim.reorder import order_function
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 import test.sample as sample
 

@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 import pyqtgraph as pg
 from pyqtgraph.Point import Point
 

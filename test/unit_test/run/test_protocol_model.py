@@ -4,7 +4,7 @@ from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone
-from PyQt4 import QtCore
+from QtWrapper import QtCore
 
 class TestQProtocolModel():
     def test_insert_emtpy_stim(self):

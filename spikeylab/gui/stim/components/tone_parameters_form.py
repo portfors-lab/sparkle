@@ -3,11 +3,11 @@
 # Form implementation generated from reading ui file '.\tone_parameters.ui'
 #
 # Created: Wed Apr 09 10:30:12 2014
-#      by: PyQt4 UI code generator 4.9.6
+#      by: QtWrapper UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

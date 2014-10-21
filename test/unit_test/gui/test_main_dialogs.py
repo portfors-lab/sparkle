@@ -1,7 +1,7 @@
 import os, glob
 import threading, time
 
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 from nose.tools import assert_equal
 
 from spikeylab.gui.main_control import MainWindow

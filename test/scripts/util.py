@@ -2,7 +2,7 @@ import sys, time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.acq.players import FinitePlayer
 from spikeylab.stim.types.stimuli_classes import PureTone

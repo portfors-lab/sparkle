@@ -1,6 +1,6 @@
 from spikeylab.gui.plotting.pyqtgraph_widgets import FFTWidget
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 class CalibrationDisplay(QtGui.QWidget):
     """Widget container with two FFT plots, of outgoing and incoming signal,

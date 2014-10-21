@@ -3,7 +3,7 @@ import os
 import re
 import h5py
 import numpy
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
     def __init__(self, parent, h5node):
@@ -35,7 +35,7 @@ class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
             
 
 class H5TreeWidget(QtGui.QTreeWidget):
-    nodeChanged = QtCore.pyqtSignal(QtGui.QTreeWidgetItem)
+    nodeChanged = QtCore.Signal(QtGui.QTreeWidgetItem)
     def __init__(self, *args):
         QtGui.QTreeWidget.__init__(self, *args)
         self.fhandles = {}

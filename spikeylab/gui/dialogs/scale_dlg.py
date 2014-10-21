@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 from scale_dlg_form import Ui_ScaleDlg
 
 class ScaleDialog(QtGui.QDialog):

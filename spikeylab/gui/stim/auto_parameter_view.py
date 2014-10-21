@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
@@ -8,8 +8,8 @@ class AddLabel(object):
         
 class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     """Table View which holds auto parameter details, with a parameter per row"""
-    hintRequested = QtCore.pyqtSignal(str)
-    parameterChanged = QtCore.pyqtSignal(list)
+    hintRequested = QtCore.Signal(str)
+    parameterChanged = QtCore.Signal(list)
     def __init__(self):
         QtGui.QTableView.__init__(self)
         AbstractDragView.__init__(self)

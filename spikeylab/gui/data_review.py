@@ -2,7 +2,7 @@ from spikeylab.gui.hdftree import H5TreeWidget
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.gui.stim.component_detail import ComponentsDetailWidget
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 class QDataReviewer(QtGui.QWidget):
     def __init__(self, parent=None):

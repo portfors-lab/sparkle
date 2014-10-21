@@ -5,7 +5,7 @@ algorithms and parameter values
 import sys, time, os, json
 
 import numpy as np
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 import pyqtgraph as pg
 
 from spikeylab.acq.players import FinitePlayer

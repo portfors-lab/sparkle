@@ -1,6 +1,6 @@
 import os
 
-from PyQt4 import QtGui, QtCore, QtTest
+from QtWrapper import QtGui, QtCore, QtTest
 
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 from spikeylab.gui.stim.components.vocal_parameters import VocalParameterWidget

@@ -8,9 +8,9 @@ import test.sample as sample
 
 from nose.tools import assert_equal
 
-from PyQt4.QtTest import QTest 
-from PyQt4.QtGui import QApplication, QLineEdit
-from PyQt4.QtCore import Qt
+from QtWrapper.QtTest import QTest 
+from QtWrapper.QtGui import QApplication, QLineEdit
+from QtWrapper.QtCore import Qt
 
 class TestCalibrationDialog():
     def setUp(self):

@@ -1,5 +1,5 @@
 
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from spikeylab.tools.util import clearLayout
 

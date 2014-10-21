@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 from comment_dlg_form import Ui_CellCommentDialog
 
 class CellCommentDialog(QtGui.QDialog):

@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 class WaitWidget(QtGui.QLabel):
     """Simple wiget that only contains a label "Loading..." So the user

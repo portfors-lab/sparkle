@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from common_parameters_form import Ui_ParameterWidget
 from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget

@@ -3,7 +3,7 @@ from spikeylab.gui.plotting.pyqtgraph_widgets import ChartWidget
 import time
 import numpy as np
 
-from PyQt4.QtGui import QApplication
+from QtWrapper.QtGui import QApplication
 
 def test_chart_speed():
 

@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.drag_label import DragLabel
 from spikeylab.gui.stim.auto_parameter_view import AutoParameterTableView, AddLabel
@@ -8,9 +8,9 @@ from spikeylab.stim.reorder import order_function
 
 class Parametizer(QtGui.QWidget):
     """Container widget for the auto parameters"""
-    hintRequested = QtCore.pyqtSignal(str)
-    visibilityChanged = QtCore.pyqtSignal(bool)
-    titleChange = QtCore.pyqtSignal(str)
+    hintRequested = QtCore.Signal(str)
+    visibilityChanged = QtCore.Signal(bool)
+    titleChange = QtCore.Signal(str)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 

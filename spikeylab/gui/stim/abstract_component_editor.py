@@ -1,11 +1,11 @@
-from PyQt4 import QtCore
+from QtWrapper import QtCore
 
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 
 class AbstractComponentWidget(AbstractEditorWidget):
     """Common functions for Component editors"""
     _component = None
-    attributesSaved = QtCore.pyqtSignal(str, dict)
+    attributesSaved = QtCore.Signal(str, dict)
     
     def name(self):
         """Gets the component name

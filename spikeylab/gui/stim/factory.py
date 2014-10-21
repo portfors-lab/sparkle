@@ -5,7 +5,7 @@ and assigning editors to them
 import os
 import json
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.gui.stim.tuning_curve import TuningCurveEditor

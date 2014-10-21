@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 from numpy import floor
 
 class SmartSpinBox(QtGui.QDoubleSpinBox):

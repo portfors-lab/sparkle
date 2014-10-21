@@ -3,7 +3,7 @@ import json
 import logging
 
 import yaml
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 import spikeylab.tools.systools as systools
 from spikeylab.tools.util import convert2native

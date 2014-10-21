@@ -5,7 +5,7 @@ from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 
-from PyQt4 import QtCore
+from QtWrapper import QtCore
 
 import test.sample as sample
 

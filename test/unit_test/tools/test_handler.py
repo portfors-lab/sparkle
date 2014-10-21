@@ -4,7 +4,7 @@ import logging
 import re
 
 import yaml
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 from spikeylab.tools.log import init_logging
 from spikeylab.tools.uihandler import TextEditHandler

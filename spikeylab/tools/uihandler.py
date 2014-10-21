@@ -1,10 +1,10 @@
 import logging
 import traceback
 
-from PyQt4 import QtCore
+from QtWrapper import QtCore
 
 class LogSignal(QtCore.QObject):
-    message = QtCore.pyqtSignal(str)
+    message = QtCore.Signal(str)
 
 class TextEditHandler(logging.Handler):
     """Relay log message via a signal to connected widgets. Using a signal

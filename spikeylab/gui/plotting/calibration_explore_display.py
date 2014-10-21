@@ -1,6 +1,6 @@
 from spikeylab.gui.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 
 class ExtendedCalibrationDisplay(QtGui.QWidget):

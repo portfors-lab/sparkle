@@ -1,6 +1,6 @@
 import cPickle
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 class AbstractDragView(object):
     """Class to keep drag and drop behaviour consistent across UI"""

@@ -1,5 +1,5 @@
 import sip
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 class AbstractEditorWidget(QtGui.QWidget):
     """Abstract class to share class variables for all editor widgets,
@@ -12,7 +12,7 @@ class AbstractEditorWidget(QtGui.QWidget):
     tunit_labels = []
     funit_fields = []
     tunit_fields = []
-    valueChanged = QtCore.pyqtSignal()
+    valueChanged = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(AbstractEditorWidget, self).__init__(parent)

@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 from numpy import floor
 
 from incrementer_form import Ui_IncrementInput
@@ -8,7 +8,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     """Input widget with buttons to increment the value in the 
     field by 1,5, or 10"""
     numtype = float
-    valueChanged = QtCore.pyqtSignal()
+    valueChanged = QtCore.Signal()
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)

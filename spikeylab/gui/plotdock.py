@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.plotting.protocoldisplay import ProtocolDisplay
 from spikeylab.gui.plotting.calibration_display import CalibrationDisplay

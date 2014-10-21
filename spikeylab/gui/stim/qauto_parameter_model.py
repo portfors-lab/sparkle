@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 import numpy as np
 
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel
@@ -11,9 +11,9 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
     """PyQt wrapper for AutoParameterModel, for it to be able to 
     interface with the :class:`AutoParameterTableView<spikeylab.gui.stim.auto_parameter_view.AutoParameterTableView>`"""
     SelectionModelRole = 34
-    emptied = QtCore.pyqtSignal(bool)
-    hintRequested = QtCore.pyqtSignal(str)
-    countChanged = QtCore.pyqtSignal()
+    emptied = QtCore.Signal(bool)
+    hintRequested = QtCore.Signal(str)
+    countChanged = QtCore.Signal()
     def __init__(self, model):
         super(QAutoParameterModel, self).__init__()
         self.model = model

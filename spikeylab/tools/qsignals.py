@@ -1,24 +1,24 @@
-from PyQt4 import QtCore
+from QtWrapper import QtCore
 import numpy
 
 class ProtocolSignals(QtCore.QObject):
-    curve_finished = QtCore.pyqtSignal()
-    ncollected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
-    warning = QtCore.pyqtSignal(str)
-    response_collected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
-    average_response = QtCore.pyqtSignal(int, int, float)
-    calibration_response_collected = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray, float)
-    current_trace = QtCore.pyqtSignal(int, int, dict)
-    current_rep = QtCore.pyqtSignal(int)
-    spikes_found = QtCore.pyqtSignal(list, int)
-    stim_generated = QtCore.pyqtSignal(numpy.ndarray, int)
-    threshold_updated = QtCore.pyqtSignal(float)
-    trace_finished = QtCore.pyqtSignal(int, float, float, float)
-    group_finished = QtCore.pyqtSignal(bool)
-    calibration_file_changed = QtCore.pyqtSignal(str)
-    tuning_curve_started = QtCore.pyqtSignal(list, list, str)
-    tuning_curve_response = QtCore.pyqtSignal(int, int, float)
-    over_voltage = QtCore.pyqtSignal(float)
+    curve_finished = QtCore.Signal()
+    ncollected = QtCore.Signal(numpy.ndarray, numpy.ndarray)
+    warning = QtCore.Signal(str)
+    response_collected = QtCore.Signal(numpy.ndarray, numpy.ndarray)
+    average_response = QtCore.Signal(int, int, float)
+    calibration_response_collected = QtCore.Signal(numpy.ndarray, numpy.ndarray, float)
+    current_trace = QtCore.Signal(int, int, dict)
+    current_rep = QtCore.Signal(int)
+    spikes_found = QtCore.Signal(list, int)
+    stim_generated = QtCore.Signal(numpy.ndarray, int)
+    threshold_updated = QtCore.Signal(float)
+    trace_finished = QtCore.Signal(int, float, float, float)
+    group_finished = QtCore.Signal(bool)
+    calibration_file_changed = QtCore.Signal(str)
+    tuning_curve_started = QtCore.Signal(list, list, str)
+    tuning_curve_response = QtCore.Signal(int, int, float)
+    over_voltage = QtCore.Signal(float)
 
     def iteritems(self):
         return {
@@ -42,5 +42,5 @@ class ProtocolSignals(QtCore.QObject):
         }.iteritems()
 
 class TestSignals(QtCore.QObject):
-    update_data = QtCore.pyqtSignal(numpy.ndarray, numpy.ndarray)
-    done = QtCore.pyqtSignal()
+    update_data = QtCore.Signal(numpy.ndarray, numpy.ndarray)
+    done = QtCore.Signal()

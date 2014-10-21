@@ -3,11 +3,11 @@
 # Form implementation generated from reading ui file '.\vocal_parameters.ui'
 #
 # Created: Fri Aug 29 13:57:41 2014
-#      by: PyQt4 UI code generator 4.11.1
+#      by: QtWrapper UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

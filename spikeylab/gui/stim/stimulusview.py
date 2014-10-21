@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.drag_label import DragLabel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
@@ -21,8 +21,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     _height = ROW_HEIGHT
     _width = 10
     _componentDefaults = {}
-    componentSelected = QtCore.pyqtSignal(AbstractStimulusComponent)
-    countChanged = QtCore.pyqtSignal()
+    componentSelected = QtCore.Signal(AbstractStimulusComponent)
+    countChanged = QtCore.Signal()
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
         AbstractDragView.__init__(self)

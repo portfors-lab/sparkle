@@ -1,13 +1,13 @@
 import os
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 class TrashWidget(QtGui.QPushButton):
     """Widget which serves as a drop location to remove items from a model/view"""
-    itemTrashed = QtCore.pyqtSignal()
+    itemTrashed = QtCore.Signal()
     """Signal_ sent when an item has dropped over this widget
 
-    .. _Signal: http://pyqt.sourceforge.net/Docs/PyQt4/new_style_signals_slots.html#PyQt4.QtCore.pyqtSignal
+    .. _Signal: http://pyqt.sourceforge.net/Docs/QtWrapper/new_style_signals_slots.html#PyQt4.QtCore.Signal
     """
     def __init__(self,parent=None):
         QtGui.QPushButton.__init__(self, parent)

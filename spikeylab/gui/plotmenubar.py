@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 class PlotMenuBar(QtGui.QMenuBar):
     """Menu bar for the plot dock widget"""

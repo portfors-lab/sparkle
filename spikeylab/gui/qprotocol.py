@@ -1,6 +1,6 @@
 import spikeylab
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.stim.factory import StimFactory
 from spikeylab.run.protocol_model import ProtocolTabelModel

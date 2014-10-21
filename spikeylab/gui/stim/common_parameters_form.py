@@ -3,11 +3,11 @@
 # Form implementation generated from reading ui file '.\common_parameters.ui'
 #
 # Created: Thu Jun 19 13:26:28 2014
-#      by: PyQt4 UI code generator 4.9.6
+#      by: QtWrapper UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

@@ -1,5 +1,5 @@
 import os, shutil
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 

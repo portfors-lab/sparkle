@@ -1,6 +1,6 @@
 import os
 
-from PyQt4.QtGui import QApplication
+from QtWrapper.QtGui import QApplication
 
 from spikeylab.gui.main_control import MainWindow
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget

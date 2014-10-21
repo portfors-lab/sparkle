@@ -1,6 +1,6 @@
 import time
 
-from PyQt4 import QtCore, QtGui
+from QtWrapper import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
 import threading
@@ -85,7 +85,7 @@ class TraceWidget(BasePlot):
     rasterBottom = 0.5 # bottom of raster plot
     # this will be set automatically
     rasterYslots = None
-    thresholdUpdated = QtCore.pyqtSignal(float)
+    thresholdUpdated = QtCore.Signal(float)
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
@@ -260,8 +260,8 @@ class SpecWidget(BasePlot):
     imgArgs = {'lut':None, 'state':None, 'levels':None}
     resetImageScale = True
     imgScale = (1.,1.)
-    colormapChanged = QtCore.pyqtSignal(object)
-    spec_done = QtCore.pyqtSignal(np.ndarray, np.ndarray, np.ndarray)
+    colormapChanged = QtCore.Signal(object)
+    spec_done = QtCore.Signal(np.ndarray, np.ndarray, np.ndarray)
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
 

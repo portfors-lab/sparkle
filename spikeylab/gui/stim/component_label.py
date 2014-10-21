@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from spikeylab.stim.types import get_stimuli_models
 from spikeylab.gui.trashcan import TrashWidget

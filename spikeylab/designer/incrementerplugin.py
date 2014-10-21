@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtDesigner
+from QtWrapper import QtGui, QtDesigner
 
 from spikeylab.gui.stim.incrementer import IncrementInput
 

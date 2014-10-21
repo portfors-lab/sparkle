@@ -1,7 +1,7 @@
 import cPickle
 
 from nose.tools import assert_equal
-from PyQt4 import QtCore, QtGui, QtTest
+from QtWrapper import QtCore, QtGui, QtTest
 
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.gui.qprotocol import QProtocolTabelModel, ProtocolView

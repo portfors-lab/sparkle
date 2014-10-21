@@ -1,6 +1,6 @@
 import re
 
-from PyQt4 import QtGui, QtCore
+from QtWrapper import QtGui, QtCore
 
 from calibration_dlg_form import Ui_CalibrationDialog
 from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget

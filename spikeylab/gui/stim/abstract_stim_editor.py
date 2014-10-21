@@ -1,7 +1,7 @@
 import os
 import json
 
-from PyQt4 import QtGui
+from QtWrapper import QtGui
 
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 

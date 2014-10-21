@@ -4,7 +4,7 @@ import logging
 
 import yaml
 import numpy as np
-from PyQt4 import QtCore
+from QtWrapper import QtCore
 
 from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
 from spikeylab.tools.audiotools import impulse_response, convolve_filter
@@ -25,7 +25,7 @@ MAXV = config['max_voltage']
 
 class QStimulusModel(QtCore.QAbstractItemModel):
     """Qt wrapper for :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`"""
-    samplerateChanged = QtCore.pyqtSignal(int)
+    samplerateChanged = QtCore.Signal(int)
     def __init__(self, stim, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
 

@@ -1,9 +1,9 @@
 import os
 import json
 
-from PyQt4.QtTest import QTest 
-from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import Qt, QTimer
+from QtWrapper.QtTest import QTest 
+from QtWrapper.QtGui import QApplication
+from QtWrapper.QtCore import Qt, QTimer
 import unittest
 
 from spikeylab.gui.stim.qstimulus import QStimulusModel
