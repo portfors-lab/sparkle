@@ -2,7 +2,7 @@ import cPickle
 
 from PyQt4 import QtGui, QtCore
 
-class AbstractDragView():
+class AbstractDragView(object):
     """Class to keep drag and drop behaviour consistent across UI"""
     DragRole = 33
     def __init__(self):

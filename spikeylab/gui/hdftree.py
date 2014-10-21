@@ -3,7 +3,7 @@ import os
 import re
 import h5py
 import numpy
-from PyQt4 import Qt, QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
     def __init__(self, parent, h5node):
@@ -15,11 +15,11 @@ class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
             self.setText(0, h5node.name.rpartition('/')[-1])
 
     def path(self):        
-        path = str(self.data(0, Qt.Qt.DisplayRole).toString())
+        path = str(self.data(0, QtCore.Qt.DisplayRole).toString())
         parent = self.parent()
         root = self.treeWidget().invisibleRootItem()
         while parent is not None:
-            path = str(parent.data(0, Qt.Qt.DisplayRole).toString()) + "/" + path
+            path = str(parent.data(0, QtCore.Qt.DisplayRole).toString()) + "/" + path
             parent = parent.parent()
         return str(path)
 

@@ -14,13 +14,11 @@ class SavingDialog(QtGui.QFileDialog):
         # reverse engineer to get a hold of file name line edit
         layout = self.layout()
         for i in range(layout.count()):
-            try:
-                w = layout.itemAt(i).widget()
+            item = layout.itemAt(i)
+            if isinstance(item, QtGui.QWidgetItem):
+                w = item.widget()
                 if isinstance(w, QtGui.QLineEdit):
                     w.textChanged.connect(self.update_label)
-            except:
-                # wasn't a widget
-                pass
 
         if defaultFile is not None:
             self.selectFile(defaultFile)
