@@ -33,6 +33,8 @@ class TestFFTWidget():
 
     def tearDown(self):
         self.fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
     def test_fft_plot(self):
         self.fig.setWindowTitle(inspect.stack()[0][3])
@@ -57,6 +59,8 @@ class TestTraceWidget():
 
     def tearDown(self):
         self.fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
     def test_threshold(self):
         self.fig.setThreshold(0.33)
@@ -122,6 +126,8 @@ class TestSpecWidget():
 
     def tearDown(self):
         self.fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
     def test_spec_plot(self):
         self.fig.setWindowTitle(inspect.stack()[0][3])
@@ -155,6 +161,8 @@ class TestSimplePlotWidget():
 
     def tearDown(self):
         self.fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
     def test_simple_plot(self):
         self.fig.setWindowTitle(inspect.stack()[0][3])
@@ -193,6 +201,8 @@ class TestProgressWidget():
 
     def tearDown(self):
         self.fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
         
     def test_progress_plots(self):
         self.fig.setWindowTitle(inspect.stack()[0][3])
@@ -253,6 +263,8 @@ class TestPSTHWidget():
         assert_array_equal(barvals, np.zeros(nbins))
 
         fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
 class TestStackedWidget():
     def setup(self):
@@ -262,6 +274,8 @@ class TestStackedWidget():
 
     def teardown(self):
         self.fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
     def test_stacking_plots(self):
         for i in range(1,5):
@@ -297,3 +311,5 @@ class TestOtherWidgets():
             QApplication.processEvents()
             time.sleep(PAUSE)
         fig.close()
+        QApplication.closeAllWindows()
+        QApplication.processEvents()

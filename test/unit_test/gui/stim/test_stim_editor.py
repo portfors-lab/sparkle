@@ -43,7 +43,9 @@ class TestStimulusEditor():
 
     def tearDown(self):
         self.editor.close()
-        self.editor.deleteLater()
+        self.editor.deleteLater()        
+        QApplication.closeAllWindows()
+        QApplication.processEvents()
 
     def test_preview(self):
         

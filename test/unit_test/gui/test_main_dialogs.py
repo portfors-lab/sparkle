@@ -1,7 +1,7 @@
 import os, glob
 import threading, time
 
-from QtWrapper import QtGui
+from QtWrapper import QtGui, QtTest
 from nose.tools import assert_equal
 
 from spikeylab.gui.main_control import MainWindow
@@ -22,6 +22,7 @@ class TestMainDialogs():
     def tearDown(self):
         self.form.close()
         QtGui.QApplication.closeAllWindows()
+        QtGui.QApplication.processEvents()
 
         # delete all data files in temp folder -- this will also clear out past
         # test runs that produced errors and did not delete their files
@@ -36,7 +37,6 @@ class TestMainDialogs():
         assert self.form.ui.dataFileLbl.text() == os.path.basename(self.form.acqmodel.current_data_file())
 
     def test_calibration_dlg(self):
-
         qtbot.handle_dialog()
         self.form.launchCalibrationDlg()
         assert self.form.ui.currentCalLbl.text() == 'None'
@@ -45,6 +45,7 @@ class TestMainDialogs():
         fscale = self.form.fscale
         tscale = self.form.tscale
         qtbot.handle_dialog()
+        QtTest.QTest.qWait(100)
         self.form.launchScaleDlg()
         assert fscale == self.form.fscale
         assert tscale == self.form.tscale
