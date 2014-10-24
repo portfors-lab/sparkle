@@ -1,9 +1,7 @@
 """Adapted from https://gist.github.com/remram44/5985681
 
 This compatibility layer allows to use either PySide or PyQt4 as the Qt
-binding. It will choose what's available, defaulting on PySide, unless the
-QT_API environment variable is set.
-"""
+binding. """
 
 
 import os
@@ -64,12 +62,12 @@ if binding == "PySide":
             QtGui.QApplication.processEvents()
     QtTest.QTest.qWait = qWait
 
-    def QtLoadUI(uifile):
+    def QtLoadUI(uifile, base):
         from PySide import QtUiTools
         loader = QtUiTools.QUiLoader()
         uif = QtCore.QFile(uifile)
         uif.open(QtCore.QFile.ReadOnly)
-        result = loader.load(uif)
+        result = loader.load(uif, base)
         uif.close()
         return result
 
@@ -89,9 +87,9 @@ elif binding == 'PyQt4':
     QtCore.Slot = QtCore.pyqtSlot
     QtCore.Property = QtCore.pyqtProperty
     os.environ['QT_API'] = 'pyqt'
-    def QtLoadUI(uifile):
+    def QtLoadUI(uifile, base):
         from PyQt4 import uic
-        return uic.loadUi(uifile)
+        return uic.loadUi(uifile, base)
 
 def get_qt_binding_name():
     return binding
