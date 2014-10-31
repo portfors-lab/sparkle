@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Wed Jun 18 16:50:03 2014
-#      by: QtWrapper UI code generator 4.9.6
+# Created: Mon Nov 03 09:41:31 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -202,6 +202,18 @@ class Ui_TuningCurveEditor(object):
         QtCore.QObject.connect(self.freqStepSpnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QObject.connect(self.dbStepSpnbx, QtCore.SIGNAL(_fromUtf8("editingFinished()")), TuningCurveEditor.submit)
         QtCore.QMetaObject.connectSlotsByName(TuningCurveEditor)
+        TuningCurveEditor.setTabOrder(self.freqStartSpnbx, self.freqStopSpnbx)
+        TuningCurveEditor.setTabOrder(self.freqStopSpnbx, self.freqStepSpnbx)
+        TuningCurveEditor.setTabOrder(self.freqStepSpnbx, self.dbStartSpnbx)
+        TuningCurveEditor.setTabOrder(self.dbStartSpnbx, self.dbStopSpnbx)
+        TuningCurveEditor.setTabOrder(self.dbStopSpnbx, self.dbStepSpnbx)
+        TuningCurveEditor.setTabOrder(self.dbStepSpnbx, self.durSpnbx)
+        TuningCurveEditor.setTabOrder(self.durSpnbx, self.risefallSpnbx)
+        TuningCurveEditor.setTabOrder(self.risefallSpnbx, self.nrepsSpnbx)
+        TuningCurveEditor.setTabOrder(self.nrepsSpnbx, self.saveBtn)
+        TuningCurveEditor.setTabOrder(self.saveBtn, self.okBtn)
+        TuningCurveEditor.setTabOrder(self.okBtn, self.freqNstepsLbl)
+        TuningCurveEditor.setTabOrder(self.freqNstepsLbl, self.dbNstepsLbl)
 
     def retranslateUi(self, TuningCurveEditor):
         TuningCurveEditor.setWindowTitle(_translate("TuningCurveEditor", "Form", None))

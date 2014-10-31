@@ -339,9 +339,24 @@
   <customwidget>
    <class>SmartSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>spikeylab.stim.smart_spinbox</header>
+   <header>spikeylab.gui.stim.smart_spinbox</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>freqStartSpnbx</tabstop>
+  <tabstop>freqStopSpnbx</tabstop>
+  <tabstop>freqStepSpnbx</tabstop>
+  <tabstop>dbStartSpnbx</tabstop>
+  <tabstop>dbStopSpnbx</tabstop>
+  <tabstop>dbStepSpnbx</tabstop>
+  <tabstop>durSpnbx</tabstop>
+  <tabstop>risefallSpnbx</tabstop>
+  <tabstop>nrepsSpnbx</tabstop>
+  <tabstop>saveBtn</tabstop>
+  <tabstop>okBtn</tabstop>
+  <tabstop>freqNstepsLbl</tabstop>
+  <tabstop>dbNstepsLbl</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
