@@ -25,6 +25,7 @@ class AbstractAcquisitionRunner():
 
         self.player_lock = threading.Lock()
         self.current_dataset_name = None
+        self.save_data = False # subclasses may set different defaults
         
     def update_reference_voltage(self):
         """Updates the voltage intensity combination used to calculate
@@ -115,6 +116,8 @@ class AbstractAcquisitionRunner():
             self.datafile = kwargs['datafile']
         if 'reprate' in kwargs:
             self.reprate = kwargs['reprate']
+        if 'save' in kwargs:
+            self.save_data = kwargs['save']
 
     def run(self, interval, **kwargs):
         """Runs the acquisiton

@@ -35,18 +35,21 @@ class TestAcquisitionManager():
         for f in files:
             os.remove(f)
 
-    def test_cal_tone_duration(self):
+    def test_cal_tone_settings(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        manager.set_cal_tone(15000, 100)
+        manager.set(caldb=100, calf=15000)
         manager.set_calibration_duration(winsz)
+        manager.set_calibration_by_index(1)
 
-        stims = manager.cal_toner.stimuli_list()
-        for stim in stims:
-            if stim.name == 'Pure Tone':
-                assert stim.duration() == winsz
+        t = manager.run_calibration(0.1, False)
+        t.join()
+
+        reftone = manager.bs_calibrator.reftone
+        assert reftone.duration() == winsz
+        assert reftone.frequency()
 
         manager.close_data()
 
@@ -544,6 +547,7 @@ class TestAcquisitionManager():
         winsz = 0.1 #seconds
         manager, fname = self.create_acqmodel(winsz)
         acq_rate = manager.calibration_genrate()
+        manager.set(caldb=66, calf=1234)
 
         manager.set_calibration_by_index(1)
         tc = manager.calibration_stimulus('noise')
@@ -553,7 +557,7 @@ class TestAcquisitionManager():
         manager.set_calibration_duration(winsz)
         t = manager.run_calibration(0.1, False)
         t.join()
-        calname = manager.process_calibration()
+        calname, db = manager.process_calibration()
         fname = manager.datafile.filename
         manager.close_data()
 
@@ -570,6 +574,14 @@ class TestAcquisitionManager():
         assert_equal(signals.shape,(nreps, npts))
         
         assert cal_vector.shape == ((npts/2+1),)
+
+        reftone = hfile[calname]['reference_tone']
+        print 'reftone', reftone.attrs.keys()
+        stim = json.loads(reftone.attrs['stim'])
+        tone = stim[0]['components'][0]
+        assert tone['stim_type'] == 'Pure Tone'
+        assert tone['frequency'] == 1234
+        assert tone['intensity'] == 66
 
         hfile.close()
 

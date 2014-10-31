@@ -46,13 +46,6 @@ class AbstractCalibrationRunner(ListAcquisitionRunner):
         """
         raise NotImplementedError
 
-    def set_reps(self, reps):
-        """set the number of repetitions for the stimul(us/i)
-
-        :param reps: number of times to present the same stimulus
-        :type reps: int
-        """
-        self.stimulus.setRepCount(reps)
 
 class CalibrationRunner(AbstractCalibrationRunner):
     """Handles Calibration acquistion, where there is a single unique 
@@ -69,6 +62,13 @@ class CalibrationRunner(AbstractCalibrationRunner):
         self.stim_components = [WhiteNoise(), FMSweep()]
         self.stimulus.insertComponent(self.stim_components[0])
         self.protocol_model.insert(self.stimulus, 0)
+
+        # reference tone for setting the refence voltage==db
+        self.refstim = StimulusModel()
+        tone = PureTone()
+        tone.setRisefall(0.001)
+        self.refstim.insertComponent(tone, 0,0)
+        self.reftone = tone
 
         self.save_data = True
         self.group_name = 'calibration_'
@@ -101,6 +101,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
         # all stim components
         for comp in self.stim_components:
             comp.setDuration(dur)
+        self.reftone.setDuration(dur)
 
     def _initialize_run(self):
        
@@ -111,7 +112,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
         
         logger = logging.getLogger('main')
         logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
-        
+
         self.datafile.init_data(self.current_dataset_name, mode='calibration', 
                                 dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
 
@@ -124,26 +125,40 @@ class CalibrationRunner(AbstractCalibrationRunner):
         if self.apply_cal:
             self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
         else:
+            # point is to output the signal at the specificed voltage, to we set
+            # the intensity of the components to match whatever the caldb is now
             self.stimulus.component(0,0).setIntensity(self.caldb)
-            # self.stimulus.data(self.stimulus.index(0,0)).setIntensity(self.caldb)
+            print 'USING {} V, {} Hz, {} dBSPL'.format(self.calv, self.calf, self.caldb)
+            self.reftone.setIntensity(self.caldb)
+            self.reftone.setFrequency(self.calf)
+            self.protocol_model.insert(self.refstim,0)
             self.calname = None
             self.protocol_model.setCalibration(None, None, None)
+
+            self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                    nested_name='reference_tone',
+                                    dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
 
     def _initialize_test(self, test):
         return
 
     def _process_response(self, response, trace_info, irep):
-        self.datafile.append(self.current_dataset_name, response)
+        if trace_info['components'][0]['stim_type'] == 'Pure Tone':
+            self.datafile.append(self.current_dataset_name, response, nested_name='reference_tone')
+        elif trace_info['components'][0]['stim_type'] == 'FM Sweep' or trace_info['components'][0]['stim_type'] == 'White Noise':
+            self.datafile.append(self.current_dataset_name, response)
+        else:
+            raise Exception("Improper calibration stimulus : {}".format(trace_info['components'][0]['stim_type']))
 
         self.putnotify('response_collected', (self.aitimes, response))
-        
+
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
         of speaker to get frequency vs. attenuation curve.
 
-        :param save: Wheter to save this calibration data to file
+        :param save: Whether to save this calibration data to file
         :type save: bool
-        :returns: numpy.ndarray, str, int -- frequency response (in dB), dataset name, calibration reference frequency
+        :returns: numpy.ndarray, str, int, float -- frequency response (in dB), dataset name, calibration reference frequency, reference intensity
         """
         avg_signal = np.mean(self.datafile.get(self.current_dataset_name + '/signal'), axis=0)
 
@@ -165,11 +180,26 @@ class CalibrationRunner(AbstractCalibrationRunner):
                              }
             self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
                                        relevant_info)
+
+            mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
+            freq, spectrum = calc_spectrum(mean_reftone, self.player.get_aisr())
+            peak_fft = spectrum[(np.abs(freq-self.calf)).argmin()]
+            db = calc_db(peak_fft)
+            # remove the reference tone from protocol
+            self.protocol_model.remove(0)
         else:
             # delete the data saved to file thus far.
             self.datafile.delete_group(self.current_dataset_name)
-        return diffdB, self.current_dataset_name, self.calf
+        return diffdB, self.current_dataset_name, self.calf, db
 
+    def set_reps(self, reps):
+        """set the number of repetitions for the stimuli (reference tone and cal stim)
+
+        :param reps: number of times to present the same stimulus
+        :type reps: int
+        """
+        self.stimulus.setRepCount(reps)
+        self.refstim.setRepCount(reps)
 
 # whether to use relative peak level (from FFT), or calculate from
 # microphone sensitivity level
@@ -339,3 +369,11 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         # Not currenly saving resultant intensity
 
         return resultant_dB, '', self.calf
+
+    def set_reps(self, reps):
+        """set the number of repetitions for the stimul(us/i)
+
+        :param reps: number of times to present the same stimulus
+        :type reps: int
+        """
+        self.stimulus.setRepCount(reps)

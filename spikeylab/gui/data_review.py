@@ -63,24 +63,19 @@ class QDataReviewer(QtGui.QWidget):
     def setCurrentData(self, widgetitem):
         path = makepath(widgetitem)
         info = self.datafile.get_info(path)
-        self.attrtxt.clear()
-        for attr in info:
-            if attr[0] != 'stim':
-                self.attrtxt.appendPlainText(attr[0] + ' : ' + str(attr[1]))
 
+        # clear out old stuff
+        self.detailWidget.clearDoc()
         setname = widgetitem.text(0)
         self.tracetable.setRowCount(0)
         self.derivedtxt.clear()
-        if setname.startsWith('test') or setname.startsWith('signal'):
-            self.detailWidget.clearDoc()
-            # trace_data = self.datafile.get(path)
-            data_shape = self.datafile.hdf5[path].shape
-            # input samplerate is stored in group attributes
-            group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
-            fsout = dict(group_data)['samplerate_ad']
-            self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
-            self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
-            if self.datafile.get_trace_info(path) is not None:
+        self.attrtxt.clear()
+        
+        for attr in info:
+            if attr[0] != 'stim':
+                self.attrtxt.appendPlainText(attr[0] + ' : ' + str(attr[1]))
+            else:
+                # use the datafile object to do json converstion of stim data
                 stimuli = self.datafile.get_trace_info(path)
 
                 self.tracetable.setRowCount(len(stimuli))
@@ -103,9 +98,22 @@ class QDataReviewer(QtGui.QWidget):
                     item =  QtGui.QTableWidgetItem(str(stim['samplerate_da']))
                     item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                     self.tracetable.setItem(row, 2, item)
-
                 self.current_test = stimuli
 
+        if path == '':
+            return
+        data_object = self.datafile.hdf5[path]
+        if hasattr(data_object, 'shape'):
+            # only data sets have a shape
+            data_shape = data_object.shape
+            self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
+            
+            if setname.startsWith('test') or setname.startsWith('signal') or setname == 'reference_tone':
+                # input samplerate is stored in group attributes
+                group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
+                fsout = dict(group_data)['samplerate_ad']
+                self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
+            
 
     def setTraceData(self, row, column):
         self.detailWidget.clearDoc()

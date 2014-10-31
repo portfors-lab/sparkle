@@ -9,6 +9,7 @@ from spikeylab.run.protocol_runner import ProtocolRunner
 from spikeylab.run.chart_runner import ChartRunner
 from spikeylab.run.calibration_runner import CalibrationRunner, CalibrationCurveRunner
 from spikeylab.stim.stimulus_model import StimulusModel
+from spikeylab.stim.types.stimuli_classes import PureTone
 
 class AcquisitionManager():
     """Handles all of the marshalling of different acquisition operations to the correct runner class.
@@ -54,11 +55,7 @@ class AcquisitionManager():
         self.bs_calibrator = CalibrationRunner(self.signals)
         self.tone_calibrator = CalibrationCurveRunner(self.signals)
         self.charter = ChartRunner(self.signals)
-        self.cal_toner = SearchRunner(self.signals)
-        stim_names = self.cal_toner.stim_names()
-        toneidx = stim_names.index("Pure Tone")
-        self.cal_toner.set_stim_by_index(toneidx)
-        self.cal_tone_idx = toneidx
+
         # charter should share protocol model with windowed
         self.charter.protocol_model = self.protocoler.protocol_model
 
@@ -121,23 +118,6 @@ class AcquisitionManager():
         """
         return self.explorer.stimuli_list()
 
-    def set_cal_tone(self, freq, db):
-        """Sets the test calibration tone, for settting the reference intensity/voltage point
-
-        :param freq: Frequency of the tone to be played
-        :type freq: int
-        :param db: Intensity of the tone to be played (dBSPL)
-        :type db: float
-        """
-        stims = self.cal_toner.stimuli_list()
-        for stim in stims:
-            if stim.name == 'Pure Tone':
-                stim.set('frequency', freq)
-                stim.set('intensity', db)
-                # make it so that we output the target voltage regardless
-                self.cal_toner.set(caldb=stim.intensity())
-        self.cal_toner.set_stim_by_index(self.cal_tone_idx)
-
     def set_calibration(self, datakey, calf=None, frange=None):
         """Sets a calibration for all of the acquisition operations,
         from an already gathered calibration data set.
@@ -190,9 +170,6 @@ class AcquisitionManager():
         """
         self.bs_calibrator.set_duration(dur)
         self.tone_calibrator.set_duration(dur)
-        self.cal_toner.set_current_stim_parameter('duration', dur)
-        # resets the signal in player to output
-        self.cal_toner.set_stim_by_index(self.cal_tone_idx)
 
     def set_calibration_reps(self, reps):
         """Sets the number of repetitions for calibration stimuli
@@ -260,12 +237,9 @@ class AcquisitionManager():
         """
         self.explorer.set(**kwargs)
         self.protocoler.set(**kwargs)
-        self.bs_calibrator.set(**kwargs)
         self.tone_calibrator.set(**kwargs)
         self.charter.set(**kwargs)
-        if 'caldb' in kwargs:
-            kwargs.pop('caldb')
-        self.cal_toner.set(**kwargs)
+        self.bs_calibrator.set(**kwargs)
 
     def set_stim_by_index(self, index):
         """Sets the current stimulus for search operation by it's index in the order of stim types
@@ -319,10 +293,6 @@ class AcquisitionManager():
         :returns: :py:class:`threading.Thread` -- the acquisition thread
         """
         return self.protocoler.run()
-
-    def run_caltone(self, interval):
-        """Runs a continuous repetition of the calibration tone"""
-        return self.cal_toner.run(interval)
 
     def set_calibration_by_index(self, idx):
         """Sets the calibration stimulus by it's index in the list of calibration stimuli, with tone curve always being last"""
@@ -387,8 +357,8 @@ class AcquisitionManager():
         if self.selected_calibration_index == 2:
             raise Exception("Calibration curve processing not currently supported")
         else:
-            results, calname, freq = self.bs_calibrator.process_calibration(save)
-        return calname
+            results, calname, freq, db = self.bs_calibrator.process_calibration(save)
+        return calname, db
 
     def halt(self):
         """Halts any/all running operations"""
@@ -397,7 +367,6 @@ class AcquisitionManager():
         self.bs_calibrator.halt()
         self.tone_calibrator.halt()
         self.charter.halt()
-        self.cal_toner.halt()
 
     def close_data(self):
         """Closes the current data file"""

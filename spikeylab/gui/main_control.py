@@ -154,7 +154,6 @@ class MainWindow(ControlWindow):
         self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ/self.fscale, scale_lbl, REFVOLTAGE))
         self.acqmodel.set(**self.calvals)
         self.acqmodel.set_calibration(None, self.calvals['calf'], self.calvals['frange'])
-        self.acqmodel.set_cal_tone(REFFREQ, self.calvals['caldb'])
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
 
@@ -192,9 +191,6 @@ class MainWindow(ControlWindow):
             except TypeError:
                 # disconnecting already disconnected signals throws TypeError
                 pass
-
-    def playCalTone(self):
-        self.onStart(calTone=True)
 
     def onStart(self, calTone=False):
         # set plot axis to appropriate limits
@@ -327,8 +323,9 @@ class MainWindow(ControlWindow):
             #maybe don't call this at all if save is false?
             save = self.ui.calibrationWidget.saveChecked() and not halted
             if save:
-                calname = self.acqmodel.process_calibration(save)
+                calname, db = self.acqmodel.process_calibration(save)
                 ww = self.showWait()
+                self.ui.refDbSpnbx.setValue(db)
                 self.acqmodel.set_calibration(calname, self.calvals['calf'], self.calvals['frange'])
                 self.calvals['calname'] = calname
                 self.calvals['use_calfile'] = True
@@ -384,29 +381,6 @@ class MainWindow(ControlWindow):
 
         self.onUpdate()            
         self.acqmodel.run_explore(interval)
-
-    def runCalTone(self):
-        winsz = float(self.ui.windowszSpnbx.value())
-        self.acqmodel.set_calibration_duration(winsz*self.tscale)
-        
-        self.ui.calToneBtn.setText('Stop')
-        self.ui.calToneBtn.clicked.disconnect()
-        self.ui.calToneBtn.clicked.connect(self.stopCalTone)
-        self.ui.startBtn.setEnabled(False)
-        self.ui.stopBtn.setEnabled(False)
-
-        self.connectUpdatable(True)
-
-        self.activeOperation = 'caltone'
-        reprate = self.ui.reprateSpnbx.value()
-        interval = (1/reprate)*1000
-
-        self.onUpdate()           
-        nreps = self.ui.exNrepsSpnbx.value()
-        self.acqmodel.set(nreps=nreps)
-        self.display.setNreps(nreps)
-
-        self.acqmodel.run_caltone(interval)
 
     def runProtocol(self):
         self.display.updateSpec(None)

@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri Oct 17 15:14:23 2014
-#      by: QtWrapper UI code generator 4.11.1
+# Created: Thu Oct 30 14:27:50 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -166,16 +166,14 @@ class Ui_ControlWindow(object):
         self.refToneLbl = QtGui.QLabel(self.tabCalibrate)
         self.refToneLbl.setObjectName(_fromUtf8("refToneLbl"))
         self.horizontalLayout_10.addWidget(self.refToneLbl)
-        self.calToneBtn = QtGui.QPushButton(self.tabCalibrate)
-        self.calToneBtn.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.calToneBtn.setObjectName(_fromUtf8("calToneBtn"))
-        self.horizontalLayout_10.addWidget(self.calToneBtn)
         self.label_4 = QtGui.QLabel(self.tabCalibrate)
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.horizontalLayout_10.addWidget(self.label_4)
         self.refDbSpnbx = SmartSpinBox(self.tabCalibrate)
+        self.refDbSpnbx.setEnabled(False)
         self.refDbSpnbx.setToolTip(_fromUtf8(""))
+        self.refDbSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.refDbSpnbx.setMaximum(120.0)
         self.refDbSpnbx.setObjectName(_fromUtf8("refDbSpnbx"))
         self.horizontalLayout_10.addWidget(self.refDbSpnbx)
@@ -572,7 +570,6 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.clearProtocol)
         QtCore.QObject.connect(self.actionStimulus_Details, QtCore.SIGNAL(_fromUtf8("triggered()")), self.detail_dock.showNormal)
         QtCore.QObject.connect(self.actionView_Settings, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchViewDlg)
-        QtCore.QObject.connect(self.calToneBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.playCalTone)
         QtCore.QObject.connect(self.refDbSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateCalDb)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
@@ -594,7 +591,6 @@ class Ui_ControlWindow(object):
         self.overAttenLbl_2.setText(_translate("ControlWindow", "0", None))
         self.label_19.setText(_translate("ControlWindow", "undesired attenuation", None))
         self.refToneLbl.setText(_translate("ControlWindow", "Intensity at ? kHz and ?V", None))
-        self.calToneBtn.setText(_translate("ControlWindow", "Play", None))
         self.label_4.setText(_translate("ControlWindow", "=", None))
         self.label_15.setText(_translate("ControlWindow", "dB SPL", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabCalibrate), _translate("ControlWindow", "Calibration", None))

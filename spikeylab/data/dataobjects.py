@@ -151,7 +151,7 @@ class AcquisitionData():
             setpath ='/'.join([key, setname])
             self.hdf5[key].create_dataset(setname, dims)
             self.meta[nested_name] = {'cursor':[0]*len(dims)}
-            if nested_name == 'signal':
+            if nested_name == 'signal' or 'reference_tone':
                 self.set_metadata(setpath, {'stim': '[]'})
         elif mode == 'finite':
             self.test_count +=1
@@ -486,7 +486,10 @@ class AcquisitionData():
             setname = key+'_set'+str(setnum)
             _append_stim(self.hdf5, setname, stim_data)
         elif mode == 'calibration':
-            setname = key + '/' + 'signal'
+            if 'Pure Tone' in stim_data:
+                setname =  key + '/' + 'reference_tone'
+            else:
+                setname = key + '/' + 'signal'
             _append_stim(self.hdf5, setname, stim_data)
 
     def keys(self):

@@ -26,8 +26,17 @@ class TestDataReviewer():
         assert self.ui.attrtxt.toPlainText() != ''
 
     def test_select_dataset(self):
+        # third entry is a protocol run
         group = self.ui.datatree.model().index(2,0, self.treeroot)
         self.ui.datatree.expand(group)
         self.ui.datatree.selectionModel().select(self.ui.datatree.model().index(0,0, group), QtGui.QItemSelectionModel.Select)
-        # assert self.ui.attrtxt.toPlainText() != ''
-        # assert self.ui.tracetable.rowCount() > 0
+        assert self.ui.attrtxt.toPlainText() != ''
+        assert self.ui.tracetable.rowCount() > 0
+
+    def test_show_calibration_stims(self):
+        group = self.ui.datatree.model().index(0,0, self.treeroot)
+        self.ui.datatree.expand(group)
+        self.ui.datatree.selectionModel().select(self.ui.datatree.model().index(2,0, group), QtGui.QItemSelectionModel.Select)
+        assert self.ui.tracetable.rowCount() > 0
+        self.ui.datatree.selectionModel().select(self.ui.datatree.model().index(1,0, group), QtGui.QItemSelectionModel.Select)
+        assert self.ui.tracetable.rowCount() > 0

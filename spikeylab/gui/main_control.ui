@@ -278,19 +278,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="calToneBtn">
-                <property name="maximumSize">
-                 <size>
-                  <width>50</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Play</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QLabel" name="label_4">
                 <property name="text">
                  <string>=</string>
@@ -302,8 +289,14 @@
               </item>
               <item>
                <widget class="SmartSpinBox" name="refDbSpnbx">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string extracomment="Play the tone and put the measured dB SPL here"/>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::NoButtons</enum>
                 </property>
                 <property name="maximum">
                  <double>120.000000000000000</double>
@@ -1307,22 +1300,6 @@
     <hint type="destinationlabel">
      <x>512</x>
      <y>309</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>calToneBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>playCalTone()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>777</x>
-     <y>387</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1005</x>
-     <y>586</y>
     </hint>
    </hints>
   </connection>

@@ -8,11 +8,9 @@ For the purposes of speaker frequency roll-off documentation and compensation.
 #. First set up the hardware. 
     - From the AO channel you are using on the ADC/DAC BNC router, route the output signal to an amplifier, then to the attenutator, and then to the speaker.
     - Place the microphone exactly 10cm away from the speaker. The microphone is highly directional, it is important that it is directly in front of, and facing the speaker, with the shield off. Connect the microphone preamplifier (the wand that the little microphone is screwed on to), to the measuring amplifier. Then route the signal through the Bessel Filter, and then to an AI channel on the ADC/DAC BNC router. See settings for individual pieces of electronics.
+    - Make sure the *Input Section Gain* and *Output Section Gain* on the measuring amplifier are set to 0.
 
-
-#. Get a verified decibel level at reference frequency. Go to to the *calibration* tab, if you are not there already. In the center of the tab there will be a line that reads "Intensity of _kHz tone at _V". Press the *play* button located here. Read the value on the measuring amplifier and put this into the field on the right. This sets a reference point for the program so that it knows what amplitude of a signal to output to recieve the correct loudness at the listener. You can turn the knob on the *Input Section Gain* on the measuring amplifier to change the scale to get a reading when the stimulus is out of range. However, make sure the gain is turned back to 0 when recording or testing a calibration.
-
-#. For saving a calibration, most of the input values are fixed, so all you can change is the duration and number of repetitions.
+#. For saving a calibration, most of the input values are fixed, so all you can change is the duration and number of repetitions. The duration of the stimulus is fixed to the window size, so you change the recording window to change the stimulus duration.
 
 #. Press the start button, the plot display will update with the data from the ouput and recorded signals. After recording the program will take several seconds to calculate the filter it will be using. Finally a frequency roll-off plot of the speaker will appear.
 

@@ -10,20 +10,21 @@ class ProtocolRunner(ListAcquisitionRunner):
     def __init__(self, *args):
         ListAcquisitionRunner.__init__(self, *args)
 
-        self.save_data = True # always
+        self.save_data = True
         self.group_name = 'segment_'
         self.player = FinitePlayer()
 
         self.silence_window = True
         
     def _initialize_run(self):
-        data_items = self.datafile.keys()
-        self.current_dataset_name = next_str_num(self.group_name, data_items)
+        if self.save_data:
+            data_items = self.datafile.keys()
+            self.current_dataset_name = next_str_num(self.group_name, data_items)
 
-        self.datafile.init_group(self.current_dataset_name)
+            self.datafile.init_group(self.current_dataset_name)
 
-        info = {'samplerate_ad': self.player.aisr}
-        self.datafile.set_metadata(self.current_dataset_name, info)
+            info = {'samplerate_ad': self.player.aisr}
+            self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
@@ -32,11 +33,12 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.trace_counter = -1    
 
     def _initialize_test(self, test):        
-        recording_length = self.aitimes.shape[0]
-        # +1 to trace count for silence window
-        self.datafile.init_data(self.current_dataset_name, 
-                                dims=(test.traceCount()+1, test.repCount(), recording_length),
-                                mode='finite')
+        if self.save_data:
+            recording_length = self.aitimes.shape[0]
+            # +1 to trace count for silence window
+            self.datafile.init_data(self.current_dataset_name, 
+                                    dims=(test.traceCount()+1, test.repCount(), recording_length),
+                                    mode='finite')
         # check for special condition -- replace this with a generic
         # if test.editor is not None and test.editor.name == "Tuning Curve":
         self.current_test_type = test.stimType()
@@ -70,7 +72,9 @@ class ProtocolRunner(ListAcquisitionRunner):
         response_bins = spikestats.bin_spikes(spike_times, self.binsz)
         self.putnotify('spikes_found', (response_bins, irep))
 
-        self.datafile.append(self.current_dataset_name, response)
+        if self.save_data:
+            self.datafile.append(self.current_dataset_name, response)
+
         if irep == self.nreps-1:
             total_spikes = float(sum(spike_counts))
             avg_count = total_spikes/len(spike_counts)
