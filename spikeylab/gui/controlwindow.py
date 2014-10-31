@@ -17,6 +17,7 @@ from spikeylab.tools.systools import get_src_directory
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 USE_ATTEN = config['use_attenuator']
+MPHONE_SENSITVITY = config['microphone_sensitivity']
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
@@ -285,6 +286,8 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['calvals'] = self.calvals
         savedict['calparams'] = self.acqmodel.calibration_template()
         savedict['calreps'] = self.ui.calibrationWidget.ui.nrepsSpnbx.value()
+        savedict['mphonesens'] = self.ui.mphoneSensSpnbx.value()
+        savedict['mphonedb'] = self.ui.mphoneDBSpnbx.value()
 
         # parameter settings
         for stim in self.exploreStimuli:
@@ -311,7 +314,6 @@ class ControlWindow(QtGui.QMainWindow):
             logger = logging.getLogger('main')
             logger.exception("Unable to load app data")
             inputsdict = {}
-        
 
         self.ui.threshSpnbx.setValue(inputsdict.get('threshold', 0.5))
         self.stashedAisr = inputsdict.get('aisr', 100)
@@ -337,6 +339,11 @@ class ControlWindow(QtGui.QMainWindow):
         self.calvals['use_calfile'] = False
         self.calvals['calname'] = ''
         self.ui.refDbSpnbx.setValue(self.calvals['caldb'])
+        self.ui.mphoneSensSpnbx.setValue(MPHONE_SENSITVITY)
+        self.ui.mphoneDBSpnbx.setValue(94)
+        # self.ui.mphoneSensSpnbx.setValue(inputsdict.get('mphonesens', 0.004))
+        # self.ui.mphoneDBSpnbx.setValue(inputsdict.get('mphonedb', 94))
+
 
         # load the previous sessions scaling
         self.tscale = inputsdict.get('tscale', 0.001)

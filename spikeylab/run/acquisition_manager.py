@@ -294,6 +294,17 @@ class AcquisitionManager():
         """
         return self.protocoler.run()
 
+    def set_mphone_calibration(self, sens, db):
+        """Sets the microphone calibration, for the purpose of calculating recorded dB levels
+
+        :param sens: microphone sensitivity (V)
+        :type sens: float
+        :param db: dB SPL that the calibration was measured at
+        :type db: int
+        """
+        self.bs_calibrator.set_mphone_calibration(sens, db)
+        self.tone_calibrator.set_mphone_calibration(sens, db)
+
     def set_calibration_by_index(self, idx):
         """Sets the calibration stimulus by it's index in the list of calibration stimuli, with tone curve always being last"""
         self.selected_calibration_index = idx

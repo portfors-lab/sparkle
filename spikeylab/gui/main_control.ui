@@ -295,6 +295,9 @@
                 <property name="toolTip">
                  <string extracomment="Play the tone and put the measured dB SPL here"/>
                 </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::NoButtons</enum>
                 </property>
@@ -307,6 +310,79 @@
                <widget class="QLabel" name="label_15">
                 <property name="text">
                  <string>dB SPL</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Microphone sensitivity</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="mphoneSensSpnbx">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::NoButtons</enum>
+                </property>
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>V at</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="mphoneDBSpnbx">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::NoButtons</enum>
+                </property>
+                <property name="decimals">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <double>120.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>dB SPL</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="mphoneCalBtn">
+                <property name="text">
+                 <string>calibrate</string>
                 </property>
                </widget>
               </item>
@@ -667,7 +743,7 @@
      <x>0</x>
      <y>0</y>
      <width>1274</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -1139,7 +1215,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>386</x>
-     <y>782</y>
+     <y>776</y>
     </hint>
    </hints>
   </connection>
@@ -1154,8 +1230,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1331</x>
-     <y>241</y>
+     <x>1273</x>
+     <y>268</y>
     </hint>
    </hints>
   </connection>
@@ -1166,12 +1242,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>549</x>
-     <y>117</y>
+     <x>482</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
-     <y>154</y>
+     <x>716</x>
+     <y>303</y>
     </hint>
    </hints>
   </connection>
@@ -1198,8 +1274,8 @@
    <slot>modeToggled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1030</x>
-     <y>271</y>
+     <x>1012</x>
+     <y>374</y>
     </hint>
     <hint type="destinationlabel">
      <x>705</x>
@@ -1218,8 +1294,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1331</x>
-     <y>728</y>
+     <x>1273</x>
+     <y>565</y>
     </hint>
    </hints>
   </connection>
@@ -1262,8 +1338,8 @@
    <slot>clearProtocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>804</x>
-     <y>676</y>
+     <x>716</x>
+     <y>659</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1282,8 +1358,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1331</x>
-     <y>782</y>
+     <x>1273</x>
+     <y>776</y>
     </hint>
    </hints>
   </connection>
@@ -1310,12 +1386,28 @@
    <slot>updateCalDb()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>516</x>
-     <y>389</y>
+     <x>616</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>866</x>
      <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mphoneSensSpnbx</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>update_microphone_calibration()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>606</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>788</x>
+     <y>594</y>
     </hint>
    </hints>
   </connection>
@@ -1365,5 +1457,6 @@
   <slot>clearProtocol()</slot>
   <slot>playCalTone()</slot>
   <slot>updateCalDb()</slot>
+  <slot>update_microphone_calibration()</slot>
  </slots>
 </ui>
