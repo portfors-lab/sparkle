@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file '.\incrementer.ui'
 #
-# Created: Thu Sep 25 14:29:45 2014
-#      by: QtWrapper UI code generator 4.11.1
+# Created: Fri Oct 31 09:36:27 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -40,6 +40,7 @@ class Ui_IncrementInput(object):
         sizePolicy.setHeightForWidth(self.valueSpnbx.sizePolicy().hasHeightForWidth())
         self.valueSpnbx.setSizePolicy(sizePolicy)
         self.valueSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.valueSpnbx.setMaximum(120.0)
         self.valueSpnbx.setObjectName(_fromUtf8("valueSpnbx"))
         self.horizontalLayout.addWidget(self.valueSpnbx)
         self.gridLayout = QtGui.QGridLayout()
