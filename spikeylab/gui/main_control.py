@@ -440,11 +440,13 @@ class MainWindow(ControlWindow):
         if self.ui.calibrationWidget.ui.applycalCkbx.isChecked():
             stim_index = self.ui.calibrationWidget.currentIndex()
             self.acqmodel.set_calibration_by_index(stim_index)
-            self.ui.calibrationWidget.saveToObject()        
+            self.ui.calibrationWidget.saveToObject()  
+            rep_multiplier = 1      
         else:
             # Always use noise on saving calibration.
             # BEWARE: Hardcoded to index 1... this could change?!
             self.acqmodel.set_calibration_by_index(1)
+            rep_multiplier = 2     
 
         if self.ui.calibrationWidget.ui.applycalCkbx.isChecked() and self.ui.calibrationWidget.isToneCal():
             frequencies, intensities = self.acqmodel.calibration_range()
@@ -462,7 +464,7 @@ class MainWindow(ControlWindow):
 
         # reset style sheet of progress bar
         self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
-        self.ui.protocolProgressBar.setMaximum(self.acqmodel.calibration_total_count())
+        self.ui.protocolProgressBar.setMaximum(self.acqmodel.calibration_total_count()*rep_multiplier)
 
         self.acqmodel.run_calibration(interval, self.ui.calibrationWidget.ui.applycalCkbx.isChecked())
 
