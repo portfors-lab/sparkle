@@ -44,7 +44,7 @@ class TestMainUI():
         self.form.show()
         # so that the data display doesn't get in the way of out
         # mouse movements
-        self.form.ui.plotDock.close()
+        self.form.ui.plotDock.setFloating(False)
         self.form.showMaximized()
         QtGui.QApplication.processEvents()
 
@@ -308,6 +308,14 @@ class TestMainUI():
         tests = pv.model().stimulusList()
         print tests[1].stimType()
         assert tests[1].stimType() == 'Custom'
+
+    def test_undock_display(self):
+        # set display to top tab
+        self.form.tabifyDockWidget(self.form.ui.psthDock, self.form.ui.plotDock)
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.drag(self.form.ui.plotDock.titleBarWidget(), self.form)
+        # wait to make sure it doesn't crash
+        QtTest.QTest.qWait(1000)
 
     def add_builder_tone(self):
         pv = self.form.ui.protocolView
