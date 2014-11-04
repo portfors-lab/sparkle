@@ -100,9 +100,48 @@ class QPureTone(QStimulusComponent):
 
 class QFMSweep(QStimulusComponent):
     def paint(self, painter, rect, palette):
-        mid = rect.y() + (rect.height()/2)
-        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
+        fscale, flabel = AbstractStimulusComponent.get_fscale()
+        if (self.startFrequency()/fscale) - np.floor(self.startFrequency()/fscale) > 0.0:
+            start_freq = str(self.startFrequency()/fscale)
+        else:
+            start_freq = str(int(self.startFrequency()/fscale))
+        if (self.stopFrequency()/fscale) - np.floor(self.stopFrequency()/fscale) > 0.0:
+            stop_freq = str(self.stopFrequency()/fscale)
+        else:
+            stop_freq = str(int(self.stopFrequency()/fscale))
+        if self.startFrequency() < self.stopFrequency():
+            line_start = QtCore.QPoint(rect.x()+30, rect.y()+rect.height()-25)
+            line_stop = QtCore.QPoint(rect.x()+rect.width()-35, rect.y()+40)
+            text_start = QtCore.QPoint(rect.x()+5, rect.y()+rect.height()-20)
+            text_stop = QtCore.QPoint(rect.x()+rect.width()-25, rect.y()+40)
+            labelpos = QtCore.QPoint(rect.x()+rect.width()-25, rect.y()+rect.height()-10)
+        elif self.startFrequency() > self.stopFrequency():
+            line_start = QtCore.QPoint(rect.x()+30, rect.y()+40)
+            line_stop = QtCore.QPoint(rect.x()+rect.width()-35, rect.y()+rect.height()-25)
+            text_start = QtCore.QPoint(rect.x()+5, rect.y()+40)
+            text_stop = QtCore.QPoint(rect.x()+rect.width()-25, rect.y()+rect.height()-20)
+            labelpos = QtCore.QPoint(rect.x()+5, rect.y()+rect.height()-10)
+        else:
+            line_start = QtCore.QPoint(rect.x()+30, rect.y()+ (rect.height()/2))
+            line_stop = QtCore.QPoint(rect.x()+rect.width()-35, rect.y()+ (rect.height()/2))
+            text_start = QtCore.QPoint(rect.x()+5, rect.y()+ (rect.height()/2))
+            text_stop = QtCore.QPoint(rect.x()+rect.width()-25, rect.y()+(rect.height()/2))
+            labelpos = QtCore.QPoint(rect.x()+rect.width()-25, rect.y()+rect.height()-10)
 
+        painter.fillRect(rect, palette.base())
+        painter.drawText(rect.x()+5, rect.y()+12, rect.width()-5, rect.height()-12, QtCore.Qt.AlignLeft, "FM Sweep")
+
+        painter.drawText(text_start, start_freq)
+        painter.drawText(text_stop, stop_freq)
+        painter.drawText(labelpos, flabel)
+        pen = painter.pen()
+        fatpen = QtGui.QPen()
+        fatpen.setWidth(10)
+        painter.setPen(fatpen)
+        painter.drawLine(line_start, line_stop)
+        
+        # put the regular pen back
+        painter.setPen(pen)
 
 class QVocalization(QStimulusComponent):
     _cached_pixmaps = {} # for faster drawing
