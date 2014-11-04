@@ -24,9 +24,8 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     componentSelected = QtCore.Signal(AbstractStimulusComponent)
     countChanged = QtCore.Signal()
     def __init__(self, parent=None):
-        # QtGui.QAbstractItemView.__init__(self)
-        # AbstractDragView.__init__(self)
-        super(StimulusView, self).__init__()
+        QtGui.QAbstractItemView.__init__(self)
+        AbstractDragView.__init__(self)
 
         self.horizontalScrollBar().setRange(0, 0)
         self.verticalScrollBar().setRange(0, 0)

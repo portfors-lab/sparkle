@@ -157,7 +157,7 @@ class MainWindow(ControlWindow):
         self.ui.tabGroup.setCurrentIndex(0)
         
         #updates the microphone calibration in the acquisition model
-        self.update_microphone_calibration(0) # arg is place holder
+        self.updateMicrophoneCalibration(0) # arg is place holder
 
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
@@ -219,7 +219,7 @@ class MainWindow(ControlWindow):
             self.ui.runningLabel.setStyleSheet(GREENSS)
 
         if calTone:
-            self.runCalTone()
+            return
         elif self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             self.runExplore()
         elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
@@ -338,6 +338,9 @@ class MainWindow(ControlWindow):
                 self.pw.setLabels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
                 ww.close()
                 self.pw.show()
+        elif self.activeOperation == 'caltone':
+            mphone_sens = self.acqmodel.process_mphone_calibration()
+            self.ui.mphoneSensSpnbx.setValue(mphone_sens)
         elif self.currentMode == 'windowed':
             cellbox = CellCommentDialog(cellid=self.acqmodel.current_cellid)
             cellbox.setComment(self.ui.commentTxtEdt.toPlainText())
@@ -467,6 +470,21 @@ class MainWindow(ControlWindow):
         self.ui.protocolProgressBar.setMaximum(self.acqmodel.calibration_total_count())
 
         self.acqmodel.run_calibration(interval, self.ui.calibrationWidget.ui.applycalCkbx.isChecked())
+
+    def mphoneCalibrate(self):
+        self.onStart(True)
+
+        self.display.updateSpec(None)
+
+        self.ui.startBtn.setEnabled(False)
+        self.activeOperation = 'caltone'
+
+        reprate = self.ui.reprateSpnbx.value()
+        interval = (1/reprate)*1000
+        
+        self.onUpdate()
+
+        self.acqmodel.run_mphone_calibration(interval)
 
     def displayResponse(self, times, response):
         if len(times) != len(response):
@@ -718,7 +736,7 @@ class MainWindow(ControlWindow):
         else:
             raise Exception('unknown acquistion mode '+mode)
 
-    def update_microphone_calibration(self, x):
+    def updateMicrophoneCalibration(self, x):
         mphonesens = self.ui.mphoneSensSpnbx.value()
         mphonedb = self.ui.mphoneDBSpnbx.value()
         self.acqmodel.set_mphone_calibration(mphonesens, mphonedb)

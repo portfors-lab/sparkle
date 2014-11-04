@@ -4,6 +4,7 @@ from spikeylab.run.list_runner import ListAcquisitionRunner
 from spikeylab.tools import spikestats
 from spikeylab.tools.util import next_str_num
 from spikeylab.acq.players import FinitePlayer
+from spikeylab.stim.stimulus_model import StimulusModel
 
 class ProtocolRunner(ListAcquisitionRunner):
     """Handles the presentation of data for an experimental protocol"""

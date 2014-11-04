@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Fri Oct 31 14:25:46 2014
+# Created: Mon Nov  3 15:43:21 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -607,7 +607,9 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionStimulus_Details, QtCore.SIGNAL(_fromUtf8("triggered()")), self.detail_dock.showNormal)
         QtCore.QObject.connect(self.actionView_Settings, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchViewDlg)
         QtCore.QObject.connect(self.refDbSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateCalDb)
-        QtCore.QObject.connect(self.mphoneSensSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.update_microphone_calibration)
+        QtCore.QObject.connect(self.mphoneSensSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
+        QtCore.QObject.connect(self.mphoneCalBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.mphoneCalibrate)
+        QtCore.QObject.connect(self.mphoneDBSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):

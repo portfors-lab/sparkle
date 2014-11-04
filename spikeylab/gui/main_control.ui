@@ -1242,12 +1242,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>150</y>
+     <x>364</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel">
-     <x>716</x>
-     <y>303</y>
+     <x>364</x>
+     <y>149</y>
     </hint>
    </hints>
   </connection>
@@ -1274,7 +1274,7 @@
    <slot>modeToggled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1012</x>
+     <x>1008</x>
      <y>374</y>
     </hint>
     <hint type="destinationlabel">
@@ -1338,8 +1338,8 @@
    <slot>clearProtocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>716</x>
-     <y>659</y>
+     <x>364</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1399,7 +1399,7 @@
    <sender>mphoneSensSpnbx</sender>
    <signal>valueChanged(double)</signal>
    <receiver>ControlWindow</receiver>
-   <slot>update_microphone_calibration()</slot>
+   <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>440</x>
@@ -1408,6 +1408,38 @@
     <hint type="destinationlabel">
      <x>788</x>
      <y>594</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mphoneCalBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>mphoneCalibrate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>691</x>
+     <y>599</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>749</x>
+     <y>622</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mphoneDBSpnbx</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>updateMicrophoneCalibration()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>557</x>
+     <y>611</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>807</x>
+     <y>568</y>
     </hint>
    </hints>
   </connection>
@@ -1457,6 +1489,7 @@
   <slot>clearProtocol()</slot>
   <slot>playCalTone()</slot>
   <slot>updateCalDb()</slot>
-  <slot>update_microphone_calibration()</slot>
+  <slot>updateMicrophoneCalibration()</slot>
+  <slot>mphoneCalibrate()</slot>
  </slots>
 </ui>
