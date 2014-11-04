@@ -1,3 +1,5 @@
+import time
+
 from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.plotting.protocoldisplay import ProtocolDisplay
@@ -27,11 +29,12 @@ class PlotDockWidget(QtGui.QDockWidget):
         :param floating: whether the widget is now on its own
         :type floating: bool
         """
-        if floating:
-            self.setWindowFlags(QtCore.Qt.Window)
-            self.setVisible(True) # not sure why this is necessary
-        else:
-            self.setWindowFlags(QtCore.Qt.Widget)
+        pass # This causes the program to crash :(
+        # if floating:
+        #     self.setWindowFlags(QtCore.Qt.Window)
+        #     self.setVisible(True) # not sure why this is necessary
+        # else:
+        #     self.setWindowFlags(QtCore.Qt.Widget)
 
     def switchDisplay(self, display):
         """Switches the visible widget to the one named *display*
