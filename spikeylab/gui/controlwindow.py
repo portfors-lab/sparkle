@@ -234,20 +234,22 @@ class ControlWindow(QtGui.QMainWindow):
         if self.fscale == 1000:
             for field in frequency_inputs:
                 field.setDecimals(3)
-                field.setMinimum(0.001)
                 if scale_freq:
+                    print 'scaling freq up'
+                    field.setMinimum(field.minimum()/1000)
                     field.setValue(field.value()/1000)
-                field.setMaximum(500)
+                    field.setMaximum(field.maximum()/1000)
             for lbl in frequency_labels:
                 lbl.setText(u'kHz')
 
         elif self.fscale == 1:
             for field in frequency_inputs:
-                field.setMaximum(500000)
                 if scale_freq:
+                    print 'scaling freq down'
+                    field.setMaximum(field.maximum()*1000)
                     field.setValue(field.value()*1000)
+                    field.setMinimum(field.minimum()*1000)
                 field.setDecimals(0)
-                field.setMinimum(1)
             for lbl in frequency_labels:
                 lbl.setText(u'Hz')
         else:

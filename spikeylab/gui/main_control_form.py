@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_control.ui'
+# Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Nov  3 15:43:21 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Tue Nov 04 17:42:07 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -108,6 +108,7 @@ class Ui_ControlWindow(object):
         self.aosrSpnbx.setEnabled(False)
         self.aosrSpnbx.setToolTip(_fromUtf8(""))
         self.aosrSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.aosrSpnbx.setMaximum(500000.0)
         self.aosrSpnbx.setObjectName(_fromUtf8("aosrSpnbx"))
         self.gridLayout_7.addWidget(self.aosrSpnbx, 0, 1, 1, 1)
         self.label_20 = QtGui.QLabel(self.tabExplore)
@@ -395,7 +396,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -590,7 +591,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tabGroup.setCurrentIndex(2)
+        self.tabGroup.setCurrentIndex(0)
         self.parameterStack.setCurrentIndex(-1)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchSaveDlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCalibrationDlg)

@@ -26,6 +26,8 @@ class GenericParameterWidget(AbstractComponentWidget):
                 layout.addWidget(inpt, row_counter, 1)
                 lbl = QtGui.QLabel(details['label'])
                 layout.addWidget(lbl, row_counter, 2)
+                inpt.setMinimum(details['min']/details['multiplier'])
+                inpt.setMaximum(details['max']/details['multiplier'])
             else:
                 inpt = SmartSpinBox()
                 layout.addWidget(QtGui.QLabel(details.get('text', field)), row_counter, 0)
