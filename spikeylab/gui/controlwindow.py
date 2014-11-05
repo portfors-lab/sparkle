@@ -17,7 +17,7 @@ from spikeylab.tools.systools import get_src_directory
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 USE_ATTEN = config['use_attenuator']
-MPHONE_SENSITVITY = config['microphone_sensitivity']
+MPHONE_CALDB = config['microphone_calibration_db']
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
@@ -339,11 +339,9 @@ class ControlWindow(QtGui.QMainWindow):
         self.calvals['use_calfile'] = False
         self.calvals['calname'] = ''
         self.ui.refDbSpnbx.setValue(self.calvals['caldb'])
-        self.ui.mphoneSensSpnbx.setValue(MPHONE_SENSITVITY)
-        self.ui.mphoneDBSpnbx.setValue(94)
-        # self.ui.mphoneSensSpnbx.setValue(inputsdict.get('mphonesens', 0.004))
+        self.ui.mphoneSensSpnbx.setValue(inputsdict.get('mphonesens', 0.004))
+        self.ui.mphoneDBSpnbx.setValue(MPHONE_CALDB)
         # self.ui.mphoneDBSpnbx.setValue(inputsdict.get('mphonedb', 94))
-
 
         # load the previous sessions scaling
         self.tscale = inputsdict.get('tscale', 0.001)
