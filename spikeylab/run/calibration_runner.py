@@ -38,6 +38,10 @@ class AbstractCalibrationRunner(ListAcquisitionRunner):
         """
         self.apply_cal = apply_cal
 
+    def set_mphone_calibration(self, sens, db):
+        self.mphonesens = sens
+        self.mphonedb = db
+
     def set_duration(self, dur):
         """Sets the duration of the stimulus (seconds)
 
@@ -184,7 +188,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
             mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
             freq, spectrum = calc_spectrum(mean_reftone, self.player.get_aisr())
             peak_fft = spectrum[(np.abs(freq-self.calf)).argmin()]
-            db = calc_db(peak_fft)
+            db = calc_db(peak_fft, self.mphonesens, self.mphonedb)
             # remove the reference tone from protocol
             self.protocol_model.remove(0)
         else:
@@ -336,7 +340,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
                 # use relative dB
                 # resultdb = calc_db(mean_peak, self.calpeak) + self.caldb
                 # dB according to microphone sensitivity
-                resultdb = calc_db(mean_peak)
+                resultdb = calc_db(mean_peak, self.mphonesens, self.mphonedb)
                 self.putnotify('average_response', (f, db, resultdb))
 
     def process_calibration(self, save=False):
@@ -346,7 +350,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         if not self.save_data:
             raise Exception("Runner must be set to save when run, to be able to process")
 
-        vfunc = np.vectorize(calc_db)
+        vfunc = np.vectorize(calc_db, self.mphonesens, self.mphonedb)
 
         if USE_FFT:
             peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/fft_peaks')), axis=1)

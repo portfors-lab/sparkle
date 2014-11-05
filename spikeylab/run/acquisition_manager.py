@@ -8,8 +8,9 @@ from spikeylab.run.search_runner import SearchRunner
 from spikeylab.run.protocol_runner import ProtocolRunner
 from spikeylab.run.chart_runner import ChartRunner
 from spikeylab.run.calibration_runner import CalibrationRunner, CalibrationCurveRunner
+from spikeylab.run.microphone_calibration_runner import MphoneCalibrationRunner
 from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone
+
 
 class AcquisitionManager():
     """Handles all of the marshalling of different acquisition operations to the correct runner class.
@@ -54,6 +55,7 @@ class AcquisitionManager():
         self.protocoler =  ProtocolRunner(self.signals)
         self.bs_calibrator = CalibrationRunner(self.signals)
         self.tone_calibrator = CalibrationCurveRunner(self.signals)
+        self.mphone_calibrator = MphoneCalibrationRunner(self.signals)
         self.charter = ChartRunner(self.signals)
 
         # charter should share protocol model with windowed
@@ -240,6 +242,7 @@ class AcquisitionManager():
         self.tone_calibrator.set(**kwargs)
         self.charter.set(**kwargs)
         self.bs_calibrator.set(**kwargs)
+        self.mphone_calibrator.set(**kwargs)
 
     def set_stim_by_index(self, index):
         """Sets the current stimulus for search operation by it's index in the order of stim types
@@ -294,6 +297,17 @@ class AcquisitionManager():
         """
         return self.protocoler.run()
 
+    def set_mphone_calibration(self, sens, db):
+        """Sets the microphone calibration, for the purpose of calculating recorded dB levels
+
+        :param sens: microphone sensitivity (V)
+        :type sens: float
+        :param db: dB SPL that the calibration was measured at
+        :type db: int
+        """
+        self.bs_calibrator.set_mphone_calibration(sens, db)
+        self.tone_calibrator.set_mphone_calibration(sens, db)
+
     def set_calibration_by_index(self, idx):
         """Sets the calibration stimulus by it's index in the list of calibration stimuli, with tone curve always being last"""
         self.selected_calibration_index = idx
@@ -326,6 +340,10 @@ class AcquisitionManager():
             self.bs_calibrator.apply_calibration(applycal)
             self.bs_calibrator.setup(interval)
             return self.bs_calibrator.run()
+
+    def run_mphone_calibration(self, interval):
+        self.mphone_calibrator.setup(interval)
+        return self.mphone_calibrator.run()
 
     def start_chart(self):
         """Starts the chart acquistion"""
@@ -360,6 +378,9 @@ class AcquisitionManager():
             results, calname, freq, db = self.bs_calibrator.process_calibration(save)
         return calname, db
 
+    def process_mphone_calibration(self):
+        return self.mphone_calibrator.process_calibration()
+
     def halt(self):
         """Halts any/all running operations"""
         self.explorer.halt()
@@ -367,6 +388,7 @@ class AcquisitionManager():
         self.bs_calibrator.halt()
         self.tone_calibrator.halt()
         self.charter.halt()
+        self.mphone_calibrator.halt()
 
     def close_data(self):
         """Closes the current data file"""

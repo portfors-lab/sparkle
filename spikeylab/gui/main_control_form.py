@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\main_control.ui'
+# Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Thu Oct 30 14:27:50 2014
-#      by: PyQt4 UI code generator 4.11.1
+# Created: Mon Nov  3 15:43:21 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -173,6 +173,7 @@ class Ui_ControlWindow(object):
         self.refDbSpnbx = SmartSpinBox(self.tabCalibrate)
         self.refDbSpnbx.setEnabled(False)
         self.refDbSpnbx.setToolTip(_fromUtf8(""))
+        self.refDbSpnbx.setAlignment(QtCore.Qt.AlignCenter)
         self.refDbSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.refDbSpnbx.setMaximum(120.0)
         self.refDbSpnbx.setObjectName(_fromUtf8("refDbSpnbx"))
@@ -181,6 +182,41 @@ class Ui_ControlWindow(object):
         self.label_15.setObjectName(_fromUtf8("label_15"))
         self.horizontalLayout_10.addWidget(self.label_15)
         self.verticalLayout.addLayout(self.horizontalLayout_10)
+        self.horizontalLayout_12 = QtGui.QHBoxLayout()
+        self.horizontalLayout_12.setObjectName(_fromUtf8("horizontalLayout_12"))
+        self.label_9 = QtGui.QLabel(self.tabCalibrate)
+        self.label_9.setObjectName(_fromUtf8("label_9"))
+        self.horizontalLayout_12.addWidget(self.label_9)
+        self.mphoneSensSpnbx = QtGui.QDoubleSpinBox(self.tabCalibrate)
+        self.mphoneSensSpnbx.setEnabled(False)
+        self.mphoneSensSpnbx.setAlignment(QtCore.Qt.AlignCenter)
+        self.mphoneSensSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.mphoneSensSpnbx.setDecimals(4)
+        self.mphoneSensSpnbx.setObjectName(_fromUtf8("mphoneSensSpnbx"))
+        self.horizontalLayout_12.addWidget(self.mphoneSensSpnbx)
+        self.label_18 = QtGui.QLabel(self.tabCalibrate)
+        self.label_18.setObjectName(_fromUtf8("label_18"))
+        self.horizontalLayout_12.addWidget(self.label_18)
+        self.mphoneDBSpnbx = QtGui.QDoubleSpinBox(self.tabCalibrate)
+        self.mphoneDBSpnbx.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.mphoneDBSpnbx.sizePolicy().hasHeightForWidth())
+        self.mphoneDBSpnbx.setSizePolicy(sizePolicy)
+        self.mphoneDBSpnbx.setAlignment(QtCore.Qt.AlignCenter)
+        self.mphoneDBSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.mphoneDBSpnbx.setDecimals(0)
+        self.mphoneDBSpnbx.setMaximum(120.0)
+        self.mphoneDBSpnbx.setObjectName(_fromUtf8("mphoneDBSpnbx"))
+        self.horizontalLayout_12.addWidget(self.mphoneDBSpnbx)
+        self.label_22 = QtGui.QLabel(self.tabCalibrate)
+        self.label_22.setObjectName(_fromUtf8("label_22"))
+        self.horizontalLayout_12.addWidget(self.label_22)
+        self.mphoneCalBtn = QtGui.QPushButton(self.tabCalibrate)
+        self.mphoneCalBtn.setObjectName(_fromUtf8("mphoneCalBtn"))
+        self.horizontalLayout_12.addWidget(self.mphoneCalBtn)
+        self.verticalLayout.addLayout(self.horizontalLayout_12)
         self.tabGroup.addTab(self.tabCalibrate, _fromUtf8(""))
         self.tabReview = QtGui.QWidget()
         self.tabReview.setObjectName(_fromUtf8("tabReview"))
@@ -359,7 +395,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -571,6 +607,9 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionStimulus_Details, QtCore.SIGNAL(_fromUtf8("triggered()")), self.detail_dock.showNormal)
         QtCore.QObject.connect(self.actionView_Settings, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchViewDlg)
         QtCore.QObject.connect(self.refDbSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateCalDb)
+        QtCore.QObject.connect(self.mphoneSensSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
+        QtCore.QObject.connect(self.mphoneCalBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.mphoneCalibrate)
+        QtCore.QObject.connect(self.mphoneDBSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -593,6 +632,10 @@ class Ui_ControlWindow(object):
         self.refToneLbl.setText(_translate("ControlWindow", "Intensity at ? kHz and ?V", None))
         self.label_4.setText(_translate("ControlWindow", "=", None))
         self.label_15.setText(_translate("ControlWindow", "dB SPL", None))
+        self.label_9.setText(_translate("ControlWindow", "Microphone sensitivity", None))
+        self.label_18.setText(_translate("ControlWindow", "V at", None))
+        self.label_22.setText(_translate("ControlWindow", "dB SPL", None))
+        self.mphoneCalBtn.setText(_translate("ControlWindow", "calibrate", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabCalibrate), _translate("ControlWindow", "Calibration", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabReview), _translate("ControlWindow", "Review", None))
         self.label_30.setText(_translate("ControlWindow", "AI channel", None))

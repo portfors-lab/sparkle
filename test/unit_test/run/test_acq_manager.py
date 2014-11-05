@@ -548,6 +548,7 @@ class TestAcquisitionManager():
         manager, fname = self.create_acqmodel(winsz)
         acq_rate = manager.calibration_genrate()
         manager.set(caldb=66, calf=1234)
+        manager.set_mphone_calibration(0.004, 94)
 
         manager.set_calibration_by_index(1)
         tc = manager.calibration_stimulus('noise')

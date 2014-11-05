@@ -36,10 +36,8 @@ def test_calc_db_positive_gain():
     assert result == 20
 
 def test_calc_db_SPL():
-    with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
-        config = yaml.load(yf)
-    mphone_sensitivity = config['microphone_sensitivity']
-    result = tools.calc_db(mphone_sensitivity)
+    mphone_sensitivity = 0.004
+    result = tools.calc_db(mphone_sensitivity, mphone_sensitivity, 94)
     assert result == 94
 
 def test_calc_db_zeros():

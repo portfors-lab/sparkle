@@ -12,29 +12,30 @@ VERBOSE = False
 
 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-mphone_sensitivity = config['microphone_sensitivity']
 USE_RMS = config['use_rms']
 
-def calc_db(peak, cal_peak=None):
+def calc_db(peak, refval, mphonecaldb=0):
     u""" 
-    Converts voltage difference into decibels : 20*log10(peak/cal_peak)
-    If calpeak not provided uses microphone sensitivity value from config file,
-    and return value is dB SPL, instead of difference.
+    Converts voltage difference into decibels : 20*log10(peak/refval)
+    
+    :param peak:
+    :param refval: This can be either a another sound peak(or RMS val), to get the dB difference, or the microphone mphone_sensitivity
+    :type refval: float
+    :param mphonecaldb: If using the microphone sensitivity for refval, provide the dB SPL the microphone was calibrated at. Otherwise, leave as 0
+    :type mphonecaldb: int
+    :returns: float -- decibels difference (comparision), or dB SPL (using microphone sensitivity)
     """
-    if cal_peak is not None:
-        if cal_peak == 0:
-            if peak == 0:
-                return 0
-            else:
-                return np.nan
-        pbdB = 20 * np.log10(peak/cal_peak)
-    else:
-        pbdB = 94 + (20.*np.log10((peak)/mphone_sensitivity))
+    if refval == 0:
+        if peak == 0:
+            return 0
+        else:
+            return np.nan
+    pbdB = mphonecaldb + (20.*np.log10(peak/refval))
     return pbdB
 
-def calc_summed_db(spectrum):
+def calc_summed_db(spectrum, mphonesens, mphonecaldb=0):
     x = sum(spectrum ** 2)
-    pbdB = 94 + (10.*np.log10(x/(mphone_sensitivity**2)))
+    pbdB = mphonecaldb + (10.*np.log10(x/(mphonesens**2)))
     return pbdB
 
 def sum_db(x):

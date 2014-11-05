@@ -40,7 +40,6 @@ REDSS = "QLabel { background-color : transparent; color : red; }"
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-MPHONE_SENSITIVITY = config['microphone_sensitivity']
 DEVNAME = config['device_name']
 REFFREQ = config['reference_frequency']
 REFVOLTAGE = config['reference_voltage']
@@ -156,6 +155,9 @@ class MainWindow(ControlWindow):
         self.acqmodel.set_calibration(None, self.calvals['calf'], self.calvals['frange'])
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
+        
+        #updates the microphone calibration in the acquisition model
+        self.updateMicrophoneCalibration(0) # arg is place holder
 
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
@@ -217,7 +219,7 @@ class MainWindow(ControlWindow):
             self.ui.runningLabel.setStyleSheet(GREENSS)
 
         if calTone:
-            self.runCalTone()
+            return
         elif self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             self.runExplore()
         elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
@@ -336,6 +338,9 @@ class MainWindow(ControlWindow):
                 self.pw.setLabels('Frequency', 'Attenuation', 'Calibration Curve', xunits='Hz', yunits='dB')
                 ww.close()
                 self.pw.show()
+        elif self.activeOperation == 'caltone':
+            mphone_sens = self.acqmodel.process_mphone_calibration()
+            self.ui.mphoneSensSpnbx.setValue(mphone_sens)
         elif self.currentMode == 'windowed':
             cellbox = CellCommentDialog(cellid=self.acqmodel.current_cellid)
             cellbox.setComment(self.ui.commentTxtEdt.toPlainText())
@@ -468,6 +473,21 @@ class MainWindow(ControlWindow):
 
         self.acqmodel.run_calibration(interval, self.ui.calibrationWidget.ui.applycalCkbx.isChecked())
 
+    def mphoneCalibrate(self):
+        self.onStart(True)
+
+        self.display.updateSpec(None)
+
+        self.ui.startBtn.setEnabled(False)
+        self.activeOperation = 'caltone'
+
+        reprate = self.ui.reprateSpnbx.value()
+        interval = (1/reprate)*1000
+        
+        self.onUpdate()
+
+        self.acqmodel.run_mphone_calibration(interval)
+
     def displayResponse(self, times, response):
         if len(times) != len(response):
             print "WARNING: times and response not equal"
@@ -475,13 +495,15 @@ class MainWindow(ControlWindow):
         # convert voltage amplitudes into dB SPL    
         sr = self.ui.aisrSpnbx.value()*self.fscale
         # amp = signal_amplitude(response, sr)
-        amp_signal = calc_db(np.amax(response))
-        amp_signal_rms = calc_db(rms(response, sr))
+        mphonesens = self.ui.mphoneSensSpnbx.value()
+        mphonedb = self.ui.mphoneDBSpnbx.value()
+        amp_signal = calc_db(np.amax(response), mphonesens, mphonedb)
+        amp_signal_rms = calc_db(rms(response, sr), mphonesens, mphonedb)
 
         freq, signal_fft = calc_spectrum(response, sr)
         idx = np.where((freq > 5000) & (freq < 100000))
-        summed_db0 = calc_summed_db(signal_fft[idx])
-        spectrum = calc_db(signal_fft)
+        summed_db0 = calc_summed_db(signal_fft[idx], mphonesens, mphonedb)
+        spectrum = calc_db(signal_fft, mphonesens, mphonedb)
         spectrum[spectrum < 30] = 0
         spectrum[0] = 0
         summed_db1 = sum_db(spectrum[idx])
@@ -506,9 +528,10 @@ class MainWindow(ControlWindow):
             self.extendedDisplay.updateSpec(response, sr, plot='response')
 
     def displayCalibrationResponse(self, spectrum, freqs, amp):
-
-        masterdb = calc_db(amp)
-        spectrum = calc_db(spectrum)
+        mphonesens = self.ui.mphoneSensSpnbx.value()
+        mphonedb = self.ui.mphoneDBSpnbx.value()
+        masterdb = calc_db(amp, mphonesens, mphonedb)
+        spectrum = calc_db(spectrum, mphonesens, mphonedb)
         spectrum[0] = 0
         peakspl = np.amax(spectrum)
 
@@ -714,6 +737,11 @@ class MainWindow(ControlWindow):
             self.ui.startChartBtn.show()
         else:
             raise Exception('unknown acquistion mode '+mode)
+
+    def updateMicrophoneCalibration(self, x):
+        mphonesens = self.ui.mphoneSensSpnbx.value()
+        mphonedb = self.ui.mphoneDBSpnbx.value()
+        self.acqmodel.set_mphone_calibration(mphonesens, mphonedb)
 
     def saveExploreToggled(self, save):
         self.saveExplore = save
