@@ -5,7 +5,7 @@ Settings Configuration File
 
 This file holds a number of settings that have been deemed semi-permanent. They have been obsured from the user, as they are unlikely to need to be changed often. This file resides in the top-most folder of the project, and is titled `settings.conf`. It is a YAML formatted file, with the following values:
 
-* microphone_sensitivity -- The sensitivity, in V/Pa, of the microphone employed in calibration.
+* microphone_calibration_db -- The intensity that the microphone calibrator device ouputs.
 
 * default_genrate -- The default samplerate for output, in Hz. This will be all stimuli, apart from stimuli based from recordings (e.g. vocalizations), which will be generated at the rate which they were recorded at.
 

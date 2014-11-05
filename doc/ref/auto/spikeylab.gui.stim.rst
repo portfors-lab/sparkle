@@ -49,10 +49,10 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`common_parametersform` Module
------------------------------------
+:mod:`common_parameters_form` Module
+------------------------------------
 
-.. automodule:: spikeylab.gui.stim.common_parametersform
+.. automodule:: spikeylab.gui.stim.common_parameters_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -69,22 +69,6 @@ stim Package
 -----------------------------
 
 .. automodule:: spikeylab.gui.stim.component_label
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`detail_form` Module
--------------------------
-
-.. automodule:: spikeylab.gui.stim.detail_form
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`detail_widget` Module
----------------------------
-
-.. automodule:: spikeylab.gui.stim.detail_widget
     :members:
     :undoc-members:
     :show-inheritance:
@@ -161,10 +145,18 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`stimeditor_form` Module
------------------------------
+:mod:`stim_detail` Module
+-------------------------
 
-.. automodule:: spikeylab.gui.stim.stimeditor_form
+.. automodule:: spikeylab.gui.stim.stim_detail
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`stim_detail_form` Module
+------------------------------
+
+.. automodule:: spikeylab.gui.stim.stim_detail_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -173,6 +165,14 @@ stim Package
 -----------------------------
 
 .. automodule:: spikeylab.gui.stim.stimulus_editor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`stimulus_editor_form` Module
+----------------------------------
+
+.. automodule:: spikeylab.gui.stim.stimulus_editor_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -193,18 +193,18 @@ stim Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`tceditor` Module
-----------------------
+:mod:`tuning_curve` Module
+--------------------------
 
-.. automodule:: spikeylab.gui.stim.tceditor
+.. automodule:: spikeylab.gui.stim.tuning_curve
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`tcform` Module
---------------------
+:mod:`tuning_curve_form` Module
+-------------------------------
 
-.. automodule:: spikeylab.gui.stim.tcform
+.. automodule:: spikeylab.gui.stim.tuning_curve_form
     :members:
     :undoc-members:
     :show-inheritance:

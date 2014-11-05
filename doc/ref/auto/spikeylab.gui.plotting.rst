@@ -49,10 +49,10 @@ plotting Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`rasterform` Module
-------------------------
+:mod:`raster_bounds_dlg_form` Module
+------------------------------------
 
-.. automodule:: spikeylab.gui.plotting.rasterform
+.. automodule:: spikeylab.gui.plotting.raster_bounds_dlg_form
     :members:
     :undoc-members:
     :show-inheritance:

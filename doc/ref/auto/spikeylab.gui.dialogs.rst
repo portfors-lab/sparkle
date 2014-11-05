@@ -9,18 +9,18 @@ dialogs Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`caldialog_form` Module
-----------------------------
-
-.. automodule:: spikeylab.gui.dialogs.caldialog_form
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`calibration_dlg` Module
 -----------------------------
 
 .. automodule:: spikeylab.gui.dialogs.calibration_dlg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`calibration_dlg_form` Module
+----------------------------------
+
+.. automodule:: spikeylab.gui.dialogs.calibration_dlg_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -33,10 +33,10 @@ dialogs Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`commentform` Module
--------------------------
+:mod:`comment_dlg_form` Module
+------------------------------
 
-.. automodule:: spikeylab.gui.dialogs.commentform
+.. automodule:: spikeylab.gui.dialogs.comment_dlg_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -57,10 +57,10 @@ dialogs Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`scaleform` Module
------------------------
+:mod:`scale_dlg_form` Module
+----------------------------
 
-.. automodule:: spikeylab.gui.dialogs.scaleform
+.. automodule:: spikeylab.gui.dialogs.scale_dlg_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -73,10 +73,10 @@ dialogs Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`specgramform` Module
---------------------------
+:mod:`specgram_dlg_form` Module
+-------------------------------
 
-.. automodule:: spikeylab.gui.dialogs.specgramform
+.. automodule:: spikeylab.gui.dialogs.specgram_dlg_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -89,10 +89,10 @@ dialogs Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`viewdialog_form` Module
------------------------------
+:mod:`view_dlg_form` Module
+---------------------------
 
-.. automodule:: spikeylab.gui.dialogs.viewdialog_form
+.. automodule:: spikeylab.gui.dialogs.view_dlg_form
     :members:
     :undoc-members:
     :show-inheritance:

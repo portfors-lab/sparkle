@@ -17,22 +17,6 @@ tools Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`doc` Module
------------------
-
-.. automodule:: spikeylab.tools.doc
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`exception_test` Module
-----------------------------
-
-.. automodule:: spikeylab.tools.exception_test
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`exceptions` Module
 ------------------------
 
@@ -45,6 +29,14 @@ tools Package
 -----------------
 
 .. automodule:: spikeylab.tools.log
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`logging_example` Module
+-----------------------------
+
+.. automodule:: spikeylab.tools.logging_example
     :members:
     :undoc-members:
     :show-inheritance:

@@ -25,18 +25,10 @@ gui Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`calwidget_form` Module
-----------------------------
+:mod:`calibration_widget_form` Module
+-------------------------------------
 
-.. automodule:: spikeylab.gui.calwidget_form
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`control` Module
----------------------
-
-.. automodule:: spikeylab.gui.control
+.. automodule:: spikeylab.gui.calibration_widget_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -81,10 +73,18 @@ gui Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`maincontrol_form` Module
-------------------------------
+:mod:`main_control` Module
+--------------------------
 
-.. automodule:: spikeylab.gui.maincontrol_form
+.. automodule:: spikeylab.gui.main_control
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`main_control_form` Module
+-------------------------------
+
+.. automodule:: spikeylab.gui.main_control_form
     :members:
     :undoc-members:
     :show-inheritance:
@@ -117,6 +117,14 @@ gui Package
 -----------------
 
 .. automodule:: spikeylab.gui.run
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`test_wrapper` Module
+--------------------------
+
+.. automodule:: spikeylab.gui.test_wrapper
     :members:
     :undoc-members:
     :show-inheritance:

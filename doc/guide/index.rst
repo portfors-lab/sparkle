@@ -6,7 +6,12 @@ SSHF is an electrophysiology data acqusition and auditory stimulus assembly inte
 
 The program is divided into three different types of operation: search (explore), protocol (pre-defined), and calibration. Also, there are two different modes of acquisition: windowed (finite), and chart (continuous). Currently, only finite acquisition is available.
 
-:ref:`start`
+First Steps
+------------
+.. toctree::
+   :maxdepth: 1
+
+   start.rst
 
 General Info
 ------------

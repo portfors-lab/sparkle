@@ -41,6 +41,14 @@ run Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`microphone_calibration_runner` Module
+-------------------------------------------
+
+.. automodule:: spikeylab.run.microphone_calibration_runner
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`protocol_model` Module
 ----------------------------
 
