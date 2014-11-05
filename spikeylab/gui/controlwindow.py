@@ -196,20 +196,20 @@ class ControlWindow(QtGui.QMainWindow):
         # now go through our list of labels and fields and scale/update
         if self.tscale == 0.001:
             for field in time_inputs:
-                field.setMaximum(3000)
                 if scale_time:
+                    field.setMaximum(field.maximum()/0.001)
                     field.setValue(field.value()/0.001)
+                    field.setMinimum(field.minimum()/0.001)
                 field.setDecimals(0)
-                field.setMinimum(1)
             for lbl in time_labels:
                 lbl.setText(u'ms')
         elif self.tscale == 1:
             for field in time_inputs:
                 field.setDecimals(3)
-                field.setMinimum(0.001)
                 if scale_time:
+                    field.setMinimum(field.minimum()*0.001)
                     field.setValue(field.value()*0.001)
-                field.setMaximum(20)
+                    field.setMaximum(field.maximum()*0.001)
             for lbl in time_labels:
                 lbl.setText(u's')
         else:
@@ -235,7 +235,6 @@ class ControlWindow(QtGui.QMainWindow):
             for field in frequency_inputs:
                 field.setDecimals(3)
                 if scale_freq:
-                    print 'scaling freq up'
                     field.setMinimum(field.minimum()/1000)
                     field.setValue(field.value()/1000)
                     field.setMaximum(field.maximum()/1000)
@@ -245,7 +244,6 @@ class ControlWindow(QtGui.QMainWindow):
         elif self.fscale == 1:
             for field in frequency_inputs:
                 if scale_freq:
-                    print 'scaling freq down'
                     field.setMaximum(field.maximum()*1000)
                     field.setValue(field.value()*1000)
                     field.setMinimum(field.minimum()*1000)
@@ -350,6 +348,30 @@ class ControlWindow(QtGui.QMainWindow):
         # load the previous sessions scaling
         self.tscale = inputsdict.get('tscale', 0.001)
         self.fscale = inputsdict.get('fscale', 1000)
+
+        # the editors in the UI will set their own max/min, properly initialize
+        # the controls on the main UI
+        if self.fscale == 1000:
+            self.ui.aisrSpnbx.setMinimum(0.001)
+            self.ui.aisrSpnbx.setMaximum(500)
+            self.ui.aosrSpnbx.setMinimum(0.001)
+            self.ui.aosrSpnbx.setMaximum(500)
+        elif self.fscale == 1:
+            self.ui.aisrSpnbx.setMinimum(1)
+            self.ui.aisrSpnbx.setMaximum(500000)
+            self.ui.aosrSpnbx.setMinimum(1)
+            self.ui.aosrSpnbx.setMaximum(500000)
+        if self.tscale == 0.001:
+            self.ui.windowszSpnbx.setMinimum(1)
+            self.ui.windowszSpnbx.setMaximum(3000)
+            self.ui.binszSpnbx.setMinimum(1)
+            self.ui.binszSpnbx.setMaximum(3000)
+        elif self.tscale == 1:
+            self.ui.windowszSpnbx.setMinimum(0.001)
+            self.ui.windowszSpnbx.setMaximum(3)
+            self.ui.binszSpnbx.setMinimum(0.001)
+            self.ui.binszSpnbx.setMaximum(3)
+
 
         cal_template = inputsdict.get('calparams', None)
         if cal_template is not None:

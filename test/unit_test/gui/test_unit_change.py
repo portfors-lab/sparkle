@@ -88,19 +88,15 @@ class TestUnitChanges():
         assert control.ui.windowszSpnbx.value() == t0/0.001
         assert control.ui.binszSpnbx.value() == t1/0.001
 
-        time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
-        for field in time_inputs:
-            assert field.decimals() == 0
-            assert field.minimum() == 1
+        assert_fields_ms(control)
 
+        # change it back
         control.updateUnitLabels(1, control.fscale)
 
         assert control.ui.windowszSpnbx.value() == t0 
         assert control.ui.binszSpnbx.value() == t1
 
-        for field in time_inputs:
-            assert field.decimals() == 3
-            assert field.minimum() == 0.001
+        assert_fields_s(control)
 
         control.close()
 
@@ -124,10 +120,7 @@ class TestUnitChanges():
         assert control.ui.windowszSpnbx.value() == t0/0.001
         assert control.ui.binszSpnbx.value() == t1/0.001
         
-        time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
-        for field in time_inputs:
-            assert field.decimals() == 0
-            assert field.minimum() == 1
+        assert_fields_ms(control)
 
         control.close()
 
@@ -144,10 +137,7 @@ class TestUnitChanges():
         assert control.ui.windowszSpnbx.value() == t0
         assert control.ui.binszSpnbx.value() == t1
 
-        time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
-        for field in time_inputs:
-            assert field.decimals() == 3
-            assert field.minimum() == 0.001
+        assert_fields_s(control)
 
         control.close()
 
@@ -171,3 +161,40 @@ class TestUnitChanges():
 
         control.close()
             
+
+def assert_fields_s(control):
+    time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
+    for field in time_inputs:
+        assert field.decimals() == 3
+    # test some known min/maxes
+    assert control.ui.windowszSpnbx.minimum() == 0.001
+    assert control.ui.binszSpnbx.minimum() == 0.001
+    assert control.ui.windowszSpnbx.maximum() == 3
+    assert control.ui.binszSpnbx.maximum() == 3
+    # most editors in parameter stack should have a risefall and duration
+    # field -- although if any components overwrite the default this 
+    # will fail
+    for editor_widget in control.ui.parameterStack.widgets():
+        if 'risefall' in editor_widget.inputWidgets:
+            assert editor_widget.inputWidgets['risefall'].minimum() == 0
+            assert editor_widget.inputWidgets['risefall'].maximum() == 0.1
+        if 'duration' in editor_widget.inputWidgets:
+            assert editor_widget.inputWidgets['duration'].minimum() == 0
+            assert editor_widget.inputWidgets['duration'].maximum() == 3
+
+def assert_fields_ms(control):
+    time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
+    for field in time_inputs:
+        assert field.decimals() == 0
+    # check max/mins
+    assert control.ui.windowszSpnbx.minimum() == 1
+    assert control.ui.binszSpnbx.minimum() == 1
+    assert control.ui.windowszSpnbx.maximum() == 3000
+    assert control.ui.binszSpnbx.maximum() == 3000
+    for editor_widget in control.ui.parameterStack.widgets():
+        if 'risefall' in editor_widget.inputWidgets:
+            assert editor_widget.inputWidgets['risefall'].minimum() == 0
+            assert editor_widget.inputWidgets['risefall'].maximum() == 100
+        if 'duration' in editor_widget.inputWidgets:
+            assert editor_widget.inputWidgets['duration'].minimum() == 0
+            assert editor_widget.inputWidgets['duration'].maximum() == 3000
