@@ -103,7 +103,7 @@ class QProtocolTabelModel(QtCore.QAbstractTableModel):
                 value = value.toPyObject()
             if index.column() == 0:
                 test = self._testmodel.test(index.row())
-                test.setUserTag(value)
+                test.setUserTag(str(value))
                 return True
             if index.column() == 2:
                 test = self._testmodel.test(index.row())
