@@ -25,11 +25,11 @@ def calc_db(peak, refval, mphonecaldb=0):
     :type mphonecaldb: int
     :returns: float -- decibels difference (comparision), or dB SPL (using microphone sensitivity)
     """
-    # if peak == 0:
-    #     if refval == 0:
-    #         return 0
-    #     else:
-    #         return np.nan
+    if refval == 0:
+        if peak == 0:
+            return 0
+        else:
+            return np.nan
     pbdB = mphonecaldb + (20.*np.log10(peak/refval))
     return pbdB
 
