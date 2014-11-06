@@ -91,7 +91,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
             if event.source() == self:
                 self.model().setData(index, param)
             else:
-                self.hintRequested.emit('Select Components in view to modify')
+                self.hintRequested.emit('Select Components in view to modify -- click to toggle membership of component in auto-parameter')
                 row = index.row()
                 # select rows doesn't work with -ve indexes
                 if row == -1:

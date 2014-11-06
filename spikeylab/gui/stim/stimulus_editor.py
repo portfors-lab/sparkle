@@ -19,10 +19,13 @@ class StimulusEditor(AbstractStimulusWidget):
         self.ui.trackview.componentSelected.connect(self.ui.parametizer.view().componentSelection)
         self.ui.parametizer.view().parameterChanged.connect(self.ui.trackview.updateSelectionModel)
         self.ui.trackview.countChanged.connect(self.updateTraceCount)
+        self.ui.trackview.hintRequested.connect(self.setHint)
 
         # when the auto-parameter editor is toggled show/hide changes the edit mode of the StimulusView
         self.ui.parametizer.visibilityChanged.connect(self.ui.trackview.setMode)
-        
+        self.ui.parametizer.visibilityChanged.connect(self.setModeLabel)
+        self.ui.parametizer.hintRequested.connect(self.setHint)
+
         self.ok = self.ui.okBtn
 
     def setModel(self, model):
@@ -30,7 +33,6 @@ class StimulusEditor(AbstractStimulusWidget):
         self.ui.trackview.setModel(model)
         self.ui.nrepsSpnbx.setValue(model.repCount())
 
-        self.ui.parametizer.hintRequested.connect(self.setHint)
         self.ui.parametizer.randomizeCkbx.toggled.connect(model.randomToggle)
         self.ui.parametizer.randomizeCkbx.setChecked(bool(model.reorder()))
 
@@ -74,6 +76,12 @@ class StimulusEditor(AbstractStimulusWidget):
     def setHint(self, message):
         """Sets the hint text to *message*"""
         self.ui.hintTxedt.setText(message)
+
+    def setModeLabel(self, mode):
+        if mode == 0:
+            self.ui.modeLbl.setText("BUILDING MODE")
+        else:
+            self.ui.modeLbl.setText("AUTO-PARAMETER MODE")
 
 
 

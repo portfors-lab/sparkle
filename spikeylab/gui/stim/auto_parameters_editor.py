@@ -78,22 +78,20 @@ class Parametizer(QtGui.QWidget):
         if len(selected) > 0:
             # select the correct components in the StimulusView
             self.paramList.parameterChanged.emit(model.selection(selected[0]))
-            self.hintRequested.emit('Select parameter to edit. \
-                Parameter must have selected components in order to edit fields')
+            self.hintRequested.emit('Select parameter to edit. \n\nParameter must have selected components in order to edit fields')
         elif model.rowCount() > 0:
             # just select first item
             self.paramList.selectRow(0)
             self.paramList.parameterChanged.emit(model.selection(model.index(0,0)))
-            self.hintRequested.emit('Select parameter to edit. \
-                Parameter must have selected components in order to edit fields')
+            self.hintRequested.emit('Select parameter to edit. \n\nParameter must have selected components in order to edit fields')
         else:
             model.emptied.emit(True)
-            self.hintRequested.emit('Drag "Add" to add parameter first')
+            self.hintRequested.emit('To add a parameter, Drag "Add" onto empty auto-parameter table')
 
     def hideEvent(self, event):
         """notifies other widgets this editor is not longer visible"""
         self.visibilityChanged.emit(0)
-        self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; Drag to move.')
+        self.hintRequested.emit('Drag Components onto view to Add.\n\nDouble click to edit.\n\nDrag to move.')
 
     def closeEvent(self, event):
         """Emits a signal to update start values on components"""

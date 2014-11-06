@@ -23,6 +23,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     _componentDefaults = {}
     componentSelected = QtCore.Signal(AbstractStimulusComponent)
     countChanged = QtCore.Signal()
+    hintRequested = QtCore.Signal(str)
     def __init__(self, parent=None):
         QtGui.QAbstractItemView.__init__(self)
         AbstractDragView.__init__(self)
@@ -306,7 +307,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         # highlight selected components
         region = self.visualRegionForSelection(self.selectionModel().selection())
-        
+
         painter.save()
         painter.setClipRegion(region)
         painter.setOpacity(0.5)
@@ -355,6 +356,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                 self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
                 comp = self.model().data(index, QtCore.Qt.UserRole+1)
                 self.componentSelected.emit(comp)
+                self.hintRequested.emit('Click components to toggle more members of auto-parameter\n\n-or-\n\nEdit fields of auto-parameter (parameter type should be selected first)')
 
     def emptySelection(self, empty):
         """Enables the view if not *empty*, clears the current selection and
@@ -365,7 +367,12 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         """
         self.setEnabled(not empty)
         if empty:
-            self.clearSelection()
+            # self.clearSelection()
+            # Clear selection doesn't work? But removing individually does
+            m = self.selectionModel()
+            for index in m.selectedIndexes():
+                m.select(index, QtGui.QItemSelectionModel.Deselect)
+            self.hintRequested.emit('To add a parameter, Drag "Add" onto empty auto-parameter table')
 
     def updateSelectionModel(self, components):
         """Creates a new selection model and adds *components* to it
