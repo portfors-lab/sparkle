@@ -24,6 +24,9 @@
           <pointsize>16</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>SONIC SPARKLE HIGH FIVE!!!!!</string>
+        </property>
         <property name="text">
          <string>SSHF</string>
         </property>
@@ -63,7 +66,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -117,6 +120,9 @@
                 </item>
                 <item row="1" column="1">
                  <widget class="QSpinBox" name="exNrepsSpnbx">
+                  <property name="toolTip">
+                   <string>Number of presentations before plots reset</string>
+                  </property>
                   <property name="minimum">
                    <number>1</number>
                   </property>
@@ -158,7 +164,7 @@
                    <bool>false</bool>
                   </property>
                   <property name="toolTip">
-                   <string extracomment="You can't change this"/>
+                   <string extracomment="You can't change this">Stimulus output sampling rate</string>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -177,6 +183,9 @@
                 </item>
                 <item row="2" column="1">
                  <widget class="QLabel" name="overAttenLbl">
+                  <property name="toolTip">
+                   <string>Stimulus had to be scaled down by this amount to be generated</string>
+                  </property>
                   <property name="text">
                    <string>0</string>
                   </property>
@@ -236,8 +245,11 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Remove all tests</string>
+                </property>
                 <property name="text">
-                 <string>clear protocol</string>
+                 <string>Clear Protocol</string>
                 </property>
                </widget>
               </item>
@@ -296,7 +308,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="toolTip">
-                 <string extracomment="Play the tone and put the measured dB SPL here"/>
+                 <string extracomment="Play the tone and put the measured dB SPL here">intensity recorded at microphone</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -332,6 +344,9 @@
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="toolTip">
+                 <string>Resultant amplitude of microphone measurement</string>
+                </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
                 </property>
@@ -361,6 +376,9 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="toolTip">
+                 <string>intensity of microphone calibration device</string>
+                </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
                 </property>
@@ -384,6 +402,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="mphoneCalBtn">
+                <property name="toolTip">
+                 <string>Start recording microphone calibration tone</string>
+                </property>
                 <property name="text">
                  <string>calibrate</string>
                 </property>
@@ -422,7 +443,11 @@
         <item>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="1">
-           <widget class="QComboBox" name="aochanBox"/>
+           <widget class="QComboBox" name="aochanBox">
+            <property name="toolTip">
+             <string>Output channel (AO#)</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_30">
@@ -433,12 +458,16 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>AI channel</string>
+             <string>Recording channel</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="aichanBox"/>
+           <widget class="QComboBox" name="aichanBox">
+            <property name="toolTip">
+             <string>Input channel (AI#)</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_29">
@@ -449,7 +478,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Stim channel</string>
+             <string>Stimulus channel</string>
             </property>
            </widget>
           </item>
@@ -515,6 +544,9 @@
           </item>
           <item row="0" column="1">
            <widget class="SmartSpinBox" name="aisrSpnbx">
+            <property name="toolTip">
+             <string>Recording sampling rate</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -525,6 +557,9 @@
           </item>
           <item row="4" column="1">
            <widget class="SmartSpinBox" name="binszSpnbx">
+            <property name="toolTip">
+             <string>Time bin duration for detected spikes for raster and PSTH</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -535,6 +570,9 @@
           </item>
           <item row="2" column="1">
            <widget class="SmartSpinBox" name="windowszSpnbx">
+            <property name="toolTip">
+             <string>Recording window duration</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -545,6 +583,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="reprateSpnbx">
+            <property name="toolTip">
+             <string>Rate of recording window repetitions</string>
+            </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
@@ -590,6 +631,9 @@
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="threshSpnbx">
+            <property name="toolTip">
+             <string>Spike detection threshold</string>
+            </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
@@ -614,6 +658,9 @@
           </item>
           <item>
            <widget class="QComboBox" name="modeCmbx">
+            <property name="toolTip">
+             <string>Mode of acquisition to use</string>
+            </property>
             <item>
              <property name="text">
               <string>Windowed</string>
@@ -720,6 +767,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QPushButton" name="startBtn">
+            <property name="toolTip">
+             <string>Begins acquisition with current settings</string>
+            </property>
             <property name="text">
              <string>Start</string>
             </property>

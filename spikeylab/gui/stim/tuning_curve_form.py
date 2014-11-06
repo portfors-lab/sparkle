@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\tuning_curve.ui'
 #
-# Created: Mon Nov 03 09:41:31 2014
+# Created: Wed Nov 05 16:22:49 2014
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -182,6 +182,7 @@ class Ui_TuningCurveEditor(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.saveBtn = QtGui.QPushButton(TuningCurveEditor)
+        self.saveBtn.setToolTip(_fromUtf8(""))
         self.saveBtn.setObjectName(_fromUtf8("saveBtn"))
         self.horizontalLayout.addWidget(self.saveBtn)
         self.okBtn = QtGui.QPushButton(TuningCurveEditor)
@@ -231,7 +232,10 @@ class Ui_TuningCurveEditor(object):
         self.label_22.setText(_translate("TuningCurveEditor", "Duration", None))
         self.tunit_lbl_4.setText(_translate("TuningCurveEditor", "ms", None))
         self.tunit_lbl_3.setText(_translate("TuningCurveEditor", "ms", None))
+        self.nrepsSpnbx.setToolTip(_translate("TuningCurveEditor", "Number of times to repeat each tone", None))
         self.label_31.setText(_translate("TuningCurveEditor", "Reps", None))
+        self.durSpnbx.setToolTip(_translate("TuningCurveEditor", "Tone duration", None))
+        self.risefallSpnbx.setToolTip(_translate("TuningCurveEditor", "rise+fall time for stimulus", None))
         self.saveBtn.setText(_translate("TuningCurveEditor", "Save As...", None))
         self.okBtn.setText(_translate("TuningCurveEditor", "Ok", None))
 

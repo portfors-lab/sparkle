@@ -10,6 +10,7 @@ class DragLabel(QtGui.QLabel):
         self.setClass(factoryclass)
         self.setMinimumSize(QtCore.QSize(100,32))
         self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.setToolTip("Drag to add")
 
     def setClass(self, factoryclass):
         """Sets the constructor for the component type this label is to 

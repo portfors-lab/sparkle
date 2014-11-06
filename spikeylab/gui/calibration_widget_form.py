@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file '.\calibration_widget.ui'
 #
-# Created: Fri Oct 17 15:18:33 2014
-#      by: QtWrapper UI code generator 4.11.1
+# Created: Wed Nov 05 16:22:20 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -100,10 +100,14 @@ class Ui_CalibrationWidget(object):
 
     def retranslateUi(self, CalibrationWidget):
         CalibrationWidget.setWindowTitle(_translate("CalibrationWidget", "Form", None))
+        self.savecalCkbx.setToolTip(_translate("CalibrationWidget", "Saves calibration data to file and sets as current calibration", None))
         self.savecalCkbx.setText(_translate("CalibrationWidget", "Save calibration", None))
+        self.applycalCkbx.setToolTip(_translate("CalibrationWidget", "Play stimulus with calibration applied; does not save to file", None))
         self.applycalCkbx.setText(_translate("CalibrationWidget", "Test calibration", None))
         self.label_2.setText(_translate("CalibrationWidget", "Reps", None))
+        self.nrepsSpnbx.setToolTip(_translate("CalibrationWidget", "Number of repeats for the stimulus", None))
         self.testTypeGrp.setTitle(_translate("CalibrationWidget", "Test type", None))
+        self.calTypeCmbbx.setToolTip(_translate("CalibrationWidget", "Stimulus type", None))
         self.calTypeCmbbx.setItemText(0, _translate("CalibrationWidget", "Tone Curve", None))
 
 from spikeylab.gui.stim.tuning_curve import TuningCurveEditor

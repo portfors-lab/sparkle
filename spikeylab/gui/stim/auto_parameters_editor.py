@@ -88,12 +88,12 @@ class Parametizer(QtGui.QWidget):
                 Parameter must have selected components in order to edit fields')
         else:
             model.emptied.emit(True)
-            self.hintRequested.emit('Drag to add parameter first')
+            self.hintRequested.emit('Drag "Add" to add parameter first')
 
     def hideEvent(self, event):
         """notifies other widgets this editor is not longer visible"""
         self.visibilityChanged.emit(0)
-        self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; right drag to move.')
+        self.hintRequested.emit('Drag Components onto view to Add. Double click to edit; Drag to move.')
 
     def closeEvent(self, event):
         """Emits a signal to update start values on components"""

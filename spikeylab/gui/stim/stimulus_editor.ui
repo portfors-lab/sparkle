@@ -120,6 +120,9 @@
            <height>100</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Hint</string>
+         </property>
          <property name="frameShape">
           <enum>QFrame::Panel</enum>
          </property>
@@ -143,6 +146,9 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="0" column="1">
           <widget class="QSlider" name="horizontalSlider">
+           <property name="toolTip">
+            <string>Zoom</string>
+           </property>
            <property name="minimum">
             <number>1</number>
            </property>
@@ -175,7 +181,11 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="1">
-          <widget class="QSpinBox" name="nrepsSpnbx"/>
+          <widget class="QSpinBox" name="nrepsSpnbx">
+           <property name="toolTip">
+            <string>Number of times to repeat (also applies to each expanded stimulus if auto-parameters are used)</string>
+           </property>
+          </widget>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_2">
@@ -208,6 +218,9 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="1" column="1">
           <widget class="QLabel" name="ntracesLbl">
+           <property name="toolTip">
+            <string>Number of unique stimuli (including expanded auto-parameters) in this test</string>
+           </property>
            <property name="text">
             <string>1</string>
            </property>
@@ -217,6 +230,9 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <widget class="QPushButton" name="previewBtn">
+         <property name="toolTip">
+          <string>Generate preview spectrogram</string>
+         </property>
          <property name="text">
           <string>Preview Spectrogram</string>
          </property>
@@ -224,6 +240,9 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <widget class="QPushButton" name="saveBtn">
+         <property name="toolTip">
+          <string>Save stimulus template to file</string>
+         </property>
          <property name="text">
           <string>Save As...</string>
          </property>

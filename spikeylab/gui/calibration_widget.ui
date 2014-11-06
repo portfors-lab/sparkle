@@ -39,6 +39,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <widget class="QRadioButton" name="savecalCkbx">
+        <property name="toolTip">
+         <string>Saves calibration data to file and sets as current calibration</string>
+        </property>
         <property name="text">
          <string>Save calibration</string>
         </property>
@@ -49,6 +52,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="applycalCkbx">
+        <property name="toolTip">
+         <string>Play stimulus with calibration applied; does not save to file</string>
+        </property>
         <property name="text">
          <string>Test calibration</string>
         </property>
@@ -74,6 +80,9 @@
           <width>100</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of repeats for the stimulus</string>
         </property>
         <property name="value">
          <number>1</number>
@@ -106,6 +115,9 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QComboBox" name="calTypeCmbbx">
+           <property name="toolTip">
+            <string>Stimulus type</string>
+           </property>
            <item>
             <property name="text">
              <string>Tone Curve</string>

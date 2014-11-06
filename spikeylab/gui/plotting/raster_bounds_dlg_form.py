@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file '.\raster_bounds_dlg.ui'
 #
-# Created: Thu Oct 16 14:50:47 2014
-#      by: QtWrapper UI code generator 4.11.1
+# Created: Wed Nov 05 16:22:36 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -26,9 +26,20 @@ except AttributeError:
 class Ui_RasterBoundsDialog(object):
     def setupUi(self, RasterBoundsDialog):
         RasterBoundsDialog.setObjectName(_fromUtf8("RasterBoundsDialog"))
-        RasterBoundsDialog.resize(229, 99)
+        RasterBoundsDialog.resize(257, 127)
         self.verticalLayout = QtGui.QVBoxLayout(RasterBoundsDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.label_3 = QtGui.QLabel(RasterBoundsDialog)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_3.setFont(font)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.verticalLayout.addWidget(self.label_3)
+        self.label_4 = QtGui.QLabel(RasterBoundsDialog)
+        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.verticalLayout.addWidget(self.label_4)
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label = QtGui.QLabel(RasterBoundsDialog)
@@ -63,6 +74,8 @@ class Ui_RasterBoundsDialog(object):
 
     def retranslateUi(self, RasterBoundsDialog):
         RasterBoundsDialog.setWindowTitle(_translate("RasterBoundsDialog", "Raster y-axis bounds", None))
+        self.label_3.setText(_translate("RasterBoundsDialog", "Portion of plot to display raster points in", None))
+        self.label_4.setText(_translate("RasterBoundsDialog", "(values between 0.0 - 1.0)", None))
         self.label.setText(_translate("RasterBoundsDialog", "Upper bound", None))
         self.label_2.setText(_translate("RasterBoundsDialog", "Lower bound", None))
 

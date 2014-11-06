@@ -18,6 +18,7 @@ class TrashWidget(QtGui.QPushButton):
         self.setIcon(self.trashIcon)
         self.setIconSize(QtCore.QSize(25,25))
         self.setAcceptDrops(True)
+        self.setToolTip("Drag here to delete")
 
         self._underMouse = False
 
