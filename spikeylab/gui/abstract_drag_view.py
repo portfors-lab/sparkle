@@ -171,6 +171,7 @@ class AbstractDragView(object):
                 selected = self.limbo_component
                 self.model().insertItem(self.originalPos, selected)
                 self.originalPos = None
+                self.dragStartPosition = None
                 self.viewport().update()
 
     def mouseReleaseEvent(self, event):
