@@ -2,6 +2,8 @@ import cPickle
 
 from QtWrapper import QtGui, QtCore
 
+from spikeylab.gui.qconstants import CursorRole
+
 class AbstractDragView(object):
     """Class to keep drag and drop behaviour consistent across UI"""
     DragRole = 33
@@ -11,6 +13,7 @@ class AbstractDragView(object):
         self.dragline = None
         self.originalPos = None
         self.dragStartPosition = None
+        self.setMouseTracking(True)
 
     def grabImage(self, index):
         """Gets a pixmap image of the item located at index
@@ -55,6 +58,10 @@ class AbstractDragView(object):
         """Determines if a drag is taking place, and initiates it"""
         if self.dragStartPosition is None or \
             (event.pos() - self.dragStartPosition).manhattanLength() < QtGui.QApplication.startDragDistance():
+            # change cursor to reflect actions for what its hovering on
+            index = self.indexAt(event.pos())
+            cursor = self.model().data(index, CursorRole)
+            self.setCursor(cursor)
             return
         # mouse has been dragged past a threshold distance
 

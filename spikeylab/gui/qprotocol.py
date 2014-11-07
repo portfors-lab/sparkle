@@ -6,6 +6,8 @@ from spikeylab.gui.stim.factory import StimFactory
 from spikeylab.run.protocol_model import ProtocolTabelModel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.gui.stim.qstimulus import QStimulusModel
+from spikeylab.gui.qconstants import CursorRole
+from spikeylab.resources import cursors
 
 class QProtocolTabelModel(QtCore.QAbstractTableModel):
     """Qt wrapper for :class:`ProcotolModel<spikeylab.run.protocol_model.ProtocolTabelModel>`,
@@ -80,6 +82,15 @@ class QProtocolTabelModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.UserRole + 1:  #return the whole python object
             test = self._testmodel.test(index.row())
             return test
+        elif role == CursorRole:
+            col = index.column()
+            if not index.isValid():
+                return QtGui.QCursor(QtCore.Qt.ArrowCursor)
+            elif col == 0:
+                return QtGui.QCursor(QtCore.Qt.IBeamCursor)
+            else:
+                return cursors.openHand()
+
 
     def flags(self, index):
         """"Determines interaction allowed with table cells.
@@ -241,6 +252,7 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             row = self.model().rowCount()
         y = self.rowHeight(0)*row
         return 0, y
+
 
 if __name__ == '__main__': # pragma: no cover
     

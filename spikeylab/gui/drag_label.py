@@ -1,6 +1,7 @@
 import cPickle
 
 from QtWrapper import QtGui, QtCore
+from spikeylab.resources import cursors
 
 class DragLabel(QtGui.QLabel):
     def __init__(self, factoryclass, parent=None):
@@ -11,6 +12,7 @@ class DragLabel(QtGui.QLabel):
         self.setMinimumSize(QtCore.QSize(100,32))
         self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.setToolTip("Drag to add")
+        self.setCursor(cursors.openHand())
 
     def setClass(self, factoryclass):
         """Sets the constructor for the component type this label is to 
@@ -30,6 +32,7 @@ class DragLabel(QtGui.QLabel):
         """Determines if a drag is taking place, and initiates it"""
         if (event.pos() - self.dragStartPosition).manhattanLength() < 10:
             return
+        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
         factory = self.factoryclass()
 
         mimeData = QtCore.QMimeData()
@@ -56,6 +59,9 @@ class DragLabel(QtGui.QLabel):
         drag.setPixmap(pixmap)
 
         result = drag.exec_(QtCore.Qt.MoveAction)
+
+        QtGui.QApplication.restoreOverrideCursor()
+
 
 
 if __name__ == '__main__':

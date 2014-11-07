@@ -4,6 +4,7 @@ from spikeylab.gui.drag_label import DragLabel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel
+from spikeylab.gui.qconstants import CursorRole
 
 ROW_HEIGHT = 100
 ROW_SPACE = 25
@@ -331,6 +332,15 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
                 index = self.indexAt(event.pos())
                 self.edit(index)
 
+    def mouseMoveEvent(self, event):
+        super(StimulusView, self).mouseMoveEvent(event)
+        if self.mode == BUILDMODE:
+            index = self.indexAt(event.pos())
+            cursor = self.model().data(index, CursorRole)
+            self.setCursor(cursor)
+        else:
+            self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+            
     def grabImage(self, index):
         """Gets an image of the item at *index*
 

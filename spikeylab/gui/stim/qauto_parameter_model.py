@@ -4,6 +4,8 @@ import numpy as np
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+from spikeylab.gui.qconstants import CursorRole
+from spikeylab.resources import cursors
 
 ERRCELL = QtGui.QColor('firebrick')
 
@@ -86,6 +88,17 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         elif role == self.SelectionModelRole:
             # may need to translate to QModelIndexes
             return self.model.selection(self.model.param(index.row()))
+        
+        elif role == CursorRole:
+            col = index.column()
+            if not index.isValid():
+                return QtGui.QCursor(QtCore.Qt.ArrowCursor)
+            elif col == 0:
+                return cursors.pointyHand()
+            elif col < 4:
+                return cursors.handEdit()
+            else:
+                return cursors.openHand()
 
     def setData(self, index, value, role=QtCore.Qt.UserRole):
         """Sets data at *index* to *value* in underlying data structure

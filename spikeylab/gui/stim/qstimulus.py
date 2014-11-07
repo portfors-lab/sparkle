@@ -4,7 +4,7 @@ import logging
 
 import yaml
 import numpy as np
-from QtWrapper import QtCore
+from QtWrapper import QtCore, QtGui
 
 from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
 from spikeylab.tools.audiotools import impulse_response, convolve_filter
@@ -14,7 +14,8 @@ from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
-
+from spikeylab.gui.qconstants import CursorRole
+from spikeylab.resources import cursors
 
 src_dir = get_src_directory()
 # print 'src_dir', src_dir
@@ -91,6 +92,12 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         See :qtdoc:`QAbstractItemModel<QAbstractItemModel.data>`, 
         and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
         """
+        if role == CursorRole:
+            if index.isValid():
+                return cursors.openHand()
+            else:
+                return QtGui.QCursor(QtCore.Qt.ArrowCursor)
+
         if not index.isValid():
             return None
         if role == QtCore.Qt.DisplayRole:
@@ -99,7 +106,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         elif role == QtCore.Qt.SizeHintRole:
             component = self._stim.component(index.row(),index.column())
             return component.duration() #* PIXELS_PER_MS * 1000
-        elif role >= QtCore.Qt.UserRole:  #return the whole python object
+        elif role == QtCore.Qt.UserRole or role == QtCore.Qt.UserRole+1:  #return the whole python object
             if self._stim.columnCountForRow(index.row()) > index.column():
                 component = self._stim.component(index.row(),index.column())
                 if role == QtCore.Qt.UserRole:
