@@ -10,8 +10,9 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     """Table View which holds auto parameter details, with a parameter per row"""
     hintRequested = QtCore.Signal(str)
     parameterChanged = QtCore.Signal(list)
-    def __init__(self):
-        QtGui.QTableView.__init__(self)
+    dragActive = QtCore.Signal(bool)
+    def __init__(self, parent=None):
+        QtGui.QTableView.__init__(self, parent)
         AbstractDragView.__init__(self)
 
         self.setItemDelegate(SmartDelegate())
@@ -98,6 +99,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
                     row = self.model().rowCount() - 1
                 self.selectRow(row)
                 self.parameterChanged.emit(self.model().selection(index))
+        self.dragActive.emit(False)
 
     def indexXY(self, index):
         """Coordinates for the parameter row at *index*
@@ -116,6 +118,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         indexes = self.selectedIndexes()
         index = indexes[0]
         self.model().toggleSelection(index, comp)
+
 
 class ComboboxDelegate(QtGui.QStyledItemDelegate):
     """Drop down editor for parameter selection

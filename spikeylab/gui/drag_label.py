@@ -4,6 +4,7 @@ from QtWrapper import QtGui, QtCore
 from spikeylab.resources import cursors
 
 class DragLabel(QtGui.QLabel):
+    dragActive = QtCore.Signal(bool)
     def __init__(self, factoryclass, parent=None):
         super(DragLabel, self).__init__(parent)
         self.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.Panel)
@@ -58,11 +59,14 @@ class DragLabel(QtGui.QLabel):
         drag.setHotSpot(QtCore.QPoint(pixmap.width()/2, pixmap.height()/2))
         drag.setPixmap(pixmap)
 
+        self.dragActive.emit(True)
         result = drag.exec_(QtCore.Qt.MoveAction)
 
         QtGui.QApplication.restoreOverrideCursor()
 
-
+    def childEvent(self, event):
+        if event.type() == QtCore.QEvent.ChildRemoved:
+            self.dragActive.emit(False)
 
 if __name__ == '__main__':
 
