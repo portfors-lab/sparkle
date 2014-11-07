@@ -14,7 +14,7 @@ from spikeylab.stim.reorder import order_function
 from spikeylab.tools.systools import get_src_directory
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
-from spikeylab.gui.qconstants import CursorRole
+from spikeylab.gui.qconstants import CursorRole, BuildMode, AutoParamMode
 from spikeylab.resources import cursors
 
 src_dir = get_src_directory()
@@ -86,7 +86,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         """Wrapper for :meth:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel.traceCount>`"""
         return self._stim.traceCount()
 
-    def data(self, index, role=QtCore.Qt.UserRole):
+    def data(self, index, role=QtCore.Qt.UserRole, mode=BuildMode):
         """Used by the view to determine data to present
 
         See :qtdoc:`QAbstractItemModel<QAbstractItemModel.data>`, 
@@ -94,7 +94,12 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         """
         if role == CursorRole:
             if index.isValid():
-                return cursors.openHand()
+                if mode == BuildMode:
+                    return cursors.openHand()
+                elif mode == AutoParamMode:
+                    return cursors.pointyHand()
+                else:
+                    raise ValueError("Invalid stimulus edit mode")
             else:
                 return QtGui.QCursor(QtCore.Qt.ArrowCursor)
 

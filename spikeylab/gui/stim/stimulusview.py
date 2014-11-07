@@ -4,17 +4,13 @@ from spikeylab.gui.drag_label import DragLabel
 from spikeylab.gui.abstract_drag_view import AbstractDragView
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.gui.stim.selectionmodel import ComponentSelectionModel
-from spikeylab.gui.qconstants import CursorRole
+from spikeylab.gui.qconstants import CursorRole, BuildMode, AutoParamMode
 
 ROW_HEIGHT = 100
 ROW_SPACE = 25
 
 GRID_PIXEL_MIN = 100
 GRID_PIXEL_MAX = 200
-
-#Enums
-BUILDMODE = 0
-AUTOPARAMMODE = 1
 
 class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     """View for building/editing stimulus components"""
@@ -40,7 +36,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
-        self.mode = BUILDMODE
+        self.mode = BuildMode
         self._rects = [[]]
         # these orignal settings are important
         self.pixelsPerms = 5
@@ -327,19 +323,19 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
     def mouseDoubleClickEvent(self, event):
         """Launches an editor for the component, if the mouse cursor is over an item"""
-        if self.mode == BUILDMODE:
+        if self.mode == BuildMode:
             if event.button() == QtCore.Qt.LeftButton:
                 index = self.indexAt(event.pos())
                 self.edit(index)
 
     def mouseMoveEvent(self, event):
         super(StimulusView, self).mouseMoveEvent(event)
-        if self.mode == BUILDMODE:
+        if self.mode == AutoParamMode:
+            # default is buildmode, so we need to set if auto-param mode
             index = self.indexAt(event.pos())
-            cursor = self.model().data(index, CursorRole)
+            cursor = self.model().data(index, CursorRole, self.mode)
             self.setCursor(cursor)
-        else:
-            self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+
             
     def grabImage(self, index):
         """Gets an image of the item at *index*
@@ -357,7 +353,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     def mousePressEvent(self, event):
         """In Auto-parameter selection mode, mouse press over an item emits
         `componentSelected`"""
-        if self.mode == BUILDMODE:
+        if self.mode == BuildMode:
             super(StimulusView, self).mousePressEvent(event)
         else:
             # select and de-select components
@@ -453,9 +449,9 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     def setMode(self, mode):
         """Sets the "mode" for this view:
 
-        BUILDMODE 0: Allowing adding, moving and editing of component items
+        BuildMode 0: Allowing adding, moving and editing of component items
 
-        AUTOPARAMMODE 1: For adding components to a selection of an 
+        AutoParamMode 1: For adding components to a selection of an 
         auto-parameter. clicks toggle membership in selection. Moving and 
         editing of components disabled.
         
@@ -463,7 +459,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         :type mode: int
         """
         self.mode = mode
-        if mode == BUILDMODE:
+        if mode == BuildMode:
             self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
             self.setSelectionModel(QtGui.QItemSelectionModel(self.model()))
             self.setEnabled(True)
