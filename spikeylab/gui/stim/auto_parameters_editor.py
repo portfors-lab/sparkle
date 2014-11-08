@@ -5,7 +5,6 @@ from spikeylab.gui.stim.auto_parameter_view import AutoParameterTableView, AddLa
 from spikeylab.gui.trashcan import TrashWidget
 from spikeylab.gui.hidden_widget import WidgetHider
 from spikeylab.stim.reorder import order_function
-from spikeylab.gui.border import QBorder
 
 class Parametizer(QtGui.QWidget):
     """Container widget for the auto parameters"""
@@ -19,7 +18,6 @@ class Parametizer(QtGui.QWidget):
         btnLayout = QtGui.QHBoxLayout()
         
         self.addLbl = DragLabel(AddLabel)
-        self.addLbl.dragActive.connect(self.highlightTable)
 
         separator = QtGui.QFrame()
         separator.setFrameShape(QtGui.QFrame.VLine)
@@ -37,7 +35,7 @@ class Parametizer(QtGui.QWidget):
         self.paramList = AutoParameterTableView()
         self.paramList.installEventFilter(self.trashLbl)
         self.paramList.hintRequested.connect(self.hintRequested)
-        self.tableFrame = QBorder(self.paramList)
+        self.addLbl.dragActive.connect(self.paramList.showBorder)
 
         layout.addWidget(self.paramList)
         layout.addLayout(btnLayout)
@@ -62,13 +60,6 @@ class Parametizer(QtGui.QWidget):
         model.rowsInserted.connect(self.updateTitle)
         model.rowsRemoved.connect(self.updateTitle)
         self.updateTitle()
-
-    def highlightTable(self, active):
-        """A drag was started, so highlight the table area to show where to drop to"""
-        if active:
-            self.tableFrame.showBorder(True)
-        else:
-            self.tableFrame.showBorder(False)
 
     def updateTitle(self):
         """Updates the Title of this widget according to how many parameters are currently in the model"""

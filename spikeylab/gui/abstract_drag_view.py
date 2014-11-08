@@ -3,6 +3,7 @@ import cPickle
 from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.qconstants import CursorRole
+from spikeylab.gui.border import QBorder
 
 class AbstractDragView(object):
     """Class to keep drag and drop behaviour consistent across UI"""
@@ -14,6 +15,7 @@ class AbstractDragView(object):
         self.originalPos = None
         self.dragStartPosition = None
         self.setMouseTracking(True)
+        self._frame = QBorder(self)
 
     def grabImage(self, index):
         """Gets a pixmap image of the item located at index
@@ -177,3 +179,9 @@ class AbstractDragView(object):
     def mouseReleaseEvent(self, event):
         """Resets the drag start position"""
         self.dragStartPosition = None
+
+    def frame(self):
+        return self._frame
+
+    def showBorder(self, show):
+        self._frame.showBorder(show)

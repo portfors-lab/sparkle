@@ -90,6 +90,10 @@ class ControlWindow(QtGui.QMainWindow):
             logger = logging.getLogger('main')
             logger.exception("Error Initializing main GUI")
 
+        # connect drag label signals
+        for label in self.ui.stimulusChoices.labels():
+            label.dragActive.connect(self.ui.protocolView.showBorder)
+
     def verifyInputs(self, mode):
         """Goes through and checks all stimuli and input settings are valid
         and consistent. Prompts user with a message if there is a condition

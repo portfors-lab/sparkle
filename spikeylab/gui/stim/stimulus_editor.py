@@ -26,6 +26,9 @@ class StimulusEditor(AbstractStimulusWidget):
         self.ui.parametizer.visibilityChanged.connect(self.setModeLabel)
         self.ui.parametizer.hintRequested.connect(self.setHint)
 
+        for label in self.ui.templateBox.labels():
+            label.dragActive.connect(self.ui.trackview.showBorder)
+
         self.ok = self.ui.okBtn
 
     def setModel(self, model):

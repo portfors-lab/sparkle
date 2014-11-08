@@ -12,6 +12,3 @@ def arrowdown():
 
 def windowicon():
     return QtGui.QIcon(os.path.join(thisfolder,'horsey.png'))
-
-def handediticon():
-    return QtGui.QIcon(os.path.join(thisfolder,'hand_ibeam.png'))

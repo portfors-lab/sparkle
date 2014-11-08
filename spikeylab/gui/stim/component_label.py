@@ -47,6 +47,9 @@ class ComponentTemplateTable(QtGui.QWidget):
         else:
             return None
 
+    def labels(self):
+        return self.stimLabels.values()
+
 if __name__ == '__main__':
     import sys
     app  = QtGui.QApplication(sys.argv)

@@ -28,6 +28,9 @@ class StimulusLabelTable(QtGui.QWidget):
         """Returns the trash widget"""
         return self.trashLbl
 
+    def labels(self):
+        return [self.builderLbl, self.tcLbl, self.templateLbl]
+
 
 if __name__ == '__main__':
 
