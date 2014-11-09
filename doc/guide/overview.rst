@@ -17,18 +17,16 @@ Acquisition Settings
 * Mode: Windowed mode is finite chunks of recording, and Chart is continuous acquisition.
 
 
-Options
-=======
-
-The options menu allows the you to specify a number of system wide settings.
+Options Menu
+============
 
 Change Data File
-------------
-Allow you to change location where data will save to. Can load a previous file, or create a new one.
+----------------
+Allows you to change location where data will save to. Can load a previous file, or create a new one.
 
 Calibration Parameters
 -----------------------
-Set the current calibration, and parameters for calculating new calibrations.
+Sets the current calibration, and parameters for calculating new calibrations.
 see :ref:`calibration`
 
 Set Scale
@@ -39,17 +37,24 @@ Spectrogram Parameters
 ----------------------
 Input parameters for spectrogram generation on all spectrogram plots in the program.
 
-View
-====
-Show hidden parts of the interface, and setup stimulus details to display
+View Menu
+==========
+
+View Settings
+--------------
+Shows hidden parts of the interface. When you close a subwindow, this is how you get it back.
+
+View Settings
+--------------
+Setup stimulus details to display. The details chosen here will be listed
+during acquisition in the *Stimulus Details* subwindow.
 
 
-Plot Display
-============
+Data Display Subwindows
+========================
+The data display consists of a several plots to visualize both the generated stimulus and the recorded response. The plot displays are dockable subwindows, meaning they can be attached to the main window, or float freely. The plots within each display (if more than one) can also be resized. Right click any of the plots to reset the zoom. There is a different main display for calibration and data collection.
 
-The data display consists of a several plots to visualize both the generated stimulus and the recorded response. It is in a dockable window, that may remain attached to the control interface to float freely, with the ability of full-screen mode. The plots within the display can also be resized. Right click any of the plots to reset the zoom. There is a different display for calibration and data collection.
-
-Zooming behaviour is consistent across all plots. The mouse wheel may be used to zoom in and out the y-axis, with the center of the zoom being where the mouse pointer's current location. Holding ``ctrl`` will zoom the x-axis. Likewise, click and drag will pan the y-axis, and holding ``ctrl`` will pan the x-axis. Right click and drag will create a bounding-box zoom. More options are available by right clicking the plots to display a pop-up menu.
+Zooming behaviour is consistent across all plots. The mouse wheel may be used to zoom in and out the y-axis, with the center of the zoom being the mouse pointer's current location. Holding ``ctrl`` will zoom the x-axis. Likewise, click and drag will pan the y-axis, and holding ``ctrl`` will pan the x-axis. Right click and drag will create a bounding-box zoom. More options are available by right clicking the plots to display a pop-up menu.
 
 Calibration Display
 -------------------
@@ -57,6 +62,9 @@ For both the generated and recorded signal, there is a spectrogram, a time signa
 
 Data Collection Display
 -----------------------
+
+This is the main display for use during recording.
+
 Recording Trace
 ~~~~~~~~~~~~~~~~
 The plot in the bottom left displays the response trace.The xaxis will update with the widow size specified on the control interface.
@@ -65,7 +73,7 @@ There is a red threshold line which can be grabbed and dragged. It has a linked 
 
 A raster of detected spikes will appear if the recording traces crosses over threshold. The detected spikes are sorted into bins, of size determined by the bin size field on the control interface. The raster points appear between set coordinate bounds. To change these limits right click on the plot and select *edit raster bounds*.
 
-the small blue trace in the upper left of the response plot is the stimulus signal.
+The small blue trace in the upper left of the response plot is the stimulus signal.
 
 Stimulus Spectrogram
 ~~~~~~~~~~~~~~~~~~~~
@@ -76,8 +84,12 @@ Stimulus FFT
 The sideways plot on the right is the spectrum analysis of the stimulus signal, in dB SPL.
 
 PSTH
-=====
+------
 Online display of spike detection histogram, using the user-chosen threshold. Note that the metrics below the plot are calculating averages from the previous set of repetitions, not what is currently displayed in the plot!
+
+Progress
+---------
+During a protocol acquisition, the total spike counts for each trace are tallied and plotted in presentation order in a line plot. For tuning curves, the x-axis is labelled with frequency, and line color will differentiate intensity. For all other types of stimulus, the x-axis will be trace number.
 
 Data Files
 ==========
@@ -85,7 +97,7 @@ Recorded data is saved to data files in HDF5 format. Each protcol list is a grou
 
 Other Settings
 ===============
-Semi-permanent setting loaded once at program start are located in the :ref:`settings`.
+Semi-permanent settings loaded once at program start are located in the :ref:`settings`.
 
 Names
 =====
