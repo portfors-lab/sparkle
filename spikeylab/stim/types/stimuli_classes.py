@@ -241,6 +241,7 @@ class WhiteNoise(AbstractStimulusComponent):
 
     def setTransfer(self, H):
         self.transfer = H
+        explore = True
 
 class Silence(AbstractStimulusComponent):
     name = "silence"
@@ -256,6 +257,15 @@ class Silence(AbstractStimulusComponent):
     def signal(self, *args, **kwargs):
         fs = kwargs['fs']
         return np.zeros((self._duration*fs,))
+
+class NoStim(AbstractStimulusComponent):
+    name = "OFF"
+    explore = True
+    def signal(self, fs, atten, caldb, calv):
+        return [0]
+
+    def auto_details(self):
+        return {}
 
 class Modulation(AbstractStimulusComponent):
     modulation_frequency = None
