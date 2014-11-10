@@ -323,6 +323,7 @@ class TestMainUI():
         parentdir, fname = os.path.split(fpath)
         vocal_editor.setRootDirs(parentdir, parentdir)
         QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(2000)
         qtbot.drag(vocal_editor.filelistView, vocal_editor.filelistView, 
                            vocal_editor.filelistView.model().index(fpath), 
                            vocal_editor.filelistView.model().index(sample.samplewav1()))
@@ -343,7 +344,7 @@ class TestMainUI():
         assert self.form.acqmodel.protocol_model().rowCount() == 2
         stims = self.form.acqmodel.protocol_model().allTests()
         assert stims[1].stimType() == 'Custom'
-        assert stims[1].traceCount() == 2
+        assert stims[1].traceCount() > 1
 
     def test_undock_display(self):
         # set display to top tab
