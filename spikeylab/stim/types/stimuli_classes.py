@@ -117,7 +117,7 @@ class Vocalization(AbstractStimulusComponent):
 
     def stateDict(self):
         state = super(Vocalization, self).stateDict()
-        state['file'] = self._filename
+        state['filename'] = self._filename
         state['browsedir'] = self._browsedir
         return state
 
@@ -125,7 +125,7 @@ class Vocalization(AbstractStimulusComponent):
         super(Vocalization,self).loadState(state)
 
         browsedir = state['browsedir']
-        fname = state['file']
+        fname = state['filename']
 
         # error will occur later if unset
         if os.path.isdir(browsedir):
@@ -180,7 +180,7 @@ class Vocalization(AbstractStimulusComponent):
     def auto_details(self):
         details = super(Vocalization, self).auto_details()
         del details['duration']
-        details['file'] = {'label':'Edit from component dialog'}
+        details['filename'] = {'label':'Edit from component dialog'}
         return details
 
     def verify(self, **kwargs):

@@ -13,6 +13,9 @@ def sampleimage():
 def samplewav():
     return os.path.join(wavdir(), 'asample_syl.wav')
 
+def samplewav1():
+    return os.path.join(wavdir(), 'another_syl.wav')
+
 def samplewav333():
     return os.path.join(wavdir(), 'asample_syl333.wav')
 

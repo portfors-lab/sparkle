@@ -255,7 +255,7 @@ class TestAutoParameterModel():
         component = Vocalization()
         model = QAutoParameterModel(AutoParameterModel())
 
-        p = {'parameter': 'file',
+        p = {'parameter': 'filename',
              'names': [sample.samplewav()],
              'selection': [component]
         }

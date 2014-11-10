@@ -70,6 +70,7 @@ class TestProtocolView():
     def test_set_user_tag(self):
         view, stim = self.createView()
         view.show()
+        QtTest.QTest.qWait(200)
         tag = self.add_tag(view)
         
         assert view.model().data(view.model().index(0,0), QtCore.Qt.DisplayRole) == tag
@@ -80,6 +81,7 @@ class TestProtocolView():
     def test_save_reload_test(self):
         view, stim = self.createView()
         view.show()
+        QtTest.QTest.qWait(200)
         tag = self.add_tag(view)
         fname = os.path.join(tempfolder,'save_tmp.json')
 

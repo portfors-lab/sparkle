@@ -415,6 +415,14 @@ class StimulusModel():
             for ip, param in enumerate(params):
                 for component in param['selection']:
                     # print 'setting component {} parameter {} to {}'.format(component.name, param['parameter'], varylist[itrace][ip])
+                    
+                    # so I encountered a bug when the parameters were dragged the
+                    # pickling/unpickling seems to either make a copy or somehow
+                    # otherwise loose connection to the original components
+                    # make sure to be setting the components that are in this model.
+                    index = self.indexByComponent(component)
+                    component = self.component(*index)
+
                     component.set(param['parameter'], varylist[itrace][ip])
             # copy of current stim state, or go ahead and turn it into a signal?
             # so then would I want to formulate some doc here as well?
@@ -452,7 +460,6 @@ class StimulusModel():
         # 3 loops now -- could be done in one...
         signals = self.expandFunction(self.signal)
         docs = self.expandFunction(self.componentDoc)
-
         overloads = []
         for s, d in zip(signals, docs):
             d['overloaded_attenuation'] = s[2]

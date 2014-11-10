@@ -730,7 +730,7 @@ def create_vocal_stim(nreps):
 
     auto_model = stim_model.autoParams()
     auto_model.insertRow(0)
-    p = {'parameter' : 'file',
+    p = {'parameter' : 'filename',
          'names' : [sample.samplewav(), sample.samplewav()],
          'selection' : []
         }

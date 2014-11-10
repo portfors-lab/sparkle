@@ -75,7 +75,7 @@ class AbstractDragView(object):
         pixmap = self.grabImage(index)
 
         # get the item at the drug index
-        selected = self.model().data(index, QtCore.Qt.UserRole+1)
+        selected = self.model().data(index, self.DragRole)
         if selected is None:
             return
             

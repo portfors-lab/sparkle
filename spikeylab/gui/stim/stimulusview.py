@@ -360,7 +360,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             index = self.indexAt(event.pos())
             if index.isValid():
                 self.selectionModel().select(index, QtGui.QItemSelectionModel.Toggle)
-                comp = self.model().data(index, QtCore.Qt.UserRole+1)
+                comp = self.model().data(index, AbstractDragView.DragRole)
                 self.componentSelected.emit(comp)
                 self.hintRequested.emit('Click components to toggle more members of auto-parameter\n\n-or-\n\nEdit fields of auto-parameter (parameter type should be selected first)')
 
@@ -522,9 +522,10 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         auto_model = self.model().autoParams()
         row = auto_model.fileParameter(component)
         if len(files) > 1:
-            p = {'parameter' : 'file',
+            clean_component = self.model().data(self.model().indexByComponent(component), AbstractDragView.DragRole)
+            p = {'parameter' : 'filename',
                  'names' : files,
-                 'selection' : [component]
+                 'selection' : [clean_component]
             }
             if row is None:
                 auto_model.insertItem(auto_model.index(0,0), p)

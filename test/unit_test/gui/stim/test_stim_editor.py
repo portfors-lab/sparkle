@@ -15,6 +15,7 @@ from spikeylab.stim.auto_parameter_model import AutoParameterModel
 import test.sample as sample
 import qtbot
 
+ALLOW = 100
 
 class TestStimulusEditor():
 
@@ -40,6 +41,7 @@ class TestStimulusEditor():
         editor = StimulusEditor()
         editor.setModel(QStimulusModel(model))
         self.editor = editor
+        self.stim = model
 
     def tearDown(self):
         self.editor.close()
@@ -70,6 +72,25 @@ class TestStimulusEditor():
 
         assert isinstance(template, dict)
 
+    def test_move_auto_parameter(self):
+        self.editor.show()
+
+        signals, docs, overloads = self.stim.expandedStim()
+        # check the first two, make sure they are not the same
+        key = 'duration'
+        assert docs[0]['components'][0][key] != docs[1]['components'][0][key]
+
+        QTest.qWait(ALLOW)
+        qtbot.click(self.editor.ui.parametizer.hideBtn)
+        QTest.qWait(ALLOW)
+        pztr = self.editor.ui.parametizer.parametizer
+
+        qtbot.drag(pztr.paramList, pztr.paramList, pztr.paramList.model().index(0,0))
+
+        signals, docs, overloads = self.stim.expandedStim()
+        # check the first two, make sure they are not the same
+        assert docs[0]['components'][0][key] != docs[1]['components'][0][key]
+
     def add_auto_param(self, model):
         # adds an autoparameter to the given model
         ptype = 'duration'
@@ -84,7 +105,6 @@ class TestStimulusEditor():
         # set values for autoparams
         parameter_model.setParamValue(0, start=start, step=step, 
                                       stop=stop, parameter=ptype)
-
 
     def close_dialog(self):
         print 'what what'

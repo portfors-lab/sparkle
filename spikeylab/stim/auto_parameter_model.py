@@ -71,7 +71,7 @@ class AutoParameterModel():
         :type field: str
         :param value: pre-scaled value to assign to field
         """
-        if self._parameters[row]['parameter'] == 'file':
+        if self._parameters[row]['parameter'] == 'filename':
             return # cannot be set this way?
         if field == 'parameter':
             old_multiplier = self.getDetail(row, 'multiplier')
@@ -104,7 +104,7 @@ class AutoParameterModel():
         if field == 'parameter':            
             return self.paramValue(row, field)
         elif field in ['start', 'stop', 'step']:
-            if self._parameters[row]['parameter'] == 'file':
+            if self._parameters[row]['parameter'] == 'filename':
                 return '-'
             else:
                 val = self.paramValue(row, field)
@@ -165,7 +165,7 @@ class AutoParameterModel():
         :param param: parameter to get the expansion count for
         :type param: dict
         """
-        if param['parameter'] == 'file':
+        if param['parameter'] == 'filename':
             return len(param['names'])
         else:
             if param['step'] > 0:
@@ -228,7 +228,7 @@ class AutoParameterModel():
             return False
         if field == 'nsteps':
             return self.numSteps(row) != 0
-        if param['parameter'] == 'file':
+        if param['parameter'] == 'filename':
             # do something here... check filenames?
             return True
         if field == 'parameter':
@@ -246,7 +246,7 @@ class AutoParameterModel():
         :returns: list<str> -- filenames the found parameter will loop through
         """
         for p in self._parameters:
-            if p['parameter'] == 'file' and comp in p['selection']:
+            if p['parameter'] == 'filename' and comp in p['selection']:
                 return p['names']
 
     def checkLimits(self, row, value):
@@ -338,7 +338,7 @@ class AutoParameterModel():
         steps = []
         for p in self._parameters:
             # inclusive range
-            if p['parameter'] == 'file':
+            if p['parameter'] == 'filename':
                 steps.append(p['names'])
             else:
                 if p['step'] > 0:
@@ -377,27 +377,27 @@ class AutoParameterModel():
             details = comp.auto_details()
             editable_sets.append(set(details.keys()))
         editable_paramters = set.intersection(*editable_sets)
-        # do not allow selecting of file from here
+        # do not allow selecting of filename from here
         return list(editable_paramters)
 
     def updateComponentStartVals(self):
         """Go through selected components for each auto parameter and set the start value"""
         for param in self._parameters:
             for component in param['selection']:
-                if param['parameter'] == 'file':
+                if param['parameter'] == 'filename':
                     component.set(param['parameter'], param['names'][0])
                 else:
                     component.set(param['parameter'], param['start'])
 
     def fileParameter(self, comp):
         """Returns the row which component *comp* can be found in the 
-        selections of, and is also a file parameter
+        selections of, and is also a filename parameter
 
         :returns: int -- the index of the (filename) parameter *comp* is a member of 
         """
         for row in range(self.nrows()):
             p = self._parameters[row]
-            if p['parameter'] == 'file':
+            if p['parameter'] == 'filename':
                 # ASSUMES COMPONENT IN ONE SELECTION
                 if comp in p['selection']:
                     return row
@@ -407,7 +407,7 @@ class AutoParameterModel():
 
         :returns: bool -- True if values can be manipulated
         """
-        return self._parameters[row]['parameter'] != 'file'
+        return self._parameters[row]['parameter'] != 'filename'
 
     def verify(self):
         """Checks all parameters for invalidating conditions
@@ -432,7 +432,7 @@ class AutoParameterModel():
             return "At least one component must be selected for each auto-parameter"
         if param['parameter'] not in self._selectionParameters(param):
             return 'Parameter {} not present in all selected components'.format(param['parameter'])
-        if param['parameter'] == 'file':
+        if param['parameter'] == 'filename':
             if len(param['names']) < 1:
                 return "No filenames in file auto-parameter list"
         else:

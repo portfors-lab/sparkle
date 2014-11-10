@@ -137,6 +137,6 @@ if __name__ == '__main__':
     data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
     viewer = QDataReviewer()
     viewer.setDataObject(data)
-    viewer.setDisplayAttributes({'Vocalization': [u'Vocalization', u'risefall', u'intensity', u'file', u'duration', 'start_s'], 'silence': [u'silence', u'duration', u'risefall', u'intensity'], 'Pure Tone': [u'Pure Tone', u'duration', u'risefall', u'intensity', u'frequency']})
+    viewer.setDisplayAttributes({'Vocalization': [u'Vocalization', u'risefall', u'intensity', u'filename', u'duration', 'start_s'], 'silence': [u'silence', u'duration', u'risefall', u'intensity'], 'Pure Tone': [u'Pure Tone', u'duration', u'risefall', u'intensity', u'frequency']})
     viewer.show()
     app.exec_()

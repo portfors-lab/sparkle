@@ -1,10 +1,11 @@
-from QtWrapper import QtCore, QtGui
+from QtWrapper import QtCore, QtGui, QtTest
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
 from spikeylab.gui.stim.auto_parameter_view import AutoParameterTableView
 
 import qtbot
+
 
 class TestAutoParameterView():
 
@@ -15,6 +16,9 @@ class TestAutoParameterView():
         self.view.setModel(self.qmodel)
         self.view.show()
         self.view.resize(600,300)
+
+    def tearDown(self):
+        self.view.close()
 
     def test_drag_nowhere(self):
         self.qmodel.insertRows(0, 1)

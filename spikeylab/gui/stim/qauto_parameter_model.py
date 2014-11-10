@@ -114,7 +114,6 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             self.model.setScaledValue(index.row(), self._headers[index.column()], value)
             self.countChanged.emit()
         elif role == QtCore.Qt.UserRole:
-            print "replace all values"
             row = index.row()
             if row == -1:
                 row = self.rowCount() -1

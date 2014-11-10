@@ -514,7 +514,7 @@ class TestStimModel():
         return len(range(start,stop,step)) + 1
 
     def add_vocal_param(self, model):
-        p = {'parameter' : 'file',
+        p = {'parameter' : 'filename',
                 'names' : [sample.samplewav(), sample.samplewav()],
                 'selection' : []
         }

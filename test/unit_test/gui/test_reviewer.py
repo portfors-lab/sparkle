@@ -10,7 +10,7 @@ class TestDataReviewer():
         self.ui = QDataReviewer()
         self.datafile = AcquisitionData(sample.datafile(), filemode='r')
         self.ui.setDataObject(self.datafile)
-        self.ui.setDisplayAttributes({'Vocalization': [u'Vocalization', u'risefall', u'intensity', u'file', u'duration', 'start_s'], 'silence': [u'silence', u'duration', u'risefall', u'intensity'], 'Pure Tone': [u'Pure Tone', u'duration', u'risefall', u'intensity', u'frequency']})
+        self.ui.setDisplayAttributes({'Vocalization': [u'Vocalization', u'risefall', u'intensity', u'filename', u'duration', 'start_s'], 'silence': [u'silence', u'duration', u'risefall', u'intensity'], 'Pure Tone': [u'Pure Tone', u'duration', u'risefall', u'intensity', u'frequency']})
         self.ui.show()
         self.treeroot = self.ui.datatree.model().index(0,0)
 

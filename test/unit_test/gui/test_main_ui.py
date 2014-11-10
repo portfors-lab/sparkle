@@ -305,9 +305,45 @@ class TestMainUI():
         # now drag the builder to the top
         pv = self.form.ui.protocolView
         qtbot.drag_view(pv, (0,1), (1,1))
-        tests = pv.model().stimulusList()
-        print tests[1].stimType()
-        assert tests[1].stimType() == 'Custom'
+        stims = pv.model().stimulusList()
+        print stims[1].stimType()
+        assert stims[1].stimType() == 'Custom'
+
+    def test_reorder_protocol_multivocal(self):
+        # I was recieving a pickling error from wrapping the 
+        # stimulus components -- later again with vocal autoparams
+        self.form.ui.tabGroup.setCurrentIndex(1)
+        stimEditor = self.add_edit_builder()
+
+        qtbot.drag(stimEditor.ui.templateBox.getLabelByName('Vocalization'),
+                   stimEditor.ui.trackview)
+        QtTest.QTest.qWait(ALLOW)
+        vocal_editor = QtGui.QApplication.activeModalWidget()
+        fpath = sample.samplewav()
+        parentdir, fname = os.path.split(fpath)
+        vocal_editor.setRootDirs(parentdir, parentdir)
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.drag(vocal_editor.filelistView, vocal_editor.filelistView, 
+                           vocal_editor.filelistView.model().index(fpath), 
+                           vocal_editor.filelistView.model().index(sample.samplewav1()))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.keypress('enter')
+        QtTest.QTest.qWait(PAUSE)
+
+        qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
+
+        # throw in a tuning curve too
+        self.setup_tc()
+
+        pv = self.form.ui.protocolView
+        qtbot.drag_view(pv, (0,1), (1,1))
+        QtTest.QTest.qWait(ALLOW)
+
+        assert self.form.acqmodel.protocol_model().rowCount() == 2
+        stims = self.form.acqmodel.protocol_model().allTests()
+        assert stims[1].stimType() == 'Custom'
+        assert stims[1].traceCount() == 2
 
     def test_undock_display(self):
         # set display to top tab
@@ -318,17 +354,13 @@ class TestMainUI():
         QtTest.QTest.qWait(1000)
 
     def add_builder_tone(self):
-        pv = self.form.ui.protocolView
+        stimEditor = self.add_edit_builder()
 
-        qtbot.drag(self.form.ui.stimulusChoices.builderLbl, pv)
-        qtbot.doubleclick(pv, pv.model().index(0,1))
-        QtTest.QTest.qWait(PAUSE)
-
-        stimEditor = pv.stimEditor
         qtbot.drag(stimEditor.ui.templateBox.getLabelByName('Pure Tone'),
                    stimEditor.ui.trackview)
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(PAUSE)
         qtbot.keypress('enter')
+        QtTest.QTest.qWait(PAUSE)
 
         return stimEditor
 
@@ -336,10 +368,11 @@ class TestMainUI():
         self.form.ui.tabGroup.setCurrentIndex(0)
         stimuli = [str(self.form.ui.exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimTypeCmbbx.count())]
         tone_idx = stimuli.index(comptype)
+        QtTest.QTest.qWait(ALLOW)
         qtbot.move(self.form.ui.exploreStimTypeCmbbx)
 
         # scroll the mouse the number of ticks equal to it's index
-        QtTest.QTest.qWait(1000)
+        QtTest.QTest.qWait(PAUSE)
         qtbot.wheel(-1*tone_idx)
 
         if comptype == 'vocalization':
@@ -364,8 +397,8 @@ class TestMainUI():
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "OFF"
 
-    def setup_builder_components(self, components):
-
+    def add_edit_builder(self):
+        # add a custom stimulus and opens its editor
         self.form.ui.tabGroup.setCurrentIndex(1)
 
         QtGui.QApplication.processEvents()
@@ -380,7 +413,12 @@ class TestMainUI():
 
         assert hasattr(pv, 'stimEditor')
 
-        stimEditor = pv.stimEditor
+        return pv.stimEditor
+
+    def setup_builder_components(self, components):
+
+        stimEditor = self.add_edit_builder()
+
         for comp in components:
             name = comp[0]
             vals = comp[1]
@@ -435,11 +473,18 @@ class TestMainUI():
         qtbot.doubleclick(self.form.ui.windowszSpnbx)
         qtbot.type_msg(stim.duration()*1000+100)
 
+        signals, docs, overloads = stim.expandedStim()
+        # check the first two, make sure they are not the same
+        if len(autoparams) > 0:
+            key = autoparams[0][0]
+            assert docs[0]['components'][0][key] != docs[1]['components'][0][key]
+
         self.start_acq()
 
         # modal dialog will block qt methods in main thread
         # qtbot.handle_modal_widget(wait=True, press_enter=False)
         qtbot.handle_modal_widget(wait=True)
+
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
