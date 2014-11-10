@@ -109,28 +109,30 @@ class CalibrationRunner(AbstractCalibrationRunner):
 
     def _initialize_run(self):
        
-        data_items = self.datafile.keys()
-        self.current_dataset_name = next_str_num(self.group_name, data_items)
-        
-        self.datafile.init_group(self.current_dataset_name, mode='calibration')
-        
-        logger = logging.getLogger('main')
-        logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
-
-        self.datafile.init_data(self.current_dataset_name, mode='calibration', 
-                                dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
-
-        info = {'samplerate_ad': self.player.aisr}
-        self.datafile.set_metadata(self.current_dataset_name, info)
-
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
 
         if self.apply_cal:
             self.protocol_model.setCalibration(self.calibration_vector, self.calibration_freqs, self.calibration_frange)
+            # calibration testing doesn't save anything
+            self.save_data = False
         else:
+            data_items = self.datafile.keys()
+            self.current_dataset_name = next_str_num(self.group_name, data_items)
+            
+            self.datafile.init_group(self.current_dataset_name, mode='calibration')
+            
+            logger = logging.getLogger('main')
+            logger.debug('Calibrating with fs %s' %  self.stimulus.samplerate())
+
+            self.datafile.init_data(self.current_dataset_name, mode='calibration', 
+                                    dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
+
+            info = {'samplerate_ad': self.player.aisr}
+            self.datafile.set_metadata(self.current_dataset_name, info)
             # point is to output the signal at the specificed voltage, to we set
             # the intensity of the components to match whatever the caldb is now
+            self.save_data = True
             self.stimulus.component(0,0).setIntensity(self.caldb)
             print 'USING {} V, {} Hz, {} dBSPL'.format(self.calv, self.calf, self.caldb)
             self.reftone.setIntensity(self.caldb)
@@ -147,12 +149,13 @@ class CalibrationRunner(AbstractCalibrationRunner):
         return
 
     def _process_response(self, response, trace_info, irep):
-        if trace_info['components'][0]['stim_type'] == 'Pure Tone':
-            self.datafile.append(self.current_dataset_name, response, nested_name='reference_tone')
-        elif trace_info['components'][0]['stim_type'] == 'FM Sweep' or trace_info['components'][0]['stim_type'] == 'White Noise':
-            self.datafile.append(self.current_dataset_name, response)
-        else:
-            raise Exception("Improper calibration stimulus : {}".format(trace_info['components'][0]['stim_type']))
+        if self.save_data:
+            if trace_info['components'][0]['stim_type'] == 'Pure Tone':
+                self.datafile.append(self.current_dataset_name, response, nested_name='reference_tone')
+            elif trace_info['components'][0]['stim_type'] == 'FM Sweep' or trace_info['components'][0]['stim_type'] == 'White Noise':
+                self.datafile.append(self.current_dataset_name, response)
+            else:
+                raise Exception("Improper calibration stimulus : {}".format(trace_info['components'][0]['stim_type']))
 
         self.putnotify('response_collected', (self.aitimes, response))
 
@@ -164,6 +167,9 @@ class CalibrationRunner(AbstractCalibrationRunner):
         :type save: bool
         :returns: numpy.ndarray, str, int, float -- frequency response (in dB), dataset name, calibration reference frequency, reference intensity
         """
+        if not self.save_data:
+            raise Exception("Cannot process an unsaved calibration")
+            
         avg_signal = np.mean(self.datafile.get(self.current_dataset_name + '/signal'), axis=0)
 
         diffdB = attenuation_curve(self.stimulus.signal()[0], avg_signal,
@@ -172,28 +178,25 @@ class CalibrationRunner(AbstractCalibrationRunner):
         logger.debug('The maximum dB attenuation is {}, caldB {}'.format(max(diffdB), self.caldb))
 
         # save a vector of only the calibration intensity results
-        if save:
-            self.datafile.init_data(self.current_dataset_name, mode='calibration',
-                                    dims=diffdB.shape,
-                                    nested_name='calibration_intensities')
-            self.datafile.append(self.current_dataset_name, diffdB,
-                                 nested_name='calibration_intensities')
+        self.datafile.init_data(self.current_dataset_name, mode='calibration',
+                                dims=diffdB.shape,
+                                nested_name='calibration_intensities')
+        self.datafile.append(self.current_dataset_name, diffdB,
+                             nested_name='calibration_intensities')
 
-            relevant_info = {'frequencies': 'all', 'calibration_dB':self.caldb,
-                             'calibration_voltage': self.calv, 'calibration_frequency': self.calf,
-                             }
-            self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
-                                       relevant_info)
+        relevant_info = {'frequencies': 'all', 'calibration_dB':self.caldb,
+                         'calibration_voltage': self.calv, 'calibration_frequency': self.calf,
+                         }
+        self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
+                                   relevant_info)
 
-            mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
-            freq, spectrum = calc_spectrum(mean_reftone, self.player.get_aisr())
-            peak_fft = spectrum[(np.abs(freq-self.calf)).argmin()]
-            db = calc_db(peak_fft, self.mphonesens, self.mphonedb)
-            # remove the reference tone from protocol
-            self.protocol_model.remove(0)
-        else:
-            # delete the data saved to file thus far.
-            self.datafile.delete_group(self.current_dataset_name)
+        mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
+        freq, spectrum = calc_spectrum(mean_reftone, self.player.get_aisr())
+        peak_fft = spectrum[(np.abs(freq-self.calf)).argmin()]
+        db = calc_db(peak_fft, self.mphonesens, self.mphonedb)
+        # remove the reference tone from protocol
+        self.protocol_model.remove(0)
+        
         return diffdB, self.current_dataset_name, self.calf, db
 
     def set_reps(self, reps):

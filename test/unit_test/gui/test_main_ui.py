@@ -140,6 +140,11 @@ class TestMainUI():
         assert self.form.calvals['use_calfile'] == withcal
         assert self.form.calvals['calname'] == calname
 
+        # also should not save data
+        data_groups = self.form.acqmodel.datafile.keys()
+        print 'keys', data_groups
+        assert len(data_groups) == 0
+
     def test_tuning_curve(self):
         
         self.setup_tc()
