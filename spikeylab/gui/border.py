@@ -7,7 +7,7 @@ class QBorder(QtGui.QFrame):
 
     def showBorder(self, show):
         if show:
-            self.setStyleSheet("border: 2px solid red")
+            self.setStyleSheet("border: 3px solid turquoise")
             self.resize(self.parent().size())
         else:
             self.setStyleSheet("border: 0px")
