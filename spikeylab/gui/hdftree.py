@@ -97,16 +97,18 @@ class H5TreeWidget(QtGui.QTreeWidget):
         self.setCurrentIndex(selected.indexes()[0])
         self.nodeChanged.emit(self.currentItem())
 
-    def closeCurrentFile(self):
+    def closeFile(self, filename):
+        # filename = self.getOpenFileName(item.path())
+        try:
+            fhandle = self.fhandles[filename]
+            fhandle.close()
+            del self.fhandles[filename]
+        except KeyError, ValueError:
+            print 'File not open:', filename
+
+    def clearTree(self):
         to_delete = {}
-        for item in self.selectedItems():
-            filename = self.getOpenFileName(item.path())
-            try:
-                fhandle = self.fhandles[filename]
-                fhandle.close()
-                del self.fhandles[filename]
-            except KeyError:
-                print 'File not open:', filename
+        for item in self.roots.values():
             current = item
             parent = current.parent()
             while current.parent() != None:

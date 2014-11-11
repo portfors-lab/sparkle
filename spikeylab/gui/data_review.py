@@ -5,6 +5,7 @@ from spikeylab.gui.stim.component_detail import ComponentsDetailWidget
 from QtWrapper import QtCore, QtGui
 
 class QDataReviewer(QtGui.QWidget):
+    reviewDataSelected = QtCore.Signal(str, int)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -52,6 +53,13 @@ class QDataReviewer(QtGui.QWidget):
         layout.addWidget(hsplitter)
 
     def setDataObject(self, data):
+        self.datatree.clearTree()
+        self.tracetable.clearContents()
+        self.tracetable.setRowCount(0)
+        self.attrtxt.clear()
+        self.derivedtxt.clear()
+        self.detailWidget.clearDoc()
+
         self.datafile = data
         # display contents as a tree
         self.datatree.addH5Handle(data.hdf5)
@@ -99,6 +107,7 @@ class QDataReviewer(QtGui.QWidget):
                     item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                     self.tracetable.setItem(row, 2, item)
                 self.current_test = stimuli
+                self.current_path = path
 
         if path == '':
             return
@@ -118,6 +127,7 @@ class QDataReviewer(QtGui.QWidget):
     def setTraceData(self, row, column):
         self.detailWidget.clearDoc()
         self.detailWidget.setDoc(self.current_test[row]['components'])
+        self.reviewDataSelected.emit(self.current_path, row)
 
     def setDisplayAttributes(self, attrs):
         self.detailWidget.setDisplayTable(attrs)

@@ -274,7 +274,6 @@ class MainWindow(ControlWindow):
             self.acqmodel.set(nreps=nreps)
             
             # have model sort all signals stuff out?
-            print 'got delay', self.ui.delaySpnbx.value()*self.tscale
             self.acqmodel.set_explore_delay(self.ui.delaySpnbx.value()*self.tscale)
             stim_index = self.ui.exploreStimTypeCmbbx.currentIndex()
             self.acqmodel.set_stim_by_index(stim_index)
@@ -640,6 +639,7 @@ class MainWindow(ControlWindow):
             self.ui.currentCalLbl.setText('None')
             fname = os.path.basename(fname)
             self.ui.dataFileLbl.setText(fname)
+            self.ui.reviewer.setDataObject(self.acqmodel.datafile)
         dlg.deleteLater()
 
     def launchCalibrationDlg(self):
