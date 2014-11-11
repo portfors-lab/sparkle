@@ -351,6 +351,9 @@ class TestMainUI():
         assert stims[1].stimType() == 'Custom'
         assert stims[1].traceCount() > 1
 
+    def test_explore_stim_off(self):
+        self.explore_run('off')
+
     def test_undock_display(self):
         # set display to top tab
         self.form.tabifyDockWidget(self.form.ui.psthDock, self.form.ui.plotDock)
@@ -491,7 +494,6 @@ class TestMainUI():
         # qtbot.handle_modal_widget(wait=True, press_enter=False)
         qtbot.handle_modal_widget(wait=True)
 
-
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
             QtTest.QTest.qWait(500)
@@ -533,7 +535,10 @@ class TestMainUI():
         qtbot.click(self.form.ui.startBtn)
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "RECORDING"
-        
+        QtTest.QTest.qWait(PAUSE)
+        log_msg = self.form.ui.logTxedt.toPlainText()
+        assert 'Uncaught Exception' not in log_msg
+
 def msg_enter(widget, msg):
     qtbot.type_msg(msg)
     qtbot.keypress('enter')

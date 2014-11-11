@@ -262,7 +262,7 @@ class NoStim(AbstractStimulusComponent):
     name = "OFF"
     explore = True
     def signal(self, fs, atten, caldb, calv):
-        return [0]
+        return [0,0]
 
     def auto_details(self):
         return {}
