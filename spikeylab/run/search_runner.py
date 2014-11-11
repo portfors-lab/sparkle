@@ -10,6 +10,7 @@ from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.tools.util import increment_title
 from spikeylab.tools import spikestats
 from spikeylab.stim.types import get_stimuli_models
+from spikeylab.stim.types.stimuli_classes import Silence
 
 class SearchRunner(AbstractAcquisitionRunner):
     """Handles the presentation of data where changes are allowed to
@@ -25,6 +26,9 @@ class SearchRunner(AbstractAcquisitionRunner):
 
         stimuli_types = get_stimuli_models()
         self._explore_stimuli = [x() for x in stimuli_types if x.explore]
+
+        self.delay = Silence()
+        self.stimulus.insertComponent(self.delay)
 
     def stimuli_list(self):
         """Gets a list of all the stimuli this runner has access to. Order
@@ -42,6 +46,9 @@ class SearchRunner(AbstractAcquisitionRunner):
         """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.update_reference_voltage>`"""
         self.stimulus.setReferenceVoltage(self.caldb, self.calv)
 
+    def set_delay(self, duration):
+        self.delay.setDuration(duration)
+
     def set_stim_by_index(self, index):
         """Sets the stimulus to be generated to the one referenced by index
 
@@ -50,7 +57,8 @@ class SearchRunner(AbstractAcquisitionRunner):
         """
         # remove any current components
         self.stimulus.clearComponents()
-        self.stimulus.insertComponent(self._explore_stimuli[index])
+        self.stimulus.insertComponent(self.delay)
+        self.stimulus.insertComponent(self._explore_stimuli[index], 0, 1)
         signal, atten, overload = self.stimulus.signal()
         self.player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
         self.putnotify('over_voltage', (overload,))
@@ -63,7 +71,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         :type param: str
         :param val: new value to set the parameter to
         """
-        component = self.stimulus.component(0,0)
+        component = self.stimulus.component(0,1)
         component.set(param, val)
 
     def current_signal(self):

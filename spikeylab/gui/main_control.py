@@ -116,6 +116,7 @@ class MainWindow(ControlWindow):
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
         self.ui.threshSpnbx.setKeyboardTracking(False)
+        self.ui.delaySpnbx.setKeyboardTracking(False)
 
         self.activeOperation = None
 
@@ -170,6 +171,7 @@ class MainWindow(ControlWindow):
             self.ui.windowszSpnbx.valueChanged.disconnect()
             self.ui.windowszSpnbx.valueChanged.connect(self.onUpdate)
             self.ui.exNrepsSpnbx.valueChanged.connect(self.onUpdate)
+            self.ui.delaySpnbx.valueChanged.connect(self.onUpdate)
             for editor in self.ui.parameterStack.widgets():
                 editor.valueChanged.connect(self.onUpdate)
             self.ui.actionSet_Scale.setEnabled(False)
@@ -180,6 +182,7 @@ class MainWindow(ControlWindow):
                 self.ui.exNrepsSpnbx.valueChanged.disconnect()
                 self.ui.binszSpnbx.valueChanged.disconnect()
                 self.ui.windowszSpnbx.valueChanged.disconnect()
+                self.ui.delaySpnbx.valueChanged.disconnect()
                 # this should be connected when search ISN'T running
                 self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
                 self.ui.startBtn.clicked.disconnect()
@@ -259,9 +262,8 @@ class MainWindow(ControlWindow):
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
         self.ui.psth.setBins(bin_centers)
-        self.acqmodel.set(aochan=aochan, aichan=aichan,
-                                 acqtime=winsz, aisr=acq_rate,
-                                 binsz=binsz)
+        self.acqmodel.set(aochan=aochan, aichan=aichan, acqtime=winsz,
+                          aisr=acq_rate, binsz=binsz)
         self.binsz = binsz
 
         self.display.setXlimits((0,winsz))
@@ -272,6 +274,8 @@ class MainWindow(ControlWindow):
             self.acqmodel.set(nreps=nreps)
             
             # have model sort all signals stuff out?
+            print 'got delay', self.ui.delaySpnbx.value()*self.tscale
+            self.acqmodel.set_explore_delay(self.ui.delaySpnbx.value()*self.tscale)
             stim_index = self.ui.exploreStimTypeCmbbx.currentIndex()
             self.acqmodel.set_stim_by_index(stim_index)
 

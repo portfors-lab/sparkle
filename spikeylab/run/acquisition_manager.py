@@ -244,6 +244,9 @@ class AcquisitionManager():
         self.bs_calibrator.set(**kwargs)
         self.mphone_calibrator.set(**kwargs)
 
+    def set_explore_delay(self, duration):
+        self.explorer.set_delay(duration)
+
     def set_stim_by_index(self, index):
         """Sets the current stimulus for search operation by it's index in the order of stim types
 

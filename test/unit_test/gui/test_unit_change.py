@@ -190,8 +190,10 @@ def assert_fields_ms(control):
     # check max/mins
     assert control.ui.windowszSpnbx.minimum() == 1
     assert control.ui.binszSpnbx.minimum() == 1
+    assert control.ui.delaySpnbx.minimum() == 0
     assert control.ui.windowszSpnbx.maximum() == 3000
     assert control.ui.binszSpnbx.maximum() == 3000
+    assert control.ui.delaySpnbx.maximum() == 3000
     for editor_widget in control.ui.parameterStack.widgets():
         if 'risefall' in editor_widget.inputWidgets:
             assert editor_widget.inputWidgets['risefall'].minimum() == 0
