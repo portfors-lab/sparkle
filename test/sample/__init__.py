@@ -44,3 +44,6 @@ def reset_input_file():
     src = os.path.join(sampledir(), 'inputsstash.json')
     dest = os.path.join(sampledir(), 'controlinputs.json')
     shutil.copyfile(src, dest)
+    src = os.path.join(sampledir(), 'hzsinputs_stash.json')
+    dest = os.path.join(sampledir(), 'hzsinputs.json')
+    shutil.copyfile(src, dest)

@@ -17,6 +17,7 @@ class TestUnitChanges():
             os.remove(self.tempfile)        
         except:
             print 'remove failed'
+        sample.reset_input_file()
 
     def test_freq_khz(self):
         """Assumes default scale of khz"""
