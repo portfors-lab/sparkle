@@ -117,6 +117,11 @@ class SearchRunner(AbstractAcquisitionRunner):
             spike_rates = []
             self.irep = 0
             times = self.aitimes
+            # report inital stim
+            trace_doc = self.stimulus.componentDoc()
+            trace_doc['overloaded_attenuation'] = np.nan
+            self.putnotify('current_trace', (0,0,trace_doc))
+
             # self.player.start_timer(self.reprate)
             stim = self.player.start()
             while not self._halt:
@@ -129,6 +134,10 @@ class SearchRunner(AbstractAcquisitionRunner):
                 self.putnotify('response_collected', (times, response))
                 if stim is not None:
                     self.putnotify('stim_generated', (stim, self.player.get_samplerate()))
+                    trace_doc = self.stimulus.componentDoc()
+                    trace_doc['overloaded_attenuation'] = np.nan
+                    self.putnotify('current_trace', (0,0,trace_doc))
+                
                 # process response; calculate spike times
                 spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
                 spike_counts.append(len(spike_times))
