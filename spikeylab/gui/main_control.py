@@ -165,6 +165,7 @@ class MainWindow(ControlWindow):
         self.ui.reviewer.reviewDataSelected.connect(self.displayOldData)
         self.ui.reviewer.testSelected.connect(self.displayOldProgressPlot)
 
+        self.display.spiketracePlot.invertPolarity.connect(self.toggleResponsePolarity)
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
 
@@ -833,6 +834,9 @@ class MainWindow(ControlWindow):
 
     def setStatusMsg(self, status):
         self.statusBar().showMessage(status)
+
+    def toggleResponsePolarity(self):
+        self.acqmodel.toggle_response_polarity()
 
     def showWait(self):
         screenPos = self.geometry()

@@ -139,6 +139,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                 response = self.player.run()
                 stamp = time.time()
 
+                response = response*self.response_polarity
                 self.putnotify('response_collected', (times, response))
                 if stim is not None:
                     self.putnotify('stim_generated', (stim, self.player.get_samplerate()))

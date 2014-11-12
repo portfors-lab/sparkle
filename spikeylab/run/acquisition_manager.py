@@ -494,3 +494,8 @@ class AcquisitionManager():
                 return True
         else:
             return True
+
+    def toggle_response_polarity(self):
+        self.explorer.invert_polarity()
+        self.protocoler.invert_polarity()
+        self.charter.invert_polarity()

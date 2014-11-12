@@ -75,6 +75,8 @@ A raster of detected spikes will appear if the recording traces crosses over thr
 
 The small blue trace in the upper left of the response plot is the stimulus signal.
 
+Other options for this plot are available by right-clicking to get the pop-up menu. These options include showing a grid, and the ability to reverse the polarity of the response signal.
+
 Stimulus Spectrogram
 ~~~~~~~~~~~~~~~~~~~~
 Spectrogram of the stimulus presented, in the same time scale as the response trace

@@ -87,6 +87,7 @@ class TraceWidget(BasePlot):
     # this will be set automatically
     rasterYslots = None
     thresholdUpdated = QtCore.Signal(float)
+    invertPolarity = QtCore.Signal()
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
@@ -103,6 +104,11 @@ class TraceWidget(BasePlot):
         rasterBoundsAction = QtGui.QAction("Edit raster bounds", None)
         self.scene().contextMenu.append(rasterBoundsAction) #should use function for this?
         rasterBoundsAction.triggered.connect(self.askRasterBounds)
+
+        invertAction = QtGui.QAction('Invert response polarity', None)
+        invertAction.setCheckable(True)
+        self.scene().contextMenu.append(invertAction) #should use function for this?
+        invertAction.triggered.connect(self.invertPolarity.emit)
 
         self.threshLine = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.threshLine)

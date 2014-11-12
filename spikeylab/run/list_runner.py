@@ -166,7 +166,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             timecollection.append(looplen)
                             stamps.append(s)
 
-                            self._process_response(response, trace_doc, irep)
+                            self._process_response(response*self.response_polarity, trace_doc, irep)
                             if irep == 0:
                                 self.putnotify('stim_generated', (signal, fs))
                                 self.putnotify('current_trace', (itest,itrace,trace_doc))

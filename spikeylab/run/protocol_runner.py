@@ -16,7 +16,7 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.player = FinitePlayer()
 
         self.silence_window = True
-        
+
     def _initialize_run(self):
         if self.save_data:
             data_items = self.datafile.keys()
@@ -59,6 +59,7 @@ class ProtocolRunner(ListAcquisitionRunner):
             spike_latencies = self.spike_latencies
             spike_rates = self.spike_rates
 
+        # invert polarity affects spike counting, but saves original polarity to file
         self.putnotify('response_collected', (self.aitimes, response))
 
         # process response; calculate spike times
@@ -70,8 +71,8 @@ class ProtocolRunner(ListAcquisitionRunner):
             spike_latencies.append(np.nan)
         spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
-        response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-        self.putnotify('spikes_found', (response_bins, irep))
+        # response_bins = spikestats.bin_spikes(spike_times, self.binsz)
+        # self.putnotify('spikes_found', (response_bins, irep))
 
         if self.save_data:
             self.datafile.append(self.current_dataset_name, response)
