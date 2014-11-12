@@ -136,31 +136,38 @@ class QDataReviewer(QtGui.QWidget):
             self.current_data_shape = data_shape
             
 
-    def setTraceData(self, row, column):
+    def setTraceData(self, row, column, repnum=0):
         
-        self.current_rep_num = 0
+        self.current_rep_num = repnum
         self.current_trace_num = row
         self._update_buttons()
-        self.reviewDataSelected.emit(self.current_path, row, 0)
+        self.tracetable.selectRow(row)
+        self.reviewDataSelected.emit(self.current_path, row, repnum)
 
     def nextRep(self):
         self.current_rep_num += 1
-        self._update_buttons()
-        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
+        if self.current_rep_num == self.current_data_shape[1]:
+            self.setTraceData(self.current_trace_num+1,0)
+        else:
+            self._update_buttons()
+            self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
 
     def prevRep(self):
         self.current_rep_num -= 1
-        self._update_buttons()
-        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
+        if self.current_rep_num == -1:
+            self.setTraceData(self.current_trace_num-1, 0, self.current_data_shape[1]-1)
+        else:
+            self._update_buttons()
+            self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
 
     def _update_buttons(self):
         # by keeping buttons correctly enabled we dont need to check current
         # rep is within data limits
-        if self.current_rep_num > 0:
+        if self.current_rep_num > 0 or self.current_trace_num > 0:
             self.prevButton.setEnabled(True)
         else:
             self.prevButton.setEnabled(False)
-        if self.current_data_shape[1] > self.current_rep_num + 1:
+        if self.current_data_shape[1] > self.current_rep_num + 1 or self.current_data_shape[0] > self.current_trace_num + 1:
             self.nextButton.setEnabled(True)
         else:
             self.nextButton.setEnabled(False)

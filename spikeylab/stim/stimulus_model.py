@@ -539,7 +539,7 @@ class StimulusModel():
         stim = StimulusModel()    
         component_classes = get_stimuli_models()
         if len(doc['components']) == 1 and doc['components'][0]['stim_type'] == 'silence':
-            return np.array([0])
+            return np.array([0,0])
         for comp_doc in doc['components']:
             comp = get_component(comp_doc['stim_type'], component_classes)
             comp.loadState(comp_doc) # ignore extra dict entries
