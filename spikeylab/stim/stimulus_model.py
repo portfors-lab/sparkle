@@ -532,6 +532,23 @@ class StimulusModel():
         stim.setStimType(template['testtype'])
         return stim
 
+    @staticmethod
+    def signalFromDoc(doc, calv, caldb):
+        # use the output from ComponentDoc to create a single (no auto-params)
+        # stimulus and return it's signal
+        stim = StimulusModel()    
+        component_classes = get_stimuli_models()
+        if len(doc['components']) == 1 and doc['components'][0]['stim_type'] == 'silence':
+            return np.array([0])
+        for comp_doc in doc['components']:
+            comp = get_component(comp_doc['stim_type'], component_classes)
+            comp.loadState(comp_doc) # ignore extra dict entries
+            stim.insertComponent(comp, *comp_doc['index'])
+        
+        stim.setReferenceVoltage(calv, caldb)
+        signal, atten, sad_atten = stim.signal()
+        return signal
+
     def duration(self):
         """The duration of this stimulus
 
@@ -625,8 +642,7 @@ class StimulusModel():
                 info['stim_type'] = component.name
                 if starttime:
                     info['start_s'] = start_time
-                else:
-                    info['index'] = (row, col)
+                info['index'] = (row, col)
                 start_time += info['duration']
 
                 doc_list.append(info)

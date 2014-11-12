@@ -24,7 +24,8 @@ from spikeylab.tools.util import clearLayout
 from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
-
+from spikeylab.stim.stimulus_model import StimulusModel
+    
 from controlwindow import ControlWindow
 
 RED = QtGui.QPalette()
@@ -159,6 +160,9 @@ class MainWindow(ControlWindow):
         
         #updates the microphone calibration in the acquisition model
         self.updateMicrophoneCalibration(0) # arg is place holder
+
+        # connect data reviewer to data display
+        self.ui.reviewer.reviewDataSelected.connect(self.displayOldData)
 
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
@@ -627,6 +631,43 @@ class MainWindow(ControlWindow):
         self.ui.spikeLatencyLbl.setText(str(avgLatency*1000))
         self.ui.spikeRateLbl.setText(str(avgRate))
 
+    def displayOldData(self, path, tracenum, repnum=0):
+        if self.activeOperation is None:
+            # requires initmate knowledge of datafile organization
+            path = str(path)
+            group_path = os.path.dirname(path)
+            response = self.acqmodel.datafile.get(path, (tracenum, repnum))
+            npoints = response.shape[0]
+            stimuli = self.acqmodel.datafile.get_trace_info(path)
+
+            stimulus = stimuli[tracenum]
+            group_info = dict(self.acqmodel.datafile.get_info(group_path))
+            aisr = group_info['samplerate_ad']
+
+            # show the stimulus details
+            self.reportProgress(-1, tracenum, stimulus)
+            self.reportRep(repnum)
+
+            winsz = float(npoints)/aisr
+            times = np.linspace(0, winsz, npoints)
+
+            # plot response signal
+            self.ui.plotDock.switchDisplay('standard')
+            self.display.setXlimits((0,winsz))
+            self.display.updateSpiketrace(times, response)
+            # need to also recreate the stim
+            if repnum == 0:
+                # assume user must first access the first presentation
+                # before being able to browse through reps
+                stim_signal = StimulusModel.signalFromDoc(stimulus, self.calvals['calv'], self.calvals['caldb'])
+                fs = stimulus['samplerate_da']
+                timevals = np.arange(len(stim_signal)).astype(float)/fs
+                freq, spectrum = calc_spectrum(stim_signal, fs)
+                spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
+                self.display.updateSignal(timevals, stim_signal)
+                self.display.updateFft(freq, spectrum)
+                self.display.updateSpec(stim_signal, fs)
+
     def launchSaveDlg(self):
         dlg = SavingDialog(defaultFile = self.acqmodel.current_data_file())
         if dlg.exec_():
@@ -682,7 +723,6 @@ class MainWindow(ControlWindow):
         if dlg.exec_():
             self.viewSettings = dlg.values()
             self.ui.stimDetails.setDisplayAttributes(self.viewSettings['display_attributes'])
-            self.ui.reviewer.setDisplayAttributes(self.viewSettings['display_attributes'])
             font = QtGui.QFont()
             font.setPointSize(self.viewSettings['fontsz'])
             QtGui.QApplication.setFont(font)

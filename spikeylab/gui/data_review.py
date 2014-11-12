@@ -5,7 +5,7 @@ from spikeylab.gui.stim.component_detail import ComponentsDetailWidget
 from QtWrapper import QtCore, QtGui
 
 class QDataReviewer(QtGui.QWidget):
-    reviewDataSelected = QtCore.Signal(str, int)
+    reviewDataSelected = QtCore.Signal(str, int, int)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -32,8 +32,8 @@ class QDataReviewer(QtGui.QWidget):
         asplitter.addWidget(holder)
         hsplitter.addWidget(asplitter)
 
-        # traceLayout = QtGui.QVBoxLayout()
         traceSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        traceLayout = QtGui.QVBoxLayout()
 
         self.tracetable = QtGui.QTableWidget()
         headers = ['No. Components', 'Stim Type', 'Sample Rate (Hz)']
@@ -41,16 +41,27 @@ class QDataReviewer(QtGui.QWidget):
         self.tracetable.setHorizontalHeaderLabels(headers)
         self.tracetable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tracetable.cellClicked.connect(self.setTraceData)
-        traceSplitter.addWidget(self.tracetable)
 
-        self.detailWidget = ComponentsDetailWidget()
-        scroller = QtGui.QScrollArea()
-        scroller.setWidget(self.detailWidget)
-        scroller.setWidgetResizable(True)
-        traceSplitter.addWidget(scroller)
+        self.prevButton = QtGui.QPushButton('<')
+        self.nextButton = QtGui.QPushButton('>')
+        self.prevButton.clicked.connect(self.prevRep)
+        self.nextButton.clicked.connect(self.nextRep)
+        self.prevButton.setEnabled(False)   
+        self.nextButton.setEnabled(False)
+        
+        btnLayout = QtGui.QHBoxLayout()
+        btnLayout.addWidget(self.prevButton)
+        btnLayout.addWidget(self.nextButton)
 
-        hsplitter.addWidget(traceSplitter)
+        traceLayout.addWidget(self.tracetable)
+        traceLayout.addLayout(btnLayout)
+        holder_widget = QtGui.QWidget()
+        holder_widget.setLayout(traceLayout)
+
+        hsplitter.addWidget(holder_widget)
         layout.addWidget(hsplitter)
+
+        self.current_rep_num = 0
 
     def setDataObject(self, data):
         self.datatree.clearTree()
@@ -58,7 +69,6 @@ class QDataReviewer(QtGui.QWidget):
         self.tracetable.setRowCount(0)
         self.attrtxt.clear()
         self.derivedtxt.clear()
-        self.detailWidget.clearDoc()
 
         self.datafile = data
         # display contents as a tree
@@ -73,11 +83,12 @@ class QDataReviewer(QtGui.QWidget):
         info = self.datafile.get_info(path)
 
         # clear out old stuff
-        self.detailWidget.clearDoc()
         setname = widgetitem.text(0)
         self.tracetable.setRowCount(0)
         self.derivedtxt.clear()
         self.attrtxt.clear()
+
+        self.current_rep_num = 0
         
         for attr in info:
             if attr[0] != 'stim':
@@ -122,15 +133,37 @@ class QDataReviewer(QtGui.QWidget):
                 group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
                 fsout = dict(group_data)['samplerate_ad']
                 self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
+            self.current_data_shape = data_shape
             
 
     def setTraceData(self, row, column):
-        self.detailWidget.clearDoc()
-        self.detailWidget.setDoc(self.current_test[row]['components'])
-        self.reviewDataSelected.emit(self.current_path, row)
+        
+        self.current_rep_num = 0
+        self.current_trace_num = row
+        self._update_buttons()
+        self.reviewDataSelected.emit(self.current_path, row, 0)
 
-    def setDisplayAttributes(self, attrs):
-        self.detailWidget.setDisplayTable(attrs)
+    def nextRep(self):
+        self.current_rep_num += 1
+        self._update_buttons()
+        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
+
+    def prevRep(self):
+        self.current_rep_num -= 1
+        self._update_buttons()
+        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
+
+    def _update_buttons(self):
+        # by keeping buttons correctly enabled we dont need to check current
+        # rep is within data limits
+        if self.current_rep_num > 0:
+            self.prevButton.setEnabled(True)
+        else:
+            self.prevButton.setEnabled(False)
+        if self.current_data_shape[1] > self.current_rep_num + 1:
+            self.nextButton.setEnabled(True)
+        else:
+            self.nextButton.setEnabled(False)
 
 def makepath(item):
     if item is None:
@@ -147,6 +180,5 @@ if __name__ == '__main__':
     data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
     viewer = QDataReviewer()
     viewer.setDataObject(data)
-    viewer.setDisplayAttributes({'Vocalization': [u'Vocalization', u'risefall', u'intensity', u'filename', u'duration', 'start_s'], 'silence': [u'silence', u'duration', u'risefall', u'intensity'], 'Pure Tone': [u'Pure Tone', u'duration', u'risefall', u'intensity', u'frequency']})
     viewer.show()
     app.exec_()

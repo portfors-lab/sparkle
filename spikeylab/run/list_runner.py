@@ -115,7 +115,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     fs = test.samplerate()
                     if self.silence_window:
                         self.player.set_stim(np.array([0., 0.]), fs, 0)
-                        trace_doc = {'samplerate_da':fs, 'components': [{'start_s':0, 
+                        trace_doc = {'samplerate_da':fs, 'components': [{'start_s':0, 'index':(0,0),
                         'stim_type':'silence', 'duration':0, 'risefall':0, 'intensity':0}], 'overloaded_attenuation':0}
                         itrace = -1
                         self.putnotify('stim_generated', (np.array([0, 0]), fs))
