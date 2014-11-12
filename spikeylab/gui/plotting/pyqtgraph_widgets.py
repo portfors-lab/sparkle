@@ -8,6 +8,7 @@ import threading
 from spikeylab.gui.plotting.viewbox import SpikeyViewBox
 from spikeylab.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 import spikeylab.tools.audiotools as audiotools
+from spikeylab.tools import spikestats
 
 STIM_HEIGHT = 0.05
 
@@ -538,6 +539,27 @@ class ProgressWidget(BasePlot):
             self.setTitle("Spike Counts")
             self.setLabel('bottom', "Test Number", units='')
             self.setLabel('left', "Spike Count (mean)", units='')
+
+    @staticmethod
+    def loadCurve(data, groups, threshold, fs, xlabels):
+        """Accepts a data set from a whole test, averages reps and re-creates the 
+        progress plot as the same as it was during live plotting"""
+        xlims = (xlabels[0], xlabels[-1])
+        pw = ProgressWidget(groups, xlims)
+        spike_counts = []
+        # skip control
+        for itrace in range(1,data.shape[0]):
+            flat_reps = data[itrace].flatten()
+            spike_times = spikestats.spike_times(flat_reps, threshold, fs)
+            spike_counts.append(len(spike_times)/data.shape[1]) #mean spikes per rep
+
+        i = 0
+        for g in groups:
+            for x in xlabels:
+                pw.setPoint(x, g, spike_counts[i])
+                i +=1
+
+        return pw
 
 class PSTHWidget(BasePlot):
     """Post Stimulus Time Histogram plot widget, for plotting spike counts"""

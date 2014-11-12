@@ -66,6 +66,7 @@ class H5TreeWidget(QtGui.QTreeWidget):
     def addTree(self, currentItem, node):
         if isinstance(node, h5py.Group) or isinstance(node, h5py.File):
             subnodes = node.keys()
+            # if path contains a number pull it out to ensure proper ordering
             subnodes = sorted(subnodes, key=lambda item: (item.partition('_')[0], int(item.rpartition('_')[-1]) if item[-1].isdigit() else float('inf')))
             for child in subnodes:
                 item = H5TreeWidgetItem(currentItem, node[child])
@@ -119,7 +120,9 @@ class H5TreeWidget(QtGui.QTreeWidget):
             index = self.indexOfTopLevelItem(item)
             self.takeTopLevelItem(index)
             del item
-            
+        self.roots = {}
+
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app

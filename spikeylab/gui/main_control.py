@@ -163,6 +163,7 @@ class MainWindow(ControlWindow):
 
         # connect data reviewer to data display
         self.ui.reviewer.reviewDataSelected.connect(self.displayOldData)
+        self.ui.reviewer.testSelected.connect(self.displayOldProgressPlot)
 
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
@@ -667,6 +668,39 @@ class MainWindow(ControlWindow):
                 self.display.updateSignal(timevals, stim_signal)
                 self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(stim_signal, fs)
+
+    def displayOldProgressPlot(self, path):
+        if self.activeOperation is None:
+            path = str(path)
+            group_path = os.path.dirname(path)
+            testdata = self.acqmodel.datafile.get(path)
+            test_info = dict(self.acqmodel.datafile.get_info(path))
+            comp_info = self.acqmodel.datafile.get_trace_info(path)
+            group_info = dict(self.acqmodel.datafile.get_info(group_path))
+            aisr = group_info['samplerate_ad']
+            if test_info['testtype'] == 'Tuning Curve':
+                # we need to harvest the intensities out of the component doc
+                intensities = []
+                frequencies = []
+                for comp in comp_info[1:]:
+                    # only a single tone present in stims
+                    intensities.append(comp['components'][0]['intensity'])
+                    frequencies.append(comp['components'][0]['frequency'])
+                intensities = list(set(intensities))
+                frequencies = list(set(frequencies))
+                intensities.sort() #got out of order?
+                frequencies.sort()
+                xlabels = frequencies
+                groups = intensities
+                plottype = 'tuning'
+            else:
+                xlabels = range(testdata.shape[0]-1)
+                groups = [0]
+                plottype = 'other'
+            # a not-so-live curve
+            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self.ui.threshSpnbx.value(), aisr, xlabels)
+            self.comatosecurve.setLabels(plottype)
+            self.ui.progressDock.setWidget(self.comatosecurve)
 
     def launchSaveDlg(self):
         dlg = SavingDialog(defaultFile = self.acqmodel.current_data_file())

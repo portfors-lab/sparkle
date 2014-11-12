@@ -6,6 +6,7 @@ from QtWrapper import QtCore, QtGui
 
 class QDataReviewer(QtGui.QWidget):
     reviewDataSelected = QtCore.Signal(str, int, int)
+    testSelected = QtCore.Signal(str)
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -133,6 +134,8 @@ class QDataReviewer(QtGui.QWidget):
                 group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
                 fsout = dict(group_data)['samplerate_ad']
                 self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
+            if setname.startsWith('test'):
+                self.testSelected.emit(path)
             self.current_data_shape = data_shape
             
 
