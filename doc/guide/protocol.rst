@@ -49,7 +49,10 @@ Construction Tool for creating composite stimuli. Components are arranged in tra
 
 Auto-Parameters
 ^^^^^^^^^^^^^^^
-Known as an autotest in Batlab. Click the arrow at the bottom of the editor to expand this section. This will place the editor into selection mode, which does not allow re-ordering or editing of components.
+Known as an autotest in Batlab. There are two ways to set up the auto-parameters depending on which parameter you are manipulating.
+If you wish to loop through different vocalizations by file, skip ahead to :ref:`autofile`. For all other parameters just keep reading.
+
+Click the arrow at the bottom of the editor to expand this section. This will place the editor into selection mode, which does not allow re-ordering or editing of components.
 
 #. First, add a new auto-parameter by dragging the *add* label into the now revealed and empty table area.
 #. Then you must first select at least one component for this parameter to affect. The selected component will highlight itself blue, when it is selected. You may select as many components as you want for a parameter, and they are toggled out of the selection by clicking them again. The component must be selected before the parameters are set because the available parameters depend on the component type.
@@ -67,6 +70,14 @@ Known as an autotest in Batlab. Click the arrow at the bottom of the editor to e
 * If you enter a start value that is different from the value in the component(s) selected, it will automatically update in the main view, when exiting auto-parameter mode.
 
 * Collapse the Auto-parameter area to go back to component editor mode.
+
+.. _autofile:
+
+Auto-filenames
+~~~~~~~~~~~~~~
+An exception to how auto-parameters are assembled, is when looping by filename for audio recordings. Instead, in the editor for the vocalization component, select multiple files by either: click and drag, Shift+click, or Ctrl+click. 
+
+To arrange the order in which there are presented click the *order* button. An entry in the regular auto-parameters editor (described above), will be made, and you can re-arrange this auto-parameter's order with respect to other auto-parameters there.
 
 .. _tuning_curve:
 
