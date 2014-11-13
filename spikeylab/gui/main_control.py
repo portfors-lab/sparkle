@@ -696,7 +696,7 @@ class MainWindow(ControlWindow):
                 plottype = 'tuning'
             else:
                 xlabels = range(testdata.shape[0]-1)
-                groups = [0]
+                groups = ['all traces']
                 plottype = 'other'
             # a not-so-live curve
             self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self.ui.threshSpnbx.value(), aisr, xlabels)

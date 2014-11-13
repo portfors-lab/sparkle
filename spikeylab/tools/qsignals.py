@@ -17,7 +17,7 @@ class ProtocolSignals(QtCore.QObject):
     group_finished = QtCore.Signal(bool)
     calibration_file_changed = QtCore.Signal(str)
     tuning_curve_started = QtCore.Signal(list, list, str)
-    tuning_curve_response = QtCore.Signal(int, int, float)
+    tuning_curve_response = QtCore.Signal(int, object, float)
     over_voltage = QtCore.Signal(float)
 
     def iteritems(self):

@@ -47,7 +47,7 @@ class ProtocolRunner(ListAcquisitionRunner):
             frequencies, intensities =  test.autoParamRanges()
             self.putnotify('tuning_curve_started', (list(frequencies), list(intensities), 'tuning'))
         elif test.traceCount() > 1:
-            self.putnotify('tuning_curve_started', (range(test.traceCount()), [0], 'generic'))
+            self.putnotify('tuning_curve_started', (range(test.traceCount()), ['all traces'], 'generic'))
     
     def _process_response(self, response, trace_info, irep):
         if irep == 0:
@@ -88,7 +88,7 @@ class ProtocolRunner(ListAcquisitionRunner):
                 db = trace_info['components'][0]['intensity']
                 self.putnotify('tuning_curve_response', (f, db, avg_count))
             else:
-                self.putnotify('tuning_curve_response', (self.trace_counter, 0, avg_count))
+                self.putnotify('tuning_curve_response', (self.trace_counter, 'all traces', avg_count))
             self.trace_counter +=1
 
         self.spike_counts = spike_counts

@@ -492,9 +492,12 @@ class ProgressWidget(BasePlot):
     def __init__(self, groups, xlims=None, parent=None):
         super(ProgressWidget, self).__init__(parent)
         self.lines = []
+        self.legend = self.addLegend()
         for iline in range(len(groups)):
             # give each line a different color
-            self.lines.append(self.plot(pen=pg.intColor(iline, hues=len(groups))))
+            line = self.plot(pen=pg.intColor(iline, hues=len(groups)))
+            self.lines.append(line)
+            self.legend.addItem(line, str(groups[iline]))
 
         if xlims is not None:
             self.setXlim((xlims[0], xlims[1]))
