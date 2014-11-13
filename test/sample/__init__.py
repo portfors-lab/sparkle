@@ -19,6 +19,9 @@ def samplewav1():
 def samplewav333():
     return os.path.join(wavdir(), 'asample_syl333.wav')
 
+def samplecall1():
+    return os.path.join(wavdir(), 'sample_syl.call1')
+
 def calibration_filename():
     return os.path.join(sampledir(), 'calibration.hdf5')
 

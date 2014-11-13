@@ -440,12 +440,19 @@ def audioread(filename):
     :returns: int, numpy.ndarray -- samplerate, array containing the audio signal
     """
     try:
-        sr, wavdata = wv.read(filename)
+        if '.wav' in filename.lower():
+            sr, signal = wv.read(filename)
+        elif '.call' in filename.lower():
+            with open(filename, 'rb') as f:
+                signal = np.fromfile(f, dtype=np.int16)
+            sr = 333333
+        else:
+            raise IOError("Unsupported audio format for file: {}".format(filename))
     except:
         print u"Problem reading wav file"
         raise
-    wavdata = wavdata.astype(float)
-    return sr, wavdata 
+    signal = signal.astype(float)
+    return sr, signal 
 
 def audiorate(filename):
     """Determines the samplerate of the given audio recording file
@@ -454,9 +461,15 @@ def audiorate(filename):
     :type filename: str
     :returns: int -- samplerate of the recording
     """
-    wf =  wave.open(filename)
-    fs= wf.getframerate()
-    wf.close()
+    if '.wav' in filename.lower():
+        wf =  wave.open(filename)
+        fs= wf.getframerate()
+        wf.close()
+    elif '.call' in filename.lower():
+        fs = 333333
+    else:
+        raise IOError("Unsupported audio format for file: {}".format(filename))
+
     return fs
 
 def rms(signal, fs):

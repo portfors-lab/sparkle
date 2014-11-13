@@ -19,7 +19,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         # self.colormap_changed = self.ui.specPreview.colormap_changed
         self.common.valueChanged.connect(self.valueChanged.emit)
         self.inputWidgets = {'intensity': self.common.dbSpnbx}
-        self.audioExtentions = ['wav']
+        self.audioExtentions = ['wav', 'call1']
         # save old function so we can call it
         self.stashedSelectionChanged = self.filelistView.selectionChanged
         # but I want to hook up to this slot, as there is no signal
