@@ -2,6 +2,8 @@
 Spikeylab API
 =================
 
+For a description of how I set up the development environment see :doc:`dev_env`
+
 The program can be divided into two parts: 
 
 * The GUI which interacts with the user to get inputs and presents results. Saves user input values.
