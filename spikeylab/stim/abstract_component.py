@@ -87,7 +87,7 @@ class AbstractStimulusComponent(object):
         :returns: dict<dict> -- {'parametername': {'label':str, 'multiplier':float, 'min':float, 'max':float},}
         """
         return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0., 'max':3.},
-                'intensity':{'label': 'db SPL', 'multiplier':1, 'min':0, 'max':120}, 
+                'intensity':{'label': 'dB SPL', 'multiplier':1, 'min':0, 'max':120}, 
                 'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
 
     def stateDict(self):
