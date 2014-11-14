@@ -795,6 +795,12 @@ class MainWindow(ControlWindow):
         elif self.prevTab == 'calibration':
             self.ui.aisrSpnbx.setEnabled(True)
             self.ui.aisrSpnbx.setValue(self.stashedAisr)
+        
+        if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'review' and self.activeOperation != 'explore':
+            self.ui.startBtn.setEnabled(False)
+        elif self.activeOperation is None or str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'explore':
+            self.ui.startBtn.setEnabled(True)
+
         self.prevTab = str(self.ui.tabGroup.tabText(tabIndex)).lower()
 
     def modeToggled(self, mode):
