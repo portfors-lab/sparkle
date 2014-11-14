@@ -446,3 +446,22 @@ def test_smooth_bad_dim():
 def test_smooth_bad_win_len():
     x = np.ones((9,))
     smx = tools.smooth(x, window_len=10)
+
+def test_audioread_wav():
+    fs, signal = tools.audioread(sample.samplewav())
+    assert signal.shape == (29758,)
+    assert fs == 375000
+
+def test_audioread_call1():
+    fs, signal = tools.audioread(sample.samplecall1())
+    assert signal.shape == (29152,)
+    assert fs == 333333
+
+def test_audiorate_wav():
+    fs = tools.audiorate(sample.samplewav())
+    assert fs == 375000
+
+def test_audiorate_call1():
+    fs = tools.audiorate(sample.samplecall1())
+    assert fs == 333333
+
