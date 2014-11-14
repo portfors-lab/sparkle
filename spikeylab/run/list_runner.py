@@ -36,7 +36,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         """
         total = 0
         for test in self.protocol_model.allTests():
-            total += test.traceCount()*test.loopCount()*test.repCount()
+            total += test.traceCount()*test.loopCount()*test.repCount() + test.repCount()
         return total
 
     def setup(self, interval):
