@@ -71,8 +71,8 @@ class ProtocolRunner(ListAcquisitionRunner):
             spike_latencies.append(np.nan)
         spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
 
-        # response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-        # self.putnotify('spikes_found', (response_bins, irep))
+        response_bins = spikestats.bin_spikes(spike_times, self.binsz)
+        self.putnotify('spikes_found', (response_bins, irep))
 
         if self.save_data:
             self.datafile.append(self.current_dataset_name, response)
