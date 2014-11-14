@@ -2,6 +2,7 @@ import time
 import threading
 import logging
 import gc
+
 import numpy as np
 
 from spikeylab.run.abstract_acquisition import AbstractAcquisitionRunner
@@ -45,22 +46,15 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self._halt = False
         self.interval = interval
 
+    def run(self):
+        """Runs the acquisiton"""
+        self._initialize_run()
+
         stimuli = self.protocol_model.allTests()
 
         self.acq_thread = threading.Thread(target=self._worker, 
                                            args=(stimuli,), )
-
-        # go through and get any overloads, this is not efficient since
-        # I am going to be calculating the signals again later, so stash?
-        # self._cached_stims = [stim.expandedStim() for stim in stimuli]
-        # undesired_attenuations = [s[2] for s in self._cached_stims]
-        # return undesired_attenuations
-
-    def run(self):
-        """Runs the acquisiton"""
         # save the current calibration to data file doc        
-        self._initialize_run()
-
         if self.save_data:
             info = {'calibration_used': self.calname, 'calibration_range': self.cal_frange}
             self.datafile.set_metadata(self.current_dataset_name, info)

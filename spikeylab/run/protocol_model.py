@@ -1,3 +1,4 @@
+import copy
 
 class ProtocolTabelModel():
     def __init__(self, parent=None):
@@ -46,7 +47,7 @@ class ProtocolTabelModel():
 
         :returns: list<:class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`>
         """
-        return self._tests
+        return copy.deepcopy(self._tests)
 
     def remove(self, position):
         """Removes the test at position from the protocol

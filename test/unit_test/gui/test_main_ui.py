@@ -362,6 +362,41 @@ class TestMainUI():
         # wait to make sure it doesn't crash
         QtTest.QTest.qWait(1000)
 
+    def test_edit_stim_after_start(self):
+        stimEditor = self.add_builder_tone()
+
+        qtbot.doubleclick(stimEditor.ui.trackview,stimEditor.ui.trackview.model().index(0,0))
+        qtbot.type_msg('20')
+        qtbot.keypress('enter')
+        qtbot.click(stimEditor.ui.okBtn)
+
+        self.setup_tc()
+        
+        pv = self.form.ui.protocolView
+        qtbot.drag(pv, pv, pv.model().index(0,4))
+        QtTest.QTest.qWait(500)
+
+        self.start_acq()
+
+        QtTest.QTest.qWait(PAUSE)
+        qtbot.doubleclick(pv, pv.model().index(1,1))
+        QtTest.QTest.qWait(PAUSE)
+        stimEditor = pv.stimEditor
+        qtbot.doubleclick(stimEditor.ui.trackview,stimEditor.ui.trackview.model().index(0,0))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.type_msg('75')
+        qtbot.keypress('enter')
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
+
+        qtbot.handle_modal_widget(wait=True)
+
+        datafile = self.form.acqmodel.datafile
+        stim_info = datafile.get_trace_info('/segment_1/test_2')
+        # first stim is control silence, other stim is our tone
+        assert stim_info[1]['components'][0]['duration'] == 0.02
+
     def add_builder_tone(self):
         stimEditor = self.add_edit_builder()
 
@@ -415,7 +450,7 @@ class TestMainUI():
         
         qtbot.drag(self.form.ui.stimulusChoices.builderLbl, pv)
 
-        assert self.form.acqmodel.protocol_model().rowCount() == 1
+        assert self.form.acqmodel.protocol_model().rowCount() > 0
 
         qtbot.doubleclick(pv, pv.model().index(0,1))
         QtTest.QTest.qWait(PAUSE)
