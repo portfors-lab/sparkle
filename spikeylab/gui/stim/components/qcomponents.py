@@ -10,6 +10,7 @@ from spikeylab.stim.types.stimuli_classes import *
 from spikeylab.gui.stim.generic_parameters import GenericParameterWidget
 from spikeylab.gui.stim.components import vocal_parameters
 from spikeylab.tools.audiotools import spectrogram, audioread, audiorate
+from spikeylab.resources import img
 
 COLORTABLE=[]
 for i in reversed(range(256)): COLORTABLE.append(QtGui.qRgb(i,i,i))
@@ -184,8 +185,9 @@ class QVocalization(QStimulusComponent):
 
 class QWhiteNoise(QStimulusComponent):
     def paint(self, painter, rect, palette):
-        mid = rect.y() + (rect.height()/2)
-        painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
+        image = img.noise()
+        brush = QtGui.QBrush(image)
+        painter.fillRect(rect, brush)
 
 class QSilence(QStimulusComponent):
     def paint(self, painter, rect, palette):
