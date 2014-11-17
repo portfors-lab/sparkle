@@ -754,6 +754,10 @@ class MainWindow(ControlWindow):
             QtGui.QApplication.setFont(font)
         dlg.deleteLater()
 
+    def launchCellDlg(self):
+        cid = QtGui.QInputDialog.getInt(self, "Cell ID", "Enter the ID number of the current cell:", self.acqmodel.current_cellid)
+        self.acqmodel.current_cellid = cid[0]
+
     def recordingSelected(self, modelIndex):
         """ On double click of wav file, load into display """
         # display spectrogram of file

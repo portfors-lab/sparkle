@@ -823,7 +823,7 @@
      <x>0</x>
      <y>0</y>
      <width>1274</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -834,6 +834,7 @@
     <addaction name="actionSet_Calibration"/>
     <addaction name="actionSet_Scale"/>
     <addaction name="actionSpectrogram_Parameters"/>
+    <addaction name="actionSet_Cell_ID"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -848,6 +849,7 @@
      <addaction name="actionProgress"/>
      <addaction name="actionLog"/>
      <addaction name="actionStimulus_Details"/>
+     <addaction name="actionComment"/>
     </widget>
     <addaction name="actionView_Settings"/>
     <addaction name="menuShow"/>
@@ -1178,6 +1180,16 @@
     <string>Stimulus Details</string>
    </property>
   </action>
+  <action name="actionSet_Cell_ID">
+   <property name="text">
+    <string>Set Cell ID</string>
+   </property>
+  </action>
+  <action name="actionComment">
+   <property name="text">
+    <string>Comment</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1322,8 +1334,8 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
-     <y>149</y>
+     <x>520</x>
+     <y>117</y>
     </hint>
     <hint type="destinationlabel">
      <x>364</x>
@@ -1354,8 +1366,8 @@
    <slot>modeToggled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1008</x>
-     <y>374</y>
+     <x>972</x>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
      <x>705</x>
@@ -1418,8 +1430,8 @@
    <slot>clearProtocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
-     <y>161</y>
+     <x>746</x>
+     <y>676</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1466,8 +1478,8 @@
    <slot>updateCalDb()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>616</x>
-     <y>474</y>
+     <x>634</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>866</x>
@@ -1482,8 +1494,8 @@
    <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
-     <y>606</y>
+     <x>471</x>
+     <y>616</y>
     </hint>
     <hint type="destinationlabel">
      <x>788</x>
@@ -1498,8 +1510,8 @@
    <slot>mphoneCalibrate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>691</x>
-     <y>599</y>
+     <x>746</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>749</x>
@@ -1514,12 +1526,44 @@
    <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>557</x>
-     <y>611</y>
+     <x>600</x>
+     <y>616</y>
     </hint>
     <hint type="destinationlabel">
      <x>807</x>
      <y>568</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSet_Cell_ID</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>launchCellDlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>401</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionComment</sender>
+   <signal>triggered()</signal>
+   <receiver>runComment</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>136</x>
+     <y>545</y>
     </hint>
    </hints>
   </connection>
@@ -1571,5 +1615,7 @@
   <slot>updateCalDb()</slot>
   <slot>updateMicrophoneCalibration()</slot>
   <slot>mphoneCalibrate()</slot>
+  <slot>launchCellDlg()</slot>
+  <slot>showComment()</slot>
  </slots>
 </ui>

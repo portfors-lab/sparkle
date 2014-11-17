@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_control.ui'
+# Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Mon Nov 10 22:58:57 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Mon Nov 17 11:52:15 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -406,7 +406,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -586,15 +586,21 @@ class Ui_ControlWindow(object):
         self.actionLog.setObjectName(_fromUtf8("actionLog"))
         self.actionStimulus_Details = QtGui.QAction(ControlWindow)
         self.actionStimulus_Details.setObjectName(_fromUtf8("actionStimulus_Details"))
+        self.actionSet_Cell_ID = QtGui.QAction(ControlWindow)
+        self.actionSet_Cell_ID.setObjectName(_fromUtf8("actionSet_Cell_ID"))
+        self.actionComment = QtGui.QAction(ControlWindow)
+        self.actionComment.setObjectName(_fromUtf8("actionComment"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
         self.menuOptions.addAction(self.actionSpectrogram_Parameters)
+        self.menuOptions.addAction(self.actionSet_Cell_ID)
         self.menuShow.addAction(self.actionData_Display)
         self.menuShow.addAction(self.actionPSTH)
         self.menuShow.addAction(self.actionProgress)
         self.menuShow.addAction(self.actionLog)
         self.menuShow.addAction(self.actionStimulus_Details)
+        self.menuShow.addAction(self.actionComment)
         self.menuView.addAction(self.actionView_Settings)
         self.menuView.addAction(self.menuShow.menuAction())
         self.menubar.addAction(self.menuOptions.menuAction())
@@ -621,6 +627,8 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.mphoneSensSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
         QtCore.QObject.connect(self.mphoneCalBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.mphoneCalibrate)
         QtCore.QObject.connect(self.mphoneDBSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
+        QtCore.QObject.connect(self.actionSet_Cell_ID, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCellDlg)
+        QtCore.QObject.connect(self.actionComment, QtCore.SIGNAL(_fromUtf8("triggered()")), self.runComment.showNormal)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -731,6 +739,8 @@ class Ui_ControlWindow(object):
         self.actionProgress.setText(_translate("ControlWindow", "Progress", None))
         self.actionLog.setText(_translate("ControlWindow", "Log", None))
         self.actionStimulus_Details.setText(_translate("ControlWindow", "Stimulus Details", None))
+        self.actionSet_Cell_ID.setText(_translate("ControlWindow", "Set Cell ID", None))
+        self.actionComment.setText(_translate("ControlWindow", "Comment", None))
 
 from spikeylab.gui.data_review import QDataReviewer
 from spikeylab.gui.qprotocol import ProtocolView

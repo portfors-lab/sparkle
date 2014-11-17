@@ -61,3 +61,9 @@ class TestMainDialogs():
         qtbot.handle_dialog()
         self.form.launchViewDlg()
         assert vsettings['fontsz'] == self.form.viewSettings['fontsz']
+
+    def test_cell_id_dlg(self):
+        cid = self.form.acqmodel.current_cellid
+        qtbot.handle_dialog()
+        self.form.launchCellDlg()
+        assert cid == self.form.acqmodel.current_cellid
