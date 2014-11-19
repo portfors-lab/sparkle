@@ -3,7 +3,6 @@ from QtWrapper import QtGui
 class DynamicStackedWidget(QtGui.QStackedWidget):
     """Adds a couple methods for getting child widgets to 
     a :qtdoc:QStackedWidget"""
-
     def widgetForName(self, name):
         """Gets a widget with *name*
 

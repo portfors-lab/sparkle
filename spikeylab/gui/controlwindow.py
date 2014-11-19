@@ -36,9 +36,9 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.plotDock.switchDisplay('standard')
 
         # make a list of which widgets should be updated when scales are changed
-        self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx, self.ui.delaySpnbx]
+        self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx]
         self.frequencyInputs = [self.ui.aisrSpnbx, self.ui.aosrSpnbx]
-        self.timeLabels = [self.ui.tunit_lbl, self.ui.tunit_lbl_2, self.ui.tunit_lbl_3]
+        self.timeLabels = [self.ui.tunit_lbl, self.ui.tunit_lbl_2]
         self.frequencyLabels = [self.ui.funit_lbl, self.ui.funit_lbl_2]
 
         # Allow items from the the procotol view to be thrown in trash located
@@ -67,8 +67,7 @@ class ControlWindow(QtGui.QMainWindow):
             # intial from saved values
             StimulusView.updateDefaults(stim.__class__.__name__, stim.stateDict())
             # add this editor to the expore list of stims
-            self.ui.parameterStack.addWidget(editor)
-            self.ui.exploreStimTypeCmbbx.addItem(stim.name)
+            self.ui.exploreEditor0.addWidget(editor, stim.name)
 
         # rerun to set decimal places correctly for newly added editors
         self.updateUnitLabels(self.tscale, self.fscale)
@@ -114,10 +113,9 @@ class ControlWindow(QtGui.QMainWindow):
             #     return False
             if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
                 # each widget should be in charge of putting its own stimulus together
-                stimIndex = self.ui.exploreStimTypeCmbbx.currentIndex()
-                stimWidget = self.ui.parameterStack.widget(stimIndex)
+                stimWidget = self.ui.exploreEditor0.currentWidget()
                 stimWidget.saveToObject()
-                selectedStim = self.exploreStimuli[stimIndex]
+                selectedStim = stimWidget.component()
                 # have the stim check itself and report
                 failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale, 
                             duration=self.ui.windowszSpnbx.value()*self.tscale)
@@ -284,7 +282,6 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['ex_nreps'] = self.ui.exNrepsSpnbx.value()
         savedict['reprate'] = self.ui.reprateSpnbx.value()
         savedict['windowsz'] = self.ui.windowszSpnbx.value()
-        savedict['exdelay'] = self.ui.delaySpnbx.value()
         savedict['raster_bounds'] = self.display.spiketracePlot.getRasterBounds()
         savedict['specargs'] = self.specArgs
         savedict['viewSettings'] = self.viewSettings
@@ -325,7 +322,6 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.aisrSpnbx.setValue(self.stashedAisr)
         self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 100))
         self.ui.binszSpnbx.setValue(inputsdict.get('binsz', 5))        
-        self.ui.delaySpnbx.setValue(inputsdict.get('exdelay', 0.0))
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.exNrepsSpnbx.setValue(inputsdict.get('ex_nreps', 5))
         self.ui.reprateSpnbx.setValue(inputsdict.get('reprate', 1))

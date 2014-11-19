@@ -61,8 +61,9 @@ class MainWindow(ControlWindow):
             fname = None
             
         # get stimuli components, they must be wrapped to get editor
-        self.exploreStimuli = [wrapComponent(x) for x in self.acqmodel.stimuli_list()]
-        
+        # self.exploreStimuli = [wrapComponent(x) for x in self.acqmodel.stimuli_list()]
+        self.ui.exploreStimEditor.setModel(self.acqmodel.stimuli_list())
+
         # auto generated code intialization
         ControlWindow.__init__(self, inputsFilename)
         if datafile is not None:
@@ -117,7 +118,6 @@ class MainWindow(ControlWindow):
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
         self.ui.threshSpnbx.setKeyboardTracking(False)
-        self.ui.delaySpnbx.setKeyboardTracking(False)
 
         self.activeOperation = None
 
@@ -126,7 +126,7 @@ class MainWindow(ControlWindow):
         self.setCalibrationDuration()
 
         # set up wav file directory finder paths
-        self.exvocal = self.ui.parameterStack.widgetForName("Vocalization")
+        self.exvocal = self.ui.exploreEditor0.widgetForName("Vocalization")
         self.exvocal.filelistView.doubleClicked.connect(self.recordingSelected)
         self.exvocal.filelistView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.selectedWavFile = self.exvocal.currentWavFile
@@ -177,8 +177,8 @@ class MainWindow(ControlWindow):
             self.ui.windowszSpnbx.valueChanged.disconnect()
             self.ui.windowszSpnbx.valueChanged.connect(self.onUpdate)
             self.ui.exNrepsSpnbx.valueChanged.connect(self.onUpdate)
-            self.ui.delaySpnbx.valueChanged.connect(self.onUpdate)
-            for editor in self.ui.parameterStack.widgets():
+            self.ui.exploreEditor0.valueChanged.connect(self.onUpdate)
+            for editor in self.ui.exploreEditor0.widgets():
                 editor.valueChanged.connect(self.onUpdate)
             self.ui.actionSet_Scale.setEnabled(False)
             self.ui.actionSave_Options.setEnabled(False)
@@ -188,12 +188,12 @@ class MainWindow(ControlWindow):
                 self.ui.exNrepsSpnbx.valueChanged.disconnect()
                 self.ui.binszSpnbx.valueChanged.disconnect()
                 self.ui.windowszSpnbx.valueChanged.disconnect()
-                self.ui.delaySpnbx.valueChanged.disconnect()
+                self.ui.exploreEditor0.valueChanged.disconnect()
                 # this should be connected when search ISN'T running
                 self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
                 self.ui.startBtn.clicked.disconnect()
                 self.ui.startBtn.clicked.connect(self.onStart)
-                for editor in self.ui.parameterStack.widgets():
+                for editor in self.ui.exploreEditor0.widgets():
                     editor.valueChanged.disconnect()
                 self.ui.actionSet_Scale.setEnabled(True)
                 self.ui.actionSave_Options.setEnabled(True)
@@ -275,13 +275,13 @@ class MainWindow(ControlWindow):
         self.display.setXlimits((0,winsz))
 
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
-            nreps = self.ui.exNrepsSpnbx.value()
+            nreps = self.ui.exploreStimEditor.repCount()
 
             self.acqmodel.set(nreps=nreps)
             
             # have model sort all signals stuff out?
-            self.acqmodel.set_explore_delay(self.ui.delaySpnbx.value()*self.tscale)
-            stim_index = self.ui.exploreStimTypeCmbbx.currentIndex()
+            self.acqmodel.set_explore_delay(self.ui.exploreEditor0.delay())
+            stim_index = self.ui.exploreEditor0.currentIndex()
             self.acqmodel.set_stim_by_index(stim_index)
 
             self.display.setNreps(nreps)

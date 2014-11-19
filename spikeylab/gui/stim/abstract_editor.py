@@ -1,7 +1,7 @@
 import sip
 from QtWrapper import QtGui, QtCore
 
-class AbstractEditorWidget(QtGui.QWidget):
+class AbstractEditorWidget(QtGui.QFrame):
     """Abstract class to share class variables for all editor widgets,
     mainly for the purpose of managing scaling changes across the GUI"""
     scales = [0.001, 1000] # time, frequency scaling factors
