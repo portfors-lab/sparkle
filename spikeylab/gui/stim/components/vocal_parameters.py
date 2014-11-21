@@ -14,22 +14,33 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         self.setupUi(self)
 
         # grey out parameters determined by file, not to be altered by user
-        self.common.durSpnbx.setEnabled(False)
-        self.common.risefallSpnbx.setEnabled(False)
+        self.durSpnbx.setEnabled(False)
+        self.risefallSpnbx.setEnabled(False)
         # self.colormap_changed = self.ui.specPreview.colormap_changed
-        self.common.valueChanged.connect(self.valueChanged.emit)
-        self.inputWidgets = {'intensity': self.common.dbSpnbx}
+        self.dbSpnbx.valueChanged.connect(self.valueChanged.emit)
+        self.risefallSpnbx.valueChanged.connect(self.valueChanged.emit)
+        self.durSpnbx.setKeyboardTracking(False)
+        self.risefallSpnbx.setKeyboardTracking(False)
+
+        self.tunit_labels.append(self.tunit_lbl_0)
+        self.tunit_labels.append(self.tunit_lbl_1)
+        self.tunit_fields.append(self.durSpnbx)
+        self.tunit_fields.append(self.risefallSpnbx)
+
+        self.inputWidgets = {'intensity': self.dbSpnbx}
         self.audioExtentions = ['wav', 'call1']
         # save old function so we can call it
         self.stashedSelectionChanged = self.filelistView.selectionChanged
         # but I want to hook up to this slot, as there is no signal
         self.filelistView.selectionChanged = self.fileSelectionChanged
+        self.filelistView.doubleClicked.connect(self.valueChanged.emit)
         self.fileorder = []
         self.setComponent(component)
         
     def setComponent(self, component):
-        self.common.setFields(component)
-
+        self.dbSpnbx.setValue(component.intensity())
+        self.risefallSpnbx.setValue(component.risefall()/self.scales[0])
+        
         self.currentWavFile = component.file()
         if self.currentWavFile is not None:
             wav_parent_dir = dirname(self.currentWavFile)
@@ -42,7 +53,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
 
             self.filelistView.setCurrentIndex(self.filemodel.index(self.currentWavFile))
             dur = self.specPreview.fromFile(self.currentWavFile)
-            self.common.setDuration(dur)
+            self.durSpnbx.setValue(dur/self.scales[0])
 
         self._component = component
 
@@ -82,7 +93,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         return self.filemodel.rootPath()
 
     def saveToObject(self):
-        self._component.setIntensity(self.common.intensityValue())
+        self._component.setIntensity(self.dbSpnbx.value())
         if len(self.fileorder) > 0:
             self._component.setFile(self.fileorder[0])
         self._component.setBrowseDir(str(self.dirmodel.rootPath()))
@@ -121,7 +132,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
             return # not an audio file
 
         dur = self.specPreview.fromFile(spath)
-        self.common.setDuration(dur)
+        self.durSpnbx.setValue(dur/self.scales[0])
         self.currentWavFile = spath
         self.nfiles.setNum(len(allselected))
 

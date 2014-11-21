@@ -5,14 +5,21 @@ from spikeylab.gui.stim.dynamic_stacker import DynamicStackedWidget
 
 class ExploreComponentEditor(AbstractEditorWidget):
     """Editor for individual track in the explore stimulus model"""
-    valueChanged = QtCore.Signal()
     closePlease = QtCore.Signal()
     def __init__(self, parent=None):
         super(ExploreComponentEditor, self).__init__(parent)
 
         headerLayout  = QtGui.QHBoxLayout()
         self.exploreStimTypeCmbbx = QtGui.QComboBox()
+        # typemin = self.exploreStimTypeCmbbx.minimumSize()
+        # self.exploreStimTypeCmbbx.setMinimumSize(typemin.width(), 50)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        font.setBold(True) 
+        self.exploreStimTypeCmbbx.setFont(font)
         self.closeBtn = QtGui.QPushButton('x')
+        self.closeBtn.setFixedSize(25,25)
+        self.closeBtn.setFlat(True)
         self.closeBtn.clicked.connect(self.closePlease.emit)
         headerLayout.addWidget(self.exploreStimTypeCmbbx)
         headerLayout.addWidget(self.closeBtn)
@@ -21,7 +28,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
         self.exploreStimTypeCmbbx.currentIndexChanged.connect(self.componentStack.setCurrentIndex)
 
         self.delaySpnbx = QtGui.QDoubleSpinBox()
-        self.delaySpnbx.setDecimals(3)
+        self.delaySpnbx.setDecimals(0)
         self.delaySpnbx.setKeyboardTracking(False)
         self.delaySpnbx.valueChanged.connect(self.valueChanged.emit)
         self.tunit_fields.append(self.delaySpnbx)
@@ -44,8 +51,8 @@ class ExploreComponentEditor(AbstractEditorWidget):
 
         self.setLayout(layout)
 
-        self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
-        self.setLineWidth(2)
+        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
+        self.setLineWidth(3)
 
         for m in ['widgets', 'widgetForName']:
             setattr(self, m, getattr(self.componentStack, m))
@@ -53,6 +60,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
     def addWidget(self, widget, name):
         self.exploreStimTypeCmbbx.addItem(name)
         self.componentStack.addWidget(widget)
+        widget.valueChanged.connect(self.valueChanged.emit)
 
     def currentWidget(self):
         stimIndex = self.exploreStimTypeCmbbx.currentIndex()

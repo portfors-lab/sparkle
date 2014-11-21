@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1223</width>
-    <height>571</height>
+    <height>621</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,7 +76,13 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_9">
               <item>
-               <widget class="QFrame" name="exploreStimEditor">
+               <widget class="ExploreStimulusEditor" name="exploreStimEditor">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="frameShape">
                  <enum>QFrame::StyledPanel</enum>
                 </property>
@@ -84,19 +90,6 @@
                  <enum>QFrame::Raised</enum>
                 </property>
                </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
               <item>
                <layout class="QGridLayout" name="gridLayout_7">
@@ -732,7 +725,7 @@
      <x>0</x>
      <y>0</y>
      <width>1223</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -1145,6 +1138,12 @@
    <class>QDataReviewer</class>
    <extends>QWidget</extends>
    <header>spikeylab.gui.data_review</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ExploreStimulusEditor</class>
+   <extends>QFrame</extends>
+   <header>spikeylab.gui.stim.explore_stim_editor</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

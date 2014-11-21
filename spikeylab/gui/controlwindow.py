@@ -37,9 +37,9 @@ class ControlWindow(QtGui.QMainWindow):
 
         # make a list of which widgets should be updated when scales are changed
         self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx]
-        self.frequencyInputs = [self.ui.aisrSpnbx, self.ui.aosrSpnbx]
+        self.frequencyInputs = [self.ui.aisrSpnbx]
         self.timeLabels = [self.ui.tunit_lbl, self.ui.tunit_lbl_2]
-        self.frequencyLabels = [self.ui.funit_lbl, self.ui.funit_lbl_2]
+        self.frequencyLabels = [self.ui.funit_lbl_2]
 
         # Allow items from the the procotol view to be thrown in trash located
         # on different widget
@@ -58,16 +58,16 @@ class ControlWindow(QtGui.QMainWindow):
         # set for new component editors
         self.updateUnitLabels(self.tscale, self.fscale)
 
-        for stim in self.exploreStimuli:
-            editor = stim.showEditor()
-            # connect signal to static class method to be able to share
-            # default attributes in stimulus builder from explore components
-            # using class variables
-            editor.attributesSaved.connect(StimulusView.updateDefaults)
-            # intial from saved values
-            StimulusView.updateDefaults(stim.__class__.__name__, stim.stateDict())
-            # add this editor to the expore list of stims
-            self.ui.exploreEditor0.addWidget(editor, stim.name)
+        # for stim in self.exploreStimuli:
+        #     editor = stim.showEditor()
+        #     # connect signal to static class method to be able to share
+        #     # default attributes in stimulus builder from explore components
+        #     # using class variables
+        #     editor.attributesSaved.connect(StimulusView.updateDefaults)
+        #     # intial from saved values
+        #     StimulusView.updateDefaults(stim.__class__.__name__, stim.stateDict())
+        #     # add this editor to the expore list of stims
+        #     self.ui.exploreEditor0.addWidget(editor, stim.name)
 
         # rerun to set decimal places correctly for newly added editors
         self.updateUnitLabels(self.tscale, self.fscale)
@@ -113,12 +113,8 @@ class ControlWindow(QtGui.QMainWindow):
             #     return False
             if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
                 # each widget should be in charge of putting its own stimulus together
-                stimWidget = self.ui.exploreEditor0.currentWidget()
-                stimWidget.saveToObject()
-                selectedStim = stimWidget.component()
-                # have the stim check itself and report
-                failmsg = selectedStim.verify(samplerate=self.ui.aosrSpnbx.value()*self.fscale, 
-                            duration=self.ui.windowszSpnbx.value()*self.tscale)
+                self.ui.exploreStimEditor.saveToObject()
+                failmsg = self.ui.exploreStimEditor.verify(self.ui.windowszSpnbx.value()*self.tscale)
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
@@ -279,7 +275,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['tscale'] = self.tscale
         savedict['fscale'] = self.fscale
         savedict['saveformat'] = self.saveformat
-        savedict['ex_nreps'] = self.ui.exNrepsSpnbx.value()
+        savedict['ex_nreps'] = self.ui.exploreStimEditor.repCount()
         savedict['reprate'] = self.ui.reprateSpnbx.value()
         savedict['windowsz'] = self.ui.windowszSpnbx.value()
         savedict['raster_bounds'] = self.display.spiketracePlot.getRasterBounds()
@@ -292,10 +288,10 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['mphonedb'] = self.ui.mphoneDBSpnbx.value()
 
         # parameter settings
-        for stim in self.exploreStimuli:
-            editor = self.ui.parameterStack.widgetForName(stim.name)
-            editor.saveToObject()
-            savedict[stim.name] = stim.stateDict()
+        # for stim in self.exploreStimuli:
+        #     editor = self.ui.parameterStack.widgetForName(stim.name)
+        #     editor.saveToObject()
+        #     savedict[stim.name] = stim.stateDict()
 
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
@@ -323,7 +319,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 100))
         self.ui.binszSpnbx.setValue(inputsdict.get('binsz', 5))        
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
-        self.ui.exNrepsSpnbx.setValue(inputsdict.get('ex_nreps', 5))
+        self.ui.exploreStimEditor.setReps((inputsdict.get('ex_nreps', 5)))
         self.ui.reprateSpnbx.setValue(inputsdict.get('reprate', 1))
         self.display.spiketracePlot.setRasterBounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.specArgs = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
@@ -353,13 +349,9 @@ class ControlWindow(QtGui.QMainWindow):
         if self.fscale == 1000:
             self.ui.aisrSpnbx.setMinimum(0.001)
             self.ui.aisrSpnbx.setMaximum(500)
-            self.ui.aosrSpnbx.setMinimum(0.001)
-            self.ui.aosrSpnbx.setMaximum(500)
         elif self.fscale == 1:
             self.ui.aisrSpnbx.setMinimum(1)
             self.ui.aisrSpnbx.setMaximum(500000)
-            self.ui.aosrSpnbx.setMinimum(1)
-            self.ui.aosrSpnbx.setMaximum(500000)
         if self.tscale == 0.001:
             self.ui.windowszSpnbx.setMinimum(1)
             self.ui.windowszSpnbx.setMaximum(3000)
@@ -380,18 +372,18 @@ class ControlWindow(QtGui.QMainWindow):
                 logger = logging.getLogger('main')
                 logger.exception("Unable to load previous calibration settings")
                 
-            for stim in self.exploreStimuli:
-                try:
-                    stim.loadState(inputsdict[stim.name])
+            # for stim in self.exploreStimuli:
+            #     try:
+            #         stim.loadState(inputsdict[stim.name])
 
-                except KeyError:
-                    logger = logging.getLogger('main')
-                    logger.exception('Unable to load saved inputs for {}'.format(stim.__class__))
+            #     except KeyError:
+            #         logger = logging.getLogger('main')
+            #         logger.exception('Unable to load saved inputs for {}'.format(stim.__class__))
         else:
             logger = logging.getLogger('main')
             logger.debug('No saved stimului inputs')
  
-        self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
+        # self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
         """Closes listening threads and saves GUI data for later use.

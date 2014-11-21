@@ -188,7 +188,10 @@ class StimulusModel():
 
         :returns: int -- number of rows
         """
-        return len(self._segments)
+        if len(self._segments[0]) == 0:
+            return 0
+        else:
+            return len(self._segments)
 
     def columnCount(self, row=None):
         """Returns the number of components in a track, 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\main_control.ui'
+# Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Mon Nov 17 17:04:32 2014
-#      by: PyQt4 UI code generator 4.11.1
+# Created: Wed Nov 19 17:21:07 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(1274, 803)
+        ControlWindow.resize(1223, 621)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -67,49 +67,31 @@ class Ui_ControlWindow(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.verticalLayout_9 = QtGui.QVBoxLayout()
         self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
-        self.exploreEditor0 = ExploreComponentEditor(self.tabExplore)
-        self.exploreEditor0.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.exploreEditor0.setFrameShadow(QtGui.QFrame.Raised)
-        self.exploreEditor0.setObjectName(_fromUtf8("exploreEditor0"))
-        self.verticalLayout_9.addWidget(self.exploreEditor0)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_9.addItem(spacerItem)
+        self.exploreStimEditor = ExploreStimulusEditor(self.tabExplore)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.exploreStimEditor.sizePolicy().hasHeightForWidth())
+        self.exploreStimEditor.setSizePolicy(sizePolicy)
+        self.exploreStimEditor.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.exploreStimEditor.setFrameShadow(QtGui.QFrame.Raised)
+        self.exploreStimEditor.setObjectName(_fromUtf8("exploreStimEditor"))
+        self.verticalLayout_9.addWidget(self.exploreStimEditor)
         self.gridLayout_7 = QtGui.QGridLayout()
         self.gridLayout_7.setObjectName(_fromUtf8("gridLayout_7"))
-        self.label_39 = QtGui.QLabel(self.tabExplore)
-        self.label_39.setObjectName(_fromUtf8("label_39"))
-        self.gridLayout_7.addWidget(self.label_39, 0, 0, 1, 1)
-        self.exNrepsSpnbx = QtGui.QSpinBox(self.tabExplore)
-        self.exNrepsSpnbx.setMinimum(1)
-        self.exNrepsSpnbx.setMaximum(100)
-        self.exNrepsSpnbx.setProperty("value", 5)
-        self.exNrepsSpnbx.setObjectName(_fromUtf8("exNrepsSpnbx"))
-        self.gridLayout_7.addWidget(self.exNrepsSpnbx, 0, 1, 1, 1)
         self.save_explore_ckbx = QtGui.QCheckBox(self.tabExplore)
         self.save_explore_ckbx.setEnabled(False)
         self.save_explore_ckbx.setObjectName(_fromUtf8("save_explore_ckbx"))
-        self.gridLayout_7.addWidget(self.save_explore_ckbx, 3, 0, 1, 2)
+        self.gridLayout_7.addWidget(self.save_explore_ckbx, 1, 0, 1, 2)
         self.label_20 = QtGui.QLabel(self.tabExplore)
         self.label_20.setObjectName(_fromUtf8("label_20"))
-        self.gridLayout_7.addWidget(self.label_20, 2, 0, 1, 1)
+        self.gridLayout_7.addWidget(self.label_20, 0, 0, 1, 1)
         self.overAttenLbl = QtGui.QLabel(self.tabExplore)
         self.overAttenLbl.setObjectName(_fromUtf8("overAttenLbl"))
-        self.gridLayout_7.addWidget(self.overAttenLbl, 2, 1, 1, 1)
+        self.gridLayout_7.addWidget(self.overAttenLbl, 0, 1, 1, 1)
         self.label_23 = QtGui.QLabel(self.tabExplore)
         self.label_23.setObjectName(_fromUtf8("label_23"))
-        self.gridLayout_7.addWidget(self.label_23, 2, 2, 1, 1)
-        self.aosrSpnbx = SmartSpinBox(self.tabExplore)
-        self.aosrSpnbx.setEnabled(False)
-        self.aosrSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.aosrSpnbx.setMaximum(500000.0)
-        self.aosrSpnbx.setObjectName(_fromUtf8("aosrSpnbx"))
-        self.gridLayout_7.addWidget(self.aosrSpnbx, 1, 1, 1, 1)
-        self.label_6 = QtGui.QLabel(self.tabExplore)
-        self.label_6.setObjectName(_fromUtf8("label_6"))
-        self.gridLayout_7.addWidget(self.label_6, 1, 0, 1, 1)
-        self.funit_lbl = QtGui.QLabel(self.tabExplore)
-        self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
-        self.gridLayout_7.addWidget(self.funit_lbl, 1, 2, 1, 1)
+        self.gridLayout_7.addWidget(self.label_23, 0, 2, 1, 1)
         self.verticalLayout_9.addLayout(self.gridLayout_7)
         self.horizontalLayout_7.addLayout(self.verticalLayout_9)
         self.tabGroup.addTab(self.tabExplore, _fromUtf8(""))
@@ -128,8 +110,8 @@ class Ui_ControlWindow(object):
         self.stimulusChoices = StimulusLabelTable(self.tabProtocol)
         self.stimulusChoices.setObjectName(_fromUtf8("stimulusChoices"))
         self.horizontalLayout_9.addWidget(self.stimulusChoices)
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_9.addItem(spacerItem1)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_9.addItem(spacerItem)
         self.pushButton = QtGui.QPushButton(self.tabProtocol)
         self.pushButton.setMaximumSize(QtCore.QSize(200, 16777215))
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
@@ -361,8 +343,8 @@ class Ui_ControlWindow(object):
         self.label_14.setObjectName(_fromUtf8("label_14"))
         self.gridLayout_2.addWidget(self.label_14, 1, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_2)
-        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem2)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem1)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
         self.startChartBtn = QtGui.QPushButton(self.centralwidget)
@@ -385,7 +367,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -469,8 +451,8 @@ class Ui_ControlWindow(object):
         self.spikeTotalLbl = QtGui.QLabel(self.PSTHContainer)
         self.spikeTotalLbl.setObjectName(_fromUtf8("spikeTotalLbl"))
         self.gridLayout_9.addWidget(self.spikeTotalLbl, 0, 1, 1, 1)
-        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_9.addItem(spacerItem3, 0, 2, 1, 1)
+        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_9.addItem(spacerItem2, 0, 2, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_9)
         self.verticalLayout_10.addWidget(self.PSTHContainer)
         self.psthDock.setWidget(self.dockWidgetContents_2)
@@ -613,16 +595,11 @@ class Ui_ControlWindow(object):
         self.label_3.setToolTip(_translate("ControlWindow", "SONIC SPARKLE HIGH FIVE!!!!!", None))
         self.label_3.setText(_translate("ControlWindow", "SSHF", None))
         self.runningLabel.setText(_translate("ControlWindow", "OFF", None))
-        self.label_39.setText(_translate("ControlWindow", "Reps", None))
-        self.exNrepsSpnbx.setToolTip(_translate("ControlWindow", "Number of presentations before plots reset", None))
         self.save_explore_ckbx.setText(_translate("ControlWindow", "Save Explore Recording", None))
         self.label_20.setText(_translate("ControlWindow", "Undesired Attenuation:", None))
         self.overAttenLbl.setToolTip(_translate("ControlWindow", "Stimulus had to be scaled down by this amount to be generated", None))
         self.overAttenLbl.setText(_translate("ControlWindow", "0", None))
         self.label_23.setText(_translate("ControlWindow", "dB", None))
-        self.aosrSpnbx.setToolTip(_translate("ControlWindow", "Stimulus output sampling rate", None))
-        self.label_6.setText(_translate("ControlWindow", "Gen. Sample rate", None))
-        self.funit_lbl.setText(_translate("ControlWindow", "kHz", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabExplore), _translate("ControlWindow", "Explore", None))
         self.label_2.setText(_translate("ControlWindow", "Experiment Protocol:", None))
         self.pushButton.setToolTip(_translate("ControlWindow", "Remove all tests", None))
@@ -717,11 +694,11 @@ class Ui_ControlWindow(object):
         self.actionSet_Cell_ID.setText(_translate("ControlWindow", "Set Cell ID", None))
         self.actionComment.setText(_translate("ControlWindow", "Comment", None))
 
-from spikeylab.gui.stim.explore_component_editor import ExploreComponentEditor
 from spikeylab.gui.data_review import QDataReviewer
 from spikeylab.gui.qprotocol import ProtocolView
 from spikeylab.gui.plotting.pyqtgraph_widgets import PSTHWidget
 from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
+from spikeylab.gui.stim.explore_stim_editor import ExploreStimulusEditor
 from spikeylab.gui.calibration_widget import CalibrationWidget
 from spikeylab.gui.stim.stim_detail import StimDetailWidget
 from spikeylab.gui.stim.stimulus_label import StimulusLabelTable
