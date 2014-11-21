@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'explore_stim_editor.ui'
 #
-# Created: Wed Nov 19 18:04:03 2014
+# Created: Thu Nov 20 18:08:31 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,29 +29,20 @@ class Ui_ExploreStimEditor(object):
         ExploreStimEditor.resize(513, 393)
         self.verticalLayout = QtGui.QVBoxLayout(ExploreStimEditor)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.scrollArea = QtGui.QScrollArea(ExploreStimEditor)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
-        self.scrollArea.setSizePolicy(sizePolicy)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
-        self.scrollAreaWidgetContents_3 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 493, 254))
-        self.scrollAreaWidgetContents_3.setObjectName(_fromUtf8("scrollAreaWidgetContents_3"))
-        self.layout = QtGui.QVBoxLayout(self.scrollAreaWidgetContents_3)
-        self.layout.setObjectName(_fromUtf8("layout"))
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents_3)
-        self.verticalLayout.addWidget(self.scrollArea)
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self._2 = QtGui.QHBoxLayout()
+        self._2.setObjectName(_fromUtf8("_2"))
+        self.trackBtnLayout = QtGui.QHBoxLayout()
+        self.trackBtnLayout.setObjectName(_fromUtf8("trackBtnLayout"))
+        self._2.addLayout(self.trackBtnLayout)
         self.addBtn = QtGui.QPushButton(ExploreStimEditor)
         self.addBtn.setObjectName(_fromUtf8("addBtn"))
-        self.horizontalLayout.addWidget(self.addBtn)
+        self._2.addWidget(self.addBtn)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self._2.addItem(spacerItem)
+        self.verticalLayout.addLayout(self._2)
+        self.trackStack = QtGui.QStackedWidget(ExploreStimEditor)
+        self.trackStack.setObjectName(_fromUtf8("trackStack"))
+        self.verticalLayout.addWidget(self.trackStack)
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.exNrepsSpnbx = QtGui.QSpinBox(ExploreStimEditor)

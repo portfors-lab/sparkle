@@ -51,8 +51,8 @@ class ExploreComponentEditor(AbstractEditorWidget):
 
         self.setLayout(layout)
 
-        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
-        self.setLineWidth(3)
+        self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Sunken)
+        self.setLineWidth(2)
 
         for m in ['widgets', 'widgetForName']:
             setattr(self, m, getattr(self.componentStack, m))

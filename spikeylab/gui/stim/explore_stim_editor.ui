@@ -15,31 +15,10 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QScrollArea" name="scrollArea">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents_3">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>493</width>
-        <height>254</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="layout"/>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="_2">
+     <item>
+      <layout class="QHBoxLayout" name="trackBtnLayout"/>
+     </item>
      <item>
       <widget class="QPushButton" name="addBtn">
        <property name="text">
@@ -61,6 +40,9 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="trackStack"/>
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">

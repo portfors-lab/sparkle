@@ -13,6 +13,8 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.ui = Ui_ExploreStimEditor()
         self.ui.setupUi(self)
 
+        self.trackBtnGroup = QtGui.QButtonGroup()
+
         self.ui.addBtn.clicked.connect(self.addComponent)
         self.ui.exNrepsSpnbx.valueChanged.connect(self.setReps)
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
@@ -57,10 +59,17 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.valueChanged.emit()
 
     def addComponent(self):
-        comp_stack_editor = ExploreComponentEditor()
-        self.ui.layout.addWidget(comp_stack_editor)
-
         row = self._model.rowCount()
+
+        comp_stack_editor = ExploreComponentEditor()
+        self.ui.trackStack.addWidget(comp_stack_editor)
+
+        idx_button = IndexButton(row)
+        idx_button.pickMe.connect(self.ui.trackStack.setCurrentIndex)
+        self.trackBtnGroup.addButton(idx_button)
+        self.ui.trackBtnLayout.addWidget(idx_button)
+        self.ui.trackStack.setCurrentIndex(row)
+
         delay = Silence()
         comp_stack_editor.delaySpnbx.setValue(delay.duration()/self.scales[0])
         self._model.insertComponent(delay, row,0)
@@ -94,6 +103,19 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
     def verify(self, winsz):
         # have the stim check itself and report
         return self._model.verify(winsz)
+
+class IndexButton(QtGui.QPushButton):
+    pickMe = QtCore.Signal(int)
+    def __init__(self, num):
+        super(IndexButton, self).__init__("Track {}".format(num+1))
+        self.num = num
+        self.setCheckable(True)
+        self.setChecked(True)
+        self.toggled.connect(self.toggletoggle)
+
+    def toggletoggle(self, checked):
+        if checked:
+            self.pickMe.emit(self.num)
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])
