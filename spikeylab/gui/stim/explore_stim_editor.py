@@ -15,14 +15,14 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
 
         self.trackBtnGroup = QtGui.QButtonGroup()
 
-        self.ui.addBtn.clicked.connect(self.addComponent)
+        self.ui.addBtn.clicked.connect(self.addComponentEditor)
         self.ui.exNrepsSpnbx.valueChanged.connect(self.setReps)
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
 
         self.funit_fields.append(self.ui.aosrSpnbx)
         self.funit_labels.append(self.ui.funit_lbl)
 
-        self.components = []
+        self.buttons  = []
 
         self.stimuli_types = get_stimuli_models()
         self._allComponents = []
@@ -58,7 +58,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.ui.exNrepsSpnbx.setValue(reps)
         self.valueChanged.emit()
 
-    def addComponent(self):
+    def addComponentEditor(self):
         row = self._model.rowCount()
 
         comp_stack_editor = ExploreComponentEditor()
@@ -69,6 +69,8 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.trackBtnGroup.addButton(idx_button)
         self.ui.trackBtnLayout.addWidget(idx_button)
         self.ui.trackStack.setCurrentIndex(row)
+
+        comp_stack_editor.closePlease.connect(self.removeComponentEditor)
 
         delay = Silence()
         comp_stack_editor.delaySpnbx.setValue(delay.duration()/self.scales[0])
@@ -86,15 +88,31 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         initcomp = self._allComponents[row][0]
         self._model.insertComponent(initcomp, row, 1)
 
-        self.components.append(comp_stack_editor)
+        self.buttons.append(idx_button)
 
         comp_stack_editor.exploreStimTypeCmbbx.currentIndexChanged.connect(lambda x : self.setStimIndex(row, x))
         comp_stack_editor.delaySpnbx.valueChanged.connect(lambda x : self.setDelay(row, x))
         comp_stack_editor.valueChanged.connect(self.valueChanged.emit)
 
+    def removeComponentEditor(self, widget):
+        ntracks = self.ui.trackStack.count()
+        index = self.ui.trackStack.indexOf(widget)
+        self.ui.trackStack.removeWidget(widget)
+        self._model.removeRow(index)
+        # remove index button and adjust other numbers
+        for idx in range(index+1, ntracks):
+            self.buttons[idx].setNum(idx-1)
+        self.ui.trackBtnLayout.removeWidget(self.buttons[index])
+        btn = self.buttons.pop(index)
+        btn.setVisible(False)
+        btn.deleteLater()
+        self.valueChanged.emit()
+        if len(self.buttons) > 0:
+            self.buttons[0].setChecked(True)
+
     def saveToObject(self):
-        for comp in self.components:
-            comp.currentWidget().saveToObject()
+        for icomp in range(self.ui.trackStack.count()):
+            self.ui.trackStack.widget(icomp).currentWidget().saveToObject()
         self.ui.aosrSpnbx.setValue(self._model.samplerate()/self.scales[1])
 
     def samplerate(self):
@@ -116,6 +134,10 @@ class IndexButton(QtGui.QPushButton):
     def toggletoggle(self, checked):
         if checked:
             self.pickMe.emit(self.num)
+
+    def setNum(self, num):
+        self.num = num
+        self.setText("Track {}".format(num+1))
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])

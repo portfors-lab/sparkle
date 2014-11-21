@@ -275,7 +275,7 @@ class StimulusModel():
                 self.updateCalibration()
 
     def insertEmptyRow(self):
-        """Inserts and empty track at the end"""
+        """Appends an empty track at the end"""
         self._segments.append([])
 
     def removeLastRow(self):
@@ -283,6 +283,10 @@ class StimulusModel():
         lastrow = self._segments.pop(len(self._segments)-1)
         if len(lastrow) > 0:
             raise Exception("Attempt to remove non-empty stimulus track")
+
+    def removeRow(self, row):
+        """Removes the track at row, empty or not"""
+        self._segments.pop(row)
 
     def removeComponent(self, row,col):
         """Removes the component at the given location

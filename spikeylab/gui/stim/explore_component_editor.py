@@ -5,7 +5,7 @@ from spikeylab.gui.stim.dynamic_stacker import DynamicStackedWidget
 
 class ExploreComponentEditor(AbstractEditorWidget):
     """Editor for individual track in the explore stimulus model"""
-    closePlease = QtCore.Signal()
+    closePlease = QtCore.Signal(object)
     def __init__(self, parent=None):
         super(ExploreComponentEditor, self).__init__(parent)
 
@@ -20,7 +20,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
         self.closeBtn = QtGui.QPushButton('x')
         self.closeBtn.setFixedSize(25,25)
         self.closeBtn.setFlat(True)
-        self.closeBtn.clicked.connect(self.closePlease.emit)
+        self.closeBtn.clicked.connect(lambda : self.closePlease.emit(self))
         headerLayout.addWidget(self.exploreStimTypeCmbbx)
         headerLayout.addWidget(self.closeBtn)
 

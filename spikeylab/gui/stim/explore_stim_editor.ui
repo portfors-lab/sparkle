@@ -15,16 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="_2">
+    <layout class="QHBoxLayout" name="_">
      <item>
       <layout class="QHBoxLayout" name="trackBtnLayout"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="addBtn">
-       <property name="text">
-        <string>+</string>
-       </property>
-      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -38,6 +31,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addBtn">
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

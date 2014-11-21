@@ -64,7 +64,7 @@ class MainWindow(ControlWindow):
         ControlWindow.__init__(self, inputsFilename)
             
         self.ui.exploreStimEditor.setModel(self.acqmodel.explore_stimulus())
-        self.ui.exploreStimEditor.addComponent()
+        self.ui.exploreStimEditor.addComponentEditor()
         if datafile is not None:
             self.ui.reviewer.setDataObject(self.acqmodel.datafile)
             self.ui.dataFileLbl.setText(fname)
@@ -263,12 +263,6 @@ class MainWindow(ControlWindow):
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             nreps = self.ui.exploreStimEditor.repCount()
 
-            # self.acqmodel.set(nreps=nreps)
-            
-            # have model sort all signals stuff out?
-            # self.acqmodel.set_explore_delay(self.ui.exploreEditor0.delay())
-            # stim_index = self.ui.exploreEditor0.currentIndex()
-            # self.acqmodel.set_stim_by_index(stim_index)
             self.acqmodel.reset_explore_stim()
 
             self.display.setNreps(nreps)

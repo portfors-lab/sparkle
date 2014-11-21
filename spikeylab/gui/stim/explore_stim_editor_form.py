@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'explore_stim_editor.ui'
 #
-# Created: Thu Nov 20 18:08:31 2014
+# Created: Fri Nov 21 09:43:53 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,17 +29,17 @@ class Ui_ExploreStimEditor(object):
         ExploreStimEditor.resize(513, 393)
         self.verticalLayout = QtGui.QVBoxLayout(ExploreStimEditor)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self._2 = QtGui.QHBoxLayout()
-        self._2.setObjectName(_fromUtf8("_2"))
+        self._ = QtGui.QHBoxLayout()
+        self._.setObjectName(_fromUtf8("_"))
         self.trackBtnLayout = QtGui.QHBoxLayout()
         self.trackBtnLayout.setObjectName(_fromUtf8("trackBtnLayout"))
-        self._2.addLayout(self.trackBtnLayout)
+        self._.addLayout(self.trackBtnLayout)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self._.addItem(spacerItem)
         self.addBtn = QtGui.QPushButton(ExploreStimEditor)
         self.addBtn.setObjectName(_fromUtf8("addBtn"))
-        self._2.addWidget(self.addBtn)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self._2.addItem(spacerItem)
-        self.verticalLayout.addLayout(self._2)
+        self._.addWidget(self.addBtn)
+        self.verticalLayout.addLayout(self._)
         self.trackStack = QtGui.QStackedWidget(ExploreStimEditor)
         self.trackStack.setObjectName(_fromUtf8("trackStack"))
         self.verticalLayout.addWidget(self.trackStack)
