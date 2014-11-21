@@ -213,7 +213,7 @@ class TestMainUI():
         self.explore_setup('pure tone')
 
         val = 33
-        editor = self.form.ui.parameterStack.widgetForName('Pure Tone')
+        editor = self.form.ui.exploreStimEditor.ui.trackStack.widget(0).widgetForName('Pure Tone')
         editor.inputWidgets['intensity'].setValue(val)
 
         # get it to save by running
@@ -366,9 +366,11 @@ class TestMainUI():
         stimEditor = self.add_builder_tone()
 
         qtbot.doubleclick(stimEditor.ui.trackview,stimEditor.ui.trackview.model().index(0,0))
+        QtTest.QTest.qWait(ALLOW)
         qtbot.type_msg('20')
         qtbot.keypress('enter')
         qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
 
         self.setup_tc()
         
@@ -410,10 +412,10 @@ class TestMainUI():
 
     def explore_setup(self, comptype):
         self.form.ui.tabGroup.setCurrentIndex(0)
-        stimuli = [str(self.form.ui.exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimTypeCmbbx.count())]
+        stimuli = [str(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.count())]
         tone_idx = stimuli.index(comptype)
         QtTest.QTest.qWait(ALLOW)
-        qtbot.move(self.form.ui.exploreStimTypeCmbbx)
+        qtbot.move(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx)
 
         # scroll the mouse the number of ticks equal to it's index
         QtTest.QTest.qWait(PAUSE)
@@ -423,11 +425,12 @@ class TestMainUI():
             # We are going to cheat and set the vocal folders directly
             fpath = sample.samplewav()
             parentdir, fname = os.path.split(fpath)
-            self.form.exvocal.setRootDirs(parentdir, parentdir)
+            editor = self.form.ui.exploreStimEditor.ui.trackStack.widget(0).widgetForName('Vocalization')
+            editor.setRootDirs(parentdir, parentdir)
             QtTest.QTest.qWait(200) # needs longer allow
-            idx = self.form.exvocal.filemodel.index(fpath)
+            idx = editor.filemodel.index(fpath)
             # print 'idx of vocal file', idx.row()
-            qtbot.click(self.form.exvocal.filelistView, idx)
+            qtbot.click(editor.filelistView, idx)
             QtTest.QTest.qWait(ALLOW)
 
     def explore_run(self, comptype=None):

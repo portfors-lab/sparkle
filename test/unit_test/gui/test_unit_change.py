@@ -27,10 +27,10 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.aosrSpnbx.setValue(fs0/1000)
+        control.ui.exploreStimEditor.ui.aosrSpnbx.setValue(fs0/1000)
         control.ui.aisrSpnbx.setValue(fs1/1000)
 
-        assert control.ui.aosrSpnbx.value() == fs0/1000 
+        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0/1000 
         assert control.ui.aisrSpnbx.value() == fs1/1000
 
         frequency_inputs = control.frequencyInputs + AbstractEditorWidget.funit_fields
@@ -40,7 +40,7 @@ class TestUnitChanges():
 
         control.updateUnitLabels(control.tscale, 1)
 
-        assert control.ui.aosrSpnbx.value() == fs0 
+        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0 
         assert control.ui.aisrSpnbx.value() == fs1
         for field in frequency_inputs:
             field.decimals() == 0
@@ -55,17 +55,17 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.aosrSpnbx.setValue(fs0/1000)
+        control.ui.exploreStimEditor.ui.aosrSpnbx.setValue(fs0/1000)
         control.ui.aisrSpnbx.setValue(fs1/1000)
 
-        assert control.ui.aosrSpnbx.value() == fs0/1000 
+        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0/1000 
         assert control.ui.aisrSpnbx.value() == fs1/1000
 
         control.updateUnitLabels(control.tscale, 1)
         control.updateUnitLabels(control.tscale, 1000)
 
         print 'spin boxes', control.ui.aisrSpnbx.value(), fs1/1000
-        assert control.ui.aosrSpnbx.value() == fs0/1000 
+        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0/1000 
         assert control.ui.aisrSpnbx.value() == fs1/1000
 
         frequency_inputs = control.frequencyInputs + AbstractEditorWidget.funit_fields
@@ -149,10 +149,10 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.aosrSpnbx.setValue(fs0)
+        control.ui.exploreStimEditor.ui.aosrSpnbx.setValue(fs0)
         control.ui.aisrSpnbx.setValue(fs1)
 
-        assert control.ui.aosrSpnbx.value() == fs0 
+        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0 
         assert control.ui.aisrSpnbx.value() == fs1
 
         frequency_inputs = control.frequencyInputs + AbstractEditorWidget.funit_fields
