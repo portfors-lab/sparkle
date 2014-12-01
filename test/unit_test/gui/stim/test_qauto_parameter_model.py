@@ -11,13 +11,6 @@ from QtWrapper import QtCore
 import test.sample as sample
 
 class TestAutoParameterModel():
-    # def setUp(self):
-    #     self.original_tunits = AbstractStimulusComponent._scales[0]
-    #     self.original_funits = AbstractStimulusComponent._scales[1]
-
-    # def tearDown(self):
-    #     AbstractStimulusComponent().update_tscale(self.original_tunits)
-    #     AbstractStimulusComponent().update_fscale(self.original_funits)
 
     def test_insert_rows(self):
         data = AutoParameterModel()
@@ -79,22 +72,20 @@ class TestAutoParameterModel():
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
         details = component.auto_details()
-        # multiplier = details[values[0]]['multiplier']
 
-        # unit0 = details[values[0]]['unit']
         nsteps0 = model.data(model.index(0,4), QtCore.Qt.EditRole)
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 'Hz'
+        assert model.data(model.index(0,2), QtCore.Qt.DisplayRole) == str(values[2]) + " Hz"
 
         tscale = 's'
         fscale = 'Hz'
         AbstractEditorWidget.updateScales(tscale, fscale)
         SmartDelegate.updateScales(tscale, fscale)
-        # AbstractStimulusComponent().update_fscale(1)
         
         details = component.auto_details()
-        # unit1 = details[values[0]]['label']
-        # assert unit0 != unit1
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 'Hz'
+
+        # scaling is not done in model, so we are really just checking 
+        # that it all didn't change
+        assert model.data(model.index(0,2), QtCore.Qt.DisplayRole) == str(values[2]) + " Hz"
 
         assert values[1] == model.data(model.index(0,1), QtCore.Qt.EditRole)
         assert values[2] == model.data(model.index(0,2), QtCore.Qt.EditRole)
@@ -110,11 +101,9 @@ class TestAutoParameterModel():
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
         details = component.auto_details()
-        # multiplier = details[values[0]]['multiplier']
 
-        # unit0 = details[values[0]]['label']
         nsteps0 = model.data(model.index(0,4), QtCore.Qt.EditRole)
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 's'
+        assert model.data(model.index(0,2), QtCore.Qt.DisplayRole) == str(values[2]) + " s"
 
         tscale = 's'
         fscale = 'Hz'
@@ -122,9 +111,7 @@ class TestAutoParameterModel():
         SmartDelegate.updateScales(tscale, fscale)
 
         details = component.auto_details()
-        # unit1 = details[values[0]]['label']
-        # assert unit0 != unit1
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 's'
+        assert model.data(model.index(0,2), QtCore.Qt.DisplayRole) == str(values[2]) + " s"
 
         assert values[1] == model.data(model.index(0,1), QtCore.Qt.EditRole)
         assert values[2] == model.data(model.index(0,2), QtCore.Qt.EditRole)

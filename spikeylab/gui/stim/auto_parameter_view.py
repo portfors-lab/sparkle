@@ -161,13 +161,16 @@ class SmartDelegate(QtGui.QStyledItemDelegate):
         spnbox = SmartSpinBox(parent)
         model = parent.parentWidget().model().model
         unit = model.getDetail(index.row(), 'unit')
+        if unit is None:
+            # parameter type must be selected first, don't show editor
+            return None
         if unit == 's':
             spnbox.setScale(self._scales[0])
         elif unit == 'Hz':
             spnbox.setScale(self._scales[1])
         else:
             spnbox.setScale(unit)
-            
+    
         spnbox.setMinimum(model.getDetail(index.row(), 'min'))
         spnbox.setMaximum(model.getDetail(index.row(), 'max'))
         spnbox.setKeyboardTracking(True)

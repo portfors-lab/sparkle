@@ -358,8 +358,6 @@ class TestAcquisitionManager():
         manager.set(nreps=2)
         stim = manager.explore_stimulus()
         stim.insertComponent(PureTone())
-        # stim_names = manager.explore_stim_names()
-        # manager.set_stim_by_index(stim_names.index('Pure Tone'))
         t = manager.run_explore(0.25)
 
         time.sleep(1)
@@ -370,7 +368,6 @@ class TestAcquisitionManager():
         manager.close_data()
 
         # should check that it did not save data!
-
 
     def test_vocal_explore(self):
         """Run search operation with vocal wav stimulus"""

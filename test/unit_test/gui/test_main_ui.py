@@ -16,6 +16,9 @@ import qtbot
 PAUSE = 200
 ALLOW = 15
 
+# this should match wha
+DEFAULT_TIME_SCALAR = 0.001
+
 class TestMainSetup():
     def setUp(self):
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
@@ -98,7 +101,7 @@ class TestMainUI():
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], hfile[calname].attrs['samplerate_ad'])
 
-        npts = (self.form.ui.aisrSpnbx.value()*1000)*(self.form.ui.windowszSpnbx.value()*0.001)
+        npts = (self.form.ui.aisrSpnbx.value()*1000)*(self.form.ui.windowszSpnbx.value()*DEFAULT_TIME_SCALAR)
         # print 'data shape', signals.shape, (nreps, npts)
         assert_equal(signals.shape,(nreps, npts))
         assert cal_vector.shape == ((npts/2+1),)
@@ -251,7 +254,7 @@ class TestMainUI():
         stimModel = stimEditor.ui.trackview.model()
         tone = stimModel.data(stimModel.index(0,0))
         # assumes default ms scale
-        assert tone.duration() == val*0.001
+        assert tone.duration() == val*DEFAULT_TIME_SCALAR
 
         # close editor
         qtbot.click(stimEditor.ui.okBtn)
@@ -268,7 +271,7 @@ class TestMainUI():
 
         # assert the same value as we last set
         tone = stimModel.data(stimModel.index(0,0))
-        assert tone.duration() == val*0.001
+        assert tone.duration() == val*DEFAULT_TIME_SCALAR
 
         # set a new value to make sure no errors occured
         val = 11
@@ -278,7 +281,7 @@ class TestMainUI():
         QtTest.QTest.qWait(ALLOW)
 
         tone = stimModel.data(stimModel.index(0,0), role=QtCore.Qt.UserRole+1)
-        assert tone.duration() == val*0.001
+        assert tone.duration() == val*DEFAULT_TIME_SCALAR
 
         qtbot.click(stimEditor.ui.okBtn)
 

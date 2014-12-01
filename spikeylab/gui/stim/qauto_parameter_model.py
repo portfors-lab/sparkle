@@ -65,6 +65,8 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             field = self._headers[index.column()]
             val = self.model.paramValue(row, field)
             if 1 <= index.column() <= 3:
+                # standard units for data, not necessary current for UI
+                # view will scale and convert appropriately
                 unit = self.model.getDetail(index.row(), 'unit')
                 if val is not None and unit is not None:
                     return str(val) + ' ' + unit
@@ -78,10 +80,6 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             field = self._headers[index.column()]
             return self.model.paramValue(row, field)
             # return self.model.paramValue(row, field)
-        elif role == QtCore.Qt.ToolTipRole:
-            if 1 <= index.column() <= 3:
-                label = self.model.getDetail(index.row(), 'unit')
-                return label
         elif role == QtCore.Qt.ForegroundRole:
             # color the background red for bad values
             if not self.checkValidCell(index):

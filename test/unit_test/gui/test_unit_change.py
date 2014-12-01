@@ -43,7 +43,6 @@ class TestUnitChanges():
         assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0 
         assert control.ui.aisrSpnbx.value() == fs1
         for field in frequency_inputs:
-            # field.decimals() == 0
             field.minimum() == 1
 
         control.close()
@@ -161,12 +160,11 @@ class TestUnitChanges():
             field.minimum() == 1
 
         control.close()
-            
 
 def assert_fields_s(control):
     time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
     for field in time_inputs:
-        assert field.decimals() == 3
+        assert field.suffix() == ' s'
     # test some known min/maxes
     assert control.ui.windowszSpnbx.minimum() == 0.00
     assert control.ui.binszSpnbx.minimum() == 0.00
@@ -185,15 +183,13 @@ def assert_fields_s(control):
 
 def assert_fields_ms(control):
     time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
-    # for field in time_inputs:
-    #     assert field.decimals() == 0
+    for field in time_inputs:
+        assert field.suffix() == ' ms'
     # check max/mins
     assert control.ui.windowszSpnbx.minimum() == 0
     assert control.ui.binszSpnbx.minimum() == 0
-    # assert control.ui.delaySpnbx.minimum() == 0
     assert control.ui.windowszSpnbx.maximum() == 3
     assert control.ui.binszSpnbx.maximum() == 3
-    # assert control.ui.delaySpnbx.maximum() == 3000
     for editor_widget in control.ui.exploreStimEditor.allComponentWidgets():
         if 'risefall' in editor_widget.inputWidgets:
             assert editor_widget.inputWidgets['risefall'].minimum() == 0
