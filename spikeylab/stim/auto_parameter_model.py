@@ -59,9 +59,9 @@ class AutoParameterModel():
         else:
             selection.append(component)
 
-    def setScaledValue(self, row, field, value):
+    def setVerifiedValue(self, row, field, value):
         """Sets the *value* for *field* in the parameter
-        indexed by *row*
+        indexed by *row*, only if the value is within set limits
 
         :param row: the ith parameter number
         :type row: int
@@ -78,30 +78,9 @@ class AutoParameterModel():
                 kwd = {field : value}
                 self.setParamValue(row, **kwd)
 
-    def scaledValue(self, row, field):
-        """Gets the value in *field* in the parameter
-        indexed by *row* and returns it
-
-        :param row: the ith parameter number
-        :type row: int
-        :param field: detail of the parameter to set
-        :type field: str
-        :returns: value -- type appropriate to parameter
-        """
-        if field == 'parameter':            
-            return self.paramValue(row, field)
-        elif field in ['start', 'stop', 'step']:
-            if self._parameters[row]['parameter'] == 'filename':
-                return '-'
-            else:
-                val = self.paramValue(row, field)
-                return val
-        elif field == 'nsteps':
-            return self.numSteps(row)
-
     def setParamValue(self, row, **kwargs):
         """Sets the arguments as field=val for parameter
-        indexed by *row*. No scaling applied.
+        indexed by *row*
 
         :param row: the ith parameter number
         :type row: int
@@ -112,7 +91,7 @@ class AutoParameterModel():
 
     def paramValue(self, row, field):
         """Gets the value for *field* for parameter indexed by
-        *row*. No scaling appplied.
+        *row*
         
         :param row: the ith parameter number
         :type row: int
@@ -120,9 +99,13 @@ class AutoParameterModel():
         :type field: str
         :returns: value -- type appropriate to parameter
         """
-
-        param = self._parameters[row]
-        return param[field]
+        if field == 'nsteps':
+            return self.numSteps(row)
+        if field in ['start', 'stop', 'step'] and self._parameters[row]['parameter'] == 'filename':
+                return '-'
+        else:
+            param = self._parameters[row]
+            return param[field]
 
     def overwriteParam(self, row, param):
         """Assigns *param* to index *row*, overwritting the
