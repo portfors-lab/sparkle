@@ -23,7 +23,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.valueSpnbx.valueChanged.connect(self.valueChanged.emit)
 
         # shortcut to propagate methods for spinbox
-        for m in ['setValue', 'setMaximum', 'maximum', 'setMinimum', 'minimum', 'value', 'setDecimals', 'decimals']:
+        for m in ['setValue', 'setMaximum', 'maximum', 'setMinimum', 'minimum', 'value', 'setDecimals', 'decimals', 'setScale']:
             setattr(self, m, getattr(self.valueSpnbx, m))
 
     def increment1(self):

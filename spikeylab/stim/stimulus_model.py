@@ -651,9 +651,8 @@ class StimulusModel():
                     info['start_s'] = start_time
                 info['index'] = (row, col)
                 start_time += info['duration']
-
                 doc_list.append(info)
-
+                
         return {'samplerate_da':samplerate, 'components' : doc_list}
 
     def testDoc(self):
@@ -750,6 +749,7 @@ class StimulusModel():
             return "Test is empty"
         if windowSize is not None:
             durations = self.expandFunction(self.duration)
+            # print 'windowSize', windowSize, 'self', durations[0],  durations[-1]
             # ranges are linear, so we only need to test first and last
             if durations[0] > windowSize or durations[-1] > windowSize:
                 return "Stimulus duration exceeds window duration"

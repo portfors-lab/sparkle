@@ -88,7 +88,8 @@ class QStimulusComponent(object):
 
 class QPureTone(QStimulusComponent):
     def paint(self, painter, rect, palette):
-        fscale, flabel = AbstractStimulusComponent.get_fscale()
+        # fscale, flabel = AbstractStimulusComponent.get_fscale()
+        fscale, flabel = 1000, 'kHz'
         if (self.frequency()/fscale) - np.floor(self.frequency()/fscale) > 0.0:
             freq = str(self.frequency()/fscale)
         else:
@@ -101,7 +102,8 @@ class QPureTone(QStimulusComponent):
 
 class QFMSweep(QStimulusComponent):
     def paint(self, painter, rect, palette):
-        fscale, flabel = AbstractStimulusComponent.get_fscale()
+        # fscale, flabel = AbstractStimulusComponent.get_fscale()
+        fscale, flabel = 1000, 'kHz'
         if (self.startFrequency()/fscale) - np.floor(self.startFrequency()/fscale) > 0.0:
             start_freq = str(self.startFrequency()/fscale)
         else:

@@ -2,21 +2,22 @@ from nose.tools import assert_in
 
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
 from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
-from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
+from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
+from spikeylab.gui.stim.auto_parameter_view import SmartDelegate
 
 from QtWrapper import QtCore
 
 import test.sample as sample
 
 class TestAutoParameterModel():
-    def setUp(self):
-        self.original_tunits = AbstractStimulusComponent._scales[0]
-        self.original_funits = AbstractStimulusComponent._scales[1]
+    # def setUp(self):
+    #     self.original_tunits = AbstractStimulusComponent._scales[0]
+    #     self.original_funits = AbstractStimulusComponent._scales[1]
 
-    def tearDown(self):
-        AbstractStimulusComponent().update_tscale(self.original_tunits)
-        AbstractStimulusComponent().update_fscale(self.original_funits)
+    # def tearDown(self):
+    #     AbstractStimulusComponent().update_tscale(self.original_tunits)
+    #     AbstractStimulusComponent().update_fscale(self.original_funits)
 
     def test_insert_rows(self):
         data = AutoParameterModel()
@@ -73,70 +74,75 @@ class TestAutoParameterModel():
         component = PureTone()
         model = self.create_model(component)
 
-        values = ['frequency', 0, 100, 10]
+        values = ['frequency', 0, 100000, 10000]
         for i, value in enumerate(values):
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
         details = component.auto_details()
-        multiplier = details[values[0]]['multiplier']
+        # multiplier = details[values[0]]['multiplier']
 
-        unit0 = details[values[0]]['label']
+        # unit0 = details[values[0]]['unit']
         nsteps0 = model.data(model.index(0,4), QtCore.Qt.EditRole)
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == unit0
+        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 'Hz'
 
-        AbstractStimulusComponent().update_fscale(1)
+        tscale = 's'
+        fscale = 'Hz'
+        AbstractEditorWidget.updateScales(tscale, fscale)
+        SmartDelegate.updateScales(tscale, fscale)
+        # AbstractStimulusComponent().update_fscale(1)
         
         details = component.auto_details()
-        unit1 = details[values[0]]['label']
-        assert unit0 != unit1
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == unit1
+        # unit1 = details[values[0]]['label']
+        # assert unit0 != unit1
+        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 'Hz'
 
-        assert values[1]*multiplier == model.data(model.index(0,1), QtCore.Qt.EditRole)
-        assert values[2]*multiplier == model.data(model.index(0,2), QtCore.Qt.EditRole)
-        assert values[3]*multiplier == model.data(model.index(0,3), QtCore.Qt.EditRole)
+        assert values[1] == model.data(model.index(0,1), QtCore.Qt.EditRole)
+        assert values[2] == model.data(model.index(0,2), QtCore.Qt.EditRole)
+        assert values[3] == model.data(model.index(0,3), QtCore.Qt.EditRole)
         assert nsteps0 == model.data(model.index(0,4), QtCore.Qt.EditRole)
 
     def test_units_change_time(self):
         component = PureTone()
         model = self.create_model(component)
 
-        values = ['duration', 5, 100, 10]
+        values = ['duration', 0.005, 0.100, 0.010]
         for i, value in enumerate(values):
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
         details = component.auto_details()
-        multiplier = details[values[0]]['multiplier']
+        # multiplier = details[values[0]]['multiplier']
 
-        unit0 = details[values[0]]['label']
+        # unit0 = details[values[0]]['label']
         nsteps0 = model.data(model.index(0,4), QtCore.Qt.EditRole)
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == unit0
+        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 's'
 
-        AbstractStimulusComponent().update_tscale(1)
-        
+        tscale = 's'
+        fscale = 'Hz'
+        AbstractEditorWidget.updateScales(tscale, fscale)
+        SmartDelegate.updateScales(tscale, fscale)
+
         details = component.auto_details()
-        unit1 = details[values[0]]['label']
-        assert unit0 != unit1
-        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == unit1
+        # unit1 = details[values[0]]['label']
+        # assert unit0 != unit1
+        assert model.data(model.index(0,1), QtCore.Qt.ToolTipRole) == 's'
 
-        assert values[1]*multiplier == model.data(model.index(0,1), QtCore.Qt.EditRole)
-        print 'multiplier', multiplier*values[2],  model.data(model.index(0,2), QtCore.Qt.EditRole)
-        assert values[2]*multiplier == model.data(model.index(0,2), QtCore.Qt.EditRole)
-        assert values[3]*multiplier == model.data(model.index(0,3), QtCore.Qt.EditRole)
+        assert values[1] == model.data(model.index(0,1), QtCore.Qt.EditRole)
+        assert values[2] == model.data(model.index(0,2), QtCore.Qt.EditRole)
+        assert values[3] == model.data(model.index(0,3), QtCore.Qt.EditRole)
         assert nsteps0 == model.data(model.index(0,4), QtCore.Qt.EditRole)
 
     def test_change_param_type(self):
         component = PureTone()
         model = self.create_model(component)
 
-        values = ['duration', 8, 100, 10]
+        values = ['duration', 0.008, 0.100, 0.010]
         for i, value in enumerate(values):
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
         # check that values are stored correctly inside model
         p = model.data(model.index(0,0))
-        mult = model.model.getDetail(0, 'multiplier')
         for i, value in enumerate(values[1:]):
-            assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value*mult
+            assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value
 
         values[0] = 'frequency'
         model.setData(model.index(0,0), 'frequency', QtCore.Qt.EditRole)
@@ -145,14 +151,13 @@ class TestAutoParameterModel():
 
         # check that values are stored correctly inside model
         p = model.data(model.index(0,0))
-        mult = model.model.getDetail(0, 'multiplier')
         for i, value in enumerate(values[1:]):
-            assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value*mult
+            assert p[model.headerData(i+1, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)] == value
 
     def test_verify_success(self):
         component = PureTone()
         model = self.create_model(component)
-        values = ['duration', 8, 100, 10]
+        values = ['duration', 0.008, 0.100, 0.010]
         for i, value in enumerate(values):
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
@@ -175,7 +180,7 @@ class TestAutoParameterModel():
     def test_verify_bad_step_size(self):
         component = PureTone()
         model = self.create_model(component)
-        values = ['duration', 8, 100]
+        values = ['duration', 0.008, 0.100]
         for i, value in enumerate(values):
             model.setData(model.index(0,i), value, QtCore.Qt.EditRole)
 
@@ -194,8 +199,8 @@ class TestAutoParameterModel():
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
         model.setData(model.index(0,1), -1, QtCore.Qt.EditRole)
-        model.setData(model.index(0,2), 10, QtCore.Qt.EditRole)
-        model.setData(model.index(0,3), 1, QtCore.Qt.EditRole)
+        model.setData(model.index(0,2), 0.010, QtCore.Qt.EditRole)
+        model.setData(model.index(0,3), 0.001, QtCore.Qt.EditRole)
 
         # cannot set a bad start value
         assert model.verify() == 0
@@ -204,9 +209,9 @@ class TestAutoParameterModel():
         component = PureTone()
         model = self.create_model(component)
         model.setData(model.index(0,0), 'duration', QtCore.Qt.EditRole)
-        model.setData(model.index(0,1), 10, QtCore.Qt.EditRole)
-        model.setData(model.index(0,2), 10, QtCore.Qt.EditRole)
-        model.setData(model.index(0,3), 10, QtCore.Qt.EditRole)
+        model.setData(model.index(0,1), 0.010, QtCore.Qt.EditRole)
+        model.setData(model.index(0,2), 0.010, QtCore.Qt.EditRole)
+        model.setData(model.index(0,3), 0.010, QtCore.Qt.EditRole)
 
         assert model.verify()
 

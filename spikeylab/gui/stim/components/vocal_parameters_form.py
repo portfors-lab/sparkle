@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'vocal_parameters.ui'
 #
-# Created: Thu Nov 20 14:43:09 2014
+# Created: Fri Nov 21 23:57:44 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -85,9 +85,9 @@ class Ui_VocalParameterWidget(object):
         self.risefallSpnbx.setMaximum(500.0)
         self.risefallSpnbx.setObjectName(_fromUtf8("risefallSpnbx"))
         self.gridLayout_5.addWidget(self.risefallSpnbx, 3, 1, 1, 1)
-        self.label_6 = QtGui.QLabel(VocalParameterWidget)
-        self.label_6.setObjectName(_fromUtf8("label_6"))
-        self.gridLayout_5.addWidget(self.label_6, 0, 2, 1, 1)
+        self.dbSpnbx = IncrementInput(VocalParameterWidget)
+        self.dbSpnbx.setObjectName(_fromUtf8("dbSpnbx"))
+        self.gridLayout_5.addWidget(self.dbSpnbx, 0, 1, 1, 1)
         self.label_32 = QtGui.QLabel(VocalParameterWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -96,31 +96,12 @@ class Ui_VocalParameterWidget(object):
         self.label_32.setSizePolicy(sizePolicy)
         self.label_32.setObjectName(_fromUtf8("label_32"))
         self.gridLayout_5.addWidget(self.label_32, 1, 0, 1, 1)
-        self.dbSpnbx = IncrementInput(VocalParameterWidget)
-        self.dbSpnbx.setObjectName(_fromUtf8("dbSpnbx"))
-        self.gridLayout_5.addWidget(self.dbSpnbx, 0, 1, 1, 1)
         self.label_42 = QtGui.QLabel(VocalParameterWidget)
         self.label_42.setObjectName(_fromUtf8("label_42"))
         self.gridLayout_5.addWidget(self.label_42, 0, 0, 1, 1)
         self.label_40 = QtGui.QLabel(VocalParameterWidget)
         self.label_40.setObjectName(_fromUtf8("label_40"))
         self.gridLayout_5.addWidget(self.label_40, 3, 0, 1, 1)
-        self.tunit_lbl_0 = QtGui.QLabel(VocalParameterWidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tunit_lbl_0.sizePolicy().hasHeightForWidth())
-        self.tunit_lbl_0.setSizePolicy(sizePolicy)
-        self.tunit_lbl_0.setObjectName(_fromUtf8("tunit_lbl_0"))
-        self.gridLayout_5.addWidget(self.tunit_lbl_0, 1, 2, 1, 1)
-        self.tunit_lbl_1 = QtGui.QLabel(VocalParameterWidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tunit_lbl_1.sizePolicy().hasHeightForWidth())
-        self.tunit_lbl_1.setSizePolicy(sizePolicy)
-        self.tunit_lbl_1.setObjectName(_fromUtf8("tunit_lbl_1"))
-        self.gridLayout_5.addWidget(self.tunit_lbl_1, 3, 2, 1, 1)
         self.durSpnbx = SmartSpinBox(VocalParameterWidget)
         self.durSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.durSpnbx.setDecimals(3)
@@ -141,12 +122,9 @@ class Ui_VocalParameterWidget(object):
         self.label.setText(_translate("VocalParameterWidget", "Files selected:", None))
         self.nfiles.setText(_translate("VocalParameterWidget", "0", None))
         self.orderBtn.setText(_translate("VocalParameterWidget", "Order...", None))
-        self.label_6.setText(_translate("VocalParameterWidget", "dB SPL", None))
         self.label_32.setText(_translate("VocalParameterWidget", "Duration", None))
         self.label_42.setText(_translate("VocalParameterWidget", "Intensity", None))
         self.label_40.setText(_translate("VocalParameterWidget", "Rise fall time", None))
-        self.tunit_lbl_0.setText(_translate("VocalParameterWidget", "ms", None))
-        self.tunit_lbl_1.setText(_translate("VocalParameterWidget", "ms", None))
 
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
 from spikeylab.gui.stim.incrementer import IncrementInput

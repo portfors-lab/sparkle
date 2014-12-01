@@ -76,14 +76,6 @@ class ProtocolDisplay(QtGui.QWidget):
         if not self.specPlot.hasImg() and fname is not None:
             self.specPlot.fromFile(fname)
 
-    def setSpecArgs(self, *args, **kwargs):
-        """Sets the parameters for the spectrogram calculation/drawing,
-        chosen by the user.
-
-        For arguments, see: :meth:`SpecWidget.setSpecArgs<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.setSpecArgs>`
-        """
-        self.specPlot.setSpecArgs(*args, **kwargs)
-
     def updateFft(self, *args, **kwargs):
         """Updates the FFT plot with new data
 

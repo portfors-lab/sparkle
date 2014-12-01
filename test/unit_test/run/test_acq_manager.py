@@ -356,8 +356,10 @@ class TestAcquisitionManager():
         manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
         manager.set(nreps=2)
-        stim_names = manager.explore_stim_names()
-        manager.set_stim_by_index(stim_names.index('Pure Tone'))
+        stim = manager.explore_stimulus()
+        stim.insertComponent(PureTone())
+        # stim_names = manager.explore_stim_names()
+        # manager.set_stim_by_index(stim_names.index('Pure Tone'))
         t = manager.run_explore(0.25)
 
         time.sleep(1)
@@ -377,11 +379,11 @@ class TestAcquisitionManager():
         manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
         manager.set(nreps=2)
-        stim_names = manager.explore_stim_names()
 
-        # cheat - private access
-        manager.explorer._explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
-        manager.set_stim_by_index(stim_names.index('Vocalization'))
+        stim = manager.explore_stimulus()
+        vocal = Vocalization()
+        vocal.setFile(sample.samplewav())
+        stim.insertComponent(vocal)
         
         t = manager.run_explore(0.25)
 
@@ -399,15 +401,20 @@ class TestAcquisitionManager():
         manager, fname = self.create_acqmodel(winsz, acq_rate)        
 
         manager.set(nreps=2, save=True)
-        stim_names = manager.explore_stim_names()
-        manager.set_stim_by_index(stim_names.index('Pure Tone'))
+        stim = manager.explore_stimulus()
+        stim.insertComponent(PureTone())
+
+        manager.reset_explore_stim()
         t = manager.run_explore(0.25)
 
         time.sleep(1)
 
-        # cheat to set vocal file :(
-        manager.explorer._explore_stimuli[stim_names.index('Vocalization')].setFile(sample.samplewav())
-        manager.set_stim_by_index(stim_names.index('Vocalization'))
+        stim.removeComponent(0,0)
+
+        vocal = Vocalization()
+        vocal.setFile(sample.samplewav())
+        stim.insertComponent(vocal)
+        manager.reset_explore_stim()
 
         time.sleep(2)
 

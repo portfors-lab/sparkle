@@ -26,7 +26,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         # self._explore_stimuli = [x() for x in stimuli_types if x.explore]
 
         # self.delay = Silence()
-        # self._stimulus.insertComponent(self.delay)
+        # self._stimulus.insertfComponent(self.delay)
 
     def stimulus(self):
         """Gets a list of all the stimuli this runner has access to. Order

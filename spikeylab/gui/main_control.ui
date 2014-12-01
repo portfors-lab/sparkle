@@ -422,24 +422,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="funit_lbl_2">
-            <property name="text">
-             <string>kHz</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">
              <string>Window size</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="tunit_lbl">
-            <property name="text">
-             <string>ms</string>
             </property>
            </widget>
           </item>
@@ -450,24 +436,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>V</string>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_43">
             <property name="text">
              <string>Spike bin size</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QLabel" name="tunit_lbl_2">
-            <property name="text">
-             <string>ms</string>
             </property>
            </widget>
           </item>
@@ -493,20 +465,13 @@
              <number>3</number>
             </property>
             <property name="maximum">
-             <double>3000.000000000000000</double>
+             <double>3.000000000000000</double>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="SmartSpinBox" name="windowszSpnbx">
-            <property name="toolTip">
-             <string>Recording window duration</string>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
             </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>3000.000000000000000</double>
+            <property name="value">
+             <double>0.001000000000000</double>
             </property>
            </widget>
           </item>
@@ -566,11 +531,30 @@
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
+            <property name="suffix">
+             <string> V</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
             <property name="maximum">
              <double>500.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="SmartSpinBox" name="windowszSpnbx">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>3.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>

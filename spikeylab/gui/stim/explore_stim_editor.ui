@@ -62,13 +62,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_39">
-       <property name="text">
-        <string>Reps</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
@@ -92,10 +85,10 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QLabel" name="funit_lbl">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_39">
        <property name="text">
-        <string>kHz</string>
+        <string>Reps</string>
        </property>
       </widget>
      </item>

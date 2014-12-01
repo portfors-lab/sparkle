@@ -269,6 +269,7 @@ class SpecWidget(BasePlot):
     imgScale = (1.,1.)
     colormapChanged = QtCore.Signal(object)
     spec_done = QtCore.Signal(np.ndarray, np.ndarray, np.ndarray)
+    instances = []
     def __init__(self, parent=None):
         super(SpecWidget, self).__init__(parent)
 
@@ -285,6 +286,8 @@ class SpecWidget(BasePlot):
 
         self.spec_done.connect(self.updateImage)
         self.hideButtons() # hides the 'A' Auto-scale button
+
+        self.instances.append(self)
 
     def fromFile(self, fname):
         """Displays a spectrogram of an audio file. Supported formats see :func:`spikeylab.tools.audiotools.audioread`
@@ -332,7 +335,8 @@ class SpecWidget(BasePlot):
         t = threading.Thread(target=_doSpectrogram, args=(self.spec_done, (fs, signal),), kwargs=self.specgramArgs)
         t.start()
 
-    def setSpecArgs(self, **kwargs):
+    @staticmethod
+    def setSpecArgs(**kwargs):
         """Sets optional arguments for the spectrogram appearance.
 
         Available options:
@@ -348,12 +352,13 @@ class SpecWidget(BasePlot):
         """
         for key, value in kwargs.items():
             if key == 'colormap':
-                self.imgArgs['lut'] = value['lut']
-                self.imgArgs['levels'] = value['levels']
-                self.imgArgs['state'] = value['state']
-                self.updateColormap()
+                SpecWidget.imgArgs['lut'] = value['lut']
+                SpecWidget.imgArgs['levels'] = value['levels']
+                SpecWidget.imgArgs['state'] = value['state']
+                for w in SpecWidget.instances:
+                    w.updateColormap()
             else:
-                self.specgramArgs[key] = value
+                SpecWidget.specgramArgs[key] = value
 
     def clearImg(self):
         """Clears the current image"""
@@ -400,6 +405,10 @@ class SpecWidget(BasePlot):
     def getColormap(self):
         """Returns the currently stored colormap settings"""
         return self.imgArgs
+
+    def closeEvent(self, event):
+        self.instances.remove(self)
+        return super(SpecWidget, self).closeEvent(event)
 
 class FFTWidget(BasePlot):
     """Widget for ploting an FFT. Does not perform an FFT, just labels axis"""

@@ -10,8 +10,6 @@ class AbstractStimulusComponent(object):
     _duration = .01 # in seconds
     _intensity = 20 # in dB SPL
     _risefall = 0.003
-    _scales = [0.001, 1000] # time, frequency scaling factors
-    _labels = ['ms', 'kHz']
     def __init__(self):
         self.idnum = uuid.uuid1()
 
@@ -84,11 +82,11 @@ class AbstractStimulusComponent(object):
 
         Subclasses should re-implement and add to this list
 
-        :returns: dict<dict> -- {'parametername': {'label':str, 'multiplier':float, 'min':float, 'max':float},}
+        :returns: dict<dict> -- {'parametername': {'label':str, 'unit':str, 'min':float, 'max':float},}
         """
-        return {'duration':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0., 'max':3.},
-                'intensity':{'label': 'dB SPL', 'multiplier':1, 'min':0, 'max':120}, 
-                'risefall':{'label':self._labels[0], 'multiplier':self._scales[0], 'min':0, 'max':0.1}}
+        return {'duration':{'unit':'s', 'min':0., 'max':3.},
+                'intensity':{'unit':'dB SPL', 'min':0, 'max':120}, 
+                'risefall':{'unit':'s', 'min':0, 'max':0.1}}
 
     def stateDict(self):
         """Saves internal values to be loaded later
@@ -112,34 +110,6 @@ class AbstractStimulusComponent(object):
         self._duration = state['duration']
         self._intensity = state['intensity']
         self._risefall = state['risefall']
-
-    @staticmethod
-    def update_fscale(scale):
-        AbstractStimulusComponent._scales[1] = scale
-        if scale == 1000:
-            AbstractStimulusComponent._labels[1] = 'kHz'
-        elif scale == 1:
-            AbstractStimulusComponent._labels[1] = 'Hz'
-        else:
-            raise Exception(u"Invalid frequency scale")
-
-    @staticmethod
-    def update_tscale(scale):
-        AbstractStimulusComponent._scales[0] = scale
-        if scale == 0.001:
-            AbstractStimulusComponent._labels[0] = 'ms'
-        elif scale == 1:
-            AbstractStimulusComponent._labels[0] = 's'
-        else:
-            raise Exception(u"Invalid time scale")
-
-    @staticmethod
-    def get_fscale():
-        return AbstractStimulusComponent._scales[1], AbstractStimulusComponent._labels[1]
-
-    @staticmethod
-    def get_tscale():
-        return AbstractStimulusComponent._scales[0], AbstractStimulusComponent._labels[0]
 
     def serialize(self):
         return cPickle.dumps(self)

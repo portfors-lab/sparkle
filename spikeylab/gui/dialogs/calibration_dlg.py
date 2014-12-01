@@ -12,6 +12,9 @@ class CalibrationDialog(QtGui.QDialog):
         self.ui = Ui_CalibrationDialog()
         self.ui.setupUi(self)
         
+        self.ui.frangeLowSpnbx.setScale(fscale)
+        self.ui.frangeHighSpnbx.setScale(fscale)
+
         if datafile is not None:
             cal_names = datafile.calibration_list()
             self.ui.calChoiceCmbbx.insertItems(0, cal_names)
@@ -20,8 +23,8 @@ class CalibrationDialog(QtGui.QDialog):
                 calidx = cal_names.index(defaultVals['calname'])
                 self.ui.calChoiceCmbbx.setCurrentIndex(calidx)
             self.ui.calfileRadio.setChecked(defaultVals['use_calfile'])
-            self.ui.frangeLowSpnbx.setValue(defaultVals['frange'][0]/fscale)
-            self.ui.frangeHighSpnbx.setValue(defaultVals['frange'][1]/fscale)
+            self.ui.frangeLowSpnbx.setValue(defaultVals['frange'][0])
+            self.ui.frangeHighSpnbx.setValue(defaultVals['frange'][1])
         self.fscale = fscale
         self.pw = None
         self.datafile = datafile
@@ -34,9 +37,9 @@ class CalibrationDialog(QtGui.QDialog):
         """
         try:
             x, freqs = self.datafile.get_calibration(str(self.ui.calChoiceCmbbx.currentText()), self.calf)
-            self.ui.frangeLowSpnbx.setValue(freqs[0]/self.fscale)
-            self.ui.frangeHighSpnbx.setValue(freqs[-1]/self.fscale)
-            print 'set freq range', freqs[0], freqs[-1], freqs[0]/self.fscale, freqs[-1]/self.fscale
+            self.ui.frangeLowSpnbx.setValue(freqs[0])
+            self.ui.frangeHighSpnbx.setValue(freqs[-1])
+            print 'set freq range', freqs[0], freqs[-1], freqs[0], freqs[-1]
         except IOError:
             QtGui.QMessageBox.warning(self, "File Read Error", "Unable to read calibration file")
         except KeyError:
@@ -66,7 +69,7 @@ class CalibrationDialog(QtGui.QDialog):
         results = {}
         results['use_calfile'] = self.ui.calfileRadio.isChecked()
         results['calname'] = str(self.ui.calChoiceCmbbx.currentText())
-        results['frange'] = (self.ui.frangeLowSpnbx.value()*self.fscale, self.ui.frangeHighSpnbx.value()*self.fscale)
+        results['frange'] = (self.ui.frangeLowSpnbx.value(), self.ui.frangeHighSpnbx.value())
         return results
 
     def conditional_accept(self):
@@ -83,8 +86,8 @@ class CalibrationDialog(QtGui.QDialog):
             except KeyError:
                 QtGui.QMessageBox.warning(self, "File Data Error", "Unable to find data in file")
                 return
-            if self.ui.frangeLowSpnbx.value()*self.fscale < freqs[0] or \
-                self.ui.frangeHighSpnbx.value()*self.fscale > freqs[-1]:
+            if self.ui.frangeLowSpnbx.value()    < freqs[0] or \
+                self.ui.frangeHighSpnbx.value() > freqs[-1]:
                 QtGui.QMessageBox.warning(self, "Invalid Frequency Range", 
                     "Provided frequencys outside of calibration file range of {} - {} Hz".format(freqs[0], freqs[-1]))
                 return

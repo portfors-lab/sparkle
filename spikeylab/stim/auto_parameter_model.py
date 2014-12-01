@@ -60,10 +60,8 @@ class AutoParameterModel():
             selection.append(component)
 
     def setScaledValue(self, row, field, value):
-        """Converts the *value* for *field* in the parameter
-        indexed by *row*, according to that parameters internally
-        stored multiplier and assigns the converted value to that
-        parameter
+        """Sets the *value* for *field* in the parameter
+        indexed by *row*
 
         :param row: the ith parameter number
         :type row: int
@@ -74,26 +72,15 @@ class AutoParameterModel():
         if self._parameters[row]['parameter'] == 'filename':
             return # cannot be set this way?
         if field == 'parameter':
-            old_multiplier = self.getDetail(row, 'multiplier')
             self.setParamValue(row, parameter=value)
-            # keep the displayed values the same, so multiply to ajust
-            # real underlying value
-            new_multiplier = self.getDetail(row, 'multiplier')
-            if old_multiplier is not None and old_multiplier != new_multiplier:
-                new_multiplier = float(new_multiplier)
-                for f in ['start', 'stop', 'step']:
-                    self.setScaledValue(row, f, (self.paramValue(row, f)/new_multiplier)*(new_multiplier/old_multiplier))
         elif field in ['start', 'stop', 'step']:
-            multiplier = self.getDetail(row, 'multiplier')
-            if multiplier is not None:
-                if self.checkLimits(row, value*multiplier):
-                    kwd = {field : value*multiplier}
-                    self.setParamValue(row, **kwd)
+            if self.checkLimits(row, value):
+                kwd = {field : value}
+                self.setParamValue(row, **kwd)
 
     def scaledValue(self, row, field):
-        """Scales the value in *field* in the parameter
-        indexed by *row*, according to that parameters internally
-        stored multiplier and returns it
+        """Gets the value in *field* in the parameter
+        indexed by *row* and returns it
 
         :param row: the ith parameter number
         :type row: int
@@ -108,9 +95,7 @@ class AutoParameterModel():
                 return '-'
             else:
                 val = self.paramValue(row, field)
-                multiplier = self.getDetail(row, 'multiplier')
-                if multiplier is not None:
-                    return float(val)/multiplier
+                return val
         elif field == 'nsteps':
             return self.numSteps(row)
 

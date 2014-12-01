@@ -11,8 +11,11 @@ from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.gui.stim.stimulusview import StimulusView
+from spikeylab.gui.stim.auto_parameter_view import SmartDelegate
 from main_control_form import Ui_ControlWindow
 from spikeylab.tools.systools import get_src_directory
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
+from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
@@ -38,9 +41,10 @@ class ControlWindow(QtGui.QMainWindow):
         # make a list of which widgets should be updated when scales are changed
         self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx]
         self.frequencyInputs = [self.ui.aisrSpnbx]
-        self.timeLabels = [self.ui.tunit_lbl, self.ui.tunit_lbl_2]
-        self.frequencyLabels = [self.ui.funit_lbl_2]
-
+            
+        self.ui.exploreStimEditor.setModel(self.acqmodel.explore_stimulus())
+        self.ui.exploreStimEditor.addComponentEditor()
+        
         # Allow items from the the procotol view to be thrown in trash located
         # on different widget
         self.ui.protocolView.installEventFilter(self.ui.stimulusChoices.trash())
@@ -54,24 +58,6 @@ class ControlWindow(QtGui.QMainWindow):
         for calstim in self.acqmodel.bs_calibrator.get_stims()[::-1]: #tsk
             self.ui.calibrationWidget.addOption(wrapComponent(calstim))
         
-        # update now so that multipliers will be correct when values are
-        # set for new component editors
-        self.updateUnitLabels(self.tscale, self.fscale)
-
-        # for stim in self.exploreStimuli:
-        #     editor = stim.showEditor()
-        #     # connect signal to static class method to be able to share
-        #     # default attributes in stimulus builder from explore components
-        #     # using class variables
-        #     editor.attributesSaved.connect(StimulusView.updateDefaults)
-        #     # intial from saved values
-        #     StimulusView.updateDefaults(stim.__class__.__name__, stim.stateDict())
-        #     # add this editor to the expore list of stims
-        #     self.ui.exploreEditor0.addWidget(editor, stim.name)
-
-        # rerun to set decimal places correctly for newly added editors
-        self.updateUnitLabels(self.tscale, self.fscale)
-
         try:
             # reload previous window geometry
             settings = QtCore.QSettings("audiolab")
@@ -114,7 +100,7 @@ class ControlWindow(QtGui.QMainWindow):
             if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
                 # each widget should be in charge of putting its own stimulus together
                 self.ui.exploreStimEditor.saveToObject()
-                failmsg = self.ui.exploreStimEditor.verify(self.ui.windowszSpnbx.value()*self.tscale)
+                failmsg = self.ui.exploreStimEditor.verify(self.ui.windowszSpnbx.value())
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
@@ -125,7 +111,7 @@ class ControlWindow(QtGui.QMainWindow):
             elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
                 protocol_model = self.acqmodel.protocol_model()
                 # protocol delegates to each test to verify itself and report
-                failure = protocol_model.verify(float(self.ui.windowszSpnbx.value())*self.tscale)
+                failure = protocol_model.verify(float(self.ui.windowszSpnbx.value()))
                 if failure:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failure)
                     return False
@@ -137,12 +123,12 @@ class ControlWindow(QtGui.QMainWindow):
                 else:
                     calibration_stimulus = self.acqmodel.calibration_stimulus('tone')
 
-                failmsg = calibration_stimulus.verify(float(self.ui.windowszSpnbx.value())*self.tscale)
+                failmsg = calibration_stimulus.verify(float(self.ui.windowszSpnbx.value()))
                 if failmsg:
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
                 # also check that the recording samplerate is high enough in this case
-                failmsg = calibration_stimulus.verifyExpanded(samplerate=self.ui.aisrSpnbx.value()*self.fscale)
+                failmsg = calibration_stimulus.verifyExpanded(samplerate=self.ui.aisrSpnbx.value())
                 if failmsg:
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
@@ -171,86 +157,33 @@ class ControlWindow(QtGui.QMainWindow):
             not perform field value conversion
         :type setup: bool
         """
-        AbstractEditorWidget.scales = [tscale, fscale]
+        AbstractEditorWidget.updateScales(tscale, fscale)
+        SmartDelegate.updateScales(tscale, fscale)
 
         # purges stored label references from deleted parent widgets
         AbstractEditorWidget.purgeDeletedWidgets()
-
-        if tscale != self.tscale:
-            # time conversion necessary
-            scale_time = True
-        else:
-            scale_time = False
             
         self.tscale = tscale
 
         # updates labels for components
-        AbstractStimulusComponent.update_tscale(self.tscale)
         # add the list of all time unit labels out there to our update
         # list here
         time_inputs = self.timeInputs + AbstractEditorWidget.tunit_fields
-        time_labels = self.timeLabels + AbstractEditorWidget.tunit_labels
 
         # now go through our list of labels and fields and scale/update
-        if self.tscale == 0.001:
-            for field in time_inputs:
-                if scale_time:
-                    field.setMaximum(field.maximum()/0.001)
-                    field.setValue(field.value()/0.001)
-                    field.setMinimum(field.minimum()/0.001)
-                field.setDecimals(0)
-            for lbl in time_labels:
-                lbl.setText(u'ms')
-        elif self.tscale == 1:
-            for field in time_inputs:
-                field.setDecimals(3)
-                if scale_time:
-                    field.setMinimum(field.minimum()*0.001)
-                    field.setValue(field.value()*0.001)
-                    field.setMaximum(field.maximum()*0.001)
-            for lbl in time_labels:
-                lbl.setText(u's')
-        else:
-            print self.tscale
-            raise Exception(u"Invalid time scale")
-
-        if fscale != self.fscale:
-            scale_freq = True
-        else:
-            scale_freq = False
+        for field in time_inputs:
+            field.setScale(tscale)
 
         self.fscale = fscale
 
-        # updates labels for components
-        AbstractStimulusComponent.update_fscale(self.fscale)
-        # add the list of all time unit labels out there to our update
+        # add the list of all frequency unit labels out there to our update
         # list here
         frequency_inputs = self.frequencyInputs + AbstractEditorWidget.funit_fields
-        frequency_labels = self.frequencyLabels + AbstractEditorWidget.funit_labels
 
         # now go through our list of labels and fields and scale/update
-        if self.fscale == 1000:
-            for field in frequency_inputs:
-                field.setDecimals(3)
-                if scale_freq:
-                    field.setMinimum(field.minimum()/1000)
-                    field.setValue(field.value()/1000)
-                    field.setMaximum(field.maximum()/1000)
-            for lbl in frequency_labels:
-                lbl.setText(u'kHz')
+        for field in frequency_inputs:
+            field.setScale(fscale)
 
-        elif self.fscale == 1:
-            for field in frequency_inputs:
-                if scale_freq:
-                    field.setMaximum(field.maximum()*1000)
-                    field.setValue(field.value()*1000)
-                    field.setMinimum(field.minimum()*1000)
-                field.setDecimals(0)
-            for lbl in frequency_labels:
-                lbl.setText(u'Hz')
-        else:
-            print self.fscale
-            raise Exception(u"Invalid frequency scale")
             
     def saveInputs(self, fname):
         """Save the values in the input fields so they can be loaded
@@ -314,16 +247,17 @@ class ControlWindow(QtGui.QMainWindow):
             inputsdict = {}
 
         self.ui.threshSpnbx.setValue(inputsdict.get('threshold', 0.5))
-        self.stashedAisr = inputsdict.get('aisr', 100)
+        self.stashedAisr = inputsdict.get('aisr', 100000)
         self.ui.aisrSpnbx.setValue(self.stashedAisr)
-        self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 100))
-        self.ui.binszSpnbx.setValue(inputsdict.get('binsz', 5))        
+        self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 0.1))
+        self.ui.binszSpnbx.setValue(inputsdict.get('binsz', 0.005))        
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.exploreStimEditor.setReps((inputsdict.get('ex_nreps', 5)))
         self.ui.reprateSpnbx.setValue(inputsdict.get('reprate', 1))
         self.display.spiketracePlot.setRasterBounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.specArgs = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
-        self.display.setSpecArgs(**self.specArgs)  
+        # self.display.setSpecArgs(**self.specArgs)  
+        SpecWidget.setSpecArgs(**self.specArgs)
         self.viewSettings = inputsdict.get('viewSettings', {'fontsz': 10, 'display_attributes':{}})
         self.ui.stimDetails.setDisplayAttributes(self.viewSettings['display_attributes'])
         font = QtGui.QFont()
@@ -341,28 +275,14 @@ class ControlWindow(QtGui.QMainWindow):
         # self.ui.mphoneDBSpnbx.setValue(inputsdict.get('mphonedb', 94))
 
         # load the previous sessions scaling
-        self.tscale = inputsdict.get('tscale', 0.001)
-        self.fscale = inputsdict.get('fscale', 1000)
-
-        # the editors in the UI will set their own max/min, properly initialize
-        # the controls on the main UI
-        if self.fscale == 1000:
-            self.ui.aisrSpnbx.setMinimum(0.001)
-            self.ui.aisrSpnbx.setMaximum(500)
-        elif self.fscale == 1:
-            self.ui.aisrSpnbx.setMinimum(1)
-            self.ui.aisrSpnbx.setMaximum(500000)
-        if self.tscale == 0.001:
-            self.ui.windowszSpnbx.setMinimum(1)
-            self.ui.windowszSpnbx.setMaximum(3000)
-            self.ui.binszSpnbx.setMinimum(1)
-            self.ui.binszSpnbx.setMaximum(3000)
-        elif self.tscale == 1:
-            self.ui.windowszSpnbx.setMinimum(0.001)
-            self.ui.windowszSpnbx.setMaximum(3)
-            self.ui.binszSpnbx.setMinimum(0.001)
-            self.ui.binszSpnbx.setMaximum(3)
-
+        self.tscale = inputsdict.get('tscale', SmartSpinBox.MilliSeconds)
+        self.fscale = inputsdict.get('fscale', SmartSpinBox.kHz)
+        try:
+            self.updateUnitLabels(self.tscale, self.fscale)
+        except:
+            self.tscale = 'ms'
+            self.fscale = 'kHz'
+            self.updateUnitLabels(self.tscale, self.fscale)
 
         cal_template = inputsdict.get('calparams', None)
         if cal_template is not None:

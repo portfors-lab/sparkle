@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'explore_stim_editor.ui'
 #
-# Created: Fri Nov 21 09:43:53 2014
+# Created: Fri Nov 21 21:01:53 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -51,9 +51,6 @@ class Ui_ExploreStimEditor(object):
         self.exNrepsSpnbx.setProperty("value", 5)
         self.exNrepsSpnbx.setObjectName(_fromUtf8("exNrepsSpnbx"))
         self.gridLayout.addWidget(self.exNrepsSpnbx, 0, 1, 1, 1)
-        self.label_39 = QtGui.QLabel(ExploreStimEditor)
-        self.label_39.setObjectName(_fromUtf8("label_39"))
-        self.gridLayout.addWidget(self.label_39, 0, 0, 1, 1)
         self.label_6 = QtGui.QLabel(ExploreStimEditor)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout.addWidget(self.label_6, 1, 0, 1, 1)
@@ -63,9 +60,9 @@ class Ui_ExploreStimEditor(object):
         self.aosrSpnbx.setMaximum(500000.0)
         self.aosrSpnbx.setObjectName(_fromUtf8("aosrSpnbx"))
         self.gridLayout.addWidget(self.aosrSpnbx, 1, 1, 1, 1)
-        self.funit_lbl = QtGui.QLabel(ExploreStimEditor)
-        self.funit_lbl.setObjectName(_fromUtf8("funit_lbl"))
-        self.gridLayout.addWidget(self.funit_lbl, 1, 2, 1, 1)
+        self.label_39 = QtGui.QLabel(ExploreStimEditor)
+        self.label_39.setObjectName(_fromUtf8("label_39"))
+        self.gridLayout.addWidget(self.label_39, 0, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
 
         self.retranslateUi(ExploreStimEditor)
@@ -75,9 +72,8 @@ class Ui_ExploreStimEditor(object):
         ExploreStimEditor.setWindowTitle(_translate("ExploreStimEditor", "Form", None))
         self.addBtn.setText(_translate("ExploreStimEditor", "+", None))
         self.exNrepsSpnbx.setToolTip(_translate("ExploreStimEditor", "Number of presentations before plots reset", None))
-        self.label_39.setText(_translate("ExploreStimEditor", "Reps", None))
         self.label_6.setText(_translate("ExploreStimEditor", "Gen. Sample rate", None))
         self.aosrSpnbx.setToolTip(_translate("ExploreStimEditor", "Stimulus output sampling rate", None))
-        self.funit_lbl.setText(_translate("ExploreStimEditor", "kHz", None))
+        self.label_39.setText(_translate("ExploreStimEditor", "Reps", None))
 
 from spikeylab.gui.stim.smart_spinbox import SmartSpinBox

@@ -22,8 +22,6 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         self.durSpnbx.setKeyboardTracking(False)
         self.risefallSpnbx.setKeyboardTracking(False)
 
-        self.tunit_labels.append(self.tunit_lbl_0)
-        self.tunit_labels.append(self.tunit_lbl_1)
         self.tunit_fields.append(self.durSpnbx)
         self.tunit_fields.append(self.risefallSpnbx)
 
@@ -39,7 +37,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         
     def setComponent(self, component):
         self.dbSpnbx.setValue(component.intensity())
-        self.risefallSpnbx.setValue(component.risefall()/self.scales[0])
+        self.risefallSpnbx.setValue(component.risefall())
         
         self.currentWavFile = component.file()
         if self.currentWavFile is not None:
@@ -53,7 +51,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
 
             self.filelistView.setCurrentIndex(self.filemodel.index(self.currentWavFile))
             dur = self.specPreview.fromFile(self.currentWavFile)
-            self.durSpnbx.setValue(dur/self.scales[0])
+            self.durSpnbx.setValue(dur)
 
         self._component = component
 
@@ -132,7 +130,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
             return # not an audio file
 
         dur = self.specPreview.fromFile(spath)
-        self.durSpnbx.setValue(dur/self.scales[0])
+        self.durSpnbx.setValue(dur)
         self.currentWavFile = spath
         self.nfiles.setNum(len(allselected))
 
@@ -151,9 +149,6 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
 
     def setContentFocus(self):
         pass
-
-    def setSpecArgs(self, *args, **kwargs):
-        self.specPreview.setSpecArgs(*args, **kwargs)
 
     def updateColormap(self):
         self.specPreview.updateColormap()

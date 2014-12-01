@@ -83,14 +83,14 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
         self.colormapChanged = self.stimSpecPlot.colormapChanged
         self.colormapChanged = self.responseSpecPlot.colormapChanged
 
-    def setSpecArgs(self, *args, **kwargs):
-        """Sets the parameters for the spectrogram calculation/drawing,
-        chosen by the user.
+    # def setSpecArgs(self, *args, **kwargs):
+    #     """Sets the parameters for the spectrogram calculation/drawing,
+    #     chosen by the user.
 
-        For arguments, see: :meth:`SpecWidget.setSpecArgs<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.setSpecArgs>`
-        """
-        self.stimSpecPlot.setSpecArgs(*args, **kwargs)
-        self.responseSpecPlot.setSpecArgs(*args, **kwargs)
+    #     For arguments, see: :meth:`SpecWidget.setSpecArgs<spikeylab.gui.plotting.pyqtgraph_widgets.SpecWidget.setSpecArgs>`
+    #     """
+    #     self.stimSpecPlot.setSpecArgs(*args, **kwargs)
+    #     self.responseSpecPlot.setSpecArgs(*args, **kwargs)
 
     def updateSpec(self, *args, **kwargs):
         """Updates the spectrogram given by kwarg *'plot'*, which is

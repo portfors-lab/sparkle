@@ -20,7 +20,6 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
 
         self.funit_fields.append(self.ui.aosrSpnbx)
-        self.funit_labels.append(self.ui.funit_lbl)
 
         self.buttons  = []
 
@@ -30,7 +29,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         
     def setModel(self, model):
         self._model = model
-        self.ui.aosrSpnbx.setValue(model.samplerate()/self.scales[1])
+        self.ui.aosrSpnbx.setValue(model.samplerate())
         #must be at least one component & delay
         # for row in range(1,model.rowCount()):
         #     delay = model.component(row,0)
@@ -46,7 +45,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self._model.insertComponent(newcomp, row, 1)
 
     def setDelay(self, row, delay):
-        self._model.component(row,0).setDuration(delay*self.scales[0])
+        self._model.component(row,0).setDuration(delay)
         self.valueChanged.emit()
 
     def repCount(self):
@@ -73,7 +72,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         comp_stack_editor.closePlease.connect(self.removeComponentEditor)
 
         delay = Silence()
-        comp_stack_editor.delaySpnbx.setValue(delay.duration()/self.scales[0])
+        comp_stack_editor.delaySpnbx.setValue(delay.duration())
         self._model.insertComponent(delay, row,0)
 
         self._allComponents.append([x() for x in self.stimuli_types if x.explore])
@@ -113,7 +112,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
     def saveToObject(self):
         for icomp in range(self.ui.trackStack.count()):
             self.ui.trackStack.widget(icomp).currentWidget().saveToObject()
-        self.ui.aosrSpnbx.setValue(self._model.samplerate()/self.scales[1])
+        self.ui.aosrSpnbx.setValue(self._model.samplerate())
 
     def samplerate(self):
         return self._model.samplerate()
@@ -121,6 +120,12 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
     def verify(self, winsz):
         # have the stim check itself and report
         return self._model.verify(winsz)
+
+    def allComponentWidgets(self):
+        w = []
+        for icomp in range(self.ui.trackStack.count()):
+            w.extend(self.ui.trackStack.widget(icomp).widgets())
+        return w
 
 class IndexButton(QtGui.QPushButton):
     pickMe = QtCore.Signal(int)

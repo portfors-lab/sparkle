@@ -14,7 +14,7 @@ from QtWrapper.QtCore import Qt
 
 class TestCalibrationDialog():
     def setUp(self):
-        self.fscale = 1000
+        self.fscale = 'kHz'
         self.defaults = {'calf':20000, 'caldb':100,  'calv':0.1, 'calname':'calibration_1', 
                          'use_calfile':False, 'frange':(5000, 1e5)}
         cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
@@ -55,8 +55,8 @@ class TestCalibrationDialog():
         calname = cal_data_file.calibration_list()[0]
         x, freqs = cal_data_file.get_calibration(calname, reffreq=15000)
 
-        assert self.dlg.ui.frangeLowSpnbx.value()*self.fscale == max(freqs[0], self.dlg.ui.frangeLowSpnbx.minimum()*self.fscale)
-        assert self.dlg.ui.frangeHighSpnbx.value()*self.fscale == min(freqs[-1], self.dlg.ui.frangeHighSpnbx.maximum()*self.fscale)
+        assert self.dlg.ui.frangeLowSpnbx.value() == max(freqs[0], self.dlg.ui.frangeLowSpnbx.minimum())
+        assert self.dlg.ui.frangeHighSpnbx.value() == min(freqs[-1], self.dlg.ui.frangeHighSpnbx.maximum())
 
     def test_plot_curve(self):
         self.dlg.ui.calfileRadio.setChecked(True)
@@ -132,7 +132,7 @@ class TestSavingDialog():
 
 class TestScaleDialog():
     def test_accept_defaults(self):
-        defaults = {'fscale':1000, 'tscale':0.001}
+        defaults = {'fscale':'kHz', 'tscale':'ms'}
         dlg = ScaleDialog(defaultVals=defaults)
         retvals = dlg.values()
         assert retvals[0] == defaults['fscale']
@@ -141,13 +141,13 @@ class TestScaleDialog():
         dlg.deleteLater()
 
     def test_change_scale(self):
-        defaults = {'fscale':1000, 'tscale':0.001}
+        defaults = {'fscale':'kHz', 'tscale':'ms'}
         dlg = ScaleDialog(defaultVals=defaults)
         dlg.ui.secBtn.setChecked(True)
         dlg.ui.hzBtn.setChecked(True)
         retvals = dlg.values()
-        assert retvals[0] == 1
-        assert retvals[1] == 1
+        assert retvals[0] == 'Hz'
+        assert retvals[1] == 's'
         dlg.close()
         dlg.deleteLater()
 

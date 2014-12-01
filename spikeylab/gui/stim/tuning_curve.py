@@ -24,6 +24,19 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.ui.dbNstepsLbl.textChanged.connect(self.updateTextColor)
         self.ok = self.ui.okBtn
 
+        # set scaling to current for application
+        self.ui.freqStartSpnbx.setScale(self._scales[1])
+        self.ui.freqStopSpnbx.setScale(self._scales[1])
+        self.ui.freqStepSpnbx.setScale(self._scales[1])
+        self.ui.durSpnbx.setScale(self._scales[0])
+        self.ui.risefallSpnbx.setScale(self._scales[0])
+
+        self.tunit_fields.append(self.ui.durSpnbx)
+        self.tunit_fields.append(self.ui.risefallSpnbx)
+        self.funit_fields.append(self.ui.freqStartSpnbx)
+        self.funit_fields.append(self.ui.freqStopSpnbx)
+        self.funit_fields.append(self.ui.freqStepSpnbx)
+
     def setModel(self, model):
         """Sets the StimulusModel for this editor"""
         self.stimModel = model
@@ -44,9 +57,9 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
 
         tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole+1)
         info = tone.auto_details()
-        self.ui.durSpnbx.setValue(tone.duration()/info['duration']['multiplier'])
+        self.ui.durSpnbx.setValue(tone.duration())
         self.ui.nrepsSpnbx.setValue(self.stimModel.repCount())
-        self.ui.risefallSpnbx.setValue(tone.risefall()/info['risefall']['multiplier'])
+        self.ui.risefallSpnbx.setValue(tone.risefall())
         self.tone = tone
 
     def submit(self):
@@ -60,8 +73,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         """Sets the duration of the StimulusModel from values pulled from
         this widget"""
         duration = self.ui.durSpnbx.value()
-        info = self.tone.auto_details()
-        self.tone.setDuration(duration*info['duration']['multiplier'])
+        self.tone.setDuration(duration)
         # self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole).setDuration(duration)
 
     def setStimReps(self):
@@ -74,8 +86,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         """Sets the Risefall of the StimulusModel's tone from values pulled from
         this widget"""
         rf = self.ui.risefallSpnbx.value()
-        info = self.tone.auto_details()
-        self.tone.setRisefall(rf*info['risefall']['multiplier'])
+        self.tone.setRisefall(rf)
 
     def model(self):
         """Gets this editor's StimulusModel"""

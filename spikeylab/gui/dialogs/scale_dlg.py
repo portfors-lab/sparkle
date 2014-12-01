@@ -1,6 +1,8 @@
 from QtWrapper import QtGui
 from scale_dlg_form import Ui_ScaleDlg
 
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
+
 class ScaleDialog(QtGui.QDialog):
     """Dialog for setting the time and frequency scaling for the GUI"""
     def __init__(self,  parent=None, defaultVals=None):
@@ -9,16 +11,16 @@ class ScaleDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         if defaultVals is not None:
-            if defaultVals[u'fscale'] == 1:
+            if defaultVals[u'fscale'] == SmartSpinBox.Hz:
                 self.ui.hzBtn.setChecked(True)
-            elif defaultVals[u'fscale'] == 1000:
+            elif defaultVals[u'fscale'] == SmartSpinBox.kHz:
                 self.ui.khzBtn.setChecked(True)
             else:
                 raise Exception(u"Invalid frequency scale")
 
-            if defaultVals[u'tscale'] == 1:
+            if defaultVals[u'tscale'] == SmartSpinBox.Seconds:
                 self.ui.secBtn.setChecked(True)
-            elif defaultVals[u'tscale'] == 0.001:
+            elif defaultVals[u'tscale'] == SmartSpinBox.MilliSeconds:
                 self.ui.msBtn.setChecked(True)
             else:
                 raise Exception(u"Invalid time scale")
@@ -32,13 +34,13 @@ class ScaleDialog(QtGui.QDialog):
         :returns: float, float -- frequency scaling, time scaling
         """
         if self.ui.hzBtn.isChecked():
-            fscale = 1
+            fscale = SmartSpinBox.Hz
         else:
-            fscale = 1000
+            fscale = SmartSpinBox.kHz
 
         if self.ui.msBtn.isChecked():
-            tscale = 0.001
+            tscale = SmartSpinBox.MilliSeconds
         else:
-            tscale = 1
+            tscale = SmartSpinBox.Seconds
 
         return fscale, tscale

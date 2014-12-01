@@ -2,6 +2,7 @@ from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
 from spikeylab.gui.stim.dynamic_stacker import DynamicStackedWidget
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
 
 class ExploreComponentEditor(AbstractEditorWidget):
     """Editor for individual track in the explore stimulus model"""
@@ -27,18 +28,14 @@ class ExploreComponentEditor(AbstractEditorWidget):
         self.componentStack = DynamicStackedWidget()
         self.exploreStimTypeCmbbx.currentIndexChanged.connect(self.componentStack.setCurrentIndex)
 
-        self.delaySpnbx = QtGui.QDoubleSpinBox()
-        self.delaySpnbx.setDecimals(0)
+        self.delaySpnbx = SmartSpinBox()
         self.delaySpnbx.setKeyboardTracking(False)
         self.delaySpnbx.valueChanged.connect(self.valueChanged.emit)
         self.tunit_fields.append(self.delaySpnbx)
 
         delayLayout = QtGui.QHBoxLayout()
-        delay_label = QtGui.QLabel('ms')
-        self.tunit_labels.append(delay_label)
         delayLayout.addWidget(QtGui.QLabel("Delay"))
         delayLayout.addWidget(self.delaySpnbx)
-        delayLayout.addWidget(delay_label)
 
         separator = QtGui.QFrame()
         separator.setFrameStyle(QtGui.QFrame.HLine)
@@ -71,4 +68,4 @@ class ExploreComponentEditor(AbstractEditorWidget):
         return self.exploreStimTypeCmbbx.currentIndex()
 
     def delay(self):
-        return self.delaySpnbx.value()*self.scales[0]
+        return self.delaySpnbx.value()

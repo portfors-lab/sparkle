@@ -60,13 +60,23 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         See :qtdoc:`QAbstractItemModel<QAbstractItemModel.data>`, 
         and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
         """
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+        if role == QtCore.Qt.DisplayRole:
+            row = index.row()
+            field = self._headers[index.column()]
+            val = self.model.scaledValue(row, field)
+            unit = self.model.getDetail(index.row(), 'unit')
+            if val is not None and unit is not None:
+                return str(val) + ' ' + unit
+            else:
+                return val
+        elif role == QtCore.Qt.EditRole:
             row = index.row()
             field = self._headers[index.column()]
             return self.model.scaledValue(row, field)
+            # return self.model.paramValue(row, field)
         elif role == QtCore.Qt.ToolTipRole:
             if 1 <= index.column() <= 3:
-                label = self.model.getDetail(index.row(), 'label')
+                label = self.model.getDetail(index.row(), 'unit')
                 return label
         elif role == QtCore.Qt.ForegroundRole:
             # color the background red for bad values
@@ -112,6 +122,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             elif isinstance(value, QtCore.QString):
                 value = str(value)
             self.model.setScaledValue(index.row(), self._headers[index.column()], value)
+            # self.model.setParamValue(index.row(), self._headers[index.column()], value)
             self.countChanged.emit()
         elif role == QtCore.Qt.UserRole:
             row = index.row()
