@@ -64,11 +64,15 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
             row = index.row()
             field = self._headers[index.column()]
             val = self.model.scaledValue(row, field)
-            unit = self.model.getDetail(index.row(), 'unit')
-            if val is not None and unit is not None:
-                return str(val) + ' ' + unit
+            if 1 <= index.column() <= 3:
+                unit = self.model.getDetail(index.row(), 'unit')
+                if val is not None and unit is not None:
+                    return str(val) + ' ' + unit
+                else:
+                    return val
             else:
                 return val
+                
         elif role == QtCore.Qt.EditRole:
             row = index.row()
             field = self._headers[index.column()]

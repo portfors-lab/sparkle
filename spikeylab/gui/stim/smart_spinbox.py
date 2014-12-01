@@ -24,10 +24,7 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
 
     def textFromValue(self, val):
         val = val/self._scalar
-        if val - floor(val) > 0.0:
-            return str(val)
-        else:
-            return str(int(val))
+        return trim(val)
 
     def setScale(self, scale):
         if scale == self.MilliSeconds:
@@ -61,3 +58,9 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
             return (2, pos)
         else:
             return (1, pos)
+
+def trim(val):
+    if val - floor(val) > 0.0:
+        return str(val)
+    else:
+        return str(int(val))

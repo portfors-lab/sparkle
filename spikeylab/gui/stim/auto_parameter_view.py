@@ -3,7 +3,7 @@ import re
 from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.abstract_drag_view import AbstractDragView
-from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox, trim
 
 class AddLabel(object):
     name = "Add"
@@ -176,7 +176,8 @@ class SmartDelegate(QtGui.QStyledItemDelegate):
     def displayText(self, value, locale):
         # we don't have the luxury of index and model, so we got the
         # model to include the base unit we can parse out and manually
-        # adjust the scale here
+        # adjust the scale here. This is essentially code duplicated
+        # from SmartSpinBox
         txt = super(SmartDelegate, self).displayText(value, locale)
         result = re.search('[a-zA-Z]+', txt)
         if result is not None:
@@ -184,10 +185,12 @@ class SmartDelegate(QtGui.QStyledItemDelegate):
             val = re.search('\d+\.?\d*', txt).group(0)
             if unit == 's':
                 if self._scales[0] == 'ms':
-                    txt = str(float(val)*1000) + ' ms'
+                    txt = trim(float(val)*1000) + ' ms'
             elif unit == 'Hz':
                 if self._scales[1] == 'kHz':
-                    txt = str(float(val)*0.001) + ' kHz'
+                    txt = trim(float(val)*0.001) + ' kHz'
+            else:
+                txt = trim(val)
         return txt
 
     @staticmethod
