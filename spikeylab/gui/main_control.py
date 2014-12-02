@@ -26,7 +26,8 @@ from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
-    
+from spikeylab.tools import spikestats
+        
 from controlwindow import ControlWindow
 
 RED = QtGui.QPalette()
@@ -632,6 +633,8 @@ class MainWindow(ControlWindow):
             if repnum == 0:
                 # assume user must first access the first presentation
                 # before being able to browse through reps
+
+                # recreate stim signal
                 stim_signal = StimulusModel.signalFromDoc(stimulus, self.calvals['calv'], self.calvals['caldb'])
                 fs = stimulus['samplerate_da']
                 timevals = np.arange(len(stim_signal)).astype(float)/fs
@@ -640,6 +643,22 @@ class MainWindow(ControlWindow):
                 self.display.updateSignal(timevals, stim_signal)
                 self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(stim_signal, fs)
+
+                # recreate PSTH for current threshold and all reps
+                tracedata = self.acqmodel.datafile.get(path, (tracenum,))
+                binsz = float(self.ui.binszSpnbx.value())
+                self.ui.psth.clearData()
+                self.display.clearRaster()
+                winsz = float(tracedata.shape[1])/aisr
+                nbins = np.ceil(winsz/binsz)
+                bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
+                self.ui.psth.setBins(bin_centers)
+                bins = []
+                for itrace in range(tracedata.shape[0]):
+                    spike_times = spikestats.spike_times(tracedata[itrace,:], self.ui.threshSpnbx.value(), aisr)
+                    response_bins = spikestats.bin_spikes(spike_times, binsz)
+                    bins.extend(response_bins)
+                self.ui.psth.appendData(bins, tracedata.shape[0])
 
     def displayOldProgressPlot(self, path):
         if self.activeOperation is None:
