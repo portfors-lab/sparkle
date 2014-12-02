@@ -208,6 +208,10 @@ class CalibrationRunner(AbstractCalibrationRunner):
         self.stimulus.setRepCount(reps)
         self.refstim.setRepCount(reps)
 
+    def count(self):
+        return self.stimulus.repCount()
+
+
 # whether to use relative peak level (from FFT), or calculate from
 # microphone sensitivity level
 USE_FFT = True
@@ -384,3 +388,13 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         :type reps: int
         """
         self.stimulus.setRepCount(reps)
+
+    def count(self):
+        """Total number of all tests/traces/reps currently in this protocol
+
+        :returns: int -- the total
+        """
+        total = 0
+        for test in self.protocol_model.allTests():
+            total += test.traceCount()*test.loopCount()*test.repCount()
+        return total
