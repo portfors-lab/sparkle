@@ -11,6 +11,7 @@ from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from spikeylab.gui.stim.stimulus_editor import StimulusEditor
 from spikeylab.stim.auto_parameter_model import AutoParameterModel
+from spikeylab.gui.stim.factory import BuilderFactory
 
 import test.sample as sample
 import qtbot
@@ -90,6 +91,33 @@ class TestStimulusEditor():
         signals, docs, overloads = self.stim.expandedStim()
         # check the first two, make sure they are not the same
         assert docs[0]['components'][0][key] != docs[1]['components'][0][key]
+
+    def test_rep_count_persistant(self):
+        self.editor.show()
+
+        le_count = 44
+        self.editor.ui.nrepsSpnbx.setValue(le_count)
+        QTest.qWait(ALLOW)
+        
+        assert self.stim.repCount() == le_count
+
+        factory = BuilderFactory()
+        newstim = factory.create()
+        
+        # add a component so the editor doesn't complain when we close it
+        component = PureTone()
+        newstim.insertComponent(component, 0,0)
+        newstim.setReferenceVoltage(100, 0.1)
+
+        qstim = QStimulusModel(newstim)
+        neweditor = qstim.showEditor()
+        neweditor.show()
+
+        assert newstim.repCount() == le_count
+        assert neweditor.ui.nrepsSpnbx.value() == le_count
+
+        neweditor.close()
+        neweditor.deleteLater()
 
     def add_auto_param(self, model):
         # adds an autoparameter to the given model

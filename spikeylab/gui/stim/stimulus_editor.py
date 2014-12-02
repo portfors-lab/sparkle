@@ -9,6 +9,7 @@ class StimulusEditor(AbstractStimulusWidget):
     """Interface for editing stimuli in any way possible. Assemble components,
         assign auto-tests"""
     name = 'Custom'
+    _rep_default_cache = [1] # list (mutable) so we can share between instances
     def __init__(self, parent=None):
         super(StimulusEditor,self).__init__(parent)
         self.ui = Ui_StimulusEditor()
@@ -51,7 +52,12 @@ class StimulusEditor(AbstractStimulusWidget):
 
     def setRepCount(self, count):
         """Sets the repetition *count* for the stimulus model"""
+        self._rep_default_cache[0] = count
         self.ui.trackview.model().setRepCount(count)
+
+    @staticmethod
+    def defaultReps():
+        return StimulusEditor._rep_default_cache[0]
 
     def updateTraceCount(self):
         """Updates the trace count label with the data from the model"""

@@ -41,6 +41,7 @@ class BuilderFactory(StimFactory):
     def create(self):
         stim = StimulusModel()
         stim.setStimType(StimulusEditor.name)
+        stim.setRepCount(StimulusEditor.defaultReps())
         return stim
 
 class TCFactory(StimFactory):
