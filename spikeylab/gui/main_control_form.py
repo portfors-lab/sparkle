@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Mon Nov 24 09:02:14 2014
+# Created: Tue Dec  2 16:47:54 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -506,9 +506,18 @@ class Ui_ControlWindow(object):
         self.verticalLayout_14.setObjectName(_fromUtf8("verticalLayout_14"))
         self.splLayout = QtGui.QGridLayout()
         self.splLayout.setObjectName(_fromUtf8("splLayout"))
+        self.widget = QtGui.QWidget(self.dockWidgetContents_7)
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.splLayout.addWidget(self.widget, 0, 0, 1, 1)
         self.verticalLayout_14.addLayout(self.splLayout)
         self.responseSpl.setWidget(self.dockWidgetContents_7)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.responseSpl)
+        self.dockWidget = QtGui.QDockWidget(ControlWindow)
+        self.dockWidget.setObjectName(_fromUtf8("dockWidget"))
+        self.timerWidget = TimerWidget()
+        self.timerWidget.setObjectName(_fromUtf8("timerWidget"))
+        self.dockWidget.setWidget(self.timerWidget)
+        ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget)
         self.actionSave_Options = QtGui.QAction(ControlWindow)
         self.actionSave_Options.setObjectName(_fromUtf8("actionSave_Options"))
         self.actionSet_Calibration = QtGui.QAction(ControlWindow)
@@ -543,6 +552,8 @@ class Ui_ControlWindow(object):
         self.actionSet_Cell_ID.setObjectName(_fromUtf8("actionSet_Cell_ID"))
         self.actionComment = QtGui.QAction(ControlWindow)
         self.actionComment.setObjectName(_fromUtf8("actionComment"))
+        self.actionTimer = QtGui.QAction(ControlWindow)
+        self.actionTimer.setObjectName(_fromUtf8("actionTimer"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
@@ -554,6 +565,7 @@ class Ui_ControlWindow(object):
         self.menuShow.addAction(self.actionLog)
         self.menuShow.addAction(self.actionStimulus_Details)
         self.menuShow.addAction(self.actionComment)
+        self.menuShow.addAction(self.actionTimer)
         self.menuView.addAction(self.actionView_Settings)
         self.menuView.addAction(self.menuShow.menuAction())
         self.menubar.addAction(self.menuOptions.menuAction())
@@ -580,6 +592,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.mphoneDBSpnbx, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), ControlWindow.updateMicrophoneCalibration)
         QtCore.QObject.connect(self.actionSet_Cell_ID, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCellDlg)
         QtCore.QObject.connect(self.actionComment, QtCore.SIGNAL(_fromUtf8("triggered()")), self.runComment.showNormal)
+        QtCore.QObject.connect(self.actionTimer, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.showNormal)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -664,6 +677,7 @@ class Ui_ControlWindow(object):
         self.label_21.setText(_translate("ControlWindow", "Cell ID:", None))
         self.cellIDLbl.setText(_translate("ControlWindow", "0", None))
         self.responseSpl.setWindowTitle(_translate("ControlWindow", "Response dB SPL", None))
+        self.dockWidget.setWindowTitle(_translate("ControlWindow", "Timer", None))
         self.actionSave_Options.setText(_translate("ControlWindow", "Change Data File...", None))
         self.actionSet_Calibration.setText(_translate("ControlWindow", "Calibration Parameters...", None))
         self.actionSet_Scale.setText(_translate("ControlWindow", "Set Scale...", None))
@@ -681,6 +695,7 @@ class Ui_ControlWindow(object):
         self.actionStimulus_Details.setText(_translate("ControlWindow", "Stimulus Details", None))
         self.actionSet_Cell_ID.setText(_translate("ControlWindow", "Set Cell ID", None))
         self.actionComment.setText(_translate("ControlWindow", "Comment", None))
+        self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
 
 from spikeylab.gui.data_review import QDataReviewer
 from spikeylab.gui.qprotocol import ProtocolView
@@ -689,5 +704,6 @@ from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
 from spikeylab.gui.stim.explore_stim_editor import ExploreStimulusEditor
 from spikeylab.gui.calibration_widget import CalibrationWidget
 from spikeylab.gui.stim.stim_detail import StimDetailWidget
+from spikeylab.gui.timer_widget import TimerWidget
 from spikeylab.gui.stim.stimulus_label import StimulusLabelTable
 from spikeylab.gui.plotdock import PlotDockWidget

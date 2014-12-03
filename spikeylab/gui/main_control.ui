@@ -736,6 +736,7 @@
      <addaction name="actionLog"/>
      <addaction name="actionStimulus_Details"/>
      <addaction name="actionComment"/>
+     <addaction name="actionTimer"/>
     </widget>
     <addaction name="actionView_Settings"/>
     <addaction name="menuShow"/>
@@ -986,10 +987,23 @@
    <widget class="QWidget" name="dockWidgetContents_7">
     <layout class="QVBoxLayout" name="verticalLayout_14">
      <item>
-      <layout class="QGridLayout" name="splLayout"/>
+      <layout class="QGridLayout" name="splLayout">
+       <item row="0" column="0">
+        <widget class="QWidget" name="widget" native="true"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="windowTitle">
+    <string>Timer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="TimerWidget" name="timerWidget"/>
   </widget>
   <action name="actionSave_Options">
    <property name="text">
@@ -1076,6 +1090,11 @@
     <string>Comment</string>
    </property>
   </action>
+  <action name="actionTimer">
+   <property name="text">
+    <string>Timer</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1128,6 +1147,12 @@
    <class>ExploreStimulusEditor</class>
    <extends>QFrame</extends>
    <header>spikeylab.gui.stim.explore_stim_editor</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TimerWidget</class>
+   <extends>QWidget</extends>
+   <header>spikeylab.gui.timer_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -1434,6 +1459,22 @@
     <hint type="destinationlabel">
      <x>136</x>
      <y>442</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTimer</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>611</x>
+     <y>310</y>
     </hint>
    </hints>
   </connection>
