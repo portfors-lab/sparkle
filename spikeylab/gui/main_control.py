@@ -545,6 +545,7 @@ class MainWindow(ControlWindow):
             raise
 
     def spawnTuningCurve(self, frequencies, intensities, plotType):
+        print 'spawning curve'
         self.livecurve = ProgressWidget(intensities, (frequencies[0], frequencies[-1]))
         self.livecurve.setLabels(plotType)
 
@@ -554,6 +555,7 @@ class MainWindow(ControlWindow):
 
     def displayTuningCurve(self, f, db, spikeCount):
         if self.plotProgress:
+            print 'point', f, db, spikeCount
             self.livecurve.setPoint(f, db, spikeCount)
 
     def displayRaster(self, bins, repnum):

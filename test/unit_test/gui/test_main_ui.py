@@ -366,9 +366,12 @@ class TestMainUI():
         stimEditor = self.add_builder_tone()
 
         qtbot.doubleclick(stimEditor.ui.trackview,stimEditor.ui.trackview.model().index(0,0))
+        QtTest.QTest.qWait(ALLOW)
         qtbot.type_msg('20')
         qtbot.keypress('enter')
+        QtTest.QTest.qWait(ALLOW)
         qtbot.click(stimEditor.ui.okBtn)
+        QtTest.QTest.qWait(ALLOW)
 
         self.setup_tc()
         

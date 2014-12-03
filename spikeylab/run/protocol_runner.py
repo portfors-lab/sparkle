@@ -28,12 +28,12 @@ class ProtocolRunner(ListAcquisitionRunner):
             self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
-        self.player.set_aichan(self.aichan)
+        self.player.set_aichan(self.aichan)    
 
+    def _initialize_test(self, test):      
         # override defualt trace_counter intialization to make space for silence window
-        self.trace_counter = -1    
-
-    def _initialize_test(self, test):        
+        self.trace_counter = -1
+          
         if self.save_data:
             recording_length = self.aitimes.shape[0]
             # +1 to trace count for silence window
