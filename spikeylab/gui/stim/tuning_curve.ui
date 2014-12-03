@@ -17,94 +17,30 @@
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="2" column="2">
-      <widget class="QSpinBox" name="dbStopSpnbx">
+      <widget class="SmartSpinBox" name="dbStopSpnbx">
        <property name="maximum">
-        <number>120</number>
-       </property>
-       <property name="value">
-        <number>110</number>
+        <double>120.000000000000000</double>
        </property>
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QSpinBox" name="freqStopSpnbx">
+      <widget class="SmartSpinBox" name="freqStopSpnbx">
        <property name="maximum">
-        <number>200</number>
-       </property>
-       <property name="value">
-        <number>150</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="4">
-      <widget class="QLabel" name="label_21">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>dB SPL</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
-      <widget class="QLabel" name="funit_lbl_0">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>kHz</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QSpinBox" name="freqStartSpnbx">
-       <property name="maximum">
-        <number>200</number>
-       </property>
-       <property name="singleStep">
-        <number>5</number>
-       </property>
-       <property name="value">
-        <number>5</number>
+        <double>250000.000000000000000</double>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QSpinBox" name="dbStartSpnbx">
+      <widget class="SmartSpinBox" name="dbStartSpnbx">
        <property name="maximum">
-        <number>150</number>
-       </property>
-       <property name="singleStep">
-        <number>5</number>
-       </property>
-       <property name="value">
-        <number>0</number>
+        <double>120.000000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_25">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Frequency</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_26">
-       <property name="text">
-        <string>Start</string>
+     <item row="1" column="3">
+      <widget class="SmartSpinBox" name="freqStepSpnbx">
+       <property name="maximum">
+        <double>2500000.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -122,27 +58,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
-      <widget class="QLabel" name="label_28">
-       <property name="text">
-        <string>Step</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="5">
+     <item row="0" column="4">
       <widget class="QLabel" name="label_3">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -155,13 +71,27 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_25">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Frequency</string>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="3">
-      <widget class="SmartSpinBox" name="dbStepSpnbx"/>
+      <widget class="SmartSpinBox" name="dbStepSpnbx">
+       <property name="maximum">
+        <double>120.000000000000000</double>
+       </property>
+      </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="SmartSpinBox" name="freqStepSpnbx"/>
-     </item>
-     <item row="1" column="5">
+     <item row="1" column="4">
       <widget class="QLineEdit" name="freqNstepsLbl">
        <property name="enabled">
         <bool>false</bool>
@@ -192,7 +122,41 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="5">
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_26">
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLabel" name="label_28">
+       <property name="text">
+        <string>Step</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="SmartSpinBox" name="freqStartSpnbx">
+       <property name="maximum">
+        <double>250000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4">
       <widget class="QLineEdit" name="dbNstepsLbl">
        <property name="enabled">
         <bool>false</bool>
@@ -224,10 +188,19 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="3">
-      <widget class="QLabel" name="label_14">
-       <property name="text">
-        <string>Rise fall time</string>
+     <item row="1" column="3">
+      <widget class="QSpinBox" name="nrepsSpnbx">
+       <property name="toolTip">
+        <string>Number of times to repeat each tone</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>5</number>
        </property>
       </widget>
      </item>
@@ -245,51 +218,9 @@
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="tunit_lbl_4">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QLabel" name="label_14">
        <property name="text">
-        <string>ms</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QLabel" name="tunit_lbl_3">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>ms</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
-      <widget class="QSpinBox" name="nrepsSpnbx">
-       <property name="toolTip">
-        <string>Number of times to repeat each tone</string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>5</number>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QLabel" name="label_31">
-       <property name="text">
-        <string>Reps</string>
+        <string>Rise fall time</string>
        </property>
       </widget>
      </item>
@@ -299,14 +230,24 @@
         <string>Tone duration</string>
        </property>
        <property name="maximum">
-        <double>1000.000000000000000</double>
+        <double>3.000000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="1" column="2">
+      <widget class="QLabel" name="label_31">
+       <property name="text">
+        <string>Reps</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
       <widget class="SmartSpinBox" name="risefallSpnbx">
        <property name="toolTip">
         <string>rise+fall time for stimulus</string>
+       </property>
+       <property name="maximum">
+        <double>3.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -401,70 +342,6 @@
     <hint type="destinationlabel">
      <x>247</x>
      <y>245</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>freqStartSpnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>submit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>102</x>
-     <y>40</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>118</x>
-     <y>2</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dbStartSpnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>submit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>78</x>
-     <y>64</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>57</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>freqStopSpnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>submit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>349</x>
-     <y>48</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>187</x>
-     <y>-15</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dbStopSpnbx</sender>
-   <signal>editingFinished()</signal>
-   <receiver>TuningCurveEditor</receiver>
-   <slot>submit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>349</x>
-     <y>74</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>142</y>
     </hint>
    </hints>
   </connection>

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\incrementer.ui'
+# Form implementation generated from reading ui file 'incrementer.ui'
 #
-# Created: Fri Oct 31 09:36:27 2014
-#      by: PyQt4 UI code generator 4.11.1
+# Created: Fri Nov 21 22:39:05 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_IncrementInput(object):
     def setupUi(self, IncrementInput):
         IncrementInput.setObjectName(_fromUtf8("IncrementInput"))
-        IncrementInput.resize(371, 49)
+        IncrementInput.resize(371, 65)
         IncrementInput.setAutoFillBackground(True)
         IncrementInput.setStyleSheet(_fromUtf8(""))
         self.horizontalLayout = QtGui.QHBoxLayout(IncrementInput)
@@ -40,7 +40,7 @@ class Ui_IncrementInput(object):
         sizePolicy.setHeightForWidth(self.valueSpnbx.sizePolicy().hasHeightForWidth())
         self.valueSpnbx.setSizePolicy(sizePolicy)
         self.valueSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.valueSpnbx.setMaximum(120.0)
+        self.valueSpnbx.setMaximum(500000.0)
         self.valueSpnbx.setObjectName(_fromUtf8("valueSpnbx"))
         self.horizontalLayout.addWidget(self.valueSpnbx)
         self.gridLayout = QtGui.QGridLayout()

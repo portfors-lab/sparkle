@@ -113,12 +113,12 @@ class AcquisitionManager():
         """Increments the current cellid number that is saved for each test run"""
         self.current_cellid +=1
 
-    def stimuli_list(self):
+    def explore_stimulus(self):
         """Get a list of the stimuli for search operation
 
         :returns: list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`> -- list of the stimuli classes instances in the search operation
         """
-        return self.explorer.stimuli_list()
+        return self.explorer.stimulus()
 
     def set_calibration(self, datakey, calf=None, frange=None):
         """Sets a calibration for all of the acquisition operations,
@@ -243,17 +243,9 @@ class AcquisitionManager():
         self.charter.set(**kwargs)
         self.bs_calibrator.set(**kwargs)
         self.mphone_calibrator.set(**kwargs)
-
-    def set_explore_delay(self, duration):
-        self.explorer.set_delay(duration)
-
-    def set_stim_by_index(self, index):
-        """Sets the current stimulus for search operation by it's index in the order of stim types
-
-        :param index: Index of stimulus to set from the stimuli list
-        :type index: int
-        """
-        self.explorer.set_stim_by_index(index)
+    
+    def reset_explore_stim(self):
+        self.explorer.reset_stim()
 
     def current_stim(self):
         """The signal of the current search stimulus
@@ -261,13 +253,6 @@ class AcquisitionManager():
         :returns: numpy.ndarray -- the voltage signal of the output
         """
         return self.explorer.current_signal()
-
-    def explore_stim_names(self):
-        """Names of the available search operation stimuli, in order
-
-        :returns: list<str> -- list of the names of the stimuli
-        """
-        return self.explorer.stim_names()
 
     def run_explore(self, interval):
         """Runs the explore operation
@@ -426,7 +411,7 @@ class AcquisitionManager():
 
         :returns: int -- the outgoing samplerate
         """
-        return self.explorer.stimulus.samplerate()
+        return self.explorer.stimulus().samplerate()
 
     def calibration_genrate(self):
         """Gets the ouput samplerate for the calibration operation

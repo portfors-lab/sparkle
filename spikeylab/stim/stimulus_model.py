@@ -188,7 +188,10 @@ class StimulusModel():
 
         :returns: int -- number of rows
         """
-        return len(self._segments)
+        if len(self._segments[0]) == 0:
+            return 0
+        else:
+            return len(self._segments)
 
     def columnCount(self, row=None):
         """Returns the number of components in a track, 
@@ -272,7 +275,7 @@ class StimulusModel():
                 self.updateCalibration()
 
     def insertEmptyRow(self):
-        """Inserts and empty track at the end"""
+        """Appends an empty track at the end"""
         self._segments.append([])
 
     def removeLastRow(self):
@@ -280,6 +283,10 @@ class StimulusModel():
         lastrow = self._segments.pop(len(self._segments)-1)
         if len(lastrow) > 0:
             raise Exception("Attempt to remove non-empty stimulus track")
+
+    def removeRow(self, row):
+        """Removes the track at row, empty or not"""
+        self._segments.pop(row)
 
     def removeComponent(self, row,col):
         """Removes the component at the given location
@@ -644,9 +651,8 @@ class StimulusModel():
                     info['start_s'] = start_time
                 info['index'] = (row, col)
                 start_time += info['duration']
-
                 doc_list.append(info)
-
+                
         return {'samplerate_da':samplerate, 'components' : doc_list}
 
     def testDoc(self):
@@ -743,6 +749,7 @@ class StimulusModel():
             return "Test is empty"
         if windowSize is not None:
             durations = self.expandFunction(self.duration)
+            # print 'windowSize', windowSize, 'self', durations[0],  durations[-1]
             # ranges are linear, so we only need to test first and last
             if durations[0] > windowSize or durations[-1] > windowSize:
                 return "Stimulus duration exceeds window duration"

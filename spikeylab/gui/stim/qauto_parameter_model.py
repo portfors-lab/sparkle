@@ -60,14 +60,26 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
         See :qtdoc:`QAbstractItemModel<QAbstractItemModel.data>`, 
         and :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
         """
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+        if role == QtCore.Qt.DisplayRole:
             row = index.row()
             field = self._headers[index.column()]
-            return self.model.scaledValue(row, field)
-        elif role == QtCore.Qt.ToolTipRole:
+            val = self.model.paramValue(row, field)
             if 1 <= index.column() <= 3:
-                label = self.model.getDetail(index.row(), 'label')
-                return label
+                # standard units for data, not necessary current for UI
+                # view will scale and convert appropriately
+                unit = self.model.getDetail(index.row(), 'unit')
+                if val is not None and unit is not None:
+                    return str(val) + ' ' + unit
+                else:
+                    return val
+            else:
+                return val
+
+        elif role == QtCore.Qt.EditRole:
+            row = index.row()
+            field = self._headers[index.column()]
+            return self.model.paramValue(row, field)
+            # return self.model.paramValue(row, field)
         elif role == QtCore.Qt.ForegroundRole:
             # color the background red for bad values
             if not self.checkValidCell(index):
@@ -111,7 +123,7 @@ class QAutoParameterModel(QtCore.QAbstractTableModel):
                 value = value.toPyObject()
             elif isinstance(value, QtCore.QString):
                 value = str(value)
-            self.model.setScaledValue(index.row(), self._headers[index.column()], value)
+            self.model.setVerifiedValue(index.row(), self._headers[index.column()], value)
             self.countChanged.emit()
         elif role == QtCore.Qt.UserRole:
             row = index.row()

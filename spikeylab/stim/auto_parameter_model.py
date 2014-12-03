@@ -59,11 +59,9 @@ class AutoParameterModel():
         else:
             selection.append(component)
 
-    def setScaledValue(self, row, field, value):
-        """Converts the *value* for *field* in the parameter
-        indexed by *row*, according to that parameters internally
-        stored multiplier and assigns the converted value to that
-        parameter
+    def setVerifiedValue(self, row, field, value):
+        """Sets the *value* for *field* in the parameter
+        indexed by *row*, only if the value is within set limits
 
         :param row: the ith parameter number
         :type row: int
@@ -74,49 +72,15 @@ class AutoParameterModel():
         if self._parameters[row]['parameter'] == 'filename':
             return # cannot be set this way?
         if field == 'parameter':
-            old_multiplier = self.getDetail(row, 'multiplier')
             self.setParamValue(row, parameter=value)
-            # keep the displayed values the same, so multiply to ajust
-            # real underlying value
-            new_multiplier = self.getDetail(row, 'multiplier')
-            if old_multiplier is not None and old_multiplier != new_multiplier:
-                new_multiplier = float(new_multiplier)
-                for f in ['start', 'stop', 'step']:
-                    self.setScaledValue(row, f, (self.paramValue(row, f)/new_multiplier)*(new_multiplier/old_multiplier))
         elif field in ['start', 'stop', 'step']:
-            multiplier = self.getDetail(row, 'multiplier')
-            if multiplier is not None:
-                if self.checkLimits(row, value*multiplier):
-                    kwd = {field : value*multiplier}
-                    self.setParamValue(row, **kwd)
-
-    def scaledValue(self, row, field):
-        """Scales the value in *field* in the parameter
-        indexed by *row*, according to that parameters internally
-        stored multiplier and returns it
-
-        :param row: the ith parameter number
-        :type row: int
-        :param field: detail of the parameter to set
-        :type field: str
-        :returns: value -- type appropriate to parameter
-        """
-        if field == 'parameter':            
-            return self.paramValue(row, field)
-        elif field in ['start', 'stop', 'step']:
-            if self._parameters[row]['parameter'] == 'filename':
-                return '-'
-            else:
-                val = self.paramValue(row, field)
-                multiplier = self.getDetail(row, 'multiplier')
-                if multiplier is not None:
-                    return float(val)/multiplier
-        elif field == 'nsteps':
-            return self.numSteps(row)
+            if self.checkLimits(row, value):
+                kwd = {field : value}
+                self.setParamValue(row, **kwd)
 
     def setParamValue(self, row, **kwargs):
         """Sets the arguments as field=val for parameter
-        indexed by *row*. No scaling applied.
+        indexed by *row*
 
         :param row: the ith parameter number
         :type row: int
@@ -127,7 +91,7 @@ class AutoParameterModel():
 
     def paramValue(self, row, field):
         """Gets the value for *field* for parameter indexed by
-        *row*. No scaling appplied.
+        *row*
         
         :param row: the ith parameter number
         :type row: int
@@ -135,9 +99,13 @@ class AutoParameterModel():
         :type field: str
         :returns: value -- type appropriate to parameter
         """
-
-        param = self._parameters[row]
-        return param[field]
+        if field == 'nsteps':
+            return self.numSteps(row)
+        if field in ['start', 'stop', 'step'] and self._parameters[row]['parameter'] == 'filename':
+                return '-'
+        else:
+            param = self._parameters[row]
+            return param[field]
 
     def overwriteParam(self, row, param):
         """Assigns *param* to index *row*, overwritting the

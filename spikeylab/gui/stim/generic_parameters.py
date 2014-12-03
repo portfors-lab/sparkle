@@ -24,28 +24,26 @@ class GenericParameterWidget(AbstractComponentWidget):
                 inpt = IncrementInput()
                 layout.addWidget(QtGui.QLabel(field), row_counter, 0)
                 layout.addWidget(inpt, row_counter, 1)
-                lbl = QtGui.QLabel(details['label'])
-                layout.addWidget(lbl, row_counter, 2)
-                inpt.setMinimum(details['min']/details['multiplier'])
-                inpt.setMaximum(details['max']/details['multiplier'])
             else:
                 inpt = SmartSpinBox()
                 layout.addWidget(QtGui.QLabel(details.get('text', field)), row_counter, 0)
                 layout.addWidget(inpt, row_counter, 1)
-                lbl = QtGui.QLabel(details['label'])
-                layout.addWidget(lbl, row_counter, 2)
-                # set the max and min
-                inpt.setMinimum(details['min']/details['multiplier'])
-                inpt.setMaximum(details['max']/details['multiplier'])
             row_counter +=1
+            # set the max and min
+            inpt.setMinimum(details['min'])
+            inpt.setMaximum(details['max'])  
+             
             # if the label is the same as the the special labels of 
             # time or frequency add to list to be updated with scaling change
-            if details['label'] == component._labels[0]:
-                self.tunit_labels.append(lbl)
+            if details['unit'] == 's':
                 self.tunit_fields.append(inpt)
-            elif details['label'] == component._labels[1]:
-                self.funit_labels.append(lbl)
+                inpt.setScale(self._scales[0])
+            elif details['unit'] == 'Hz':
                 self.funit_fields.append(inpt)
+                inpt.setScale(self._scales[1])
+            else:
+                inpt.setScale(details['unit'])
+
             inpt.valueChanged.connect(self.valueChanged.emit)
             self.inputWidgets[field] = inpt
         layout.setRowStretch(row_counter, 1)
@@ -58,14 +56,14 @@ class GenericParameterWidget(AbstractComponentWidget):
         state = component.stateDict()
         for field, detail in details.items():
             val = state[field]
-            self.inputWidgets[field].setValue(val/detail['multiplier'])
+            self.inputWidgets[field].setValue(val)
         self._component = component
 
     def saveToObject(self):
         """Re-implemented from :meth:`AbstractComponentWidget<spikeylab.gui.stim.abstract_component_editor.AbstractComponentWidget.saveToObject>`"""
         details = self._component.auto_details()
         for field, widget in self.inputWidgets.items():
-            self._component.set(field, widget.value()*details[field]['multiplier'])
+            self._component.set(field, widget.value())
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def setContentFocus(self):

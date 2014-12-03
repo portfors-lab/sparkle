@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\vocal_parameters.ui'
+# Form implementation generated from reading ui file 'vocal_parameters.ui'
 #
-# Created: Fri Aug 29 13:57:41 2014
-#      by: QtWrapper UI code generator 4.11.1
+# Created: Fri Nov 21 23:57:44 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -77,9 +77,38 @@ class Ui_VocalParameterWidget(object):
         self.orderBtn.setObjectName(_fromUtf8("orderBtn"))
         self.horizontalLayout.addWidget(self.orderBtn)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.common = CommonParameterWidget(VocalParameterWidget)
-        self.common.setObjectName(_fromUtf8("common"))
-        self.verticalLayout.addWidget(self.common)
+        self.gridLayout_5 = QtGui.QGridLayout()
+        self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
+        self.risefallSpnbx = SmartSpinBox(VocalParameterWidget)
+        self.risefallSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.risefallSpnbx.setDecimals(3)
+        self.risefallSpnbx.setMaximum(500.0)
+        self.risefallSpnbx.setObjectName(_fromUtf8("risefallSpnbx"))
+        self.gridLayout_5.addWidget(self.risefallSpnbx, 3, 1, 1, 1)
+        self.dbSpnbx = IncrementInput(VocalParameterWidget)
+        self.dbSpnbx.setObjectName(_fromUtf8("dbSpnbx"))
+        self.gridLayout_5.addWidget(self.dbSpnbx, 0, 1, 1, 1)
+        self.label_32 = QtGui.QLabel(VocalParameterWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_32.sizePolicy().hasHeightForWidth())
+        self.label_32.setSizePolicy(sizePolicy)
+        self.label_32.setObjectName(_fromUtf8("label_32"))
+        self.gridLayout_5.addWidget(self.label_32, 1, 0, 1, 1)
+        self.label_42 = QtGui.QLabel(VocalParameterWidget)
+        self.label_42.setObjectName(_fromUtf8("label_42"))
+        self.gridLayout_5.addWidget(self.label_42, 0, 0, 1, 1)
+        self.label_40 = QtGui.QLabel(VocalParameterWidget)
+        self.label_40.setObjectName(_fromUtf8("label_40"))
+        self.gridLayout_5.addWidget(self.label_40, 3, 0, 1, 1)
+        self.durSpnbx = SmartSpinBox(VocalParameterWidget)
+        self.durSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.durSpnbx.setDecimals(3)
+        self.durSpnbx.setMaximum(2000.0)
+        self.durSpnbx.setObjectName(_fromUtf8("durSpnbx"))
+        self.gridLayout_5.addWidget(self.durSpnbx, 1, 1, 1, 1)
+        self.verticalLayout.addLayout(self.gridLayout_5)
 
         self.retranslateUi(VocalParameterWidget)
         QtCore.QObject.connect(self.filetreeView, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), VocalParameterWidget.wavdirSelected)
@@ -93,6 +122,10 @@ class Ui_VocalParameterWidget(object):
         self.label.setText(_translate("VocalParameterWidget", "Files selected:", None))
         self.nfiles.setText(_translate("VocalParameterWidget", "0", None))
         self.orderBtn.setText(_translate("VocalParameterWidget", "Order...", None))
+        self.label_32.setText(_translate("VocalParameterWidget", "Duration", None))
+        self.label_42.setText(_translate("VocalParameterWidget", "Intensity", None))
+        self.label_40.setText(_translate("VocalParameterWidget", "Rise fall time", None))
 
 from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
-from spikeylab.gui.stim.common_parameters import CommonParameterWidget
+from spikeylab.gui.stim.incrementer import IncrementInput
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox

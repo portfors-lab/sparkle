@@ -7,14 +7,6 @@ from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
 import test.sample as sample
 
 class TestAutoParameterModel():
-    def setUp(self):
-        self.original_tunits = AbstractStimulusComponent._scales[0]
-        self.original_funits = AbstractStimulusComponent._scales[1]
-
-    def tearDown(self):
-        AbstractStimulusComponent().update_tscale(self.original_tunits)
-        AbstractStimulusComponent().update_fscale(self.original_funits)
-
     def test_insert_rows(self):
         param_model = AutoParameterModel()
         param_model.insertRow(0)
@@ -44,7 +36,7 @@ class TestAutoParameterModel():
         parameter = 'frequency'
         model.setParamValue(0, parameter=parameter)
 
-        details = ['label', 'multiplier', 'min', 'max']
+        details = ['unit', 'min', 'max']
         for detail in details:
             d = model.getDetail(0, detail)
             assert d == component.auto_details()[parameter][detail]

@@ -35,7 +35,7 @@ class PureTone(AbstractStimulusComponent):
 
     def auto_details(self):
         details = super(PureTone, self).auto_details()
-        details['frequency'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000}
+        details['frequency'] = {'unit':'Hz', 'min':0, 'max':200000}
         return details
 
     def verify(self, **kwargs):
@@ -80,8 +80,8 @@ class FMSweep(AbstractStimulusComponent):
 
     def auto_details(self):
         details = super(FMSweep, self).auto_details()
-        details['start_f'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000, 'text': "Start Frequency"}
-        details['stop_f'] = {'label':self._labels[1], 'multiplier':self._scales[1], 'min':0, 'max':200000, 'text': "Stop Frequency"}
+        details['start_f'] = { 'unit':'Hz', 'min':0, 'max':200000, 'text': "Start Frequency"}
+        details['stop_f'] = {'unit':'Hz', 'min':0, 'max':200000, 'text': "Stop Frequency"}
         return details
 
     def loadState(self, state):

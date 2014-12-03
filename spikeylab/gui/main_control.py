@@ -25,7 +25,9 @@ from spikeylab.gui.qprotocol import QProtocolTabelModel
 from spikeylab.gui.stim.qstimulus import QStimulusModel
 from spikeylab.gui.stim.components.qcomponents import wrapComponent
 from spikeylab.stim.stimulus_model import StimulusModel
-    
+from spikeylab.gui.plotting.pyqtgraph_widgets import SpecWidget
+from spikeylab.tools import spikestats
+        
 from controlwindow import ControlWindow
 
 RED = QtGui.QPalette()
@@ -59,12 +61,10 @@ class MainWindow(ControlWindow):
             fname = os.path.basename(self.acqmodel.current_data_file())
         else:
             fname = None
-            
-        # get stimuli components, they must be wrapped to get editor
-        self.exploreStimuli = [wrapComponent(x) for x in self.acqmodel.stimuli_list()]
-        
+
         # auto generated code intialization
         ControlWindow.__init__(self, inputsFilename)
+
         if datafile is not None:
             self.ui.reviewer.setDataObject(self.acqmodel.datafile)
             self.ui.dataFileLbl.setText(fname)
@@ -115,21 +115,13 @@ class MainWindow(ControlWindow):
 
         self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
-        self.ui.exNrepsSpnbx.setKeyboardTracking(False)
         self.ui.threshSpnbx.setKeyboardTracking(False)
-        self.ui.delaySpnbx.setKeyboardTracking(False)
 
         self.activeOperation = None
 
         # update GUI to reflect loaded values
         self.setPlotThresh()
         self.setCalibrationDuration()
-
-        # set up wav file directory finder paths
-        self.exvocal = self.ui.parameterStack.widgetForName("Vocalization")
-        self.exvocal.filelistView.doubleClicked.connect(self.recordingSelected)
-        self.exvocal.filelistView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.selectedWavFile = self.exvocal.currentWavFile
 
         # always start in windowed mode
         self.modeToggled('Windowed')
@@ -148,11 +140,11 @@ class MainWindow(ControlWindow):
 
         self.calvals['calf'] = REFFREQ
         self.calvals['calv'] = REFVOLTAGE
-        if self.fscale == 1000:
-            scale_lbl = 'kHz'
-        elif self.fscale == 1:
-            scale_lbl = 'Hz'
-        self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ/self.fscale, scale_lbl, REFVOLTAGE))
+        if self.fscale == 'kHz':
+            scalar = 1000
+        elif self.fscale == 'Hz':
+            scalar = 1
+        self.ui.refToneLbl.setText("Intensity of {}{} Tone at {}V".format(REFFREQ/scalar, self.fscale, REFVOLTAGE))
         self.acqmodel.set(**self.calvals)
         self.acqmodel.set_calibration(None, self.calvals['calf'], self.calvals['frange'])
         self.calpeak = None
@@ -176,25 +168,19 @@ class MainWindow(ControlWindow):
             self.ui.binszSpnbx.valueChanged.connect(self.onUpdate)
             self.ui.windowszSpnbx.valueChanged.disconnect()
             self.ui.windowszSpnbx.valueChanged.connect(self.onUpdate)
-            self.ui.exNrepsSpnbx.valueChanged.connect(self.onUpdate)
-            self.ui.delaySpnbx.valueChanged.connect(self.onUpdate)
-            for editor in self.ui.parameterStack.widgets():
-                editor.valueChanged.connect(self.onUpdate)
+            self.ui.exploreStimEditor.valueChanged.connect(self.onUpdate)
             self.ui.actionSet_Scale.setEnabled(False)
             self.ui.actionSave_Options.setEnabled(False)
             self.ui.actionSet_Calibration.setEnabled(False)
         else:
             try:
-                self.ui.exNrepsSpnbx.valueChanged.disconnect()
                 self.ui.binszSpnbx.valueChanged.disconnect()
-                self.ui.windowszSpnbx.valueChanged.disconnect()
-                self.ui.delaySpnbx.valueChanged.disconnect()
+                self.ui.exploreStimEditor.valueChanged.disconnect()
                 # this should be connected when search ISN'T running
+                self.ui.windowszSpnbx.valueChanged.disconnect()
                 self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
                 self.ui.startBtn.clicked.disconnect()
                 self.ui.startBtn.clicked.connect(self.onStart)
-                for editor in self.ui.parameterStack.widgets():
-                    editor.valueChanged.disconnect()
                 self.ui.actionSet_Scale.setEnabled(True)
                 self.ui.actionSave_Options.setEnabled(True)
                 self.ui.actionSet_Calibration.setEnabled(True)
@@ -260,10 +246,10 @@ class MainWindow(ControlWindow):
             return
         aochan = str(self.ui.aochanBox.currentText())
         aichan = str(self.ui.aichanBox.currentText())
-        acq_rate = self.ui.aisrSpnbx.value()*self.fscale
+        acq_rate = self.ui.aisrSpnbx.value()
 
-        winsz = float(self.ui.windowszSpnbx.value())*self.tscale
-        binsz = float(self.ui.binszSpnbx.value())*self.tscale
+        winsz = float(self.ui.windowszSpnbx.value())
+        binsz = float(self.ui.binszSpnbx.value())
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
@@ -275,14 +261,9 @@ class MainWindow(ControlWindow):
         self.display.setXlimits((0,winsz))
 
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
-            nreps = self.ui.exNrepsSpnbx.value()
+            nreps = self.ui.exploreStimEditor.repCount()
 
-            self.acqmodel.set(nreps=nreps)
-            
-            # have model sort all signals stuff out?
-            self.acqmodel.set_explore_delay(self.ui.delaySpnbx.value()*self.tscale)
-            stim_index = self.ui.exploreStimTypeCmbbx.currentIndex()
-            self.acqmodel.set_stim_by_index(stim_index)
+            self.acqmodel.reset_explore_stim()
 
             self.display.setNreps(nreps)
         if self.currentMode == 'chart':
@@ -377,7 +358,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.start_chart()
 
     def updateScollingWindowsize(self):
-        winsz = float(self.ui.windowszSpnbx.value())*self.tscale
+        winsz = float(self.ui.windowszSpnbx.value())
         self.scrollplot.setWindowSize(winsz)
 
     def updateChart(self, stimData, responseData):
@@ -431,7 +412,7 @@ class MainWindow(ControlWindow):
 
     def runCalibration(self):
         winsz = float(self.ui.windowszSpnbx.value())
-        self.acqmodel.set_calibration_duration(winsz*self.tscale)
+        self.acqmodel.set_calibration_duration(winsz)
         
         self.ui.startBtn.setEnabled(False)
         self.ui.stopBtn.setText("Abort")
@@ -445,13 +426,13 @@ class MainWindow(ControlWindow):
         if self.ui.calibrationWidget.ui.applycalCkbx.isChecked():
             stim_index = self.ui.calibrationWidget.currentIndex()
             self.acqmodel.set_calibration_by_index(stim_index)
-            self.ui.calibrationWidget.saveToObject()  
-            rep_multiplier = 1      
+            self.ui.calibrationWidget.saveToObject()
+            total_presentations = self.acqmodel.calibration_total_count()
         else:
             # Always use noise on saving calibration.
             # BEWARE: Hardcoded to index 1... this could change?!
             self.acqmodel.set_calibration_by_index(1)
-            rep_multiplier = 2     
+            total_presentations = self.ui.calibrationWidget.ui.nrepsSpnbx.value() * 2
 
         if self.ui.calibrationWidget.ui.applycalCkbx.isChecked() and self.ui.calibrationWidget.isToneCal():
             frequencies, intensities = self.acqmodel.calibration_range()
@@ -469,7 +450,7 @@ class MainWindow(ControlWindow):
 
         # reset style sheet of progress bar
         self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
-        self.ui.protocolProgressBar.setMaximum(self.acqmodel.calibration_total_count()*rep_multiplier)
+        self.ui.protocolProgressBar.setMaximum(total_presentations)
 
         self.acqmodel.run_calibration(interval, self.ui.calibrationWidget.ui.applycalCkbx.isChecked())
 
@@ -493,7 +474,7 @@ class MainWindow(ControlWindow):
             print "WARNING: times and response not equal"
         # print 'response signal', len(response)
         # convert voltage amplitudes into dB SPL    
-        sr = self.ui.aisrSpnbx.value()*self.fscale
+        sr = self.ui.aisrSpnbx.value()
         # amp = signal_amplitude(response, sr)
         mphonesens = self.ui.mphoneSensSpnbx.value()
         mphonedb = self.ui.mphoneDBSpnbx.value()
@@ -570,7 +551,7 @@ class MainWindow(ControlWindow):
             self.ui.psth.appendData(bins, repnum)
             
     def displayStim(self, signal, fs):
-        self.ui.aosrSpnbx.setValue(fs/self.fscale)
+        # self.ui.aosrSpnbx.setValue(fs/self.fscale)
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
         spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
@@ -654,6 +635,8 @@ class MainWindow(ControlWindow):
             if repnum == 0:
                 # assume user must first access the first presentation
                 # before being able to browse through reps
+
+                # recreate stim signal
                 stim_signal = StimulusModel.signalFromDoc(stimulus, self.calvals['calv'], self.calvals['caldb'])
                 fs = stimulus['samplerate_da']
                 timevals = np.arange(len(stim_signal)).astype(float)/fs
@@ -662,6 +645,22 @@ class MainWindow(ControlWindow):
                 self.display.updateSignal(timevals, stim_signal)
                 self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(stim_signal, fs)
+
+                # recreate PSTH for current threshold and all reps
+                tracedata = self.acqmodel.datafile.get(path, (tracenum,))
+                binsz = float(self.ui.binszSpnbx.value())
+                self.ui.psth.clearData()
+                self.display.clearRaster()
+                winsz = float(tracedata.shape[1])/aisr
+                nbins = np.ceil(winsz/binsz)
+                bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
+                self.ui.psth.setBins(bin_centers)
+                bins = []
+                for itrace in range(tracedata.shape[0]):
+                    spike_times = spikestats.spike_times(tracedata[itrace,:], self.ui.threshSpnbx.value(), aisr)
+                    response_bins = spikestats.bin_spikes(spike_times, binsz)
+                    bins.extend(response_bins)
+                self.ui.psth.appendData(bins, tracedata.shape[0])
 
     def displayOldProgressPlot(self, path):
         if self.activeOperation is None:
@@ -740,8 +739,7 @@ class MainWindow(ControlWindow):
         dlg = SpecDialog(defaultVals=self.specArgs)
         if dlg.exec_():
             argdict = dlg.values()
-            self.display.setSpecArgs(**argdict)
-            self.exvocal.setSpecArgs(**argdict)
+            SpecWidget.setSpecArgs(**self.specArgs)
             QtGui.QApplication.processEvents()
             self.specArgs = argdict
         dlg.deleteLater()
@@ -769,14 +767,14 @@ class MainWindow(ControlWindow):
         self.displayStim(audio_signal, sr)
 
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
-            winsz = float(self.ui.windowszSpnbx.value())*self.tscale
+            winsz = float(self.ui.windowszSpnbx.value())
 
             self.display.setXlimits((0,winsz))
         self.selectedWavFile = spath
         self.onUpdate()
 
     def relayCMapChange(self, cmap):
-        self.exvocal.update_colormap()
+        # self.exvocal.update_colormap()
         self.specArgs['colormap'] = cmap
 
     def setCalibrationDuration(self):
@@ -795,7 +793,7 @@ class MainWindow(ControlWindow):
     def tabChanged(self, tabIndex):
         if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'calibration':
             self.stashedAisr = self.ui.aisrSpnbx.value()
-            self.ui.aisrSpnbx.setValue(self.acqmodel.calibration_genrate()/self.fscale)
+            self.ui.aisrSpnbx.setValue(self.acqmodel.calibration_genrate())
             self.ui.aisrSpnbx.setEnabled(False)
             self.setCalibrationDuration()
         elif self.prevTab == 'calibration':

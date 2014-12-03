@@ -1,7 +1,9 @@
+import re
+
 from QtWrapper import QtGui, QtCore
 
 from spikeylab.gui.abstract_drag_view import AbstractDragView
-from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
+from spikeylab.gui.stim.smart_spinbox import SmartSpinBox, trim
 
 class AddLabel(object):
     name = "Add"
@@ -22,6 +24,10 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(100,100,255))
         self.setPalette(palette)
+
+    # def setModel(self, model):
+    #     super(AutoParameterTableView, self).setModel(model)
+    #     self.model.rowScale.connect(self.setRowScale)
 
     # def edit(self, index, trigger, event):
     #     "Sets editing widget for selected list item"
@@ -150,11 +156,47 @@ class ComboboxDelegate(QtGui.QStyledItemDelegate):
 
 class SmartDelegate(QtGui.QStyledItemDelegate):
     """Just a deletegate with a :class:`SmartSpinBox<spikeylab.gui.stim.smart_spinbox.SmartSpinBox>`"""
+    _scales = ['ms', 'kHz']
     def createEditor(self, parent, option, index):
         spnbox = SmartSpinBox(parent)
-        # could set this in setEditorData to reflect
-        # parameter specific max and mins
-        spnbox.setMinimum(0)
-        spnbox.setMaximum(2000)
+        model = parent.parentWidget().model().model
+        unit = model.getDetail(index.row(), 'unit')
+        if unit is None:
+            # parameter type must be selected first, don't show editor
+            return None
+        if unit == 's':
+            spnbox.setScale(self._scales[0])
+        elif unit == 'Hz':
+            spnbox.setScale(self._scales[1])
+        else:
+            spnbox.setScale(unit)
+    
+        spnbox.setMinimum(model.getDetail(index.row(), 'min'))
+        spnbox.setMaximum(model.getDetail(index.row(), 'max'))
         spnbox.setKeyboardTracking(True)
         return spnbox
+        
+    def displayText(self, value, locale):
+        # we don't have the luxury of index and model, so we got the
+        # model to include the base unit we can parse out and manually
+        # adjust the scale here. This is essentially code duplicated
+        # from SmartSpinBox
+        txt = super(SmartDelegate, self).displayText(value, locale)
+        result = re.search('[a-zA-Z]+', txt)
+        if result is not None:
+            unit = result.group(0)
+            val = re.search('\d+\.?\d*', txt).group(0)
+            if unit == 's':
+                if self._scales[0] == 'ms':
+                    txt = trim(float(val)*1000) + ' ms'
+            elif unit == 'Hz':
+                if self._scales[1] == 'kHz':
+                    txt = trim(float(val)*0.001) + ' kHz'
+            else:
+                txt = trim(val)
+        return txt
+
+    @staticmethod
+    def updateScales(tscale, fscale):
+        SmartDelegate._scales[0] = tscale
+        SmartDelegate._scales[1] = fscale

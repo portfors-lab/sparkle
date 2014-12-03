@@ -9,14 +9,12 @@ from spikeylab.run.abstract_acquisition import AbstractAcquisitionRunner
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.tools.util import increment_title
 from spikeylab.tools import spikestats
-from spikeylab.stim.types import get_stimuli_models
-from spikeylab.stim.types.stimuli_classes import Silence
 
 class SearchRunner(AbstractAcquisitionRunner):
     """Handles the presentation of data where changes are allowed to
     be made to the stimulus while running"""
     def __init__(self, *args):
-        self.stimulus = StimulusModel()
+        self._stimulus = StimulusModel()
 
         AbstractAcquisitionRunner.__init__(self, *args)
 
@@ -24,44 +22,52 @@ class SearchRunner(AbstractAcquisitionRunner):
         self.save_data = False
         self.set_name = 'explore_1'
 
-        stimuli_types = get_stimuli_models()
-        self._explore_stimuli = [x() for x in stimuli_types if x.explore]
+        # stimuli_types = get_stimuli_models()
+        # self._explore_stimuli = [x() for x in stimuli_types if x.explore]
 
-        self.delay = Silence()
-        self.stimulus.insertComponent(self.delay)
+        # self.delay = Silence()
+        # self._stimulus.insertfComponent(self.delay)
 
-    def stimuli_list(self):
+    def stimulus(self):
         """Gets a list of all the stimuli this runner has access to. Order
         of the list matches the index order which stimuli can be set by.
 
         :returns: (subclasses of) list<:class:`AbstractStimulusComponent<spikeylab.stim.abstract_component.AbstractStimulusComponent>`>
         """
-        return self._explore_stimuli
+        return self._stimulus
 
     def set_calibration(self, attenuations, freqs, frange, calname):
         """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.set_calibration>`"""
-        self.stimulus.setCalibration(attenuations, freqs, frange)
+        self._stimulus.setCalibration(attenuations, freqs, frange)
 
     def update_reference_voltage(self):
         """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.update_reference_voltage>`"""
-        self.stimulus.setReferenceVoltage(self.caldb, self.calv)
+        self._stimulus.setReferenceVoltage(self.caldb, self.calv)
 
-    def set_delay(self, duration):
-        self.delay.setDuration(duration)
+    # def set_delay(self, duration):
+    #     self.delay.setDuration(duration)
 
-    def set_stim_by_index(self, index):
-        """Sets the stimulus to be generated to the one referenced by index
+    # def set_stim_by_index(self, index):
+    #     """Sets the stimulus to be generated to the one referenced by index
 
-        :param index: index number of stimulus to set from this class's internal list of stimuli
-        :type index: int
-        """
-        # remove any current components
-        self.stimulus.clearComponents()
-        self.stimulus.insertComponent(self.delay)
-        self.stimulus.insertComponent(self._explore_stimuli[index], 0, 1)
-        signal, atten, overload = self.stimulus.signal()
-        self.player.set_stim(signal, self.stimulus.samplerate(), attenuation=atten)
+    #     :param index: index number of stimulus to set from this class's internal list of stimuli
+    #     :type index: int
+    #     """
+    #     # remove any current components
+    #     self._stimulus.clearComponents()
+    #     self._stimulus.insertComponent(self.delay)
+    #     self._stimulus.insertComponent(self._explore_stimuli[index], 0, 1)
+    #     signal, atten, overload = self._stimulus.signal()
+    #     self.player.set_stim(signal, self._stimulus.samplerate(), attenuation=atten)
+    #     self.putnotify('over_voltage', (overload,))
+    #     return signal, overload
+
+    def reset_stim(self):
+        signal, atten, overload = self._stimulus.signal()
+        self.player.set_stim(signal, self._stimulus.samplerate(), attenuation=atten)
         self.putnotify('over_voltage', (overload,))
+        self.nreps = self._stimulus.repCount()
+        self.irep = 0
         return signal, overload
 
     def set_current_stim_parameter(self, param, val):
@@ -71,7 +77,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         :type param: str
         :param val: new value to set the parameter to
         """
-        component = self.stimulus.component(0,1)
+        component = self._stimulus.component(0,1)
         component.set(param, val)
 
     def current_signal(self):
@@ -79,17 +85,17 @@ class SearchRunner(AbstractAcquisitionRunner):
 
         :returns: numpy.ndarray
         """
-        return self.stimulus.signal()
+        return self._stimulus.signal()
 
-    def stim_names(self):
-        """The names of the all the stimuli this class can generate, in order
+    # def stim_names(self):
+    #     """The names of the all the stimuli this class can generate, in order
 
-        :returns: list<str>
-        """
-        stim_names = []
-        for stim in self._explore_stimuli:
-            stim_names.append(stim.name)
-        return stim_names
+    #     :returns: list<str>
+    #     """
+    #     stim_names = []
+    #     for stim in self._explore_stimuli:
+    #         stim_names.append(stim.name)
+    #     return stim_names
 
     def run(self, interval):
         """See :meth:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner.run>`"""
@@ -126,7 +132,7 @@ class SearchRunner(AbstractAcquisitionRunner):
             self.irep = 0
             times = self.aitimes
             # report inital stim
-            trace_doc = self.stimulus.componentDoc()
+            trace_doc = self._stimulus.componentDoc()
             trace_doc['overloaded_attenuation'] = np.nan
             self.putnotify('current_trace', (0,0,trace_doc))
 
@@ -143,7 +149,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                 self.putnotify('response_collected', (times, response))
                 if stim is not None:
                     self.putnotify('stim_generated', (stim, self.player.get_samplerate()))
-                    trace_doc = self.stimulus.componentDoc()
+                    trace_doc = self._stimulus.componentDoc()
                     trace_doc['overloaded_attenuation'] = np.nan
                     self.putnotify('current_trace', (0,0,trace_doc))
                 
@@ -203,7 +209,7 @@ class SearchRunner(AbstractAcquisitionRunner):
         """
         self.datafile.append(self.current_dataset_name, data)
         # save stimulu info
-        info = dict(self.stimulus.componentDoc().items() + self.stimulus.testDoc().items())
+        info = dict(self._stimulus.componentDoc().items() + self._stimulus.testDoc().items())
         print 'saving doc', info
         info['time_stamps'] = [stamp]
         info['samplerate_ad'] = self.player.aisr

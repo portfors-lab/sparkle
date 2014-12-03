@@ -126,8 +126,8 @@ class TestQStimModel():
         ap_model.insertRows(0,1)
         ap_model.toggleSelection(ap_model.index(0,0), component)
         
-        # default value is in kHz
-        values = ['frequency', 100, 300, 25]
+        # setData always deals with base units
+        values = ['frequency', 100000, 300000, 25000]
         for i, value in enumerate(values):
             ap_model.setData(ap_model.index(0,i), value, QtCore.Qt.EditRole)
 

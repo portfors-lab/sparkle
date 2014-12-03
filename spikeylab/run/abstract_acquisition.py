@@ -98,9 +98,6 @@ class AbstractAcquisitionRunner():
             self.aochan = kwargs['aochan']
         if 'aichan' in kwargs:
             self.aichan = kwargs['aichan']
-        if 'nreps' in kwargs:
-            self.nreps = kwargs['nreps']
-            self.irep = 0
         if 'binsz' in kwargs:
             self.binsz = kwargs['binsz']
         if 'save' in kwargs:
