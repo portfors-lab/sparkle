@@ -15,6 +15,7 @@ The top-level class for the GUI is :class:`MainWindow<spikeylab.gui.control.Main
 
 Backend Structure
 ------------------
+
 Runner classes
 +++++++++++++++
 The :class:`AcquisitionManager<spikeylab.run.acquisition_manager>` contains runner classes for the different types of data acquisition that the system is capable of. It also contains some shared state and resources between the different acqusition runner classes such as communication queues. Only one acqusition operation may be in progress at any time.
@@ -28,7 +29,8 @@ The different acquisition operations that the program runs are:
 
 All of these runner classes share a common superclass :class:`AbstractAcquisitionRunner<spikeylab.run.abstract_acquisition.AbstractAcquisitionRunner>`:
 
-.. image:: runnerUML.png
+.. inheritance-diagram:: spikeylab.run.protocol_runner spikeylab.run.chart_runner spikeylab.run.calibration_runner spikeylab.run.search_runner
+   :parts: 1
 
 Hardware Communication
 ++++++++++++++++++++++
@@ -58,7 +60,7 @@ Visually, the hierarchy of Stimulus Assembly is as follows:
 
 The list of StimlusModels inside of a ProtocolModel, and the list of Components inside of a SimulusModel can, in fact, be empty (and are upon initialization), but cannot be when run by a runner class; i.e. an empty stimulus is considered an error. 
 
-Discovery of the stimulus component classes is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `spikeylab/stim/types` are searched for subclasses of :code:`AbstractStimulusComponent`. Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations.
+Discovery of the stimulus components classes is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `spikeylab/stim/types` are searched for subclasses of :code:`AbstractStimulusComponent`. Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations by the UI.
 
 For further information related to adding additional Stimulus Component classes see :doc:`Extending spikey<extending>`
 
@@ -96,18 +98,24 @@ GUI Structure
 -------------
 The Qt_ framework was chosen to build the GUI for this project. The project was developed using the PyQt package for the Python bindings. The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. These files have the extention .ui. The main UI class :class:`MainWindow<spikeylab.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<spikeylab.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
 
+The views noted above are often contained in editor widgets. There is also an inheritance hierarchy for these editor widgets.
+
 .. _Qt: http://qt-project.org/doc/qt-4.8
 
 Stimulus widgets
 +++++++++++++++++
 
 To interface with the stimuli classes, this program makes use of the Qt Model-View classes to wrap around the native python objects. This is the case with 4 classes, our stimuli classes are wrapped by :class:`QProtocolTableModel<spikeylab.gui.qprotocol.QProtocolTabelModel>`,
-:class:`QStimulusModel<spikeylab.gui.stim.qstimulus.QStimulusModel>`, :class:`QStimulusComponent<spikeylab.gui.stim.components.qcomponents.QStimulusComponent>`, and :class:`QAutoParameterModel<spikeylab.gui.stim.qauto_parameter_model.QAutoParameterModel>`. Each of these models (except components) has a custom view, which inherits from a Qt view superclass, and also from :class:`AbstractDragView<spikeylab.gui.abstract_drag_view.AbstractDragView>`. This is to create some sort of continuity with the way the user interacts with the different parts of stimulus assembly.
+:class:`QStimulusModel<spikeylab.gui.stim.qstimulus.QStimulusModel>`, :class:`QStimulusComponent<spikeylab.gui.stim.components.qcomponents.QStimulusComponent>`, and :class:`QAutoParameterModel<spikeylab.gui.stim.qauto_parameter_model.QAutoParameterModel>`. Each of these models (except components) has a custom view, which inherits from a Qt view superclass, and also from :class:`AbstractDragView<spikeylab.gui.abstract_drag_view.AbstractDragView>`. This is to create some sort of continuity with the way the user interacts with the different parts of stimulus assembly. That being said, a view may not always be used; sometimes a simplified editor widget is used to provide a short-cut for certain types of stimulus assembly, such as a tuning curve.
 
 .. image:: stimviewsUML.png
 
-Components each have their own editor widgets, which must be subclasses of :class:`AbstractComponentWidget<spikeylab.gui.stim.abstract_component_editor>`. Which editor to use is supplied by the wrapper class for that Stimulus class, e.g. A `Vocalization` component class has a `QVocalization` wrapper class that has a `showEditor` method that will return an editor widget appropriate for that component type. A generic default editor is generated for component class that do not have a wrapper provided, or if the wrapper class does not re-implement the `showEditor` method from base class `QStimulusComponent`.
+Components each have their own editor widgets, which must be subclasses of :class:`AbstractComponentWidget<spikeylab.gui.stim.abstract_component_editor>`. Which editor to use is supplied by the wrapper class for that Stimulus class, e.g. A ``Vocalization`` component class has a ``QVocalization`` wrapper class that has a ``showEditor`` method that will return an editor widget appropriate for that component type. A generic default editor is generated for component classes that do not have a wrapper provided, or if the wrapper class does not re-implement the ``showEditor`` method from base class ``QStimulusComponent``.
 
+All parts of the stimulus assembly have 1 or more editor widgets that can be used to manipulate the data model, these editor widget may contain the views mentioned above. All editor widgets are a subclass of the base :class:`AbstractEditorWidget<spikeylab.gui.stim.abstract_editor>`.
+
+.. inheritance-diagram:: spikeylab.gui.stim.tuning_curve spikeylab.gui.stim.stimulus_editor spikeylab.gui.stim.explore_stim_editor.ExploreStimulusEditor spikeylab.gui.stim.generic_parameters spikeylab.gui.stim.components.vocal_parameters spikeylab.gui.stim.explore_component_editor
+    :parts: 1
 
 Plotting
 +++++++++

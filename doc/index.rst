@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to Sonic Sparkle High-Five's documentation!
-=====================================
+====================================================
 This doc is very drafty!!!
 
 User Guide

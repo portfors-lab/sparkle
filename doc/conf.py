@@ -30,6 +30,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest', 
               'sphinx.ext.viewcode', 
               'sphinx.ext.intersphinx',
+              'sphinx.ext.inheritance_diagram',
+              'sphinx.ext.graphviz',
               'spikeylab.tools.qtdoc',]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -251,3 +253,5 @@ intersphinx_mapping = {'pyqtgraph': ('http://www.pyqtgraph.org/documentation', N
     'python': ('http://docs.python.org/2.7', None),
 }
 
+inheritance_graph_attrs = dict(rankdir="TB")
+inheritance_edge_attrs = dict(dir='back')

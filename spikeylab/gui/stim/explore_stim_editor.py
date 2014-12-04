@@ -8,6 +8,7 @@ from spikeylab.stim.types import get_stimuli_models
 from spikeylab.stim.types.stimuli_classes import Silence
     
 class ExploreStimulusEditor(AbstractStimulusWidget):
+    """Editor for StimulusModel used in search mode"""
     def __init__(self, parent=None):
         super(ExploreStimulusEditor, self).__init__(parent)
         self.ui = Ui_ExploreStimEditor()
@@ -28,6 +29,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self._model = None
         
     def setModel(self, model):
+        "Sets the StimulusModel for this editor"
         self._model = model
         self.ui.aosrSpnbx.setValue(model.samplerate())
         #must be at least one component & delay
@@ -40,6 +42,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         return self._model
 
     def setStimIndex(self, row, stimIndex):
+        "Change out the component type in row to the one indexed by stimIndex"
         newcomp = self._allComponents[row][stimIndex]
         self._model.removeComponent(row, 1)
         self._model.insertComponent(newcomp, row, 1)
@@ -58,6 +61,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.valueChanged.emit()
 
     def addComponentEditor(self):
+        """Adds a new component to the model, and an editor for this component to this editor"""
         row = self._model.rowCount()
 
         comp_stack_editor = ExploreComponentEditor()
@@ -128,6 +132,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         return w
 
 class IndexButton(QtGui.QPushButton):
+    """Custom button for explore editor to toggle bettween tracks"""
     pickMe = QtCore.Signal(int)
     def __init__(self, num):
         super(IndexButton, self).__init__("Track {}".format(num+1))

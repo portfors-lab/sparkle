@@ -12,8 +12,6 @@ class ExploreComponentEditor(AbstractEditorWidget):
 
         headerLayout  = QtGui.QHBoxLayout()
         self.exploreStimTypeCmbbx = QtGui.QComboBox()
-        # typemin = self.exploreStimTypeCmbbx.minimumSize()
-        # self.exploreStimTypeCmbbx.setMinimumSize(typemin.width(), 50)
         font = QtGui.QFont()
         font.setPointSize(16)
         font.setBold(True) 
@@ -55,6 +53,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
             setattr(self, m, getattr(self.componentStack, m))
 
     def addWidget(self, widget, name):
+        """Add a component editor widget"""
         self.exploreStimTypeCmbbx.addItem(name)
         self.componentStack.addWidget(widget)
         widget.valueChanged.connect(self.valueChanged.emit)
