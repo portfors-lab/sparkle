@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'explore_stim_editor.ui'
 #
-# Created: Fri Nov 21 21:01:53 2014
+# Created: Fri Dec  5 14:45:05 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,7 +47,7 @@ class Ui_ExploreStimEditor(object):
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.exNrepsSpnbx = QtGui.QSpinBox(ExploreStimEditor)
         self.exNrepsSpnbx.setMinimum(1)
-        self.exNrepsSpnbx.setMaximum(100)
+        self.exNrepsSpnbx.setMaximum(1000)
         self.exNrepsSpnbx.setProperty("value", 5)
         self.exNrepsSpnbx.setObjectName(_fromUtf8("exNrepsSpnbx"))
         self.gridLayout.addWidget(self.exNrepsSpnbx, 0, 1, 1, 1)
