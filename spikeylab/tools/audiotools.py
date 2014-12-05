@@ -488,10 +488,14 @@ def rms(signal, fs):
     chunk_time = 0.001 # 1 ms chunk
     chunk_samps = int(chunk_time*fs)
     amps = []
-    for i in range(0, len(signal)-chunk_samps, chunk_samps):
-        amps.append(np.sqrt(np.mean(pow(signal[i:i+chunk_samps],2))))
-    amps.append(np.sqrt(np.mean(pow(signal[len(signal)-chunk_samps:],2))))
-    return np.amax(amps)
+    if chunk_samps > 10:
+        for i in range(0, len(signal)-chunk_samps, chunk_samps):
+            amps.append(np.sqrt(np.mean(pow(signal[i:i+chunk_samps],2))))
+        amps.append(np.sqrt(np.mean(pow(signal[len(signal)-chunk_samps:],2))))
+        return np.amax(amps)
+    else:
+        # samplerate low, just rms the whole thing
+        return np.sqrt(np.mean(pow(signal,2)))
 
 def signal_amplitude(signal, fs):
     if USE_RMS:
