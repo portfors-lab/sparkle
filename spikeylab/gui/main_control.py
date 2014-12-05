@@ -646,21 +646,24 @@ class MainWindow(ControlWindow):
                 self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(stim_signal, fs)
 
-                # recreate PSTH for current threshold and all reps
-                tracedata = self.acqmodel.datafile.get(path, (tracenum,))
-                binsz = float(self.ui.binszSpnbx.value())
-                self.ui.psth.clearData()
-                self.display.clearRaster()
-                winsz = float(tracedata.shape[1])/aisr
-                nbins = np.ceil(winsz/binsz)
-                bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
-                self.ui.psth.setBins(bin_centers)
-                bins = []
-                for itrace in range(tracedata.shape[0]):
-                    spike_times = spikestats.spike_times(tracedata[itrace,:], self.ui.threshSpnbx.value(), aisr)
-                    response_bins = spikestats.bin_spikes(spike_times, binsz)
-                    bins.extend(response_bins)
-                self.ui.psth.appendData(bins, tracedata.shape[0])
+            # recreate PSTH for current threshold and current rep
+            tracedata = self.acqmodel.datafile.get(path, (tracenum,))
+            binsz = float(self.ui.binszSpnbx.value())
+            self.ui.psth.clearData()
+            self.display.clearRaster()
+
+            winsz = float(tracedata.shape[1])/aisr
+            nbins = np.ceil(winsz/binsz)
+            bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
+            self.ui.psth.setBins(bin_centers)
+            
+            # because we can scroll forwards or backwards re-do entire plot every time 
+            bins = []
+            for itrace in range(repnum+1):
+                spike_times = spikestats.spike_times(tracedata[itrace,:], self.ui.threshSpnbx.value(), aisr)
+                response_bins = spikestats.bin_spikes(spike_times, binsz)
+                bins.extend(response_bins)
+            self.ui.psth.appendData(bins, repnum)
 
     def displayOldProgressPlot(self, path):
         if self.activeOperation is None:
