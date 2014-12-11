@@ -394,6 +394,9 @@ class AcquisitionManager():
         """
         return self.protocoler.protocol_model
 
+    def protocol_reps(self):
+        return self.protocoler.max_reps()
+
     def calibration_stimulus(self, mode):
         """Gets the stimulus model for calibration
 

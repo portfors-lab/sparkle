@@ -39,6 +39,12 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
             total += test.traceCount()*test.loopCount()*test.repCount() + test.repCount()
         return total
 
+    def max_reps(self):
+        all_reps = [] 
+        for test in self.protocol_model.allTests():
+            all_reps.append(test.repCount())
+        return max(all_reps)
+
     def setup(self, interval):
         """Prepares the tests for execution"""
         self.trace_counter = 0

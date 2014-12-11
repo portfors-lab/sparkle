@@ -266,6 +266,10 @@ class MainWindow(ControlWindow):
             self.acqmodel.reset_explore_stim()
 
             self.display.setNreps(nreps)
+        elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
+            nreps = self.acqmodel.protocol_reps()
+            self.display.setNreps(nreps)
+
         if self.currentMode == 'chart':
             return winsz, acq_rate
             
