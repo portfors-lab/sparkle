@@ -45,7 +45,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
         self.incrementn(-10)
 
     def incrementn(self, n):
-        self.valueSpnbx.setValue(self.valueSpnbx.value() + n)
+        self.valueSpnbx.setValue(self.valueSpnbx.value() + (n*self.valueSpnbx.currentScale()))
 
     def sizeHint(self):
         return QtCore.QSize(450,45)

@@ -59,6 +59,13 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
         else:
             return (1, pos)
 
+    def stepBy(self, steps):
+        self.setValue(self.value() + (steps*self._scalar))
+
+    def currentScale(self):
+        return self._scalar
+
+
 def trim(val):
     if val - floor(val) > 0.0:
         return str(val)
