@@ -38,7 +38,8 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
         self.putnotify('response_collected', (self.aitimes, response))
 
     def process_calibration(self):
-        mean_response = np.mean(self.response_buffer,0)
-        amp = rms(mean_response, self.player.aisr)
-
+        amps = []
+        for itest in range(self.response_buffer.shape[0]):
+            amps.append(rms(self.response_buffer[itest,:], self.player.aisr))
+        amp = np.mean(amps)
         return amp
