@@ -1,6 +1,6 @@
 import os, yaml
 
-from scipy.signal import chirp, hann
+from scipy.signal import chirp, hann, square
 import numpy as np
 
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
@@ -43,6 +43,34 @@ class PureTone(AbstractStimulusComponent):
             if kwargs['samplerate']/2 < self._frequency:
                 return "Generation sample rate must be at least twice the stimulus frequency"
         return super(PureTone, self).verify(**kwargs)
+
+class SquareWave(PureTone):
+    name = "Square Wave"
+    _frequency = 50
+    _amplitude = 1
+
+    def signal(self, fs, atten, caldb, calv):
+        npts = int(self._duration * fs)
+        t = np.linspace(0, self._duration, npts)
+        sig = square(2 * np.pi * self._frequency * t)
+        sig = sig * self._amplitude
+        return sig
+
+    def auto_details(self):
+        details = super(SquareWave, self).auto_details()
+        del details['risefall']
+        del details['intensity']
+        details['amplitude'] = {'unit': 'V', 'min': 0.001, 'max': 10.}
+        return details
+
+    def loadState(self, state):
+        super(SquareWave,self).loadState(state)
+        self._amplitude = state['amplitude']
+
+    def stateDict(self):
+        state = super(SquareWave, self).stateDict()
+        state['amplitude'] = self._amplitude
+        return state
 
 class FMSweep(AbstractStimulusComponent):
     name = "FM Sweep"
