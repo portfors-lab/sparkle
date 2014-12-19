@@ -185,7 +185,7 @@ class SmartDelegate(QtGui.QStyledItemDelegate):
         result = re.search('[a-zA-Z]+', txt)
         if result is not None:
             unit = result.group(0)
-            val = re.search('\d+\.?\d*', txt).group(0)
+            val = re.search('-?\d+\.?\d*', txt).group(0)
             if unit == 's':
                 if self._scales[0] == 'ms':
                     txt = trim(float(val)*1000) + ' ms'
@@ -193,7 +193,7 @@ class SmartDelegate(QtGui.QStyledItemDelegate):
                 if self._scales[1] == 'kHz':
                     txt = trim(float(val)*0.001) + ' kHz'
             else:
-                txt = trim(val)
+                txt = trim(float(val))
         return txt
 
     @staticmethod

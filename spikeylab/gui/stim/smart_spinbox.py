@@ -17,10 +17,6 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
         self.setKeyboardTracking(False)
         self._scalar = 1
         self.setDecimals(3)
-        self._min = 0
-        self._max = 500000
-        self.setMinimum(self._min)
-        self.setMaximum(self._max)
 
     def textFromValue(self, val):
         val = val/self._scalar
@@ -45,8 +41,8 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
         self.setSuffix(' '+scale)
 
     def valueFromText(self, text):
-        numstr = re.match('\d*\.?\d*', text).group(0)
-        if len(numstr) > 0:
+        numstr = re.match('-?\d*\.?\d*', text).group(0)
+        if len(numstr) > 0 and numstr != '-':
             val = float(numstr)
         else:
             val = 0.

@@ -60,7 +60,7 @@ class SquareWave(PureTone):
         details = super(SquareWave, self).auto_details()
         del details['risefall']
         del details['intensity']
-        details['amplitude'] = {'unit': 'V', 'min': 0.001, 'max': 10.}
+        details['amplitude'] = {'unit': 'V', 'min': -10, 'max': 10.}
         return details
 
     def loadState(self, state):
