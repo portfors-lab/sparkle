@@ -149,13 +149,10 @@ class ControlWindow(QtGui.QMainWindow):
             * seconds and miliseconds for time
             * Hz and kHz for frequency
 
-        :param tscale: Time scale to update to, either 1 (seconds) or 0.1 (ms)
-        :type tscale: float
-        :param fscale: Frequency scale to update to, either 1 (Hz) or 1000 (kHz)
-        :type fscale: float
-        :param setup: Whether this is the first call after GUI creation. Does
-            not perform field value conversion
-        :type setup: bool
+        :param tscale: Time scale to update to either 's' or 'ms'
+        :type tscale: str
+        :param fscale: Frequency scale to update to either 'Hz' or 'kHz'
+        :type fscale: str
         """
         AbstractEditorWidget.updateScales(tscale, fscale)
         SmartDelegate.updateScales(tscale, fscale)
