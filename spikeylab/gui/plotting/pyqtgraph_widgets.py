@@ -1,4 +1,6 @@
 import time
+import os
+import yaml
 
 from QtWrapper import QtCore, QtGui
 import pyqtgraph as pg
@@ -9,6 +11,7 @@ from spikeylab.gui.plotting.viewbox import SpikeyViewBox
 from spikeylab.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 import spikeylab.tools.audiotools as audiotools
 from spikeylab.tools import spikestats
+from spikeylab.tools.systools import get_src_directory
 
 STIM_HEIGHT = 0.05
 
@@ -16,6 +19,10 @@ STIM_HEIGHT = 0.05
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 pg.setConfigOptions(useWeave=False)
+
+with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
+    config = yaml.load(yf)
+VOLT2AMPS = config['volt_amp_conversion']
 
 class BasePlot(pg.PlotWidget):
     """Abstract class meant to be subclassed by other plot types.
@@ -88,6 +95,7 @@ class TraceWidget(BasePlot):
     rasterYslots = None
     thresholdUpdated = QtCore.Signal(float)
     invertPolarity = QtCore.Signal()
+    _ampScalar = VOLT2AMPS
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
@@ -109,6 +117,11 @@ class TraceWidget(BasePlot):
         invertAction.setCheckable(True)
         self.scene().contextMenu.append(invertAction) #should use function for this?
         invertAction.triggered.connect(self.invertPolarity.emit)
+
+        self._traceUnit = 'V'
+        self.unitsAction = QtGui.QAction('Plot Amps', None)
+        self.scene().contextMenu.append(self.unitsAction)
+        self.unitsAction.triggered.connect(self.toggleUnits)
 
         self.threshLine = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.threshLine)
@@ -135,6 +148,8 @@ class TraceWidget(BasePlot):
             ranges = self.viewRange()
             self.rangeChange(self, ranges)
         if axeskey == 'response':
+            if self._traceUnit == 'A':
+                y = y * self._ampScalar
             self.tracePlot.setData(x,y)
 
     def appendData(self, axeskey, bins, ypoints):
@@ -220,6 +235,17 @@ class TraceWidget(BasePlot):
         :returns: (float, float) -- (min, max) of raster plot bounds
         """
         return (self.rasterBottom, self.rasterTop)
+
+    def toggleUnits(self):
+        if self._traceUnit == 'V':
+            self.setLabel('bottom', 'Current', units='A')
+            self._traceUnit = 'A'
+            self.unitsAction.setText("Plot Volts")
+        else:
+            self.setLabel('bottom', 'Potential', units='V')
+            self._traceUnit = 'V'
+            self.unitsAction.setText("Plot Amps")
+
 
     def rangeChange(self, pw, ranges):
         """Adjusts the stimulus signal to keep it at the top of a plot,
