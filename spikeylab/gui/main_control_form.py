@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_control.ui'
+# Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Tue Dec  2 16:47:54 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Wed Jan 14 11:51:46 2015
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -296,17 +296,23 @@ class Ui_ControlWindow(object):
         self.windowszSpnbx.setObjectName(_fromUtf8("windowszSpnbx"))
         self.gridLayout.addWidget(self.windowszSpnbx, 2, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
-        self.horizontalLayout_6 = QtGui.QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
-        self.label_17 = QtGui.QLabel(self.centralwidget)
-        self.label_17.setObjectName(_fromUtf8("label_17"))
-        self.horizontalLayout_6.addWidget(self.label_17)
+        self.gridLayout_5 = QtGui.QGridLayout()
+        self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
+        self.trigchanBox = QtGui.QComboBox(self.centralwidget)
+        self.trigchanBox.setObjectName(_fromUtf8("trigchanBox"))
+        self.gridLayout_5.addWidget(self.trigchanBox, 1, 1, 1, 1)
+        self.trigCkbx = QtGui.QCheckBox(self.centralwidget)
+        self.trigCkbx.setObjectName(_fromUtf8("trigCkbx"))
+        self.gridLayout_5.addWidget(self.trigCkbx, 1, 0, 1, 1)
         self.modeCmbx = QtGui.QComboBox(self.centralwidget)
         self.modeCmbx.setObjectName(_fromUtf8("modeCmbx"))
         self.modeCmbx.addItem(_fromUtf8(""))
         self.modeCmbx.addItem(_fromUtf8(""))
-        self.horizontalLayout_6.addWidget(self.modeCmbx)
-        self.verticalLayout_2.addLayout(self.horizontalLayout_6)
+        self.gridLayout_5.addWidget(self.modeCmbx, 0, 1, 1, 1)
+        self.label_17 = QtGui.QLabel(self.centralwidget)
+        self.label_17.setObjectName(_fromUtf8("label_17"))
+        self.gridLayout_5.addWidget(self.label_17, 0, 0, 1, 1)
+        self.verticalLayout_2.addLayout(self.gridLayout_5)
         self.frame = QtGui.QFrame(self.centralwidget)
         self.frame.setFrameShape(QtGui.QFrame.HLine)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
@@ -359,7 +365,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -593,6 +599,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionSet_Cell_ID, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCellDlg)
         QtCore.QObject.connect(self.actionComment, QtCore.SIGNAL(_fromUtf8("triggered()")), self.runComment.showNormal)
         QtCore.QObject.connect(self.actionTimer, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.showNormal)
+        QtCore.QObject.connect(self.modeCmbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.setTriggerEnable)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -640,10 +647,11 @@ class Ui_ControlWindow(object):
         self.label_36.setText(_translate("ControlWindow", "reps/s", None))
         self.threshSpnbx.setToolTip(_translate("ControlWindow", "Spike detection threshold", None))
         self.threshSpnbx.setSuffix(_translate("ControlWindow", " V", None))
-        self.label_17.setText(_translate("ControlWindow", "Mode", None))
+        self.trigCkbx.setText(_translate("ControlWindow", "Triggered", None))
         self.modeCmbx.setToolTip(_translate("ControlWindow", "Mode of acquisition to use", None))
         self.modeCmbx.setItemText(0, _translate("ControlWindow", "Windowed", None))
         self.modeCmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
+        self.label_17.setText(_translate("ControlWindow", "Mode", None))
         self.label_8.setText(_translate("ControlWindow", "Calibration:", None))
         self.currentCalLbl.setText(_translate("ControlWindow", "None", None))
         self.dataFileLbl.setText(_translate("ControlWindow", "None", None))

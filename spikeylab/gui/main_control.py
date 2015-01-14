@@ -80,6 +80,9 @@ class MainWindow(ControlWindow):
         self.ui.aochanBox.addItems(cnames)
         cnames = get_ai_chans(DEVNAME.encode())
         self.ui.aichanBox.addItems(cnames)
+        # can't find a function in DAQmx that gets the trigger
+        # channel names, so add manually
+        self.ui.trigchanBox.addItems(['/PCI-6259/PFI0', '/PCI-6259/PFI1'])
 
         self.ui.runningLabel.setStyleSheet(REDSS)
 
@@ -172,6 +175,8 @@ class MainWindow(ControlWindow):
             self.ui.actionSet_Scale.setEnabled(False)
             self.ui.actionSave_Options.setEnabled(False)
             self.ui.actionSet_Calibration.setEnabled(False)
+            self.ui.trigCkbx.stateChanged.connect(self.onUpdate)
+            self.ui.trigchanBox.currentIndexChanged.connect(self.onUpdate)
         else:
             try:
                 self.ui.binszSpnbx.valueChanged.disconnect()
@@ -184,6 +189,8 @@ class MainWindow(ControlWindow):
                 self.ui.actionSet_Scale.setEnabled(True)
                 self.ui.actionSave_Options.setEnabled(True)
                 self.ui.actionSet_Calibration.setEnabled(True)
+                self.ui.trigCkbx.stateChanged.disconnect()
+                self.ui.trigchanBox.currentIndexChanged.disconnect()
 
             except TypeError:
                 # disconnecting already disconnected signals throws TypeError
@@ -254,8 +261,12 @@ class MainWindow(ControlWindow):
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
         self.ui.psth.setBins(bin_centers)
+        if self.ui.trigCkbx.isChecked():
+            trigger = str(self.ui.trigchanBox.currentText())
+        else:
+            trigger = None
         self.acqmodel.set(aochan=aochan, aichan=aichan, acqtime=winsz,
-                          aisr=acq_rate, binsz=binsz)
+                          aisr=acq_rate, binsz=binsz, trigger=trigger)
         self.binsz = binsz
 
         self.display.setXlimits((0,winsz))
@@ -815,7 +826,7 @@ class MainWindow(ControlWindow):
         self.prevTab = str(self.ui.tabGroup.tabText(tabIndex)).lower()
 
     def modeToggled(self, mode):
-        self.currentMode = mode.lower()
+        self.currentMode = str(mode).lower()
         if self.currentMode == "windowed":
             self.ui.startChartBtn.hide()
             self.ui.stopChartBtn.hide()
@@ -845,6 +856,14 @@ class MainWindow(ControlWindow):
 
     def toggleResponsePolarity(self):
         self.acqmodel.toggle_response_polarity()
+
+    def setTriggerEnable(self, text):
+        if text == 'Windowed':
+            self.ui.trigchanBox.setEnabled(True)
+            self.ui.trigCkbx.setEnabled(True)
+        else:
+            self.ui.trigchanBox.setEnabled(False)
+            self.ui.trigCkbx.setEnabled(False)
 
     def showWait(self):
         screenPos = self.geometry()

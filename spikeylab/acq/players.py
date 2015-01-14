@@ -36,8 +36,8 @@ class AbstractPlayerBase():
 
         self.connect_attenuator()
 
-        self.trigger_src = "PCI-6259/port0/line1"  
-        self.trigger_dest = "/PCI-6259/PFI0"
+        self.trigger_src = None #"PCI-6259/port0/line1"  
+        self.trigger_dest = None #"/PCI-6259/PFI0"
 
     def start(self):
         """Abstract, must be implemented by subclass"""
@@ -179,6 +179,9 @@ class AbstractPlayerBase():
     def stop_timer(self):
         self.trigger_task.stop()
 
+    def set_trigger(self, trigger):
+        self.trigger_dest = trigger
+
 class FinitePlayer(AbstractPlayerBase):
     """For finite generation/acquisition tasks"""
     def __init__(self):
@@ -241,7 +244,7 @@ class FinitePlayer(AbstractPlayerBase):
 
         response_npts = int(self.aitime*self.aisr)
         try:
-            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts)#, trigsrc=self.trigger_dest)
+            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts, trigsrc=self.trigger_dest)
             new_gen = self.reset_generation(u"ai/StartTrigger")
         except:
             print u'ERROR! TERMINATE!'

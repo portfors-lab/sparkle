@@ -134,7 +134,7 @@ class AITaskFinite(Task):
     :param trigsrc: source of a digital trigger to start the generation, default : no trigger, begin immediately on call of start method
     :type trigsrc: str
     """
-    def __init__(self, chan, samplerate, npts, clksrc="", trigsrc=u""):
+    def __init__(self, chan, samplerate, npts, clksrc="", trigsrc=None):
         Task.__init__(self)
         self.CreateAIVoltageChan(chan,"",DAQmx_Val_Cfg_Default,
                                  -10.0, 10.0, DAQmx_Val_Volts, None)
@@ -143,7 +143,7 @@ class AITaskFinite(Task):
         #self.AutoRegisterDoneEvent(0)
         self.npts = npts
 
-        if len(trigsrc) > 0:
+        if trigsrc:
             self.CfgDigEdgeStartTrig(trigsrc, DAQmx_Val_Rising)
 
     def start(self):
@@ -185,14 +185,14 @@ class AOTaskFinite(Task):
     :param trigsrc: source of a digital trigger to start the generation
     :type trigsrc: str
     """
-    def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=u""):
+    def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=None):
         Task.__init__(self)
         self.npoints = npoints
 
         self.CreateAOVoltageChan(chan,u"",-10.0,10.0, DAQmx_Val_Volts, None)
         self.CfgSampClkTiming(clksrc,samplerate, DAQmx_Val_Rising, 
                               DAQmx_Val_FiniteSamps, npoints)
-        if len(trigsrc) > 0:
+        if trigsrc:
             self.CfgDigEdgeStartTrig(trigsrc, DAQmx_Val_Rising)
 
     def start(self):

@@ -87,11 +87,13 @@ class AbstractAcquisitionRunner():
             self.player.set_aidur(kwargs['acqtime'])
         if 'aisr' in kwargs:
             self.player.set_aisr(kwargs['aisr'])
-            self.aisr=kwargs['aisr']
+            self.aisr = kwargs['aisr']
         if 'aisr' in kwargs or 'acqtime' in kwargs:
             t = kwargs.get('acqtime', self.player.get_aidur())
             npoints = t*float(kwargs.get('aisr', self.player.get_aisr()))
             self.aitimes = np.linspace(0, t, npoints)
+        if 'trigger' in kwargs:
+            self.player.set_trigger(kwargs['trigger'])
         self.player_lock.release()
 
         if 'aochan' in kwargs:
