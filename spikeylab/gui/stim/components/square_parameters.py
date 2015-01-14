@@ -24,7 +24,7 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
         self.duration_input.setScale(self._scales[0])
         self.duration_input.valueChanged.connect(self.valueChanged.emit)
 
-        layout.addWidget(QtGui.QLabel('Frequency'), 1, 0)
+        layout.addWidget(QtGui.QLabel('frequency'), 1, 0)
         self.freq_input = IncrementInput()
         layout.addWidget(self.freq_input, 1, 1)
         self.freq_input.setMinimum(details['frequency']['min'])
@@ -90,7 +90,7 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
 
     def saveToObject(self):
         self._component.set('duration', self.duration_input.value())
-        self._component.set('Frequency', self.freq_input.value())
+        self._component.set('frequency', self.freq_input.value())
         self._component.set('amplitude', self.amp_input.value())
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
