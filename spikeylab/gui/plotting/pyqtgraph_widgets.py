@@ -123,6 +123,10 @@ class TraceWidget(BasePlot):
         self.scene().contextMenu.append(self.unitsAction)
         self.unitsAction.triggered.connect(self.toggleUnits)
 
+        self.zeroAction = QtGui.QAction('Zero recording start', None)
+        self.zeroAction.setCheckable(True)
+        self.scene().contextMenu.append(self.zeroAction)
+
         self.threshLine = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.threshLine)
         self.threshLine.sigPositionChangeFinished.connect(self.update_thresh)
@@ -150,6 +154,9 @@ class TraceWidget(BasePlot):
         if axeskey == 'response':
             if self._traceUnit == 'A':
                 y = y * self._ampScalar
+            if self.zeroAction.isChecked():
+                start_avg = np.mean(y[5:25])
+                y = y - start_avg
             self.tracePlot.setData(x,y)
 
     def appendData(self, axeskey, bins, ypoints):
