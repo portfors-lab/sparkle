@@ -41,6 +41,21 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         """Sets the StimulusModel for this editor"""
         self.stimModel = model
         self.parameterModel = model.autoParams()
+        tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole+1)
+        info = tone.auto_details()
+
+        # set max/mins
+        print 'info', info
+        fmax = info['frequency']['max']
+        self.ui.freqStartSpnbx.setMaximum(fmax)
+        self.ui.freqStopSpnbx.setMaximum(fmax)
+        self.ui.freqStepSpnbx.setMaximum(500000)
+        dbmax = info['intensity']['max']
+        self.ui.dbStartSpnbx.setMaximum(dbmax)
+        self.ui.dbStopSpnbx.setMaximum(dbmax)
+        self.ui.dbStepSpnbx.setMaximum(500000)
+        self.ui.durSpnbx.setMaximum(info['duration']['max'])
+        self.ui.risefallSpnbx.setMaximum(info['risefall']['max'])
 
         self.fmapper.setModel(self.parameterModel)
         self.dbmapper.setModel(self.parameterModel)
@@ -55,8 +70,6 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.fmapper.toFirst()
         self.dbmapper.setCurrentIndex(1)
 
-        tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole+1)
-        info = tone.auto_details()
         self.ui.durSpnbx.setValue(tone.duration())
         self.ui.nrepsSpnbx.setValue(self.stimModel.repCount())
         self.ui.risefallSpnbx.setValue(tone.risefall())

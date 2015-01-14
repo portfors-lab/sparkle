@@ -94,6 +94,7 @@ def test_hz():
 
 def test_mVV():
     box = SmartSpinBox()
+    box.setScalarFactor('mV/V', 20)
     box.setScale(SmartSpinBox.mVV)
     val = 1
     box.setValue(val)
@@ -105,6 +106,7 @@ def test_mVV():
 
 def test_pAV():
     box = SmartSpinBox()
+    box.setScalarFactor('pA/V', 400)
     box.setScale(SmartSpinBox.pAV)
     val = 1
     box.setValue(val)
