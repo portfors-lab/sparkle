@@ -9,6 +9,9 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
     Seconds = 's'
     Hz = 'Hz'
     kHz = 'kHz'
+    mVV = 'mV/V'
+    pAV = 'pA/V'
+    _factors = { mVV: 1./20, pAV: 1./400}
     """Spin box that shows decimals only if value is not a whole number"""
     def __init__(self, parent=None):
         super(SmartSpinBox, self).__init__(parent)
@@ -17,6 +20,7 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
         self.setKeyboardTracking(False)
         self._scalar = 1
         self.setDecimals(3)
+        self.setMaximum(500000) # default high max
 
     def textFromValue(self, val):
         val = val/self._scalar
@@ -35,6 +39,12 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
         elif scale == self.kHz:
             self._scalar = 1000.
             self.setDecimals(3)
+        elif scale == self.mVV:
+            self._scalar = self._factors[self.mVV]
+            scale = 'mV'
+        elif scale == self.pAV:
+            self._scalar = self._factors[self.pAV]
+            scale = 'pA'
         else:
             self._scalar = 1
             self.setDecimals(3)
@@ -60,6 +70,13 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
 
     def currentScale(self):
         return self._scalar
+
+    def setScalarFactor(self, unit, factor):
+        self._factors[str(unit)] = 1./factor
+        self.setScale(unit)
+
+    def scalarFactor(self, unit):
+        return 1./self._factors[str(unit)]
 
 
 def trim(val):

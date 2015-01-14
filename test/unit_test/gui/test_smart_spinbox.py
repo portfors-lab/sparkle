@@ -91,3 +91,27 @@ def test_hz():
     box.setValue(val)
     assert box.value() == val
     assert box.text() == '6 Hz'
+
+def test_mVV():
+    box = SmartSpinBox()
+    box.setScale(SmartSpinBox.mVV)
+    val = 1
+    box.setValue(val)
+    assert box.value() == val
+    assert box.text() == '20 mV'
+    box.setScalarFactor('mV/V', 1000)
+    assert box.value() == val
+    assert box.text() == '1000 mV'
+
+def test_pAV():
+    box = SmartSpinBox()
+    box.setScale(SmartSpinBox.pAV)
+    val = 1
+    box.setValue(val)
+    assert box.value() == 1
+    assert box.text() == '400 pA'
+    box.setScalarFactor('pA/V', 1000)
+    assert box.value() == 1
+    assert box.text() == '1000 pA'
+
+

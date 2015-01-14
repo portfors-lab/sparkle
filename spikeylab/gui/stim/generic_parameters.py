@@ -15,7 +15,6 @@ class GenericParameterWidget(AbstractComponentWidget):
         self.setWindowTitle(component.name)
 
         row_counter = 0
-        details = component.auto_details()
         self.inputWidgets = {}
         for field, details in component.auto_details().items():
 
@@ -23,11 +22,10 @@ class GenericParameterWidget(AbstractComponentWidget):
                 # special case field should get incrementer
                 inpt = IncrementInput()
                 layout.addWidget(QtGui.QLabel(field), row_counter, 0)
-                layout.addWidget(inpt, row_counter, 1)
             else:
                 inpt = SmartSpinBox()
                 layout.addWidget(QtGui.QLabel(details.get('text', field)), row_counter, 0)
-                layout.addWidget(inpt, row_counter, 1)
+            layout.addWidget(inpt, row_counter, 1)
             row_counter +=1
             # set the max and min
             inpt.setMinimum(details['min'])

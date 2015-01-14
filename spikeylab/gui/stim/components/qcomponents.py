@@ -8,7 +8,7 @@ from pyqtgraph import GradientEditorItem
 from spikeylab.stim.abstract_component import AbstractStimulusComponent
 from spikeylab.stim.types.stimuli_classes import *
 from spikeylab.gui.stim.generic_parameters import GenericParameterWidget
-from spikeylab.gui.stim.components import vocal_parameters
+from spikeylab.gui.stim.components import vocal_parameters, square_parameters
 from spikeylab.tools.audiotools import spectrogram, audioread, audiorate
 from spikeylab.resources import img
 
@@ -195,3 +195,8 @@ class QSilence(QStimulusComponent):
     def paint(self, painter, rect, palette):
         mid = rect.y() + (rect.height()/2)
         painter.drawLine(rect.x()+5, mid, rect.x()+rect.width()-10, mid)
+
+class QSquareWave(QStimulusComponent):
+    def showEditor(self):
+        editor = square_parameters.SquareWaveParameterWidget(self)
+        return editor
