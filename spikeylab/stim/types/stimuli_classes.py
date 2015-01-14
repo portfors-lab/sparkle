@@ -53,7 +53,7 @@ class SquareWave(PureTone):
         npts = int(self._duration * fs)
         t = np.linspace(0, self._duration, npts)
         sig = square(2 * np.pi * self._frequency * t)
-        sig = sig * self._amplitude
+        sig = sig * (self._amplitude/2) + (self._amplitude/2)
         return sig
 
     def auto_details(self):
