@@ -45,7 +45,6 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         info = tone.auto_details()
 
         # set max/mins
-        print 'info', info
         fmax = info['frequency']['max']
         self.ui.freqStartSpnbx.setMaximum(fmax)
         self.ui.freqStopSpnbx.setMaximum(fmax)

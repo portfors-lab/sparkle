@@ -20,7 +20,6 @@ class SmartSpinBox(QtGui.QDoubleSpinBox):
         self.setKeyboardTracking(False)
         self._scalar = 1
         self.setDecimals(3)
-        self.setMaximum(500000) # default high max
 
     def textFromValue(self, val):
         val = val/self._scalar

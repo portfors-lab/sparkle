@@ -20,19 +20,17 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
         self.duration_input = SmartSpinBox()
         layout.addWidget(self.duration_input, 0, 1)
         self.duration_input.setMinimum(details['duration']['min'])
-        self.duration_input.setMinimum(details['duration']['min'])
+        self.duration_input.setMaximum(details['duration']['max'])
         self.duration_input.setScale(self._scales[0])
         self.duration_input.valueChanged.connect(self.valueChanged.emit)
-        layout.setRowStretch(0, 1)
 
         layout.addWidget(QtGui.QLabel('Frequency'), 1, 0)
         self.freq_input = IncrementInput()
-        layout.addWidget(self.freq_input, 0, 1)
+        layout.addWidget(self.freq_input, 1, 1)
         self.freq_input.setMinimum(details['frequency']['min'])
-        self.freq_input.setMinimum(details['frequency']['min'])
+        self.freq_input.setMaximum(details['frequency']['max'])
         self.freq_input.setScale(self._scales[1])
         self.freq_input.valueChanged.connect(self.valueChanged.emit)
-        layout.setRowStretch(1, 1)
 
         amp_input_layout = QtGui.QHBoxLayout()
         self.amp_input = SmartSpinBox()
@@ -73,10 +71,15 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
         editor_layout = QtGui.QVBoxLayout()
         editor_layout.addLayout(layout)
         editor_layout.addWidget(amp_box)
+        editor_layout.addWidget(QtGui.QWidget()) # add empty widget to get spacing
+        editor_layout.setStretch(2, 1)
         self.setLayout(editor_layout)
 
         self.setComponent(component)
         self.updateFactor(self.amp_factor_input.value())
+        self.inputWidgets = {'duration': self.duration_input,
+                             'frequency': self.freq_input,
+                             'amplitude': self.amp_input}
 
     def setComponent(self, component):
         values = component.stateDict()
