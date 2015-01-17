@@ -25,7 +25,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         self.tunit_fields.append(self.durSpnbx)
         self.tunit_fields.append(self.risefallSpnbx)
 
-        self.inputWidgets = {'intensity': self.dbSpnbx}
+        self.inputWidgets = {'intensity': self.dbSpnbx, 'risefall': self.risefallSpnbx}
         self.audioExtentions = ['wav', 'call1']
         # save old function so we can call it
         self.stashedSelectionChanged = self.filelistView.selectionChanged
@@ -95,6 +95,7 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         if len(self.fileorder) > 0:
             self._component.setFile(self.fileorder[0])
         self._component.setBrowseDir(str(self.dirmodel.rootPath()))
+        self._component.setRisefall(self.risefallSpnbx.value())
 
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
@@ -119,11 +120,11 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         self.filelistView.setRootIndex(self.filemodel.setRootPath(spath))
 
     def fileSelectionChanged(self, selected, deselected):
-        # like super kinda
+        # like super kinda -- call the original slot
         self.stashedSelectionChanged(selected, deselected)
 
         allselected = self.filelistView.selectedIndexes()
-        # display spectrogram of file
+        # display spectrogram of (first) file
         allpaths = [str(self.filemodel.fileInfo(idx).absoluteFilePath()) for idx in allselected]
         spath = allpaths[0]
         if not any(map(spath.lower().endswith, self.audioExtentions)):

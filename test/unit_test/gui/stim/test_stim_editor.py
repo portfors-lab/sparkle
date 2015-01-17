@@ -59,7 +59,7 @@ class TestStimulusEditor():
 
         self.editor.previewFig.close()
         
-    @unittest.skip("Works indepdently but not in batch?")
+    # @unittest.skip("Works indepdently but not in batch?")
     def test_save(self):
         self.editor.show()
         QApplication.processEvents()
@@ -87,6 +87,7 @@ class TestStimulusEditor():
         pztr = self.editor.ui.parametizer.parametizer
 
         qtbot.drag(pztr.paramList, pztr.paramList, pztr.paramList.model().index(0,0))
+        QTest.qWait(ALLOW)
 
         signals, docs, overloads = self.stim.expandedStim()
         # check the first two, make sure they are not the same
