@@ -747,6 +747,7 @@
      <addaction name="actionStimulus_Details"/>
      <addaction name="actionComment"/>
      <addaction name="actionTimer"/>
+     <addaction name="actionResponse_SPL"/>
     </widget>
     <addaction name="actionView_Settings"/>
     <addaction name="menuShow"/>
@@ -1006,7 +1007,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="timerDock">
    <property name="windowTitle">
     <string>Timer</string>
    </property>
@@ -1103,6 +1104,11 @@
   <action name="actionTimer">
    <property name="text">
     <string>Timer</string>
+   </property>
+  </action>
+  <action name="actionResponse_SPL">
+   <property name="text">
+    <string>response SPL</string>
    </property>
   </action>
  </widget>
@@ -1475,7 +1481,7 @@
   <connection>
    <sender>actionTimer</sender>
    <signal>triggered()</signal>
-   <receiver>ControlWindow</receiver>
+   <receiver>timerDock</receiver>
    <slot>showNormal()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1483,8 +1489,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>611</x>
-     <y>310</y>
+     <x>1080</x>
+     <y>504</y>
     </hint>
    </hints>
   </connection>
@@ -1501,6 +1507,22 @@
     <hint type="destinationlabel">
      <x>882</x>
      <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionResponse_SPL</sender>
+   <signal>triggered()</signal>
+   <receiver>responseSpl</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1080</x>
+     <y>412</y>
     </hint>
    </hints>
   </connection>
