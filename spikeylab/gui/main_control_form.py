@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Wed Jan 14 11:51:46 2015
+# Created: Wed Jan 21 11:24:15 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -301,17 +301,17 @@ class Ui_ControlWindow(object):
         self.trigchanBox = QtGui.QComboBox(self.centralwidget)
         self.trigchanBox.setObjectName(_fromUtf8("trigchanBox"))
         self.gridLayout_5.addWidget(self.trigchanBox, 1, 1, 1, 1)
-        self.trigCkbx = QtGui.QCheckBox(self.centralwidget)
-        self.trigCkbx.setObjectName(_fromUtf8("trigCkbx"))
-        self.gridLayout_5.addWidget(self.trigCkbx, 1, 0, 1, 1)
+        self.label_17 = QtGui.QLabel(self.centralwidget)
+        self.label_17.setObjectName(_fromUtf8("label_17"))
+        self.gridLayout_5.addWidget(self.label_17, 0, 0, 1, 1)
         self.modeCmbx = QtGui.QComboBox(self.centralwidget)
         self.modeCmbx.setObjectName(_fromUtf8("modeCmbx"))
         self.modeCmbx.addItem(_fromUtf8(""))
         self.modeCmbx.addItem(_fromUtf8(""))
         self.gridLayout_5.addWidget(self.modeCmbx, 0, 1, 1, 1)
-        self.label_17 = QtGui.QLabel(self.centralwidget)
-        self.label_17.setObjectName(_fromUtf8("label_17"))
-        self.gridLayout_5.addWidget(self.label_17, 0, 0, 1, 1)
+        self.trigCkbx = QtGui.QCheckBox(self.centralwidget)
+        self.trigCkbx.setObjectName(_fromUtf8("trigCkbx"))
+        self.gridLayout_5.addWidget(self.trigCkbx, 1, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_5)
         self.frame = QtGui.QFrame(self.centralwidget)
         self.frame.setFrameShape(QtGui.QFrame.HLine)
@@ -647,11 +647,11 @@ class Ui_ControlWindow(object):
         self.label_36.setText(_translate("ControlWindow", "reps/s", None))
         self.threshSpnbx.setToolTip(_translate("ControlWindow", "Spike detection threshold", None))
         self.threshSpnbx.setSuffix(_translate("ControlWindow", " V", None))
-        self.trigCkbx.setText(_translate("ControlWindow", "Triggered", None))
+        self.label_17.setText(_translate("ControlWindow", "Mode", None))
         self.modeCmbx.setToolTip(_translate("ControlWindow", "Mode of acquisition to use", None))
         self.modeCmbx.setItemText(0, _translate("ControlWindow", "Windowed", None))
         self.modeCmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
-        self.label_17.setText(_translate("ControlWindow", "Mode", None))
+        self.trigCkbx.setText(_translate("ControlWindow", "Trigger", None))
         self.label_8.setText(_translate("ControlWindow", "Calibration:", None))
         self.currentCalLbl.setText(_translate("ControlWindow", "None", None))
         self.dataFileLbl.setText(_translate("ControlWindow", "None", None))
