@@ -191,9 +191,8 @@ class CalibrationRunner(AbstractCalibrationRunner):
                                    relevant_info)
 
         mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
-        freq, spectrum = calc_spectrum(mean_reftone, self.player.get_aisr())
-        peak_fft = spectrum[(np.abs(freq-self.calf)).argmin()]
-        db = calc_db(peak_fft, self.mphonesens, self.mphonedb)
+        tone_amp = signal_amplitude(mean_reftone, self.player.get_aisr())
+        db = calc_db(tone_amp, self.mphonesens, self.mphonedb)
         # remove the reference tone from protocol
         self.protocol_model.remove(0)
         

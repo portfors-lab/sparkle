@@ -1,7 +1,7 @@
 import numpy as np
 
 from spikeylab.run.list_runner import ListAcquisitionRunner
-from spikeylab.tools.audiotools import rms
+from spikeylab.tools.audiotools import signal_amplitude
 from spikeylab.stim.stimulus_model import StimulusModel
 from spikeylab.stim.types.stimuli_classes import Silence
 from spikeylab.acq.players import FinitePlayer
@@ -40,6 +40,6 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
     def process_calibration(self):
         amps = []
         for itest in range(self.response_buffer.shape[0]):
-            amps.append(rms(self.response_buffer[itest,:], self.player.aisr))
+            amps.append(signal_amplitude(self.response_buffer[itest,:], self.player.aisr))
         amp = np.mean(amps)
         return amp
