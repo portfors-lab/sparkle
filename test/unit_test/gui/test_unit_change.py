@@ -177,9 +177,14 @@ def assert_fields_s(control):
         if 'risefall' in editor_widget.inputWidgets:
             assert editor_widget.inputWidgets['risefall'].minimum() == 0
             assert editor_widget.inputWidgets['risefall'].maximum() == 0.1
+            assert editor_widget.inputWidgets['risefall'].suffix() == ' s'
         if 'duration' in editor_widget.inputWidgets:
             assert editor_widget.inputWidgets['duration'].minimum() == 0
             assert editor_widget.inputWidgets['duration'].maximum() == 3
+            print editor_widget.name(), editor_widget.inputWidgets['duration'].suffix()
+            assert editor_widget.inputWidgets['duration'].suffix() == ' s'
+    for component_stack in control.ui.exploreStimEditor.trackEditorWidgets():
+        assert component_stack.delaySpnbx.suffix() == ' s'
 
 def assert_fields_ms(control):
     time_inputs = control.timeInputs + AbstractEditorWidget.tunit_fields
@@ -194,6 +199,10 @@ def assert_fields_ms(control):
         if 'risefall' in editor_widget.inputWidgets:
             assert editor_widget.inputWidgets['risefall'].minimum() == 0
             assert editor_widget.inputWidgets['risefall'].maximum() == 0.1
+            assert editor_widget.inputWidgets['risefall'].suffix() == ' ms'
         if 'duration' in editor_widget.inputWidgets:
             assert editor_widget.inputWidgets['duration'].minimum() == 0
             assert editor_widget.inputWidgets['duration'].maximum() == 3.0
+            assert editor_widget.inputWidgets['duration'].suffix() == ' ms'
+    for component_stack in control.ui.exploreStimEditor.trackEditorWidgets():
+        assert component_stack.delaySpnbx.suffix() == ' ms'

@@ -22,6 +22,12 @@ class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
         self.durSpnbx.setKeyboardTracking(False)
         self.risefallSpnbx.setKeyboardTracking(False)
 
+        details = component.auto_details()
+        self.risefallSpnbx.setMinimum(details['risefall']['min'])
+        self.risefallSpnbx.setMaximum(details['risefall']['max'])
+        self.dbSpnbx.setMinimum(details['intensity']['min'])
+        self.dbSpnbx.setMaximum(details['intensity']['max'])
+
         self.tunit_fields.append(self.durSpnbx)
         self.tunit_fields.append(self.risefallSpnbx)
 

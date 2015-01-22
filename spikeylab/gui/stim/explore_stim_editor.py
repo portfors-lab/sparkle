@@ -131,6 +131,12 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         for itrack in range(self.ui.trackStack.count()):
             w.extend(self.ui.trackStack.widget(itrack).widgets())
         return w
+        
+    def trackEditorWidgets(self):
+        w = []
+        for itrack in range(self.ui.trackStack.count()):
+            w.append(self.ui.trackStack.widget(itrack))
+        return w
 
     def saveTemplate(self):
         template = []
@@ -147,6 +153,9 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         for track in template:
             comp_stack_editor = self.addComponentEditor()
             comp_stack_editor.loadTemplate(track)
+
+    def closeEvent(self, event):
+        pass
 
 class IndexButton(QtGui.QPushButton):
     """Custom button for explore editor to toggle bettween tracks"""

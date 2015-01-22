@@ -28,6 +28,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
 
         self.delaySpnbx = SmartSpinBox()
         self.delaySpnbx.setKeyboardTracking(False)
+        self.delaySpnbx.setScale(self._scales[0])
         self.delaySpnbx.valueChanged.connect(self.valueChanged.emit)
         self.tunit_fields.append(self.delaySpnbx)
 

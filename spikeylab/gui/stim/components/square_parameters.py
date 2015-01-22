@@ -22,6 +22,7 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
         self.duration_input.setMinimum(details['duration']['min'])
         self.duration_input.setMaximum(details['duration']['max'])
         self.duration_input.setScale(self._scales[0])
+        self.tunit_fields.append(self.duration_input)
         self.duration_input.valueChanged.connect(self.valueChanged.emit)
 
         layout.addWidget(QtGui.QLabel('frequency'), 1, 0)
