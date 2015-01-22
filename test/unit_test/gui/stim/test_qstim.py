@@ -64,10 +64,10 @@ class TestQStimModel():
         model = QStimulusModel(data)
         fake_component0 = PureTone()
         assert model.columnCountForRow(0) == 0
-        assert model.rowCount() == 1
+        assert model.rowCount() == 0
         model.insertComponent(model.createIndex(0, 0, fake_component0), fake_component0)
         assert model.columnCountForRow(0) == 1
-        assert model.rowCount() == 2
+        assert model.rowCount() == 1
 
     def test_trace_count_no_auto(self):
         data = StimulusModel()

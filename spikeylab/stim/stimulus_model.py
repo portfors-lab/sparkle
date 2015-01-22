@@ -188,10 +188,13 @@ class StimulusModel():
 
         :returns: int -- number of rows
         """
-        if len(self._segments[0]) == 0:
-            return 0
-        else:
-            return len(self._segments)
+        # if len(self._segments[0]) == 0:
+        #     return 0
+        # else:
+        # there should always be an empty ending row...
+        if len(self._segments[-1]) != 0:
+            raise IndexError("Stimulus model should end in empty row")
+        return len(self._segments) -1
 
     def columnCount(self, row=None):
         """Returns the number of components in a track, 
@@ -251,6 +254,8 @@ class StimulusModel():
         if row > len(self._segments) -1:
             self.insertEmptyRow()
         self._segments[row].insert(col, comp)
+        if len(self._segments[-1]) > 0:
+            self.insertEmptyRow()
 
         if comp.__class__.__name__ == 'Vocalization':
             if comp.samplerate() is not None:
@@ -287,6 +292,8 @@ class StimulusModel():
     def removeRow(self, row):
         """Removes the track at row, empty or not"""
         self._segments.pop(row)
+        if len(self._segments) == 0 or len(self._segments[-1]) > 0:
+            self.insertEmptyRow()
 
     def removeComponent(self, row,col):
         """Removes the component at the given location

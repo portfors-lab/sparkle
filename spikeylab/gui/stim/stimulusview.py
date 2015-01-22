@@ -117,7 +117,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         if not self._viewIsDirty:
             return
 
-        self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount())]
+        self._rects = [[None] * self.model().columnCountForRow(x) for x in range(self.model().rowCount()+1)]
         x, y = 0, 0
         maxx = 0
         for row in range(self.model().rowCount(self.rootIndex())):
@@ -151,7 +151,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
 
         row = wy/(ROW_HEIGHT + ROW_SPACE)
         if row > self.model().rowCount(self.rootIndex()) - 1:
-            row = self.model().rowCount(self.rootIndex()) - 1
+            row = self.model().rowCount(self.rootIndex())
         for col in range(self.model().columnCountForRow(row)):
             if self._rects[row][col].contains(wx, wy):
                 return (row, col)

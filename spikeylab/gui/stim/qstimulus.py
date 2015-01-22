@@ -54,8 +54,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
 
         Required by view, see :qtdoc:`subclassing<qabstractitemmodel.subclassing>`
         """
-        count = self._stim.rowCount()
-        return max(1, count)
+        return self._stim.rowCount()
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         """Determines the numbers of columns the view will draw
