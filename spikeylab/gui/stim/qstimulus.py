@@ -138,13 +138,12 @@ class QStimulusModel(QtCore.QAbstractItemModel):
     def insertComponent(self, index, comp):
         """Inserts new component *comp* at index"""
         # new component needs to be wrapped
-        self._stim.insertComponent(comp, index.row(), index.column())
-
-        if self.columnCountForRow(-1) > 0:
-            self.beginInsertRows(QtCore.QModelIndex(), self._stim.rowCount(), 
-                                 self._stim.rowCount())
-            self._stim.insertEmptyRow()
+        if self.columnCountForRow(index.row()) == 0:
+            self.beginInsertRows(QtCore.QModelIndex(), index.row(), index.row())
+            self._stim.insertComponent(comp, index.row(), index.column())
             self.endInsertRows()
+        else:
+            self._stim.insertComponent(comp, index.row(), index.column())
 
         self.samplerateChanged.emit(self._stim.samplerate())
 
@@ -155,13 +154,13 @@ class QStimulusModel(QtCore.QAbstractItemModel):
     def removeComponent(self, index):
         """Removes the component at *index* from the model. If the two last
         rows are now empty, trims the last row."""
-        self._stim.removeComponent(index.row(), index.column())
-
-        if self.columnCountForRow(-2) == 0 and self.columnCountForRow(-1) == 0:
+        if index.row() ==  self.rowCount() -1  and self.columnCountForRow(index.row()) == 1:
             self.beginRemoveRows(QtCore.QModelIndex(), self._stim.rowCount()-1, 
                                  self._stim.rowCount()-1)
-            self._stim.removeLastRow()
+            self._stim.removeComponent(index.row(), index.column())
             self.endRemoveRows()
+        else:
+            self._stim.removeComponent(index.row(), index.column())
 
         # this could have affected the sample of this stimulus
         self.samplerateChanged.emit(self._stim.samplerate())

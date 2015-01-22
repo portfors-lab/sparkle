@@ -30,7 +30,7 @@ class StimulusModel():
         self._nloops = 1 # reps of entire expanded list of autoparams
 
         # 2D array of simulus components track number x component number
-        self._segments = [[]]
+        self._segments = []
         # add an empty place to place components into new track
         self._autoParams = AutoParameterModel()
         
@@ -188,13 +188,7 @@ class StimulusModel():
 
         :returns: int -- number of rows
         """
-        # if len(self._segments[0]) == 0:
-        #     return 0
-        # else:
-        # there should always be an empty ending row...
-        if len(self._segments[-1]) != 0:
-            raise IndexError("Stimulus model should end in empty row")
-        return len(self._segments) -1
+        return len(self._segments)
 
     def columnCount(self, row=None):
         """Returns the number of components in a track, 
@@ -215,7 +209,7 @@ class StimulusModel():
         try:
             return len(self._segments[row])
         except IndexError:
-            return None
+            return 0
 
     def componentCount(self):
         """Returns the total number of components in stimulus
@@ -254,8 +248,6 @@ class StimulusModel():
         if row > len(self._segments) -1:
             self.insertEmptyRow()
         self._segments[row].insert(col, comp)
-        if len(self._segments[-1]) > 0:
-            self.insertEmptyRow()
 
         if comp.__class__.__name__ == 'Vocalization':
             if comp.samplerate() is not None:
@@ -292,8 +284,6 @@ class StimulusModel():
     def removeRow(self, row):
         """Removes the track at row, empty or not"""
         self._segments.pop(row)
-        if len(self._segments) == 0 or len(self._segments[-1]) > 0:
-            self.insertEmptyRow()
 
     def removeComponent(self, row,col):
         """Removes the component at the given location
@@ -305,13 +295,13 @@ class StimulusModel():
         """
         self._segments[row].pop(col)
 
-        # If the last two rows are now empty we should remove one
-        if self.columnCountForRow(-2) == 0 and self.columnCountForRow(-1) == 0:
-            self._segments.pop(len(self._segments)-1)
+        # If this row is now empty we should remove it?
+        if self.columnCountForRow(-1) == 0:
+            self.removeRow(len(self._segments)-1)
 
     def clearComponents(self):
         """Removes all components"""
-        self._segments = [[]]
+        self._segments = []
         # also clear auto parameters
         self._autoParams.clearParameters()
 
