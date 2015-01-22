@@ -96,6 +96,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         comp_stack_editor.exploreStimTypeCmbbx.currentIndexChanged.connect(lambda x : self.setStimIndex(row, x))
         comp_stack_editor.delaySpnbx.valueChanged.connect(lambda x : self.setDelay(row, x))
         comp_stack_editor.valueChanged.connect(self.valueChanged.emit)
+        return comp_stack_editor
 
     def removeComponentEditor(self, widget):
         ntracks = self.ui.trackStack.count()
@@ -127,9 +128,25 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
 
     def allComponentWidgets(self):
         w = []
-        for icomp in range(self.ui.trackStack.count()):
-            w.extend(self.ui.trackStack.widget(icomp).widgets())
+        for itrack in range(self.ui.trackStack.count()):
+            w.extend(self.ui.trackStack.widget(itrack).widgets())
         return w
+
+    def saveTemplate(self):
+        template = []
+        for itrack in range(self.ui.trackStack.count()):
+            comp_stack_editor = self.ui.trackStack.widget(itrack)
+            template.append(comp_stack_editor.saveTemplate())
+        return template
+
+    def loadTemplate(self, template):
+        # wipe any current editors and add according to template
+        for i in range(self.ui.trackStack.count()):
+            self.removeComponentEditor(self.ui.trackStack.widget(i))
+
+        for track in template:
+            comp_stack_editor = self.addComponentEditor()
+            comp_stack_editor.loadTemplate(track)
 
 class IndexButton(QtGui.QPushButton):
     """Custom button for explore editor to toggle bettween tracks"""

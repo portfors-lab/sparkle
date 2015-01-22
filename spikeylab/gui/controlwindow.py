@@ -217,11 +217,8 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['mphonesens'] = self.ui.mphoneSensSpnbx.value()
         savedict['mphonedb'] = self.ui.mphoneDBSpnbx.value()
 
-        # parameter settings
-        # for stim in self.exploreStimuli:
-        #     editor = self.ui.parameterStack.widgetForName(stim.name)
-        #     editor.saveToObject()
-        #     savedict[stim.name] = stim.stateDict()
+        # parameter settings -- save all tracks present
+        savedict['explorestims'] = self.ui.exploreStimEditor.saveTemplate()
 
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
@@ -288,18 +285,16 @@ class ControlWindow(QtGui.QMainWindow):
             except:
                 logger = logging.getLogger('main')
                 logger.exception("Unable to load previous calibration settings")
-                
-            # for stim in self.exploreStimuli:
-            #     try:
-            #         stim.loadState(inputsdict[stim.name])
-
-            #     except KeyError:
-            #         logger = logging.getLogger('main')
-            #         logger.exception('Unable to load saved inputs for {}'.format(stim.__class__))
         else:
             logger = logging.getLogger('main')
-            logger.debug('No saved stimului inputs')
- 
+            logger.debug('No saved calibration stimului inputs')
+
+        if 'explorestims' in inputsdict:
+            self.ui.exploreStimEditor.loadTemplate(inputsdict['explorestims'])
+        else:
+            logger = logging.getLogger('main')
+            logger.debug('No saved explore stimului inputs')
+
         # self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):

@@ -68,3 +68,20 @@ class ExploreComponentEditor(AbstractEditorWidget):
 
     def delay(self):
         return self.delaySpnbx.value()
+
+    def saveTemplate(self):
+        """Get a json structure of the current inputs, 
+        to be able to load later"""
+        savedict = {}
+        for comp_editor in self.widgets():
+            stim = comp_editor.component()
+            comp_editor.saveToObject()
+            savedict[stim.name] = stim.stateDict()
+        return savedict
+
+    def loadTemplate(self, template):
+        for comp_editor in self.widgets():
+            stim = comp_editor.component()
+            stim.loadState(template[stim.name])
+            # re-assign component to editor, so GUI fields are updated
+            comp_editor.setComponent(stim)
