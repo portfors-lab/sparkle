@@ -65,11 +65,12 @@ class GenericParameterWidget(AbstractComponentWidget):
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
 
     def setContentFocus(self):
-        """ Builder calls this to get cursor in editor"""
+        """Builder calls this to get cursor in editor"""
         self.inputWidgets['duration'].setFocus()
         self.inputWidgets['duration'].selectAll()
 
     def durationInputWidget(self):
         """Gets the widget responsible for duration input"""
-        return self.inputWidgets['duration']
+        if 'duration' in self.inputWidgets:
+            return self.inputWidgets['duration']
 
