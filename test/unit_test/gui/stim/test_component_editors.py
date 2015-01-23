@@ -24,6 +24,7 @@ class TestVocalizationEditor():
 
     def tearDown(self):
         self.editor.close()
+        self.editor.deleteLater()        
 
     def xtest_file_order(self):
         # these methods of selecting files, won't work in testing (only)
@@ -114,12 +115,18 @@ class TestEditors():
             state = comp.stateDict()    
             for parameter_name, field in editor.inputWidgets.items():
                 assert state[parameter_name] == val
+            editor.close()
+            editor.deleteLater()        
 
 class TestSquareWaveEditor():
     def setUp(self):
         self.component = SquareWave()
         self.qcomponent = wrapComponent(self.component)
         self.editor = self.qcomponent.showEditor()
+
+    def tearDown(self):
+        self.editor.close()
+        self.editor.deleteLater()        
 
     def test_update_paramters(self):
         self.editor.durationInputWidget().setValue(0.44)

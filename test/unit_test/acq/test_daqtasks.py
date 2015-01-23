@@ -1,3 +1,4 @@
+import unittest
 import numpy as np
 from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
                                     DigitalOutTask, get_ao_chans, get_ai_chans
@@ -122,7 +123,8 @@ class TestDAQTasks():
         # this reading is haywire?
         # assert  dout.generated() == dur*rate
         dout.stop()
-
+    
+    @unittest.skip("Hardware needs to be connected")
     def test_triggered_AI(self):
         npts = 10000
         rate = 2.
@@ -144,6 +146,7 @@ class TestDAQTasks():
         # print "duration", duration
         assert len(response1) == npts
 
+    @unittest.skip("Hardware needs to be connected")
     def test_triggered_and_sync_AI_AO(self):
         npts = 10000
         rate = 2.

@@ -10,6 +10,7 @@ class TestExploreStimEditor():
 
   def tearDown(self):
     self.editor.close()
+    self.editor.deleteLater()        
 
   def test_add_remove_tracks(self):
     #lotsa adding and removing... had a bug here before
