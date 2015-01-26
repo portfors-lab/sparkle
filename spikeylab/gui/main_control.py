@@ -82,7 +82,7 @@ class MainWindow(ControlWindow):
         self.ui.aichanBox.addItems(cnames)
         # can't find a function in DAQmx that gets the trigger
         # channel names, so add manually
-        self.ui.trigchanBox.addItems(['/PCI-6259/PFI0', '/PCI-6259/PFI1'])
+        self.ui.trigchanBox.addItems(['/'+DEVNAME+'/PFI0', '/'+DEVNAME+'/PFI1'])
 
         self.ui.runningLabel.setStyleSheet(REDSS)
 
