@@ -78,6 +78,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
             stim = comp_editor.component()
             comp_editor.saveToObject()
             savedict[stim.name] = stim.stateDict()
+        savedict['delay'] = self.delaySpnbx.value()
         return savedict
 
     def loadTemplate(self, template):
@@ -86,3 +87,5 @@ class ExploreComponentEditor(AbstractEditorWidget):
             stim.loadState(template[stim.name])
             # re-assign component to editor, so GUI fields are updated
             comp_editor.setComponent(stim)
+        delay = template.get('delay', 0)
+        self.delaySpnbx.setValue(delay)

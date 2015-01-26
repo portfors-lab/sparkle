@@ -55,11 +55,13 @@ class TestExploreStimEditor():
     tone_editor = self.editor.ui.trackStack.widget(0).componentStack.widgetForName('Pure Tone')
     tone_editor.inputWidgets['frequency'].setValue(666)
     tone_editor.inputWidgets['duration'].setValue(0.666)
+    self.editor.ui.trackStack.widget(0).delaySpnbx.setValue(0.066)
 
     # reach in and set values on inputs
     tone_editor = self.editor.ui.trackStack.widget(1).componentStack.widgetForName('Pure Tone')
     tone_editor.inputWidgets['frequency'].setValue(777)
     tone_editor.inputWidgets['duration'].setValue(0.777)
+    self.editor.ui.trackStack.widget(1).delaySpnbx.setValue(0.077)
 
     template = self.editor.saveTemplate()
     new_explore_editor = ExploreStimulusEditor()
@@ -70,10 +72,12 @@ class TestExploreStimEditor():
     tone_editor = new_explore_editor.ui.trackStack.widget(0).componentStack.widgetForName('Pure Tone')
     assert tone_editor.inputWidgets['frequency'].value() == 666
     assert tone_editor.inputWidgets['duration'].value() == 0.666
+    assert new_explore_editor.ui.trackStack.widget(0).delaySpnbx.value() == 0.066
 
     tone_editor = new_explore_editor.ui.trackStack.widget(1).componentStack.widgetForName('Pure Tone')
     assert tone_editor.inputWidgets['frequency'].value() == 777
     assert tone_editor.inputWidgets['duration'].value() == 0.777
+    assert new_explore_editor.ui.trackStack.widget(1).delaySpnbx.value() == 0.077
 
     assert new_explore_model.rowCount() == 2
     
