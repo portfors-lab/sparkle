@@ -119,3 +119,21 @@ def firing_rate(spike_times, window_size=None):
 
     rate = window_size/len(spike_times)
     return rate
+
+def dataset_spike_counts(dset, threshold, fs):
+    """Dataset should be of dimensions (trace, rep, samples)"""
+    if len(dset.shape) == 3:
+        results = np.zeros(dset.shape[0])
+        for itrace in range(dset.shape[0]):
+            results[itrace] = count_spikes(dset[itrace], threshold, fs)
+        return results
+    elif len(dset.shape == 2):
+        return count_spikes(dset, threshold, fs)
+    else:
+        raise Exception("Improper data dimensions")
+
+def count_spikes(dset, threshold, fs):
+    trace_count = 0
+    for irep in range(dset.shape[0]):
+        trace_count += len(spike_times(dset[irep,:], threshold, fs))
+    return trace_count

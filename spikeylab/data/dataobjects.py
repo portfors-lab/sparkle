@@ -497,7 +497,34 @@ class AcquisitionData():
 
         :returns: list<str> -- list of the keys
         """
+
         return self.hdf5.keys()
+
+    def all_datasets(self):
+        """Go through file and get all datasets"""
+        self._dsets = []
+        self.hdf5.visititems(self._gather_datasets)
+        # sort into order alpha-numerical
+        self._dsets = sorted(self._dsets, key=lambda item: (item.name.partition('_')[0], int(item.name.rpartition('_')[-1]) if item.name[-1].isdigit() else float('inf'))) 
+        return self._dsets
+
+    def _gather_datasets(self, name, item):
+        if hasattr(item, 'shape'):
+            self._dsets.append(item)
+
+    def _repr_html_(self):
+        # display the contents of this file in HTML for viewing in ipython notebooks
+        self._printstr = '<p>'
+        self.hdf5.visititems(self._report_item)
+        self._printstr += '</p>'
+        return self._printstr
+
+    def _report_item(self, name, item):
+        self._printstr += name
+        if hasattr(item, 'shape'):
+            self._printstr += ' ' + str(item.shape)
+        self._printstr += '<br>'
+
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':
