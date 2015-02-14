@@ -1,4 +1,5 @@
 import os, yaml
+import logging
 
 from scipy.signal import chirp, hann, square
 import numpy as np
@@ -155,11 +156,13 @@ class Vocalization(AbstractStimulusComponent):
         browsedir = state['browsedir']
         fname = state['filename']
 
-        # error will occur later if unset
         if os.path.isdir(browsedir):
             self._browsedir = browsedir
         if fname is not None and os.path.isfile(fname):
             self._filename = fname
+        else:
+            logger = logging.getLogger('main')
+            logger.warn('File: {} not found'.format(fname))
             
         # if not os.path.isdir(browsedir):
         #     raise FileDoesNotExistError(browsedir)
@@ -181,6 +184,11 @@ class Vocalization(AbstractStimulusComponent):
             self._duration = duration
 
     def signal(self, fs, atten, caldb, calv):
+        if self._filename is None:
+            # allow lack of file to not cause error, catch in GUI when necessary?
+            logger = logging.getLogger('main')
+            logger.warn('Vocalization signal request without a file')
+            return np.array([])
         sr, wavdata = audioread(self._filename)
         if fs != sr:
             print 'specified', fs, 'wav file', sr

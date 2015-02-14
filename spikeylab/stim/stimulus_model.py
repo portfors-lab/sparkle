@@ -550,7 +550,7 @@ class StimulusModel():
             stim.insertComponent(comp, *comp_doc['index'])
         
         stim.setReferenceVoltage(calv, caldb)
-        signal, atten, sad_atten = stim.signal()
+        signal, atten, sad_atten = stim.signal(force_fs=doc['samplerate_da'])
         return signal
 
     def duration(self):
@@ -564,13 +564,18 @@ class StimulusModel():
             
         return max(durs)
 
-    def signal(self):
+    def signal(self, force_fs=False):
         """The current stimulus in signal representation, this is the sum
         of its components
 
+        :param force_fs: Allow to use a different samplerate than the default, should be used to recreate historical signals only
+        :type force_fs: int
         :returns: numpy.ndarray -- voltage signal for this stimulus
         """
-        samplerate = self.samplerate()
+        if force_fs:
+            samplerate = force_fs
+        else:
+            samplerate = self.samplerate()
         track_signals = []
         max_db = max([comp.intensity() for t in self._segments for comp in t])
         # atten = self.caldb - max_db

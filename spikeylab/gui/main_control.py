@@ -694,9 +694,9 @@ class MainWindow(ControlWindow):
                 intensities = []
                 frequencies = []
                 for comp in comp_info[1:]:
-                    # only a single tone present in stims
-                    intensities.append(comp['components'][0]['intensity'])
-                    frequencies.append(comp['components'][0]['frequency'])
+                    # only a single tone present in stims... or a delay component before it
+                    intensities.append(comp['components'][-1]['intensity'])
+                    frequencies.append(comp['components'][-1]['frequency'])
                 intensities = list(set(intensities))
                 frequencies = list(set(frequencies))
                 intensities.sort() #got out of order?
@@ -705,7 +705,7 @@ class MainWindow(ControlWindow):
                 groups = intensities
                 plottype = 'tuning'
             else:
-                xlabels = range(testdata.shape[0]-1)
+                xlabels = range(testdata.shape[0])
                 groups = ['all traces']
                 plottype = 'other'
             # a not-so-live curve

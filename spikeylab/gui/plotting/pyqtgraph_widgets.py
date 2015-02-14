@@ -599,7 +599,7 @@ class ProgressWidget(BasePlot):
         pw = ProgressWidget(groups, xlims)
         spike_counts = []
         # skip control
-        for itrace in range(1,data.shape[0]):
+        for itrace in range(data.shape[0]):
             flat_reps = data[itrace].flatten()
             spike_times = spikestats.spike_times(flat_reps, threshold, fs)
             spike_counts.append(len(spike_times)/data.shape[1]) #mean spikes per rep
