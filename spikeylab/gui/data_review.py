@@ -1,4 +1,5 @@
 from spikeylab.gui.hdftree import H5TreeWidget
+from spikeylab.gui.stim_table import StimTable
 from spikeylab.data.dataobjects import AcquisitionData
 from spikeylab.gui.stim.component_detail import ComponentsDetailWidget
 
@@ -15,9 +16,32 @@ class QDataReviewer(QtGui.QWidget):
         hsplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
         asplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        contents_view = QtGui.QWidget()
+        content_view_layout = QtGui.QVBoxLayout()
+        self.btngrp = QtGui.QButtonGroup()
+        choice_layout = QtGui.QHBoxLayout()
+        tree_radio = QtGui.QRadioButton("File tree")
+        table_radio = QtGui.QRadioButton("Test table")
+        tree_radio.setChecked(True)
+        self.btngrp.addButton(tree_radio)
+        self.btngrp.addButton(table_radio)
+        self.btngrp.setId(tree_radio, 0)
+        self.btngrp.setId(table_radio, 1)
+        choice_layout.addWidget(tree_radio)
+        choice_layout.addWidget(table_radio)
+        content_view_layout.addLayout(choice_layout)
+        contents_stack = QtGui.QStackedWidget()
         self.datatree = H5TreeWidget()
-        self.datatree.nodeChanged.connect(self.setCurrentData)
-        asplitter.addWidget(self.datatree)
+        self.datatable = StimTable()
+        contents_stack.addWidget(self.datatree)
+        contents_stack.addWidget(self.datatable)
+        self.btngrp.buttonClicked[int].connect(contents_stack.setCurrentIndex)
+        content_view_layout.addWidget(contents_stack)
+        contents_view.setLayout(content_view_layout)
+
+        self.datatree.nodeChanged.connect(self.setCurrentNode)
+        self.datatable.cellClicked.connect(self.setCurrentCell)
+        asplitter.addWidget(contents_view)
 
         self.attrtxt = QtGui.QPlainTextEdit()
         attrLayout = QtGui.QVBoxLayout()
@@ -75,16 +99,26 @@ class QDataReviewer(QtGui.QWidget):
         # display contents as a tree
         self.datatree.addH5Handle(data.hdf5)
         self.datatree.expandItem(self.datatree.topLevelItem(0))
+        # and a table
+        self.datatable.setData(data)
 
     def update(self):
         self.datatree.update(self.datafile.hdf5)
 
-    def setCurrentData(self, widgetitem):
+    def setCurrentCell(self, row, column):
+        # don't care about the column clicked, get the path for the row
+        path = str(self.datatable.item(row, 0).text())
+        self.setCurrentData(path)
+
+    def setCurrentNode(self, widgetitem):
         path = makepath(widgetitem)
+        self.setCurrentData(path)
+        
+    def setCurrentData(self, path):
+        setname = path.split('/')[-1]
         info = self.datafile.get_info(path)
 
         # clear out old stuff
-        setname = widgetitem.text(0)
         self.tracetable.setRowCount(0)
         self.derivedtxt.clear()
         self.attrtxt.clear()
@@ -129,12 +163,12 @@ class QDataReviewer(QtGui.QWidget):
             data_shape = data_object.shape
             self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
             
-            if setname.startsWith('test') or setname.startsWith('signal') or setname == 'reference_tone':
+            if setname.startswith('test') or setname.startswith('signal') or setname == 'reference_tone':
                 # input samplerate is stored in group attributes
                 group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
                 fsout = dict(group_data)['samplerate_ad']
                 self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
-            if setname.startsWith('test'):
+            if setname.startswith('test'):
                 self.testSelected.emit(path)
             self.current_data_shape = data_shape
             
@@ -187,7 +221,9 @@ if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
-    data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
+    # data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
+    # data = AcquisitionData('/home/leeloo/testdata/20141119.hdf5', filemode='r')
+    data = AcquisitionData('/home/leeloo/testdata/Mouse 871c.hdf5', filemode='r')
     viewer = QDataReviewer()
     viewer.setDataObject(data)
     viewer.show()
