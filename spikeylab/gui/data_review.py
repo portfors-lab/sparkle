@@ -62,12 +62,15 @@ class QDataReviewer(QtGui.QWidget):
         traceSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         traceLayout = QtGui.QVBoxLayout()
 
-        self.tracetable = QtGui.QTableWidget()
+        self.tracetable = TraceTable()
         headers = ['No. Components', 'Stim Type', 'Sample Rate (Hz)']
         self.tracetable.setColumnCount(len(headers))
         self.tracetable.setHorizontalHeaderLabels(headers)
         self.tracetable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tracetable.cellClicked.connect(self.setTraceData)
+        self.tracetable.currentCellChanged.connect(self.traceChanged)
+        self.tracetable.left.connect(self.prevRep)
+        self.tracetable.right.connect(self.nextRep)
 
         self.prevButton = QtGui.QPushButton('<')
         self.nextButton = QtGui.QPushButton('>')
@@ -115,6 +118,7 @@ class QDataReviewer(QtGui.QWidget):
         self.current_rep_num = 0
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.nextRep)
+        self.traceStop = False
 
     def setDataObject(self, data):
         self.datatree.clearTree()
@@ -199,20 +203,26 @@ class QDataReviewer(QtGui.QWidget):
             if setname.startswith('test'):
                 self.testSelected.emit(path)
             self.current_data_shape = data_shape
-            
 
     def setTraceData(self, row, column, repnum=0):
-        
         self.current_rep_num = repnum
         self.current_trace_num = row
         self._update_buttons()
-        self.tracetable.selectRow(row)
         self.reviewDataSelected.emit(self.current_path, row, repnum)
 
+    def selectTrace(self, tracenum, repnum=0):
+        self.tracetable.selectRow(tracenum)
+        self.setTraceData(tracenum, 0, repnum)
+
+    def traceChanged(self, row, col, prevrow, prevcol):
+        self.setTraceData(row, col)
+
     def nextRep(self):
+        if self.current_rep_num == self.current_data_shape[1]-1 and self.current_trace_num == self.current_data_shape[0]-1:
+            return
         self.current_rep_num += 1
         if self.current_rep_num == self.current_data_shape[1]:
-            self.setTraceData(self.current_trace_num+1,0)
+            self.selectTrace(self.current_trace_num+1)
             if self.traceStop:
                 self.stopTrace()
         else:
@@ -220,9 +230,11 @@ class QDataReviewer(QtGui.QWidget):
             self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
 
     def prevRep(self):
+        if self.current_rep_num == 0 and self.current_trace_num == 0:
+            return
         self.current_rep_num -= 1
         if self.current_rep_num == -1:
-            self.setTraceData(self.current_trace_num-1, 0, self.current_data_shape[1]-1)
+            self.selectTrace(self.current_trace_num-1, self.current_data_shape[1]-1)
         else:
             self._update_buttons()
             self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
@@ -267,8 +279,7 @@ class QDataReviewer(QtGui.QWidget):
         self.timer.start(INTERVAL)
 
     def _update_buttons(self):
-        # by keeping buttons correctly enabled we dont need to check current
-        # rep is within data limits
+        # enable/disable buttons appropriate to current location in the data
         if self.current_rep_num > 0 or self.current_trace_num > 0:
             self.prevButton.setEnabled(True)
         else:
@@ -287,6 +298,16 @@ class QDataReviewer(QtGui.QWidget):
         else:
             self.lastButton.setEnabled(False)
 
+class TraceTable(QtGui.QTableWidget):
+    left = QtCore.Signal()
+    right = QtCore.Signal()
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Left:
+            self.left.emit()
+        elif event.key() == QtCore.Qt.Key_Right:
+            self.right.emit()
+        else:
+            super(TraceTable, self).keyPressEvent(event)
 
 def makepath(item):
     if item is None:
