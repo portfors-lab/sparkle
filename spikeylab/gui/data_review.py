@@ -5,6 +5,8 @@ from spikeylab.gui.stim.component_detail import ComponentsDetailWidget
 
 from QtWrapper import QtCore, QtGui
 
+INTERVAL = 200 #ms
+
 class QDataReviewer(QtGui.QWidget):
     reviewDataSelected = QtCore.Signal(str, int, int)
     testSelected = QtCore.Signal(str)
@@ -69,14 +71,38 @@ class QDataReviewer(QtGui.QWidget):
 
         self.prevButton = QtGui.QPushButton('<')
         self.nextButton = QtGui.QPushButton('>')
+        self.firstButton = QtGui.QPushButton('|<')
+        self.lastButton = QtGui.QPushButton('>|')
         self.prevButton.clicked.connect(self.prevRep)
         self.nextButton.clicked.connect(self.nextRep)
+        self.firstButton.clicked.connect(self.firstRep)
+        self.lastButton.clicked.connect(self.lastRep)
         self.prevButton.setEnabled(False)   
         self.nextButton.setEnabled(False)
+        self.firstButton.setEnabled(False)
+        self.lastButton.setEnabled(False)
+        self.prevButton.setToolTip("previous presentation")
+        self.nextButton.setToolTip("next presentation")
+        self.firstButton.setToolTip("start of trace")
+        self.lastButton.setToolTip("end of trace")
         
+        self.playTraceButton = QtGui.QPushButton("play")
+        self.playTraceButton.clicked.connect(self.playTrace)
+        self.playTestButton = QtGui.QPushButton("play all")
+        self.playTestButton.clicked.connect(self.playTest)
+        self.playTraceButton.setToolTip("play current trace")
+        self.playTestButton.setToolTip("play test")
+
         btnLayout = QtGui.QHBoxLayout()
         btnLayout.addWidget(self.prevButton)
+        btnLayout.addWidget(self.firstButton)
+        btnLayout.addWidget(self.lastButton)
         btnLayout.addWidget(self.nextButton)
+        div = QtGui.QFrame()
+        div.setFrameShape(QtGui.QFrame.VLine)
+        btnLayout.addWidget(div)
+        btnLayout.addWidget(self.playTraceButton)
+        btnLayout.addWidget(self.playTestButton)
 
         traceLayout.addWidget(self.tracetable)
         traceLayout.addLayout(btnLayout)
@@ -87,6 +113,8 @@ class QDataReviewer(QtGui.QWidget):
         layout.addWidget(hsplitter)
 
         self.current_rep_num = 0
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.nextRep)
 
     def setDataObject(self, data):
         self.datatree.clearTree()
@@ -185,6 +213,8 @@ class QDataReviewer(QtGui.QWidget):
         self.current_rep_num += 1
         if self.current_rep_num == self.current_data_shape[1]:
             self.setTraceData(self.current_trace_num+1,0)
+            if self.traceStop:
+                self.stopTrace()
         else:
             self._update_buttons()
             self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
@@ -197,6 +227,45 @@ class QDataReviewer(QtGui.QWidget):
             self._update_buttons()
             self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
 
+    def firstRep(self):
+        self.current_rep_num = 0
+        self._update_buttons()
+        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
+
+    def lastRep(self):
+        self.current_rep_num = self.current_data_shape[1]-1
+        self._update_buttons()
+        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
+
+    def playTrace(self):
+        self.firstRep()
+        self.traceStop = True
+        self.playTraceButton.setText("stop")
+        self.playTraceButton.clicked.disconnect()
+        self.playTraceButton.clicked.connect(self.stopTrace)
+        self.playTestButton.setEnabled(False)
+        self.timer.start(INTERVAL)
+
+    def stopTrace(self):
+        self.timer.stop()
+        self.playTraceButton.setText("play")
+        self.playTestButton.setText("play all")
+        self.playTraceButton.clicked.disconnect()
+        self.playTraceButton.clicked.connect(self.playTrace)
+        self.playTestButton.clicked.disconnect()
+        self.playTestButton.clicked.connect(self.playTest)
+        self.playTestButton.setEnabled(True)
+        self.playTraceButton.setEnabled(True)
+
+    def playTest(self):
+        self.setTraceData(0, 0, 0)
+        self.traceStop = False
+        self.playTestButton.clicked.disconnect()
+        self.playTestButton.clicked.connect(self.stopTrace)
+        self.playTraceButton.setEnabled(False)
+        self.playTestButton.setText("stop")
+        self.timer.start(INTERVAL)
+
     def _update_buttons(self):
         # by keeping buttons correctly enabled we dont need to check current
         # rep is within data limits
@@ -208,6 +277,16 @@ class QDataReviewer(QtGui.QWidget):
             self.nextButton.setEnabled(True)
         else:
             self.nextButton.setEnabled(False)
+            self.stopTrace()
+        if self.current_rep_num != 0:
+            self.firstButton.setEnabled(True)
+        else:
+            self.firstButton.setEnabled(False)
+        if self.current_rep_num < self.current_data_shape[1]-1:
+            self.lastButton.setEnabled(True)
+        else:
+            self.lastButton.setEnabled(False)
+
 
 def makepath(item):
     if item is None:
