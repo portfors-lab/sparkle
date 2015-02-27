@@ -39,7 +39,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.plotDock.switchDisplay('standard')
 
         # make a list of which widgets should be updated when scales are changed
-        self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx]
+        self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx, self.ui.psthStartField, self.ui.psthStopField]
         self.frequencyInputs = [self.ui.aisrSpnbx]
             
         self.ui.exploreStimEditor.setModel(self.acqmodel.explore_stimulus())

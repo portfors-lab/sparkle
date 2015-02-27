@@ -661,38 +661,56 @@ class MainWindow(ControlWindow):
                 self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(stim_signal, fs)
 
+
             # recreate PSTH for current threshold and current rep
             tracedata = self.acqmodel.datafile.get(path, (tracenum,))
             binsz = float(self.ui.binszSpnbx.value())
             self.ui.psth.clearData()
             self.display.clearRaster()
-
+            
             winsz = float(tracedata.shape[1])/aisr
+            # set the max of the PSTH subwindow to the size of this data
+            self.ui.psthStopField.setMaximum(winsz)
+            self.ui.psthStartField.setMaximum(winsz)
+            
+            # use time subwindow of trace, specified by user
+            start_time = self.ui.psthStartField.value()
+            if self.ui.psthMaxBox.isChecked():
+                stop_time = winsz
+            else:
+                stop_time = self.ui.psthStopField.value()
+            start_index = int(aisr*start_time)
+            stop_index = int(aisr*stop_time)
+            subwinsz = stop_time - start_time
+
             nbins = np.ceil(winsz/binsz)
             bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
             self.ui.psth.setBins(bin_centers)
-            
-            # because we can scroll forwards or backwards re-do entire plot every time 
+            # number of bins to shift spike counts by since we are cropping first part of data
+            binshift = np.ceil(start_time/binsz)
+
+            # because we can scroll forwards or backwards, re-do entire plot every time 
             bins = []
             spike_counts = []
             spike_latencies = []
             spike_rates = []
             for itrace in range(repnum+1):
-                spike_times = spikestats.spike_times(tracedata[itrace,:], self.ui.threshSpnbx.value(), aisr)
-                response_bins = spikestats.bin_spikes(spike_times, binsz)
+                spike_times = spikestats.spike_times(tracedata[itrace,start_index:stop_index], self.ui.threshSpnbx.value(), aisr)
+                response_bins = spikestats.bin_spikes(spike_times, binsz) + binshift
                 bins.extend(response_bins)
                 spike_counts.append(len(spike_times))
                 if len(spike_times) > 0:
                     spike_latencies.append(spike_times[0])
                 else:
                     spike_latencies.append(np.nan)
-                spike_rates.append(spikestats.firing_rate(spike_times, winsz))
+                spike_rates.append(spikestats.firing_rate(spike_times, subwinsz))
 
             total_spikes = sum(spike_counts)
             avg_count = np.mean(spike_counts)
             avg_latency = sum(spike_latencies)/len(spike_latencies)
             avg_rate = sum(spike_rates)/len(spike_rates)
 
+            # update UI
             self.ui.psth.appendData(bins, repnum)
             self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\main_control.ui'
+# Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Wed Jan 21 11:33:53 2015
+# Created: Fri Feb 27 10:23:38 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_ControlWindow(object):
     def setupUi(self, ControlWindow):
         ControlWindow.setObjectName(_fromUtf8("ControlWindow"))
-        ControlWindow.resize(1223, 621)
+        ControlWindow.resize(1223, 656)
         self.centralwidget = QtGui.QWidget(ControlWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralwidget)
@@ -365,7 +365,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -452,6 +452,36 @@ class Ui_ControlWindow(object):
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_9.addItem(spacerItem2, 0, 2, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_9)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+        self.groupBox = QtGui.QGroupBox(self.PSTHContainer)
+        self.groupBox.setFlat(False)
+        self.groupBox.setObjectName(_fromUtf8("groupBox"))
+        self.horizontalLayout_13 = QtGui.QHBoxLayout(self.groupBox)
+        self.horizontalLayout_13.setObjectName(_fromUtf8("horizontalLayout_13"))
+        self.label_6 = QtGui.QLabel(self.groupBox)
+        self.label_6.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_6.setObjectName(_fromUtf8("label_6"))
+        self.horizontalLayout_13.addWidget(self.label_6)
+        self.psthStartField = SmartSpinBox(self.groupBox)
+        self.psthStartField.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.psthStartField.setObjectName(_fromUtf8("psthStartField"))
+        self.horizontalLayout_13.addWidget(self.psthStartField)
+        self.label_13 = QtGui.QLabel(self.groupBox)
+        self.label_13.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_13.setObjectName(_fromUtf8("label_13"))
+        self.horizontalLayout_13.addWidget(self.label_13)
+        self.psthStopField = SmartSpinBox(self.groupBox)
+        self.psthStopField.setEnabled(False)
+        self.psthStopField.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.psthStopField.setObjectName(_fromUtf8("psthStopField"))
+        self.horizontalLayout_13.addWidget(self.psthStopField)
+        self.psthMaxBox = QtGui.QCheckBox(self.groupBox)
+        self.psthMaxBox.setChecked(True)
+        self.psthMaxBox.setObjectName(_fromUtf8("psthMaxBox"))
+        self.horizontalLayout_13.addWidget(self.psthMaxBox)
+        self.horizontalLayout_3.addWidget(self.groupBox)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_3)
         self.verticalLayout_10.addWidget(self.PSTHContainer)
         self.psthDock.setWidget(self.dockWidgetContents_2)
         ControlWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.psthDock)
@@ -604,6 +634,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionTimer, QtCore.SIGNAL(_fromUtf8("triggered()")), self.timerDock.showNormal)
         QtCore.QObject.connect(self.modeCmbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.setTriggerEnable)
         QtCore.QObject.connect(self.actionResponse_SPL, QtCore.SIGNAL(_fromUtf8("triggered()")), self.responseSpl.showNormal)
+        QtCore.QObject.connect(self.psthMaxBox, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.psthStopField.setDisabled)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -673,15 +704,19 @@ class Ui_ControlWindow(object):
         self.label_11.setToolTip(_translate("ControlWindow", "Total no. of spikes over repetitions", None))
         self.label_11.setText(_translate("ControlWindow", "Total :", None))
         self.label_16.setToolTip(_translate("ControlWindow", "Mean no. of spikes per unique stimulus", None))
-        self.label_16.setText(_translate("ControlWindow", "Average :", None))
+        self.label_16.setText(_translate("ControlWindow", "Average : ", None))
         self.label_5.setToolTip(_translate("ControlWindow", "Mean time of first spike", None))
-        self.label_5.setText(_translate("ControlWindow", "Latency (ms) :", None))
+        self.label_5.setText(_translate("ControlWindow", "Latency (ms) : ", None))
         self.spikeLatencyLbl.setText(_translate("ControlWindow", "0", None))
         self.label_7.setToolTip(_translate("ControlWindow", "Mean no. spikes per window", None))
         self.label_7.setText(_translate("ControlWindow", "Rate :", None))
         self.spikeRateLbl.setText(_translate("ControlWindow", "0", None))
         self.spikeAvgLbl.setText(_translate("ControlWindow", "0", None))
         self.spikeTotalLbl.setText(_translate("ControlWindow", "0", None))
+        self.groupBox.setTitle(_translate("ControlWindow", "subwindow", None))
+        self.label_6.setText(_translate("ControlWindow", "start:", None))
+        self.label_13.setText(_translate("ControlWindow", "end:", None))
+        self.psthMaxBox.setText(_translate("ControlWindow", "max", None))
         self.progressDock.setWindowTitle(_translate("ControlWindow", "Progress", None))
         self.log_dock.setWindowTitle(_translate("ControlWindow", "Log", None))
         self.detail_dock.setWindowTitle(_translate("ControlWindow", "Stimulus Details", None))
