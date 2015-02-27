@@ -674,11 +674,27 @@ class MainWindow(ControlWindow):
             
             # because we can scroll forwards or backwards re-do entire plot every time 
             bins = []
+            spike_counts = []
+            spike_latencies = []
+            spike_rates = []
             for itrace in range(repnum+1):
                 spike_times = spikestats.spike_times(tracedata[itrace,:], self.ui.threshSpnbx.value(), aisr)
                 response_bins = spikestats.bin_spikes(spike_times, binsz)
                 bins.extend(response_bins)
+                spike_counts.append(len(spike_times))
+                if len(spike_times) > 0:
+                    spike_latencies.append(spike_times[0])
+                else:
+                    spike_latencies.append(np.nan)
+                spike_rates.append(spikestats.firing_rate(spike_times, winsz))
+
+            total_spikes = sum(spike_counts)
+            avg_count = np.mean(spike_counts)
+            avg_latency = sum(spike_latencies)/len(spike_latencies)
+            avg_rate = sum(spike_rates)/len(spike_rates)
+
             self.ui.psth.appendData(bins, repnum)
+            self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
 
     def displayOldProgressPlot(self, path):
         if self.activeOperation is None:
