@@ -195,14 +195,20 @@ class QDataReviewer(QtGui.QWidget):
             data_shape = data_object.shape
             self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
             
+            group_info = self.datafile.get_info('/'.join(path.split('/')[:-1]))
             if setname.startswith('test') or setname.startswith('signal') or setname == 'reference_tone':
                 # input samplerate is stored in group attributes
-                group_data = self.datafile.get_info('/'.join(path.split('/')[:-1]))
-                fsout = dict(group_data)['samplerate_ad']
+                fsout = dict(group_info)['samplerate_ad']
                 self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
             if setname.startswith('test'):
                 self.testSelected.emit(path)
             self.current_data_shape = data_shape
+
+            # also display "inherited" attributes from group
+            self.attrtxt.appendHtml('<br><b>Segment Attributes:</b>')
+            for gattr in group_info:
+                self.attrtxt.appendPlainText(gattr[0] + ' : ' + str(gattr[1]))
+
 
     def setTraceData(self, row, column, repnum=0):
         self.current_rep_num = repnum
