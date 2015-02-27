@@ -12,6 +12,7 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
     the average RMS, which will be used as the microphone sensitivity
     variable in dB SPL calculations elsewhere
     """
+    _reps = 5
     def __init__(self, *args):
         ListAcquisitionRunner.__init__(self, *args)
 
@@ -21,7 +22,7 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
 
         # acquistiion without a stimulus is not allowed, so use silence
         stim = StimulusModel()
-        stim.setRepCount(5)
+        stim.setRepCount(self._reps)
         stim.insertComponent(Silence())
         self.protocol_model.insert(stim,0)
 
@@ -43,3 +44,6 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
             amps.append(signal_amplitude(self.response_buffer[itest,:], self.player.aisr))
         amp = np.mean(amps)
         return amp
+
+    def reps(self):
+        return self._reps

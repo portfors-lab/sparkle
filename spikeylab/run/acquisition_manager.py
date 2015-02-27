@@ -487,3 +487,6 @@ class AcquisitionManager():
         self.explorer.invert_polarity()
         self.protocoler.invert_polarity()
         self.charter.invert_polarity()
+
+    def mphone_calibration_reps(self):
+        return self.mphone_calibrator.reps()

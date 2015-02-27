@@ -482,6 +482,10 @@ class MainWindow(ControlWindow):
         
         self.onUpdate()
 
+        # reset style sheet of progress bar
+        self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; }")
+        self.ui.protocolProgressBar.setMaximum(self.acqmodel.mphone_calibration_reps())
+
         self.acqmodel.run_mphone_calibration(interval)
 
     def displayResponse(self, times, response):
