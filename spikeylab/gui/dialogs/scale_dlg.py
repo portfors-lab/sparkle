@@ -6,7 +6,7 @@ from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
 class ScaleDialog(QtGui.QDialog):
     """Dialog for setting the time and frequency scaling for the GUI"""
     def __init__(self,  parent=None, defaultVals=None):
-        QtGui.QDialog.__init__(self,parent)
+        super(ScaleDialog, self).__init__(parent)
         self.ui = Ui_ScaleDlg()
         self.ui.setupUi(self)
 

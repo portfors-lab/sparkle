@@ -9,7 +9,7 @@ from spikeylab.stim.stimulus_model import StimulusModel
 class ProtocolRunner(ListAcquisitionRunner):
     """Handles the presentation of data for an experimental protocol"""
     def __init__(self, *args):
-        ListAcquisitionRunner.__init__(self, *args)
+        super(ProtocolRunner, self).__init__(*args)
 
         self.save_data = True
         self.group_name = 'segment_'

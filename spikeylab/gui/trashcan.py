@@ -10,7 +10,7 @@ class TrashWidget(QtGui.QPushButton):
     .. _Signal: http://pyqt.sourceforge.net/Docs/QtWrapper/new_style_signals_slots.html#PyQt4.QtCore.Signal
     """
     def __init__(self,parent=None):
-        QtGui.QPushButton.__init__(self, parent)
+        super(TrashWidget, self).__init__(parent)
 
         thisfolder = os.path.dirname(os.path.realpath(__file__))
         self.trashIcon = QtGui.QIcon(os.path.join(thisfolder,'trash.png'))

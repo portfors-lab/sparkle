@@ -8,7 +8,7 @@ class WidgetHider(QtGui.QWidget):
     :type content: :qtdoc:`QWidget`
     """
     def __init__(self, content, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(WidgetHider, self).__init__(parent)
 
         self.title = QtGui.QLabel(content.windowTitle())
         self.hideIcon = arrowdown()

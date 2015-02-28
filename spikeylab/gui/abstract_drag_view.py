@@ -9,6 +9,7 @@ class AbstractDragView(object):
     """Class to keep drag and drop behaviour consistent across UI"""
     DragRole = 33
     def __init__(self):
+        super(AbstractDragView, self).__init__()
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.dragline = None
@@ -54,10 +55,12 @@ class AbstractDragView(object):
 
     def mousePressEvent(self, event):
         """saves the drag position, so we know when a drag should be initiated"""
+        super(AbstractDragView, self).mousePressEvent(event)
         self.dragStartPosition = event.pos()
 
     def mouseMoveEvent(self, event):
         """Determines if a drag is taking place, and initiates it"""
+        super(AbstractDragView, self).mouseMoveEvent(event)
         if self.dragStartPosition is None or \
             (event.pos() - self.dragStartPosition).manhattanLength() < QtGui.QApplication.startDragDistance():
             # change cursor to reflect actions for what its hovering on
@@ -110,6 +113,7 @@ class AbstractDragView(object):
 
     def dragEnterEvent(self, event):
         """Determines if the widget under the mouse can recieve the drop"""
+        super(AbstractDragView, self).dragEnterEvent(event)
         if event.mimeData().hasFormat("application/x-protocol"):
             event.setDropAction(QtCore.Qt.MoveAction)
             event.accept()
@@ -118,6 +122,7 @@ class AbstractDragView(object):
 
     def dragMoveEvent(self, event):
         """Determines if the widget under the mouse can recieve the drop"""
+        super(AbstractDragView, self).dragMoveEvent(event)
         if event.mimeData().hasFormat("application/x-protocol"):
             # find the nearest break to cursor
             self.dragline = self.cursor(event.pos())
@@ -129,6 +134,7 @@ class AbstractDragView(object):
 
     def dragLeaveEvent(self, event):
         """Clears drop cursor line"""
+        super(AbstractDragView, self).dragLeaveEvent(event)
         self.dragline = None
         self.viewport().update()
         event.accept()
@@ -148,6 +154,7 @@ class AbstractDragView(object):
         """Handles an item being dropped onto view, calls
         dropped -- implemented by subclass
         """
+        super(AbstractDragView, self).dropEvent(event)
         self.dragStartPosition = None
         self.dragline = None
         self.originalPos = None
@@ -167,6 +174,7 @@ class AbstractDragView(object):
         :param event: contains event parameters for child object events
         :type event: :qtdoc:`QChildEvent`
         """
+        super(AbstractDragView, self).childEvent(event)
         if event.type() == QtCore.QEvent.ChildRemoved:
             # hack to catch drop offs   
             if self.originalPos is not None:
@@ -178,6 +186,7 @@ class AbstractDragView(object):
 
     def mouseReleaseEvent(self, event):
         """Resets the drag start position"""
+        super(AbstractDragView, self).mouseReleaseEvent(event)
         self.dragStartPosition = None
 
     def frame(self):

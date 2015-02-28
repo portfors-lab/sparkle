@@ -11,7 +11,7 @@ class QDataReviewer(QtGui.QWidget):
     reviewDataSelected = QtCore.Signal(str, int, int)
     testSelected = QtCore.Signal(str)
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(QDataReviewer, self).__init__(parent)
 
         layout = QtGui.QHBoxLayout(self)
 

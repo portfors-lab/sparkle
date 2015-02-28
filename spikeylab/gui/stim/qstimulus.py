@@ -28,7 +28,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
     """Qt wrapper for :class:`StimulusModel<spikeylab.stim.stimulus_model.StimulusModel>`"""
     samplerateChanged = QtCore.Signal(int)
     def __init__(self, stim, parent=None):
-        QtCore.QAbstractItemModel.__init__(self, parent)
+        super(QStimulusModel, self).__init__(parent)
 
         self._autoParams = QAutoParameterModel(stim.autoParams()) # ?!
         self._stim = stim #StimulusModel

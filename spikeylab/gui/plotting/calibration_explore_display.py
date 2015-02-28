@@ -7,7 +7,7 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
     """Display Widget for intended for use with calibration operation with 
     plots for signal, FFT, and spectrogram of output and incoming signals"""
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(ExtendedCalibrationDisplay, self).__init__(parent)
 
         self.stimFftPlot = FFTWidget(self, rotation=0)
         self.responseFftPlot = FFTWidget(self, rotation=0)

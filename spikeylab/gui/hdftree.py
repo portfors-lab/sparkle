@@ -7,7 +7,8 @@ from QtWrapper import QtCore, QtGui
 
 class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
     def __init__(self, parent, h5node):
-        QtGui.QTreeWidgetItem.__init__(self, parent)
+        super(H5TreeWidgetItem, self).__init__(parent)
+
         self.h5node = h5node
         if isinstance(h5node, h5py.File):
             self.setText(0, h5node.filename)
@@ -37,7 +38,8 @@ class H5TreeWidgetItem(QtGui.QTreeWidgetItem):
 class H5TreeWidget(QtGui.QTreeWidget):
     nodeChanged = QtCore.Signal(QtGui.QTreeWidgetItem)
     def __init__(self, *args):
-        QtGui.QTreeWidget.__init__(self, *args)
+        super(H5TreeWidget, self).__init__(*args)
+        
         self.fhandles = {}
         self.roots = {}
         self.header().hide()
@@ -129,7 +131,8 @@ if __name__ == '__main__':
     # mainwin = DataVizGui()
     mainwin = QtGui.QMainWindow()
     tree = H5TreeWidget(mainwin)    
-    tree.addH5File('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5')
+    # tree.addH5File('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5')
+    tree.addH5File('/home/leeloo/testdata/20141119.hdf5')
     mainwin.setCentralWidget(tree)
     mainwin.show()
     app.exec_()

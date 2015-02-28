@@ -14,7 +14,7 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
     """
     _reps = 5
     def __init__(self, *args):
-        ListAcquisitionRunner.__init__(self, *args)
+        super(MphoneCalibrationRunner, self).__init__(*args)
 
         self.save_data = False
         self.silence_window = False

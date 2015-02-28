@@ -8,7 +8,7 @@ from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 class CalibrationDialog(QtGui.QDialog):
     """Dialog to set current calibration, and the frequency range to apply it to"""
     def __init__(self, fscale, defaultVals=None, datafile=None):
-        QtGui.QDialog.__init__(self, None)
+        super(CalibrationDialog, self).__init__()
         self.ui = Ui_CalibrationDialog()
         self.ui.setupUi(self)
         

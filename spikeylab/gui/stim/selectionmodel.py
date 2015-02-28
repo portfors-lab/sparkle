@@ -4,7 +4,7 @@ class ComponentSelectionModel(QtGui.QItemSelectionModel):
     """Stores items in the selection model by object, not by position"""
     hintRequested = QtCore.Signal(str)
     def __init__(self, model):
-        QtGui.QItemSelectionModel.__init__(self, model)
+        super(ComponentSelectionModel, self).__init__(model)
         self._selectedComponents = []
 
     def select(self, index, command=QtGui.QItemSelectionModel.Toggle):

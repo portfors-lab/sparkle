@@ -10,7 +10,7 @@ class TextEditHandler(logging.Handler):
     """Relay log message via a signal to connected widgets. Using a signal
     vs. setting the text here allows for logging messages from threads."""
     def __init__(self):
-        logging.Handler.__init__(self)
+        super(TextEditHandler, self).__init__()
         self.signal = LogSignal()
 
     def emit(self, m):

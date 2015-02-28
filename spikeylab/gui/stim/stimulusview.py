@@ -22,8 +22,7 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
     countChanged = QtCore.Signal()
     hintRequested = QtCore.Signal(str)
     def __init__(self, parent=None):
-        QtGui.QAbstractItemView.__init__(self)
-        AbstractDragView.__init__(self)
+        super(StimulusView, self).__init__()
 
         self.horizontalScrollBar().setRange(0, 0)
         self.verticalScrollBar().setRange(0, 0)
@@ -609,6 +608,8 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
 if __name__ == "__main__":
     import sys
     from spikeylab.stim.stimulus_model import *
+    from spikeylab.stim.types.stimuli_classes import *
+    from spikeylab.gui.stim.qstimulus import QStimulusModel
     app  = QtGui.QApplication(sys.argv)
 
     tone0 = PureTone()
@@ -626,8 +627,8 @@ if __name__ == "__main__":
     tone5.setDuration(0.030)
 
     vocal0 = Vocalization()
-    vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
-    # vocal0.setFile(r'C:\Users\Leeloo\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    # vocal0.setFile(r'C:\Users\amy.boyle\Dropbox\daqstuff\M1_FD024\M1_FD024_syl_12.wav')
+    vocal0.setFile(r'/home/leeloo/testdata/M1_FD024/M1_FD024_syl_12.wav')
 
     silence0 = Silence()
     silence0.setDuration(0.025)
@@ -637,16 +638,16 @@ if __name__ == "__main__":
     stim.insertComponent(tone1)
     stim.insertComponent(tone0)
 
-    stim.insertComponent(tone4, (1,0))
-    stim.insertComponent(tone5, (1,0))
-    stim.insertComponent(vocal0, (1,0))
+    stim.insertComponent(tone4, 1, 0)
+    stim.insertComponent(tone5, 1, 0)
+    stim.insertComponent(vocal0, 1, 0)
 
-    stim.insertComponent(tone3, (2,0))
-    stim.insertComponent(silence0, (2,0))
+    stim.insertComponent(tone3, 2, 0)
+    stim.insertComponent(silence0, 2, 0)
 
     viewer = StimulusView()
     
-    viewer.setModel(stim)
+    viewer.setModel(QStimulusModel(stim))
     viewer.resize(500,400)
     viewer.show()
     app.exec_()

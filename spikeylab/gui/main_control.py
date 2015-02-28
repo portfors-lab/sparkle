@@ -62,8 +62,7 @@ class MainWindow(ControlWindow):
         else:
             fname = None
 
-        # auto generated code intialization
-        ControlWindow.__init__(self, inputsFilename)
+        super(MainWindow, self).__init__(inputsFilename)
 
         if datafile is not None:
             self.ui.reviewer.setDataObject(self.acqmodel.datafile)

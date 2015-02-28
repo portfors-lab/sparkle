@@ -13,7 +13,7 @@ class QProtocolTabelModel(QtCore.QAbstractTableModel):
     """Qt wrapper for :class:`ProcotolModel<spikeylab.run.protocol_model.ProtocolTabelModel>`,
     based on :qtdoc:`QAbstractTableModel`"""
     def __init__(self, tests=None, parent=None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
+        super(QProtocolTabelModel, self).__init__(parent)
         if tests is None:
             self._testmodel = ProtocolTabelModel()
         else:
@@ -161,8 +161,7 @@ class QProtocolTabelModel(QtCore.QAbstractTableModel):
 
 class ProtocolView(AbstractDragView, QtGui.QTableView):
     def __init__(self,parent=None):
-        QtGui.QTableView.__init__(self,parent)
-        AbstractDragView.__init__(self)
+        super(ProtocolView, self).__init__()
 
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.horizontalHeader().setMovable(True)

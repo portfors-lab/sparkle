@@ -6,7 +6,7 @@ class CalibrationDisplay(QtGui.QWidget):
     """Widget container with two FFT plots, of outgoing and incoming signal,
     intending for use with calibration operation"""
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(CalibrationDisplay, self).__init__(parent)
 
         self.outFft = FFTWidget(self, rotation=0)
         self.inFft = FFTWidget(self, rotation=0)

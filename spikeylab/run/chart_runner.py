@@ -4,7 +4,7 @@ from spikeylab.tools.util import increment_title
 
 class ChartRunner(ListAcquisitionRunner):
     def __init__(self, signals):
-        ListAcquisitionRunner.__init__(self, signals)
+        super(ChartRunner, self).__init__(signals)
 
         self.chart_name = 'chart_1'
         save_data = False

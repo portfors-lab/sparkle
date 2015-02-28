@@ -14,8 +14,7 @@ class AutoParameterTableView(AbstractDragView, QtGui.QTableView):
     parameterChanged = QtCore.Signal(list)
     dragActive = QtCore.Signal(bool)
     def __init__(self, parent=None):
-        QtGui.QTableView.__init__(self, parent)
-        AbstractDragView.__init__(self)
+        super(AutoParameterTableView, self).__init__()
 
         self.setItemDelegate(SmartDelegate())
         self.setItemDelegateForColumn(0,ComboboxDelegate())

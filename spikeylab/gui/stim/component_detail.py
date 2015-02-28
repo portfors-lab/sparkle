@@ -6,7 +6,7 @@ from spikeylab.tools.util import clearLayout
 class ComponentsDetailWidget(QtGui.QWidget):
     """class that presents the stimulus doc in a clear and useful way"""
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self)
+        super(ComponentsDetailWidget, self).__init__(parent)
 
         self.lyt = QtGui.QVBoxLayout()
         self.setLayout(self.lyt)
@@ -60,8 +60,8 @@ class ComponentsDetailWidget(QtGui.QWidget):
 
 class ComponentDetailFrame(QtGui.QFrame):
     """Displays the given *displayAttributes* in a stimulus component's documentation *comp_doc*"""
-    def __init__(self, comp_doc, displayAttributes, parent=None):
-        QtGui.QFrame.__init__(self)
+    def __init__(self, comp_doc, displayAttributes):
+        super(ComponentDetailFrame, self).__init__()
 
         self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
         font = QtGui.QFont()
@@ -88,7 +88,7 @@ class ComponentDetailFrame(QtGui.QFrame):
 class ComponentsDetailSelector(QtGui.QWidget):
     """Container for ComponentAttributerCheckers"""
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self)
+        super(ComponentsDetailSelector, self).__init__(parent)
 
         layout = QtGui.QVBoxLayout()
         self.setLayout(layout)
@@ -130,8 +130,8 @@ class ComponentsDetailSelector(QtGui.QWidget):
 
 class ComponentAttributerChecker(QtGui.QFrame):
     """Allows a user to select attributes from a components's doc"""
-    def __init__(self, compAttributes, parent=None):
-        QtGui.QFrame.__init__(self)
+    def __init__(self, compAttributes):
+        super(ComponentAttributerChecker, self).__init__()
 
         self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
         layout = QtGui.QGridLayout()

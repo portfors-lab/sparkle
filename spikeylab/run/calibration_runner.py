@@ -57,7 +57,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
     This class may hold many different types of stimuli (currently 2),
     but only one is presented per calibration run."""
     def __init__(self, *args):
-        AbstractCalibrationRunner.__init__(self, *args)
+        super(AbstractCalibrationRunner, self).__init__(*args)
 
         self.player = FinitePlayer()
 
@@ -220,7 +220,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
     curve. Loops over a set of tones of different frequencies and 
     intensities. Currently just used for testing"""
     def __init__(self, *args):
-        AbstractCalibrationRunner.__init__(self, *args)
+        super(CalibrationCurveRunner, self).__init__(*args)
 
         self.group_name = 'calibration_test_'
 

@@ -10,7 +10,7 @@ class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     numtype = float
     valueChanged = QtCore.Signal()
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(IncrementInput, self).__init__(parent)
         self.setupUi(self)
 
         self.up10.setIcon(arrowup())

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'vocal_parameters.ui'
 #
-# Created: Fri Nov 21 23:57:44 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Fri Feb 27 16:36:56 2015
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -60,7 +60,7 @@ class Ui_VocalParameterWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.specPreview.sizePolicy().hasHeightForWidth())
         self.specPreview.setSizePolicy(sizePolicy)
-        self.specPreview.setMinimumSize(QtCore.QSize(0, 150))
+        self.specPreview.setMinimumSize(QtCore.QSize(0, 0))
         self.specPreview.setObjectName(_fromUtf8("specPreview"))
         self.verticalLayout.addWidget(self.splitter_2)
         self.horizontalLayout = QtGui.QHBoxLayout()

@@ -5,7 +5,7 @@ class RasterBoundsDialog(QtGui.QDialog, Ui_RasterBoundsDialog):
     """Dialog for setting where the raster plot should appear in relation
     to the spike trace"""
     def __init__(self,  parent=None, bounds=None):
-        QtGui.QDialog.__init__(self,parent)
+        super(RasterBoundsDialog, self).__init__(parent)
         self.setupUi(self)
 
         if bounds is not None:

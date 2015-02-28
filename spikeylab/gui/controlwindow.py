@@ -24,8 +24,8 @@ MPHONE_CALDB = config['microphone_calibration_db']
 
 class ControlWindow(QtGui.QMainWindow):
     """ Base class just to handle loading, saving, and validity of user inputs"""
-    def __init__(self, inputsFilename, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
+    def __init__(self, inputsFilename):
+        super(ControlWindow, self).__init__()
         self.ui = Ui_ControlWindow()
         self.ui.setupUi(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)

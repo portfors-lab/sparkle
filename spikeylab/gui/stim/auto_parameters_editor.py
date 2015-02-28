@@ -12,7 +12,7 @@ class Parametizer(QtGui.QWidget):
     visibilityChanged = QtCore.Signal(bool)
     titleChange = QtCore.Signal(str)
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(Parametizer, self).__init__(parent)
 
         layout = QtGui.QVBoxLayout()
         btnLayout = QtGui.QHBoxLayout()
@@ -103,7 +103,7 @@ class HidableParameterEditor(WidgetHider):
     """A hidable container for the parameter widget. Wraps some of it methods"""
     def __init__(self, parent=None):
         self.parametizer = Parametizer()
-        WidgetHider.__init__(self, self.parametizer, parent=parent)
+        super(HidableParameterEditor, self).__init__(self.parametizer, parent=parent)
 
         self.parametizer.titleChange.connect(self.updateTitle)
         # wrap methods from parametizer

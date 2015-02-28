@@ -3,7 +3,7 @@ import threading
 
 import numpy as np
 
-class AbstractAcquisitionRunner():
+class AbstractAcquisitionRunner(object):
     """Holds state information for an experimental session"""
     def __init__(self, queues):
         self.queues = queues

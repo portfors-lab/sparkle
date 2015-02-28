@@ -7,7 +7,7 @@ from QtWrapper import QtGui, QtCore
 class ProtocolDisplay(QtGui.QWidget):
     """Data display intended for use during brain recording"""
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(ProtocolDisplay, self).__init__(parent)
 
         self.fftPlot = FFTWidget(self, rotation=90)
         self.spiketracePlot = TraceWidget(self)

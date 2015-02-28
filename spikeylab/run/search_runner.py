@@ -16,7 +16,7 @@ class SearchRunner(AbstractAcquisitionRunner):
     def __init__(self, *args):
         self._stimulus = StimulusModel()
 
-        AbstractAcquisitionRunner.__init__(self, *args)
+        super(SearchRunner, self).__init__(*args)
 
         self.player = FinitePlayer()
         self.save_data = False

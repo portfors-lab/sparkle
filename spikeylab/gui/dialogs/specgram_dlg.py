@@ -5,7 +5,7 @@ from specgram_dlg_form import Ui_SpecDialog
 class SpecDialog(QtGui.QDialog):
     """Dialog for setting parameters for spectrogram calculation"""
     def __init__(self, parent=None, defaultVals=None):
-        QtGui.QDialog.__init__(self,parent)
+        super(SpecDialog, self).__init__(parent)
         self.ui = Ui_SpecDialog()
         self.ui.setupUi(self)
 

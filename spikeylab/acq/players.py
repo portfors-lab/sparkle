@@ -13,7 +13,7 @@ from spikeylab.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, DigitalO
 PRINT_WARNINGS = False
 VERBOSE = True
 
-class AbstractPlayerBase():
+class AbstractPlayerBase(object):
     """Holds state information for current acquisition/generation task"""
     def __init__(self):
 
@@ -185,7 +185,7 @@ class AbstractPlayerBase():
 class FinitePlayer(AbstractPlayerBase):
     """For finite generation/acquisition tasks"""
     def __init__(self):
-        AbstractPlayerBase.__init__(self)
+        super(FinitePlayer, self).__init__()
 
     def start(self):
         """Writes output buffer and settings to device
@@ -270,7 +270,7 @@ class FinitePlayer(AbstractPlayerBase):
 class ContinuousPlayer(AbstractPlayerBase):
     """This is a continuous player for a chart acquitision operation"""
     def __init__(self):
-        AbstractPlayerBase.__init__(self)
+        super(ContinuousPlayer, self).__init__()
         self.on_read = lambda x: x # placeholder
 
     def start_continuous(self, aichans, update_hz=10):

@@ -7,7 +7,7 @@ from spikeylab.stim.types import get_stimuli_models
 class ViewSettingsDialog(QtGui.QDialog):
     """Dialog for setting GUI options"""
     def __init__(self, defaultVals=None):
-        QtGui.QDialog.__init__(self, None)
+        super(ViewSettingsDialog, self).__init__()
         self.ui = Ui_ViewSettingsDialog()
         self.ui.setupUi(self)
 

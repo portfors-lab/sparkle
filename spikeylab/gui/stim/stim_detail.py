@@ -5,7 +5,7 @@ from spikeylab.gui.stim.stim_detail_form import Ui_StimDetailWidget
 class StimDetailWidget(QtGui.QWidget):
     """Container widget for presenting Stimulus details from the doc"""
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self)
+        super(StimDetailWidget, self).__init__(parent)
         self.ui = Ui_StimDetailWidget()
         self.ui.setupUi(self)
 

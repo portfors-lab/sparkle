@@ -84,7 +84,7 @@ class SpikeyViewBox(pg.ViewBox):
 class SpikeyViewBoxMenu(QtGui.QMenu):
     """Super simplified menu based from pyqtgraph ViewBoxMenu"""
     def __init__(self, view):
-        QtGui.QMenu.__init__(self)
+        super(SpikeyViewBoxMenu, self).__init__()
 
         self.setTitle("ViewBox options")
         self.viewAll = QtGui.QAction("View All", self)

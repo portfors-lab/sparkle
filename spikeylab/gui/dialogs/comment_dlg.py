@@ -4,7 +4,7 @@ from comment_dlg_form import Ui_CellCommentDialog
 class CellCommentDialog(QtGui.QDialog):
     """Dialog for collecting user comments per protocol run"""
     def __init__(self, cellid=0):
-        QtGui.QDialog.__init__(self, None)
+        super(CellCommentDialog, self).__init__()
         self.ui = Ui_CellCommentDialog()
         self.ui.setupUi(self)
 

@@ -16,7 +16,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
     def __init__(self, *args):
         self.protocol_model = ProtocolTabelModel()
 
-        AbstractAcquisitionRunner.__init__(self, *args)
+        super(ListAcquisitionRunner, self).__init__(*args)
+        
         self.silence_window = False
 
     def set_calibration(self, attenuations, freqs, frange, calname):
