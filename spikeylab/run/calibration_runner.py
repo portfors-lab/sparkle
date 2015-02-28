@@ -128,7 +128,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
             self.datafile.init_data(self.current_dataset_name, mode='calibration', 
                                     dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
 
-            info = {'samplerate_ad': self.player.aisr}
+            info = {'samplerate_ad': self.player.aifs}
             self.datafile.set_metadata(self.current_dataset_name, info)
             # point is to output the signal at the specificed voltage, to we set
             # the intensity of the components to match whatever the caldb is now
@@ -191,7 +191,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
                                    relevant_info)
 
         mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
-        tone_amp = signal_amplitude(mean_reftone, self.player.get_aisr())
+        tone_amp = signal_amplitude(mean_reftone, self.player.get_aifs())
         db = calc_db(tone_amp, self.mphonesens, self.mphonedb)
         # remove the reference tone from protocol
         self.protocol_model.remove(0)
@@ -274,7 +274,7 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
                                     dims=(self.stimulus.traceCount(), self.stimulus.repCount()),
                                     nested_name='vamp')
 
-            info = {'samplerate_ad': self.player.aisr}
+            info = {'samplerate_ad': self.player.aifs}
             self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
@@ -304,11 +304,11 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         # print 'f', f, 'db', db
         
         # target frequency amplitude
-        freq, spectrum = calc_spectrum(response, self.player.get_aisr())
+        freq, spectrum = calc_spectrum(response, self.player.get_aifs())
         peak_fft = spectrum[(np.abs(freq-f)).argmin()]
 
         # signal amplitude
-        vamp = signal_amplitude(response, self.player.get_aisr())
+        vamp = signal_amplitude(response, self.player.get_aifs())
 
         if self.trace_counter >= 0:
             if irep == 0:

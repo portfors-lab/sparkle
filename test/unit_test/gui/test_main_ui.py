@@ -49,6 +49,10 @@ class TestMainUI():
         # mouse movements
         self.form.ui.plotDock.setFloating(False)
         self.form.showMaximized()
+        # shrink font size so whole interface fits on 14" screen
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        QtGui.QApplication.setFont(font)
         QtGui.QApplication.processEvents()
 
     def tearDown(self):
@@ -101,7 +105,7 @@ class TestMainUI():
         assert_in('components', stim[0])
         assert_equal(stim[0]['samplerate_da'], hfile[calname].attrs['samplerate_ad'])
 
-        npts = (self.form.ui.aisrSpnbx.value()*1000)*(self.form.ui.windowszSpnbx.value()*DEFAULT_TIME_SCALAR)
+        npts = (self.form.ui.aifsSpnbx.value()*1000)*(self.form.ui.windowszSpnbx.value()*DEFAULT_TIME_SCALAR)
         # print 'data shape', signals.shape, (nreps, npts)
         assert_equal(signals.shape,(nreps, npts))
         assert cal_vector.shape == ((npts/2+1),)

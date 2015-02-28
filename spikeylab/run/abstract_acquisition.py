@@ -65,8 +65,8 @@ class AbstractAcquisitionRunner(object):
         
         :param acqtime: duration of recording (input) window (seconds)
         :type acqtime: float
-        :param aisr: sample rate of the recording (input) operation (Hz)
-        :type aisr: int
+        :param aifs: sample rate of the recording (input) operation (Hz)
+        :type aifs: int
         :param aochan: AO (generation) channel name
         :type aochan: str
         :param aichan: AI (recording) channel name
@@ -85,12 +85,12 @@ class AbstractAcquisitionRunner(object):
         self.player_lock.acquire()
         if 'acqtime' in kwargs:
             self.player.set_aidur(kwargs['acqtime'])
-        if 'aisr' in kwargs:
-            self.player.set_aisr(kwargs['aisr'])
-            self.aisr = kwargs['aisr']
-        if 'aisr' in kwargs or 'acqtime' in kwargs:
+        if 'aifs' in kwargs:
+            self.player.set_aifs(kwargs['aifs'])
+            self.aifs = kwargs['aifs']
+        if 'aifs' in kwargs or 'acqtime' in kwargs:
             t = kwargs.get('acqtime', self.player.get_aidur())
-            npoints = t*float(kwargs.get('aisr', self.player.get_aisr()))
+            npoints = t*float(kwargs.get('aifs', self.player.get_aifs()))
             self.aitimes = np.linspace(0, t, npoints)
         if 'trigger' in kwargs:
             self.player.set_trigger(kwargs['trigger'])

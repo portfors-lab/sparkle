@@ -289,7 +289,7 @@ class TestAcqusitionData():
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', (npoints,), mode='open')
 
-        attrs = {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
+        attrs = {'fs': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
         acq_data.append_trace_info('fake', attrs)
         acq_data.close()
 
@@ -307,7 +307,7 @@ class TestAcqusitionData():
         acq_data = AcquisitionData(fname)
         acq_data.init_data('fake', (npoints,), mode='finite')
 
-        attrs = {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
+        attrs = {'fs': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
         acq_data.append_trace_info('fake', attrs)
         acq_data.close()
 
@@ -350,7 +350,7 @@ class TestAcqusitionData():
         nsets = 32
         npoints = 10000
         fakedata = np.ones((npoints,))
-        attrs = {'sr': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_time': 4.1}
+        attrs = {'fs': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_time': 4.1}
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         acq_data = AcquisitionData(fname)

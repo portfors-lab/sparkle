@@ -633,7 +633,7 @@ class TestAcquisitionManager():
         if acq_rate is None:
             acq_rate = manager.calibration_genrate()
         manager.set(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
-                           acqtime=winsz, aisr=acq_rate, caldb=100,
+                           acqtime=winsz, aifs=acq_rate, caldb=100,
                            calv=1.0)
         return manager, fname
 

@@ -20,7 +20,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
         self.ui.exNrepsSpnbx.valueChanged.connect(self.setReps)
         self.ui.exNrepsSpnbx.setKeyboardTracking(False)
 
-        self.funit_fields.append(self.ui.aosrSpnbx)
+        self.funit_fields.append(self.ui.aofsSpnbx)
 
         self.buttons  = []
 
@@ -31,7 +31,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
     def setModel(self, model):
         "Sets the StimulusModel for this editor"
         self._model = model
-        self.ui.aosrSpnbx.setValue(model.samplerate())
+        self.ui.aofsSpnbx.setValue(model.samplerate())
         #must be at least one component & delay
         # for row in range(1,model.rowCount()):
         #     delay = model.component(row,0)
@@ -117,7 +117,7 @@ class ExploreStimulusEditor(AbstractStimulusWidget):
     def saveToObject(self):
         for icomp in range(self.ui.trackStack.count()):
             self.ui.trackStack.widget(icomp).currentWidget().saveToObject()
-        self.ui.aosrSpnbx.setValue(self._model.samplerate())
+        self.ui.aofsSpnbx.setValue(self._model.samplerate())
 
     def samplerate(self):
         return self._model.samplerate()

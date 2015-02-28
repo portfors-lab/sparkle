@@ -124,19 +124,19 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
     :returns: spec -- 2D array of intensities, freqs -- yaxis labels, bins -- time bin labels, duration -- duration of signal
     """
     if isinstance(source, basestring):
-        sr, wavdata = audioread(source)
+        fs, wavdata = audioread(source)
     else:
-        sr, wavdata = source
+        fs, wavdata = source
         
     #truncate to nears ms
-    duration = float(len(wavdata))/sr
-    desired_npts = int((np.trunc(duration*1000)/1000)*sr)
+    duration = float(len(wavdata))/fs
+    desired_npts = int((np.trunc(duration*1000)/1000)*fs)
     # print 'LENGTH {}, DESIRED {}'.format(len(wavdata), desired_npts)
     wavdata = wavdata[:desired_npts]
-    duration = len(wavdata)/sr
+    duration = len(wavdata)/fs
 
     if VERBOSE:
-        amp = rms(wavdata, sr)
+        amp = rms(wavdata, fs)
         print 'RMS of input signal to spectrogram', amp
 
     # normalize
@@ -156,7 +156,7 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
 
     noverlap = int(nfft*(float(overlap)/100))
 
-    Pxx, freqs, bins = mlab.specgram(wavdata, NFFT=nfft, Fs=sr, noverlap=noverlap,
+    Pxx, freqs, bins = mlab.specgram(wavdata, NFFT=nfft, Fs=fs, noverlap=noverlap,
                                      pad_to=nfft*2, window=winfnc, detrend=mlab.detrend_none,
                                      sides='default', scale_by_freq=False)
 
@@ -441,18 +441,18 @@ def audioread(filename):
     """
     try:
         if '.wav' in filename.lower():
-            sr, signal = wv.read(filename)
+            fs, signal = wv.read(filename)
         elif '.call' in filename.lower():
             with open(filename, 'rb') as f:
                 signal = np.fromfile(f, dtype=np.int16)
-            sr = 333333
+            fs = 333333
         else:
             raise IOError("Unsupported audio format for file: {}".format(filename))
     except:
         print u"Problem reading wav file"
         raise
     signal = signal.astype(float)
-    return sr, signal 
+    return fs, signal 
 
 def audiorate(filename):
     """Determines the samplerate of the given audio recording file

@@ -40,7 +40,7 @@ class ControlWindow(QtGui.QMainWindow):
 
         # make a list of which widgets should be updated when scales are changed
         self.timeInputs = [self.ui.windowszSpnbx, self.ui.binszSpnbx, self.ui.psthStartField, self.ui.psthStopField]
-        self.frequencyInputs = [self.ui.aisrSpnbx]
+        self.frequencyInputs = [self.ui.aifsSpnbx]
             
         self.ui.exploreStimEditor.setModel(self.acqmodel.explore_stimulus())
         self.ui.exploreStimEditor.addComponentEditor()
@@ -90,7 +90,7 @@ class ControlWindow(QtGui.QMainWindow):
         :returns: bool -- Whether all inputs and stimuli are valid
         """
         if mode == 'chart':
-            if self.ui.aisrSpnbx.value()*self.fscale > 100000:
+            if self.ui.aifsSpnbx.value()*self.fscale > 100000:
                 QtGui.QMessageBox.warning(self, "Invalid Input", "Recording samplerate cannot exceed 100kHz for chart acquisition")
                 return False
         elif mode is not None:
@@ -128,7 +128,7 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
                 # also check that the recording samplerate is high enough in this case
-                failmsg = calibration_stimulus.verifyExpanded(samplerate=self.ui.aisrSpnbx.value())
+                failmsg = calibration_stimulus.verifyExpanded(samplerate=self.ui.aifsSpnbx.value())
                 if failmsg:
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
@@ -201,7 +201,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict = {}
         savedict['threshold'] = self.ui.threshSpnbx.value()
         savedict['binsz'] = self.ui.binszSpnbx.value()
-        savedict['aisr'] = self.ui.aisrSpnbx.value()
+        savedict['aifs'] = self.ui.aifsSpnbx.value()
         savedict['tscale'] = self.tscale
         savedict['fscale'] = self.fscale
         savedict['saveformat'] = self.saveformat
@@ -241,8 +241,8 @@ class ControlWindow(QtGui.QMainWindow):
             inputsdict = {}
 
         self.ui.threshSpnbx.setValue(inputsdict.get('threshold', 0.5))
-        self.stashedAisr = inputsdict.get('aisr', 100000)
-        self.ui.aisrSpnbx.setValue(self.stashedAisr)
+        self.stashedAisr = inputsdict.get('aifs', 100000)
+        self.ui.aifsSpnbx.setValue(self.stashedAisr)
         self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 0.1))
         self.ui.binszSpnbx.setValue(inputsdict.get('binsz', 0.005))        
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
@@ -295,7 +295,7 @@ class ControlWindow(QtGui.QMainWindow):
             logger = logging.getLogger('main')
             logger.debug('No saved explore stimului inputs')
 
-        # self.ui.aosrSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
+        # self.ui.aofsSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
 
     def closeEvent(self, event):
         """Closes listening threads and saves GUI data for later use.

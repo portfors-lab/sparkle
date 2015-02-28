@@ -57,7 +57,7 @@ class AbstractPlayerBase(object):
 
         npts =  self.stim.size
         try:
-            self.aotask = AOTaskFinite(self.aochan, self.sr, npts, trigsrc=trigger)
+            self.aotask = AOTaskFinite(self.aochan, self.fs, npts, trigsrc=trigger)
             self.aotask.write(self.stim)
             if self.attenuator is not None:
                 self.attenuator.SetAtten(self.atten)
@@ -81,12 +81,12 @@ class AbstractPlayerBase(object):
         self.tone_lock.release()
         return new_gen
 
-    def set_stim(self, signal, sr, attenuation=0):
+    def set_stim(self, signal, fs, attenuation=0):
         """Sets any vector as the next stimulus to be output. Does not call write to hardware"""
 
         self.tone_lock.acquire()
         self.stim = signal
-        self.sr = sr
+        self.fs = fs
         self.atten = attenuation
         self.stim_changed = True
 
@@ -98,7 +98,7 @@ class AbstractPlayerBase(object):
 
         :returns: int -- samplerate (Hz)
         """
-        return self.sr
+        return self.fs
 
     def get_aidur(self):
         """The current input(recording) window duration 
@@ -106,20 +106,20 @@ class AbstractPlayerBase(object):
         :returns: float -- window length (seconds)"""
         return self.aitime
 
-    def get_aisr(self):
+    def get_aifs(self):
         """The current analog input (recording) samplerate 
 
         :returns: int -- samplerate (Hz)
         """
-        return self.aisr
+        return self.aifs
 
-    def set_aisr(self, fs):
+    def set_aifs(self, fs):
         """Sets the current analog input (recording) samplerate 
 
         :param fs: recording samplerate (Hz)
         :type fs: int
         """
-        self.aisr = fs
+        self.aifs = fs
 
     def set_aidur(self,dur):
         """Sets the current input(recording) window duration
@@ -242,9 +242,9 @@ class FinitePlayer(AbstractPlayerBase):
     def reset(self):
         """Rearms the gen/acq task, to the same channels as before"""
 
-        response_npts = int(self.aitime*self.aisr)
+        response_npts = int(self.aitime*self.aifs)
         try:
-            self.aitask = AITaskFinite(self.aichan, self.aisr, response_npts, trigsrc=self.trigger_dest)
+            self.aitask = AITaskFinite(self.aichan, self.aifs, response_npts, trigsrc=self.trigger_dest)
             new_gen = self.reset_generation(u"ai/StartTrigger")
         except:
             print u'ERROR! TERMINATE!'
@@ -285,9 +285,9 @@ class ContinuousPlayer(AbstractPlayerBase):
         self.daq_lock.acquire()
 
         self.ngenerated = 0 # number of stimuli presented during chart run
-        npts = int(self.aisr/update_hz) #update display at 10Hz rate
+        npts = int(self.aifs/update_hz) #update display at 10Hz rate
         nchans = len(aichans)
-        self.aitask = AITask(aichans, self.aisr, npts*5*nchans)
+        self.aitask = AITask(aichans, self.aifs, npts*5*nchans)
         self.aitask.register_callback(self._read_continuous, npts)
         self.aitask.start()
 

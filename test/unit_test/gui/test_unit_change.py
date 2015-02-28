@@ -27,11 +27,11 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.exploreStimEditor.ui.aosrSpnbx.setValue(fs0)
-        control.ui.aisrSpnbx.setValue(fs1)
+        control.ui.exploreStimEditor.ui.aofsSpnbx.setValue(fs0)
+        control.ui.aifsSpnbx.setValue(fs1)
 
-        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0
-        assert control.ui.aisrSpnbx.value() == fs1
+        assert control.ui.exploreStimEditor.ui.aofsSpnbx.value() == fs0
+        assert control.ui.aifsSpnbx.value() == fs1
 
         frequency_inputs = control.frequencyInputs + AbstractEditorWidget.funit_fields
         for field in frequency_inputs:
@@ -40,8 +40,8 @@ class TestUnitChanges():
 
         control.updateUnitLabels(control.tscale, 'Hz')
 
-        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0 
-        assert control.ui.aisrSpnbx.value() == fs1
+        assert control.ui.exploreStimEditor.ui.aofsSpnbx.value() == fs0 
+        assert control.ui.aifsSpnbx.value() == fs1
         for field in frequency_inputs:
             field.minimum() == 1
 
@@ -54,18 +54,18 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.exploreStimEditor.ui.aosrSpnbx.setValue(fs0)
-        control.ui.aisrSpnbx.setValue(fs1)
+        control.ui.exploreStimEditor.ui.aofsSpnbx.setValue(fs0)
+        control.ui.aifsSpnbx.setValue(fs1)
 
-        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0
-        assert control.ui.aisrSpnbx.value() == fs1
+        assert control.ui.exploreStimEditor.ui.aofsSpnbx.value() == fs0
+        assert control.ui.aifsSpnbx.value() == fs1
 
         control.updateUnitLabels(control.tscale, 's')
         control.updateUnitLabels(control.tscale, 'ms')
 
-        print 'spin boxes', control.ui.aisrSpnbx.value(), fs1
-        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0 
-        assert control.ui.aisrSpnbx.value() == fs1
+        print 'spin boxes', control.ui.aifsSpnbx.value(), fs1
+        assert control.ui.exploreStimEditor.ui.aofsSpnbx.value() == fs0 
+        assert control.ui.aifsSpnbx.value() == fs1
 
         frequency_inputs = control.frequencyInputs + AbstractEditorWidget.funit_fields
         for field in frequency_inputs:
@@ -148,11 +148,11 @@ class TestUnitChanges():
         fs0 = 200000.0
         fs1 = 200.0
         # manually set the inputs of interest
-        control.ui.exploreStimEditor.ui.aosrSpnbx.setValue(fs0)
-        control.ui.aisrSpnbx.setValue(fs1)
+        control.ui.exploreStimEditor.ui.aofsSpnbx.setValue(fs0)
+        control.ui.aifsSpnbx.setValue(fs1)
 
-        assert control.ui.exploreStimEditor.ui.aosrSpnbx.value() == fs0 
-        assert control.ui.aisrSpnbx.value() == fs1
+        assert control.ui.exploreStimEditor.ui.aofsSpnbx.value() == fs0 
+        assert control.ui.aifsSpnbx.value() == fs1
 
         frequency_inputs = control.frequencyInputs + AbstractEditorWidget.funit_fields
         for field in frequency_inputs:

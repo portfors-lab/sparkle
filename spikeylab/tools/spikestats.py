@@ -1,7 +1,7 @@
 """ Here is a doc string for spikestats :)"""
 import numpy as np
 
-def spike_times(signal, threshold, sr, mint=None):
+def spike_times(signal, threshold, fs, mint=None):
     """Detect spikes from a given signal
 
     :param signal: Spike trace recording (vector)
@@ -25,14 +25,14 @@ def spike_times(signal, threshold, sr, mint=None):
                 segments = np.insert(segments, [0], [0])
             else:
                 #first point in singleton
-                times.append(float(over[0])/sr)
+                times.append(float(over[0])/fs)
                 if 1 not in segments:
                     # make sure that first point is in there
                     segments[0] = 1
             if segments[-1] != len(over)-1:
                 segments = np.insert(segments, [len(segments)], [len(over)-1])
             else:
-                times.append(float(over[-1])/sr)
+                times.append(float(over[-1])/fs)
 
         for iseg in range(1,len(segments)):
             if segments[iseg] - segments[iseg-1] == 1:
@@ -42,9 +42,9 @@ def spike_times(signal, threshold, sr, mint=None):
                 segments[0] = segments[0]-1                
                 # find maximum of continuous set over max
                 idx = over[segments[iseg-1]+1] + np.argmax(signal[over[segments[iseg-1]+1]:over[segments[iseg]]])
-            times.append(float(idx)/sr)
+            times.append(float(idx)/fs)
     elif len(over) == 1:
-        times.append(float(over[0])/sr)
+        times.append(float(over[0])/fs)
         
     return times
 
@@ -64,7 +64,7 @@ def bin_spikes(spike_times, binsz):
         bins.append(int(np.floor(np.around(stime/binsz, 5))))
     return bins
 
-def spike_latency(signal, threshold, sr):
+def spike_latency(signal, threshold, fs):
     """Find the latency of the first spike over threshold
 
     :param signal: Spike trace recording (vector)
@@ -82,15 +82,15 @@ def spike_latency(signal, threshold, sr):
         if len(segments) == 0:
             # only signal peak
             idx = over[0] + np.argmax(signal[over[0]:over[-1]])
-            latency = float(idx)/sr
+            latency = float(idx)/fs
         elif segments[0] == 0:
             #first point in singleton
-            latency = float(over[0])/sr
+            latency = float(over[0])/fs
         else:
             idx = over[0] + np.argmax(signal[over[0]:over[segments[0]]])
-            latency = float(idx)/sr
+            latency = float(idx)/fs
     elif len(over) > 0:
-        latency = float(over[0])/sr
+        latency = float(over[0])/fs
     else:
         latency = None
 

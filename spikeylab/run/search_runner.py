@@ -154,7 +154,7 @@ class SearchRunner(AbstractAcquisitionRunner):
                     self.putnotify('current_trace', (0,0,trace_doc))
                 
                 # process response; calculate spike times
-                spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
+                spike_times = spikestats.spike_times(response, self.threshold, self.player.aifs)
                 spike_counts.append(len(spike_times))
                 if len(spike_times) > 0:
                     spike_latencies.append(spike_times[0])
@@ -212,5 +212,5 @@ class SearchRunner(AbstractAcquisitionRunner):
         info = dict(self._stimulus.componentDoc().items() + self._stimulus.testDoc().items())
         print 'saving doc', info
         info['time_stamps'] = [stamp]
-        info['samplerate_ad'] = self.player.aisr
+        info['samplerate_ad'] = self.player.aifs
         self.datafile.append_trace_info(self.current_dataset_name, info)

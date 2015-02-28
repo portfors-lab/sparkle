@@ -176,10 +176,10 @@ class Vocalization(AbstractStimulusComponent):
         if fname is not None:
             self._filename = fname
 
-            sr, wavdata = audioread(self._filename)
+            fs, wavdata = audioread(self._filename)
 
             # round to the nearest ms
-            duration = np.trunc((float(len(wavdata))/sr)*1000)/1000
+            duration = np.trunc((float(len(wavdata))/fs)*1000)/1000
 
             self._duration = duration
 
@@ -189,19 +189,19 @@ class Vocalization(AbstractStimulusComponent):
             logger = logging.getLogger('main')
             logger.warn('Vocalization signal request without a file')
             return np.array([])
-        sr, wavdata = audioread(self._filename)
-        if fs != sr:
-            print 'specified', fs, 'wav file', sr
+        fs, wavdata = audioread(self._filename)
+        if fs != fs:
+            print 'specified', fs, 'wav file', fs
             raise Exception("specified samplerate does not match wav stimulus")
 
         #truncate to nears ms
-        duration = float(len(wavdata))/sr
+        duration = float(len(wavdata))/fs
         # print 'duration {}, desired {}'.format(duration, np.trunc(duration*1000)/1000)
-        desired_npts = int((np.trunc(duration*1000)/1000)*sr)
+        desired_npts = int((np.trunc(duration*1000)/1000)*fs)
         # print 'npts. desired', len(wavdata), desired_npts
         wavdata = wavdata[:desired_npts]
 
-        amp_scale = signal_amplitude(wavdata, sr)
+        amp_scale = signal_amplitude(wavdata, fs)
 
         signal = ((wavdata/amp_scale)*self.amplitude(caldb, calv))
 

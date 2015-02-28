@@ -24,7 +24,7 @@ class ProtocolRunner(ListAcquisitionRunner):
 
             self.datafile.init_group(self.current_dataset_name)
 
-            info = {'samplerate_ad': self.player.aisr}
+            info = {'samplerate_ad': self.player.aifs}
             self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
@@ -63,7 +63,7 @@ class ProtocolRunner(ListAcquisitionRunner):
         self.putnotify('response_collected', (self.aitimes, response))
 
         # process response; calculate spike times
-        spike_times = spikestats.spike_times(response, self.threshold, self.player.aisr)
+        spike_times = spikestats.spike_times(response, self.threshold, self.player.aifs)
         spike_counts.append(len(spike_times))
         if len(spike_times) > 0:
             spike_latencies.append(spike_times[0])

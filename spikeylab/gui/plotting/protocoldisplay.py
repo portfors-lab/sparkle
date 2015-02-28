@@ -168,11 +168,11 @@ if __name__ == "__main__":
     # plot.updateSpec(spec, xaxis=bins, yaxis=f)
     plot.updateSpec(sylpath)
 
-    sr, wavdata = wv.read(sylpath)
-    freqs, fft = audiotools.calc_spectrum(wavdata,sr)
+    fs, wavdata = wv.read(sylpath)
+    freqs, fft = audiotools.calc_spectrum(wavdata,fs)
 
     # stim_times = np.arange(0,len(wavdata),1/float(len(wavdata)))
-    stim_times = np.linspace(0,float(len(wavdata))/sr, len(wavdata))
+    stim_times = np.linspace(0,float(len(wavdata))/fs, len(wavdata))
 
 
     marr = loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"singlesweep.mat"), squeeze_me=True)

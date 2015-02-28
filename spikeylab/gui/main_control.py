@@ -203,7 +203,7 @@ class MainWindow(ControlWindow):
 
         # disable the components we don't want changed amid generation
         self.ui.aochanBox.setEnabled(False)
-        self.ui.aisrSpnbx.setEnabled(False)
+        self.ui.aifsSpnbx.setEnabled(False)
         reprate = self.ui.reprateSpnbx.setEnabled(False)
         self.ui.stopBtn.setEnabled(True)
         self.plotProgress = False
@@ -243,7 +243,7 @@ class MainWindow(ControlWindow):
         self.ui.runningLabel.setStyleSheet(GREENSS)
         self.ui.startChartBtn.setEnabled(False)
         self.ui.aichanBox.setEnabled(False)
-        self.ui.aisrSpnbx.setEnabled(False)
+        self.ui.aifsSpnbx.setEnabled(False)
         self.ui.stopChartBtn.setEnabled(True)
         self.ui.windowszSpnbx.valueChanged.connect(self.updateScollingWindowsize)
 
@@ -252,7 +252,7 @@ class MainWindow(ControlWindow):
             return
         aochan = str(self.ui.aochanBox.currentText())
         aichan = str(self.ui.aichanBox.currentText())
-        acq_rate = self.ui.aisrSpnbx.value()
+        acq_rate = self.ui.aifsSpnbx.value()
 
         winsz = float(self.ui.windowszSpnbx.value())
         binsz = float(self.ui.binszSpnbx.value())
@@ -265,7 +265,7 @@ class MainWindow(ControlWindow):
         else:
             trigger = None
         self.acqmodel.set(aochan=aochan, aichan=aichan, acqtime=winsz,
-                          aisr=acq_rate, binsz=binsz, trigger=trigger)
+                          aifs=acq_rate, binsz=binsz, trigger=trigger)
         self.binsz = binsz
 
         self.display.setXlimits((0,winsz))
@@ -299,7 +299,7 @@ class MainWindow(ControlWindow):
         self.ui.stopBtn.clicked.connect(self.onStop)
 
         if str(self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex())).lower() != 'calibration':
-            self.ui.aisrSpnbx.setEnabled(True)
+            self.ui.aifsSpnbx.setEnabled(True)
         self.ui.aochanBox.setEnabled(True)
         reprate = self.ui.reprateSpnbx.setEnabled(True)
         self.ui.stopBtn.setEnabled(False)
@@ -319,7 +319,7 @@ class MainWindow(ControlWindow):
         self.ui.runningLabel.setText(u"OFF")
         self.ui.runningLabel.setStyleSheet(REDSS)
         self.ui.aichanBox.setEnabled(True)
-        self.ui.aisrSpnbx.setEnabled(True)
+        self.ui.aifsSpnbx.setEnabled(True)
         self.ui.stopChartBtn.setEnabled(False)
         self.ui.windowszSpnbx.valueChanged.disconnect()
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
@@ -492,14 +492,14 @@ class MainWindow(ControlWindow):
             print "WARNING: times and response not equal"
         # print 'response signal', len(response)
         # convert voltage amplitudes into dB SPL    
-        sr = self.ui.aisrSpnbx.value()
-        # amp = signal_amplitude(response, sr)
+        fs = self.ui.aifsSpnbx.value()
+        # amp = signal_amplitude(response, fs)
         mphonesens = self.ui.mphoneSensSpnbx.value()
         mphonedb = self.ui.mphoneDBSpnbx.value()
         amp_signal = calc_db(np.amax(response), mphonesens, mphonedb)
-        amp_signal_rms = calc_db(rms(response, sr), mphonesens, mphonedb)
+        amp_signal_rms = calc_db(rms(response, fs), mphonesens, mphonedb)
 
-        freq, signal_fft = calc_spectrum(response, sr)
+        freq, signal_fft = calc_spectrum(response, fs)
         idx = np.where((freq > 5000) & (freq < 100000))
         summed_db0 = calc_summed_db(signal_fft[idx], mphonesens, mphonedb)
         spectrum = calc_db(signal_fft, mphonesens, mphonedb)
@@ -524,7 +524,7 @@ class MainWindow(ControlWindow):
         elif self.ui.plotDock.current() == 'calexp':
             self.extendedDisplay.updateSignal(times, response, plot='response')
             self.extendedDisplay.updateFft(freq, spectrum, plot='response')
-            self.extendedDisplay.updateSpec(response, sr, plot='response')
+            self.extendedDisplay.updateSpec(response, fs, plot='response')
 
     def displayCalibrationResponse(self, spectrum, freqs, amp):
         mphonesens = self.ui.mphoneSensSpnbx.value()
@@ -569,7 +569,7 @@ class MainWindow(ControlWindow):
             self.ui.psth.appendData(bins, repnum)
             
     def displayStim(self, signal, fs):
-        # self.ui.aosrSpnbx.setValue(fs/self.fscale)
+        # self.ui.aofsSpnbx.setValue(fs/self.fscale)
         freq, spectrum = calc_spectrum(signal, fs)
         # spectrum = spectrum / np.sqrt(2)
         spectrum = calc_db(spectrum, self.calvals['calv']) + self.calvals['caldb']
@@ -636,13 +636,13 @@ class MainWindow(ControlWindow):
 
             stimulus = stimuli[tracenum]
             group_info = dict(self.acqmodel.datafile.get_info(group_path))
-            aisr = group_info['samplerate_ad']
+            aifs = group_info['samplerate_ad']
 
             # show the stimulus details
             self.reportProgress(-1, tracenum, stimulus)
             self.reportRep(repnum)
 
-            winsz = float(npoints)/aisr
+            winsz = float(npoints)/aifs
             times = np.linspace(0, winsz, npoints)
 
             # plot response signal
@@ -671,7 +671,7 @@ class MainWindow(ControlWindow):
             self.ui.psth.clearData()
             self.display.clearRaster()
             
-            winsz = float(tracedata.shape[1])/aisr
+            winsz = float(tracedata.shape[1])/aifs
             # set the max of the PSTH subwindow to the size of this data
             self.ui.psthStopField.setMaximum(winsz)
             self.ui.psthStartField.setMaximum(winsz)
@@ -682,8 +682,8 @@ class MainWindow(ControlWindow):
                 stop_time = winsz
             else:
                 stop_time = self.ui.psthStopField.value()
-            start_index = int(aisr*start_time)
-            stop_index = int(aisr*stop_time)
+            start_index = int(aifs*start_time)
+            stop_index = int(aifs*stop_time)
             subwinsz = stop_time - start_time
 
             nbins = np.ceil(winsz/binsz)
@@ -698,7 +698,7 @@ class MainWindow(ControlWindow):
             spike_latencies = []
             spike_rates = []
             for itrace in range(repnum+1):
-                spike_times = spikestats.spike_times(tracedata[itrace,start_index:stop_index], self.ui.threshSpnbx.value(), aisr)
+                spike_times = spikestats.spike_times(tracedata[itrace,start_index:stop_index], self.ui.threshSpnbx.value(), aifs)
                 response_bins = spikestats.bin_spikes(spike_times, binsz) + binshift
                 bins.extend(response_bins)
                 spike_counts.append(len(spike_times))
@@ -725,7 +725,7 @@ class MainWindow(ControlWindow):
             test_info = dict(self.acqmodel.datafile.get_info(path))
             comp_info = self.acqmodel.datafile.get_trace_info(path)
             group_info = dict(self.acqmodel.datafile.get_info(group_path))
-            aisr = group_info['samplerate_ad']
+            aifs = group_info['samplerate_ad']
             if test_info['testtype'] == 'Tuning Curve':
                 # we need to harvest the intensities out of the component doc
                 intensities = []
@@ -746,7 +746,7 @@ class MainWindow(ControlWindow):
                 groups = ['all traces']
                 plottype = 'other'
             # a not-so-live curve
-            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self.ui.threshSpnbx.value(), aisr, xlabels)
+            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self.ui.threshSpnbx.value(), aifs, xlabels)
             self.comatosecurve.setLabels(plottype)
             self.ui.progressDock.setWidget(self.comatosecurve)
 
@@ -818,8 +818,8 @@ class MainWindow(ControlWindow):
         # display spectrogram of file
         spath = self.exvocal.currentWavFile
 
-        sr, audio_signal = audioread(spath)
-        self.displayStim(audio_signal, sr)
+        fs, audio_signal = audioread(spath)
+        self.displayStim(audio_signal, fs)
 
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             winsz = float(self.ui.windowszSpnbx.value())
@@ -847,13 +847,13 @@ class MainWindow(ControlWindow):
 
     def tabChanged(self, tabIndex):
         if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'calibration':
-            self.stashedAisr = self.ui.aisrSpnbx.value()
-            self.ui.aisrSpnbx.setValue(self.acqmodel.calibration_genrate())
-            self.ui.aisrSpnbx.setEnabled(False)
+            self.stashedAisr = self.ui.aifsSpnbx.value()
+            self.ui.aifsSpnbx.setValue(self.acqmodel.calibration_genrate())
+            self.ui.aifsSpnbx.setEnabled(False)
             self.setCalibrationDuration()
         elif self.prevTab == 'calibration':
-            self.ui.aisrSpnbx.setEnabled(True)
-            self.ui.aisrSpnbx.setValue(self.stashedAisr)
+            self.ui.aifsSpnbx.setEnabled(True)
+            self.ui.aifsSpnbx.setValue(self.stashedAisr)
         
         if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'review' and self.activeOperation != 'explore':
             self.ui.startBtn.setEnabled(False)

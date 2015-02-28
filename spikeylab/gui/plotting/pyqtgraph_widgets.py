@@ -688,10 +688,10 @@ class ChartWidget(QtGui.QWidget):
         layout.addWidget(splitter)
         self.setLayout(layout)
 
-    def setSr(self, sr):
+    def setSr(self, fs):
         """Sets the samplerate of the input operation being plotted"""
-        self.tracePlot.setSr(sr)
-        self.stimPlot.setSr(sr)
+        self.tracePlot.setSr(fs)
+        self.stimPlot.setSr(fs)
 
     def setWindowSize(self, winsz):
         """Sets the size of scroll window"""
@@ -714,8 +714,8 @@ class ScrollingWidget(BasePlot):
 
         self.disableAutoRange()
 
-    def setSr(self, sr):
-        self._deltax = (1/float(sr))
+    def setSr(self, fs):
+        self._deltax = (1/float(fs))
 
     def setWindowSize(self, winsz):
         self._windowsize = winsz

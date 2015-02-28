@@ -105,7 +105,7 @@ class TestDAQPlayers():
         tone = data_func((fs*dur)/2, 5, 2.0)
         player.set_stim(tone, fs)
         player.set_aidur(0.02)
-        player.set_aisr(fs/4) 
+        player.set_aifs(fs/4) 
         player.set_aochan(u"PCI-6259/ao2")   
         #start the acquisition
         self.data = []
@@ -133,7 +133,7 @@ class TestDAQPlayers():
         tone = data_func(outfs*outdur, 5, amp)
         player.set_stim(tone, outfs)
         player.set_aidur(indur)
-        player.set_aisr(infs)
+        player.set_aifs(infs)
         player.set_aichan(DEVNAME+"/ai16")
         player.set_aochan(DEVNAME+"/ao2")
         # player.start_timer(10)
