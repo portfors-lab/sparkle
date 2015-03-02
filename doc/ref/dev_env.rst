@@ -5,7 +5,7 @@ This program was developed to work on the windows platform. However, development
 
 Of course, you will want to install Python 2.7 and virtualenv first.
 
-The use of virtualenv is not required, but recommended, particularly if you plan on having any other python projects.
+The use of virtualenv is not required, but recommended, particularly if you plan on having any other python projects. Another option is to install the `Anaconda Python distribution`_, which comes with most of the required packages installed for you.
 
 The project is under Git version control and is currently in a private repo on BitBucket (owned by Amy Boyle). This can, if necessary (in the event that Amy is not available), be copied from the local installation on the rig machine, and worked on/maintained/pushed to a different owner's remote repo from there. (If you are reading this, you found the repo)
 
@@ -15,6 +15,7 @@ Because installing some python packages from source on windows is painfull, if n
 
 At the time of writing there is a `great web page`_, maintained by Christoph Gohlke, which contains a nearly comprehensive listing of binary packages for python scientific libraries
 
+.. _Anaconda Python distribution: http://continuum.io/downloads
 .. _great web page: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
 So download the binaries for the following packages:
@@ -54,6 +55,8 @@ I also used IPython notebook during the development process, for that you will n
 Linux
 ------
 
-You should be able to install everything via pip, with the exception of PyQt, which I wrote a `blog post`_ about.
+You should be able to install everything via pip, with the exception of PyQt, which I wrote a `blog post`_ about. You can use the requirements file in the project root directory by running the following command::
+
+  $ pip install -r requirements.txt
 
 .. _blog post: http://amyboyle.ninja/Python-Qt-and-virtualenv-in-linux/

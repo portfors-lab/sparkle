@@ -3,7 +3,7 @@
 Speaker Calibration
 ===================
 
-For the purposes of speaker frequency roll-off documentation and compensation. Also sets the reference intensity to determine the necessary signal amplitude to correctly deliver stimuli in dB SPL.
+Speaker calibration is for the purposes of speaker frequency roll-off documentation and compensation. It also sets the reference intensity to determine the necessary signal amplitude to correctly deliver stimuli in dB SPL.
 
 #. First set up the hardware. 
 
@@ -19,11 +19,11 @@ For the purposes of speaker frequency roll-off documentation and compensation. A
 
 #. For saving a calibration, most of the input values are fixed, so all you can change is the duration and number of repetitions. The duration of the stimulus is fixed to the window size, so you change the recording window to change the stimulus duration.
 
-#. The microphone is calibrated first. Use the microphone calibrator thing that plays the tone. Place the end of the microphone into the equipment. Press the *calibrate* button on the line that says stuff about microphone calibration. When it has finished recording, remove the device, and replace the microphone at it's proper place w.r.t the speaker.
+#. The microphone is calibrated first. Use the microphone calibrator thing that plays the tone (1kHz at 95dB SPL). Place the end of the microphone into the equipment. Press the *calibrate* button on the line that says stuff about microphone calibration. When it has finished recording, remove the device, and replace the microphone at it's proper place w.r.t the speaker.
 
-#. Press the start button, the plot display will update with the data from the ouput and recorded signals. A tone will be played first to attain the reference intensity, then followed by an upsweep to get the speaker transfer function. After recording, the program will take several seconds to calculate the filter it will be using. Finally a frequency roll-off plot of the speaker will appear.
+#. Press the start button, the plot display will update with the data from the ouput and recorded signals. A tone will be played first to attain the reference intensity, then followed by an upsweep to get the speaker transfer function. After recording, the program will take several seconds to calculate the filter it will be using. Finally a frequency roll-off plot of the speaker will appear. Note that the microphone is HIGHLY DIRECTIONAL, the exact angle it is placed to the speaker can make a significant difference in the calibration of the speaker.
 
-#. Get a look at the efficacy of the calibration, by choosing the *Test Calibration* button and selecting one of the options from the drop down menu that is enabled. The closer to a flat spectrum recorded, the better.
+#. Get a look at the efficacy of the calibration, by choosing the *Test Calibration* button and selecting one of the options from the drop down menu that is enabled. The closer to a flat spectrum recorded, the better. This step will not save anything.
 
 * When you run a calibration it will be automatically set as the active calibration for the program.
 
