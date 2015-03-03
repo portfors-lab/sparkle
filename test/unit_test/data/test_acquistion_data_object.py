@@ -7,8 +7,8 @@ import re
 import h5py
 from nose.tools import raises, assert_in, assert_equal
 
-from spikeylab.data.dataobjects import AcquisitionData, increment
-from spikeylab.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
+from neurosound.data.dataobjects import AcquisitionData, increment
+from neurosound.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
                                         ReadOnlyError, OverwriteFileError
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from spikeylab.acq.players import FinitePlayer, ContinuousPlayer
+from neurosound.acq.players import FinitePlayer, ContinuousPlayer
 import unittest
 
 DEVNAME = "PCI-6259"
@@ -9,7 +9,7 @@ DEVNAME = "PCI-6259"
 try:
     from PyDAQmx import *
 except:
-    from spikeylab.acq.daqmx_stub import *
+    from neurosound.acq.daqmx_stub import *
 
 class TestDAQPlayers():
     def setUp(self):

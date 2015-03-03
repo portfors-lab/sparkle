@@ -2,11 +2,11 @@ import os
 
 from QtWrapper import QtGui, QtCore, QtTest
 
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
-from spikeylab.gui.stim.components.vocal_parameters import VocalParameterWidget
-from spikeylab.stim.types import get_stimuli_models
-from spikeylab.gui.stim.components.qcomponents import wrapComponent
-from spikeylab.stim.types.stimuli_classes import *
+from neurosound.stim.types.stimuli_classes import PureTone, Vocalization
+from neurosound.gui.stim.components.vocal_parameters import VocalParameterWidget
+from neurosound.stim.types import get_stimuli_models
+from neurosound.gui.stim.components.qcomponents import wrapComponent
+from neurosound.stim.types.stimuli_classes import *
 
 from test import sample
 import qtbot

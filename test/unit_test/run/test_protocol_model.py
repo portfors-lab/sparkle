@@ -1,9 +1,9 @@
 from nose.tools import assert_equal
 
-from spikeylab.gui.qprotocol import QProtocolTabelModel
-from spikeylab.run.protocol_model import ProtocolTabelModel
-from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone
+from neurosound.gui.qprotocol import QProtocolTabelModel
+from neurosound.run.protocol_model import ProtocolTabelModel
+from neurosound.stim.stimulus_model import StimulusModel
+from neurosound.stim.types.stimuli_classes import PureTone
 from QtWrapper import QtCore
 
 class TestQProtocolModel():

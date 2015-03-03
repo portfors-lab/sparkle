@@ -8,11 +8,11 @@ import numpy as np
 from QtWrapper import QtGui, QtCore
 import pyqtgraph as pg
 
-from spikeylab.acq.players import FinitePlayer
-from spikeylab.stim.stimulus_model import StimulusModel
-# from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
-from spikeylab.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from spikeylab.tools.audiotools import impulse_response, attenuation_curve
+from neurosound.acq.players import FinitePlayer
+from neurosound.stim.stimulus_model import StimulusModel
+# from neurosound.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
+from neurosound.stim.types.stimuli_classes import WhiteNoise, FMSweep
+from neurosound.tools.audiotools import impulse_response, attenuation_curve
 from test.scripts.util import calc_error, record, MyTableWidgetItem, \
                                 apply_calibration
 

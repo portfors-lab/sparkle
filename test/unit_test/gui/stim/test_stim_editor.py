@@ -6,12 +6,12 @@ from QtWrapper.QtGui import QApplication
 from QtWrapper.QtCore import Qt, QTimer
 import unittest
 
-from spikeylab.gui.stim.qstimulus import QStimulusModel
-from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization, Silence
-from spikeylab.gui.stim.stimulus_editor import StimulusEditor
-from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.gui.stim.factory import BuilderFactory
+from neurosound.gui.stim.qstimulus import QStimulusModel
+from neurosound.stim.stimulus_model import StimulusModel
+from neurosound.stim.types.stimuli_classes import PureTone, Vocalization, Silence
+from neurosound.gui.stim.stimulus_editor import StimulusEditor
+from neurosound.stim.auto_parameter_model import AutoParameterModel
+from neurosound.gui.stim.factory import BuilderFactory
 
 import test.sample as sample
 import qtbot

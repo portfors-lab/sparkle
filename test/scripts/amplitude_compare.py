@@ -7,10 +7,10 @@ import sys
 import numpy as np
 from QtWrapper import QtGui
 
-from spikeylab.acq.players import FinitePlayer
-from spikeylab.stim.types.stimuli_classes import FMSweep
-from spikeylab.tools import audiotools as atools
-from spikeylab.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
+from neurosound.acq.players import FinitePlayer
+from neurosound.stim.types.stimuli_classes import FMSweep
+from neurosound.tools import audiotools as atools
+from neurosound.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from test.scripts.util import record, run_tone_curve
 
 # copied from SO

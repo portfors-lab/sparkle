@@ -1,8 +1,8 @@
 from QtWrapper import QtCore, QtGui, QtTest
 
-from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
-from spikeylab.gui.stim.auto_parameter_view import AutoParameterTableView
+from neurosound.stim.auto_parameter_model import AutoParameterModel
+from neurosound.gui.stim.qauto_parameter_model import QAutoParameterModel
+from neurosound.gui.stim.auto_parameter_view import AutoParameterTableView
 
 import qtbot
 

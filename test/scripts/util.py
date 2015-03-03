@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 
 from QtWrapper import QtGui, QtCore
 
-from spikeylab.acq.players import FinitePlayer
-from spikeylab.stim.types.stimuli_classes import PureTone
-from spikeylab.tools.audiotools import calc_db, calc_spectrum, \
+from neurosound.acq.players import FinitePlayer
+from neurosound.stim.types.stimuli_classes import PureTone
+from neurosound.tools.audiotools import calc_db, calc_spectrum, \
                             convolve_filter, multiply_frequencies, \
                             signal_amplitude, calc_summed_db, rms
 

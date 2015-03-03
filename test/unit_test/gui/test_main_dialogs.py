@@ -4,7 +4,7 @@ import threading, time
 from QtWrapper import QtGui, QtTest
 from nose.tools import assert_equal
 
-from spikeylab.gui.main_control import MainWindow
+from neurosound.gui.main_control import MainWindow
 
 import qtbot
 

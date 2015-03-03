@@ -1,8 +1,8 @@
 import os
 
-from spikeylab.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
+from neurosound.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
                             CalibrationDialog, CellCommentDialog, ViewSettingsDialog
-from spikeylab.data.dataobjects import AcquisitionData
+from neurosound.data.dataobjects import AcquisitionData
 
 import test.sample as sample
 

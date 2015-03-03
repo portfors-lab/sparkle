@@ -10,10 +10,10 @@ import numpy as np
 from QtWrapper import QtGui, QtCore
 import pyqtgraph as pg
 
-from spikeylab.acq.players import FinitePlayer
-from spikeylab.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from spikeylab.gui.plotting.pyqtgraph_widgets import StackedPlot, SimplePlotWidget
-from spikeylab.tools.audiotools import tukey, impulse_response, \
+from neurosound.acq.players import FinitePlayer
+from neurosound.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
+from neurosound.gui.plotting.pyqtgraph_widgets import StackedPlot, SimplePlotWidget
+from neurosound.tools.audiotools import tukey, impulse_response, \
                 smooth, attenuation_curve, calc_db, signal_amplitude, calc_spectrum
 
 from test.scripts.util import calc_error, record, MyTableWidgetItem, \

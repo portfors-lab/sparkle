@@ -6,10 +6,10 @@ import re
 import yaml
 from QtWrapper import QtCore, QtGui
 
-from spikeylab.tools.log import init_logging
-from spikeylab.tools.uihandler import TextEditHandler
-from spikeylab.tools.uihandler import assign_uihandler_slot
-from spikeylab import tools
+from neurosound.tools.log import init_logging
+from neurosound.tools.uihandler import TextEditHandler
+from neurosound.tools.uihandler import assign_uihandler_slot
+from neurosound import tools
 
 class TestUIHandler():
 

@@ -4,11 +4,11 @@ import os, shutil
 from nose.tools import assert_equal
 from QtWrapper import QtCore, QtGui, QtTest
 
-from spikeylab.run.protocol_model import ProtocolTabelModel
-from spikeylab.gui.qprotocol import QProtocolTabelModel, ProtocolView
-from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
-from spikeylab.gui.drag_label import DragLabel
+from neurosound.run.protocol_model import ProtocolTabelModel
+from neurosound.gui.qprotocol import QProtocolTabelModel, ProtocolView
+from neurosound.stim.stimulus_model import StimulusModel
+from neurosound.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
+from neurosound.gui.drag_label import DragLabel
 
 import qtbot
 

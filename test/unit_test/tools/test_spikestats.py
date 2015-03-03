@@ -1,4 +1,4 @@
-from spikeylab.tools.spikestats import spike_times, bin_spikes, spike_latency, firing_rate
+from neurosound.tools.spikestats import spike_times, bin_spikes, spike_latency, firing_rate
 
 import test.sample as sample
 

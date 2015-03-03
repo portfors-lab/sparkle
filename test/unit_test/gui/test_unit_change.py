@@ -2,8 +2,8 @@ import os
 
 from QtWrapper.QtGui import QApplication
 
-from spikeylab.gui.main_control import MainWindow
-from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
+from neurosound.gui.main_control import MainWindow
+from neurosound.gui.stim.abstract_editor import AbstractEditorWidget
 
 import test.sample as sample
 

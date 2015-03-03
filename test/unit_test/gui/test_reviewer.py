@@ -1,7 +1,7 @@
 from QtWrapper import QtCore, QtGui, QtTest
 
-from spikeylab.gui.data_review import QDataReviewer
-from spikeylab.data.dataobjects import AcquisitionData
+from neurosound.gui.data_review import QDataReviewer
+from neurosound.data.dataobjects import AcquisitionData
 
 from test import sample
 

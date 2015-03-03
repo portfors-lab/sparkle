@@ -1,5 +1,5 @@
-from spikeylab.gui.stim.explore_stim_editor import ExploreStimulusEditor
-from spikeylab.stim.stimulus_model import StimulusModel
+from neurosound.gui.stim.explore_stim_editor import ExploreStimulusEditor
+from neurosound.stim.stimulus_model import StimulusModel
 
 class TestExploreStimEditor():
 

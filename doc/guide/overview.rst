@@ -111,6 +111,6 @@ Considering the following Names for the Program
 
 * Neuroread
 
-* Sonic Sparkle High-Five
+* NeuroSound
 
-* Spikeylab
+* Neurosound

@@ -1,6 +1,6 @@
 import os
 
-import spikeylab.tools.systools as systools
+import neurosound.tools.systools as systools
 
 def test_project_dir_valid():
     path = systools.get_project_directory()

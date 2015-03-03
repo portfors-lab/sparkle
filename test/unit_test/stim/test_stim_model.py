@@ -2,19 +2,19 @@ from nose.tools import raises, assert_equal
 
 import numpy as np
 
-from spikeylab.stim.stimulus_model import StimulusModel
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
-from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.gui.stim.stimulus_editor import StimulusEditor
-from spikeylab.gui.stim.factory import TCFactory, CCFactory
-from spikeylab.stim.reorder import order_function
+from neurosound.stim.stimulus_model import StimulusModel
+from neurosound.stim.types.stimuli_classes import PureTone, Vocalization
+from neurosound.stim.auto_parameter_model import AutoParameterModel
+from neurosound.gui.stim.stimulus_editor import StimulusEditor
+from neurosound.gui.stim.factory import TCFactory, CCFactory
+from neurosound.stim.reorder import order_function
 
 from QtWrapper import QtCore, QtGui
 
 import test.sample as sample
 
 import os, yaml
-from spikeylab.tools.systools import get_src_directory
+from neurosound.tools.systools import get_src_directory
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)

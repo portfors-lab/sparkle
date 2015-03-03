@@ -5,10 +5,10 @@ import h5py
 from nose.tools import assert_in, assert_equal
 from QtWrapper import QtGui, QtCore, QtTest
 
-from spikeylab.gui.main_control import MainWindow
-from spikeylab.data.dataobjects import AcquisitionData
-from spikeylab.gui.stim.abstract_component_editor import AbstractComponentWidget
-from spikeylab.tools.systools import rand_id
+from neurosound.gui.main_control import MainWindow
+from neurosound.data.dataobjects import AcquisitionData
+from neurosound.gui.stim.abstract_component_editor import AbstractComponentWidget
+from neurosound.tools.systools import rand_id
 
 import test.sample as sample
 import qtbot

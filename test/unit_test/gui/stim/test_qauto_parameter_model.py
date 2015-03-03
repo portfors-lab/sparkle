@@ -1,10 +1,10 @@
 from nose.tools import assert_in
 
-from spikeylab.stim.auto_parameter_model import AutoParameterModel
-from spikeylab.gui.stim.qauto_parameter_model import QAutoParameterModel
-from spikeylab.stim.types.stimuli_classes import PureTone, Vocalization
-from spikeylab.gui.stim.abstract_editor import AbstractEditorWidget
-from spikeylab.gui.stim.auto_parameter_view import SmartDelegate
+from neurosound.stim.auto_parameter_model import AutoParameterModel
+from neurosound.gui.stim.qauto_parameter_model import QAutoParameterModel
+from neurosound.stim.types.stimuli_classes import PureTone, Vocalization
+from neurosound.gui.stim.abstract_editor import AbstractEditorWidget
+from neurosound.gui.stim.auto_parameter_view import SmartDelegate
 
 from QtWrapper import QtCore
 

@@ -1,7 +1,7 @@
 import os, yaml
 
-import spikeylab.tools.audiotools as tools
-from spikeylab.tools.systools import get_src_directory
+import neurosound.tools.audiotools as tools
+from neurosound.tools.systools import get_src_directory
 
 import test.sample as sample
 

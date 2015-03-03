@@ -1,4 +1,4 @@
-from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
+from neurosound.gui.stim.smart_spinbox import SmartSpinBox
 
 class TestSmartSpinBox():
     def setUp(self):
