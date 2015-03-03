@@ -154,7 +154,7 @@
   <customwidget>
    <class>TuningCurveEditor</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.tuning_curve</header>
+   <header>neurosound.gui.stim.tuning_curve</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

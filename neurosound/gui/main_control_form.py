@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Mon Mar  2 16:04:25 2015
+# Created: Mon Mar  2 16:14:22 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -246,11 +246,11 @@ class Ui_ControlWindow(object):
         self.label_43 = QtGui.QLabel(self.centralwidget)
         self.label_43.setObjectName(_fromUtf8("label_43"))
         self.gridLayout.addWidget(self.label_43, 4, 0, 1, 1)
-        self.aisrSpnbx = SmartSpinBox(self.centralwidget)
-        self.aisrSpnbx.setDecimals(3)
-        self.aisrSpnbx.setMaximum(500000.0)
-        self.aisrSpnbx.setObjectName(_fromUtf8("aisrSpnbx"))
-        self.gridLayout.addWidget(self.aisrSpnbx, 0, 1, 1, 1)
+        self.aifsSpnbx = SmartSpinBox(self.centralwidget)
+        self.aifsSpnbx.setDecimals(3)
+        self.aifsSpnbx.setMaximum(500000.0)
+        self.aifsSpnbx.setObjectName(_fromUtf8("aifsSpnbx"))
+        self.gridLayout.addWidget(self.aifsSpnbx, 0, 1, 1, 1)
         self.binszSpnbx = SmartSpinBox(self.centralwidget)
         self.binszSpnbx.setDecimals(3)
         self.binszSpnbx.setMaximum(3.0)
@@ -675,7 +675,7 @@ class Ui_ControlWindow(object):
         self.label_10.setText(_translate("ControlWindow", "Window size", None))
         self.label_12.setText(_translate("ControlWindow", "Threshold", None))
         self.label_43.setText(_translate("ControlWindow", "Spike bin size", None))
-        self.aisrSpnbx.setToolTip(_translate("ControlWindow", "Recording sampling rate", None))
+        self.aifsSpnbx.setToolTip(_translate("ControlWindow", "Recording sampling rate", None))
         self.binszSpnbx.setToolTip(_translate("ControlWindow", "Time bin duration for detected spikes for raster and PSTH", None))
         self.reprateSpnbx.setToolTip(_translate("ControlWindow", "Rate of recording window repetitions", None))
         self.label_35.setText(_translate("ControlWindow", "Rep rate", None))
@@ -745,13 +745,13 @@ class Ui_ControlWindow(object):
         self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
         self.actionResponse_SPL.setText(_translate("ControlWindow", "response SPL", None))
 
-from spikeylab.gui.data_review import QDataReviewer
-from spikeylab.gui.qprotocol import ProtocolView
-from spikeylab.gui.plotting.pyqtgraph_widgets import PSTHWidget
-from spikeylab.gui.stim.smart_spinbox import SmartSpinBox
-from spikeylab.gui.stim.explore_stim_editor import ExploreStimulusEditor
-from spikeylab.gui.calibration_widget import CalibrationWidget
-from spikeylab.gui.stim.stim_detail import StimDetailWidget
-from spikeylab.gui.timer_widget import TimerWidget
-from spikeylab.gui.stim.stimulus_label import StimulusLabelTable
-from spikeylab.gui.plotdock import PlotDockWidget
+from neurosound.gui.stim.explore_stim_editor import ExploreStimulusEditor
+from neurosound.gui.plotting.pyqtgraph_widgets import PSTHWidget
+from neurosound.gui.calibration_widget import CalibrationWidget
+from neurosound.gui.data_review import QDataReviewer
+from neurosound.gui.stim.smart_spinbox import SmartSpinBox
+from neurosound.gui.stim.stimulus_label import StimulusLabelTable
+from neurosound.gui.plotdock import PlotDockWidget
+from neurosound.gui.timer_widget import TimerWidget
+from neurosound.gui.qprotocol import ProtocolView
+from neurosound.gui.stim.stim_detail import StimDetailWidget

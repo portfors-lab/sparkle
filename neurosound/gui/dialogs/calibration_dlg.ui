@@ -161,7 +161,7 @@
   <customwidget>
    <class>SmartSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>spikeylab.stim.smart_spinbox</header>
+   <header>neurosound.stim.smart_spinbox</header>
   </customwidget>
  </customwidgets>
  <resources/>

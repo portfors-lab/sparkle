@@ -1,7 +1,7 @@
-SPIKEYLAB
-=========
+NeuroSound
+===========
 
-SSHF is a data acquisition system designed for auditory neuroscience research. It allows for the assembly and presentation of auditory stimuli (sounds) with simultaneous recording from a single brain electrode. It is designed to be highly customized to the requirements of the Portfors' hearing research lab. It is primarily a GUI intended to facilitate ease-of-use during experiments.
+NeuroSound is a data acquisition system designed for auditory neuroscience research. It allows for the assembly and presentation of auditory stimuli (sounds) with simultaneous recording from a single brain electrode. It is designed to be highly customized to the requirements of the Portfors' hearing research lab. It is primarily a GUI intended to facilitate ease-of-use during experiments.
 
 The system will generate synthesized signals (tones, chrips, etc), as well as play recording files (.wavs). Data is saved to HDF5 format.
 

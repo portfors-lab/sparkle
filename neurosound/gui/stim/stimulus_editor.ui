@@ -301,7 +301,7 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>StimulusView</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.stimulusview</header>
+   <header>neurosound.gui.stim.stimulusview</header>
    <container>1</container>
    <slots>
     <slot>setRepCount(int)</slot>
@@ -311,13 +311,13 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>ComponentTemplateTable</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.component_label</header>
+   <header>neurosound.gui.stim.component_label</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>HidableParameterEditor</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.auto_parameters_editor</header>
+   <header>neurosound.gui.stim.auto_parameters_editor</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

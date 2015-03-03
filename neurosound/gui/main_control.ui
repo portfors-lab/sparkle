@@ -444,7 +444,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="SmartSpinBox" name="aisrSpnbx">
+           <widget class="SmartSpinBox" name="aifsSpnbx">
             <property name="toolTip">
              <string>Recording sampling rate</string>
             </property>
@@ -1179,59 +1179,59 @@
   <customwidget>
    <class>SmartSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>spikeylab.gui.stim.smart_spinbox</header>
+   <header>neurosound.gui.stim.smart_spinbox</header>
   </customwidget>
   <customwidget>
    <class>PSTHWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.plotting.pyqtgraph_widgets</header>
+   <header>neurosound.gui.plotting.pyqtgraph_widgets</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ProtocolView</class>
    <extends>QTableView</extends>
-   <header>spikeylab.gui.qprotocol</header>
+   <header>neurosound.gui.qprotocol</header>
   </customwidget>
   <customwidget>
    <class>StimulusLabelTable</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.stimulus_label</header>
+   <header>neurosound.gui.stim.stimulus_label</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>CalibrationWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.calibration_widget</header>
+   <header>neurosound.gui.calibration_widget</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PlotDockWidget</class>
    <extends>QDockWidget</extends>
-   <header>spikeylab.gui.plotdock</header>
+   <header>neurosound.gui.plotdock</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>StimDetailWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.stim_detail</header>
+   <header>neurosound.gui.stim.stim_detail</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>QDataReviewer</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.data_review</header>
+   <header>neurosound.gui.data_review</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ExploreStimulusEditor</class>
    <extends>QFrame</extends>
-   <header>spikeylab.gui.stim.explore_stim_editor</header>
+   <header>neurosound.gui.stim.explore_stim_editor</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>TimerWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.timer_widget</header>
+   <header>neurosound.gui.timer_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

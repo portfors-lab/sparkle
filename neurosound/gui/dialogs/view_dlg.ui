@@ -90,7 +90,7 @@
   <customwidget>
    <class>ComponentsDetailSelector</class>
    <extends>QWidget</extends>
-   <header>spikeylab.stim.component_detail</header>
+   <header>neurosound.stim.component_detail</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

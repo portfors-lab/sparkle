@@ -170,18 +170,18 @@
   <customwidget>
    <class>SmartSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>spikeylab.gui.stim.smart_spinbox</header>
+   <header>neurosound.gui.stim.smart_spinbox</header>
   </customwidget>
   <customwidget>
    <class>SpecWidget</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.plotting.pyqtgraph_widgets</header>
+   <header>neurosound.gui.plotting.pyqtgraph_widgets</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>IncrementInput</class>
    <extends>QWidget</extends>
-   <header>spikeylab.gui.stim.incrementer</header>
+   <header>neurosound.gui.stim.incrementer</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
