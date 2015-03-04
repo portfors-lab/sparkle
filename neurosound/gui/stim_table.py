@@ -1,3 +1,5 @@
+import copy
+
 from QtWrapper import QtCore, QtGui
 from neurosound.data.dataobjects import AcquisitionData
 
@@ -45,25 +47,39 @@ class StimTable(QtGui.QTableWidget):
         stimuli = self.data.get_trace_info(self.datasets[row].name)
         self.trace_table = QtGui.QTableWidget()
         self.trace_table.setRowCount(len(stimuli))
-        self.trace_table.setColumnCount(10)
+        if len(stimuli) == 1:
+            first = 0
+        elif len(stimuli[0]['components']) == 1 and stimuli[0]['components'][0]['stim_type'] == 'silence':
+            first = 1
+        else:
+            first = 0
+        
+        headers = []
+        # components will all be the same for each trace
+        stim = copy.deepcopy(stimuli[first]['components'])
+        for comp in stim:
+            comp.pop('stim_type')
+            comp.pop('start_s')
+            headers.append('type')
+            headers.append('start')
+            for param in comp.keys():
+                headers.append(param)
+
+        self.trace_table.setColumnCount(len(headers))
+        self.trace_table.setHorizontalHeaderLabels(headers)
         for itrace, trace in enumerate(stimuli):
             col = 0
-            headers = []
             for component in trace['components']:
-              self.trace_table.setItem(itrace, col, QtGui.QTableWidgetItem(component.pop('stim_type')))
-              col +=1
-              headers.append('type')
-              # manually curated entries?
-              self.trace_table.setItem(itrace, col, QtGui.QTableWidgetItem(str(component.pop('start_s'))))
-              col +=1
-              headers.append('start')
-
-              for attr, val in component.items():
-                self.trace_table.setItem(itrace, col, QtGui.QTableWidgetItem(str(val)))
+                self.trace_table.setItem(itrace, col, QtGui.QTableWidgetItem(component.pop('stim_type')))
                 col +=1
-                headers.append(attr)
+                # manually curated entries?
+                self.trace_table.setItem(itrace, col, QtGui.QTableWidgetItem(str(component.pop('start_s'))))
+                col +=1
 
-        self.trace_table.setHorizontalHeaderLabels(headers)
+                for attr, val in component.items():
+                    self.trace_table.setItem(itrace, col, QtGui.QTableWidgetItem(str(val)))
+                    col +=1
+
         self.trace_table.show()
 
 

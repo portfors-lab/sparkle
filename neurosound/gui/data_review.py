@@ -42,7 +42,7 @@ class QDataReviewer(QtGui.QWidget):
         contents_view.setLayout(content_view_layout)
 
         self.datatree.nodeChanged.connect(self.setCurrentNode)
-        self.datatable.cellClicked.connect(self.setCurrentCell)
+        self.datatable.currentCellChanged.connect(self.setCurrentCell)
         asplitter.addWidget(contents_view)
 
         self.attrtxt = QtGui.QPlainTextEdit()
@@ -137,7 +137,7 @@ class QDataReviewer(QtGui.QWidget):
     def update(self):
         self.datatree.update(self.datafile.hdf5)
 
-    def setCurrentCell(self, row, column):
+    def setCurrentCell(self, row, column, prevrow=None, prevcol=None):
         # don't care about the column clicked, get the path for the row
         path = str(self.datatable.item(row, 0).text())
         self.setCurrentData(path)
@@ -228,9 +228,12 @@ class QDataReviewer(QtGui.QWidget):
             return
         self.current_rep_num += 1
         if self.current_rep_num == self.current_data_shape[1]:
-            self.selectTrace(self.current_trace_num+1)
             if self.traceStop:
+                # stop here, don't advance to next trace
                 self.stopTrace()
+                self.current_rep_num -=1
+            else:
+                self.selectTrace(self.current_trace_num+1)
         else:
             self._update_buttons()
             self.reviewDataSelected.emit(self.current_path, self.current_trace_num, self.current_rep_num)
@@ -330,6 +333,7 @@ if __name__ == '__main__':
     # data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
     # data = AcquisitionData('/home/leeloo/testdata/20141119.hdf5', filemode='r')
     data = AcquisitionData('/home/leeloo/testdata/Mouse 871c.hdf5', filemode='r')
+    data = AcquisitionData('/home/leeloo/src/wsu/nidaq/test/sample/dummydata.hdf5', filemode='r')
     viewer = QDataReviewer()
     viewer.setDataObject(data)
     viewer.show()
