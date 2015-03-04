@@ -6,7 +6,12 @@ class AbstractComponentWidget(AbstractEditorWidget):
     """Common functions for Component editors"""
     _component = None
     attributesSaved = QtCore.Signal(str, dict)
-    
+    def __init__(self, parent=None):
+        super(AbstractComponentWidget, self).__init__(parent)
+        # used to keep track of widget that are used to change component
+        # parameters, primarily important for testing
+        self.inputWidgets = {}
+
     def name(self):
         """Gets the component name
 

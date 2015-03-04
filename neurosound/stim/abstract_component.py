@@ -122,7 +122,7 @@ class AbstractStimulusComponent(object):
         return cPickle.loads(stream)
 
     def __repr__(self):
-        return "StimComponent:" + str(self.idnum)
+        return self.__class__.__name__ + ':' + str(self.idnum)
 
     def __eq__(self, other):
         if self.idnum == other.idnum:

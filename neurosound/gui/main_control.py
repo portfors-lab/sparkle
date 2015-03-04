@@ -23,7 +23,6 @@ from neurosound.tools.uihandler import assign_uihandler_slot
 from neurosound.tools.util import clearLayout
 from neurosound.gui.qprotocol import QProtocolTabelModel
 from neurosound.gui.stim.qstimulus import QStimulusModel
-from neurosound.gui.stim.components.qcomponents import wrapComponent
 from neurosound.stim.stimulus_model import StimulusModel
 from neurosound.gui.plotting.pyqtgraph_widgets import SpecWidget
 from neurosound.tools import spikestats

@@ -65,11 +65,11 @@ class QStimulusComponent(object):
         """
         painter.save()
 
-        image = QtGui.QImage("./default.jpg")
+        image = img.default()
         painter.drawImage(rect, image)
 
         # set text color
-        painter.setPen(QtGui.QPen(QtCore.Qt.black)) 
+        painter.setPen(QtGui.QPen(QtCore.Qt.red)) 
         painter.drawText(rect, QtCore.Qt.AlignLeft, self.__class__.__name__)
 
         painter.restore()
