@@ -46,7 +46,7 @@ class ProtocolRunner(ListAcquisitionRunner):
         if test.stimType() == "Tuning Curve":
             frequencies, intensities =  test.autoParamRanges()
             self.putnotify('tuning_curve_started', (list(frequencies), list(intensities), 'tuning'))
-        elif test.traceCount() > 1:
+        else:
             self.putnotify('tuning_curve_started', (range(test.traceCount()), ['all traces'], 'generic'))
     
     def _process_response(self, response, trace_info, irep):

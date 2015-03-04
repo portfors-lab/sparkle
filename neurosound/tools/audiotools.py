@@ -18,7 +18,8 @@ def calc_db(peak, refval, mphonecaldb=0):
     u""" 
     Converts voltage difference into decibels : 20*log10(peak/refval)
     
-    :param peak:
+    :param peak: amplitude
+    :type peak: float or np.array
     :param refval: This can be either a another sound peak(or RMS val), to get the dB difference, or the microphone mphone_sensitivity
     :type refval: float
     :param mphonecaldb: If using the microphone sensitivity for refval, provide the dB SPL the microphone was calibrated at. Otherwise, leave as 0
@@ -26,10 +27,9 @@ def calc_db(peak, refval, mphonecaldb=0):
     :returns: float -- decibels difference (comparision), or dB SPL (using microphone sensitivity)
     """
     if refval == 0:
-        if peak == 0:
-            return 0
-        else:
-            return np.nan
+        return np.nan
+    if hasattr(peak, '__iter__'):
+        peak[peak == 0] = np.nan
     pbdB = mphonecaldb + (20.*np.log10(peak/refval))
     return pbdB
 
@@ -160,13 +160,14 @@ def spectrogram(source, nfft=512, overlap=90, window='hanning', caldb=93, calv=2
                                      pad_to=nfft*2, window=winfnc, detrend=mlab.detrend_none,
                                      sides='default', scale_by_freq=False)
 
+    # log of zero is -inf, which is not great for plotting
+    Pxx[Pxx == 0] = np.nan
+
     # convert to db scale for display
     spec = 20. * np.log10(Pxx)
     
-    # inf values prevent spec from drawing in pyqtgraph
-    # ... so set to miniumum value in spec?
+    # set 0 to miniumum value in spec?
     # would be great to have spec in db SPL, and set any -inf to 0
-    spec[np.isneginf(spec)] = np.nan
     spec[np.isnan(spec)] = np.nanmin(spec)
 
     return spec, freqs, bins, duration

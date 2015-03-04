@@ -216,6 +216,7 @@ class TestMainUI():
             [['duration', 10, 50, 10]])
 
     def xtest_stim_detail_sharing(self):
+        # disabled... took away this feature.
         # set a value on an explore stimulus
         self.explore_setup('pure tone')
 
@@ -271,7 +272,7 @@ class TestMainUI():
         stimEditor = pv.stimEditor
 
         qtbot.doubleclick(stimEditor.ui.trackview, stimEditor.ui.trackview.model().index(0,0))
-        QtTest.QTest.qWait(ALLOW*2)
+        QtTest.QTest.qWait(PAUSE)
 
         # assert the same value as we last set
         tone = stimModel.data(stimModel.index(0,0))
@@ -280,7 +281,7 @@ class TestMainUI():
         # set a new value to make sure no errors occured
         val = 11
         qtbot.type_msg(str(val))
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(ALLOW*3)
         qtbot.keypress('enter')
         QtTest.QTest.qWait(ALLOW)
 

@@ -222,8 +222,12 @@ class ControlWindow(QtGui.QMainWindow):
 
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
-        with open(fname, 'w') as jf:
-            json.dump(savedict, jf)
+        try:
+            with open(fname, 'w') as jf:
+                json.dump(savedict, jf)
+        except:
+            logger = logging.getLogger('main')
+            logger.exception("Unable to save app data to file: {}".format(fname))
 
     def loadInputs(self, fname):
         """Load previsouly saved input values, and load them to GUI widgets
@@ -237,7 +241,7 @@ class ControlWindow(QtGui.QMainWindow):
                 inputsdict = json.load(jf)
         except:
             logger = logging.getLogger('main')
-            logger.exception("Unable to load app data")
+            logger.exception("Unable to load app data from file: {}".format(inputsfname))
             inputsdict = {}
 
         self.ui.threshSpnbx.setValue(inputsdict.get('threshold', 0.5))

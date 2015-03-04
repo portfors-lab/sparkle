@@ -5,6 +5,9 @@ from neurosound.data.dataobjects import AcquisitionData
 
 from test import sample
 
+PAUSE = 200
+ALLOW = 15
+
 class TestDataReviewer():
     def setUp(self):
         self.ui = QDataReviewer()
@@ -12,6 +15,7 @@ class TestDataReviewer():
         self.ui.setDataObject(self.datafile)
         self.ui.show()
         self.treeroot = self.ui.datatree.model().index(0,0)
+        QtTest.QTest.qWait(ALLOW)
 
     def tearDown(self):
         self.ui.close()
@@ -35,6 +39,7 @@ class TestDataReviewer():
     def test_show_calibration_stims(self):
         group = self.ui.datatree.model().index(0,0, self.treeroot)
         self.ui.datatree.expand(group)
+
         self.ui.datatree.selectionModel().select(self.ui.datatree.model().index(2,0, group), QtGui.QItemSelectionModel.Select)
         assert self.ui.tracetable.rowCount() > 0
         self.ui.datatree.selectionModel().select(self.ui.datatree.model().index(1,0, group), QtGui.QItemSelectionModel.Select)

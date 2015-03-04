@@ -468,6 +468,10 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
             self.setSelectionModel(ComponentSelectionModel(self.model()))
             self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
 
+    def setSelection(self, rect, flags):
+        # selection handled manually in mouse handlers
+        pass
+
     def visualRegionForSelection(self, selection):
         """Gets the region of all of the components in selection
 

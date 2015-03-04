@@ -97,8 +97,9 @@ class H5TreeWidget(QtGui.QTreeWidget):
 
     def selectionChanged(self, selected, deselected):
         super(H5TreeWidget, self).selectionChanged(selected, deselected)
-        self.setCurrentIndex(selected.indexes()[0])
-        self.nodeChanged.emit(self.currentItem())
+        if len(selected.indexes()) > 0:
+            self.setCurrentIndex(selected.indexes()[0])
+            self.nodeChanged.emit(self.currentItem())
 
     def closeFile(self, filename):
         # filename = self.getOpenFileName(item.path())

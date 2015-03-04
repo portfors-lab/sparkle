@@ -99,7 +99,7 @@ class ExtendedCalibrationDisplay(QtGui.QWidget):
 
         For other arguments, see: :meth:`SpecWidget.updateData<neurosound.gui.plotting.pyqtgraph_widgets.SpecWidget.updateData>`
         """
-        if args[0] == None:
+        if args[0] is None:
             self.stimSpecPlot.clearImg()
             self.responseSpecPlot.clearImg()
         else:

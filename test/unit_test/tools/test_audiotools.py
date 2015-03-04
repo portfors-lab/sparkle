@@ -44,7 +44,7 @@ def test_calc_db_zeros():
     ref = 0.0
     val = 0.0
     result = tools.calc_db(val, ref)
-    assert result == 0
+    assert result is np.nan
 
 def test_calc_db_zero_ref_peak():
     ref = 0.0
@@ -296,7 +296,7 @@ def xtest_calibrate_signal():
 def test_impulse_response_truncation_length():
     fs = 5e5
     duration = 0.2
-    npts = duration*fs
+    npts = int(duration*fs)
 
     frange = [5000, 100000]
     freqs = np.arange(npts/2 + 1)/(float(npts)/fs)
@@ -320,7 +320,7 @@ def test_impulse_response_truncation_length():
 def test_impulse_response_high_pass():
     fs = 5e5
     duration = 0.2
-    npts = duration*fs
+    npts = int(duration*fs)
 
     freqs = np.arange(npts/2 + 1)/(float(npts)/fs)
 
@@ -343,7 +343,7 @@ def test_impulse_response_high_pass():
 def test_impulse_response_low_pass():
     fs = 5e5
     duration = 0.2
-    npts = duration*fs
+    npts = int(duration*fs)
 
     freqs = np.arange(npts/2 + 1)/(float(npts)/fs)
 
@@ -362,7 +362,7 @@ def test_impulse_response_low_pass():
 def test_impulse_db():
     fs = 5e5
     duration = 0.2
-    npts = duration*fs
+    npts = int(duration*fs)
 
     freqs = np.arange(npts/2 + 1)/(float(npts)/fs)
 
