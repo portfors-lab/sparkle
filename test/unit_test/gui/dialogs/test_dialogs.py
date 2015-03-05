@@ -84,7 +84,8 @@ class TestSavingDialog():
         dlg = SavingDialog(directory=sample.sampledir())
         self.hack_filename(dlg, sample.datafile())
         fname, mode = dlg.getfile()
-        assert os.path.normpath(fname) == sample.datafile()
+        # case insensitive for windows sake
+        assert os.path.normpath(fname).lower() == sample.datafile().lower()
         assert mode == 'a'
         dlg.close()
         dlg.deleteLater()
@@ -92,7 +93,8 @@ class TestSavingDialog():
     def test_load_previous_file_as_default(self):
         dlg = SavingDialog(sample.datafile())
         fname, mode = dlg.getfile()
-        assert os.path.normpath(fname) == sample.datafile()
+        # case insensitive for windows sake
+        assert os.path.normpath(fname).lower() == sample.datafile().lower()
         assert mode == 'a'
         dlg.close()
         dlg.deleteLater()
@@ -102,9 +104,9 @@ class TestSavingDialog():
         dlg.show()
         QTest.qWait(100)
         self.hack_filename(dlg, 'newfile')
-        fname, mode = dlg.getfile() 
-        print os.path.normpath(fname), os.path.join(sample.sampledir(), 'newfile.hdf5')
-        assert os.path.normpath(fname) == os.path.join(sample.sampledir(), 'newfile.hdf5')
+        fname, mode = dlg.getfile()
+        # case insensitive for windows sake
+        assert os.path.abspath(fname).lower() == os.path.join(sample.sampledir(), 'newfile.hdf5').lower()
         assert mode == 'w-'
         dlg.close()
         dlg.deleteLater()
@@ -113,7 +115,8 @@ class TestSavingDialog():
         dlg = SavingDialog(directory=sample.sampledir())
         self.hack_filename(dlg, 'newfile')
         fname, mode = dlg.getfile()
-        assert os.path.normpath(fname) == os.path.join(sample.sampledir(), 'newfile.hdf5')
+        # case insensitive for windows sake
+        assert os.path.normpath(fname).lower() == os.path.join(sample.sampledir().lower(), 'newfile.hdf5')
         assert mode == 'w-'
         dlg.close()
         dlg.deleteLater()
