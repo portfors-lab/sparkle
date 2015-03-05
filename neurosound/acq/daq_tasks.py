@@ -23,7 +23,7 @@ class AITask(Task):
     :type clksrc: str
     """
     def __init__(self, chans, samplerate, bufsize, clksrc=""):
-        super(AITask, self).__init__()
+        Task.__init__(self)
         if isinstance(chans, basestring):
             chan_str = chans
             self.nchans = 1
@@ -90,7 +90,7 @@ class AOTask(Task):
     :type trigsrc: str
     """
     def __init__(self, chan, samplerate, bufsize, clksrc="", trigsrc=""):
-        super(AOTask, self).__init__()
+        Task.__init__(self)
         self.bufsize = bufsize
         self.CreateAOVoltageChan(chan,"",-10.0,10.0, 
             DAQmx_Val_Volts,None)
@@ -135,7 +135,7 @@ class AITaskFinite(Task):
     :type trigsrc: str
     """
     def __init__(self, chan, samplerate, npts, clksrc="", trigsrc=None):
-        super(AITaskFinite, self).__init__()
+        Task.__init__(self)
         self.CreateAIVoltageChan(chan,"",DAQmx_Val_Cfg_Default,
                                  -10.0, 10.0, DAQmx_Val_Volts, None)
         self.CfgSampClkTiming(clksrc, samplerate, DAQmx_Val_Rising, 
@@ -186,7 +186,7 @@ class AOTaskFinite(Task):
     :type trigsrc: str
     """
     def __init__(self, chan, samplerate, npoints, clksrc=u"", trigsrc=None):
-        super(AOTaskFinite, self).__init__()
+        Task.__init__(self)
         self.npoints = npoints
 
         self.CreateAOVoltageChan(chan,u"",-10.0,10.0, DAQmx_Val_Volts, None)
@@ -235,7 +235,7 @@ class DigitalOutTask(Task):
     :type clksrc: str
     """
     def __init__(self, chan, rate, npoints=100, clksrc=''):
-        super(DigitalOutTask, self).__init__()
+        Task.__init__(self)
         # necessary to get the rising edge at the correct frequency
         rate = rate*2
 
@@ -287,7 +287,7 @@ class CounterOutTask(Task):
     :type npoints: int
     """
     def __init__(self, chan, rate, npoints=100):
-        super(CounterOutTask, self).__init__()
+        Task.__init__(self)
         # chan e.g. 'Dev1/ctr0'
         self.CreateCOPulseChanFreq(chan, '', DAQmx_Val_Hz, DAQmx_Val_Low, 0., rate , 0.5)
         self.CfgImplicitTiming(DAQmx_Val_ContSamps, npoints)
