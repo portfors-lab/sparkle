@@ -269,6 +269,7 @@ class TestMainUI():
         qtbot.doubleclick(pv, pv.model().index(0,1))
         QtTest.QTest.qWait(ALLOW*2)
         # need to get new reference to editor -- different instance
+        QtGui.QApplication.processEvents()
         stimEditor = pv.stimEditor
 
         qtbot.doubleclick(stimEditor.ui.trackview, stimEditor.ui.trackview.model().index(0,0))
