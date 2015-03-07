@@ -7,7 +7,7 @@ import re
 import h5py
 from nose.tools import raises, assert_in, assert_equal
 
-from neurosound.data.dataobjects import AcquisitionData, increment
+from neurosound.data.hdf5data import HDF5Data
 from neurosound.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
                                         ReadOnlyError, OverwriteFileError
 
@@ -17,71 +17,7 @@ def rand_id():
     chars = string.ascii_uppercase + string.digits
     return ''.join(random.choice(chars) for x in range(4))
 
-def test_increment_index_by_1():
-    dimensions = (2,3,4)
-    data_shape = (1,)
-    current_index = [0,0,1]
-
-    current_index = increment(current_index, dimensions, data_shape)
-    assert current_index == [0,0,2]
-
-def test_increment_index_single_low_dimension():
-    dimensions = (2,3,4)
-    data_shape = (4,)
-    current_index = [0,1,0]
-
-    increment(current_index, dimensions, data_shape)
-    assert current_index == [0,2,0]
-
-def test_increment_index_double_low_dimension():
-    dimensions = (2,3,4)
-    data_shape = (1,4,)
-    current_index = [0,0,0]
-
-    current_index = increment(current_index, dimensions, data_shape)
-    assert current_index == [0,1,0]
-
-def test_increment_index_mid_dimension():
-    dimensions = (2,3,4)
-    data_shape = (2,4,)
-    current_index = [0,0,0]
-
-    current_index = increment(current_index, dimensions, data_shape)
-    assert current_index == [0,2,0]
-
-def test_increment_index_high_dimension():
-    dimensions = (2,3,4)
-    data_shape = (1,3,4,)
-    current_index = [0,0,0]
-
-    current_index = increment(current_index, dimensions, data_shape)
-    assert current_index == [1,0,0]
-
-def test_increment_double_boundary():
-    dimensions = (2,2,3,4)
-    data_shape = (4,)
-    current_index = [0,1,2,0]
-
-    current_index = increment(current_index, dimensions, data_shape)
-    assert current_index == [1,0,0,0]
-
-def test_increment_single_middle_dim():
-    dimensions = (2,1,4)
-    data_shape = (4,)
-    current_index = [0,0,0]
-
-    current_index = increment(current_index, dimensions, data_shape)
-    assert current_index == [1,0,0]
-
-@raises(DataIndexError)
-def test_bad_data_shape():
-    dimensions = (2,3,4)
-    data_shape = (4,1)
-    current_index = [0,0,0]
-
-    current_index = increment(current_index, dimensions, data_shape)
-
-class TestAcqusitionData():
+class TestHDF5Data():
     """
     Test creating, putting and getting to acquisition data structure
     """
@@ -100,7 +36,7 @@ class TestAcqusitionData():
         Test that file is created with the exact name specified
         """
         fname = os.path.join(tempfolder, 'savetemp'+rand_id())
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
 
         acq_data.init_data('fake', (1,))
         acq_data.append('fake', [1])
@@ -152,7 +88,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
             
         try:
             acq_data.init_data('fake', (nsets, npoints-1))
@@ -174,7 +110,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
             
         try:
             acq_data.init_data('fake', (nsets, npoints))
@@ -199,7 +135,7 @@ class TestAcqusitionData():
     def test_finite_dataset_single_point(self):
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
 
         acq_data.init_data('fake', (1,))
         acq_data.append('fake', [1])
@@ -226,7 +162,7 @@ class TestAcqusitionData():
         acq_data = self.setup_finite(fakedata, nsets)
         acq_data.close()
 
-        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='a')
+        reloaded_acq_data = HDF5Data(acq_data.filename, filemode='a')
         print 'hdf5 keys', reloaded_acq_data.hdf5.keys()
 
         reloaded_acq_data.init_data('fake1', (nsets, npoints))
@@ -248,7 +184,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.open_set_size = 4
             
         acq_data.init_data('fake', (npoints,), mode='open')
@@ -270,7 +206,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.open_set_size = 4
         
         acq_data.init_data('fake', (npoints,), mode='open')
@@ -286,7 +222,7 @@ class TestAcqusitionData():
         npoints = 10
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.init_data('fake', (npoints,), mode='open')
 
         attrs = {'fs': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
@@ -304,7 +240,7 @@ class TestAcqusitionData():
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
         print 'fname', fname
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.init_data('fake', (npoints,), mode='finite')
 
         attrs = {'fs': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_index':0, 'end_index':25}
@@ -323,7 +259,7 @@ class TestAcqusitionData():
         fakedata = np.ones((npoints,))
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.init_data('fake', mode='continuous')
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
@@ -353,7 +289,7 @@ class TestAcqusitionData():
         attrs = {'fs': 500000, 'duration': 0.1, 'stimtype': 'tone', 'start_time': 4.1}
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.init_data('fake', mode='continuous')
         for iset in range(nsets):
             acq_data.append('fake', fakedata*iset)
@@ -394,7 +330,7 @@ class TestAcqusitionData():
         acq_data = self.setup_calibration(calname, caldata)
         acq_data.close()
 
-        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='a')
+        reloaded_acq_data = HDF5Data(acq_data.filename, filemode='a')
 
         cal1 = reloaded_acq_data.get_calibration(calname, reffreq=15000)[0]
 
@@ -423,8 +359,8 @@ class TestAcqusitionData():
 
         hfile.close()
 
-        # test the AcquisitionData class's ability to reload nested groups
-        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='r')
+        # test the HDF5Data class's ability to reload nested groups
+        reloaded_acq_data = HDF5Data(acq_data.filename, filemode='r')
         reloaded_data = reloaded_acq_data.get(gname + '/test_1')
         assert reloaded_data.shape == (nsets, npoints)
 
@@ -435,7 +371,7 @@ class TestAcqusitionData():
         acq_data = self.setup_finite(fakedata, nsets)
         acq_data.close()
 
-        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='r')
+        reloaded_acq_data = HDF5Data(acq_data.filename, filemode='r')
         assert reloaded_acq_data.hdf5.keys() == ['fake']
         reloaded_data = reloaded_acq_data.get('fake/test_1')
         assert reloaded_data.shape == (nsets, npoints)
@@ -444,7 +380,7 @@ class TestAcqusitionData():
 
     def test_empty_data_file_deleted(self):
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.close()
 
         assert not os.path.isfile(fname)
@@ -457,27 +393,27 @@ class TestAcqusitionData():
         acq_data = self.setup_finite(fakedata, nsets)
         acq_data.close()
 
-        reloaded_acq_data = AcquisitionData(acq_data.filename, filemode='r')
+        reloaded_acq_data = HDF5Data(acq_data.filename, filemode='r')
         reloaded_acq_data.init_data('fake1', (nsets, npoints))
 
     @raises(DisallowedFilemodeError)
     def test_bad_filemode_error(self):
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname, filemode='w+')
+        acq_data = HDF5Data(fname, filemode='w+')
 
     @raises(OverwriteFileError)
     def test_overwrite_error(self):
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
         acq_data.init_data('fake1', (1, 2))
         acq_data.close()
 
-        AcquisitionData(fname, filemode='w-')
+        HDF5Data(fname, filemode='w-')
 
     def setup_calibration(self, calname, caldata):
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
 
         acq_data.init_group(calname, mode='calibration')
         acq_data.init_data(calname, mode='calibration', 
@@ -500,7 +436,7 @@ class TestAcqusitionData():
         print 'len {} and shape {}'.format(len(fakedata), fakedata.shape)
 
         fname = os.path.join(tempfolder, 'savetemp'+rand_id()+'.hdf5')
-        acq_data = AcquisitionData(fname)
+        acq_data = HDF5Data(fname)
 
         acq_data.init_data(groupname, (nsets, npoints))
         for iset in range(nsets):

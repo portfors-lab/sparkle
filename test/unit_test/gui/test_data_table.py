@@ -1,17 +1,17 @@
 from QtWrapper import QtCore, QtGui, QtTest
 
 from neurosound.gui.stim_table import StimTable
-from neurosound.data.dataobjects import AcquisitionData
+from neurosound.data.open import open_acqdata
 
 import qtbot
 from test import sample
 
 PAUSE = 200
-ALLOW = 15
+ALLOW = 20
 
 class TestStimTable():
     def setUp(self):
-        self.data = AcquisitionData(sample.datafile(), filemode='r')
+        self.data = open_acqdata(sample.datafile(), filemode='r')
         self.table = StimTable()
         self.table.setData(self.data)
         self.table.show()

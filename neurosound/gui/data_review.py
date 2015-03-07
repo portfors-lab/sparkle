@@ -1,6 +1,5 @@
 from neurosound.gui.hdftree import H5TreeWidget
 from neurosound.gui.stim_table import StimTable
-from neurosound.data.dataobjects import AcquisitionData
 from neurosound.gui.stim.component_detail import ComponentsDetailWidget
 
 from QtWrapper import QtCore, QtGui
@@ -33,15 +32,15 @@ class QDataReviewer(QtGui.QWidget):
         choice_layout.addWidget(table_radio)
         content_view_layout.addLayout(choice_layout)
         contents_stack = QtGui.QStackedWidget()
-        self.datatree = H5TreeWidget()
+        # self.datatree = H5TreeWidget()
         self.datatable = StimTable()
-        contents_stack.addWidget(self.datatree)
+        # contents_stack.addWidget(self.datatree)
         contents_stack.addWidget(self.datatable)
         self.btngrp.buttonClicked[int].connect(contents_stack.setCurrentIndex)
         content_view_layout.addWidget(contents_stack)
         contents_view.setLayout(content_view_layout)
 
-        self.datatree.nodeChanged.connect(self.setCurrentNode)
+        # self.datatree.nodeChanged.connect(self.setCurrentNode)
         self.datatable.currentCellChanged.connect(self.setCurrentCell)
         asplitter.addWidget(contents_view)
 
@@ -121,7 +120,7 @@ class QDataReviewer(QtGui.QWidget):
         self.traceStop = False
 
     def setDataObject(self, data):
-        self.datatree.clearTree()
+        # self.datatree.clearTree()
         self.tracetable.clearContents()
         self.tracetable.setRowCount(0)
         self.attrtxt.clear()
@@ -129,13 +128,14 @@ class QDataReviewer(QtGui.QWidget):
 
         self.datafile = data
         # display contents as a tree
-        self.datatree.addH5Handle(data.hdf5)
-        self.datatree.expandItem(self.datatree.topLevelItem(0))
+        # self.datatree.addH5Handle(data.hdf5)
+        # self.datatree.expandItem(self.datatree.topLevelItem(0))
         # and a table
         self.datatable.setData(data)
 
     def update(self):
-        self.datatree.update(self.datafile.hdf5)
+        # self.datatree.update(self.datafile.hdf5)
+        pass
 
     def setCurrentCell(self, row, column, prevrow=None, prevcol=None):
         # don't care about the column clicked, get the path for the row
@@ -158,8 +158,8 @@ class QDataReviewer(QtGui.QWidget):
         self.current_rep_num = 0
         
         for attr in info:
-            if attr[0] != 'stim':
-                self.attrtxt.appendPlainText(attr[0] + ' : ' + str(attr[1]))
+            if attr != 'stim':
+                self.attrtxt.appendPlainText(attr + ' : ' + str(info[attr]))
             else:
                 # use the datafile object to do json converstion of stim data
                 stimuli = self.datafile.get_trace_info(path)
@@ -189,16 +189,22 @@ class QDataReviewer(QtGui.QWidget):
 
         if path == '':
             return
-        data_object = self.datafile.hdf5[path]
+        data_object = self.datafile.get(path)
         if hasattr(data_object, 'shape'):
             # only data sets have a shape
             data_shape = data_object.shape
             self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
             
-            group_info = self.datafile.get_info('/'.join(path.split('/')[:-1]))
+            parent_path = '/'.join(path.split('/')[:-1])
+            if len(parent_path) > 0:
+                group_info = self.datafile.get_info(parent_path)
+                fsout = dict(group_info)['samplerate_ad']
+            else:
+                fsout = info['samplerate_ad']
+                group_info = []
+            # group_info = self.datafile.get_info('/'.join(path.split('/')[:-1]))
             if setname.startswith('test') or setname.startswith('signal') or setname == 'reference_tone':
                 # input samplerate is stored in group attributes
-                fsout = dict(group_info)['samplerate_ad']
                 self.derivedtxt.appendPlainText("Recording window duration : "+str(float(data_shape[-1])/fsout) + ' s')
             if setname.startswith('test'):
                 self.testSelected.emit(path)
@@ -207,7 +213,7 @@ class QDataReviewer(QtGui.QWidget):
             # also display "inherited" attributes from group
             self.attrtxt.appendHtml('<br><b>Segment Attributes:</b>')
             for gattr in group_info:
-                self.attrtxt.appendPlainText(gattr[0] + ' : ' + str(gattr[1]))
+                self.attrtxt.appendPlainText(gattr + ' : ' + str(group_info[gattr]))
 
 
     def setTraceData(self, row, column, repnum=0):
@@ -328,12 +334,13 @@ def makepath(item):
 
 if __name__ == '__main__':
     import sys
+    from neurosound.data.open import open_acqdata
+    from test import sample
+
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
-    # data = AcquisitionData('C:\\Users\\amy.boyle\\audiolab_data\\open_testing.hdf5', filemode='r')
-    # data = AcquisitionData('/home/leeloo/testdata/20141119.hdf5', filemode='r')
-    data = AcquisitionData('/home/leeloo/testdata/Mouse 871c.hdf5', filemode='r')
-    data = AcquisitionData('/home/leeloo/src/wsu/nidaq/test/sample/dummydata.hdf5', filemode='r')
+    # data = open_acqdata(sample.batlabfile(), filemode='r')
+    data = open_acqdata(sample.datafile(), filemode='r')
     viewer = QDataReviewer()
     viewer.setDataObject(data)
     viewer.show()

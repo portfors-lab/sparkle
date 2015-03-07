@@ -6,7 +6,7 @@ from nose.tools import assert_in, assert_equal
 from QtWrapper import QtGui, QtCore, QtTest
 
 from neurosound.gui.main_control import MainWindow
-from neurosound.data.dataobjects import AcquisitionData
+from neurosound.data.open import open_acqdata
 from neurosound.gui.stim.abstract_component_editor import AbstractComponentWidget
 from neurosound.tools.systools import rand_id
 
@@ -573,7 +573,7 @@ class TestMainUI():
         manager = self.form.acqmodel
         # cheat and pretend we already did a calibration
         frange = [5000, 100000]
-        cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
+        cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
         calname = cal_data_file.calibration_list()[0]
         calibration_vector, calibration_freqs = cal_data_file.get_calibration(calname, reffreq=15000)
         manager.explorer.set_calibration(calibration_vector, calibration_freqs, frange, calname)

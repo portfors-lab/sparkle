@@ -2,7 +2,7 @@ import os
 
 from neurosound.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
                             CalibrationDialog, CellCommentDialog, ViewSettingsDialog
-from neurosound.data.dataobjects import AcquisitionData
+from neurosound.data.open import open_acqdata
 
 import test.sample as sample
 
@@ -17,7 +17,7 @@ class TestCalibrationDialog():
         self.fscale = 'kHz'
         self.defaults = {'calf':20000, 'caldb':100,  'calv':0.1, 'calname':'calibration_1', 
                          'use_calfile':False, 'frange':(5000, 1e5)}
-        cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
+        cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
         self.dlg = CalibrationDialog(fscale=self.fscale, defaultVals=self.defaults,
                                      datafile=cal_data_file)
         self.dlg.show()
@@ -51,7 +51,7 @@ class TestCalibrationDialog():
         QTest.mouseClick(self.dlg.ui.rangeBtn, Qt.LeftButton)
 
         # extract the calibration ourselves
-        cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
+        cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
         calname = cal_data_file.calibration_list()[0]
         x, freqs = cal_data_file.get_calibration(calname, reffreq=15000)
 
@@ -106,6 +106,7 @@ class TestSavingDialog():
         self.hack_filename(dlg, 'newfile')
         fname, mode = dlg.getfile()
         # case insensitive for windows sake
+        print os.path.abspath(fname).lower(), os.path.join(sample.sampledir(), 'newfile.hdf5').lower()
         assert os.path.abspath(fname).lower() == os.path.join(sample.sampledir(), 'newfile.hdf5').lower()
         assert mode == 'w-'
         dlg.close()

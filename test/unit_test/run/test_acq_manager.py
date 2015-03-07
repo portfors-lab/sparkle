@@ -12,7 +12,7 @@ from neurosound.run.acquisition_manager import AcquisitionManager
 from neurosound.stim.stimulus_model import StimulusModel
 from neurosound.stim.auto_parameter_model import AutoParameterModel
 from neurosound.stim.types.stimuli_classes import PureTone, Vocalization, Silence
-from neurosound.data.dataobjects import AcquisitionData
+from neurosound.data.open import open_acqdata
 from neurosound.stim.reorder import random_order
 from neurosound.gui.stim.factory import TCFactory
 from neurosound.tools.systools import rand_id
@@ -640,7 +640,7 @@ class TestAcquisitionManager():
     def fake_calibration(self, manager):
         # cheat and pretend we already did a calibration
         frange = [5000, 100000]
-        cal_data_file = AcquisitionData(sample.calibration_filename(), filemode='r')
+        cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
         calname = cal_data_file.calibration_list()[0]
         calibration_vector, calibration_freqs = cal_data_file.get_calibration(calname, reffreq=15000)
         

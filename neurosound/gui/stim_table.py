@@ -1,7 +1,6 @@
 import copy
 
 from QtWrapper import QtCore, QtGui
-from neurosound.data.dataobjects import AcquisitionData
 
 class StimTable(QtGui.QTableWidget):
     def __init__(self, data=None):
@@ -85,9 +84,12 @@ class StimTable(QtGui.QTableWidget):
 
 if __name__ == '__main__':
     import sys
+    from neurosound.data.open import open_acqdata
+    from test import sample
+
     app = QtGui.QApplication(sys.argv)
-    # data = AcquisitionData('/home/leeloo/testdata/20141119.hdf5', filemode='r')
-    data = AcquisitionData('/home/leeloo/testdata/August 5 2010/August 5 2010.hdf5', filemode='r')
+    # data = open_acqdata(sample.batlabfile(), filemode='r')
+    data = open_acqdata(sample.datafile(), filemode='r')
     table = StimTable()
     table.setData(data)
     table.show()

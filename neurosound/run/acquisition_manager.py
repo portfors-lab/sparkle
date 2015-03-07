@@ -3,7 +3,7 @@ import threading
 import Queue
 
 from neurosound.tools.util import create_unique_path
-from neurosound.data.dataobjects import AcquisitionData
+from neurosound.data.open import open_acqdata
 from neurosound.run.search_runner import SearchRunner
 from neurosound.run.protocol_runner import ProtocolRunner
 from neurosound.run.chart_runner import ChartRunner
@@ -188,7 +188,7 @@ class AcquisitionManager():
         :param fname: File path of the location for the data file to open
         :type fname: str
         """
-        self.datafile = AcquisitionData(fname)
+        self.datafile = open_acqdata(fname)
 
         self.explorer.set(datafile=self.datafile)
         self.protocoler.set(datafile=self.datafile)
@@ -205,7 +205,7 @@ class AcquisitionManager():
         :type fname: str
         """
         self.close_data()
-        self.datafile = AcquisitionData(fname, filemode='a')
+        self.datafile = open_acqdata(fname, filemode='a')
 
         self.explorer.set(datafile=self.datafile)
         self.protocoler.set(datafile=self.datafile)

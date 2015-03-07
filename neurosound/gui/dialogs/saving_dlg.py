@@ -6,7 +6,7 @@ class SavingDialog(QtGui.QFileDialog):
     """Dialog for setting the current data file"""
     def __init__(self, defaultFile=None, *args, **kwargs):
         super(SavingDialog, self).__init__(*args, **kwargs)
-        self.setNameFilter("data files (*.hdf5 *.h5)")
+        self.setNameFilter("data files (*.hdf5 *.h5 *.pst *.raw)")
         self.setLabelText(QtGui.QFileDialog.Reject, 'Quit')
         self.setLabelText(QtGui.QFileDialog.Accept, '---')
         self.setWindowTitle("Select Data Save Location")

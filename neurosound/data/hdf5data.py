@@ -6,51 +6,18 @@ import os
 import socket
 import logging
 
+from neurosound.data.acqdata import AcquisitionData, increment
 from neurosound.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
                                         ReadOnlyError, OverwriteFileError
 from neurosound.tools.util import convert2native, max_str_num
 
-class AcquisitionData():
-    """
-    Provides convenient access to data file; 
-    each data file should represent an experimental session.
-
-    Data files may conatain any number of one of the three types of datasets: 
-
-    1. Finite datasets, where the amount of data to be stored in known in advance
-    2. Open-ended aquisition, where the size of the acqusition window is known, but the number of traces to acquire is not
-    3. Continuous acquisition, this is a 'chart' function where data is acquired continuously without break until the user stops the operation
-    
-    | Upon new file creation the following attributes are saved to the file: *date*, *user*, *computer name*
-
-    Finite datasets create sets with automatic naming of the scheme test_#, where the number starts with 1 and increments for the whole file, regardless of the group it is under.
-
-    :param filename: the name of the HDF5 file to open.
-    :type filename: str
-    :param user: name of user opening the file
-    :type user: str
-    :type filemode: str
-    :param filemode: The mode in which to open this file. Allowed values are:
-    * 'w-' : Write to new file, fails if file already exists
-    * 'a' : Append to existing file
-    * 'r' : Read only, no writing allowed
-    Overwriting an exisiting file is not allowed, and will result in an error
-    """
+class HDF5Data(AcquisitionData):
     def __init__(self, filename, user='unknown', filemode='w-'):
-        if filemode not in ['w-', 'a', 'r']:
-            raise DisallowedFilemodeError(filename, filemode)
-        if filemode == 'w-' and os.path.isfile(filename):
-            raise OverwriteFileError(filename)
+        super(HDF5Data, self).__init__(filename, user, filemode)
 
         self.hdf5 = h5py.File(filename, filemode)
         self.filename = filename
 
-        self.open_set_size = 32
-        self.chunk_size = 2**24 # better to have a multiple of fs?
-        self.needs_repack = False
-
-        self.datasets = {}
-        self.meta = {}
         if filemode == 'w-':
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
             self.hdf5.attrs['who'] = user
@@ -306,9 +273,9 @@ class AcquisitionData():
         :type key: str
         """
         if key == '':
-            return self.hdf5.attrs.items()
+            return dict(self.hdf5.attrs.items())
         else:
-            return self.hdf5[key].attrs.items()
+            return dict(self.hdf5[key].attrs.items())
 
     def get_trace_info(self, key):
         """Retrives the stimulus info saved to the given dataset. Works for finite dataset keys only
@@ -324,7 +291,7 @@ class AcquisitionData():
     def get_calibration(self, key, reffreq):
         """Gets a saved calibration, in attenuation from a refernece frequency point
 
-        :param key: THe name of the calibraiton to retrieve
+        :param key: The name of the calibration to retrieve
         :type key: str
         :param reffreq: The frequency for which to set as zero, all other frequencies will then be in attenuation difference from this frequency
         :type reffreq: int
@@ -537,37 +504,6 @@ def _append_stim(container, key, stim_data):
         existing_stim = container[key].attrs['stim'][:-1] + ','
     container[key].attrs['stim'] = existing_stim + stim_data + ']'
 
-def increment(index, dims, data_shape):
-    """Increments a given index according to the shape of the data added
-
-    :param index: Current index to be incremented
-    :type index: list
-    :param dims: Shape of the data that the index is being incremented by
-    :type dims: tuple
-    :param data_shape: Shape of the data structure being incremented, this is check that incrementing is correct
-    """
-
-    # check dimensions of data match structure
-    inc_to_match = data_shape[1:]
-    for dim_a, dim_b in zip(inc_to_match, dims[-1*(len(inc_to_match)):]):
-        if dim_a != dim_b:
-            raise DataIndexError()
-
-    # now we can safely discard all but the highest dimension
-    inc_index = len(index) - len(data_shape)
-    inc_amount = data_shape[0]
-    # make the index and increment amount dimensions match
-    index[inc_index] += inc_amount
-
-    # finally check that we did not run over allowed dimension
-    if index[inc_index] > dims[inc_index]:
-        raise DataIndexError()
-
-    while inc_index > 0 and index[inc_index] == dims[inc_index]:
-        index[inc_index-1] +=1
-        index[inc_index:] = [0]*len(index[inc_index:])
-        inc_index -=1
-    return index
 
 def _repack(h5file):
     """
