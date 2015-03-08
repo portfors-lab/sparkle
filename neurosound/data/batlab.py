@@ -65,9 +65,13 @@ class BatlabData(AcquisitionData):
                     return self.raw_data[testno-1][traceno-1][index]
 
     def get_info(self, key):
+        if key[0] == '/': # remove leading /
+            key = key[1:]
         return self.info[key]
 
     def get_trace_info(self, key):
+        if key[0] == '/': # remove leading /
+            key = key[1:]
         return self.info[key]['stim']
 
     def calibration_list(self):
@@ -76,8 +80,17 @@ class BatlabData(AcquisitionData):
     def all_datasets(self):
         return self.tests
         
-    def keys(self):
-        return self.info.keys()
+    def keys(self, key=None):
+        # keys should be for datasets only for batlab data
+        if key is None or key == self.filename or key == '':
+            allkeys = self.info.keys()
+            # relies on fact that None is falsey
+            testkeys = [k for k in allkeys if re.search("test_\d+$", k)]
+            return testkeys
+        else:
+            return None
+
+
 
 class NamedArray(np.ndarray):
     def __new__(cls, input_array, name):

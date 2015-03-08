@@ -16,7 +16,6 @@ class HDF5Data(AcquisitionData):
         super(HDF5Data, self).__init__(filename, user, filemode)
 
         self.hdf5 = h5py.File(filename, filemode)
-        self.filename = filename
 
         if filemode == 'w-':
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
@@ -259,7 +258,9 @@ class HDF5Data(AcquisitionData):
         :param index: slice of of the data to retrieve, ``None`` gets whole data set. Numpy style indexing.
         :type index: tuple
         """
-        if index is not None:
+        if not hasattr(self.hdf5[key], 'shape'):
+            return None
+        elif index is not None:
             index = tuple(index)
             data = self.hdf5[key][index]
         else:
@@ -459,13 +460,17 @@ class HDF5Data(AcquisitionData):
                 setname = key + '/' + 'signal'
             _append_stim(self.hdf5, setname, stim_data)
 
-    def keys(self):
+    def keys(self, key=None):
         """The high-level keys for this file
 
         :returns: list<str> -- list of the keys
         """
-
-        return self.hdf5.keys()
+        if key is None or key == self.filename or key == '':
+            return self.hdf5.keys()
+        elif key in self.hdf5 and hasattr(self.hdf5[key], 'keys'):
+            return self.hdf5[key].keys()
+        else:
+            return None
 
     def all_datasets(self):
         """Go through file and get all datasets"""

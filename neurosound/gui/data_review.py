@@ -1,4 +1,4 @@
-from neurosound.gui.hdftree import H5TreeWidget
+from neurosound.gui.datatree import DataTree
 from neurosound.gui.stim_table import StimTable
 from neurosound.gui.stim.component_detail import ComponentsDetailWidget
 
@@ -32,15 +32,15 @@ class QDataReviewer(QtGui.QWidget):
         choice_layout.addWidget(table_radio)
         content_view_layout.addLayout(choice_layout)
         contents_stack = QtGui.QStackedWidget()
-        # self.datatree = H5TreeWidget()
+        self.datatree = DataTree()
         self.datatable = StimTable()
-        # contents_stack.addWidget(self.datatree)
+        contents_stack.addWidget(self.datatree)
         contents_stack.addWidget(self.datatable)
         self.btngrp.buttonClicked[int].connect(contents_stack.setCurrentIndex)
         content_view_layout.addWidget(contents_stack)
         contents_view.setLayout(content_view_layout)
 
-        # self.datatree.nodeChanged.connect(self.setCurrentNode)
+        self.datatree.nodeChanged.connect(self.setCurrentNode)
         self.datatable.currentCellChanged.connect(self.setCurrentCell)
         asplitter.addWidget(contents_view)
 
@@ -120,7 +120,7 @@ class QDataReviewer(QtGui.QWidget):
         self.traceStop = False
 
     def setDataObject(self, data):
-        # self.datatree.clearTree()
+        self.datatree.clearTree()
         self.tracetable.clearContents()
         self.tracetable.setRowCount(0)
         self.attrtxt.clear()
@@ -128,23 +128,22 @@ class QDataReviewer(QtGui.QWidget):
 
         self.datafile = data
         # display contents as a tree
-        # self.datatree.addH5Handle(data.hdf5)
+        self.datatree.addData(data)
         # self.datatree.expandItem(self.datatree.topLevelItem(0))
         # and a table
         self.datatable.setData(data)
 
     def update(self):
-        # self.datatree.update(self.datafile.hdf5)
-        pass
+        self.datatree.update()
+        # self.datatable.update()
 
     def setCurrentCell(self, row, column, prevrow=None, prevcol=None):
         # don't care about the column clicked, get the path for the row
         path = str(self.datatable.item(row, 0).text())
         self.setCurrentData(path)
 
-    def setCurrentNode(self, widgetitem):
-        path = makepath(widgetitem)
-        self.setCurrentData(path)
+    def setCurrentNode(self, path):
+        self.setCurrentData(str(path))
         
     def setCurrentData(self, path):
         setname = path.split('/')[-1]
@@ -189,10 +188,10 @@ class QDataReviewer(QtGui.QWidget):
 
         if path == '':
             return
-        data_object = self.datafile.get(path)
-        if hasattr(data_object, 'shape'):
+        dataset = self.datafile.get(path)
+        if dataset is not None:
             # only data sets have a shape
-            data_shape = data_object.shape
+            data_shape = dataset.shape
             self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
             
             parent_path = '/'.join(path.split('/')[:-1])
@@ -339,8 +338,8 @@ if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
-    # data = open_acqdata(sample.batlabfile(), filemode='r')
-    data = open_acqdata(sample.datafile(), filemode='r')
+    data = open_acqdata(sample.batlabfile()+".raw", filemode='r')
+    # data = open_acqdata(sample.datafile(), filemode='r')
     viewer = QDataReviewer()
     viewer.setDataObject(data)
     viewer.show()
