@@ -18,6 +18,7 @@ tmp/
 
 # build files
 /doc/_build/
+/doc/ref/auto/
 /spikeylab/build/
 /spikeylab/dist/
 
