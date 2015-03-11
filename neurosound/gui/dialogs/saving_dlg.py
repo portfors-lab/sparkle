@@ -29,7 +29,8 @@ class SavingDialog(QtGui.QFileDialog):
         name of the data file will result in opening an existing file,
         or creating a new one"""
         current_file = str(self.selectedFiles()[0])
-        if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
+        if not '.' in current_file.split(os.path.sep)[-1]:
+            # add hdf5 extention if none given
             current_file += '.hdf5'
         if os.path.isfile(current_file):
             self.setLabelText(QtGui.QFileDialog.Accept, 'Reload')
@@ -44,10 +45,14 @@ class SavingDialog(QtGui.QFileDialog):
         :returns: str -- the name of the data file to open/create
         """
         current_file = str(self.selectedFiles()[0])
-        if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
-            current_file += '.hdf5'
         if os.path.isfile(current_file):
-            fmode = 'a'
+            print 'current_file', current_file
+            if current_file.endswith('.raw') or current_file.endswith('.pst'):
+                fmode = 'r'
+            else:
+                fmode = 'a'
         else:
+            if not current_file.endswith('.hdf5') and not current_file.endswith('.h5'):
+                current_file += '.hdf5'
             fmode = 'w-'
         return current_file, fmode
