@@ -57,7 +57,7 @@ class TestHDF5Data():
         fakedata = np.ones((npoints,))
         acq_data = self.setup_finite(fakedata, nsets)
 
-        np.testing.assert_array_equal(acq_data.get('fake/test_1', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get_data('fake/test_1', (1,)), fakedata*1)
 
         acq_data.close()
 
@@ -72,7 +72,7 @@ class TestHDF5Data():
         fakedata = np.ones((1,npoints))
         acq_data = self.setup_finite(fakedata, nsets)
         
-        np.testing.assert_array_equal(acq_data.get('fake/test_1', (2,)), np.squeeze(fakedata*2))
+        np.testing.assert_array_equal(acq_data.get_data('fake/test_1', (2,)), np.squeeze(fakedata*2))
 
         acq_data.close()
 
@@ -95,7 +95,7 @@ class TestHDF5Data():
             for iset in range(nsets):
                 acq_data.append('fake', fakedata*iset)
 
-            np.testing.assert_array_equal(acq_data.get('fake', (2,)), fakedata*2)
+            np.testing.assert_array_equal(acq_data.get_data('fake', (2,)), fakedata*2)
         finally:
             acq_data.close()
             
@@ -117,7 +117,7 @@ class TestHDF5Data():
             for iset in range(nsets+1):
                 acq_data.append('fake', fakedata*iset)
 
-            np.testing.assert_array_equal(acq_data.get('fake', (2,)), fakedata*2)
+            np.testing.assert_array_equal(acq_data.get_data('fake', (2,)), fakedata*2)
         finally:
             acq_data.close()
 
@@ -128,7 +128,7 @@ class TestHDF5Data():
         fakedata = np.ones((npoints,))
         acq_data = self.setup_finite(fakedata, nsets, 'insert')
 
-        np.testing.assert_array_equal(acq_data.get('fake/test_1', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get_data('fake/test_1', (1,)), fakedata*1)
 
         acq_data.close()
 
@@ -140,7 +140,7 @@ class TestHDF5Data():
         acq_data.init_data('fake', (1,))
         acq_data.append('fake', [1])
 
-        np.testing.assert_array_equal(acq_data.get('fake/test_1'), [1])
+        np.testing.assert_array_equal(acq_data.get_data('fake/test_1'), [1])
 
     def test_finite_dataset_save(self):
         nsets = 3
@@ -192,8 +192,8 @@ class TestHDF5Data():
             acq_data.append('fake', fakedata*iset)
         acq_data.trim('fake')
 
-        np.testing.assert_array_equal(acq_data.get('fake', (6,)), fakedata*6)
-        np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get_data('fake', (6,)), fakedata*6)
+        np.testing.assert_array_equal(acq_data.get_data('fake', (1,)), fakedata*1)
         acq_data.close()
 
     def test_open_dataset_append_mid_set(self):
@@ -214,8 +214,8 @@ class TestHDF5Data():
             acq_data.append('fake', fakedata*iset)
         acq_data.trim('fake')
 
-        np.testing.assert_array_equal(acq_data.get('fake', (8,)), fakedata*8)
-        np.testing.assert_array_equal(acq_data.get('fake', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get_data('fake', (8,)), fakedata*8)
+        np.testing.assert_array_equal(acq_data.get_data('fake', (1,)), fakedata*1)
         acq_data.close()
 
     def test_adding_open_attrs(self):
@@ -266,8 +266,8 @@ class TestHDF5Data():
 
         acq_data.consolidate('fake')
 
-        print 'sizes', acq_data.get('fake').size, nsets*npoints
-        assert acq_data.get('fake').size == nsets*npoints
+        print 'sizes', acq_data.get_data('fake').size, nsets*npoints
+        assert acq_data.get_data('fake').size == nsets*npoints
         acq_data.close()
 
         hfile = h5py.File(fname)
@@ -297,7 +297,7 @@ class TestHDF5Data():
 
         acq_data.consolidate('fake')
 
-        assert acq_data.get('fake').size == nsets*npoints
+        assert acq_data.get_data('fake').size == nsets*npoints
         acq_data.close()
 
         hfile = h5py.File(fname)
@@ -348,7 +348,7 @@ class TestHDF5Data():
         acq_data = self.setup_finite(fakedata, nsets, groupname=gname)
         
         # auto naming of tests is regardless of group
-        np.testing.assert_array_equal(acq_data.get(gname + '/test_1', (1,)), fakedata*1)
+        np.testing.assert_array_equal(acq_data.get_data(gname + '/test_1', (1,)), fakedata*1)
         acq_data.close()
 
         # make sure this is at the proper hierarchy in a raw HDF5 file
@@ -361,7 +361,7 @@ class TestHDF5Data():
 
         # test the HDF5Data class's ability to reload nested groups
         reloaded_acq_data = HDF5Data(acq_data.filename, filemode='r')
-        reloaded_data = reloaded_acq_data.get(gname + '/test_1')
+        reloaded_data = reloaded_acq_data.get_data(gname + '/test_1')
         assert reloaded_data.shape == (nsets, npoints)
 
     def test_read_only_data(self):
@@ -373,7 +373,7 @@ class TestHDF5Data():
 
         reloaded_acq_data = HDF5Data(acq_data.filename, filemode='r')
         assert reloaded_acq_data.hdf5.keys() == ['fake']
-        reloaded_data = reloaded_acq_data.get('fake/test_1')
+        reloaded_data = reloaded_acq_data.get_data('fake/test_1')
         assert reloaded_data.shape == (nsets, npoints)
 
         reloaded_acq_data.close()

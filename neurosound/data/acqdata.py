@@ -37,6 +37,7 @@ class AcquisitionData(object):
             raise OverwriteFileError(filename)
 
         self.filename = filename
+        self.filemode = filemode
 
         self.open_set_size = 32
         self.chunk_size = 2**24 # better to have a multiple of fs?
@@ -120,7 +121,7 @@ class AcquisitionData(object):
         """
         raise NotImplementedError
 
-    def get(self, key, index=None):
+    def get_data(self, key, index=None):
         """
         Returns data for key at specified index
 

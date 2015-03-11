@@ -249,7 +249,7 @@ class HDF5Data(AcquisitionData):
         else:
             print "insert not supported for mode: ", mode
 
-    def get(self, key, index=None):
+    def get_data(self, key, index=None):
         """
         Returns data for key at specified index
 

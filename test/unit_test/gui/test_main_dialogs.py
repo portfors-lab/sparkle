@@ -15,7 +15,7 @@ class TestMainDialogs():
 
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
-        self.form = MainWindow(datafile=fname, filemode='w')
+        self.form = MainWindow(datafile=fname, filemode='w-')
         self.form.ui.plotDock.close()
         self.form.show()
 

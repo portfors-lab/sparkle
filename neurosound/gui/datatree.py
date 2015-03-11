@@ -16,7 +16,8 @@ class DataTreeItem(QtGui.QTreeWidgetItem):
         parent =  self.parent()
         path = str(self.text(0))
         while parent is not None:
-            path = str(parent.text(0)) + '/' + path
+            if len(str(parent.text(0))) > 0:
+                path = str(parent.text(0)) + '/' + path
             parent = parent.parent()
         return path
 

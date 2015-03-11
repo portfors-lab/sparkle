@@ -170,7 +170,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
         if not self.save_data:
             raise Exception("Cannot process an unsaved calibration")
             
-        avg_signal = np.mean(self.datafile.get(self.current_dataset_name + '/signal'), axis=0)
+        avg_signal = np.mean(self.datafile.get_data(self.current_dataset_name + '/signal'), axis=0)
 
         diffdB = attenuation_curve(self.stimulus.signal()[0], avg_signal,
                                         self.stimulus.samplerate(), self.calf)
@@ -190,7 +190,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
         self.datafile.set_metadata('/'.join([self.current_dataset_name, 'calibration_intensities']),
                                    relevant_info)
 
-        mean_reftone = np.mean(self.datafile.get(self.current_dataset_name + '/reference_tone'), axis=0)
+        mean_reftone = np.mean(self.datafile.get_data(self.current_dataset_name + '/reference_tone'), axis=0)
         tone_amp = signal_amplitude(mean_reftone, self.player.get_aifs())
         db = calc_db(tone_amp, self.mphonesens, self.mphonedb)
         # remove the reference tone from protocol
@@ -359,9 +359,9 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         vfunc = np.vectorize(calc_db, self.mphonesens, self.mphonedb)
 
         if USE_FFT:
-            peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/fft_peaks')), axis=1)
+            peaks = np.mean(abs(self.datafile.get_data(self.current_dataset_name + '/fft_peaks')), axis=1)
         else:
-            peaks = np.mean(abs(self.datafile.get(self.current_dataset_name + '/vamp')), axis=1)
+            peaks = np.mean(abs(self.datafile.get_data(self.current_dataset_name + '/vamp')), axis=1)
 
         # print 'calibration frequencies', self.calibration_frequencies
         # cal_index = self.calibration_indexes[self.calibration_frequencies.index(self.calf)]

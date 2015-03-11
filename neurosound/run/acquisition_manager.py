@@ -198,14 +198,14 @@ class AcquisitionManager():
 
         return fname
 
-    def load_data_file(self, fname):
+    def load_data_file(self, fname, filemode='a'):
         """Opens an existing data file to append to
 
         :param fname: File path of the location for the data file to open
         :type fname: str
         """
         self.close_data()
-        self.datafile = open_acqdata(fname, filemode='a')
+        self.datafile = open_acqdata(fname, filemode=filemode)
 
         self.explorer.set(datafile=self.datafile)
         self.protocoler.set(datafile=self.datafile)
@@ -382,7 +382,7 @@ class AcquisitionManager():
         """Closes the current data file"""
         # save the total number of cells to make re-loading convient
         if self.datafile is not None:
-            if self.datafile.hdf5.mode != 'r':
+            if self.datafile.filemode != 'r':
                 self.datafile.set_metadata('', {'total cells': self.current_cellid})
             self.datafile.close()
             self.datafile = None

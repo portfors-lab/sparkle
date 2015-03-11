@@ -32,7 +32,7 @@ class TestMainSetup():
     def test_bad_inputs_file(self):
         fname = os.path.join(self.tempfolder, 'testdatafile.hdf5')
         inputsfile = sample.badinputs()
-        self.form = MainWindow(datafile=fname, filemode='w', inputsFilename=inputsfile)
+        self.form = MainWindow(datafile=fname, filemode='w-', inputsFilename=inputsfile)
         self.form.ui.plotDock.close()
         self.form.close()
         QtTest.QTest.qWait(ALLOW)
@@ -42,7 +42,7 @@ class TestMainUI():
     def setUp(self):
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         fname = os.path.join(self.tempfolder, 'testdatafile' +rand_id()+'.hdf5')
-        self.form = MainWindow(datafile=fname, filemode='w')
+        self.form = MainWindow(datafile=fname, filemode='w-')
         self.form.ui.reprateSpnbx.setValue(10)
         self.form.show()
         # so that the data display doesn't get in the way of out

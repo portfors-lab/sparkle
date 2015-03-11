@@ -129,7 +129,6 @@ class QDataReviewer(QtGui.QWidget):
         self.datafile = data
         # display contents as a tree
         self.datatree.addData(data)
-        # self.datatree.expandItem(self.datatree.topLevelItem(0))
         # and a table
         self.datatable.setData(data)
 
@@ -188,7 +187,7 @@ class QDataReviewer(QtGui.QWidget):
 
         if path == '':
             return
-        dataset = self.datafile.get(path)
+        dataset = self.datafile.get_data(path)
         if dataset is not None:
             # only data sets have a shape
             data_shape = dataset.shape

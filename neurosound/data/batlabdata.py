@@ -23,18 +23,18 @@ class BatlabData(AcquisitionData):
         self.raw_data = extract_raw_data(filename + '.raw', experiment_data)
 
         # reformat metadata to match neurosound
-        self.info = batlab2neurosound(experiment_data)
+        self._info = batlab2neurosound(experiment_data)
 
-        self.tests = []
+        self._tests = []
         # reshape into single test list with each test represented by a single numpy array
         for itest, test in enumerate(self.raw_data):
             shape = (len(test), test[0].shape[0], test[0].shape[1])
             testdata = np.zeros(shape)
             testdata = NamedArray(testdata, 'test_{}'.format(itest+1))
             for itrace, trace in enumerate(test):
-                # aborted tests will be short on traces, leave these as zeros to make data shapes work
+                # aborted _tests will be short on traces, leave these as zeros to make data shapes work
                 testdata[itrace,:trace.shape[0],:] = trace[:]
-            self.tests.append(testdata)
+            self._tests.append(testdata)
 
 
         logger = logging.getLogger('main')
@@ -43,7 +43,7 @@ class BatlabData(AcquisitionData):
     def close(self):
         pass
 
-    def get(self, key, index=None):
+    def get_data(self, key, index=None):
         # data is [test][trace][reps, samples] -- [list][list][numpy array]
         match = re.search('test_(\d+)(/trace_(\d+))?', key)
         if match is not None:
@@ -54,9 +54,9 @@ class BatlabData(AcquisitionData):
                 # get entire test
                 # 1 indexed, so substract 1
                 if index is None:
-                    return self.tests[testno -1]
+                    return self._tests[testno -1]
                 else:
-                    return test.tests[testno -1][index]
+                    return test._tests[testno -1][index]
             else:
                 traceno = int(traceno)
                 if index is None:
@@ -65,30 +65,31 @@ class BatlabData(AcquisitionData):
                     return self.raw_data[testno-1][traceno-1][index]
 
     def get_info(self, key):
-        if key[0] == '/': # remove leading /
-            key = key[1:]
-        return self.info[key]
+        if key == '':
+            return { k : self._info[k] for k in self._info.keys() if not re.search("test_\d+$", k)}
+        else:
+            return self._info[key]
 
     def get_trace_info(self, key):
-        if key[0] == '/': # remove leading /
-            key = key[1:]
-        return self.info[key]['stim']
+        return self._info[key]['stim']
 
     def calibration_list(self):
         return []
 
     def all_datasets(self):
-        return self.tests
+        return self._tests
         
     def keys(self, key=None):
         # keys should be for datasets only for batlab data
         if key is None or key == self.filename or key == '':
-            allkeys = self.info.keys()
+            allkeys = self._info.keys()
             # relies on fact that None is falsey
             testkeys = [k for k in allkeys if re.search("test_\d+$", k)]
             return testkeys
         else:
             return None
+
+    # def info_keys(self, key=None):
 
 
 

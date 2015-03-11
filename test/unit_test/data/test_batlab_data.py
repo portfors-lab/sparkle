@@ -1,6 +1,6 @@
 
 from neurosound.data.hdf5data import HDF5Data
-from neurosound.data.batlab import BatlabData
+from neurosound.data.batlabdata import BatlabData
 
 import test.sample as sample
 
@@ -19,11 +19,9 @@ class TestBatlabData():
     def test_keys(self):
         datakeys = self.datafile.keys()
 
-        # 6 file attributes, + 55 tests
-        assert len(datakeys) == 55 + 6
+        assert len(datakeys) == 55
         assert 'test_1' in datakeys
         assert 'test_55' in datakeys
-        assert 'title' in datakeys
 
     def test_get_info(self):
 
@@ -37,14 +35,14 @@ class TestBatlabData():
 
     def test_get_data(self):
         # test a few different shapes
-        data = self.datafile.get('test_1')
+        data = self.datafile.get_data('test_1')
         print 'data shape', data.shape
         assert data.shape == (8, 50, 8000)
 
-        data = self.datafile.get('test_6')
+        data = self.datafile.get_data('test_6')
         assert data.shape == (1, 200, 8000)
 
-        data = self.datafile.get('test_55')
+        data = self.datafile.get_data('test_55')
         assert data.shape == (68, 20, 8000)
 
     def test_get_trace_info(self):

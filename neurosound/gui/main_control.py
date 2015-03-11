@@ -56,7 +56,7 @@ class MainWindow(ControlWindow):
             if filemode == 'w-':
                 self.acqmodel.create_data_file(datafile)
             else:
-                self.acqmodel.load_data_file(datafile)
+                self.acqmodel.load_data_file(datafile, filemode)
             fname = os.path.basename(self.acqmodel.current_data_file())
         else:
             fname = None
@@ -627,7 +627,7 @@ class MainWindow(ControlWindow):
             # requires initmate knowledge of datafile organization
             path = str(path)
             group_path = os.path.dirname(path)
-            response = self.acqmodel.datafile.get(path, (tracenum, repnum))
+            response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
             npoints = response.shape[0]
             stimuli = self.acqmodel.datafile.get_trace_info(path)
 
@@ -663,7 +663,7 @@ class MainWindow(ControlWindow):
 
 
             # recreate PSTH for current threshold and current rep
-            tracedata = self.acqmodel.datafile.get(path, (tracenum,))
+            tracedata = self.acqmodel.datafile.get_data(path, (tracenum,))
             binsz = float(self.ui.binszSpnbx.value())
             self.ui.psth.clearData()
             self.display.clearRaster()
@@ -717,8 +717,11 @@ class MainWindow(ControlWindow):
     def displayOldProgressPlot(self, path):
         if self.activeOperation is None:
             path = str(path)
-            group_path = os.path.dirname(path)
-            testdata = self.acqmodel.datafile.get(path)
+            if '/' in path:
+                group_path = os.path.dirname(path)
+            else:
+                group_path = path
+            testdata = self.acqmodel.datafile.get_data(path)
             test_info = dict(self.acqmodel.datafile.get_info(path))
             comp_info = self.acqmodel.datafile.get_trace_info(path)
             group_info = dict(self.acqmodel.datafile.get_info(group_path))

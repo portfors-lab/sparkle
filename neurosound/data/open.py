@@ -1,5 +1,5 @@
 from neurosound.data.hdf5data import HDF5Data
-from neurosound.data.batlab import BatlabData
+from neurosound.data.batlabdata import BatlabData
 
 def open_acqdata(filename, user='unknown', filemode='w-'):
     if filename.lower().endswith((".hdf5", ".h5")):
