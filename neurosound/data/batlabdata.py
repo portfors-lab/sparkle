@@ -1,5 +1,6 @@
 import logging
 import re
+import os
 
 import numpy as np
 
@@ -18,6 +19,9 @@ class BatlabData(AcquisitionData):
         if filemode != 'r':
             raise ReadOnlyError(filename)
 
+        # accept either .pst, .raw, or extentionless filenames
+        filename = os.path.splitext(filename)[0]
+
         # these data formats are as close to the MATLAB structure as possible
         experiment_data = parse_pst(filename + '.pst')
         self.raw_data = extract_raw_data(filename + '.raw', experiment_data)
@@ -35,7 +39,6 @@ class BatlabData(AcquisitionData):
                 # aborted _tests will be short on traces, leave these as zeros to make data shapes work
                 testdata[itrace,:trace.shape[0],:] = trace[:]
             self._tests.append(testdata)
-
 
         logger = logging.getLogger('main')
         logger.info('Opened data file %s' % filename)
@@ -56,7 +59,7 @@ class BatlabData(AcquisitionData):
                 if index is None:
                     return self._tests[testno -1]
                 else:
-                    return test._tests[testno -1][index]
+                    return self._tests[testno -1][index]
             else:
                 traceno = int(traceno)
                 if index is None:
@@ -156,7 +159,9 @@ def batlab2neurosound(experiment_data):
                         comp['frequency'] = component['frequency']
                     else:
                         print 'FOUND UNKNOWN STIM', component['soundtype_name']
-                        raise ValueError
+                        # raise ValueError
+                        comp['stim_type'] = component['soundtype_name']
+
                     components.append(comp)
                 stim['components'] = components
                 stims.append(stim)

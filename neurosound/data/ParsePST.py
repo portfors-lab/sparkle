@@ -59,7 +59,7 @@ def parse_pst(filename):
         # %Get the test number.
         # test_line = textscan(lines{line_num},'%n %*s %*s %*n %s',1);
         match = re.match('(\d+) (.*)', lines[line_num])
-        test['testnum'] = match.group(1)
+        test['testnum'] = int(match.group(1))
         test['time'] = match.group(2)
         # %This is the Batlab assigned test type, not the test type that Bat2Matlab uses
         test['full_testtype'] = full_testtype

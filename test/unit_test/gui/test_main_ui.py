@@ -483,6 +483,8 @@ class TestMainUI():
             qtbot.drag(stimEditor.ui.templateBox.getLabelByName(name), stimEditor.ui.trackview)
             self.set_paramters(name, vals)
             qtbot.keypress('enter')
+            QtTest.QTest.qWait(ALLOW)
+
 
         assert stimEditor.ui.trackview.model().componentCount() == len(components)
         # pause neccessary for stims to update their visual rects,

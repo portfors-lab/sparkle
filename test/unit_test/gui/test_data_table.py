@@ -50,7 +50,7 @@ class TestStimTable():
         assert self.table.trace_table.rowCount() == 10
 
         headers = [self.table.trace_table.horizontalHeaderItem(i).text() for i in range(self.table.trace_table.columnCount())]
-        desired_headers = ['frequency', 'intensity', 'risefall', 'start', 'duration']
+        desired_headers = ['filename', 'intensity', 'risefall', 'start', 'duration']
         for field in desired_headers:
             assert field in headers
 

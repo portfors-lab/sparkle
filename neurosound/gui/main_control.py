@@ -626,7 +626,10 @@ class MainWindow(ControlWindow):
         if self.activeOperation is None:
             # requires initmate knowledge of datafile organization
             path = str(path)
-            group_path = os.path.dirname(path)
+            if '/' in path:
+                group_path = os.path.dirname(path)
+            else:
+                group_path = path
             response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
             npoints = response.shape[0]
             stimuli = self.acqmodel.datafile.get_trace_info(path)

@@ -26,10 +26,10 @@ def calibration_filename():
     return os.path.join(sampledir(), 'calibration.hdf5')
 
 def datafile():
-    return os.path.join(sampledir(), 'dummydata.hdf5')
+    return os.path.join(sampledir(), 'tinyexperiment.hdf5')
 
 def batlabfile():
-    return os.path.join(sampledir(), 'mouse497')
+    return os.path.join(sampledir(), 'batlab')
 
 def test_template():
     return os.path.join(sampledir(), 'multitone.json')

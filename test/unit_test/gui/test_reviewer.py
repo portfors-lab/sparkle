@@ -62,12 +62,12 @@ class TestDataReviewer():
         assert "mode : finite" in text
         # includes parent group attributes
         assert "comment : for science!" in text
-        assert "samplerate_ad : 500000.0" in text
+        assert "samplerate_ad : 20000.0" in text
 
         # check calculated attributes
         text = self.ui.derivedtxt.toPlainText()
-        assert "Dataset dimensions : (23, 3, 105000)" in text
-        assert "Recording window duration : 0.21 s" in text
+        assert "Dataset dimensions : (23, 3, 2000)" in text
+        assert "Recording window duration : 0.1 s" in text
 
     def test_scroll_reps(self):
         self.ui.datatable.setCurrentCell(3,0)
