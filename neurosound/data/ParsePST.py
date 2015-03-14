@@ -8,7 +8,9 @@ def parse_pst(filename):
     with open(filename) as fh:
         file_contents = fh.read()
 
-    lines = file_contents.split('\r\n')
+    # windows adds carriage returns in addition to newlines
+    file_contents = file_contents.translate(None, '\r')
+    lines = file_contents.split('\n')
     # print lines
 
     # %Static strings
