@@ -1,7 +1,8 @@
-NeuroSound
-===========
+SPARKLE 
+=================================================================================================================
+**S**ound **P**resentation **A**nd **R**ecording **K**it for **L**aboratories of **E**lectrophysiology 
 
-NeuroSound is a data acquisition system designed for auditory neuroscience research. It allows for the assembly and presentation of auditory stimuli (sounds) with simultaneous recording from a single brain electrode. It is designed to be highly customized to the requirements of the Portfors' hearing research lab. It is primarily a GUI intended to facilitate ease-of-use during experiments.
+Sparkle is a data acquisition system designed for auditory neuroscience research. It allows for the assembly and presentation of auditory stimuli (sounds) with simultaneous recording from a single brain electrode. It is designed to be highly customized to the requirements of the Portfors' hearing research lab. It is primarily a GUI intended to facilitate ease-of-use during experiments.
 
 The system will generate synthesized signals (tones, chrips, etc), as well as play recording files (.wavs). Data is saved to HDF5 format.
 
@@ -14,11 +15,12 @@ To get up and running, first install the requirements:
 
 Then run the main GUI module:
 
-    $ python spikeylab/gui/run.py
+    $ python sparkle/gui/run.py
 
 To build the documentation:
 
     $ cd doc
+    $ sphinx-apidoc -f -o ref/auto ../sparkle
     $ make html
 
 
