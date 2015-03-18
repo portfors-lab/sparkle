@@ -1,7 +1,7 @@
 import os, yaml
 
-import neurosound.tools.audiotools as tools
-from neurosound.tools.systools import get_src_directory
+import sparkle.tools.audiotools as tools
+from sparkle.tools.systools import get_src_directory
 
 import test.sample as sample
 

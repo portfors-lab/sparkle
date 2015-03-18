@@ -1,5 +1,5 @@
-from neurosound.gui.stim.explore_stim_editor import ExploreStimulusEditor
-from neurosound.stim.stimulus_model import StimulusModel
+from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
+from sparkle.stim.stimulus_model import StimulusModel
 
 class TestExploreStimEditor():
 

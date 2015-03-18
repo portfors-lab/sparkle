@@ -2,8 +2,8 @@ import unittest
 
 from QtWrapper import QtCore, QtGui, QtTest
 
-from neurosound.gui.data_review import QDataReviewer
-from neurosound.data.open import open_acqdata
+from sparkle.gui.data_review import QDataReviewer
+from sparkle.data.open import open_acqdata
 
 from test import sample
 

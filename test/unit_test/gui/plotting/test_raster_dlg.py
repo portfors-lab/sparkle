@@ -1,4 +1,4 @@
-from neurosound.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
+from sparkle.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 
 class TestRasterDialog():
     def test_dlg(self):

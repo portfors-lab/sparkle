@@ -6,10 +6,10 @@ import re
 import yaml
 from QtWrapper import QtCore, QtGui
 
-from neurosound.tools.log import init_logging
-from neurosound.tools.uihandler import TextEditHandler
-from neurosound.tools.uihandler import assign_uihandler_slot
-from neurosound import tools
+from sparkle.tools.log import init_logging
+from sparkle.tools.uihandler import TextEditHandler
+from sparkle.tools.uihandler import assign_uihandler_slot
+from sparkle import tools
 
 class TestUIHandler():
 

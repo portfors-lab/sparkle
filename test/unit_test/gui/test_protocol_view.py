@@ -4,11 +4,11 @@ import os, shutil
 from nose.tools import assert_equal
 from QtWrapper import QtCore, QtGui, QtTest
 
-from neurosound.run.protocol_model import ProtocolTabelModel
-from neurosound.gui.qprotocol import QProtocolTabelModel, ProtocolView
-from neurosound.stim.stimulus_model import StimulusModel
-from neurosound.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
-from neurosound.gui.drag_label import DragLabel
+from sparkle.run.protocol_model import ProtocolTabelModel
+from sparkle.gui.qprotocol import QProtocolTabelModel, ProtocolView
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
+from sparkle.gui.drag_label import DragLabel
 
 import qtbot
 

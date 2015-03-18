@@ -7,8 +7,8 @@ import re
 import h5py
 from nose.tools import raises, assert_in, assert_equal
 
-from neurosound.data.hdf5data import HDF5Data
-from neurosound.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
+from sparkle.data.hdf5data import HDF5Data
+from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
                                         ReadOnlyError, OverwriteFileError
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")

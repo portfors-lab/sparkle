@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# neurosound documentation build configuration file, created by
+# sparkle documentation build configuration file, created by
 # sphinx-quickstart on Fri Oct 18 12:36:05 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -32,7 +32,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.graphviz',
-              'neurosound.tools.qtdoc',]
+              'sparkle.tools.qtdoc',]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -47,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'neurosound'
+project = u'sparkle'
 copyright = u'2013, Amy Boyle'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -172,7 +172,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'neurosounddoc'
+htmlhelp_basename = 'sparkledoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -191,7 +191,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'neurosound.tex', u'neurosound Documentation',
+  ('index', 'sparkle.tex', u'sparkle Documentation',
    u'Amy Boyle', 'manual'),
 ]
 
@@ -221,7 +221,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'neurosound', u'neurosound Documentation',
+    ('index', 'sparkle', u'sparkle Documentation',
      [u'Amy Boyle'], 1)
 ]
 
@@ -235,8 +235,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'neurosound', u'neurosound Documentation',
-   u'Amy Boyle', 'neurosound', 'One line description of project.',
+  ('index', 'sparkle', u'sparkle Documentation',
+   u'Amy Boyle', 'sparkle', 'One line description of project.',
    'Miscellaneous'),
 ]
 

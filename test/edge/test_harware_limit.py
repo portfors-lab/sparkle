@@ -1,8 +1,8 @@
 """Finds the longest duration stimulus (for a given samplerate)
 capable to be output/recorded with the current DAC
 """
-from neurosound.acq.players import FinitePlayer
-from neurosound.stim.types.stimuli_classes import PureTone, Vocalization, Silence
+from sparkle.acq.players import FinitePlayer
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 
 from test.scripts.util import record
 

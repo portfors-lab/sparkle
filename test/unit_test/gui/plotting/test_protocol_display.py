@@ -4,7 +4,7 @@ import time
 from QtWrapper.QtGui import QApplication
 import numpy as np
 
-from neurosound.gui.plotting.protocoldisplay import ProtocolDisplay
+from sparkle.gui.plotting.protocoldisplay import ProtocolDisplay
 from test.sample import samplewav
 
 PAUSE = 0

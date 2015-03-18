@@ -1,10 +1,10 @@
 from nose.tools import assert_in
 
-from neurosound.stim.auto_parameter_model import AutoParameterModel
-from neurosound.gui.stim.qauto_parameter_model import QAutoParameterModel
-from neurosound.stim.types.stimuli_classes import PureTone, Vocalization
-from neurosound.gui.stim.abstract_editor import AbstractEditorWidget
-from neurosound.gui.stim.auto_parameter_view import SmartDelegate
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
+from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
+from sparkle.gui.stim.auto_parameter_view import SmartDelegate
 
 from QtWrapper import QtCore
 

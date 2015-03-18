@@ -1,7 +1,7 @@
 from nose.tools import raises
 
-from neurosound.data.acqdata import increment
-from neurosound.tools.exceptions import DataIndexError
+from sparkle.data.acqdata import increment
+from sparkle.tools.exceptions import DataIndexError
 
 
 def test_increment_index_by_1():

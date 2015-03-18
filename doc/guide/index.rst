@@ -1,8 +1,8 @@
 ===============================================
-NeuroSound Data Acquisition System
+Sparkle Data Acquisition System
 ===============================================
 
-NeuroSound is an electrophysiology data acqusition and auditory stimulus assembly interface.
+Sparkle is an electrophysiology data acqusition and auditory stimulus assembly interface.
 
 The program is divided into three different types of operation: search (explore), protocol (pre-defined), and calibration. Also, there are two different modes of acquisition: windowed (finite), and chart (continuous). Currently, only finite acquisition is available.
 

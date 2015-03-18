@@ -1,5 +1,5 @@
-from neurosound.data.ParsePST import parse_pst
-from neurosound.data.ExtractRawData import extract_raw_data
+from sparkle.data.ParsePST import parse_pst
+from sparkle.data.ExtractRawData import extract_raw_data
 
 import test.sample as sample
 

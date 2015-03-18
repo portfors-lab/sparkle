@@ -1,8 +1,8 @@
 import os
 
-from neurosound.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
+from sparkle.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
                             CalibrationDialog, CellCommentDialog, ViewSettingsDialog
-from neurosound.data.open import open_acqdata
+from sparkle.data.open import open_acqdata
 
 import test.sample as sample
 

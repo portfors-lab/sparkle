@@ -2,19 +2,19 @@ from nose.tools import raises, assert_equal
 
 import numpy as np
 
-from neurosound.stim.stimulus_model import StimulusModel
-from neurosound.stim.types.stimuli_classes import PureTone, Vocalization
-from neurosound.stim.auto_parameter_model import AutoParameterModel
-from neurosound.gui.stim.stimulus_editor import StimulusEditor
-from neurosound.gui.stim.factory import TCFactory, CCFactory
-from neurosound.stim.reorder import order_function
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.gui.stim.stimulus_editor import StimulusEditor
+from sparkle.gui.stim.factory import TCFactory, CCFactory
+from sparkle.stim.reorder import order_function
 
 from QtWrapper import QtCore, QtGui
 
 import test.sample as sample
 
 import os, yaml
-from neurosound.tools.systools import get_src_directory
+from sparkle.tools.systools import get_src_directory
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)

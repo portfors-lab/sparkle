@@ -1,11 +1,11 @@
 import unittest
 import numpy as np
-from neurosound.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
+from sparkle.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
                                     DigitalOutTask, get_ao_chans, get_ai_chans
 try:
     from PyDAQmx import *
 except:
-    from neurosound.acq.daqmx_stub import *
+    from sparkle.acq.daqmx_stub import *
 
 import time
 

@@ -1,8 +1,8 @@
 from QtWrapper import QtGui, QtCore, QtTest
 
-from neurosound.stim.types import get_stimuli_models
-from neurosound.stim.types.stimuli_classes import *
-from neurosound.gui.stim.components.qcomponents import wrapComponent
+from sparkle.stim.types import get_stimuli_models
+from sparkle.stim.types.stimuli_classes import *
+from sparkle.gui.stim.components.qcomponents import wrapComponent
 
 PAUSE = 200
 ALLOW = 15

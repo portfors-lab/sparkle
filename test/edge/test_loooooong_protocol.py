@@ -9,10 +9,10 @@ import glob
 from QtWrapper import QtGui, QtCore, QtTest
 import h5py
 
-from neurosound.gui.control import MainWindow
-from neurosound.stim.stimulus_model import StimulusModel
-from neurosound.gui.stim.factory import TCFactory
-from neurosound.tools.systools import rand_id
+from sparkle.gui.control import MainWindow
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.gui.stim.factory import TCFactory
+from sparkle.tools.systools import rand_id
 
 import qtbot
 import test.sample as sample

@@ -1,7 +1,7 @@
 from QtWrapper import QtCore, QtGui, QtTest
 
-from neurosound.gui.stim_table import StimTable
-from neurosound.data.open import open_acqdata
+from sparkle.gui.stim_table import StimTable
+from sparkle.data.open import open_acqdata
 
 import qtbot
 from test import sample

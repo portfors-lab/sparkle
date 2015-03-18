@@ -2,8 +2,8 @@ import os
 
 from QtWrapper.QtGui import QApplication
 
-from neurosound.gui.main_control import MainWindow
-from neurosound.gui.stim.abstract_editor import AbstractEditorWidget
+from sparkle.gui.main_control import MainWindow
+from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 
 import test.sample as sample
 

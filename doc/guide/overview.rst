@@ -101,16 +101,3 @@ Other Settings
 ===============
 Semi-permanent settings loaded once at program start are located in the :ref:`settings`.
 
-Names
-=====
-Considering the following Names for the Program
-
-* ADA : Auditory Data Acqusition (Also the name of first programmer Ada Lovelace)
-
-* SONIC : Spiffy Otologic Neuron Investigation Companion
-
-* Neuroread
-
-* NeuroSound
-
-* Neurosound

@@ -1,6 +1,6 @@
 import os, shutil
 
-from neurosound.tools.util import increment_title, convert2native, \
+from sparkle.tools.util import increment_title, convert2native, \
                                     next_str_num, create_unique_path
 
 import numpy as np

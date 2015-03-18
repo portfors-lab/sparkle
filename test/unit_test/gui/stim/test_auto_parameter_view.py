@@ -1,8 +1,8 @@
 from QtWrapper import QtCore, QtGui, QtTest
 
-from neurosound.stim.auto_parameter_model import AutoParameterModel
-from neurosound.gui.stim.qauto_parameter_model import QAutoParameterModel
-from neurosound.gui.stim.auto_parameter_view import AutoParameterTableView
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
+from sparkle.gui.stim.auto_parameter_view import AutoParameterTableView
 
 import qtbot
 

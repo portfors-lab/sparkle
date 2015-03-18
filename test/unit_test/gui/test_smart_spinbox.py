@@ -1,4 +1,4 @@
-from neurosound.gui.stim.smart_spinbox import SmartSpinBox
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
 
 class TestSmartSpinBox():
     def setUp(self):

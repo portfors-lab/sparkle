@@ -8,11 +8,11 @@ import numpy as np
 from QtWrapper import QtGui, QtCore
 import pyqtgraph as pg
 
-from neurosound.acq.players import FinitePlayer
-from neurosound.stim.stimulus_model import StimulusModel
-# from neurosound.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
-from neurosound.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from neurosound.tools.audiotools import impulse_response, attenuation_curve
+from sparkle.acq.players import FinitePlayer
+from sparkle.stim.stimulus_model import StimulusModel
+# from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
+from sparkle.stim.types.stimuli_classes import WhiteNoise, FMSweep
+from sparkle.tools.audiotools import impulse_response, attenuation_curve
 from test.scripts.util import calc_error, record, MyTableWidgetItem, \
                                 apply_calibration
 

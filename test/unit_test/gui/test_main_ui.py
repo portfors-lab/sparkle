@@ -5,10 +5,10 @@ import h5py
 from nose.tools import assert_in, assert_equal
 from QtWrapper import QtGui, QtCore, QtTest
 
-from neurosound.gui.main_control import MainWindow
-from neurosound.data.open import open_acqdata
-from neurosound.gui.stim.abstract_component_editor import AbstractComponentWidget
-from neurosound.tools.systools import rand_id
+from sparkle.gui.main_control import MainWindow
+from sparkle.data.open import open_acqdata
+from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
+from sparkle.tools.systools import rand_id
 
 import test.sample as sample
 import qtbot

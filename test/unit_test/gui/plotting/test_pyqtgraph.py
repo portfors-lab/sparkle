@@ -1,7 +1,7 @@
 import sip
 sip.setdestroyonexit(0)
 
-from neurosound.gui.plotting.pyqtgraph_widgets import FFTWidget, \
+from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, \
         TraceWidget, SpecWidget, ProgressWidget, PSTHWidget, ChartWidget, \
         SimplePlotWidget, StackedPlot
 
@@ -12,7 +12,7 @@ import numpy as np
 from QtWrapper.QtCore import Qt, QTimer
 from QtWrapper.QtGui import QApplication
 
-import neurosound.tools.audiotools as audiotools
+import sparkle.tools.audiotools as audiotools
 import test.sample as sample
 
 from nose.tools import assert_equal

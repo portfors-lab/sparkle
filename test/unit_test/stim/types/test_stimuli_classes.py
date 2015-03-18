@@ -1,4 +1,4 @@
-from neurosound.stim.types import get_stimuli_models
+from sparkle.stim.types import get_stimuli_models
 import test.sample as sample
 
 from nose.tools import assert_equal

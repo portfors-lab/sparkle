@@ -11,8 +11,8 @@ Plots and displays results
 """
 import sys
 import numpy as np
-from neurosound.io.players import FinitePlayer
-from neurosound.tools import audiotools
+from sparkle.io.players import FinitePlayer
+from sparkle.tools import audiotools
 from test.scripts.util import record
 import matplotlib.pyplot as plt
 

@@ -1,9 +1,9 @@
 from nose.tools import assert_equal
 
-from neurosound.gui.qprotocol import QProtocolTabelModel
-from neurosound.run.protocol_model import ProtocolTabelModel
-from neurosound.stim.stimulus_model import StimulusModel
-from neurosound.stim.types.stimuli_classes import PureTone
+from sparkle.gui.qprotocol import QProtocolTabelModel
+from sparkle.run.protocol_model import ProtocolTabelModel
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import PureTone
 from QtWrapper import QtCore
 
 class TestQProtocolModel():

@@ -1,4 +1,4 @@
-from neurosound.gui.plotting.pyqtgraph_widgets import ChartWidget
+from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget
 
 import time
 import numpy as np

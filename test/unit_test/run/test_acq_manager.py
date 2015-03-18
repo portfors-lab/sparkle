@@ -8,14 +8,14 @@ import numpy as np
 from nose.tools import assert_in, assert_equal, nottest
 import unittest
 
-from neurosound.run.acquisition_manager import AcquisitionManager
-from neurosound.stim.stimulus_model import StimulusModel
-from neurosound.stim.auto_parameter_model import AutoParameterModel
-from neurosound.stim.types.stimuli_classes import PureTone, Vocalization, Silence
-from neurosound.data.open import open_acqdata
-from neurosound.stim.reorder import random_order
-from neurosound.gui.stim.factory import TCFactory
-from neurosound.tools.systools import rand_id
+from sparkle.run.acquisition_manager import AcquisitionManager
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, Silence
+from sparkle.data.open import open_acqdata
+from sparkle.stim.reorder import random_order
+from sparkle.gui.stim.factory import TCFactory
+from sparkle.tools.systools import rand_id
 
 import test.sample as sample
 

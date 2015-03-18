@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from neurosound.acq.players import FinitePlayer, ContinuousPlayer
+from sparkle.acq.players import FinitePlayer, ContinuousPlayer
 import unittest
 
 DEVNAME = "PCI-6259"
@@ -9,7 +9,7 @@ DEVNAME = "PCI-6259"
 try:
     from PyDAQmx import *
 except:
-    from neurosound.acq.daqmx_stub import *
+    from sparkle.acq.daqmx_stub import *
 
 class TestDAQPlayers():
     def setUp(self):
