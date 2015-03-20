@@ -121,7 +121,6 @@ def batlab2sparkle(experiment_data):
         nsdata[setname]['user_tag'] = ''
 
         if test['full_testtype'] == 'General Auto Test' and test['testtype'] == 'tone':
-            print 'General Auto Test', test['testtype']
             nsdata[setname]['testtype'] = 'Tuning Curve'
         else:
             nsdata[setname]['testtype'] = test['full_testtype']
@@ -158,7 +157,7 @@ def batlab2sparkle(experiment_data):
                         comp['stim_type'] = 'Pure Tone'
                         comp['frequency'] = component['frequency']
                     else:
-                        print 'FOUND UNKNOWN STIM', component['soundtype_name']
+                        # print 'FOUND UNKNOWN STIM', component['soundtype_name']
                         # raise ValueError
                         comp['stim_type'] = component['soundtype_name']
 
