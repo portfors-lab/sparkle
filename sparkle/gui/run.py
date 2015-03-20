@@ -8,6 +8,13 @@ from sparkle.gui.dialogs import SavingDialog
 from sparkle.tools.systools import get_free_mb, get_drives
 from sparkle.resources import icons
 
+
+try:
+    import PyDAQmx
+    REVIEWMODE = False
+except:
+    REVIEWMODE = True
+
 def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
     logger.error("Uncaught exception: ", exc_info=exc_info)
@@ -47,7 +54,7 @@ def main():
     dlg = SavingDialog()
     if dlg.exec_():
         fname, fmode = dlg.getfile()
-        myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode)
+        myapp = MainWindow("controlinputs.json", datafile=fname, filemode=fmode, hidetabs=REVIEWMODE)
         app.setActiveWindow(myapp)
         myapp.show()
         status = app.exec_()

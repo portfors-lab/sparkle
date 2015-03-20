@@ -48,7 +48,7 @@ REFVOLTAGE = config['reference_voltage']
 
 class MainWindow(ControlWindow):
     """Main GUI for the application. Run the main fucntion of this file"""
-    def __init__(self, inputsFilename='', datafile=None, filemode='w-'):
+    def __init__(self, inputsFilename='', datafile=None, filemode='w-', hidetabs=False):
         # set up model and stimlui first, 
         # as saved configuration relies on this
         self.acqmodel = AcquisitionManager()
@@ -159,6 +159,14 @@ class MainWindow(ControlWindow):
         self.ui.reviewer.testSelected.connect(self.displayOldProgressPlot)
 
         self.display.spiketracePlot.invertPolarity.connect(self.toggleResponsePolarity)
+
+        if hidetabs:
+            print "Hiding search and calibrate operations"
+            for tabIndex in reversed(range(self.ui.tabGroup.count())):
+                txt = str(self.ui.tabGroup.tabText(tabIndex)).lower()
+                if txt == 'calibration' or txt == 'explore':
+                    self.ui.tabGroup.removeTab(tabIndex)
+                    
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
 
