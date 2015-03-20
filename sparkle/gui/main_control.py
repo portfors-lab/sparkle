@@ -760,7 +760,7 @@ class MainWindow(ControlWindow):
             if fmode == 'w-':
                 self.acqmodel.create_data_file(fname)
             else:
-                self.acqmodel.load_data_file(fname)
+                self.acqmodel.load_data_file(fname, fmode)
             # calibration clears on data file load
             self.ui.currentCalLbl.setText('None')
             fname = os.path.basename(fname)
