@@ -157,8 +157,6 @@ class CalibrationRunner(AbstractCalibrationRunner):
             else:
                 raise Exception("Improper calibration stimulus : {}".format(trace_info['components'][0]['stim_type']))
 
-        self.putnotify('response_collected', (self.aitimes, response))
-
     def process_calibration(self, save=True):
         """processes calibration control signal. Determines transfer function
         of speaker to get frequency vs. attenuation curve.
@@ -327,7 +325,6 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
                                      nested_name='vamp')
                 self.datafile.append_trace_info(self.current_dataset_name, trace_info)
 
-            self.putnotify('response_collected', (self.aitimes, response))
             self.putnotify('calibration_response_collected', (spectrum, freq, vamp))
 
         # calculate resultant dB and emit

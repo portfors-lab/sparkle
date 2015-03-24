@@ -145,27 +145,12 @@ class SearchRunner(AbstractAcquisitionRunner):
                 response = self.player.run()
                 stamp = time.time()
 
-                response = response*self.response_polarity
-                self.putnotify('response_collected', (times, response))
+                self.putnotify('response_collected', (times, response, -1, -1, self.irep, {}))
                 if stim is not None:
                     self.putnotify('stim_generated', (stim, self.player.get_samplerate()))
                     trace_doc = self._stimulus.componentDoc()
                     trace_doc['overloaded_attenuation'] = np.nan
                     self.putnotify('current_trace', (0,0,trace_doc))
-                
-                # process response; calculate spike times
-                spike_times = spikestats.spike_times(response, self.threshold, self.player.aifs)
-                spike_counts.append(len(spike_times))
-                if len(spike_times) > 0:
-                    spike_latencies.append(spike_times[0])
-                else:
-                    spike_latencies.append(np.nan)
-                spike_rates.append(spikestats.firing_rate(spike_times, self.player.aitime))
-
-                # produces erroneous results if threshold is None (this is 
-                # the case in cal toner, but we don't really care then)
-                response_bins = spikestats.bin_spikes(spike_times, self.binsz)
-                self.putnotify('spikes_found', (response_bins, self.irep))
 
                 #lock it so we don't get a times mismatch
                 self.player_lock.acquire()
@@ -179,16 +164,7 @@ class SearchRunner(AbstractAcquisitionRunner):
 
                 self.irep +=1
                 if self.irep == self.nreps:
-                    total_spikes = float(sum(spike_counts))
-                    avg_count = total_spikes/len(spike_counts)
-                    avg_latency = sum(spike_latencies)/len(spike_latencies)
-                    avg_rate = sum(spike_rates)/len(spike_rates)
                     self.irep = 0
-                    self.putnotify('trace_finished', (total_spikes, avg_count, avg_latency, avg_rate))
-                    
-                    spike_counts = []
-                    spike_latencies = []
-                    spike_rates = []
 
             self.player.stop()
             # self.player.stop_timer()

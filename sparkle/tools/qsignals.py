@@ -5,7 +5,7 @@ class ProtocolSignals(QtCore.QObject):
     curve_finished = QtCore.Signal()
     ncollected = QtCore.Signal(numpy.ndarray, numpy.ndarray)
     warning = QtCore.Signal(str)
-    response_collected = QtCore.Signal(numpy.ndarray, numpy.ndarray)
+    response_collected = QtCore.Signal(numpy.ndarray, numpy.ndarray, int, int, int, dict)
     average_response = QtCore.Signal(int, int, float)
     calibration_response_collected = QtCore.Signal(numpy.ndarray, numpy.ndarray, float)
     current_trace = QtCore.Signal(int, int, dict)

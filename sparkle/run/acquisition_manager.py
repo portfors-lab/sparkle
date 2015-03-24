@@ -75,11 +75,12 @@ class AcquisitionManager():
                 t.daemon = True
                 self.queue_threads.append(t)
 
-    def _listen(self, q, func, wake_event):
+    def _listen(self, q, func_list, wake_event):
         while not self._halt_threads:
             if not q.empty():
                 data = q.get()
-                func(*data)
+                for func in func_list:
+                    func(*data)
             wake_event.clear()
             wake_event.wait()
 
@@ -107,7 +108,10 @@ class AcquisitionManager():
         :param func: function reference to execute, expects queue contents as argument(s)
         :type func: callable
         """
-        self.acquisition_hooks[name] = func
+        if name in self.acquisition_hooks:
+            self.acquisition_hooks[name].append(func)
+        else:
+            self.acquisition_hooks[name] = [func]
 
     def increment_cellid(self):
         """Increments the current cellid number that is saved for each test run"""
@@ -482,11 +486,6 @@ class AcquisitionManager():
                 return True
         else:
             return True
-
-    def toggle_response_polarity(self):
-        self.explorer.invert_polarity()
-        self.protocoler.invert_polarity()
-        self.charter.invert_polarity()
 
     def mphone_calibration_reps(self):
         return self.mphone_calibrator.reps()

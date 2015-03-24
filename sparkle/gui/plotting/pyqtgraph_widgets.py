@@ -94,7 +94,8 @@ class TraceWidget(BasePlot):
     # this will be set automatically
     rasterYslots = None
     thresholdUpdated = QtCore.Signal(float)
-    invertPolarity = QtCore.Signal()
+    polarityInverted = QtCore.Signal(int)
+    _polarity = 1
     _ampScalar = VOLT2AMPS
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
@@ -116,7 +117,7 @@ class TraceWidget(BasePlot):
         invertAction = QtGui.QAction('Invert response polarity', None)
         invertAction.setCheckable(True)
         self.scene().contextMenu.append(invertAction) #should use function for this?
-        invertAction.triggered.connect(self.invertPolarity.emit)
+        invertAction.triggered.connect(self.invertPolarity)
 
         self._traceUnit = 'V'
         self.unitsAction = QtGui.QAction('Plot Amps', None)
@@ -157,7 +158,7 @@ class TraceWidget(BasePlot):
             if self.zeroAction.isChecked():
                 start_avg = np.mean(y[5:25])
                 y = y - start_avg
-            self.tracePlot.setData(x,y)
+            self.tracePlot.setData(x,y*self._polarity)
 
     def appendData(self, axeskey, bins, ypoints):
         """Appends data to existing plotted data
@@ -289,6 +290,14 @@ class TraceWidget(BasePlot):
     def update_thresh(self):
         """Emits a Qt signal thresholdUpdated with the current threshold value"""
         self.thresholdUpdated.emit(self.threshLine.value())
+
+    def invertPolarity(self, inverted):
+        if inverted:
+            pol = -1
+        else:
+            pol = 1
+        self._polarity = pol
+        self.polarityInverted.emit(pol)
 
 def _doSpectrogram(signal, *args, **kwargs):
     spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)
@@ -616,6 +625,8 @@ class PSTHWidget(BasePlot):
     """Post Stimulus Time Histogram plot widget, for plotting spike counts"""
     _bins = np.arange(5)
     _counts = np.zeros((5,))
+    _threshold = 0.1
+    _polarity = 1
     def __init__(self, parent=None):
         super(PSTHWidget, self).__init__(parent)
         self.histo = pg.BarGraphItem(x=self._bins, height=self._counts, width=0.5)
@@ -662,8 +673,39 @@ class PSTHWidget(BasePlot):
         """
         return self.histo.opts['height']
 
+    def processData(self, times, response, test_num, trace_num, rep_num):
+        """Calulate spike times from raw response data"""
+        # invert polarity affects spike counting
+        response = response * self._polarity
+
+        if rep_num == 0:
+            # reset
+            self.spike_counts = []
+            self.spike_latencies = []
+            self.spike_rates = []
+
+        fs = 1./(times[1] - times[0])
+
+        # process response; calculate spike times
+        spike_times = spikestats.spike_times(response, self._threshold, fs)
+        self.spike_counts.append(len(spike_times))
+        if len(spike_times) > 0:
+            self.spike_latencies.append(spike_times[0])
+        else:
+            self.spike_latencies.append(np.nan)
+        self.spike_rates.append(spikestats.firing_rate(spike_times, times))
+
+        binsz = self._bins[1] - self._bins[0]
+        response_bins = spikestats.bin_spikes(spike_times, binsz)
+        # self.putnotify('spikes_found', (response_bins, rep_num))
+        self.appendData(response_bins, rep_num)
+
+    def setThreshold(self, thresh):
+        self._threshold = thresh
+        # reload data?
+
 class ChartWidget(QtGui.QWidget):
-    """Scrolling plot widget for continuous acquistiion display"""
+    """Scrolling plot widget for continuous acquisition display"""
     def __init__(self, parent=None):
         super(ChartWidget, self).__init__(parent)
         self.tracePlot = ScrollingWidget()

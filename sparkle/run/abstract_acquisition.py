@@ -26,7 +26,6 @@ class AbstractAcquisitionRunner(object):
         self.player_lock = threading.Lock()
         self.current_dataset_name = None
         self.save_data = False # subclasses may set different defaults
-        self.response_polarity = 1
         
     def update_reference_voltage(self):
         """Updates the voltage intensity combination used to calculate
@@ -155,6 +154,3 @@ class AbstractAcquisitionRunner(object):
         # self.signals[name][0].send(*args)
         self.queues[name][0].put(*args)
         self.queues[name][1].set()
-
-    def invert_polarity(self):
-        self.response_polarity = self.response_polarity*-1

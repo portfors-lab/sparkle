@@ -48,6 +48,8 @@ REFVOLTAGE = config['reference_voltage']
 
 class MainWindow(ControlWindow):
     """Main GUI for the application. Run the main fucntion of this file"""
+    _polarity = 1
+    _threshold = 10
     def __init__(self, inputsFilename='', datafile=None, filemode='w-', hidetabs=False):
         # set up model and stimlui first, 
         # as saved configuration relies on this
@@ -97,10 +99,9 @@ class MainWindow(ControlWindow):
 
         self.signals = ProtocolSignals()
         self.signals.response_collected.connect(self.displayResponse)
+        self.signals.response_collected.connect(self.processResponse)
         self.signals.calibration_response_collected.connect(self.displayCalibrationResponse)
         self.signals.average_response.connect(self.displayDbResult)
-        self.signals.spikes_found.connect(self.displayRaster)
-        self.signals.trace_finished.connect(self.traceDone)
         self.signals.stim_generated.connect(self.displayStim)
         self.signals.warning.connect(self.setStatusMsg)
         self.signals.ncollected.connect(self.updateChart)
@@ -158,7 +159,7 @@ class MainWindow(ControlWindow):
         self.ui.reviewer.reviewDataSelected.connect(self.displayOldData)
         self.ui.reviewer.testSelected.connect(self.displayOldProgressPlot)
 
-        self.display.spiketracePlot.invertPolarity.connect(self.toggleResponsePolarity)
+        self.display.spiketracePlot.polarityInverted.connect(self.setPolarity)
 
         if hidetabs:
             print "Hiding search and calibrate operations"
@@ -257,6 +258,7 @@ class MainWindow(ControlWindow):
     def onUpdate(self):
         if not self.verifyInputs(self.activeOperation):
             return
+
         aochan = str(self.ui.aochanBox.currentText())
         aichan = str(self.ui.aichanBox.currentText())
         acq_rate = self.ui.aifsSpnbx.value()
@@ -267,6 +269,8 @@ class MainWindow(ControlWindow):
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
         self.ui.psth.setBins(bin_centers)
+        self.ui.psthStopField.setMaximum(winsz)
+        self.ui.psthStartField.setMaximum(winsz)
         if self.ui.trigCkbx.isChecked():
             trigger = str(self.ui.trigchanBox.currentText())
         else:
@@ -277,16 +281,16 @@ class MainWindow(ControlWindow):
 
         self.display.setXlimits((0,winsz))
 
+        self.nreps = None
         if self.ui.tabGroup.currentWidget().objectName() == 'tabExplore':
             nreps = self.ui.exploreStimEditor.repCount()
-
             self.acqmodel.reset_explore_stim()
-
             self.display.setNreps(nreps)
+            self.nreps = nreps
         elif self.ui.tabGroup.currentWidget().objectName() == 'tabProtocol':
             nreps = self.acqmodel.protocol_reps()
             self.display.setNreps(nreps)
-
+            self.nreps = nreps
         if self.currentMode == 'chart':
             return winsz, acq_rate
             
@@ -494,7 +498,7 @@ class MainWindow(ControlWindow):
 
         self.acqmodel.run_mphone_calibration(interval)
 
-    def displayResponse(self, times, response):
+    def displayResponse(self, times, response, test_num, trace_num, rep_num):
         if len(times) != len(response):
             print "WARNING: times and response not equal"
         # print 'response signal', len(response)
@@ -549,6 +553,78 @@ class MainWindow(ControlWindow):
         except:
             print u"WARNING : Problem drawing to calibration plot"
             raise
+
+    def processResponse(self, times, response, test_num, trace_num, rep_num, extra_info={}):
+        """Calulate spike times from raw response data"""
+        if self.activeOperation == 'calibration':
+            # all this is only meaningful for spike recordings
+            return
+
+        if rep_num == 0:
+            # reset
+            self.spike_counts = []
+            self.spike_latencies = []
+            self.spike_rates = []
+            self.ui.psth.clearData()
+            self.display.clearRaster()
+
+        fs = 1./(times[1] - times[0])
+        count, latency, rate, response_bins = self.do_spike_stats(response, fs)
+
+        # bad news if this changes mid protcol, bin centers are only updated
+        # at start of protocol
+        binsz = float(self.ui.binszSpnbx.value())
+        if len(response_bins) > 0:
+            bin_times = (np.array(response_bins)*binsz)+(binsz/2)
+            self.display.addRasterPoints(bin_times, rep_num)
+            self.ui.psth.appendData(response_bins, rep_num)
+
+        self.spike_counts.append(count)
+        self.spike_latencies.append(latency)
+        self.spike_rates.append(rate)
+
+        if rep_num == self.nreps - 1:
+            total_spikes = sum(self.spike_counts)
+            avg_count = np.mean(self.spike_counts)
+            avg_latency = np.mean(self.spike_latencies)
+            avg_rate = np.mean(self.spike_rates)
+            self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
+            if 'f' in extra_info:
+                self.displayTuningCurve(extra_info['f'], extra_info['db'], avg_count)
+            elif 'all traces' in extra_info:
+                self.displayTuningCurve(trace_num, 'all traces', avg_count)
+            
+    def do_spike_stats(self, response, fs):
+        # invert polarity affects spike counting
+        response = response * self._polarity
+        winsz = float(len(response))/fs
+
+         # use time subwindow of trace, specified by user
+        start_time = self.ui.psthStartField.value()
+        if self.ui.psthMaxBox.isChecked():
+            stop_time = winsz
+        else:
+            stop_time = self.ui.psthStopField.value()
+        start_index = int(fs*start_time)
+        stop_index = int(fs*stop_time)  
+        subwinsz = stop_time - start_time
+
+        binsz = float(self.ui.binszSpnbx.value())
+        # number of bins to shift spike counts by since we are cropping first part of data
+        binshift = np.ceil(start_time/binsz)
+
+        spike_times = spikestats.spike_times(response[start_index:stop_index], self._threshold, fs)
+        
+        count = len(spike_times)
+        if len(spike_times) > 0:
+            latency = spike_times[0]
+        else:
+            latency = np.nan
+        rate = spikestats.firing_rate(spike_times, subwinsz)
+
+        response_bins = spikestats.bin_spikes(spike_times, binsz) + binshift
+
+        return count, latency, rate, response_bins
 
     def spawnTuningCurve(self, frequencies, intensities, plotType):
         self.livecurve = ProgressWidget(intensities, (frequencies[0], frequencies[-1]))
@@ -672,49 +748,37 @@ class MainWindow(ControlWindow):
                 self.display.updateFft(freq, spectrum)
                 self.display.updateSpec(stim_signal, fs)
 
+            self.ui.psth.clearData()
+            self.display.clearRaster()
 
             # recreate PSTH for current threshold and current rep
             tracedata = self.acqmodel.datafile.get_data(path, (tracenum,))
+
             binsz = float(self.ui.binszSpnbx.value())
-            self.ui.psth.clearData()
-            self.display.clearRaster()
-            
             winsz = float(tracedata.shape[1])/aifs
             # set the max of the PSTH subwindow to the size of this data
             self.ui.psthStopField.setMaximum(winsz)
             self.ui.psthStartField.setMaximum(winsz)
-            
-            # use time subwindow of trace, specified by user
-            start_time = self.ui.psthStartField.value()
-            if self.ui.psthMaxBox.isChecked():
-                stop_time = winsz
-            else:
-                stop_time = self.ui.psthStopField.value()
-            start_index = int(aifs*start_time)
-            stop_index = int(aifs*stop_time)
-            subwinsz = stop_time - start_time
 
             nbins = np.ceil(winsz/binsz)
             bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
             self.ui.psth.setBins(bin_centers)
-            # number of bins to shift spike counts by since we are cropping first part of data
-            binshift = np.ceil(start_time/binsz)
 
             # because we can scroll forwards or backwards, re-do entire plot every time 
-            bins = []
             spike_counts = []
             spike_latencies = []
             spike_rates = []
-            for itrace in range(repnum+1):
-                spike_times = spikestats.spike_times(tracedata[itrace,start_index:stop_index], self.ui.threshSpnbx.value(), aifs)
-                response_bins = spikestats.bin_spikes(spike_times, binsz) + binshift
-                bins.extend(response_bins)
-                spike_counts.append(len(spike_times))
-                if len(spike_times) > 0:
-                    spike_latencies.append(spike_times[0])
-                else:
-                    spike_latencies.append(np.nan)
-                spike_rates.append(spikestats.firing_rate(spike_times, subwinsz))
+            for irep in range(repnum+1):
+                count, latency, rate, response_bins = self.do_spike_stats(tracedata[irep], aifs)
+                
+                spike_counts.append(count)
+                spike_latencies.append(latency)
+                spike_rates.append(rate)
+
+                # build raster for current rep in trace
+                bin_times = (np.array(response_bins)*binsz)+(binsz/2)
+                self.display.addRasterPoints(bin_times, irep)
+                self.ui.psth.appendData(response_bins, repnum)
 
             total_spikes = sum(spike_counts)
             avg_count = np.mean(spike_counts)
@@ -722,7 +786,6 @@ class MainWindow(ControlWindow):
             avg_rate = sum(spike_rates)/len(spike_rates)
 
             # update UI
-            self.ui.psth.appendData(bins, repnum)
             self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
 
     def displayOldProgressPlot(self, path):
@@ -849,12 +912,15 @@ class MainWindow(ControlWindow):
 
     def updateThresh(self, thresh):
         self.ui.threshSpnbx.setValue(thresh)
-        self.acqmodel.set_threshold(thresh)
+        self._threshold = thresh
 
     def setPlotThresh(self):
         thresh = self.ui.threshSpnbx.value()
         self.display.spiketracePlot.setThreshold(thresh)
-        self.acqmodel.set_threshold(thresh)
+        self._threshold = thresh
+
+    def setPolarity(self, pol):
+        self._polarity = pol
 
     def tabChanged(self, tabIndex):
         if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'calibration':
@@ -901,9 +967,6 @@ class MainWindow(ControlWindow):
 
     def setStatusMsg(self, status):
         self.statusBar().showMessage(status)
-
-    def toggleResponsePolarity(self):
-        self.acqmodel.toggle_response_polarity()
 
     def setTriggerEnable(self, text):
         if text == 'Windowed':

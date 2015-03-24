@@ -132,6 +132,12 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             response = self.player.run()
                             stamps.append(time.time())
                             self._process_response(response, trace_doc, irep)
+                            if test.stimType() == 'Tuning Curve':
+                                extra_info = {'f': -1, 'db': 80}
+                            else:
+                                extra_info = {'all traces': True}
+                            self.putnotify('response_collected', (self.aitimes, response, itest, -1, irep, extra_info))
+
                             # print 'size of response len: {} bytes: {}'.format(len(response), response.nbytes)
                             self.putnotify('current_rep', (irep,))
                             self.player.reset()
@@ -167,7 +173,16 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             timecollection.append(looplen)
                             stamps.append(s)
 
-                            self._process_response(response*self.response_polarity, trace_doc, irep)
+                            if test.stimType() == 'Tuning Curve':
+                                f = trace_doc['components'][0]['frequency']
+                                db = trace_doc['components'][0]['intensity']
+                                extra_info = {'f': f, 'db': db}
+                            else:
+                                extra_info = {'all traces': True}
+                            
+                            self.putnotify('response_collected', (self.aitimes, response, itest, itrace, irep, extra_info))
+                            self._process_response(response, trace_doc, irep)
+
                             if irep == 0:
                                 self.putnotify('stim_generated', (signal, fs))
                                 self.putnotify('current_trace', (itest,itrace,trace_doc))
