@@ -170,7 +170,7 @@ class TraceWidget(BasePlot):
         :param ypoints: iteration number of raster, *should* match bins dimension, but really takes the first value in array for iteration number and plot row at proper place for included bins
         :type ypoints: numpy.ndarray
         """
-        if axeskey == 'raster':
+        if axeskey == 'raster' and len(bins) > 0:
             x, y = self.rasterPlot.getData()
             # don't plot overlapping points
             bins = np.unique(bins)

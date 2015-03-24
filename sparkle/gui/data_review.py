@@ -112,6 +112,8 @@ class QDataReviewer(QtGui.QWidget):
         layout.addWidget(hsplitter)
 
         self.current_rep_num = 0
+        self.current_trace_num = None
+        self.current_path = None
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.nextRep)
         self.traceStop = False
@@ -210,6 +212,8 @@ class QDataReviewer(QtGui.QWidget):
             for gattr in group_info:
                 self.attrtxt.appendPlainText(gattr + ' : ' + str(group_info[gattr]))
 
+    def currentDataPath(self):
+        return self.current_path, self.current_trace_num, self.current_rep_num
 
     def setTraceData(self, row, column, repnum=0):
         self.current_rep_num = repnum

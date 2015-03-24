@@ -708,7 +708,7 @@ class MainWindow(ControlWindow):
 
     def displayOldData(self, path, tracenum, repnum=0):
         if self.activeOperation is None:
-            # requires initmate knowledge of datafile organization
+            # requires use of AcquisitionData API
             path = str(path)
             if '/' in path:
                 group_path = os.path.dirname(path)
@@ -913,14 +913,25 @@ class MainWindow(ControlWindow):
     def updateThresh(self, thresh):
         self.ui.threshSpnbx.setValue(thresh)
         self._threshold = thresh
+        self.reloadReview()
 
     def setPlotThresh(self):
         thresh = self.ui.threshSpnbx.value()
         self.display.spiketracePlot.setThreshold(thresh)
         self._threshold = thresh
+        self.reloadReview()
 
     def setPolarity(self, pol):
         self._polarity = pol
+        self.reloadReview()
+
+    def reloadReview(self):
+        # reload data, if user is currently reviewing stuffz
+        if self.activeOperation is None:
+            path, trace_num, rep_num = self.ui.reviewer.currentDataPath()
+            if trace_num is not None:
+                self.displayOldData(path, trace_num, rep_num)
+                self.displayOldProgressPlot(path)
 
     def tabChanged(self, tabIndex):
         if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'calibration':
