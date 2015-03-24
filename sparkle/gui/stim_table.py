@@ -42,6 +42,10 @@ class StimTable(QtGui.QTableWidget):
         self.datasets = datasets
         self.data = data
 
+    def update(self):
+        # lazy way, just clear and reload
+        self.setData(self.data)
+
     def expandTest(self, row, column):
         stimuli = self.data.get_trace_info(self.datasets[row].name)
         self.trace_table = QtGui.QTableWidget()

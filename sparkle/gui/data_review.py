@@ -133,12 +133,13 @@ class QDataReviewer(QtGui.QWidget):
 
     def update(self):
         self.datatree.update()
-        # self.datatable.update()
+        self.datatable.update()
 
     def setCurrentCell(self, row, column, prevrow=None, prevcol=None):
         # don't care about the column clicked, get the path for the row
-        path = str(self.datatable.item(row, 0).text())
-        self.setCurrentData(path)
+        if row != -1:
+            path = str(self.datatable.item(row, 0).text())
+            self.setCurrentData(path)
 
     def setCurrentNode(self, path):
         self.setCurrentData(str(path))
