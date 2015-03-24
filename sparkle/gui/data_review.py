@@ -95,6 +95,10 @@ class QDataReviewer(QtGui.QWidget):
         self.playTraceButton.setToolTip("play current trace")
         self.playTestButton.setToolTip("play test")
 
+        self.overlayButton = QtGui.QPushButton("overlay")
+        self.overlayButton.clicked.connect(self.overlayTrace)
+        self.overlayButton.setToolTip('Overlap all reps in trace')
+
         btnLayout = QtGui.QGridLayout()
         btnLayout.addWidget(self.prevButton, 0, 0)
         btnLayout.addWidget(self.firstButton, 0, 1)
@@ -102,6 +106,7 @@ class QDataReviewer(QtGui.QWidget):
         btnLayout.addWidget(self.nextButton, 0, 3)
         btnLayout.addWidget(self.playTraceButton, 1, 0)
         btnLayout.addWidget(self.playTestButton, 1, 1)
+        btnLayout.addWidget(self.overlayButton, 1, 2)
 
         traceLayout.addWidget(self.tracetable)
         traceLayout.addLayout(btnLayout)
@@ -292,6 +297,9 @@ class QDataReviewer(QtGui.QWidget):
         self.playTraceButton.setEnabled(False)
         self.playTestButton.setText("stop")
         self.timer.start(INTERVAL)
+
+    def overlayTrace(self):
+        self.reviewDataSelected.emit(self.current_path, self.current_trace_num, -1)
 
     def _update_buttons(self):
         # enable/disable buttons appropriate to current location in the data

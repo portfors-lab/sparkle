@@ -91,7 +91,10 @@ class ProtocolDisplay(QtGui.QWidget):
         :param ydata: values to plot
         :type ydata: numpy.ndarray
         """
-        self.spiketracePlot.updateData(axeskey='response', x=xdata, y=ydata)
+        if len(ydata.shape) == 1 or ydata.shape[0] == 1:
+            self.spiketracePlot.updateData(axeskey='response', x=xdata, y=ydata)
+        else:
+            self.spiketracePlot.addTraces(xdata, ydata)
 
     def clearRaster(self):
         """Clears data from the raster plot"""

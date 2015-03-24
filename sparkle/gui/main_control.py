@@ -714,17 +714,19 @@ class MainWindow(ControlWindow):
                 group_path = os.path.dirname(path)
             else:
                 group_path = path
-            response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
-            npoints = response.shape[0]
-            stimuli = self.acqmodel.datafile.get_trace_info(path)
 
-            stimulus = stimuli[tracenum]
             group_info = dict(self.acqmodel.datafile.get_info(group_path))
             aifs = group_info['samplerate_ad']
 
-            # show the stimulus details
-            self.reportProgress(-1, tracenum, stimulus)
-            self.reportRep(repnum)
+            if repnum == -1:
+                showall = True
+                response = self.acqmodel.datafile.get_data(path, (tracenum,))
+                repnum = response.shape[0] -1
+                npoints = response.shape[1]
+            else:
+                showall = False
+                response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
+                npoints = response.shape[0]            
 
             winsz = float(npoints)/aifs
             times = np.linspace(0, winsz, npoints)
@@ -733,6 +735,16 @@ class MainWindow(ControlWindow):
             self.ui.plotDock.switchDisplay('standard')
             self.display.setXlimits((0,winsz))
             self.display.updateSpiketrace(times, response)
+
+            stimuli = self.acqmodel.datafile.get_trace_info(path)
+
+            stimulus = stimuli[tracenum]
+
+            # show the stimulus details
+            self.reportProgress(-1, tracenum, stimulus)
+            self.reportRep(repnum)
+
+
             # need to also recreate the stim
             if repnum == 0:
                 # assume user must first access the first presentation

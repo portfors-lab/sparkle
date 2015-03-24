@@ -136,6 +136,7 @@ class TraceWidget(BasePlot):
 
         self.hideButtons() # hides the 'A' Auto-scale button
         self.updateRasterBounds()
+        self.trace_stash = []
 
     def updateData(self, axeskey, x, y):
         """Replaces the currently displayed data
@@ -153,12 +154,23 @@ class TraceWidget(BasePlot):
             ranges = self.viewRange()
             self.rangeChange(self, ranges)
         if axeskey == 'response':
+            self.clearTraces()
             if self._traceUnit == 'A':
                 y = y * self._ampScalar
             if self.zeroAction.isChecked():
                 start_avg = np.mean(y[5:25])
                 y = y - start_avg
             self.tracePlot.setData(x,y*self._polarity)
+
+    def addTraces(self, x, ys):
+        self.clearTraces()
+        nreps = ys.shape[0]
+        for irep in range(nreps):
+            self.trace_stash.append(self.plot(x, ys[irep,:], pen=(irep, nreps)))
+
+    def clearTraces(self):
+        for trace in self.trace_stash:
+            self.removeItem(trace)
 
     def appendData(self, axeskey, bins, ypoints):
         """Appends data to existing plotted data
