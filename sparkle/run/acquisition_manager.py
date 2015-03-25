@@ -186,22 +186,6 @@ class AcquisitionManager():
         self.bs_calibrator.set_reps(reps)
         self.tone_calibrator.set_reps(reps)
 
-    def create_data_file(self, fname):
-        """Creates a new data file to use
-
-        :param fname: File path of the location for the data file to open
-        :type fname: str
-        """
-        self.datafile = open_acqdata(fname)
-
-        self.explorer.set(datafile=self.datafile)
-        self.protocoler.set(datafile=self.datafile)
-        self.charter.set(datafile=self.datafile)
-        self.bs_calibrator.set(datafile=self.datafile)
-        self.tone_calibrator.set(datafile=self.datafile)
-
-        return fname
-
     def load_data_file(self, fname, filemode='a'):
         """Opens an existing data file to append to
 

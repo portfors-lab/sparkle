@@ -55,10 +55,7 @@ class MainWindow(ControlWindow):
         # as saved configuration relies on this
         self.acqmodel = AcquisitionManager()
         if datafile is not None:
-            if filemode == 'w-':
-                self.acqmodel.create_data_file(datafile)
-            else:
-                self.acqmodel.load_data_file(datafile, filemode)
+            self.acqmodel.load_data_file(datafile, filemode)
             fname = os.path.basename(self.acqmodel.current_data_file())
         else:
             fname = None
@@ -220,9 +217,6 @@ class MainWindow(ControlWindow):
         self.acqmodel.set(reprate=self.ui.reprateSpnbx.value())
 
         if self.currentMode == 'windowed':
-            if self.acqmodel.datafile is None:
-                self.acqmodel.set_save_params(self.savefolder, self.savename)
-                self.acqmodel.create_data_file()
             self.ui.aichanBox.setEnabled(False)
             self.ui.runningLabel.setText(u"RECORDING")
             self.ui.runningLabel.setStyleSheet(GREENSS)
@@ -241,10 +235,6 @@ class MainWindow(ControlWindow):
     def onStartChart(self):
         if not self.verifyInputs('chart'):
             return
-
-        if self.acqmodel.datafile is None:
-            self.acqmodel.set_save_params(self.savefolder, self.savename)
-            self.acqmodel.create_data_file()
 
         self.runChart()
         self.ui.runningLabel.setText(u"RECORDING")
@@ -840,15 +830,13 @@ class MainWindow(ControlWindow):
         dlg = SavingDialog(defaultFile = self.acqmodel.current_data_file())
         if dlg.exec_():
             fname, fmode = dlg.getfile()
-            if fmode == 'w-':
-                self.acqmodel.create_data_file(fname)
-            else:
-                self.acqmodel.load_data_file(fname, fmode)
+            self.acqmodel.load_data_file(fname, fmode)
             # calibration clears on data file load
             self.ui.currentCalLbl.setText('None')
             fname = os.path.basename(fname)
             self.ui.dataFileLbl.setText(fname)
             self.ui.reviewer.setDataObject(self.acqmodel.datafile)
+            self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
         dlg.deleteLater()
 
     def launchCalibrationDlg(self):
