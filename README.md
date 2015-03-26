@@ -32,3 +32,16 @@ Submit bug reports by creating an issue, please provide as much detail as possib
 Contributions are welcome, you can email me if you have any questions before submitting a pull request.
 
 Maintained by Amy Boyle amy@amyboyle.ninja
+
+
+Setting the PYTHONPATH
+-----------------------
+To run sparkle with python from anywhere outside of the sparkle root directory you will need to set the pythonpath.
+
+e.g. for Mac/Linux:
+
+    $ export PYTHONPATH="$PYTHONPATH:/absolute/path/to/sparkle"
+
+or for Window (on Git bash):
+
+    $ export PYTHONPATH="$PYTHONPATH;C:\absolute\path\to\sparkle"
