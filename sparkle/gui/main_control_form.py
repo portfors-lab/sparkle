@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Mon Mar  2 16:14:22 2015
+# Created: Fri Mar 27 10:30:25 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -592,11 +592,14 @@ class Ui_ControlWindow(object):
         self.actionTimer.setObjectName(_fromUtf8("actionTimer"))
         self.actionResponse_SPL = QtGui.QAction(ControlWindow)
         self.actionResponse_SPL.setObjectName(_fromUtf8("actionResponse_SPL"))
+        self.actionVocalization_paths = QtGui.QAction(ControlWindow)
+        self.actionVocalization_paths.setObjectName(_fromUtf8("actionVocalization_paths"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
         self.menuOptions.addAction(self.actionSpectrogram_Parameters)
         self.menuOptions.addAction(self.actionSet_Cell_ID)
+        self.menuOptions.addAction(self.actionVocalization_paths)
         self.menuShow.addAction(self.actionData_Display)
         self.menuShow.addAction(self.actionPSTH)
         self.menuShow.addAction(self.actionProgress)
@@ -635,12 +638,13 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.modeCmbx, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), ControlWindow.setTriggerEnable)
         QtCore.QObject.connect(self.actionResponse_SPL, QtCore.SIGNAL(_fromUtf8("triggered()")), self.responseSpl.showNormal)
         QtCore.QObject.connect(self.psthMaxBox, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.psthStopField.setDisabled)
+        QtCore.QObject.connect(self.actionVocalization_paths, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchVocalPaths)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
         ControlWindow.setWindowTitle(_translate("ControlWindow", "MainWindow", None))
         self.label_3.setToolTip(_translate("ControlWindow", "SONIC SPARKLE HIGH FIVE!!!!!", None))
-        self.label_3.setText(_translate("ControlWindow", "Sparkle", None))
+        self.label_3.setText(_translate("ControlWindow", "NeuroSound", None))
         self.runningLabel.setText(_translate("ControlWindow", "OFF", None))
         self.save_explore_ckbx.setText(_translate("ControlWindow", "Save Explore Recording", None))
         self.label_20.setText(_translate("ControlWindow", "Undesired Attenuation:", None))
@@ -744,14 +748,15 @@ class Ui_ControlWindow(object):
         self.actionComment.setText(_translate("ControlWindow", "Comment", None))
         self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
         self.actionResponse_SPL.setText(_translate("ControlWindow", "response SPL", None))
+        self.actionVocalization_paths.setText(_translate("ControlWindow", "Vocalization paths...", None))
 
-from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
-from sparkle.gui.plotting.pyqtgraph_widgets import PSTHWidget
 from sparkle.gui.calibration_widget import CalibrationWidget
-from sparkle.gui.data_review import QDataReviewer
-from sparkle.gui.stim.smart_spinbox import SmartSpinBox
-from sparkle.gui.stim.stimulus_label import StimulusLabelTable
 from sparkle.gui.plotdock import PlotDockWidget
-from sparkle.gui.timer_widget import TimerWidget
 from sparkle.gui.qprotocol import ProtocolView
 from sparkle.gui.stim.stim_detail import StimDetailWidget
+from sparkle.gui.timer_widget import TimerWidget
+from sparkle.gui.data_review import QDataReviewer
+from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
+from sparkle.gui.stim.stimulus_label import StimulusLabelTable
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+from sparkle.gui.plotting.pyqtgraph_widgets import PSTHWidget

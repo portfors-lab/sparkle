@@ -9,7 +9,8 @@ from QtWrapper import QtCore, QtGui
 from sparkle.acq.daq_tasks import get_ao_chans, get_ai_chans
 
 from sparkle.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
-            ViewSettingsDialog, CalibrationDialog, CellCommentDialog
+            ViewSettingsDialog, CalibrationDialog, CellCommentDialog, \
+            VocalPathDialog
 from sparkle.run.acquisition_manager import AcquisitionManager
 from sparkle.tools.audiotools import calc_spectrum, calc_db, audioread, \
                                        signal_amplitude, calc_summed_db, \
@@ -24,6 +25,7 @@ from sparkle.tools.util import clearLayout
 from sparkle.gui.qprotocol import QProtocolTabelModel
 from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import Vocalization
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.tools import spikestats
         
@@ -886,6 +888,12 @@ class MainWindow(ControlWindow):
     def launchCellDlg(self):
         cid = QtGui.QInputDialog.getInt(self, "Cell ID", "Enter the ID number of the current cell:", self.acqmodel.current_cellid)
         self.acqmodel.current_cellid = cid[0]
+
+    def launchVocalPaths(self):
+        dlg = VocalPathDialog(Vocalization.paths)
+        if dlg.exec_():
+            Vocalization.paths = dlg.paths()
+        dlg.deleteLater()
 
     def recordingSelected(self, modelIndex):
         """ On double click of wav file, load into display """

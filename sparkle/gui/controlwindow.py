@@ -10,6 +10,7 @@ from sparkle.tools.util import convert2native
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.stim.abstract_component import AbstractStimulusComponent
+from sparkle.stim.types.stimuli_classes import Vocalization
 from sparkle.gui.stim.stimulusview import StimulusView
 from sparkle.gui.stim.auto_parameter_view import SmartDelegate
 from main_control_form import Ui_ControlWindow
@@ -216,6 +217,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['calreps'] = self.ui.calibrationWidget.ui.nrepsSpnbx.value()
         savedict['mphonesens'] = self.ui.mphoneSensSpnbx.value()
         savedict['mphonedb'] = self.ui.mphoneDBSpnbx.value()
+        savedict['vocalpaths'] = Vocalization.paths
 
         # parameter settings -- save all tracks present
         savedict['explorestims'] = self.ui.exploreStimEditor.saveTemplate()
@@ -271,6 +273,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.ui.mphoneSensSpnbx.setValue(inputsdict.get('mphonesens', 0.004))
         self.ui.mphoneDBSpnbx.setValue(MPHONE_CALDB)
         # self.ui.mphoneDBSpnbx.setValue(inputsdict.get('mphonedb', 94))
+        Vocalization.paths = inputsdict.get('vocalpaths', [])
 
         # load the previous sessions scaling
         self.tscale = inputsdict.get('tscale', SmartSpinBox.MilliSeconds)

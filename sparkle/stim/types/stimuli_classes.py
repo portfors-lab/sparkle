@@ -1,4 +1,5 @@
 import os, yaml
+import ntpath
 import logging
 
 from scipy.signal import chirp, hann, square
@@ -130,6 +131,7 @@ class Vocalization(AbstractStimulusComponent):
     protocol = True
     _filename = None
     _browsedir = os.path.expanduser('~')
+    paths = []
 
     def browsedir(self):
         return self._browsedir
@@ -158,12 +160,25 @@ class Vocalization(AbstractStimulusComponent):
 
         if os.path.isdir(browsedir):
             self._browsedir = browsedir
-        if fname is not None and os.path.isfile(fname):
-            self._filename = fname
+        if fname is not None:
+            if os.path.isfile(fname):
+                # found file in original location
+                self._filename = fname
+            else:
+                # If we are reviewing data, vocal files may not be in original
+                # location. Search paths for filename, use ntpath to be able 
+                # to pick apart windows style paths on mac/linux
+                basename = ntpath.basename(fname)
+                for path in self.paths:
+                    if os.path.isfile(os.path.join(path, basename)):
+                        self._filename = os.path.join(path, basename)
+                        break
+                else:
+                    logger = logging.getLogger('main')
+                    logger.warn('File: {} not found'.format(basename))
         else:
             logger = logging.getLogger('main')
-            logger.warn('File: {} not found'.format(fname))
-            
+            logger.warn('Vocalization loaded with no file defined')
         # if not os.path.isdir(browsedir):
         #     raise FileDoesNotExistError(browsedir)
         # self._browsedir = browsedir
@@ -188,7 +203,7 @@ class Vocalization(AbstractStimulusComponent):
             # allow lack of file to not cause error, catch in GUI when necessary?
             logger = logging.getLogger('main')
             logger.warn('Vocalization signal request without a file')
-            return np.array([])
+            return np.array([0,0])
         fs, wavdata = audioread(self._filename)
         if fs != fs:
             print 'specified', fs, 'wav file', fs

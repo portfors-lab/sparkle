@@ -731,6 +731,7 @@
     <addaction name="actionSet_Scale"/>
     <addaction name="actionSpectrogram_Parameters"/>
     <addaction name="actionSet_Cell_ID"/>
+    <addaction name="actionVocalization_paths"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -1174,6 +1175,11 @@
     <string>response SPL</string>
    </property>
   </action>
+  <action name="actionVocalization_paths">
+   <property name="text">
+    <string>Vocalization paths...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1404,8 +1410,8 @@
    <slot>clearProtocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>568</x>
-     <y>512</y>
+     <x>249</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1452,8 +1458,8 @@
    <slot>updateCalDb()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>473</x>
-     <y>382</y>
+     <x>249</x>
+     <y>159</y>
     </hint>
     <hint type="destinationlabel">
      <x>866</x>
@@ -1468,8 +1474,8 @@
    <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>342</x>
-     <y>482</y>
+     <x>249</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>788</x>
@@ -1484,8 +1490,8 @@
    <slot>mphoneCalibrate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>568</x>
-     <y>481</y>
+     <x>249</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>749</x>
@@ -1500,8 +1506,8 @@
    <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>482</y>
+     <x>249</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>807</x>
@@ -1605,6 +1611,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionVocalization_paths</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>launchVocalPaths()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>611</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launch_save_dlg()</slot>
@@ -1656,5 +1678,6 @@
   <slot>launchCellDlg()</slot>
   <slot>showComment()</slot>
   <slot>setTriggerEnable()</slot>
+  <slot>launchVocalPaths()</slot>
  </slots>
 </ui>
