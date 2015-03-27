@@ -629,7 +629,7 @@ class TestAcquisitionManager():
     def create_acqmodel(self, winsz, acq_rate=None):
         manager = AcquisitionManager()
         fname = os.path.join(self.tempfolder, 'testdata' +rand_id()+ '.hdf5')
-        manager.create_data_file(fname)
+        manager.load_data_file(fname, 'w-')
         if acq_rate is None:
             acq_rate = manager.calibration_genrate()
         manager.set(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
