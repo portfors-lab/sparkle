@@ -43,6 +43,6 @@ class VocalPathDialog(QtGui.QDialog):
     def paths(self):
         paths = []
         for idx in range(self.ui.filelist.count()):
-            paths.append(self.ui.filelist.item(idx).text())
+            paths.append(str(self.ui.filelist.item(idx).text()))
 
         return paths

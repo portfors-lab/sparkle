@@ -143,7 +143,7 @@ class Vocalization(AbstractStimulusComponent):
         return self._filename
 
     def samplerate(self):
-        if self._filename is not None:
+        if self._filename is not None and self._findFile():
             return audiorate(self._filename)
 
     def stateDict(self):
@@ -160,23 +160,9 @@ class Vocalization(AbstractStimulusComponent):
 
         if os.path.isdir(browsedir):
             self._browsedir = browsedir
-        if fname is not None:
-            if os.path.isfile(fname):
-                # found file in original location
-                self._filename = fname
-            else:
-                # If we are reviewing data, vocal files may not be in original
-                # location. Search paths for filename, use ntpath to be able 
-                # to pick apart windows style paths on mac/linux
-                basename = ntpath.basename(fname)
-                for path in self.paths:
-                    if os.path.isfile(os.path.join(path, basename)):
-                        self._filename = os.path.join(path, basename)
-                        break
-                else:
-                    logger = logging.getLogger('main')
-                    logger.warn('File: {} not found'.format(basename))
-        else:
+
+        self._filename = fname
+        if fname is None:
             logger = logging.getLogger('main')
             logger.warn('Vocalization loaded with no file defined')
         # if not os.path.isdir(browsedir):
@@ -198,12 +184,31 @@ class Vocalization(AbstractStimulusComponent):
 
             self._duration = duration
 
+    def _findFile(self):
+        if os.path.isfile(self._filename):
+            return True
+        # If we are reviewing data, vocal files may not be in original
+        # location. Search paths for filename, use ntpath to be able 
+        # to pick apart windows style paths on mac/linux
+        basename = ntpath.basename(self._filename)
+        for path in self.paths:
+            if os.path.isfile(os.path.join(path, basename)):
+                self.setFile(os.path.join(path, basename))
+                return True
+        logger = logging.getLogger('main')
+        logger.warn('File: {} not found'.format(basename))
+        return False
+
     def signal(self, fs, atten, caldb, calv):
         if self._filename is None:
             # allow lack of file to not cause error, catch in GUI when necessary?
             logger = logging.getLogger('main')
             logger.warn('Vocalization signal request without a file')
             return np.array([0,0])
+
+        if not self._findFile():
+            return np.array([0,0])
+
         fs, wavdata = audioread(self._filename)
         if fs != fs:
             print 'specified', fs, 'wav file', fs
