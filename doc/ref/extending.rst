@@ -1,4 +1,4 @@
-Extending Neurosound
+Extending Sparkle
 ===================
 
 Adding New Stimulus Types
@@ -51,3 +51,11 @@ To do this, you will need to implement a new :class:`StimFactory<sparkle.gui.sti
 * :meth:`create<sparkle.gui.stim.factory.StimFactory.create>` : This method must create and return a new :class:`StimulusModel<sparkle.stim.stimulus_model.StimulusModel>`, and intialize to have whatever components, auto-parameters, and/or values is appropriate. For example, for the Builder editor, this is just an empty :code:`StimlusModel`, but for the Tuning curve editor, it has a :code:`PureTone` component and two auto-parameters for intensity and frequnecy intialized.
 
 Factories are not automatically entered into the GUI. Therefore, the Factory must be placed into the layout of the :class:`StimulusLabelTable<sparkle.gui.stim.stimulus_label.StimulusLabelTable>` as a :class:`DragLabel<sparkle.gui.drag_label.DragLabel>`, by editing the constructor of :code:`StimulusLabelTable`.
+
+
+.. _newformat:
+
+Adding a new data format
+-------------------------
+
+To add a new data format subclass :class:`AcquisitionData<sparkle.data.acqdata.AcquisitionData>` and implement all it's methods. Sparkle interacts with all data through this interface. Also, datasets must be a numpy array and also have a :code:`name` field, used to identify the test after it is pulled out of the class.

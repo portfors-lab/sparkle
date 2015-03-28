@@ -37,6 +37,15 @@ Spectrogram Parameters
 ----------------------
 Input parameters for spectrogram generation on all spectrogram plots in the program.
 
+Set Cell ID
+-----------
+Each cell is given an ID number that increments by prompting the user at the start of a test segment. You can manually set the ID number if you make a mistake. (It will then increment from here). It is not possible to alter already saved cell ID numbers through Sparkle.
+
+Vocalization Paths
+-------------------
+If vocalization files are not in the original location they were initally loaded at (e.g. you are looking at data on a computer other than the one it was acquired on), you can tell sparkle to look in other directories for the recording file.  Sparkle will search all directories on this list (not recursive) for the filename of the recording.
+
+
 View Menu
 ==========
 

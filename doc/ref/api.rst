@@ -1,8 +1,8 @@
 =================
-Neurosound API
+Sparkle API
 =================
 
-This document is intented for maintainers, and people who wish to expand Neurosound. For a description of how I set up the development environment see :doc:`dev_env`
+This document is intented for maintainers, and people who wish to expand Sparkle. For a description of how I set up the development environment see :doc:`dev_env`
 
 The program can be divided into two parts: 
 

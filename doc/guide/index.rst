@@ -28,6 +28,7 @@ Operations
    explore.rst
    protocol.rst
    calibration.rst
+   review.rst
 
 .. _modes:
 
