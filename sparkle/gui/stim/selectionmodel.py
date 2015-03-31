@@ -1,4 +1,5 @@
-from QtWrapper import QtGui, QtCore
+from QtWrapper import QtCore, QtGui
+
 
 class ComponentSelectionModel(QtGui.QItemSelectionModel):
     """Stores items in the selection model by object, not by position"""

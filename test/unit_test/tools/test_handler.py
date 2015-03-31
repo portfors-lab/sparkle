@@ -1,15 +1,15 @@
-import sys
-import os
 import logging
+import os
 import re
+import sys
 
 import yaml
-from QtWrapper import QtCore, QtGui
 
-from sparkle.tools.log import init_logging
-from sparkle.tools.uihandler import TextEditHandler
-from sparkle.tools.uihandler import assign_uihandler_slot
+from QtWrapper import QtCore, QtGui
 from sparkle import tools
+from sparkle.tools.log import init_logging
+from sparkle.tools.uihandler import TextEditHandler, assign_uihandler_slot
+
 
 class TestUIHandler():
 

@@ -1,5 +1,7 @@
 import sip
-from QtWrapper import QtGui, QtCore
+
+from QtWrapper import QtCore, QtGui
+
 
 class AbstractEditorWidget(QtGui.QFrame):
     """Abstract class to share class variables for all editor widgets,

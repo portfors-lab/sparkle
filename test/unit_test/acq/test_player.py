@@ -1,8 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
-from sparkle.acq.players import FinitePlayer, ContinuousPlayer
 import unittest
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from sparkle.acq.players import ContinuousPlayer, FinitePlayer
 
 DEVNAME = "PCI-6259"
 
@@ -155,4 +156,3 @@ class TestDAQPlayers():
 def data_func(nx, f, amp):
     x = np.arange(nx)
     return amp*np.sin(2*np.pi*f*x/len(x))
-

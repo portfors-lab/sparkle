@@ -1,13 +1,12 @@
 import sparkle
-
-from QtWrapper import QtGui, QtCore
-
-from sparkle.gui.stim.factory import StimFactory
-from sparkle.run.protocol_model import ProtocolTabelModel
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
-from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.gui.qconstants import CursorRole
+from sparkle.gui.stim.factory import StimFactory
+from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.resources import cursors
+from sparkle.run.protocol_model import ProtocolTabelModel
+
 
 class QProtocolTabelModel(QtCore.QAbstractTableModel):
     """Qt wrapper for :class:`ProcotolModel<sparkle.run.protocol_model.ProtocolTabelModel>`,
@@ -309,4 +308,3 @@ if __name__ == '__main__': # pragma: no cover
     tableView.setModel(model)
 
     sys.exit(app.exec_())
-

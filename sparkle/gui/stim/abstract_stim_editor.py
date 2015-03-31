@@ -1,9 +1,9 @@
-import os
 import json
+import os
 
 from QtWrapper import QtGui
-
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
+
 
 class AbstractStimulusWidget(AbstractEditorWidget):
     """Abstract class for editors for :class:`QStimulusModels<sparkle.gui.stim.qstimulus.QStimulusModel>`"""

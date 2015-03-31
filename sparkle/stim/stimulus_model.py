@@ -1,15 +1,15 @@
+import copy
+import logging
 import os
 import uuid
-import logging
-import copy
 
-import yaml
 import numpy as np
+import yaml
 
 from sparkle.stim.auto_parameter_model import AutoParameterModel
-from sparkle.tools.audiotools import impulse_response, convolve_filter
-from sparkle.stim.types import get_stimuli_models
 from sparkle.stim.reorder import order_function
+from sparkle.stim.types import get_stimuli_models
+from sparkle.tools.audiotools import convolve_filter, impulse_response
 from sparkle.tools.systools import get_src_directory
 
 src_dir = get_src_directory()

@@ -10,6 +10,7 @@ except:
 
 import numpy as np
 
+
 class AITask(Task):
     """Class for managing continuous input with NI devices
     

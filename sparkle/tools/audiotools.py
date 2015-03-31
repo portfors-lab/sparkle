@@ -1,12 +1,14 @@
 from __future__ import division
 
-import os, yaml
-import numpy as np
+import os
 import wave
+
+import numpy as np
 import scipy.io.wavfile as wv
-from scipy.interpolate import interp1d
+import yaml
 from matplotlib import mlab
-from scipy.signal import hann, fftconvolve
+from scipy.interpolate import interp1d
+from scipy.signal import fftconvolve, hann
 
 VERBOSE = False
 

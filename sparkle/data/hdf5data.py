@@ -1,15 +1,17 @@
-import numpy as np
-import h5py
-import time
 import json
+import logging
 import os
 import socket
-import logging
+import time
+
+import h5py
+import numpy as np
 
 from sparkle.data.acqdata import AcquisitionData, increment
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
-                                        ReadOnlyError, OverwriteFileError
+    OverwriteFileError, ReadOnlyError
 from sparkle.tools.util import convert2native, max_str_num
+
 
 class HDF5Data(AcquisitionData):
     def __init__(self, filename, user='unknown', filemode='w-'):

@@ -1,20 +1,19 @@
-from nose.tools import raises, assert_equal
+import os
 
 import numpy as np
-
-from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
-from sparkle.stim.auto_parameter_model import AutoParameterModel
-from sparkle.gui.stim.stimulus_editor import StimulusEditor
-from sparkle.gui.stim.factory import TCFactory, CCFactory
-from sparkle.stim.reorder import order_function
-
-from QtWrapper import QtCore, QtGui
+import yaml
+from nose.tools import assert_equal, raises
 
 import test.sample as sample
-
-import os, yaml
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.stim.factory import CCFactory, TCFactory
+from sparkle.gui.stim.stimulus_editor import StimulusEditor
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.stim.reorder import order_function
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
 from sparkle.tools.systools import get_src_directory
+
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)

@@ -1,4 +1,5 @@
-from QtWrapper import QtGui, QtCore
+from QtWrapper import QtCore, QtGui
+
 
 class QBorder(QtGui.QFrame):
     def __init__(self, parent):

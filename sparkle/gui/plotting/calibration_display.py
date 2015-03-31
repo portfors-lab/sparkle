@@ -1,6 +1,6 @@
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget
 
-from QtWrapper import QtGui, QtCore
 
 class CalibrationDisplay(QtGui.QWidget):
     """Widget container with two FFT plots, of outgoing and incoming signal,

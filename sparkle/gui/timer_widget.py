@@ -2,6 +2,7 @@ import time
 
 from QtWrapper import QtCore, QtGui
 
+
 class TimerWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TimerWidget, self).__init__(parent)

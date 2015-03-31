@@ -1,16 +1,15 @@
-import sys
 import inspect
-
-from QtWrapper import QtGui, QtCore
+import sys
 
 from pyqtgraph import GradientEditorItem
 
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.stim.components import square_parameters, vocal_parameters
+from sparkle.gui.stim.generic_parameters import GenericParameterWidget
+from sparkle.resources import img
 from sparkle.stim.abstract_component import AbstractStimulusComponent
 from sparkle.stim.types.stimuli_classes import *
-from sparkle.gui.stim.generic_parameters import GenericParameterWidget
-from sparkle.gui.stim.components import vocal_parameters, square_parameters
-from sparkle.tools.audiotools import spectrogram, audioread, audiorate
-from sparkle.resources import img
+from sparkle.tools.audiotools import audiorate, audioread, spectrogram
 
 COLORTABLE=[]
 for i in reversed(range(256)): COLORTABLE.append(QtGui.qRgb(i,i,i))

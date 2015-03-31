@@ -9,6 +9,17 @@
 
 from PyQt4 import QtCore, QtGui
 
+from sparkle.gui.calibration_widget import CalibrationWidget
+from sparkle.gui.data_review import QDataReviewer
+from sparkle.gui.plotdock import PlotDockWidget
+from sparkle.gui.plotting.pyqtgraph_widgets import PSTHWidget
+from sparkle.gui.qprotocol import ProtocolView
+from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+from sparkle.gui.stim.stim_detail import StimDetailWidget
+from sparkle.gui.stim.stimulus_label import StimulusLabelTable
+from sparkle.gui.timer_widget import TimerWidget
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -749,14 +760,3 @@ class Ui_ControlWindow(object):
         self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
         self.actionResponse_SPL.setText(_translate("ControlWindow", "response SPL", None))
         self.actionVocalization_paths.setText(_translate("ControlWindow", "Vocalization paths...", None))
-
-from sparkle.gui.calibration_widget import CalibrationWidget
-from sparkle.gui.plotdock import PlotDockWidget
-from sparkle.gui.qprotocol import ProtocolView
-from sparkle.gui.stim.stim_detail import StimDetailWidget
-from sparkle.gui.timer_widget import TimerWidget
-from sparkle.gui.data_review import QDataReviewer
-from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
-from sparkle.gui.stim.stimulus_label import StimulusLabelTable
-from sparkle.gui.stim.smart_spinbox import SmartSpinBox
-from sparkle.gui.plotting.pyqtgraph_widgets import PSTHWidget

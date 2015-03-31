@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class AutoParameterModel():
     """Model to hold all the necessary information to generate
     auto-tests, where parameters of components are systematically

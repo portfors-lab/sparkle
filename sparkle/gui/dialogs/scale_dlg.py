@@ -1,7 +1,7 @@
 from QtWrapper import QtGui
 from scale_dlg_form import Ui_ScaleDlg
-
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+
 
 class ScaleDialog(QtGui.QDialog):
     """Dialog for setting the time and frequency scaling for the GUI"""

@@ -67,4 +67,3 @@ def test_bad_data_shape():
     current_index = [0,0,0]
 
     current_index = increment(current_index, dimensions, data_shape)
-

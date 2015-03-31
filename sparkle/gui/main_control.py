@@ -1,35 +1,32 @@
-import os, yaml
-import numpy as np
-import logging
-import time
 import getpass
+import logging
+import os
+import time
 
+import numpy as np
+import yaml
+
+from controlwindow import ControlWindow
 from QtWrapper import QtCore, QtGui
-
-from sparkle.acq.daq_tasks import get_ao_chans, get_ai_chans
-
-from sparkle.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
-            ViewSettingsDialog, CalibrationDialog, CellCommentDialog, \
-            VocalPathDialog
-from sparkle.run.acquisition_manager import AcquisitionManager
-from sparkle.tools.audiotools import calc_spectrum, calc_db, audioread, \
-                                       signal_amplitude, calc_summed_db, \
-                                       sum_db, rms
-from sparkle.gui.plotting.pyqtgraph_widgets import ProgressWidget
-from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
-from sparkle.gui.wait_widget import WaitWidget
-from sparkle.tools.systools import get_src_directory
-from sparkle.tools.qsignals import ProtocolSignals
-from sparkle.tools.uihandler import assign_uihandler_slot
-from sparkle.tools.util import clearLayout
+from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
+from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
+    SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
+    VocalPathDialog
+from sparkle.gui.plotting.pyqtgraph_widgets import ProgressWidget, \
+    SimplePlotWidget, SpecWidget
 from sparkle.gui.qprotocol import QProtocolTabelModel
 from sparkle.gui.stim.qstimulus import QStimulusModel
+from sparkle.gui.wait_widget import WaitWidget
+from sparkle.run.acquisition_manager import AcquisitionManager
 from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.types.stimuli_classes import Vocalization
-from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.tools import spikestats
-        
-from controlwindow import ControlWindow
+from sparkle.tools.audiotools import audioread, calc_db, calc_spectrum, \
+    calc_summed_db, rms, signal_amplitude, sum_db
+from sparkle.tools.qsignals import ProtocolSignals
+from sparkle.tools.systools import get_src_directory
+from sparkle.tools.uihandler import assign_uihandler_slot
+from sparkle.tools.util import clearLayout
 
 RED = QtGui.QPalette()
 RED.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
@@ -1011,7 +1008,3 @@ class MainWindow(ControlWindow):
         self.onStop()
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
-
-
-
-

@@ -1,10 +1,10 @@
 from nose.tools import assert_in
 
-from sparkle.stim.auto_parameter_model import AutoParameterModel
+import test.sample as sample
 from sparkle.stim.abstract_component import AbstractStimulusComponent
+from sparkle.stim.auto_parameter_model import AutoParameterModel
 from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
 
-import test.sample as sample
 
 class TestAutoParameterModel():
     def test_insert_rows(self):

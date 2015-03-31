@@ -1,9 +1,9 @@
-from QtWrapper import QtGui
-
-from stimulus_editor_form import Ui_StimulusEditor
 from auto_parameters_editor import Parametizer
-from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
+from QtWrapper import QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
+from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
+from stimulus_editor_form import Ui_StimulusEditor
+
 
 class StimulusEditor(AbstractStimulusWidget):
     """Interface for editing stimuli in any way possible. Assemble components,

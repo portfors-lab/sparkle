@@ -1,14 +1,18 @@
-import os, yaml
-import threading
 import multiprocessing as multip
-
+import os
 import platform
+import threading
+
+import yaml
+
+from sparkle.acq.daq_tasks import AITask, AITaskFinite, AOTaskFinite, \
+    DigitalOutTask
+
 if platform.system() == 'Windows':
     import win32com.client
 elif platform.system() == 'Linux':
     pass
 
-from sparkle.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, DigitalOutTask
 
 PRINT_WARNINGS = False
 VERBOSE = True

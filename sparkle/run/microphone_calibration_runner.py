@@ -1,10 +1,11 @@
 import numpy as np
 
+from sparkle.acq.players import FinitePlayer
 from sparkle.run.list_runner import ListAcquisitionRunner
-from sparkle.tools.audiotools import signal_amplitude
 from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.types.stimuli_classes import Silence
-from sparkle.acq.players import FinitePlayer
+from sparkle.tools.audiotools import signal_amplitude
+
 
 class MphoneCalibrationRunner(ListAcquisitionRunner):
     """

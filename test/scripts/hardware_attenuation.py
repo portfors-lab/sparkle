@@ -10,11 +10,13 @@ are testing a difference piece of hardware.
 Plots and displays results
 """
 import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
+
 from sparkle.io.players import FinitePlayer
 from sparkle.tools import audiotools
 from test.scripts.util import record
-import matplotlib.pyplot as plt
 
 #################################################
 # change these values to suit

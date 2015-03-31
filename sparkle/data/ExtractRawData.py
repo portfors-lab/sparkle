@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def extract_raw_data(filename, experiment_data, test_nums=None, trace_nums=[]):
 
     if test_nums is None:

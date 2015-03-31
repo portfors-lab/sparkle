@@ -1,7 +1,7 @@
 
 from QtWrapper import QtGui
-
 from sparkle.tools.util import clearLayout
+
 
 class ComponentsDetailWidget(QtGui.QWidget):
     """class that presents the stimulus doc in a clear and useful way"""

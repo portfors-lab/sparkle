@@ -1,15 +1,17 @@
-import numpy as np
-import os, glob
+import glob
 import json
-import random, string
+import os
+import random
 import re
+import string
 
 import h5py
-from nose.tools import raises, assert_in, assert_equal
+import numpy as np
+from nose.tools import assert_equal, assert_in, raises
 
 from sparkle.data.hdf5data import HDF5Data
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
-                                        ReadOnlyError, OverwriteFileError
+    OverwriteFileError, ReadOnlyError
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 

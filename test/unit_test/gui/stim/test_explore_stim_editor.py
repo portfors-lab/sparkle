@@ -1,6 +1,7 @@
 from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
 from sparkle.stim.stimulus_model import StimulusModel
 
+
 class TestExploreStimEditor():
 
   def setUp(self):

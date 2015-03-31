@@ -1,15 +1,16 @@
 import logging
-import re
 import os
+import re
 
 import numpy as np
 
+from ExtractRawData import extract_raw_data
+from ParsePST import parse_pst
 from sparkle.data.acqdata import AcquisitionData
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
-                                        ReadOnlyError, OverwriteFileError
+    OverwriteFileError, ReadOnlyError
 from sparkle.tools.util import convert2native, max_str_num
-from ParsePST import parse_pst
-from ExtractRawData import extract_raw_data
+
 
 class BatlabData(AcquisitionData):
     def __init__(self, filename, user='unknown', filemode='r'):

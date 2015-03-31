@@ -1,8 +1,9 @@
 import os
 
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
-                                        ReadOnlyError, OverwriteFileError
+    OverwriteFileError, ReadOnlyError
 from sparkle.tools.util import convert2native, max_str_num
+
 
 class AcquisitionData(object):
     """

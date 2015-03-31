@@ -1,22 +1,22 @@
-import os
 import json
 import logging
+import os
 
 import yaml
-from QtWrapper import QtCore, QtGui
 
 import sparkle.tools.systools as systools
-from sparkle.tools.util import convert2native
+from main_control_form import Ui_ControlWindow
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
+from sparkle.gui.stim.auto_parameter_view import SmartDelegate
 from sparkle.gui.stim.components.qcomponents import wrapComponent
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+from sparkle.gui.stim.stimulusview import StimulusView
 from sparkle.stim.abstract_component import AbstractStimulusComponent
 from sparkle.stim.types.stimuli_classes import Vocalization
-from sparkle.gui.stim.stimulusview import StimulusView
-from sparkle.gui.stim.auto_parameter_view import SmartDelegate
-from main_control_form import Ui_ControlWindow
 from sparkle.tools.systools import get_src_directory
-from sparkle.gui.stim.smart_spinbox import SmartSpinBox
-from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
+from sparkle.tools.util import convert2native
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
@@ -318,4 +318,3 @@ class ControlWindow(QtGui.QMainWindow):
         settings.setValue("windowState", self.saveState())
         logger = logging.getLogger('main')
         logger.info('All user settings saved')
-

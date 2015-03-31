@@ -1,12 +1,13 @@
 import time
 
-from QtWrapper import QtGui, QtCore
-
-from sparkle.gui.plotting.protocoldisplay import ProtocolDisplay
-from sparkle.gui.plotting.calibration_display import CalibrationDisplay
-from sparkle.gui.plotting.calibration_explore_display import ExtendedCalibrationDisplay
-from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.plotmenubar import PlotMenuBar
+from sparkle.gui.plotting.calibration_display import CalibrationDisplay
+from sparkle.gui.plotting.calibration_explore_display import \
+    ExtendedCalibrationDisplay
+from sparkle.gui.plotting.protocoldisplay import ProtocolDisplay
+from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget
+
 
 class PlotDockWidget(QtGui.QDockWidget):
     """Widget that contains all of the data display widgets"""

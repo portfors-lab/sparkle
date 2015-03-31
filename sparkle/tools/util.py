@@ -1,8 +1,10 @@
-import re
 import os
+import re
 
 import numpy as np
+
 from QtWrapper import QtCore
+
 
 def increment_title(title):
     """

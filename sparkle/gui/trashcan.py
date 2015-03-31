@@ -1,6 +1,7 @@
 import os
 
-from QtWrapper import QtGui, QtCore
+from QtWrapper import QtCore, QtGui
+
 
 class TrashWidget(QtGui.QPushButton):
     """Widget which serves as a drop location to remove items from a model/view"""

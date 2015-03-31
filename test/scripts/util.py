@@ -1,14 +1,15 @@
-import sys, time
-import numpy as np
+import sys
+import time
+
 import matplotlib.pyplot as plt
+import numpy as np
 
-from QtWrapper import QtGui, QtCore
-
+from QtWrapper import QtCore, QtGui
 from sparkle.acq.players import FinitePlayer
 from sparkle.stim.types.stimuli_classes import PureTone
-from sparkle.tools.audiotools import calc_db, calc_spectrum, \
-                            convolve_filter, multiply_frequencies, \
-                            signal_amplitude, calc_summed_db, rms
+from sparkle.tools.audiotools import calc_db, calc_spectrum, calc_summed_db, \
+    convolve_filter, multiply_frequencies, rms, signal_amplitude
+
 
 class MyTableWidgetItem(QtGui.QTableWidgetItem):
     def __lt__(self, other):

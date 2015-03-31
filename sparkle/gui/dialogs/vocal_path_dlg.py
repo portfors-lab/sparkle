@@ -1,7 +1,8 @@
 import os
 
-from QtWrapper import QtGui, QtCore
+from QtWrapper import QtCore, QtGui
 from vocal_path_dlg_form import Ui_VocalPathDialog
+
 
 class VocalPathDialog(QtGui.QDialog):
     """Dialog for collecting user comments per protocol run"""

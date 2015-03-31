@@ -1,5 +1,6 @@
 from QtWrapper import QtGui
 
+
 class DynamicStackedWidget(QtGui.QStackedWidget):
     """Adds a couple methods for getting child widgets to 
     a :qtdoc:QStackedWidget"""

@@ -1,11 +1,11 @@
-from QtWrapper import QtCore, QtGui
 import numpy as np
 
-from sparkle.gui.stim.selectionmodel import ComponentSelectionModel
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
-from sparkle.stim.auto_parameter_model import AutoParameterModel
 from sparkle.gui.qconstants import CursorRole
+from sparkle.gui.stim.selectionmodel import ComponentSelectionModel
 from sparkle.resources import cursors
+from sparkle.stim.auto_parameter_model import AutoParameterModel
 
 ERRCELL = QtGui.QColor('firebrick')
 

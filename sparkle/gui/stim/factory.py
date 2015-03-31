@@ -2,17 +2,17 @@
 Factory classes for intializing :class:`StimulusModels<sparkle.stim.stimulus_model.StimulusModel>`
 and assigning editors to them
 """
-import os
 import json
+import os
 
-from QtWrapper import QtGui, QtCore
-
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.stimulus_editor import StimulusEditor
 from sparkle.gui.stim.tuning_curve import TuningCurveEditor
-from sparkle.stim.types.stimuli_classes import PureTone
-from sparkle.stim.auto_parameter_model import AutoParameterModel
 from sparkle.stim import get_stimulus_editor
+from sparkle.stim.auto_parameter_model import AutoParameterModel
 from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import PureTone
+
 
 class StimFactory():
     """Abstract Class for all factories to re-implement"""

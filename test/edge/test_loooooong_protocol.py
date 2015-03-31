@@ -2,20 +2,20 @@
 expected really), to check that no errors happen and data gets recorded
 """
 
-import os
-import json
 import glob
+import json
+import os
 
-from QtWrapper import QtGui, QtCore, QtTest
 import h5py
-
-from sparkle.gui.control import MainWindow
-from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.gui.stim.factory import TCFactory
-from sparkle.tools.systools import rand_id
 
 import qtbot
 import test.sample as sample
+from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.gui.control import MainWindow
+from sparkle.gui.stim.factory import TCFactory
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.tools.systools import rand_id
+
 
 class TestMainUI():
     def setUp(self):

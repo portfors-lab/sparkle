@@ -1,9 +1,7 @@
-from QtWrapper import QtCore, QtGui, QtTest
-
-from sparkle.gui.stim_table import StimTable
-from sparkle.data.open import open_acqdata
-
 import qtbot
+from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.data.open import open_acqdata
+from sparkle.gui.stim_table import StimTable
 from test import sample
 
 PAUSE = 200
@@ -55,4 +53,3 @@ class TestStimTable():
             assert field in headers
 
         self.table.trace_table.close()
-            

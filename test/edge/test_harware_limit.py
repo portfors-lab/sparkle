@@ -2,8 +2,7 @@
 capable to be output/recorded with the current DAC
 """
 from sparkle.acq.players import FinitePlayer
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, Silence
-
+from sparkle.stim.types.stimuli_classes import PureTone, Silence, Vocalization
 from test.scripts.util import record
 
 if __name__ == "__main__":

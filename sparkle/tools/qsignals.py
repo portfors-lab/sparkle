@@ -1,5 +1,7 @@
-from QtWrapper import QtCore
 import numpy
+
+from QtWrapper import QtCore
+
 
 class ProtocolSignals(QtCore.QObject):
     curve_finished = QtCore.Signal()

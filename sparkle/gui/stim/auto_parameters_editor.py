@@ -1,10 +1,11 @@
-from QtWrapper import QtGui, QtCore
-
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.drag_label import DragLabel
-from sparkle.gui.stim.auto_parameter_view import AutoParameterTableView, AddLabel
-from sparkle.gui.trashcan import TrashWidget
 from sparkle.gui.hidden_widget import WidgetHider
+from sparkle.gui.stim.auto_parameter_view import AddLabel, \
+    AutoParameterTableView
+from sparkle.gui.trashcan import TrashWidget
 from sparkle.stim.reorder import order_function
+
 
 class Parametizer(QtGui.QWidget):
     """Container widget for the auto parameters"""

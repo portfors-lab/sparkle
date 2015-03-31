@@ -1,14 +1,16 @@
-import os, yaml
-import ntpath
 import logging
+import ntpath
+import os
 
-from scipy.signal import chirp, hann, square
 import numpy as np
+import yaml
+from scipy.signal import chirp, hann, square
 
 from sparkle.stim.abstract_component import AbstractStimulusComponent
-from sparkle.tools.audiotools import make_tone, audioread, audiorate, \
-                                        signal_amplitude
+from sparkle.tools.audiotools import audiorate, audioread, make_tone, \
+    signal_amplitude
 from sparkle.tools.exceptions import FileDoesNotExistError
+
 
 class PureTone(AbstractStimulusComponent):
     name = "Pure Tone"
@@ -339,4 +341,3 @@ class SFM(AbstractStimulusComponent):
 
 class Ripples(AbstractStimulusComponent):
     name = "ripples"
-

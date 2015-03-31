@@ -1,7 +1,6 @@
-from sparkle.data.ParsePST import parse_pst
-from sparkle.data.ExtractRawData import extract_raw_data
-
 import test.sample as sample
+from sparkle.data.ExtractRawData import extract_raw_data
+from sparkle.data.ParsePST import parse_pst
 
 test_types = ['tone',
               'fmsweep',
@@ -48,4 +47,3 @@ def test_parse_batlab():
     assert len(raw_data[12]) == 4
     assert raw_data[0][0].shape == (5, 4000)
     assert raw_data[12][0].shape == (5, 4000)
-

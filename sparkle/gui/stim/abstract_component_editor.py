@@ -1,6 +1,6 @@
 from QtWrapper import QtCore
-
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
+
 
 class AbstractComponentWidget(AbstractEditorWidget):
     """Common functions for Component editors"""

@@ -1,8 +1,8 @@
 from QtWrapper import QtGui
-
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
-from sparkle.gui.stim.smart_spinbox import SmartSpinBox
 from sparkle.gui.stim.incrementer import IncrementInput
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+
 
 class GenericParameterWidget(AbstractComponentWidget):
     """Editor widget intended to work with (almost) any possible 
@@ -73,4 +73,3 @@ class GenericParameterWidget(AbstractComponentWidget):
         """Gets the widget responsible for duration input"""
         if 'duration' in self.inputWidgets:
             return self.inputWidgets['duration']
-

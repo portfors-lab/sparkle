@@ -1,8 +1,8 @@
 from QtWrapper import QtGui
-
-from sparkle.stim.types import get_stimuli_models
-from sparkle.gui.trashcan import TrashWidget
 from sparkle.gui.drag_label import DragLabel
+from sparkle.gui.trashcan import TrashWidget
+from sparkle.stim.types import get_stimuli_models
+
 
 class ComponentTemplateTable(QtGui.QWidget):
     """A container filled with draggable labels that drop stimulus components"""

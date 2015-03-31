@@ -1,10 +1,11 @@
 from nose.tools import assert_equal
 
+from QtWrapper import QtCore
 from sparkle.gui.qprotocol import QProtocolTabelModel
 from sparkle.run.protocol_model import ProtocolTabelModel
 from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.types.stimuli_classes import PureTone
-from QtWrapper import QtCore
+
 
 class TestQProtocolModel():
     def test_insert_emtpy_stim(self):
@@ -105,4 +106,3 @@ class TestQProtocolModel():
         model.insertTest(stim,0)
 
         assert model.verify() == 0
-

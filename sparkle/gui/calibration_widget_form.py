@@ -9,6 +9,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+from sparkle.gui.stim.tuning_curve import TuningCurveEditor
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -110,5 +112,3 @@ class Ui_CalibrationWidget(object):
         self.testTypeGrp.setTitle(_translate("CalibrationWidget", "Test type", None))
         self.calTypeCmbbx.setToolTip(_translate("CalibrationWidget", "Stimulus type", None))
         self.calTypeCmbbx.setItemText(0, _translate("CalibrationWidget", "Tone Curve", None))
-
-from sparkle.gui.stim.tuning_curve import TuningCurveEditor

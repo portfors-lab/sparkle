@@ -1,5 +1,6 @@
-import uuid
 import cPickle
+import uuid
+
 
 class AbstractStimulusComponent(object):
     """Represents a single component of a complete summed stimulus"""

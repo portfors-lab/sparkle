@@ -5,6 +5,7 @@ import re
 from docutils import nodes, utils
 from docutils.parsers.rst.roles import set_classes
 
+
 def qtdoc_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     """Links to a Qt class's doc
 

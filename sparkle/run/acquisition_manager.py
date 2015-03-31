@@ -1,15 +1,16 @@
 import logging
-import threading
 import Queue
+import threading
 
-from sparkle.tools.util import create_unique_path
 from sparkle.data.open import open_acqdata
-from sparkle.run.search_runner import SearchRunner
-from sparkle.run.protocol_runner import ProtocolRunner
+from sparkle.run.calibration_runner import CalibrationCurveRunner, \
+    CalibrationRunner
 from sparkle.run.chart_runner import ChartRunner
-from sparkle.run.calibration_runner import CalibrationRunner, CalibrationCurveRunner
 from sparkle.run.microphone_calibration_runner import MphoneCalibrationRunner
+from sparkle.run.protocol_runner import ProtocolRunner
+from sparkle.run.search_runner import SearchRunner
 from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.tools.util import create_unique_path
 
 
 class AcquisitionManager():

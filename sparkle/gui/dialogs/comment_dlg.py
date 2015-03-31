@@ -1,5 +1,6 @@
-from QtWrapper import QtGui
 from comment_dlg_form import Ui_CellCommentDialog
+from QtWrapper import QtGui
+
 
 class CellCommentDialog(QtGui.QDialog):
     """Dialog for collecting user comments per protocol run"""

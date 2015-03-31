@@ -1,8 +1,9 @@
 import numpy as np
 
-from sparkle.gui.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget, \
+    TraceWidget
 
-from QtWrapper import QtGui, QtCore
 
 class ProtocolDisplay(QtGui.QWidget):
     """Data display intended for use during brain recording"""

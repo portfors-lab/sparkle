@@ -1,15 +1,14 @@
 import os
 
-from QtWrapper import QtGui, QtCore, QtTest
-
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
+import qtbot
+from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.components.vocal_parameters import VocalParameterWidget
 from sparkle.stim.types import get_stimuli_models
-from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.stim.types.stimuli_classes import *
-
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
 from test import sample
-import qtbot
+
 
 class TestVocalizationEditor():
     def setUp(self):

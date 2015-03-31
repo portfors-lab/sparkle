@@ -1,6 +1,6 @@
-from sparkle.gui.plotting.pyqtgraph_widgets import TraceWidget, SpecWidget, FFTWidget
-
-from QtWrapper import QtGui, QtCore
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget, \
+    TraceWidget
 
 
 class ExtendedCalibrationDisplay(QtGui.QWidget):

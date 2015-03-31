@@ -1,6 +1,6 @@
 from QtWrapper import QtGui
-
 from sparkle.gui.stim.stim_detail_form import Ui_StimDetailWidget
+
 
 class StimDetailWidget(QtGui.QWidget):
     """Container widget for presenting Stimulus details from the doc"""

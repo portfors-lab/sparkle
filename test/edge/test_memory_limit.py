@@ -3,7 +3,7 @@ window size for the current RAM usage -- therefore you get different
 limits if you are using 64-bit python or 32-bit.
 """
 from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, Silence
+from sparkle.stim.types.stimuli_classes import PureTone, Silence, Vocalization
 
 acqrate = 5e5
 winsz = 0.2 #seconds

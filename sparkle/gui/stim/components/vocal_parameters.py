@@ -1,11 +1,11 @@
 from os.path import dirname
 
-from QtWrapper import QtGui, QtCore
-
-from vocal_parameters_form import Ui_VocalParameterWidget
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
-from sparkle.tools.audiotools import spectrogram
 from sparkle.gui.stim.components.order_dlg import OrderDialog
+from sparkle.tools.audiotools import spectrogram
+from vocal_parameters_form import Ui_VocalParameterWidget
+
 
 class VocalParameterWidget(AbstractComponentWidget, Ui_VocalParameterWidget):
     vocalFilesChanged = QtCore.Signal(object, list)

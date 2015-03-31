@@ -1,9 +1,10 @@
 import logging
 
 from QtWrapper import QtGui
+from sparkle.stim.types.stimuli_classes import FMSweep, WhiteNoise
 
-from sparkle.stim.types.stimuli_classes import WhiteNoise, FMSweep
 from .calibration_widget_form import Ui_CalibrationWidget
+
 
 class CalibrationWidget(QtGui.QWidget):
     """Widget to handle inputs for the running and testing of speaker calibration. By default,

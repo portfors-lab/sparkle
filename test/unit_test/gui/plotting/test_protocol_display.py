@@ -1,9 +1,9 @@
 import sys
 import time
 
-from QtWrapper.QtGui import QApplication
 import numpy as np
 
+from QtWrapper.QtGui import QApplication
 from sparkle.gui.plotting.protocoldisplay import ProtocolDisplay
 from test.sample import samplewav
 

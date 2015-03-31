@@ -1,9 +1,10 @@
-import os, shutil
-
-from sparkle.tools.util import increment_title, convert2native, \
-                                    next_str_num, create_unique_path
+import os
+import shutil
 
 import numpy as np
+
+from sparkle.tools.util import convert2native, create_unique_path, \
+    increment_title, next_str_num
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 

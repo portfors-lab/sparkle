@@ -1,9 +1,10 @@
-from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget
-
 import time
+
 import numpy as np
 
 from QtWrapper.QtGui import QApplication
+from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget
+
 
 def test_chart_speed():
 

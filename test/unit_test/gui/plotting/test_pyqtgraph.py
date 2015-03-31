@@ -1,23 +1,28 @@
-import sip
-sip.setdestroyonexit(0)
-
-from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, \
-        TraceWidget, SpecWidget, ProgressWidget, PSTHWidget, ChartWidget, \
-        SimplePlotWidget, StackedPlot
-
-import sys, os, time
 import inspect
+import os
+import sys
+import time
+
 import numpy as np
-
-from QtWrapper.QtCore import Qt, QTimer
-from QtWrapper.QtGui import QApplication
-
-import sparkle.tools.audiotools as audiotools
-import test.sample as sample
-
+import sip
 from nose.tools import assert_equal
 from numpy.testing import assert_array_almost_equal, assert_array_equal
+
 import robouser
+import sparkle.tools.audiotools as audiotools
+import test.sample as sample
+from QtWrapper.QtCore import Qt, QTimer
+from QtWrapper.QtGui import QApplication
+from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget, FFTWidget, \
+    ProgressWidget, PSTHWidget, SimplePlotWidget, SpecWidget, StackedPlot, \
+    TraceWidget
+
+sip.setdestroyonexit(0)
+
+
+
+
+
 
 PAUSE = 0.0
 

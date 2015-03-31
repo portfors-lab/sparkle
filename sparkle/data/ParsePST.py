@@ -2,6 +2,7 @@
 
 import re
 
+
 def parse_pst(filename):
 
     # just go ahead and read the whole file in one go

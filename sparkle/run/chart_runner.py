@@ -2,6 +2,7 @@ from sparkle.acq.players import ContinuousPlayer
 from sparkle.run.list_runner import ListAcquisitionRunner
 from sparkle.tools.util import increment_title
 
+
 class ChartRunner(ListAcquisitionRunner):
     def __init__(self, signals):
         super(ChartRunner, self).__init__(signals)

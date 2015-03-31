@@ -2,6 +2,7 @@ import os
 
 import sparkle.tools.systools as systools
 
+
 def test_project_dir_valid():
     path = systools.get_project_directory()
     assert os.path.isdir(path)

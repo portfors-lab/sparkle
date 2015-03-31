@@ -1,20 +1,18 @@
-import os
 import json
-
-from QtWrapper.QtTest import QTest 
-from QtWrapper.QtGui import QApplication
-from QtWrapper.QtCore import Qt, QTimer
+import os
 import unittest
 
+import qtbot
+import test.sample as sample
+from QtWrapper.QtCore import Qt, QTimer
+from QtWrapper.QtGui import QApplication
+from QtWrapper.QtTest import QTest
+from sparkle.gui.stim.factory import BuilderFactory
 from sparkle.gui.stim.qstimulus import QStimulusModel
-from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, Silence
 from sparkle.gui.stim.stimulus_editor import StimulusEditor
 from sparkle.stim.auto_parameter_model import AutoParameterModel
-from sparkle.gui.stim.factory import BuilderFactory
-
-import test.sample as sample
-import qtbot
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import PureTone, Silence, Vocalization
 
 ALLOW = 100
 

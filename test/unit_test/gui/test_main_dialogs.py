@@ -1,12 +1,14 @@
-import os, glob
-import threading, time
+import glob
+import os
+import threading
+import time
 
-from QtWrapper import QtGui, QtTest
 from nose.tools import assert_equal
 
+import qtbot
+from QtWrapper import QtGui, QtTest
 from sparkle.gui.main_control import MainWindow
 
-import qtbot
 
 class TestMainDialogs():
     """Just trying to test the code which launches dialogs, and

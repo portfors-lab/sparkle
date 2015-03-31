@@ -2,6 +2,7 @@ import os
 
 from QtWrapper import QtGui
 
+
 class SavingDialog(QtGui.QFileDialog):
     """Dialog for setting the current data file"""
     def __init__(self, defaultFile=None, *args, **kwargs):

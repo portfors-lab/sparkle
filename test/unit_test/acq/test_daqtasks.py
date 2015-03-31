@@ -1,13 +1,16 @@
+import time
 import unittest
+
 import numpy as np
-from sparkle.acq.daq_tasks import AITaskFinite, AOTaskFinite, AITask, AOTask, \
-                                    DigitalOutTask, get_ao_chans, get_ai_chans
+
+from sparkle.acq.daq_tasks import AITask, AITaskFinite, AOTask, AOTaskFinite, \
+    DigitalOutTask, get_ai_chans, get_ao_chans
+
 try:
     from PyDAQmx import *
 except:
     from sparkle.acq.daqmx_stub import *
 
-import time
 
 DEBUG = False
 DEVNAME = "PCI-6259"

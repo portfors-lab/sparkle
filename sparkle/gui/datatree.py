@@ -1,5 +1,6 @@
 from QtWrapper import QtCore, QtGui
 
+
 class DataTreeItem(QtGui.QTreeWidgetItem):
     def __init__(self, parent, datakey):
         super(DataTreeItem, self).__init__(parent)

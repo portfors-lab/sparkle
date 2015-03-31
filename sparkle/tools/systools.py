@@ -1,7 +1,9 @@
-import sys, os
 import ctypes
+import os
 import platform
-import random, string
+import random
+import string
+import sys
 
 APPNAME = 'audiolab'
 

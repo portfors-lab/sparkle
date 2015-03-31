@@ -1,10 +1,9 @@
-from QtWrapper import QtGui, QtCore
-
-from sparkle.gui.drag_label import DragLabel
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
-from sparkle.stim.abstract_component import AbstractStimulusComponent
+from sparkle.gui.drag_label import DragLabel
+from sparkle.gui.qconstants import AutoParamMode, BuildMode, CursorRole
 from sparkle.gui.stim.selectionmodel import ComponentSelectionModel
-from sparkle.gui.qconstants import CursorRole, BuildMode, AutoParamMode
+from sparkle.stim.abstract_component import AbstractStimulusComponent
 
 ROW_HEIGHT = 100
 ROW_SPACE = 25

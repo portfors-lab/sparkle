@@ -1,21 +1,21 @@
+import logging
 import os
 import uuid
-import logging
 
-import yaml
 import numpy as np
-from QtWrapper import QtCore, QtGui
+import yaml
 
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.qconstants import AutoParamMode, BuildMode, CursorRole
+from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
-from sparkle.tools.audiotools import impulse_response, convolve_filter
-from sparkle.stim.types import get_stimuli_models
+from sparkle.resources import cursors
 from sparkle.stim import get_stimulus_editor
 from sparkle.stim.reorder import order_function
-from sparkle.tools.systools import get_src_directory
 from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.gui.stim.components.qcomponents import wrapComponent
-from sparkle.gui.qconstants import CursorRole, BuildMode, AutoParamMode
-from sparkle.resources import cursors
+from sparkle.stim.types import get_stimuli_models
+from sparkle.tools.audiotools import convolve_filter, impulse_response
+from sparkle.tools.systools import get_src_directory
 
 src_dir = get_src_directory()
 # print 'src_dir', src_dir

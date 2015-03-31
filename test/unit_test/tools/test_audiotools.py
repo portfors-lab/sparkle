@@ -1,18 +1,19 @@
-import os, yaml
+import os
 
-import sparkle.tools.audiotools as tools
-from sparkle.tools.systools import get_src_directory
-
-import test.sample as sample
-
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io.wavfile as wv
+import yaml
+from nose.tools import raises
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, \
+    assert_array_equal
 from scipy import signal
 from scipy.stats import linregress
-from nose.tools import raises
 
-from numpy.testing import assert_array_almost_equal, assert_almost_equal, assert_array_equal
-import matplotlib.pyplot as plt
+import sparkle.tools.audiotools as tools
+import test.sample as sample
+from sparkle.tools.systools import get_src_directory
+
 
 def data_func(t, f):
     return 2*np.sin(2*np.pi*f*t/len(t))
@@ -464,4 +465,3 @@ def test_audiorate_wav():
 def test_audiorate_call1():
     fs = tools.audiorate(sample.samplecall1())
     assert fs == 333333
-

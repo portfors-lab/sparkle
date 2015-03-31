@@ -1,8 +1,9 @@
 """Stand-in module for development when NI drivers are not available"""
-import numpy as np
-import threading, time
-
+import threading
+import time
 from ctypes import c_bool
+
+import numpy as np
 
 DAQmx_Val_Rising = None
 DAQmx_Val_Cfg_Default = None

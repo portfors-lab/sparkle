@@ -1,5 +1,6 @@
 from QtWrapper import QtGui
 
+
 class PlotMenuBar(QtGui.QMenuBar):
     """Menu bar for the plot dock widget"""
     def __init__(self, dock, parent=None):

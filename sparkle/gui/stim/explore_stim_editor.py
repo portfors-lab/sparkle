@@ -1,12 +1,12 @@
-from QtWrapper import QtGui, QtCore
-
 from explore_stim_editor_form import Ui_ExploreStimEditor
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
-from sparkle.gui.stim.explore_component_editor import ExploreComponentEditor
 from sparkle.gui.stim.components.qcomponents import wrapComponent
+from sparkle.gui.stim.explore_component_editor import ExploreComponentEditor
 from sparkle.stim.types import get_stimuli_models
 from sparkle.stim.types.stimuli_classes import Silence
-    
+
+
 class ExploreStimulusEditor(AbstractStimulusWidget):
     """Editor for StimulusModel used in search mode"""
     def __init__(self, parent=None):

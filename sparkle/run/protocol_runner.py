@@ -1,10 +1,11 @@
 import numpy as np
 
+from sparkle.acq.players import FinitePlayer
 from sparkle.run.list_runner import ListAcquisitionRunner
+from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.tools import spikestats
 from sparkle.tools.util import next_str_num
-from sparkle.acq.players import FinitePlayer
-from sparkle.stim.stimulus_model import StimulusModel
+
 
 class ProtocolRunner(ListAcquisitionRunner):
     """Handles the presentation of data for an experimental protocol"""

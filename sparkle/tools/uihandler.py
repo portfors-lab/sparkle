@@ -3,6 +3,7 @@ import traceback
 
 from QtWrapper import QtCore
 
+
 class LogSignal(QtCore.QObject):
     message = QtCore.Signal(str)
 

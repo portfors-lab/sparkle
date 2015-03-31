@@ -1,16 +1,15 @@
 import os
 
-from sparkle.gui.dialogs import SavingDialog, ScaleDialog, SpecDialog, \
-                            CalibrationDialog, CellCommentDialog, ViewSettingsDialog
-from sparkle.data.open import open_acqdata
-
-import test.sample as sample
-
 from nose.tools import assert_equal
 
-from QtWrapper.QtTest import QTest 
-from QtWrapper.QtGui import QApplication, QLineEdit
+import test.sample as sample
 from QtWrapper.QtCore import Qt
+from QtWrapper.QtGui import QApplication, QLineEdit
+from QtWrapper.QtTest import QTest
+from sparkle.data.open import open_acqdata
+from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
+    SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog
+
 
 class TestCalibrationDialog():
     def setUp(self):

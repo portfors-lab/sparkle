@@ -2,19 +2,22 @@
 algorithms and parameter values
 """
 
-import sys, time, os, json
+import json
+import os
+import sys
+import time
 
 import numpy as np
-from QtWrapper import QtGui, QtCore
 import pyqtgraph as pg
 
+from QtWrapper import QtCore, QtGui
 from sparkle.acq.players import FinitePlayer
 from sparkle.stim.stimulus_model import StimulusModel
 # from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
-from sparkle.stim.types.stimuli_classes import WhiteNoise, FMSweep
-from sparkle.tools.audiotools import impulse_response, attenuation_curve
-from test.scripts.util import calc_error, record, MyTableWidgetItem, \
-                                apply_calibration
+from sparkle.stim.types.stimuli_classes import FMSweep, WhiteNoise
+from sparkle.tools.audiotools import attenuation_curve, impulse_response
+from test.scripts.util import MyTableWidgetItem, apply_calibration, \
+    calc_error, record
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')

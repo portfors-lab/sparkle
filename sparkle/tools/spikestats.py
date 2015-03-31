@@ -1,6 +1,7 @@
 """ Here is a doc string for spikestats :)"""
 import numpy as np
 
+
 def spike_times(signal, threshold, fs, mint=None):
     """Detect spikes from a given signal
 

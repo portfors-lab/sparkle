@@ -1,8 +1,9 @@
-from QtWrapper import QtGui, QtCore
 from numpy import floor
 
 from incrementer_form import Ui_IncrementInput
-from sparkle.resources.icons import arrowup, arrowdown
+from QtWrapper import QtCore, QtGui
+from sparkle.resources.icons import arrowdown, arrowup
+
 
 class IncrementInput(QtGui.QWidget,Ui_IncrementInput):
     """Input widget with buttons to increment the value in the 

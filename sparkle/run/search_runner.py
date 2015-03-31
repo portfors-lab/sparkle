@@ -1,14 +1,15 @@
-import time
-import threading
 import logging
+import threading
+import time
 
 import numpy as np
 
 from sparkle.acq.players import FinitePlayer
 from sparkle.run.abstract_acquisition import AbstractAcquisitionRunner
 from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.tools.util import increment_title
 from sparkle.tools import spikestats
+from sparkle.tools.util import increment_title
+
 
 class SearchRunner(AbstractAcquisitionRunner):
     """Handles the presentation of data where changes are allowed to

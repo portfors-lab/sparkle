@@ -1,7 +1,8 @@
 import cPickle
 
-from QtWrapper import QtGui, QtCore
+from QtWrapper import QtCore, QtGui
 from sparkle.resources import cursors
+
 
 class DragLabel(QtGui.QLabel):
     dragActive = QtCore.Signal(bool)

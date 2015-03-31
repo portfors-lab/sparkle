@@ -1,9 +1,9 @@
 import cPickle
 
-from QtWrapper import QtGui, QtCore
-
-from sparkle.gui.qconstants import CursorRole
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.border import QBorder
+from sparkle.gui.qconstants import CursorRole
+
 
 class AbstractDragView(object):
     """Class to keep drag and drop behaviour consistent across UI"""

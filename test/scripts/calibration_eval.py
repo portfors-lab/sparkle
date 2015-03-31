@@ -4,20 +4,21 @@ betweent the desired and recorded signals. Produces a table and plots of
 results.
 """
 
-import sys, time
-import numpy as np
+import sys
+import time
 
-from QtWrapper import QtGui, QtCore
+import numpy as np
 import pyqtgraph as pg
 
+from QtWrapper import QtCore, QtGui
 from sparkle.acq.players import FinitePlayer
-from sparkle.stim.types.stimuli_classes import WhiteNoise, PureTone, FMSweep
-from sparkle.gui.plotting.pyqtgraph_widgets import StackedPlot, SimplePlotWidget
-from sparkle.tools.audiotools import tukey, impulse_response, \
-                smooth, attenuation_curve, calc_db, signal_amplitude, calc_spectrum
-
-from test.scripts.util import calc_error, record, MyTableWidgetItem, \
-                              apply_calibration, run_tone_curve
+from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget, \
+    StackedPlot
+from sparkle.stim.types.stimuli_classes import FMSweep, PureTone, WhiteNoise
+from sparkle.tools.audiotools import attenuation_curve, calc_db, \
+    calc_spectrum, impulse_response, signal_amplitude, smooth, tukey
+from test.scripts.util import MyTableWidgetItem, apply_calibration, \
+    calc_error, record, run_tone_curve
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')

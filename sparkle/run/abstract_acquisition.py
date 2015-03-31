@@ -1,7 +1,8 @@
-import time
 import threading
+import time
 
 import numpy as np
+
 
 class AbstractAcquisitionRunner(object):
     """Holds state information for an experimental session"""

@@ -1,13 +1,11 @@
-import sys
 import logging
+import sys
 
 from QtWrapper import QtCore, QtGui
-
-from sparkle.gui.main_control import MainWindow
 from sparkle.gui.dialogs import SavingDialog
-from sparkle.tools.systools import get_free_mb, get_drives
+from sparkle.gui.main_control import MainWindow
 from sparkle.resources import icons
-
+from sparkle.tools.systools import get_drives, get_free_mb
 
 try:
     import PyDAQmx

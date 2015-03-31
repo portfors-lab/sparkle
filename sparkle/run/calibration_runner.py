@@ -1,18 +1,19 @@
-import os
 import logging
+import os
 
-import yaml
 import numpy as np
+import yaml
 
-from sparkle.run.list_runner import ListAcquisitionRunner
-from sparkle.stim.types.stimuli_classes import WhiteNoise, FMSweep, PureTone
-from sparkle.tools.audiotools import attenuation_curve, calc_spectrum, \
-                                         calc_db, signal_amplitude
 from sparkle.acq.players import FinitePlayer
-from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.gui.stim.factory import CCFactory
-from sparkle.tools.util import next_str_num
+from sparkle.run.list_runner import ListAcquisitionRunner
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import FMSweep, PureTone, WhiteNoise
+from sparkle.tools.audiotools import attenuation_curve, calc_db, \
+    calc_spectrum, signal_amplitude
 from sparkle.tools.systools import get_src_directory
+from sparkle.tools.util import next_str_num
+
 
 class AbstractCalibrationRunner(ListAcquisitionRunner):
     """Provides some common fucntionality for calibration presentation"""

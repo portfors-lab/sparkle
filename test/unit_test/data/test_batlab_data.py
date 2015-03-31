@@ -1,8 +1,8 @@
 
-from sparkle.data.hdf5data import HDF5Data
-from sparkle.data.batlabdata import BatlabData
-
 import test.sample as sample
+from sparkle.data.batlabdata import BatlabData
+from sparkle.data.hdf5data import HDF5Data
+
 
 class TestBatlabData():
     def setup(self):

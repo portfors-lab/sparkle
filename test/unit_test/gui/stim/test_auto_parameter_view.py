@@ -1,10 +1,8 @@
-from QtWrapper import QtCore, QtGui, QtTest
-
-from sparkle.stim.auto_parameter_model import AutoParameterModel
-from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
-from sparkle.gui.stim.auto_parameter_view import AutoParameterTableView
-
 import qtbot
+from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.gui.stim.auto_parameter_view import AutoParameterTableView
+from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
+from sparkle.stim.auto_parameter_model import AutoParameterModel
 
 ALLOW = 100
 

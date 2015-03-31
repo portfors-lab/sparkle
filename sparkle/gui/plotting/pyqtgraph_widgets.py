@@ -1,15 +1,15 @@
-import time
 import os
+import threading
+import time
+
+import numpy as np
+import pyqtgraph as pg
 import yaml
 
-from QtWrapper import QtCore, QtGui
-import pyqtgraph as pg
-import numpy as np
-import threading
-
-from sparkle.gui.plotting.viewbox import SpikeyViewBox
-from sparkle.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 import sparkle.tools.audiotools as audiotools
+from QtWrapper import QtCore, QtGui
+from sparkle.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
+from sparkle.gui.plotting.viewbox import SpikeyViewBox
 from sparkle.tools import spikestats
 from sparkle.tools.systools import get_src_directory
 

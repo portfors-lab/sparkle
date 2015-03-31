@@ -1,17 +1,17 @@
-import os, glob
+import glob
 import json
+import os
 
 import h5py
-from nose.tools import assert_in, assert_equal
-from QtWrapper import QtGui, QtCore, QtTest
+from nose.tools import assert_equal, assert_in
 
-from sparkle.gui.main_control import MainWindow
+import qtbot
+import test.sample as sample
+from QtWrapper import QtCore, QtGui, QtTest
 from sparkle.data.open import open_acqdata
+from sparkle.gui.main_control import MainWindow
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
 from sparkle.tools.systools import rand_id
-
-import test.sample as sample
-import qtbot
 
 PAUSE = 200
 ALLOW = 15

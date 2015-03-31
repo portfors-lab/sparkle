@@ -1,8 +1,10 @@
-import sys
-import os
 import logging
 import logging.config
+import os
+import sys
+
 import yaml
+
 
 def init_logging():
     """Initialize a logger from a configuration file to use throughout the project"""

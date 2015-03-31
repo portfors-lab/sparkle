@@ -1,10 +1,12 @@
 """Converts Batlab format .pst and .raw files into Sparkles HDF5 format"""
 
-import h5py
 import json
 
-from ParsePST import parse_pst
+import h5py
+
 from ExtractRawData import extract_raw_data
+from ParsePST import parse_pst
+
 
 def convert_file(filename):
     # filename of the pst and raw files, without the extenstion. Assumes co-located files with the same name.

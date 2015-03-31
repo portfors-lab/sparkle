@@ -1,8 +1,7 @@
 from QtWrapper import QtGui
-
+from sparkle.stim.types import get_stimuli_models
 from view_dlg_form import Ui_ViewSettingsDialog
 
-from sparkle.stim.types import get_stimuli_models
 
 class ViewSettingsDialog(QtGui.QDialog):
     """Dialog for setting GUI options"""

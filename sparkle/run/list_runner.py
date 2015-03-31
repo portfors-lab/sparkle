@@ -1,12 +1,13 @@
-import time
-import threading
-import logging
 import gc
+import logging
+import threading
+import time
 
 import numpy as np
 
 from sparkle.run.abstract_acquisition import AbstractAcquisitionRunner
 from sparkle.run.protocol_model import ProtocolTabelModel
+
 
 class Broken(Exception): pass
 

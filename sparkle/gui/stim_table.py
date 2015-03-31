@@ -2,6 +2,7 @@ import copy
 
 from QtWrapper import QtCore, QtGui
 
+
 class StimTable(QtGui.QTableWidget):
     def __init__(self, data=None):
         super(StimTable, self).__init__()

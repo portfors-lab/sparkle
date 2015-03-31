@@ -1,23 +1,26 @@
-import sys, os, glob
+import glob
 import json
+import os
+import Queue
+import sys
+import threading
 import time
-import threading, Queue
+import unittest
 
 import h5py
 import numpy as np
-from nose.tools import assert_in, assert_equal, nottest
-import unittest
-
-from sparkle.run.acquisition_manager import AcquisitionManager
-from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.stim.auto_parameter_model import AutoParameterModel
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, Silence
-from sparkle.data.open import open_acqdata
-from sparkle.stim.reorder import random_order
-from sparkle.gui.stim.factory import TCFactory
-from sparkle.tools.systools import rand_id
+from nose.tools import assert_equal, assert_in, nottest
 
 import test.sample as sample
+from sparkle.data.open import open_acqdata
+from sparkle.gui.stim.factory import TCFactory
+from sparkle.run.acquisition_manager import AcquisitionManager
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.stim.reorder import random_order
+from sparkle.stim.stimulus_model import StimulusModel
+from sparkle.stim.types.stimuli_classes import PureTone, Silence, Vocalization
+from sparkle.tools.systools import rand_id
+
 
 class TestAcquisitionManager():
 

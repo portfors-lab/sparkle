@@ -1,9 +1,9 @@
 import re
 
-from QtWrapper import QtGui, QtCore
-
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox, trim
+
 
 class AddLabel(object):
     name = "Add"

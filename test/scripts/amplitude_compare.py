@@ -5,12 +5,12 @@ tones. Calibrations and tone curves should match.
 import sys
 
 import numpy as np
-from QtWrapper import QtGui
 
+from QtWrapper import QtGui
 from sparkle.acq.players import FinitePlayer
+from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from sparkle.stim.types.stimuli_classes import FMSweep
 from sparkle.tools import audiotools as atools
-from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from test.scripts.util import record, run_tone_curve
 
 # copied from SO

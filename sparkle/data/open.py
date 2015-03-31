@@ -1,5 +1,6 @@
-from sparkle.data.hdf5data import HDF5Data
 from sparkle.data.batlabdata import BatlabData
+from sparkle.data.hdf5data import HDF5Data
+
 
 def open_acqdata(filename, user='unknown', filemode='w-'):
     if filename.lower().endswith((".hdf5", ".h5")):

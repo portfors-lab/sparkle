@@ -1,5 +1,6 @@
 import random
 
+
 def order_function(name):
     if name == 'random':
         return random_order

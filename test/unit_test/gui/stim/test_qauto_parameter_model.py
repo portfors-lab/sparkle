@@ -1,14 +1,13 @@
 from nose.tools import assert_in
 
-from sparkle.stim.auto_parameter_model import AutoParameterModel
-from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
+import test.sample as sample
+from QtWrapper import QtCore
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.auto_parameter_view import SmartDelegate
+from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
+from sparkle.stim.auto_parameter_model import AutoParameterModel
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
 
-from QtWrapper import QtCore
-
-import test.sample as sample
 
 class TestAutoParameterModel():
 

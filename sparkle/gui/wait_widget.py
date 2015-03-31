@@ -1,5 +1,6 @@
 from QtWrapper import QtCore, QtGui
 
+
 class WaitWidget(QtGui.QLabel):
     """Simple wiget that only contains a label "Loading..." So the user
     doesn't think the GUI has frozen."""

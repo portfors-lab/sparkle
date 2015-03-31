@@ -1,16 +1,16 @@
 import cPickle
-import os, shutil
+import os
+import shutil
 
 from nose.tools import assert_equal
-from QtWrapper import QtCore, QtGui, QtTest
-
-from sparkle.run.protocol_model import ProtocolTabelModel
-from sparkle.gui.qprotocol import QProtocolTabelModel, ProtocolView
-from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
-from sparkle.gui.drag_label import DragLabel
 
 import qtbot
+from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.gui.drag_label import DragLabel
+from sparkle.gui.qprotocol import ProtocolView, QProtocolTabelModel
+from sparkle.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
+from sparkle.run.protocol_model import ProtocolTabelModel
+from sparkle.stim.stimulus_model import StimulusModel
 
 ALLOW = 15
 

@@ -1,9 +1,10 @@
-from sparkle.tools.spikestats import spike_times, bin_spikes, spike_latency, firing_rate
-
-import test.sample as sample
-
 import numpy as np
 import scipy.io.wavfile as wv
+
+import test.sample as sample
+from sparkle.tools.spikestats import bin_spikes, firing_rate, spike_latency, \
+    spike_times
+
 
 def test_spike_times_sin():
     """Use a smooth stimulus to test"""

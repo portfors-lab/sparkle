@@ -1,9 +1,9 @@
-from sparkle.stim.types import get_stimuli_models
-import test.sample as sample
-
 from nose.tools import assert_equal
 
+import test.sample as sample
 from QtWrapper.QtGui import QApplication
+from sparkle.stim.types import get_stimuli_models
+
 
 class TestStimuliTypes():
 

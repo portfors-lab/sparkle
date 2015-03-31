@@ -1,8 +1,8 @@
 from QtWrapper import QtGui
-
 from sparkle.gui.drag_label import DragLabel
 from sparkle.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
 from sparkle.gui.trashcan import TrashWidget
+
 
 class StimulusLabelTable(QtGui.QWidget):
     """A Container with draggable Stimulus labels that drop StimulusModels"""

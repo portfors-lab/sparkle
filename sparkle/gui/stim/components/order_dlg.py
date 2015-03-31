@@ -1,5 +1,6 @@
 from QtWrapper import QtCore, QtGui
 
+
 class OrderDialog(QtGui.QDialog):
     def __init__(self, items):
         super(OrderDialog, self).__init__()

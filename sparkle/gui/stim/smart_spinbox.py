@@ -1,7 +1,9 @@
 import re
 
-from QtWrapper import QtGui, QtCore
 from numpy import floor
+
+from QtWrapper import QtCore, QtGui
+
 
 class SmartSpinBox(QtGui.QDoubleSpinBox):
     # enums

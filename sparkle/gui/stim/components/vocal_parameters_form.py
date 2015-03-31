@@ -9,6 +9,10 @@
 
 from PyQt4 import QtCore, QtGui
 
+from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
+from sparkle.gui.stim.incrementer import IncrementInput
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -125,7 +129,3 @@ class Ui_VocalParameterWidget(object):
         self.label_32.setText(_translate("VocalParameterWidget", "Duration", None))
         self.label_42.setText(_translate("VocalParameterWidget", "Intensity", None))
         self.label_40.setText(_translate("VocalParameterWidget", "Rise fall time", None))
-
-from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
-from sparkle.gui.stim.incrementer import IncrementInput
-from sparkle.gui.stim.smart_spinbox import SmartSpinBox

@@ -1,6 +1,6 @@
 from QtWrapper import QtGui
-
 from specgram_dlg_form import Ui_SpecDialog
+
 
 class SpecDialog(QtGui.QDialog):
     """Dialog for setting parameters for spectrogram calculation"""

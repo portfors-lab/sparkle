@@ -1,5 +1,6 @@
 from QtWrapper import QtGui
-from sparkle.resources.icons import arrowup, arrowdown
+from sparkle.resources.icons import arrowdown, arrowup
+
 
 class WidgetHider(QtGui.QWidget):   
     """Takes a widget and places it into a collapsable container widget

@@ -1,8 +1,7 @@
-from QtWrapper import QtGui, QtCore, QtTest
-
+from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.stim.types import get_stimuli_models
 from sparkle.stim.types.stimuli_classes import *
-from sparkle.gui.stim.components.qcomponents import wrapComponent
 
 PAUSE = 200
 ALLOW = 15

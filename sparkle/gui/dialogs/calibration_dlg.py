@@ -1,9 +1,9 @@
 import re
 
-from QtWrapper import QtGui, QtCore
-
 from calibration_dlg_form import Ui_CalibrationDialog
+from QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
+
 
 class CalibrationDialog(QtGui.QDialog):
     """Dialog to set current calibration, and the frequency range to apply it to"""
