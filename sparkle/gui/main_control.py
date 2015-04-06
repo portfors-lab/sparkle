@@ -545,7 +545,7 @@ class MainWindow(ControlWindow):
 
     def processResponse(self, times, response, test_num, trace_num, rep_num, extra_info={}):
         """Calulate spike times from raw response data"""
-        if self.activeOperation == 'calibration':
+        if self.activeOperation == 'calibration' or self.activeOperation == 'caltone':
             # all this is only meaningful for spike recordings
             return
 

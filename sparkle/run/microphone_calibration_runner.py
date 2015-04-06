@@ -37,7 +37,6 @@ class MphoneCalibrationRunner(ListAcquisitionRunner):
 
     def _process_response(self, response, trace_info, irep):
         self.response_buffer[irep,:] = response
-        self.putnotify('response_collected', (self.aitimes, response))
 
     def process_calibration(self):
         amps = []
