@@ -754,6 +754,7 @@ class MainWindow(ControlWindow):
 
             # recreate PSTH for current threshold and current rep
             tracedata = self.acqmodel.datafile.get_data(path, (tracenum,))
+            self.display.setNreps(tracedata.shape[0])
 
             binsz = float(self.ui.binszSpnbx.value())
             winsz = float(tracedata.shape[1])/aifs
