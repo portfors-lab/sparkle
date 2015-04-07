@@ -2,23 +2,12 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Fri Mar 27 10:30:25 2015
+# Created: Tue Apr  7 11:18:32 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
-
-from sparkle.gui.calibration_widget import CalibrationWidget
-from sparkle.gui.data_review import QDataReviewer
-from sparkle.gui.plotdock import PlotDockWidget
-from sparkle.gui.plotting.pyqtgraph_widgets import PSTHWidget
-from sparkle.gui.qprotocol import ProtocolView
-from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
-from sparkle.gui.stim.smart_spinbox import SmartSpinBox
-from sparkle.gui.stim.stim_detail import StimDetailWidget
-from sparkle.gui.stim.stimulus_label import StimulusLabelTable
-from sparkle.gui.timer_widget import TimerWidget
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -653,9 +642,9 @@ class Ui_ControlWindow(object):
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
-        ControlWindow.setWindowTitle(_translate("ControlWindow", "MainWindow", None))
+        ControlWindow.setWindowTitle(_translate("ControlWindow", "SPARKLE", None))
         self.label_3.setToolTip(_translate("ControlWindow", "SONIC SPARKLE HIGH FIVE!!!!!", None))
-        self.label_3.setText(_translate("ControlWindow", "NeuroSound", None))
+        self.label_3.setText(_translate("ControlWindow", "SPARKLE", None))
         self.runningLabel.setText(_translate("ControlWindow", "OFF", None))
         self.save_explore_ckbx.setText(_translate("ControlWindow", "Save Explore Recording", None))
         self.label_20.setText(_translate("ControlWindow", "Undesired Attenuation:", None))
@@ -760,3 +749,14 @@ class Ui_ControlWindow(object):
         self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
         self.actionResponse_SPL.setText(_translate("ControlWindow", "response SPL", None))
         self.actionVocalization_paths.setText(_translate("ControlWindow", "Vocalization paths...", None))
+
+from sparkle.gui.calibration_widget import CalibrationWidget
+from sparkle.gui.plotdock import PlotDockWidget
+from sparkle.gui.qprotocol import ProtocolView
+from sparkle.gui.stim.stim_detail import StimDetailWidget
+from sparkle.gui.timer_widget import TimerWidget
+from sparkle.gui.data_review import QDataReviewer
+from sparkle.gui.stim.explore_stim_editor import ExploreStimulusEditor
+from sparkle.gui.stim.stimulus_label import StimulusLabelTable
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
+from sparkle.gui.plotting.pyqtgraph_widgets import PSTHWidget

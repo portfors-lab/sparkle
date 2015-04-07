@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>SPARKLE</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -28,7 +28,7 @@
          <string>SONIC SPARKLE HIGH FIVE!!!!!</string>
         </property>
         <property name="text">
-         <string>NeuroSound</string>
+         <string>SPARKLE</string>
         </property>
        </widget>
       </item>

@@ -12,7 +12,6 @@ try:
     REVIEWMODE = False
 except:
     REVIEWMODE = True
-REVIEWMODE = False
 
 def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
