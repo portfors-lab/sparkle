@@ -65,12 +65,23 @@ class TestMainUI():
         for f in files:
             os.remove(f)
 
+    # =====================================
+    # Test explore functions
+    # =====================================
+
     def test_tone_explore_defaults(self):
         """The defaults should combine to be a viable set-up"""
         self.explore_run('pure tone')
 
     def test_vocal_explore(self):
         self.explore_run('vocalization')
+
+    def test_explore_stim_off(self):
+        self.explore_run('off')
+
+    # =====================================
+    # Test calibration functions
+    # ===================================== 
 
     def test_save_calibration(self):
         """Defaults should be viable"""
@@ -117,40 +128,9 @@ class TestMainUI():
     def test_apply_calibration_nocal(self):
         self.run_all_apply_cal(False)
 
-    def run_all_apply_cal(self, withcal):
-        self.form.ui.tabGroup.setCurrentIndex(2)
-        QtTest.QTest.qWait(ALLOW)
-
-        qtbot.click(self.form.ui.calibrationWidget.ui.applycalCkbx)
-        QtTest.QTest.qWait(ALLOW)
-
-        # test for each option available
-        for i in range(self.form.ui.calibrationWidget.ui.calTypeCmbbx.count()):
-            self.run_apply_cal(withcal)
-            qtbot.move(self.form.ui.calibrationWidget.ui.calTypeCmbbx)
-            qtbot.wheel(-1)
-            QtTest.QTest.qWait(100)
-
-    def run_apply_cal(self, withcal):
-        if withcal:
-            self.set_fake_calibration()
-            assert self.form.calvals['calname'] != ''
-
-        calname = self.form.calvals['calname']
-        assert self.form.calvals['use_calfile'] == withcal
-
-        self.start_acq()
-
-        self.wait_until_done()
-
-        # make sure no calibration is present
-        assert self.form.calvals['use_calfile'] == withcal
-        assert self.form.calvals['calname'] == calname
-
-        # also should not save data
-        data_groups = self.form.acqmodel.datafile.keys()
-        print 'keys', data_groups
-        assert len(data_groups) == 0
+    # =====================================
+    # Test protocol functions
+    # =====================================
 
     def test_tuning_curve(self):
         
@@ -181,13 +161,6 @@ class TestMainUI():
         qtbot.handle_modal_widget(wait=True)
 
         assert not self.form.ui.stopBtn.isEnabled()
-
-    def setup_tc(self):
-        self.form.ui.tabGroup.setCurrentIndex(1)
-        QtGui.QApplication.processEvents()
-        pv = self.form.ui.protocolView
-        
-        qtbot.drag(self.form.ui.stimulusChoices.tcLbl, pv)
 
     def test_saved_stim(self):
         self.form.ui.tabGroup.setCurrentIndex(1)
@@ -361,17 +334,6 @@ class TestMainUI():
         assert stims[1].stimType() == 'Custom'
         assert stims[1].traceCount() > 1
 
-    def test_explore_stim_off(self):
-        self.explore_run('off')
-
-    def test_undock_display(self):
-        # set display to top tab
-        self.form.tabifyDockWidget(self.form.ui.psthDock, self.form.ui.plotDock)
-        QtTest.QTest.qWait(ALLOW)
-        qtbot.drag(self.form.ui.plotDock.titleBarWidget(), self.form)
-        # wait to make sure it doesn't crash
-        QtTest.QTest.qWait(1000)
-
     def test_edit_stim_after_start(self):
         stimEditor = self.add_builder_tone()
 
@@ -409,6 +371,29 @@ class TestMainUI():
         stim_info = datafile.get_trace_info('/segment_1/test_2')
         # first stim is control silence, other stim is our tone
         assert stim_info[1]['components'][0]['duration'] == 0.02
+
+    # =====================================
+    # Test other UI stuffs
+    # =====================================
+
+    def test_undock_display(self):
+        # set display to top tab
+        self.form.tabifyDockWidget(self.form.ui.psthDock, self.form.ui.plotDock)
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.drag(self.form.ui.plotDock.titleBarWidget(), self.form)
+        # wait to make sure it doesn't crash
+        QtTest.QTest.qWait(1000)
+
+    # =====================================
+    # helper functions
+    # =====================================
+
+    def setup_tc(self):
+        self.form.ui.tabGroup.setCurrentIndex(1)
+        QtGui.QApplication.processEvents()
+        pv = self.form.ui.protocolView
+        
+        qtbot.drag(self.form.ui.stimulusChoices.tcLbl, pv)
 
     def add_builder_tone(self):
         stimEditor = self.add_edit_builder()
@@ -454,6 +439,42 @@ class TestMainUI():
         qtbot.click(self.form.ui.stopBtn)
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "OFF"
+
+
+    def run_all_apply_cal(self, withcal):
+        self.form.ui.tabGroup.setCurrentIndex(2)
+        QtTest.QTest.qWait(ALLOW)
+
+        qtbot.click(self.form.ui.calibrationWidget.ui.applycalCkbx)
+        QtTest.QTest.qWait(ALLOW)
+
+        # test for each option available
+        for i in range(self.form.ui.calibrationWidget.ui.calTypeCmbbx.count()):
+            self.run_apply_cal(withcal)
+            qtbot.move(self.form.ui.calibrationWidget.ui.calTypeCmbbx)
+            qtbot.wheel(-1)
+            QtTest.QTest.qWait(100)
+
+    def run_apply_cal(self, withcal):
+        if withcal:
+            self.set_fake_calibration()
+            assert self.form.calvals['calname'] != ''
+
+        calname = self.form.calvals['calname']
+        assert self.form.calvals['use_calfile'] == withcal
+
+        self.start_acq()
+
+        self.wait_until_done()
+
+        # make sure no calibration is present
+        assert self.form.calvals['use_calfile'] == withcal
+        assert self.form.calvals['calname'] == calname
+
+        # also should not save data
+        data_groups = self.form.acqmodel.datafile.keys()
+        print 'keys', data_groups
+        assert len(data_groups) == 0
 
     def add_edit_builder(self):
         # add a custom stimulus and opens its editor
