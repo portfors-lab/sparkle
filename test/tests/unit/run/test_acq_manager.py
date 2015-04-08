@@ -629,6 +629,15 @@ class TestAcquisitionManager():
 
         hfile.close()
 
+    def test_mphone_calibration(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        t = manager.run_mphone_calibration(300)
+        t.join()
+        calval = manager.process_mphone_calibration()
+        assert calval > 0
+
     def create_acqmodel(self, winsz, acq_rate=None):
         manager = AcquisitionManager()
         fname = os.path.join(self.tempfolder, 'testdata' +rand_id()+ '.hdf5')

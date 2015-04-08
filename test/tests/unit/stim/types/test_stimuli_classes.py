@@ -1,7 +1,6 @@
 from nose.tools import assert_equal
 
 import test.sample as sample
-from QtWrapper.QtGui import QApplication
 from sparkle.stim.types import get_stimuli_models
 
 
@@ -33,13 +32,6 @@ class TestStimuliTypes():
         for stimulus in self.stimuli:
             msg = stimulus.verify(samplerate=fs)
             assert msg == 0
-            
-    # def test_editor(self):
-    #     app = QApplication([])
-    #     for stimulus in self.stimuli:
-    #         editor = stimulus.showEditor()
-    #         assert editor is not None
-    #     app.exit(0)
 
     def test_state_change(self):
         # test that the minimum states update
