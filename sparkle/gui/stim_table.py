@@ -48,7 +48,7 @@ class StimTable(QtGui.QTableWidget):
         self.setData(self.data)
 
     def expandTest(self, row, column):
-        stimuli = self.data.get_trace_info(self.datasets[row].name)
+        stimuli = self.data.get_trace_stim(self.datasets[row].name)
         self.trace_table = QtGui.QTableWidget()
         self.trace_table.setRowCount(len(stimuli))
         if len(stimuli) == 1:

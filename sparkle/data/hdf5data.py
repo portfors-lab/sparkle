@@ -11,7 +11,7 @@ from sparkle.data.acqdata import AcquisitionData, increment
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
     OverwriteFileError, ReadOnlyError
 from sparkle.tools.util import convert2native, max_str_num
-
+from sparkle.tools.doc_inherit import doc_inherit
 
 class HDF5Data(AcquisitionData):
     def __init__(self, filename, user='unknown', filemode='w-'):
@@ -42,11 +42,8 @@ class HDF5Data(AcquisitionData):
             logger = logging.getLogger('main')
             logger.info('Opened data file %s' % filename)
 
+    @doc_inherit
     def close(self):
-        """Closes the datafile, only one reference to a file may be 
-        open at one time.
-
-        If there is no data in the file, it will delete itself"""
         # bad hack!
         if 'closed' in self.hdf5.__repr__().lower():
             return
@@ -70,14 +67,8 @@ class HDF5Data(AcquisitionData):
             if self.needs_repack:
                 _repack(fname)
 
+    @doc_inherit
     def init_group(self, key, mode='finite'):
-        """Create a group hierarchy level
-
-        :param key: The name of the group, may be nested e.g. 'topgroup/subgroub'
-        :type key: str
-        :param mode: The type of acquisition this group is for. Options are: 'finite', 'calibration', 'open', 'continuous'
-        :type mode: str
-        """
         # regular error thrown for write attempt on read only not informative enough for me
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
@@ -91,25 +82,8 @@ class HDF5Data(AcquisitionData):
         logger = logging.getLogger('main')
         logger.info('Created data group %s' % key)
 
+    @doc_inherit
     def init_data(self, key, dims=None, mode='finite', nested_name=None):
-        """
-        Initializes a new dataset
-
-        :param key: The dataset or group name. If finite, this will create a group (if none exists), and will sequentially name datasets under this group test_#
-        :type key: str
-        :type dims: tuple
-        :param dims: 
-            Dimensions of dataset:
-            
-            * if mode == 'finite', this is the total size
-            * if mode == 'open', this is the dimension of a single trace
-            * if mode == 'continuous', this is ignored
-            * if mode == 'calibration', this is the total size
-        :param mode: The kind of acquisition taking place
-        :type mode: str
-        :param nested_name: If mode is calibration, then this will be the dataset name created under the group key. Ignored for other modes.
-        :type nested_name: str
-        """
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         if mode == 'calibration':
@@ -155,26 +129,8 @@ class HDF5Data(AcquisitionData):
         logger = logging.getLogger('main')
         logger.info('Created data set %s' % setname)
 
+    @doc_inherit
     def append(self, key, data, nested_name=None):
-        """
-        Inserts data sequentially to structure in repeated calls. 
-        Depending on how the dataset was initialized:
-
-        * If mode == 'finite': If *nested_name* is ``None``, data is appended to the current automatically incremented *test_#* dataset under the given group. Otherwise data is appended to the group *key*, dataset *nested_name*.
-        * If mode == 'calibration': Must provide a *nested_name* for a dataset to append data to under group *key*
-        * If mode == 'open': Appends chunk to dataset *key*
-        * If mode == 'continuous': Appends to dataset *key* forever
-
-        For 'Finite' and 'calibration' modes, an attempt to append past the 
-        initialized dataset size will result in an error
-
-        :param key: name of the dataset/group to append to
-        :type key: str
-        :param data: data to add to file
-        :type data: numpy.ndarray
-        :param nested_name: If mode is 'calibration' or 'finite', then this will be the dataset name created under the group key. Ignored for other modes.
-        :type nested_name: str
-        """
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         # make sure data is numpy array
@@ -228,18 +184,8 @@ class HDF5Data(AcquisitionData):
             self.meta[key]['set_counter'] = setnum
             self.meta[key]['cursor'] = end_index
 
+    @doc_inherit
     def insert(self, key, index, data):
-        """
-        Inserts data to index location. For 'finite' mode only. Does not 
-        affect appending location marker. Will Overwrite existing data.
-
-        :param key: Group name to insert to
-        :type key: str
-        :param index: location that the data should be inserted
-        :type index: tuple
-        :param data: data to add to file
-        :type data: numpy.ndarray
-        """
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         mode = self.meta[key]['mode']
@@ -251,15 +197,8 @@ class HDF5Data(AcquisitionData):
         else:
             print "insert not supported for mode: ", mode
 
+    @doc_inherit
     def get_data(self, key, index=None):
-        """
-        Returns data for key at specified index
-
-        :param key: name of the dataset to retrieve, may be nested
-        :type key: str
-        :param index: slice of of the data to retrieve, ``None`` gets whole data set. Numpy style indexing.
-        :type index: tuple
-        """
         if not hasattr(self.hdf5[key], 'shape'):
             return None
         elif index is not None:
@@ -269,37 +208,27 @@ class HDF5Data(AcquisitionData):
             data = self.hdf5[key][:]
         return data
 
-    def get_info(self, key):
-        """Retrieves all saved attributes for the group or dataset
-
-        :param key: The name of group or dataset to get info for
-        :type key: str
-        """
+    @doc_inherit
+    def get_info(self, key, inherited=False):
         if key == '':
             return dict(self.hdf5.attrs.items())
         else:
-            return dict(self.hdf5[key].attrs.items())
+            attrs = dict(self.hdf5[key].attrs.items())
+            if inherited and hasparent(key):
+                attrs.update(self.get_info('/'.join(key.split('/')[:-1]), True))
+                return attrs
+            else:
+                return attrs
 
-    def get_trace_info(self, key):
-        """Retrives the stimulus info saved to the given dataset. Works for finite dataset keys only
-
-        :param key: The name of dataset to get stimulus info for
-        :type key: str
-        """
+    @doc_inherit
+    def get_trace_stim(self, key):
         if key in self.hdf5 and 'stim' in self.hdf5[key].attrs:
             return json.loads(self.hdf5[key].attrs['stim'])
         else:
             return None
 
+    @doc_inherit
     def get_calibration(self, key, reffreq):
-        """Gets a saved calibration, in attenuation from a refernece frequency point
-
-        :param key: The name of the calibration to retrieve
-        :type key: str
-        :param reffreq: The frequency for which to set as zero, all other frequencies will then be in attenuation difference from this frequency
-        :type reffreq: int
-        :returns: (numpy.ndarray, numpy.ndarray) -- frequencies of the attenuation vector, attenuation values
-        """
         cal_vector = self.hdf5[key]['calibration_intensities'].value
         stim_info = json.loads(self.hdf5[key+'/signal'].attrs['stim'])
         fs = stim_info[0]['samplerate_da']
@@ -314,11 +243,8 @@ class HDF5Data(AcquisitionData):
 
         return (cal_vector, frequencies)
 
+    @doc_inherit
     def calibration_list(self):
-        """Lists the calibrations present in this file
-
-        :returns: list<str> -- the keys for the calibration groups
-        """
         cal_names = []
         for grpky in self.hdf5.keys():
             if 'calibration' in grpky:
@@ -388,12 +314,8 @@ class HDF5Data(AcquisitionData):
         print
         self.needs_repack = True
 
+    @doc_inherit
     def delete_group(self, key):
-        """Removes the group from the file, deleting all data under it
-
-        :param key: Name of group to remove
-        :type key: str
-        """
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         del self.hdf5[key]
@@ -402,14 +324,8 @@ class HDF5Data(AcquisitionData):
         logger = logging.getLogger('main')
         logger.info('Deleted data group %s' % key)
 
+    @doc_inherit
     def set_metadata(self, key, attrdict, signal=False):
-        """Sets attributes for a dataset or group
-
-        :param key: name of group or dataset
-        :type key: str
-        :param attrdict: A collection of name:value pairs to save as metadata
-        :type attrdict: dict
-        """
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         # key is an iterable of group keys (str), with the last
@@ -431,14 +347,8 @@ class HDF5Data(AcquisitionData):
                 else:
                     self.hdf5[key].attrs[attr] = val
  
+    @doc_inherit
     def append_trace_info(self, key, stim_data):
-        """Sets the stimulus documentation for the given dataset/groupname. If key is for a finite group, sets for current test
-
-        :param key: Group or dataset name
-        :type key: str
-        :param stim_data: JSON formatted data to append to a list
-        :type stim_data: str
-        """
         if self.hdf5.mode == 'r':
             raise ReadOnlyError(self.filename)
         # append data to json list?
@@ -462,11 +372,8 @@ class HDF5Data(AcquisitionData):
                 setname = key + '/' + 'signal'
             _append_stim(self.hdf5, setname, stim_data)
 
+    @doc_inherit
     def keys(self, key=None):
-        """The high-level keys for this file
-
-        :returns: list<str> -- list of the keys
-        """
         if key is None or key == self.filename or key == '':
             return self.hdf5.keys()
         elif key in self.hdf5 and hasattr(self.hdf5[key], 'keys'):
@@ -474,17 +381,29 @@ class HDF5Data(AcquisitionData):
         else:
             return None
 
+    @doc_inherit
     def all_datasets(self):
-        """Go through file and get all datasets"""
         self._dsets = []
         self.hdf5.visititems(self._gather_datasets)
         # sort into order alpha-numerical
         self._dsets = sorted(self._dsets, key=lambda item: (item.name.partition('_')[0], int(item.name.rpartition('_')[-1]) if item.name[-1].isdigit() else float('inf'))) 
         return self._dsets
 
+    @doc_inherit
+    def dataset_names(self):
+        self._dset_names = []
+        self.hdf5.visititems(self._gather_names)
+        # sort into order alpha-numerical
+        self._dset_names = sorted(self._dset_names, key=lambda item: (item.partition('_')[0], int(item.rpartition('_')[-1]) if item[-1].isdigit() else float('inf'))) 
+        return self._dset_names
+
     def _gather_datasets(self, name, item):
         if hasattr(item, 'shape'):
             self._dsets.append(item)
+
+    def _gather_names(self, name, item):
+        if hasattr(item, 'shape'):
+            self._dset_names.append(name)
 
     def _repr_html_(self):
         # display the contents of this file in HTML for viewing in ipython notebooks
@@ -499,6 +418,11 @@ class HDF5Data(AcquisitionData):
             self._printstr += ' ' + str(item.shape)
         self._printstr += '<br>'
 
+def hasparent(key):
+    path = key.split('/')
+    if '' in path:
+        path.remove('')
+    return len(path) > 1
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':

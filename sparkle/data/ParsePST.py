@@ -1,4 +1,7 @@
-"""This file is as close to a direct translation of ParsePST.m as possible"""
+"""This file is as close to a direct translation of ParsePST.m as possible. 
+If you are trying to access Batlab data, make sure you don't a 
+:meth:`sparkly version<sparkle.data.open.open_acqdata>` instead.
+"""
 
 import re
 

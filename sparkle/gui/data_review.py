@@ -164,7 +164,7 @@ class QDataReviewer(QtGui.QWidget):
                 self.attrtxt.appendPlainText(attr + ' : ' + str(info[attr]))
             else:
                 # use the datafile object to do json converstion of stim data
-                stimuli = self.datafile.get_trace_info(path)
+                stimuli = self.datafile.get_trace_stim(path)
 
                 self.tracetable.setRowCount(len(stimuli))
                 for row, stim in enumerate(stimuli):
@@ -200,7 +200,7 @@ class QDataReviewer(QtGui.QWidget):
             parent_path = '/'.join(path.split('/')[:-1])
             if len(parent_path) > 0:
                 group_info = self.datafile.get_info(parent_path)
-                fsout = dict(group_info)['samplerate_ad']
+                fsout = group_info['samplerate_ad']
             else:
                 fsout = info['samplerate_ad']
                 group_info = []

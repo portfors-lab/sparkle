@@ -128,6 +128,17 @@ class TestMainUI():
     def test_apply_calibration_nocal(self):
         self.run_all_apply_cal(False)
 
+    def test_mphone_calibration(self):
+        self.form.ui.tabGroup.setCurrentIndex(2)
+        qtbot.click(self.form.ui.mphoneCalBtn)
+
+        QtTest.QTest.qWait(ALLOW)
+        self.wait_until_done()
+
+        print self.form.ui.mphoneSensSpnbx.value()
+        # doesn't equal default value
+        assert self.form.ui.mphoneSensSpnbx.value() != 0.004
+
     # =====================================
     # Test protocol functions
     # =====================================
@@ -368,7 +379,7 @@ class TestMainUI():
         qtbot.handle_modal_widget(wait=True)
 
         datafile = self.form.acqmodel.datafile
-        stim_info = datafile.get_trace_info('/segment_1/test_2')
+        stim_info = datafile.get_trace_stim('/segment_1/test_2')
         # first stim is control silence, other stim is our tone
         assert stim_info[1]['components'][0]['duration'] == 0.02
 

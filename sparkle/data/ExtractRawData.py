@@ -1,7 +1,9 @@
-"""This file is as close to a direct translation of ExtractRawData.m as possible"""
+"""This file is as close to a direct translation of ExtractRawData.m as possible. 
+If you are trying to access Batlab data, make sure you don't a 
+:meth:`sparkly version<sparkle.data.open.open_acqdata>` instead.
+"""
 
 import numpy as np
-
 
 def extract_raw_data(filename, experiment_data, test_nums=None, trace_nums=[]):
 

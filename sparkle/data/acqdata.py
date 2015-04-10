@@ -4,6 +4,11 @@ from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
     OverwriteFileError, ReadOnlyError
 from sparkle.tools.util import convert2native, max_str_num
 
+"""
+This is an abstract class intended to serve mostly as an interface. It should be subclassed
+to provide actual access to datafiles. Implementation will depend on the internal structure
+of the data file.
+"""
 
 class AcquisitionData(object):
     """
@@ -12,12 +17,12 @@ class AcquisitionData(object):
 
     Data files may conatain any number of one of the three types of datasets: 
 
-    1. Finite datasets, where the amount of data to be stored in known in advance
+    1. Finite datasets, where the amount of data to be stored is known in advance
     2. Open-ended aquisition, where the size of the acqusition window is known, but the number of traces to acquire is not
     3. Continuous acquisition, this is a 'chart' function where data is acquired continuously without break until the user stops the operation
     
-    | Upon new file creation the following attributes are saved to the file: *date*, *user*, *computer name*
-
+    Upon new file creation the following attributes are saved to the file: *date*, *user*, *computer name*
+    
     Finite datasets create sets with automatic naming of the scheme test_#, where the number starts with 1 and increments for the whole file, regardless of the group it is under.
 
     :param filename: the name of the data file to open.
@@ -26,10 +31,11 @@ class AcquisitionData(object):
     :type user: str
     :type filemode: str
     :param filemode: The mode in which to open this file. Allowed values are:
-    * 'w-' : Write to new file, fails if file already exists
-    * 'a' : Append to existing file
-    * 'r' : Read only, no writing allowed
-    Overwriting an exisiting file is not allowed, and will result in an error
+
+        * 'w-' : Write to new file, fails if file already exists
+        * 'a' : Append to existing file
+        * 'r' : Read only, no writing allowed
+        Overwriting an exisiting file is not allowed, and will result in an error
     """
     def __init__(self, filename, user='unknown', filemode='w-'):
         if filemode not in ['w-', 'a', 'r']:
@@ -133,13 +139,17 @@ class AcquisitionData(object):
         """
         raise NotImplementedError
 
-    def get_info(self, key):
-        """Retrieves all saved attributes for the group or dataset
+    def get_info(self, key, inherited=False):
+        """Retrieves all saved attributes for the group or dataset. 
 
         :param key: The name of group or dataset to get info for
         :type key: str
+        :param inherited: If data uses a heirachial structure, includes inherited attributes.
+        :type inherited: bool
+        :returns: dict -- named attibutes and values
         """
         raise NotImplementedError
+
 
     def get_calibration(self, key, reffreq):
         """Gets a saved calibration, in attenuation from a refernece frequency point
@@ -188,15 +198,36 @@ class AcquisitionData(object):
         raise NotImplementedError
 
     def keys(self):
-        """The high-level keys for this file
+        """The high-level keys for this file. This may be the names of groups, and/or datasets.
 
         :returns: list<str> -- list of the keys
         """
+        raise NotImplementedError
 
     def all_datasets(self):
-        """Go through file and get all datasets"""
+        """Returns a list containing all datasets anywhere within file. Warning: this will get all
+        the data in the file
+        """
+        raise NotImplementedError
 
-        
+    def dataset_names(self):
+        """Returns a list of the name of every dataset in this file. Each name is a valid
+        key for get_info and get_data
+        """
+        raise NotImplementedError
+
+    def get_trace_stim(self, key):
+        """Gets a list of the stimulus metadata for the given dataset *key*.
+
+        :param key: The name of group or dataset to get stimulus info for
+        :type key: str
+        :returns: list<dict> -- each dict in the list holds the stimulus info
+         for each trace in the test. Therefore, the list should have a length equal 
+         to the number of traces in the given test.
+        """
+        raise NotImplementedError
+
+
 def increment(index, dims, data_shape):
     """Increments a given index according to the shape of the data added
 
@@ -205,6 +236,7 @@ def increment(index, dims, data_shape):
     :param dims: Shape of the data that the index is being incremented by
     :type dims: tuple
     :param data_shape: Shape of the data structure being incremented, this is check that incrementing is correct
+    :returns: list - the incremented index
     """
 
     # check dimensions of data match structure

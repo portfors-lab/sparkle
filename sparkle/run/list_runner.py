@@ -48,7 +48,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         return max(all_reps)
 
     def setup(self, interval):
-        """Prepares the tests for execution"""
+        """Prepares the tests for execution, interval in ms"""
         self.trace_counter = 0
 
         self._halt = False

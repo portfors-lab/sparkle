@@ -725,7 +725,7 @@ class MainWindow(ControlWindow):
             self.display.setXlimits((0,winsz))
             self.display.updateSpiketrace(times, response)
 
-            stimuli = self.acqmodel.datafile.get_trace_info(path)
+            stimuli = self.acqmodel.datafile.get_trace_stim(path)
 
             stimulus = stimuli[tracenum]
 
@@ -799,7 +799,7 @@ class MainWindow(ControlWindow):
                 group_path = path
             testdata = self.acqmodel.datafile.get_data(path)
             test_info = dict(self.acqmodel.datafile.get_info(path))
-            comp_info = self.acqmodel.datafile.get_trace_info(path)
+            comp_info = self.acqmodel.datafile.get_trace_stim(path)
             group_info = dict(self.acqmodel.datafile.get_info(group_path))
             aifs = group_info['samplerate_ad']
             if test_info['testtype'] == 'Tuning Curve':

@@ -49,8 +49,8 @@ class TestBatlabData():
         data = self.datafile.get_data('test_13')
         assert data.shape == (4, 5, 4000)
 
-    def test_get_trace_info(self):
-        stim = self.datafile.get_trace_info('test_1')
+    def test_get_trace_stim(self):
+        stim = self.datafile.get_trace_stim('test_1')
         assert len(stim) == 10
         assert stim[0]['samplerate_da'] == 400000
         assert len(stim[0]['components']) == 0
@@ -59,7 +59,7 @@ class TestBatlabData():
         assert stim[1]['components'][1]['frequency'] == 60000
         
 
-        stim = self.datafile.get_trace_info('test_3')
+        stim = self.datafile.get_trace_stim('test_3')
         assert len(stim) == 2
         assert stim[0]['samplerate_da'] == 333333
         assert len(stim[0]['components']) == 2

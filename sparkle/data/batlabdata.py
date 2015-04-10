@@ -10,6 +10,7 @@ from sparkle.data.acqdata import AcquisitionData
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
     OverwriteFileError, ReadOnlyError
 from sparkle.tools.util import convert2native, max_str_num
+from sparkle.tools.doc_inherit import doc_inherit
 
 
 class BatlabData(AcquisitionData):
@@ -44,9 +45,11 @@ class BatlabData(AcquisitionData):
         logger = logging.getLogger('main')
         logger.info('Opened data file %s' % filename)
 
+    @doc_inherit
     def close(self):
         pass
 
+    @doc_inherit
     def get_data(self, key, index=None):
         # data is [test][trace][reps, samples] -- [list][list][numpy array]
         match = re.search('test_(\d+)(/trace_(\d+))?', key)
@@ -68,21 +71,29 @@ class BatlabData(AcquisitionData):
                 else:
                     return self.raw_data[testno-1][traceno-1][index]
 
-    def get_info(self, key):
+    @doc_inherit
+    def get_info(self, key, inherited=False):
         if key == '':
             return { k : self._info[k] for k in self._info.keys() if not re.search("test_\d+$", k)}
         else:
             return self._info[key]
 
-    def get_trace_info(self, key):
+    @doc_inherit
+    def get_trace_stim(self, key):
         return self._info[key]['stim']
 
+
     def calibration_list(self):
+        """Batlab data does not include calibration information, so this will 
+        always return an emtpy list.
+        """       
         return []
 
+    @doc_inherit
     def all_datasets(self):
         return self._tests
         
+    @doc_inherit
     def keys(self, key=None):
         # keys should be for datasets only for batlab data
         if key is None or key == self.filename or key == '':
@@ -93,9 +104,10 @@ class BatlabData(AcquisitionData):
         else:
             return None
 
-    # def info_keys(self, key=None):
-
-
+    @doc_inherit
+    def dataset_names(self):
+        names = [test.name for test in self._tests]
+        return names
 
 class NamedArray(np.ndarray):
     def __new__(cls, input_array, name):

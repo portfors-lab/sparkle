@@ -1,4 +1,6 @@
-"""Converts Batlab format .pst and .raw files into Sparkles HDF5 format"""
+"""Converts Batlab format .pst and .raw files into Sparkly HDF5 format. Note
+that is NOT the same as loading Batlab data into a Sparkly data object, 
+i.e. :class:`BatlabData<sparkle.data.batlabdata.BatlabData>`."""
 
 import json
 
