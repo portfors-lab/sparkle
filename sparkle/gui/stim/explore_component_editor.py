@@ -84,7 +84,8 @@ class ExploreComponentEditor(AbstractEditorWidget):
     def loadTemplate(self, template):
         for comp_editor in self.widgets():
             stim = comp_editor.component()
-            stim.loadState(template[stim.name])
+            if stim.name in template:
+                stim.loadState(template[stim.name])
             # re-assign component to editor, so GUI fields are updated
             comp_editor.setComponent(stim)
         delay = template.get('delay', 0)

@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 import yaml
-from scipy.signal import chirp, hann, square
+from scipy.signal import chirp, hann, square, butter, lfilter
 
 from sparkle.stim.abstract_component import AbstractStimulusComponent
 from sparkle.tools.audiotools import audiorate, audioread, make_tone, \
@@ -325,6 +325,64 @@ class NoStim(AbstractStimulusComponent):
 
     def auto_details(self):
         return {}
+
+class BandNoise(AbstractStimulusComponent):
+    name = "Band noise"
+    explore = True
+    protocol = True
+    # keeps signal same to subsequent signal() calls
+    _noise = np.random.normal(0, 1.0, (15e5,))
+    _center_frequency = 20000
+    _width = 1.0 # octave = 1/_width
+    _order = 4
+
+    def signal(self, fs, atten, caldb, calv):
+        npts = self._duration*fs
+        # start with full spectrum white noise and band-pass to get desired 
+        # frequency range
+        signal = self._noise[:npts]
+        
+        # band frequency cutoffs
+        delta = 10**(3./(10.*(2*self._width)))
+        low_freq = self._center_frequency / delta
+        high_freq = self._center_frequency * delta
+        # scipy butter function wants frequencies normalized between 0. and 1.
+        nyquist = fs/2.
+        low_normed = low_freq / nyquist
+        high_normed = high_freq / nyquist
+        print self._center_frequency, low_freq, high_freq
+        print 'cutoffs', low_normed, high_normed
+
+        b, a = butter(self._order, [low_normed, high_normed], btype='band')
+        signal = lfilter(b, a, signal)
+
+        if self._risefall > 0:
+            rf_npts = int(self._risefall * fs) / 2
+            wnd = hann(rf_npts*2) # cosine taper
+            signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
+            signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
+
+        return signal
+
+    def auto_details(self):
+        details = super(BandNoise, self).auto_details()
+        details['center_frequency'] = { 'unit':'Hz', 'min':0, 'max':200000, 'text': "Center Frequency"}
+        details['width'] = { 'unit':'Ocatve', 'min':0.001, 'max':100, 'text': "Band Width 1/"}
+        details['order'] = { 'unit': '',  'min':1, 'max':100, 'text': "Filter Order"}
+        return details
+
+    def loadState(self, state):
+        super(BandNoise,self).loadState(state)
+        self._center_frequency = state['center_frequency']
+        self._width = state['width']
+        self._order = state['order']
+
+    def stateDict(self):
+        state = super(BandNoise, self).stateDict()
+        state['center_frequency'] = self._center_frequency
+        state['width'] = self._width
+        state['order'] = self._order
+        return state
 
 class Modulation(AbstractStimulusComponent):
     modulation_frequency = None
