@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 import yaml
-from scipy.signal import chirp, hann, square, butter, lfilter
+from scipy.signal import chirp, hann, square, butter, lfilter, buttord
 
 from sparkle.stim.abstract_component import AbstractStimulusComponent
 from sparkle.tools.audiotools import audiorate, audioread, make_tone, \
@@ -260,27 +260,9 @@ class WhiteNoise(AbstractStimulusComponent):
     protocol = True
     # keeps signal same to subsequent signal() calls
     _noise = np.random.normal(0, 1.0, (15e5,))
-    _phase = np.random.uniform(0.0, 2.0*np.pi,size=15e5)
-    transfer = None
-    _start_f = float(5000)
-    _stop_f = float(1e5)
 
     def signal(self, fs, atten, caldb, calv):
         npts = self._duration*fs
-
-        # based on Brandon's code:
-        # nFreqPts = 1+npts/2        
-        # mag = np.zeros(shape=(nFreqPts,),dtype=np.float32)
-        # f0 = np.ceil(self._start_f/(float(fs)/npts))
-        # f1 = np.floor(self._stop_f/(float(fs)/npts))
-        # mag[f0:f1] = 1.0
-        # phase = self._phase[:nFreqPts]
-        # spec = np.empty(shape=(nFreqPts,),dtype=np.complex64)
-        # spec.real = mag * np.cos(phase)
-        # spec.imag = mag * np.sin(phase)
-        # spec[0] = 0 # DC
-        # signal = np.empty(shape=(npts,),dtype=np.float32) # needs to be 32-bit float
-        # signal = np.fft.irfft(spec)
 
         signal = self._noise[:npts]
         
@@ -297,10 +279,6 @@ class WhiteNoise(AbstractStimulusComponent):
             
         # print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
         return signal
-
-    def setTransfer(self, H):
-        self.transfer = H
-        explore = True
 
 class Silence(AbstractStimulusComponent):
     name = "silence"
@@ -334,7 +312,6 @@ class BandNoise(AbstractStimulusComponent):
     _noise = np.random.normal(0, 1.0, (15e5,))
     _center_frequency = 20000
     _width = 1.0 # octave = 1/_width
-    _order = 4
 
     def signal(self, fs, atten, caldb, calv):
         npts = self._duration*fs
@@ -350,10 +327,13 @@ class BandNoise(AbstractStimulusComponent):
         nyquist = fs/2.
         low_normed = low_freq / nyquist
         high_normed = high_freq / nyquist
-        print self._center_frequency, low_freq, high_freq
-        print 'cutoffs', low_normed, high_normed
 
-        b, a = butter(self._order, [low_normed, high_normed], btype='band')
+        order, wn = buttord([low_normed, high_normed], [low_normed-0.05, high_normed+0.05], 1, 40)
+
+        # print 'CUTOFFS', low_freq, high_freq
+        # print 'ORDER WN', order, wn, low_normed, high_normed
+
+        b, a = butter(order, wn, btype='band')
         signal = lfilter(b, a, signal)
 
         if self._risefall > 0:
@@ -368,20 +348,17 @@ class BandNoise(AbstractStimulusComponent):
         details = super(BandNoise, self).auto_details()
         details['center_frequency'] = { 'unit':'Hz', 'min':0, 'max':200000, 'text': "Center Frequency"}
         details['width'] = { 'unit':'Ocatve', 'min':0.001, 'max':100, 'text': "Band Width 1/"}
-        details['order'] = { 'unit': '',  'min':1, 'max':100, 'text': "Filter Order"}
         return details
 
     def loadState(self, state):
         super(BandNoise,self).loadState(state)
         self._center_frequency = state['center_frequency']
         self._width = state['width']
-        self._order = state['order']
 
     def stateDict(self):
         state = super(BandNoise, self).stateDict()
         state['center_frequency'] = self._center_frequency
         state['width'] = self._width
-        state['order'] = self._order
         return state
 
 class Modulation(AbstractStimulusComponent):
