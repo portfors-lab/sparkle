@@ -58,11 +58,10 @@ def bin_spikes(spike_times, binsz):
     :type binsz: float
     :returns: list of bin indicies, one for each element in spike_times
     """
-    bins=[]
-    for stime in spike_times:
-        # bins.append((np.floor(stime/binsz)*binsz)+(binsz/2))
+    bins = np.empty((len(spike_times),), dtype=int)
+    for i, stime in enumerate(spike_times):
         # around to fix rounding errors
-        bins.append(int(np.floor(np.around(stime/binsz, 5))))
+        bins[i] = np.floor(np.around(stime/binsz, 5))
     return bins
 
 def spike_latency(signal, threshold, fs):

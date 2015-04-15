@@ -19,13 +19,7 @@ from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget, FFTWidget, \
 
 sip.setdestroyonexit(0)
 
-
-
-
-
-
 PAUSE = 0.0
-
 
 def data_func(f):
     t = np.arange(200)
@@ -239,7 +233,7 @@ class TestPSTHWidget():
         fig.setWindowTitle(inspect.stack()[0][3])
         fig.show()
 
-        dummy_data = [0,1,1,1,3,4,4,9,9,9,9,9,7]
+        dummy_data = np.array([0,1,1,1,3,4,4,9,9,9,9,9,7])
         nbins = max(dummy_data)+1
         fig.setBins(range(nbins))
         fig.appendData(dummy_data)
@@ -247,13 +241,13 @@ class TestPSTHWidget():
         time.sleep(PAUSE)
 
         control_data = []
-        for bin in range(nbins):
-            control_data.append(dummy_data.count(bin))
+        for bin_num in range(nbins):
+            control_data.append(len(dummy_data[dummy_data == bin_num]))
         barvals = fig.getData()
         assert_array_equal(barvals, control_data)
 
         for i in range(3):
-            fig.appendData([3, 3, 4, 5])
+            fig.appendData(np.array([3, 3, 4, 5]))
             control_data[3] += 2
             control_data[4] += 1
             control_data[5] += 1

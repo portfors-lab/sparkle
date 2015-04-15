@@ -559,7 +559,6 @@ class MainWindow(ControlWindow):
 
         fs = 1./(times[1] - times[0])
         count, latency, rate, response_bins = self.do_spike_stats(response, fs)
-
         # bad news if this changes mid protcol, bin centers are only updated
         # at start of protocol
         binsz = float(self.ui.binszSpnbx.value())
@@ -600,7 +599,7 @@ class MainWindow(ControlWindow):
 
         binsz = float(self.ui.binszSpnbx.value())
         # number of bins to shift spike counts by since we are cropping first part of data
-        binshift = np.ceil(start_time/binsz)
+        binshift = int(np.ceil(start_time/binsz))
 
         spike_times = spikestats.spike_times(response[start_index:stop_index], self._threshold, fs)
         

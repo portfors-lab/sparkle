@@ -673,10 +673,11 @@ class PSTHWidget(BasePlot):
         :param bins: bin center values to increment counts for, to increment a time bin more than once include multiple items in list with that bin center value
         :type bins: numpy.ndarray
         """
-        # self._counts[bins] +=1 # ignores dulplicates
-        for b in bins:
-            self._counts[b] += 1
-        self.histo.setOpts(height=self._counts)
+        # only if the last sample was above threshold, but last-1 one wasn't
+        bins[bins >= len(self._counts)] = len(self._counts) -1
+        bin_totals = np.bincount(bins)
+        self._counts[:len(bin_totals)] += bin_totals
+        self.histo.setOpts(height=np.array(self._counts))
 
     def getData(self):
         """Gets the heights of the histogram bars

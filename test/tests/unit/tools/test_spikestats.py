@@ -193,26 +193,27 @@ def test_bin_spikes_even_middle_times():
     times = np.arange(0.05, 0.95, 0.1)
     binsz = 0.1
     bins = bin_spikes(times, binsz)
-    assert bins == range(len(times))
+    assert np.array_equal(range(len(times)), bins)
+    # assert bins == np.array(range(len(times)))
 
 def test_bin_spikes_even_start_edge_times():
     times = np.arange(0, 0.9, 0.1)
     binsz = 0.1
     bins = bin_spikes(times, binsz)
-    assert bins == range(len(times))
+    assert np.array_equal(range(len(times)), bins)
 
 def test_bin_spikes_even_end_edge_times():
     times = np.arange(0.099, 0.999, 0.1)
     binsz = 0.1
     bins = bin_spikes(times, binsz)
-    assert bins == range(len(times))
+    assert np.array_equal(range(len(times)), bins)
 
 def test_bin_spikes_uneven_times():
     # manual times
     times = [0.7, 0.66, 0.22, 0.4, 0.4, 0.39]
     binsz = 0.1
     bins = bin_spikes(times, binsz)
-    assert bins == [7, 6, 2, 4, 4, 3]
+    assert np.array_equal([7, 6, 2, 4, 4, 3], bins)
 
 #---------------------------------
 
