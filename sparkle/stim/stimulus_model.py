@@ -600,6 +600,9 @@ class StimulusModel():
             total_signal[0:len(track)] += track
 
         total_signal = convolve_filter(total_signal, self.impulseResponse)
+        # last sample should always go to 0, so output isn't stuck on some
+        # other value when stim ends
+        total_signal[-1] = 0
 
         undesired_attenuation = 0
 
