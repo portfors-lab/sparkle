@@ -1,5 +1,5 @@
 SPARKLE 
-=================================================================================================================
+========================================================================================================
 **S**ound **P**resentation **A**nd **R**ecording **K**it for **L**aboratories of **E**lectrophysiology 
 
 Sparkle is a data acquisition system designed for auditory neuroscience research. It allows for the assembly and presentation of auditory stimuli (sounds) with simultaneous recording from a single brain electrode. It is designed to be highly customized to the requirements of the Portfors' hearing research lab. It is primarily a GUI intended to facilitate ease-of-use during experiments.
@@ -23,6 +23,7 @@ To build the documentation:
     $ sphinx-apidoc -f -o ref/auto ../sparkle
     $ make html
 
+See the documentation for more in-depth details on setup
 
 Contributions/ bugs
 -------------------
@@ -42,6 +43,6 @@ e.g. for Mac/Linux:
 
     $ export PYTHONPATH="$PYTHONPATH:/absolute/path/to/sparkle"
 
-or for Window (on Git bash):
+or for Windows (on Git bash):
 
     $ export PYTHONPATH="$PYTHONPATH;C:\absolute\path\to\sparkle"

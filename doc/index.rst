@@ -9,6 +9,14 @@ Welcome to Sparkle's documentation!
 
 This doc is very drafty!!!
 
+Installation
+=============
+
+.. toctree::
+    :maxdepth: 2
+    
+    setup.rst
+
 User Guide
 =================
 
