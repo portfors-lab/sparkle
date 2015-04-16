@@ -35,6 +35,8 @@ Speaker calibration is for the purposes of speaker frequency roll-off documentat
 
 * If you wish to change the calibration frequency or voltage, you will need to edit the :ref:`settings`.
 
+**When a calibration is set, it will alter all outgoing (analog output) signals with a filter to compensate for the speaker roll-off. The exception to this is if the only component in the stimulus is a square wave; it is then assumed that output is not going to a speaker.**
+
 Calibration Tests
 -----------------
 

@@ -599,6 +599,12 @@ class StimulusModel():
         for track in track_signals:
             total_signal[0:len(track)] += track
 
+        # if there is only square waves in stimulus, do not apply calibration --
+        # it is assumed to not be a signal for the speaker
+        component_names = list(set([comp.name for track in self._segments for comp in track]))
+        if len(component_names) > 1 or component_names[0] != "Square Wave":
+            total_signal = convolve_filter(total_signal, self.impulseResponse)
+
         total_signal = convolve_filter(total_signal, self.impulseResponse)
         # last sample should always go to 0, so output isn't stuck on some
         # other value when stim ends
