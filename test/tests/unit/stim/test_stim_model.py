@@ -5,6 +5,7 @@ import yaml
 from nose.tools import assert_equal, raises
 
 import test.sample as sample
+from sparkle.data.open import open_acqdata
 from sparkle.gui.stim.factory import CCFactory, TCFactory
 from sparkle.gui.stim.stimulus_editor import StimulusEditor
 from sparkle.stim.auto_parameter_model import AutoParameterModel
@@ -18,6 +19,7 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 MAXV = config['max_voltage']
 USE_RMS = config['use_rms']
+DEFAULT_SAMPLERATE = config['default_genrate']
 
 class TestStimModel():
     def test_insert_data(self):
@@ -493,6 +495,35 @@ class TestStimModel():
         invalid = stim_model.verify(windowSize=0.1)
         print 'msg', invalid
         assert invalid
+
+    def test_calibration_samplerates_change(self):
+        stim_model = StimulusModel()
+        stim_model.setReferenceVoltage(100, 0.1)
+        # get some calibration data
+        frange = [5000, 100000]
+        cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
+        calname = cal_data_file.calibration_list()[0]
+        calibration_vector, calibration_freqs = cal_data_file.get_calibration(calname, reffreq=15000)
+
+        assert stim_model.impulseResponse is None
+        stim_model.setCalibration(calibration_vector, calibration_freqs, frange)
+        assert stim_model.impulseResponse is not None
+
+        component = PureTone()
+
+        stim_model.insertComponent(component, 0,0)
+        print stim_model._calibration_fs, DEFAULT_SAMPLERATE
+        assert stim_model._calibration_fs == DEFAULT_SAMPLERATE
+
+        component = Vocalization()
+        component.setFile(sample.samplewav())
+        stim_model.insertComponent(component)
+
+        assert stim_model._calibration_fs == component.samplerate()
+
+        stim_model.removeComponent(0,0)
+
+        assert stim_model._calibration_fs == DEFAULT_SAMPLERATE
 
     def add_auto_param(self, model):
         # adds an autoparameter to the given model

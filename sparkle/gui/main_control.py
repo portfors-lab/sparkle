@@ -503,7 +503,6 @@ class MainWindow(ControlWindow):
         idx = np.where((freq > 5000) & (freq < 100000))
         summed_db0 = calc_summed_db(signal_fft[idx], mphonesens, mphonedb)
         spectrum = calc_db(signal_fft, mphonesens, mphonedb)
-        spectrum[spectrum < 30] = 0
         spectrum[0] = 0
         summed_db1 = sum_db(spectrum[idx])
         peakspl = np.amax(spectrum)

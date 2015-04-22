@@ -212,7 +212,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
 
 # whether to use relative peak level (from FFT), or calculate from
 # microphone sensitivity level
-USE_FFT = True
+USE_FFT = False
 
 class CalibrationCurveRunner(AbstractCalibrationRunner):
     """Handles the presentaion of a 'traditional' style calibration

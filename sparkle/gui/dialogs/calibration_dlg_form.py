@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file '.\calibration_dlg.ui'
 #
-# Created: Mon Jun 30 10:34:40 2014
-#      by: QtWrapper UI code generator 4.9.6
+# Created: Wed Apr 22 11:00:25 2015
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -73,7 +73,7 @@ class Ui_CalibrationDialog(object):
         self.frangeHighSpnbx = SmartSpinBox(self.groupBox)
         self.frangeHighSpnbx.setEnabled(False)
         self.frangeHighSpnbx.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.frangeHighSpnbx.setMaximum(100000.0)
+        self.frangeHighSpnbx.setMaximum(120000.0)
         self.frangeHighSpnbx.setObjectName(_fromUtf8("frangeHighSpnbx"))
         self.horizontalLayout_2.addWidget(self.frangeHighSpnbx)
         self.funit_lbl_2 = QtGui.QLabel(self.groupBox)

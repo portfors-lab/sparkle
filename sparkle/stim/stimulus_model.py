@@ -249,10 +249,8 @@ class StimulusModel():
             self.insertEmptyRow()
         self._segments[row].insert(col, comp)
 
-        if comp.__class__.__name__ == 'Vocalization':
-            if comp.samplerate() is not None:
-                # update calibration
-                self.updateCalibration()
+        # in case of samplerate change, just always update
+        self.updateCalibration()
 
     def overwriteComponent(self, comp, row, col):
         """Overwrites the component at the specficied location with a provided one.
@@ -266,10 +264,8 @@ class StimulusModel():
         """
         self._segments[row][col] = comp
 
-        if comp.__class__.__name__ == 'Vocalization':
-            if comp.samplerate() is not None:
-                # update calibration
-                self.updateCalibration()
+        # in case of samplerate change, just always update
+        self.updateCalibration()
 
     def insertEmptyRow(self):
         """Appends an empty track at the end"""
@@ -298,6 +294,10 @@ class StimulusModel():
         # If this row is now empty we should remove it?
         if self.columnCountForRow(-1) == 0:
             self.removeRow(len(self._segments)-1)
+
+        # in case of samplerate change, just always update
+        self.updateCalibration()
+
 
     def clearComponents(self):
         """Removes all components"""
@@ -605,7 +605,6 @@ class StimulusModel():
         if len(component_names) > 1 or component_names[0] != "Square Wave":
             total_signal = convolve_filter(total_signal, self.impulseResponse)
 
-        total_signal = convolve_filter(total_signal, self.impulseResponse)
         # last sample should always go to 0, so output isn't stuck on some
         # other value when stim ends
         total_signal[-1] = 0
