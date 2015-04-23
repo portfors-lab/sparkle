@@ -195,7 +195,13 @@ class QDataReviewer(QtGui.QWidget):
         if dataset is not None:
             # only data sets have a shape
             data_shape = dataset.shape
-            self.derivedtxt.appendPlainText("Dataset dimensions : "+str(data_shape))
+            # build a string for unknown data shape length
+            dimstr = '('
+            for dim in data_shape:
+                dimstr += str(dim) + ', '
+            # dont want last comma
+            dimstr = dimstr[:-2] + ')'
+            self.derivedtxt.appendPlainText("Dataset dimensions : " + dimstr)
             
             parent_path = '/'.join(path.split('/')[:-1])
             if len(parent_path) > 0:
