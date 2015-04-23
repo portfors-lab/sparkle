@@ -17,7 +17,7 @@ from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.types.stimuli_classes import FMSweep, WhiteNoise
 from sparkle.tools.audiotools import attenuation_curve, impulse_response
 from test.scripts.util import MyTableWidgetItem, apply_calibration, \
-    calc_error, record
+    calc_error, record, record_refdb
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -30,8 +30,7 @@ CONV_CAL = True # include the convolution calibration method
 SMOOTHING = 99 # number of points of a signal to smooth over
 
 nreps = 3 # no. of repetition for each outgoing signal (results will be averaged)
-refv = 1.2 # Volts, output amplitdue of the outgoing signal
-refdb = 115 # dB SPL that the above voltage produces
+refv = 0.5 # Volts, output amplitdue of the outgoing signal
 calf = 15000 # the frequency that was used for refv and refdb
 dur = 0.2 # duration of signal and window (seconds)
 fs = 5e5 # input and output samplerate
@@ -49,8 +48,12 @@ if __name__ == "__main__":
     player = FinitePlayer()
     player.set_aochan(u"PCI-6259/ao0")
     player.set_aichan(u"PCI-6259/ai0")
+
+    # get the reference db for given voltage
+    refdb = record_refdb(player, calf, refv, 5e5)
+
     player.set_aidur(dur)
-    player.set_aisr(fs)
+    player.set_aifs(fs)
 
     if not CONV_CAL and not MULT_CAL:
         print 'Must choose at lease one calibration type'
@@ -103,16 +106,11 @@ if __name__ == "__main__":
     chirp.setIntensity(80)
     chirp_signal = chirp.signal(fs, 0, refdb, refv)
 
-    # use another type of stimulus to apply calibration to
-    # really could just try this against the same signal witha different
-    # samplerate, but I like to use the vocal file anyways
+    # use a different sample rate -- one that is present in our
+    # vocal recording files
     vocal_fs = 375000
-    tempfile = os.path.join(os.path.expanduser('~'), 'EjM_Vox_plus.json')
-    with open(tempfile, 'r') as fh:
-        savedstim = json.load(fh)
-    stim = StimulusModel.loadFromTemplate(savedstim)
-    stim.setReferenceVoltage(110, 1.0)
-    vocal_signal = stim.signal()[0]
+    # pseudo vocal signal
+    vocal_signal = chirp.signal(vocal_fs, 0, refdb, refv)
 
     # Run the timed calibration executions for each test stimulus
     time_list = []

@@ -18,22 +18,25 @@ from sparkle.stim.types.stimuli_classes import FMSweep, PureTone, WhiteNoise
 from sparkle.tools.audiotools import attenuation_curve, calc_db, \
     calc_spectrum, impulse_response, signal_amplitude, smooth, tukey
 from test.scripts.util import MyTableWidgetItem, apply_calibration, \
-    calc_error, record, run_tone_curve
+    calc_error, record, run_tone_curve, record_refdb
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 ############################################################
 # Edit these values as desired
 
-MULT_CAL = True
+MPHONESENS = 0.109
+MPHONECALDB = 94
+
+MULT_CAL = False
 CONV_CAL = True
 NOISE_CAL = False
 CHIRP_CAL = True
 
-SMOOTHINGS = [99]
-# SMOOTHINGS = [0, 11, 55, 99, 155, 199]
+# SMOOTHINGS = [11, 99]
+SMOOTHINGS = [0, 11, 55, 99, 155, 199]
 # SMOOTHINGS = [0, 7, 63, 99]
-DURATIONS = [0.2]
+DURATIONS = [0.05]
 # DURATIONS = [0.1, 0.2, 0.5, 1.0]
 SAMPLERATES = [5e5]
 # FILTER_LEN = [2**10, 2**11, 2**12, 2**14, 2**15, 2**16, 0.2*5e5]
@@ -41,24 +44,23 @@ FILTER_LEN = range(50, 8500, 50)
 FILTER_LEN = [2**14]
 # SAMPLERATES = [2e5, 3e5, 4e5, 5e5]
 
-TONE_CURVE = True
+TONE_CURVE = False
 PLOT_RESULTS = True
 
-# method 1 Tone Curve
-refv = 2.0 # Volts
-refdb = 99.6 # dB SPL
+refv = 0.5 # Volts
+refdb = None #TBD
 calf = 17000
 
-test_intensity = 70
+test_intensity = 60
     
 if __name__ == "__main__":
 
     # for running a manual calibration curve. Gets a measure of how
     # acurate the intensity calculation is (for pure tones at least)
-    # tone_frequencies = range(5000, 100000, 2000)
-    tone_frequencies = [5000, calf, 50000, 100000]
+    tone_frequencies = range(5000, 100000, 2000)
+    # tone_frequencies = [5000, calf, 50000, 100000]
     # tone_intensities = [50, 60, 70, 80, 90, 100]
-    tone_intensities = [70, 80]
+    tone_intensities = [50, 60]
     frange = [3750, 101250] # range to apply calibration to
 
     player = FinitePlayer()
@@ -66,11 +68,28 @@ if __name__ == "__main__":
     player.set_aichan(u"PCI-6259/ai0")
 
     if not CONV_CAL and not MULT_CAL:
-        print 'Must choose at lease one calibration type'
+        print 'Must choose at least one calibration type'
         sys.exit()
 
     wn = WhiteNoise()
     chirp = FMSweep()
+
+    # get the reference db for given voltage
+    refdb = record_refdb(player, calf, refv, 5e5)
+    # check it back!
+    # dur = 0.2
+    # reftone = PureTone()
+    # reftone.setRisefall(0.003)
+    # reftone.setDuration(dur)
+    # reftone.setIntensity(60)
+    # reftone.setFrequency(calf)
+    # tempfs = 5e5
+    # ref_db_signal = reftone.signal(tempfs, 0, refdb, refv)
+    # player.set_aidur(dur)
+    # player.set_aifs(tempfs)
+    # ref_db_response = record(player, ref_db_signal, tempfs)
+    # checkdb = calc_db(signal_amplitude(ref_db_response, tempfs), MPHONESENS, MPHONECALDB)
+    # print "CHECK DB 60: ", checkdb
 
     # record the intital sound to determine the frequency 
     # response from. Use both noise and chirp, and include 
@@ -82,7 +101,7 @@ if __name__ == "__main__":
         for fs in SAMPLERATES:
             npts = dur*fs
             player.set_aidur(dur)
-            player.set_aisr(fs)
+            player.set_aifs(fs)
 
             # White Noise
             wn.setDuration(dur)
@@ -224,7 +243,6 @@ if __name__ == "__main__":
             testcurve_db = run_tone_curve(tone_frequencies, tone_intensities, 
                                           player, fs, dur, refdb, refv, cal,
                                           frange)[0]
-
             cal_params['tone_curve'] = testcurve_db
             print #newline
 
@@ -239,7 +257,7 @@ if __name__ == "__main__":
         chirp.setDuration(dur)
         chirp_signal = chirp.signal(fs, 0, refdb, refv)
         player.set_aidur(dur)
-        player.set_aisr(fs)
+        player.set_aifs(fs)
 
         if cal_params['method'] == 'multiply':
             cal = (freqs, cal_params['calibration'])
@@ -283,7 +301,7 @@ if __name__ == "__main__":
         fig2 = StackedPlot()
         # just show one desired control signal... whatever the last one was
         freqs, spectrum = calc_spectrum(chirp_signal, fs)
-        spectrum = calc_db(spectrum)
+        spectrum = calc_db(spectrum, MPHONESENS, MPHONECALDB)
         fig2.addPlot(freqs, spectrum, title='desired')
         # fig2.addSpectrogram(chirp_signal, fs, title='desired')
 
@@ -298,9 +316,9 @@ if __name__ == "__main__":
 
             freqs, spectrum = calc_spectrum(cal_params['chirp_response'], fs)
             # convert spectrum into dB
-            spectrum = calc_db(spectrum)
+            spectrum = calc_db(spectrum, MPHONESENS, MPHONECALDB)
             mag = signal_amplitude(cal_params['chirp_response'], fs)
-            masterdb = calc_db(mag)
+            masterdb = calc_db(mag, MPHONESENS, MPHONECALDB)
             spectrum[0] = 0
             fig2.addPlot(freqs, spectrum, title=ttl)
             print 'chirp received overall db', masterdb
@@ -335,18 +353,22 @@ if __name__ == "__main__":
     # trend_plot = SimplePlotWidget(FILTER_LEN, errs_list[1:-1])
     # trend_plot.show()
 
-    pw = pg.PlotWidget()
-    # first error is for multiplication calibration, last is uncalibrated
-    pw.plot(FILTER_LEN, errs_list[1:-1], pen={'color':'b', 'width':3})
-    pw.plot([FILTER_LEN[-1]], [errs_list[0]], symbol='x', symbolPen='b')
-    style = {'font-size':'16pt'}
-    pw.setLabel('left', 'Distance from Desired Signal (MSE)', **style)
-    pw.setLabel('bottom', 'Filter Length (no. of samples)', **style)
-    pw.setTitle('<span style="font-size:20pt">Filter Length Effect on Calibration Efficacy</span>', **style)
-    font = QtGui.QFont()
-    font.setPointSize(12)
-    pw.getAxis('bottom').setTickFont(font)
-    pw.getAxis('left').setTickFont(font)
-    pw.show()
+    # pw = pg.PlotWidget()
+    # err_idx = 0
+    # if MULT_CAL:
+    #     # first error is for multiplication calibration, last is uncalibrated
+    #     pw.plot([FILTER_LEN[-1]], [errs_list[err_idx]], symbol='x', symbolPen='b')
+    #     err_idx += 1
+    # if CONV_CAL:
+    #     pw.plot(FILTER_LEN, errs_list[err_idx:-1], pen={'color':'b', 'width':3})
+    # style = {'font-size':'16pt'}
+    # pw.setLabel('left', 'Distance from Desired Signal (MSE)', **style)
+    # pw.setLabel('bottom', 'Filter Length (no. of samples)', **style)
+    # pw.setTitle('<span style="font-size:20pt">Filter Length Effect on Calibration Efficacy</span>', **style)
+    # font = QtGui.QFont()
+    # font.setPointSize(12)
+    # pw.getAxis('bottom').setTickFont(font)
+    # pw.getAxis('left').setTickFont(font)
+    # pw.show()
 
     sys.exit(app.exec_())
