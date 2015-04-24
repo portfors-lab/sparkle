@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1223</width>
-    <height>656</height>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,7 +66,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -371,33 +371,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="aochanBox">
-            <property name="toolTip">
-             <string>Output channel (AO#)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_30">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Recording channel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="aichanBox">
-            <property name="toolTip">
-             <string>Input channel (AI#)</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_29">
             <property name="sizePolicy">
@@ -410,6 +383,23 @@
              <string>Stimulus channel</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="aochanBox">
+            <property name="toolTip">
+             <string>Output channel (AO#)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Recording channel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="aichanBox"/>
           </item>
          </layout>
         </item>
@@ -430,13 +420,6 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Threshold</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
            <widget class="QLabel" name="label_43">
             <property name="text">
              <string>Spike bin size</string>
@@ -456,7 +439,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="3" column="1">
            <widget class="SmartSpinBox" name="binszSpnbx">
             <property name="toolTip">
              <string>Time bin duration for detected spikes for raster and PSTH</string>
@@ -475,7 +458,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="4" column="1">
            <widget class="QDoubleSpinBox" name="reprateSpnbx">
             <property name="toolTip">
              <string>Rate of recording window repetitions</string>
@@ -485,6 +468,9 @@
             </property>
             <property name="prefix">
              <string/>
+            </property>
+            <property name="suffix">
+             <string> reps/s</string>
             </property>
             <property name="minimum">
              <double>0.100000000000000</double>
@@ -497,7 +483,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_35">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -507,38 +493,6 @@
             </property>
             <property name="text">
              <string>Rep rate</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QLabel" name="label_36">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>reps/s</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="threshSpnbx">
-            <property name="toolTip">
-             <string>Spike detection threshold</string>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::NoButtons</enum>
-            </property>
-            <property name="suffix">
-             <string> V</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>500.000000000000000</double>
             </property>
            </widget>
           </item>

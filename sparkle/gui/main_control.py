@@ -72,9 +72,9 @@ class MainWindow(ControlWindow):
         self.ui.startChartBtn.clicked.connect(self.onStartChart)
         self.ui.stopChartBtn.clicked.connect(self.onStopChart)
 
-        cnames = get_ao_chans(DEVNAME.encode())
+        cnames = get_ao_chans(DEVNAME)
         self.ui.aochanBox.addItems(cnames)
-        cnames = get_ai_chans(DEVNAME.encode())
+        cnames = get_ai_chans(DEVNAME)
         self.ui.aichanBox.addItems(cnames)
         # can't find a function in DAQmx that gets the trigger
         # channel names, so add manually
@@ -111,14 +111,12 @@ class MainWindow(ControlWindow):
             self.acqmodel.set_queue_callback(name, signal.emit)
         self.acqmodel.start_listening()
 
-        self.ui.threshSpnbx.valueChanged.connect(self.setPlotThresh)        
         self.ui.windowszSpnbx.valueChanged.connect(self.setCalibrationDuration)
-        self.ui.threshSpnbx.setKeyboardTracking(False)
 
         self.activeOperation = None
 
         # update GUI to reflect loaded values
-        self.setPlotThresh()
+        self.updateThresh(self.display.spiketracePlot.getThreshold())
         self.setCalibrationDuration()
 
         # always start in windowed mode
@@ -163,9 +161,21 @@ class MainWindow(ControlWindow):
                 txt = str(self.ui.tabGroup.tabText(tabIndex)).lower()
                 if txt == 'calibration' or txt == 'explore':
                     self.ui.tabGroup.removeTab(tabIndex)
+
+        # self.ui.addInputChannelBtn.clicked.connect(self.addInputChannel)
                     
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
+
+    def addInputChannel(self):
+        newChannelCmbx = QtGui.QComboBox()
+        cnames = get_ai_chans(DEVNAME.encode())
+        newChannelCmbx.addItems(cnames)
+
+        newThreshField = QtGui.QDoubleSpinBox()
+        newThreshField.setSuffix('V')
+        
+        self.inChanCmbxs
 
     def connectUpdatable(self, connect):
         if connect:
@@ -820,7 +830,7 @@ class MainWindow(ControlWindow):
                 groups = ['all traces']
                 plottype = 'other'
             # a not-so-live curve
-            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self.ui.threshSpnbx.value(), aifs, xlabels)
+            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self._threshold, aifs, xlabels)
             self.comatosecurve.setLabels(plottype)
             self.ui.progressDock.setWidget(self.comatosecurve)
 
@@ -915,13 +925,6 @@ class MainWindow(ControlWindow):
         self.ui.calibrationWidget.setDuration(winsz)
 
     def updateThresh(self, thresh):
-        self.ui.threshSpnbx.setValue(thresh)
-        self._threshold = thresh
-        self.reloadReview()
-
-    def setPlotThresh(self):
-        thresh = self.ui.threshSpnbx.value()
-        self.display.spiketracePlot.setThreshold(thresh)
         self._threshold = thresh
         self.reloadReview()
 

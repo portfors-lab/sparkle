@@ -200,7 +200,7 @@ class ControlWindow(QtGui.QMainWindow):
         fname = os.path.join(appdir, fname)
 
         savedict = {}
-        savedict['threshold'] = self.ui.threshSpnbx.value()
+        savedict['threshold'] = self.display.spiketracePlot.getThreshold()
         savedict['binsz'] = self.ui.binszSpnbx.value()
         savedict['aifs'] = self.ui.aifsSpnbx.value()
         savedict['tscale'] = self.tscale
@@ -246,7 +246,7 @@ class ControlWindow(QtGui.QMainWindow):
             logger.exception("Unable to load app data from file: {}".format(inputsfname))
             inputsdict = {}
 
-        self.ui.threshSpnbx.setValue(inputsdict.get('threshold', 0.5))
+        self.display.spiketracePlot.setThreshold(inputsdict.get('threshold', 0.5))
         self.stashedAisr = inputsdict.get('aifs', 100000)
         self.ui.aifsSpnbx.setValue(self.stashedAisr)
         self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 0.1))

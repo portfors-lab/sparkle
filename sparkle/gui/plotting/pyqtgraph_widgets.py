@@ -10,6 +10,7 @@ import sparkle.tools.audiotools as audiotools
 from QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 from sparkle.gui.plotting.viewbox import SpikeyViewBox
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
 from sparkle.tools import spikestats
 from sparkle.tools.systools import get_src_directory
 
@@ -138,6 +139,30 @@ class TraceWidget(BasePlot):
         self.updateRasterBounds()
         self.trace_stash = []
 
+        # add spinbox for threshold number display/edit
+        self.threshold_field = SmartSpinBox()
+        label = QtGui.QLabel("threshold")
+        label.setAutoFillBackground(True)
+        label.setBackgroundRole(QtGui.QPalette.Base)
+
+        self.proxy_threshold_field = QtGui.QGraphicsProxyWidget()
+        self.proxy_threshold_field.setWidget(self.threshold_field)
+        self.proxy_label = QtGui.QGraphicsProxyWidget()
+        self.proxy_label.setWidget(label)
+
+        self.centralWidget.layout.addItem(self.proxy_label, 4, 0)
+        self.centralWidget.layout.addItem(self.proxy_threshold_field, 4,1)
+        
+        self.threshold_field.setMinimumSize(QtCore.QSize(100,10))
+        self.threshold_field.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum))
+        self.threshold_field.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.threshold_field.setAlignment(QtCore.Qt.AlignRight)
+
+        self.threshold_field.setMinimum(-20)
+        self.threshold_field.setMaximum(20)
+        self.threshold_field.setSuffix(' V')
+        self.threshold_field.editingFinished.connect(self._setThresholdFromField)
+
     def updateData(self, axeskey, x, y):
         """Replaces the currently displayed data
 
@@ -210,7 +235,8 @@ class TraceWidget(BasePlot):
         :param threshold: the y value to set the threshold line at
         :type threshold: float
         """
-        self.threshLine.setValue(threshold) 
+        self.threshLine.setValue(threshold)
+        self.threshold_field.setValue(threshold)
 
     def setNreps(self, nreps):
         """Sets the number of reps user by raster plot to determine where to 
@@ -301,7 +327,9 @@ class TraceWidget(BasePlot):
 
     def update_thresh(self):
         """Emits a Qt signal thresholdUpdated with the current threshold value"""
-        self.thresholdUpdated.emit(self.threshLine.value())
+        thresh_val = self.threshLine.value()
+        self.threshold_field.setValue(thresh_val)
+        self.thresholdUpdated.emit(thresh_val)
 
     def invertPolarity(self, inverted):
         if inverted:
@@ -310,6 +338,12 @@ class TraceWidget(BasePlot):
             pol = 1
         self._polarity = pol
         self.polarityInverted.emit(pol)
+
+    def _setThresholdFromField(self):
+        thresh_val = self.threshold_field.value()
+        self.setThreshold(thresh_val)
+        self.thresholdUpdated.emit(thresh_val)
+
 
 def _doSpectrogram(signal, *args, **kwargs):
     spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)
