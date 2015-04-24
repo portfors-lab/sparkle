@@ -1,3 +1,4 @@
+import glob
 import json
 import logging
 import os
@@ -10,7 +11,7 @@ import numpy as np
 from sparkle.data.acqdata import AcquisitionData, increment
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
     OverwriteFileError, ReadOnlyError
-from sparkle.tools.util import convert2native, max_str_num
+from sparkle.tools.util import convert2native, max_str_num, increment_title
 from sparkle.tools.doc_inherit import doc_inherit
 
 class HDF5Data(AcquisitionData):
@@ -153,6 +154,10 @@ class HDF5Data(AcquisitionData):
             self.hdf5[key][setname][tuple(index)] = data[:]
             dims = self.hdf5[key][setname].shape
             increment(current_location, dims, data.shape)
+            if current_location[0] >= dims[0]:
+                # dataset filled, save data to safety file
+                copy_backup(self.hdf5)
+
         elif mode =='open':
             current_index = self.meta[key]['cursor']
             self.hdf5[key][current_index] = data
@@ -423,6 +428,34 @@ def hasparent(key):
     if '' in path:
         path.remove('')
     return len(path) > 1
+
+def copy_backup(fromfile):
+    # assemble backup file filename
+    nameparts = os.path.splitext(fromfile.filename)
+    prev_backup_file = glob.glob(nameparts[0] + '_autosave*')
+    if len(prev_backup_file) > 0:
+        prev_fileparts = os.path.splitext(prev_backup_file[0])
+        backup_filename = increment_title(prev_fileparts[0]) + prev_fileparts[1]
+    else: 
+        backup_filename = nameparts[0] + '_autosave0' + nameparts[1]
+    
+    # open a new hdf5 file for backup
+    backup_file = h5py.File(backup_filename, 'w')
+
+    # copy the contents of main data file to the backup
+    for group in fromfile.keys():
+        fromfile.copy(group, backup_file)
+    # copy the file attributes
+    for attr in fromfile.attrs:
+        backup_file.attrs[attr] = fromfile.attrs[attr]
+
+    # importantly, close the file, so it is save from corruption
+    backup_file.close()
+    
+    # delete any previous backups to free up space
+    if len(prev_backup_file) > 0:
+        os.remove(prev_backup_file[0])
+
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':
