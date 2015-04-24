@@ -1010,3 +1010,4 @@ class MainWindow(ControlWindow):
         self.onStop()
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
+        
