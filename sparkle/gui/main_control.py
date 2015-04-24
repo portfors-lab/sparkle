@@ -164,10 +164,6 @@ class MainWindow(ControlWindow):
                 if txt == 'calibration' or txt == 'explore':
                     self.ui.tabGroup.removeTab(tabIndex)
                     
-
-        crashBtn = QtGui.QPushButton('crash')
-        crashBtn.clicked.connect(crashInterpreter)
-        self.ui.horizontalLayout_2.addWidget(crashBtn)
     # def update_ui_log(self, message):
     #     self.ui.logTxedt.appendPlainText(message)
 
@@ -1011,7 +1007,4 @@ class MainWindow(ControlWindow):
         self.onStop()
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
-
-def crashInterpreter():
-    import ctypes
-    ctypes.string_at(1)
+        
