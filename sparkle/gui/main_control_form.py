@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Fri Apr 24 11:22:19 2015
+# Created: Fri Apr 24 16:53:26 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -217,15 +217,18 @@ class Ui_ControlWindow(object):
         self.label_29.setSizePolicy(sizePolicy)
         self.label_29.setObjectName(_fromUtf8("label_29"))
         self.gridLayout_4.addWidget(self.label_29, 0, 0, 1, 1)
+        self.chanNumLbl = QtGui.QLabel(self.centralwidget)
+        self.chanNumLbl.setObjectName(_fromUtf8("chanNumLbl"))
+        self.gridLayout_4.addWidget(self.chanNumLbl, 1, 1, 1, 1)
         self.aochanBox = QtGui.QComboBox(self.centralwidget)
         self.aochanBox.setObjectName(_fromUtf8("aochanBox"))
-        self.gridLayout_4.addWidget(self.aochanBox, 0, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.aochanBox, 0, 1, 1, 2)
         self.label_24 = QtGui.QLabel(self.centralwidget)
         self.label_24.setObjectName(_fromUtf8("label_24"))
         self.gridLayout_4.addWidget(self.label_24, 1, 0, 1, 1)
-        self.aichanBox = QtGui.QComboBox(self.centralwidget)
-        self.aichanBox.setObjectName(_fromUtf8("aichanBox"))
-        self.gridLayout_4.addWidget(self.aichanBox, 1, 1, 1, 1)
+        self.aichanBtn = QtGui.QPushButton(self.centralwidget)
+        self.aichanBtn.setObjectName(_fromUtf8("aichanBtn"))
+        self.gridLayout_4.addWidget(self.aichanBtn, 1, 2, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_4)
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
@@ -617,6 +620,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionResponse_SPL, QtCore.SIGNAL(_fromUtf8("triggered()")), self.responseSpl.showNormal)
         QtCore.QObject.connect(self.psthMaxBox, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.psthStopField.setDisabled)
         QtCore.QObject.connect(self.actionVocalization_paths, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchVocalPaths)
+        QtCore.QObject.connect(self.aichanBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), ControlWindow.launchChannelDlg)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -650,8 +654,10 @@ class Ui_ControlWindow(object):
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabCalibrate), _translate("ControlWindow", "Calibration", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabReview), _translate("ControlWindow", "Review", None))
         self.label_29.setText(_translate("ControlWindow", "Stimulus channel", None))
+        self.chanNumLbl.setText(_translate("ControlWindow", "0", None))
         self.aochanBox.setToolTip(_translate("ControlWindow", "Output channel (AO#)", None))
-        self.label_24.setText(_translate("ControlWindow", "Recording channel", None))
+        self.label_24.setText(_translate("ControlWindow", "Recording channels :", None))
+        self.aichanBtn.setText(_translate("ControlWindow", "choose...", None))
         self.label.setText(_translate("ControlWindow", "Acq. Sample rate", None))
         self.label_10.setText(_translate("ControlWindow", "Window size", None))
         self.label_43.setText(_translate("ControlWindow", "Spike bin size", None))

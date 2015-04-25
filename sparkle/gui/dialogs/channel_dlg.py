@@ -2,9 +2,9 @@ from QtWrapper import QtCore, QtGui
 
 from sparkle.acq.daq_tasks import get_ai_chans
 
-class ChannelPicker(QtGui.QWidget):
+class ChannelDialog(QtGui.QDialog):
     def __init__(self, device_name):
-        super(ChannelPicker, self).__init__()
+        super(ChannelDialog, self).__init__()
         
         layout = QtGui.QGridLayout()
         cnames = get_ai_chans(device_name)
@@ -24,12 +24,15 @@ class ChannelPicker(QtGui.QWidget):
                 col +=1
 
         okBtn = QtGui.QPushButton("OK")
+        okBtn.clicked.connect(self.accept)
         cancelBtn = QtGui.QPushButton("Cancel")
+        cancelBtn.clicked.connect(self.reject)
         layout.addWidget(okBtn, max_row+1, 0)
         row += 1
         layout.addWidget(cancelBtn, max_row+1, 1)
 
         self.setLayout(layout)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
 
     def getSelectedChannels(self):
         chosen_channel_names = []

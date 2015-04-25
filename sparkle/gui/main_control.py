@@ -11,7 +11,7 @@ from QtWrapper import QtCore, QtGui
 from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
-    VocalPathDialog
+    VocalPathDialog, ChannelDialog
 from sparkle.gui.plotting.pyqtgraph_widgets import ProgressWidget, \
     SimplePlotWidget, SpecWidget
 from sparkle.gui.qprotocol import QProtocolTabelModel
@@ -49,6 +49,7 @@ class MainWindow(ControlWindow):
     """Main GUI for the application. Run the main fucntion of this file"""
     _polarity = 1
     _threshold = 10
+    _aichans = []
     def __init__(self, inputsFilename='', datafile=None, filemode='w-', hidetabs=False):
         # set up model and stimlui first, 
         # as saved configuration relies on this
@@ -74,8 +75,6 @@ class MainWindow(ControlWindow):
 
         cnames = get_ao_chans(DEVNAME)
         self.ui.aochanBox.addItems(cnames)
-        cnames = get_ai_chans(DEVNAME)
-        self.ui.aichanBox.addItems(cnames)
         # can't find a function in DAQmx that gets the trigger
         # channel names, so add manually
         self.ui.trigchanBox.addItems(['/'+DEVNAME+'/PFI0', '/'+DEVNAME+'/PFI1'])
@@ -226,7 +225,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.set(reprate=self.ui.reprateSpnbx.value())
 
         if self.currentMode == 'windowed':
-            self.ui.aichanBox.setEnabled(False)
+            self.ui.aichanBtn.setEnabled(False)
             self.ui.runningLabel.setText(u"RECORDING")
             self.ui.runningLabel.setStyleSheet(GREENSS)
 
@@ -249,7 +248,7 @@ class MainWindow(ControlWindow):
         self.ui.runningLabel.setText(u"RECORDING")
         self.ui.runningLabel.setStyleSheet(GREENSS)
         self.ui.startChartBtn.setEnabled(False)
-        self.ui.aichanBox.setEnabled(False)
+        self.ui.aichanBtn.setEnabled(False)
         self.ui.aifsSpnbx.setEnabled(False)
         self.ui.stopChartBtn.setEnabled(True)
         self.ui.windowszSpnbx.valueChanged.connect(self.updateScollingWindowsize)
@@ -259,7 +258,7 @@ class MainWindow(ControlWindow):
             return
 
         aochan = str(self.ui.aochanBox.currentText())
-        aichan = str(self.ui.aichanBox.currentText())
+        # aichan = str(self.ui.aichanBox.currentText())
         acq_rate = self.ui.aifsSpnbx.value()
 
         winsz = float(self.ui.windowszSpnbx.value())
@@ -274,7 +273,7 @@ class MainWindow(ControlWindow):
             trigger = str(self.ui.trigchanBox.currentText())
         else:
             trigger = None
-        self.acqmodel.set(aochan=aochan, aichan=aichan, acqtime=winsz,
+        self.acqmodel.set(aochan=aochan, aichan=self._aichans, acqtime=winsz,
                           aifs=acq_rate, binsz=binsz, trigger=trigger)
         self.binsz = binsz
 
@@ -300,7 +299,7 @@ class MainWindow(ControlWindow):
             self.liveLock.unlock()
             self.ui.runningLabel.setText(u"OFF")
             self.ui.runningLabel.setStyleSheet(REDSS)
-            self.ui.aichanBox.setEnabled(True)
+            self.ui.aichanBtn.setEnabled(True)
             self.connectUpdatable(False)
         self.ui.startBtn.setEnabled(True)
         self.ui.stopBtn.setText("Stop")
@@ -328,7 +327,7 @@ class MainWindow(ControlWindow):
         self.liveLock.unlock()
         self.ui.runningLabel.setText(u"OFF")
         self.ui.runningLabel.setStyleSheet(REDSS)
-        self.ui.aichanBox.setEnabled(True)
+        self.ui.aichanBtn.setEnabled(True)
         self.ui.aifsSpnbx.setEnabled(True)
         self.ui.stopChartBtn.setEnabled(False)
         self.ui.windowszSpnbx.valueChanged.disconnect()
@@ -894,6 +893,13 @@ class MainWindow(ControlWindow):
     def launchCellDlg(self):
         cid = QtGui.QInputDialog.getInt(self, "Cell ID", "Enter the ID number of the current cell:", self.acqmodel.current_cellid)
         self.acqmodel.current_cellid = cid[0]
+
+    def launchChannelDlg(self):
+        dlg = ChannelDialog(DEVNAME)
+        dlg.setSelectedChannels(self._aichans)
+        if dlg.exec_():
+            self._aichans = dlg.getSelectedChannels()
+        dlg.deleteLater()
 
     def launchVocalPaths(self):
         dlg = VocalPathDialog(Vocalization.paths)
