@@ -184,6 +184,16 @@ class TestDAQTasks():
         # print "duration", duration
         assert len(response1) == npts
 
+    def test_multichannel_acq(self):
+        npts = 10000
+        fs = 10000
+        ait = AITaskFinite([DEVNAME+"/ai16", DEVNAME+"/ai17"], fs, npts)
+        ait.StartTask()
+        response = ait.read()
+        ait.stop()
+
+        assert response.shape == (2, npts)
+
     def stashacq(self, data):
         self.data.extend(data.tolist())
 

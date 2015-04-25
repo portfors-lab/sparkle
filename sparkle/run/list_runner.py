@@ -100,7 +100,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
                     self._initialize_test(test)
                     if self.save_data:
-                        print test.testDoc()
                         self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), signal=True)
                     # profiler = cProfile.Profile()
                     # print 'profiling....'

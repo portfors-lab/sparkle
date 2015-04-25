@@ -137,6 +137,11 @@ class AITaskFinite(Task):
     """
     def __init__(self, chan, samplerate, npts, clksrc="", trigsrc=None):
         Task.__init__(self)
+        if isinstance(chan, list):
+            self.nchans = len(chan)
+            chan = ','.join(chan)
+        else:
+            self.nchans = 1
         self.CreateAIVoltageChan(chan,"",DAQmx_Val_Cfg_Default,
                                  -10.0, 10.0, DAQmx_Val_Volts, None)
         self.CfgSampClkTiming(clksrc, samplerate, DAQmx_Val_Rising, 
@@ -157,11 +162,13 @@ class AITaskFinite(Task):
         :returns: numpy.ndarray -- the acquired data
         """
         r = c_int32()
-        inbuffer = np.zeros(self.npts)
-        self.ReadAnalogF64(self.npts, 10.0, DAQmx_Val_GroupByScanNumber, inbuffer,
-                           self.npts,byref(r), None)
+        bufsize = self.npts*self.nchans
+        inbuffer = np.zeros(bufsize)
+        self.ReadAnalogF64(self.npts, 10.0, DAQmx_Val_GroupByChannel, inbuffer,
+                           bufsize, byref(r), None)
         self.WaitUntilTaskDone(10.0)
-        return inbuffer
+
+        return inbuffer.reshape(self.nchans, self.npts)
 
     def stop(self):
         """Halts the acquisition"""

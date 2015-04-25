@@ -152,7 +152,7 @@ class TestAcquisitionManager():
         # stim 0 is control window
         assert_in('components', stim[1])
         assert_equal(stim[1]['samplerate_da'], gen_rate)
-        assert_equal(test.shape,(2,1,winsz*acq_rate))
+        assert_equal(test.shape,(2,1,1,winsz*acq_rate))
         assert stim[1]['overloaded_attenuation'] > 0
         hfile.close()
 
@@ -248,6 +248,30 @@ class TestAcquisitionManager():
         test = hfile['segment_1']['test_1']
 
         check_result(test, stim_model, winsz, acq_rate)
+
+        hfile.close()
+
+    def test_multichannel_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        nreps = 3
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set(aichan=[u"PCI-6259/ai0", u"PCI-6259/ai1"])
+
+        stim_model = create_vocal_stim(nreps)
+
+        manager.protocol_model().insert(stim_model,0)
+
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim_model, winsz, acq_rate, 2)
 
         hfile.close()
 
@@ -646,7 +670,7 @@ class TestAcquisitionManager():
         manager.load_data_file(fname, 'w-')
         if acq_rate is None:
             acq_rate = manager.calibration_genrate()
-        manager.set(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
+        manager.set(aochan=u"PCI-6259/ao0", aichan=[u"PCI-6259/ai0"],
                            acqtime=winsz, aifs=acq_rate, caldb=100,
                            calv=1.0)
         return manager, fname
@@ -664,11 +688,12 @@ class TestAcquisitionManager():
         manager.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
 
-def check_result(test_data, test_stim, winsz, acq_rate):
+def check_result(test_data, test_stim, winsz, acq_rate, nchans=1):
     ntraces = test_stim.traceCount()+1
     nreps = test_stim.repCount()
     stim_doc = json.loads(test_data.attrs['stim'])
 
+    print 'test_data', test_data, test_data.shape
     print 'stim doc', stim_doc[0]
 
     # check everthing we can here
@@ -680,7 +705,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     if t is None: t = ''
     assert test_data.attrs['testtype'] == t
     
-    assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
+    assert_equal(test_data.shape,(ntraces, nreps, nchans, winsz*acq_rate))
 
     for stim_info in stim_doc:
         assert len(stim_info['time_stamps']) == test_data.attrs['reps']

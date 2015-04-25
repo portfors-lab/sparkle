@@ -160,6 +160,7 @@ class HDF5Data(AcquisitionData):
             self.hdf5[key][setname][tuple(index)] = data[:]
             dims = self.hdf5[key][setname].shape
             increment(current_location, dims, data.shape)
+
             if current_location[0] >= dims[0]:
                 # dataset filled, save data to safety file
                 copy_backup(self.hdf5)
@@ -367,7 +368,6 @@ class HDF5Data(AcquisitionData):
             stim_data = json.dumps(convert2native(stim_data))
         mode = self.meta[key]['mode']
         if mode == 'open':
-            print 'appending stim in open'
             _append_stim(self.hdf5, key, stim_data)
         if mode == 'finite':
             setname = key + '/' + 'test_'+str(self.test_count)
