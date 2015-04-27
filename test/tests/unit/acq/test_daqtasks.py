@@ -57,7 +57,7 @@ class TestDAQTasks():
                 plt.plot(x, stim, x, response)
                 plt.show()
 
-            assert stim.shape == response.shape
+            assert stim.shape == np.squeeze(response).shape
 
             if not self.devmode:
                 tolerance = max(amp*0.1, 0.005) #noise floor

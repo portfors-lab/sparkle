@@ -29,7 +29,7 @@ class TestDAQPlayers():
 
         amp = np.max(stim)
         tolerance = max(amp*0.1, 0.005) #noise floor
-        assert stim.shape == response0.shape
+        assert stim.shape[-1] == response0.shape[-1]
         if not self.devmode:
             assert np.allclose(stim, response0, rtol=0, atol=tolerance)
 
@@ -38,7 +38,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs/4, dur)
 
-        assert len(stim) == len(response0)/4
+        assert stim.shape[-1] == response0.shape[-1]/4
         if not self.devmode:
             # assert np.round(np.amax(response0), 2) == np.amax(stim)
             pass
@@ -48,7 +48,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs/4, dur, fs, dur)
 
-        assert len(stim)/4 == len(response0)
+        assert stim.shape[-1]/4 == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == np.amax(stim)
 
@@ -57,7 +57,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs, dur/4)
 
-        assert len(stim) == len(response0)/4
+        assert stim.shape[-1] == response0.shape[-1]/4
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == np.amax(stim)
 
@@ -66,7 +66,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs/4, dur/2)
 
-        assert len(stim) == len(response0)/4/2
+        assert stim.shape[-1] == response0.shape[-1]/4/2
         if not self.devmode:
             pass
             # assert np.round(np.amax(response0), 2) == np.round(np.amax(stim), 2)
@@ -76,7 +76,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur/2, fs, dur)
 
-        assert len(stim)/2 == len(response0)
+        assert stim.shape[-1]/2 == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == np.amax(stim)
 
@@ -85,7 +85,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs/4, dur/2, fs, dur)
 
-        assert len(stim)/4/2 == len(response0)
+        assert stim.shape[-1]/4/2 == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 2) == np.amax(stim)
 
@@ -95,7 +95,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs, dur, 11.0)
 
-        assert len(stim) == len(response0)
+        assert stim.shape[-1] == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == MAXV
 
