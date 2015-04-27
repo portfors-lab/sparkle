@@ -11,13 +11,14 @@ from sparkle.gui.stim.stimulus_editor import StimulusEditor
 from sparkle.stim.auto_parameter_model import AutoParameterModel
 from sparkle.stim.reorder import order_function
 from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
+from sparkle.stim.types.stimuli_classes import PureTone, Vocalization, SquareWave
 from sparkle.tools.systools import get_src_directory
 
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 MAXV = config['max_voltage']
+DEVICE_MAXV = config['device_max_voltage']
 USE_RMS = config['use_rms']
 DEFAULT_SAMPLERATE = config['default_genrate']
 
@@ -222,6 +223,19 @@ class TestStimModel():
         assert atten == 0
         print 'maxv', MAXV, 'signal max', np.amax(signal), 'overload', ovld
         assert round(np.amax(signal),2) == MAXV
+        # do math to make this more accurate
+        assert ovld > 0
+
+    def test_square_wave_overload_voltage(self):
+        model = StimulusModel()
+        component0 = SquareWave()
+        component0.set('amplitude', 11.)
+        model.insertComponent(component0, 0, 0)
+
+        signal, atten, ovld = model.signal()
+        assert atten == 0
+        print 'maxv', DEVICE_MAXV, 'signal max', np.amax(signal), 'overload', ovld
+        assert round(np.amax(signal),2) == DEVICE_MAXV
         # do math to make this more accurate
         assert ovld > 0
 

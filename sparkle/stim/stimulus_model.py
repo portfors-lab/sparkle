@@ -18,6 +18,7 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 DEFAULT_SAMPLERATE = config['default_genrate']
 MAXV = config['max_voltage']
+DEVICE_MAXV = config['device_max_voltage']
 
 class StimulusModel():
     """
@@ -604,6 +605,9 @@ class StimulusModel():
         component_names = list(set([comp.name for track in self._segments for comp in track]))
         if len(component_names) > 1 or component_names[0] != "Square Wave":
             total_signal = convolve_filter(total_signal, self.impulseResponse)
+            maxv = MAXV
+        else:
+            maxv = DEVICE_MAXV
 
         # last sample should always go to 0, so output isn't stuck on some
         # other value when stim ends
@@ -621,10 +625,10 @@ class StimulusModel():
         #     atten -= allowance
 
         sig_max = np.max(abs(total_signal))
-        if sig_max > MAXV:
+        if sig_max > maxv:
             # scale stim down to outputable max
-            total_signal = (total_signal/sig_max)*MAXV
-            attenuated = 20 * np.log10(sig_max/MAXV)
+            total_signal = (total_signal/sig_max)*maxv
+            attenuated = 20 * np.log10(sig_max/maxv)
 
             if attenuated <= atten:
                 atten = atten - attenuated
@@ -633,7 +637,7 @@ class StimulusModel():
                 atten = 0
                 logger = logging.getLogger('main')
                 logger.warning("STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
-                    UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, MAXV, undesired_attenuation))
+                    UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, maxv, undesired_attenuation))
         elif sig_max < self.minv and sig_max !=0:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             total_signal = (total_signal/sig_max)*self.minv
