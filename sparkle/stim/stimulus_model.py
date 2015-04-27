@@ -606,8 +606,10 @@ class StimulusModel():
         if len(component_names) > 1 or component_names[0] != "Square Wave":
             total_signal = convolve_filter(total_signal, self.impulseResponse)
             maxv = MAXV
+            to_speaker = True
         else:
             maxv = DEVICE_MAXV
+            to_speaker = False
 
         # last sample should always go to 0, so output isn't stuck on some
         # other value when stim ends
@@ -638,7 +640,7 @@ class StimulusModel():
                 logger = logging.getLogger('main')
                 logger.warning("STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
                     UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, maxv, undesired_attenuation))
-        elif sig_max < self.minv and sig_max !=0:
+        elif sig_max < self.minv and sig_max !=0 and to_speaker:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
             total_signal = (total_signal/sig_max)*self.minv
             after_rms = np.sqrt(np.mean(pow(total_signal,2)))
