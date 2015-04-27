@@ -380,7 +380,12 @@ class TestAcquisitionManager():
         """Run search operation with tone stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        self.data = []
+        # set a callback to gather and assert for data
+        manager.set_queue_callback('response_collected', self.collect_response)
+        manager.start_listening()        
 
         manager.set(nreps=2)
         stim = manager.explore_stimulus()
@@ -394,13 +399,23 @@ class TestAcquisitionManager():
         t.join()
         manager.close_data()
 
+        assert len(self.data) > 1
+        times, dset = self.data[0]
+        assert times.shape == (int(acq_rate*winsz),)
+        assert dset.shape == (1, int(acq_rate*winsz))
         # should check that it did not save data!
+
 
     def test_vocal_explore(self):
         """Run search operation with vocal wav stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        self.data = []
+        # set a callback to gather and assert for data
+        manager.set_queue_callback('response_collected', self.collect_response)
+        manager.start_listening()        
 
         manager.set(nreps=2)
 
@@ -417,6 +432,43 @@ class TestAcquisitionManager():
 
         t.join()
         manager.close_data()
+
+        assert len(self.data) > 1
+        times, dset = self.data[0]
+        assert times.shape == (int(acq_rate*winsz),)
+        assert dset.shape == (1, int(acq_rate*winsz))
+
+    def test_multichannel_explore(self):
+        """Run search operation with tone stimulus"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager.set(aichan=[u"PCI-6259/ai0", u"PCI-6259/ai1"])
+
+        self.data = []
+        # set a callback to gather and assert for data
+        manager.set_queue_callback('response_collected', self.collect_response)
+        manager.start_listening()
+
+        manager.set(nreps=2)
+        stim = manager.explore_stimulus()
+        stim.insertComponent(PureTone())
+        t = manager.run_explore(0.25)
+
+        time.sleep(1)
+
+        manager.halt()
+
+        t.join()
+        manager.close_data()
+
+        assert len(self.data) > 1
+        times, dset = self.data[0]
+        assert times.shape == (int(acq_rate*winsz),)
+        assert dset.shape == (2, int(acq_rate*winsz))
+
+    def collect_response(self, times, response, test_num, trace_num, rep_num, extra_info={}):
+        self.data.append((times, response))
 
     def test_tone_vocal_explore_save(self):
         """Run search operation with tone and vocal stimulus, and save results"""

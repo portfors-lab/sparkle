@@ -120,6 +120,9 @@ class SearchRunner(AbstractAcquisitionRunner):
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)
 
+        # make sure a signal is loaded
+        self.reset_stim()
+        
         # and go!
         self.acq_thread.start()
 
@@ -140,7 +143,6 @@ class SearchRunner(AbstractAcquisitionRunner):
             # self.player.start_timer(self.reprate)
             stim = self.player.start()
             while not self._halt:
-                # print 'explore worker'
                 self.interval_wait()
 
                 response = self.player.run()
