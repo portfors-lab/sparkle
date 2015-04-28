@@ -590,6 +590,12 @@ class ComponentDelegate(QtGui.QStyledItemDelegate):
         # need to save over component object in stimulus model
         model.dataEdited()
 
+        # clean up
+        editor.attributesSaved.disconnect()
+        if hasattr(editor, 'vocalFilesChanged'):
+            editor.vocalFilesChanged.disconnect()
+        editor.close()
+
     def updateEditorGeometry(self, editor, option, index):
         """centers the editor widget. :qtdoc:`Re-implemented<QStyledItemDelegate.updateEditorGeometry>`"""
         qr = editor.frameGeometry()

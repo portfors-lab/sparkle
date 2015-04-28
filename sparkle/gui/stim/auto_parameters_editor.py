@@ -98,6 +98,10 @@ class Parametizer(QtGui.QWidget):
     def closeEvent(self, event):
         """Emits a signal to update start values on components"""
         self.visibilityChanged.emit(0)
+        model = self.paramList.model()
+        model.hintRequested.disconnect()
+        model.rowsInserted.disconnect()
+        model.rowsRemoved.disconnect()
 
 
 class HidableParameterEditor(WidgetHider):
