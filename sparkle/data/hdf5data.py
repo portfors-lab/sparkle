@@ -444,6 +444,9 @@ def copy_backup(h5file):
         backup_filename = increment_title(prev_fileparts[0]) + prev_fileparts[1]
     else: 
         backup_filename = nameparts[0] + '_autosave0' + nameparts[1]
+
+    logger = logging.getLogger('main')
+    logger.debug('Backing up data: %s' % backup_filename)
     
     # open a new hdf5 file for backup
     backup_file = h5py.File(backup_filename, 'w')
@@ -455,9 +458,10 @@ def copy_backup(h5file):
     for attr in h5file.attrs:
         backup_file.attrs[attr] = h5file.attrs[attr]
 
-    # importantly, close the file, so it is save from corruption
+    # importantly, close the file, so it is safe from corruption
     backup_file.close()
     
+    logger.debug('Backup safe %s' % backup_filename)        
     # delete any previous backups to free up space
     if len(prev_backup_file) > 0:
         os.remove(prev_backup_file[0])
@@ -467,6 +471,9 @@ def remove_backup(filename):
     backup_files = glob.glob(nameparts[0] + '_autosave*')
     for backup in backup_files:
         os.remove(backup)
+
+    logger = logging.getLogger('main')
+    logger.debug('Removed backup data files: %d' % len(backup_files))
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':
