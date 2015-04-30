@@ -19,7 +19,19 @@ class HDF5Data(AcquisitionData):
     def __init__(self, filename, user='unknown', filemode='w-'):
         super(HDF5Data, self).__init__(filename, user, filemode)
 
-        self.hdf5 = h5py.File(filename, filemode)
+        logger = logging.getLogger('main')
+        try:
+            self.hdf5 = h5py.File(filename, filemode)
+        except:
+            # reload backup files, if present
+            backup_dir, backup_filename, prev_backups = autosave_file(h5file.filename)
+            if len(prev_backups) > 0:
+                # reassemble data from pieces
+                self.hdf5 = recover_data_from_backup(filename, prev_backups)
+                logger.info('Recovered data file %s' % filename)
+            else:
+                print 'No backups'
+                raise
 
         if filemode == 'w-':
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
@@ -28,7 +40,6 @@ class HDF5Data(AcquisitionData):
             self.hdf5.attrs['computername'] = socket.gethostname()
             self.test_count = 0
 
-            logger = logging.getLogger('main')
             logger.info('Created data file %s' % filename)
         else:
             # find highet numbered test.. tight coupling to acquisition classes
@@ -41,7 +52,6 @@ class HDF5Data(AcquisitionData):
             else:
                 self.test_count = 0
 
-            logger = logging.getLogger('main')
             logger.info('Opened data file %s' % filename)
 
             #immediately make a backup, since we have data present
@@ -501,6 +511,26 @@ def remove_backup(filename):
 
     if os.path.exists(backup_dir) and not os.listdir(backup_dir):
         os.rmdir(backup_dir)
+
+def recover_data_from_backup(filename, backup_files):
+    new_data = h5py.File(filename+'tmp', 'w-')
+    for backup_fname in backup_files:
+        backup = h5py.File(backup_fname, 'r')
+        for key in backup.keys():
+            backup.copy(key, new_data, key)
+        # copy file attributes too
+        for attr in backup.attrs:
+            new_data.attrs[attr] = backup.attrs[attr]
+        backup.close()
+
+    # close this file, so we can change the name
+    new_data.close()
+    # do some filename shuffling
+    os.rename(filename, filename + '_corrupted')
+    os.rename(filename+'tmp', filename)
+
+    new_data = h5py.File(filename, 'a')
+    return new_data
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':
