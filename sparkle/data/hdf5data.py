@@ -1,3 +1,4 @@
+import ctypes
 import glob
 import json
 import logging
@@ -30,7 +31,7 @@ class HDF5Data(AcquisitionData):
             logger = logging.getLogger('main')
             logger.info('Created data file %s' % filename)
         else:
-            # find highets numbered test.. tight coupling to acquisition classes
+            # find highet numbered test.. tight coupling to acquisition classes
             # print 'data file keys', self.hdf5.keys()
             group_prefix = 'segment_'
             dset_prefix = 'test_'
@@ -162,7 +163,7 @@ class HDF5Data(AcquisitionData):
             increment(current_location, dims, data.shape)
             if current_location[0] >= dims[0]:
                 # dataset filled, save data to safety file
-                copy_backup(self.hdf5)
+                backup_test(self.hdf5, key)
 
         elif mode =='open':
             current_index = self.meta[key]['cursor']
@@ -437,14 +438,7 @@ def hasparent(key):
 
 def copy_backup(h5file):
     # assemble backup file filename
-    nameparts = os.path.splitext(h5file.filename)
-    prev_backup_file = glob.glob(nameparts[0] + '_autosave*')
-    if len(prev_backup_file) > 0:
-        prev_fileparts = os.path.splitext(prev_backup_file[0])
-        backup_filename = increment_title(prev_fileparts[0]) + prev_fileparts[1]
-    else: 
-        backup_filename = nameparts[0] + '_autosave0' + nameparts[1]
-
+    backup_dir, backup_filename, prev_backups = autosave_file(h5file.filename)
     logger = logging.getLogger('main')
     logger.debug('Backing up data: %s' % backup_filename)
     
@@ -463,17 +457,50 @@ def copy_backup(h5file):
     
     logger.debug('Backup safe %s' % backup_filename)        
     # delete any previous backups to free up space
-    if len(prev_backup_file) > 0:
-        os.remove(prev_backup_file[0])
+    for prevf in prev_backups:
+        os.remove(prevf)
+
+def autosave_file(data_file_name):
+    parent_dir, filename = os.path.split(data_file_name)
+    backup_dir = os.path.join(parent_dir, '.backup')
+    nameparts = os.path.splitext(filename)
+    prev_backup_files = glob.glob(os.path.join(backup_dir, nameparts[0] + '_autosave*'))
+    if len(prev_backup_files) > 0:
+        # clear up previous instances here?
+        prev_fileparts = os.path.splitext(prev_backup_files[-1])
+        backup_filename = increment_title(prev_fileparts[0]) + prev_fileparts[1]
+    else: 
+        backup_filename = os.path.join(backup_dir, nameparts[0] + '_autosave0' + nameparts[1])
+    
+    if not os.path.exists(backup_dir):
+        os.mkdir(backup_dir)
+        if os.name == 'nt':
+            # mark as hidden in windows
+            FILE_ATTRIBUTE_HIDDEN = 0x02
+            ret = ctypes.windll.kernel32.SetFileAttributesW(backup_dir,
+                                                        FILE_ATTRIBUTE_HIDDEN)
+
+    return backup_dir, backup_filename, prev_backup_files  
+
+def backup_test(from_h5file, test_key):
+    backup_dir, backup_filename, prevs = autosave_file(from_h5file.filename)
+    logger = logging.getLogger('main')
+    logger.debug('Backing up data: %s' % backup_filename)
+    backup_file = h5py.File(backup_filename, 'w')
+    from_h5file.copy(test_key, backup_file, test_key)
+    backup_file.close()
 
 def remove_backup(filename):
-    nameparts = os.path.splitext(filename)
-    backup_files = glob.glob(nameparts[0] + '_autosave*')
+    backup_dir, xx, backup_files = autosave_file(filename)
+
     for backup in backup_files:
         os.remove(backup)
 
     logger = logging.getLogger('main')
     logger.debug('Removed backup data files: %d' % len(backup_files))
+
+    if os.path.exists(backup_dir) and not os.listdir(backup_dir):
+        os.rmdir(backup_dir)
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':

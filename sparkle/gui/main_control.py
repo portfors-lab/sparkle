@@ -1,4 +1,3 @@
-import getpass
 import logging
 import os
 import time
@@ -134,7 +133,6 @@ class MainWindow(ControlWindow):
         logger = logging.getLogger('main')
         assign_uihandler_slot(logger, self.ui.logTxedt.appendHtml)
 
-        logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
 
         self.calvals['calf'] = REFFREQ
         self.calvals['calv'] = REFVOLTAGE
@@ -164,8 +162,7 @@ class MainWindow(ControlWindow):
                 if txt == 'calibration' or txt == 'explore':
                     self.ui.tabGroup.removeTab(tabIndex)
                     
-    # def update_ui_log(self, message):
-    #     self.ui.logTxedt.appendPlainText(message)
+        logger.info("PROGRAM LOADED -- waiting for user")
 
     def connectUpdatable(self, connect):
         if connect:
@@ -548,6 +545,7 @@ class MainWindow(ControlWindow):
             # all this is only meaningful for spike recordings
             return
 
+        # not actually guaranteed to happend in order :/
         if rep_num == 0:
             # reset
             self.spike_counts = []
