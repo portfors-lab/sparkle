@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+import threading
 
 import numpy as np
 import yaml
@@ -11,6 +12,7 @@ from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
     VocalPathDialog
+from sparkle.gui.load_frame import LoadFrame
 from sparkle.gui.plotting.pyqtgraph_widgets import ProgressWidget, \
     SimplePlotWidget, SpecWidget
 from sparkle.gui.qprotocol import QProtocolTabelModel
@@ -48,6 +50,7 @@ class MainWindow(ControlWindow):
     """Main GUI for the application. Run the main fucntion of this file"""
     _polarity = 1
     _threshold = 10
+    fileLoaded = QtCore.Signal(str)
     def __init__(self, inputsFilename='', datafile=None, filemode='w-', hidetabs=False):
         # set up model and stimlui first, 
         # as saved configuration relies on this
@@ -154,6 +157,9 @@ class MainWindow(ControlWindow):
         self.ui.reviewer.testSelected.connect(self.displayOldProgressPlot)
 
         self.display.spiketracePlot.polarityInverted.connect(self.setPolarity)
+
+        # connect file load dialog to update ui
+        self.fileLoaded.connect(self.updateDataFileStuffs)
 
         if hidetabs:
             print "Hiding search and calibrate operations"
@@ -826,14 +832,35 @@ class MainWindow(ControlWindow):
         dlg = SavingDialog(defaultFile = self.acqmodel.current_data_file())
         if dlg.exec_():
             fname, fmode = dlg.getfile()
-            self.acqmodel.load_data_file(fname, fmode)
-            # calibration clears on data file load
-            self.ui.currentCalLbl.setText('None')
-            fname = os.path.basename(fname)
-            self.ui.dataFileLbl.setText(fname)
-            self.ui.reviewer.setDataObject(self.acqmodel.datafile)
-            self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
+            # loading a file may take a while... background to seprate thread,
+            # and display a window asking the user to wait
+            self.lf = LoadFrame(x=self.x() + (self.width()/2), y=self.y() + (self.height()/2))
+            QtGui.QApplication.processEvents()
+            load_thread = threading.Thread(target=self.loadDataFile,
+                                           args=(fname, fmode))
+            load_thread.start()
         dlg.deleteLater()
+
+    def loadDataFile(self, fname, fmode):
+        # meant to be run in thread only by save dialog call
+
+        # this is really dumb, but processEvents doesn't cut it for getting
+        # the patience ("Loading") window to appear, so we sleep for a bit
+        time.sleep(0.1)
+        self.acqmodel.load_data_file(fname, fmode)
+        self.fileLoaded.emit(fname)
+
+    def updateDataFileStuffs(self, fname):
+        # this is meant to be called only my fileLoaded signal!!!
+        # calibration clears on data file load
+        self.ui.currentCalLbl.setText('None')
+        fname = os.path.basename(str(fname))
+        self.ui.dataFileLbl.setText(fname)
+        self.ui.reviewer.setDataObject(self.acqmodel.datafile)
+        self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
+        self.lf.close()
+        self.lf.deleteLater()
+        self.lf = None
 
     def launchCalibrationDlg(self):
         dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
@@ -1002,7 +1029,10 @@ class MainWindow(ControlWindow):
 
     def closeEvent(self,event):
         # stop any tasks that may be running
+        lf = LoadFrame("Saving Stuff and Things", x=self.x() + (self.width()/2), y=self.y() + (self.height()/2))
+        QtGui.QApplication.processEvents()
         self.onStop()
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
-        
+        lf.close()
+        lf.deleteLater()
