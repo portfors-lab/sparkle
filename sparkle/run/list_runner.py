@@ -1,4 +1,3 @@
-import gc
 import logging
 import threading
 import time
@@ -87,7 +86,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         timecollection = []
         try:
             logger = logging.getLogger('main')
-            # gc.disable()
             # self.player.start_timer(self.reprate)
             # incase of early abortion...
             itest = 0
@@ -212,7 +210,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
             if self.save_data:
                 self.datafile.backup(self.current_dataset_name)
             self.putnotify('group_finished', (self._halt,))
-            # gc.enable()
         except:
             logger.exception("Uncaught Exception from Acq Thread: ")
 

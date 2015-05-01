@@ -1,3 +1,4 @@
+import gc
 import json
 import logging
 import os
@@ -79,6 +80,13 @@ class ControlWindow(QtGui.QMainWindow):
         # connect drag label signals
         for label in self.ui.stimulusChoices.labels():
             label.dragActive.connect(self.ui.protocolView.showBorder)
+
+        # make sure garbage collection ALWAYS happens in GUI thread,
+        # UI elements collected outside of main thread can crash the program
+        self.garbage_timer = QtCore.QTimer(self)
+        self.garbage_timer.timeout.connect(gc.collect)
+        gc.disable()
+        self.garbage_timer.start(5000)
 
     def verifyInputs(self, mode):
         """Goes through and checks all stimuli and input settings are valid
@@ -318,3 +326,6 @@ class ControlWindow(QtGui.QMainWindow):
         settings.setValue("windowState", self.saveState())
         logger = logging.getLogger('main')
         logger.info('All user settings saved')
+
+        self.garbage_timer.stop()
+        gc.enable()
