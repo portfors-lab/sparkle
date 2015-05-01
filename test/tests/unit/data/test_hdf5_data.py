@@ -9,7 +9,7 @@ import h5py
 import numpy as np
 from nose.tools import assert_equal, assert_in, raises
 
-from sparkle.data.hdf5data import HDF5Data, recover_data_from_backup, autosave_file
+from sparkle.data.hdf5data import HDF5Data, recover_data_from_backup, autosave_filenames
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
     OverwriteFileError, ReadOnlyError
 
@@ -420,9 +420,19 @@ class TestHDF5Data():
 
         # add another group to make sure we have multiple backup files we are collecting
         acq_data.init_data('segment0', (nsets, npoints))
+        acq_data.set_metadata('segment0', {'raindrops': 'roses', 'whiskers':'kittens'})
         # data is only backed up when it is filled so...
         for iset in range(nsets):
             acq_data.append('segment0', fakedata)
+
+
+        # add another segments with > 10 tests:
+        for itest in range(12):
+            acq_data.init_data('segment1', (nsets, npoints))
+            # data is only backed up when it is filled so add data
+            acq_data.set_metadata('segment1', {'just': 'dont', 'crash':'!!!!!'})
+            for iset in range(nsets):
+                acq_data.append('segment1', fakedata)
 
         original_set_names = acq_data.dataset_names()
         original_filename =  acq_data.hdf5.filename
@@ -453,6 +463,11 @@ class TestHDF5Data():
         for iset in range(nsets):
             acq_data.append('segment1', fakedata)
 
+        # have two tests under the same segment
+        acq_data.init_data('segment1', (nsets, npoints))
+        for iset in range(nsets):
+            acq_data.append('segment1', fakedata)
+
         original_set_names = acq_data.dataset_names()
 
         self.recover_and_check(acq_data)
@@ -461,23 +476,101 @@ class TestHDF5Data():
         original_set_names = acq_data.dataset_names()
         original_filename =  acq_data.hdf5.filename
 
-        # if AcquisitionData object is close normally, it will clean up the
+        # if AcquisitionData object is closed normally, it will clean up the
         # backup files, so close the HDF5 file ourselves to by-pass this
         acq_data.hdf5.close()
 
         # recover from backups and compare to original
-        backup_dir, backup_filename, prev_backups = autosave_file(original_filename)
+        backup_dir, backup_filename, prev_backups = autosave_filenames(original_filename)
         recovered_data = recover_data_from_backup(original_filename, prev_backups)
+
         # close this so we can re-open it as an HDF5Data object
         recovered_data.close()
 
+        # recover_data_from_backup moves filenames around!
+        # also since we still have the backup data present loading and HDF5 data object
+        # will cause it to try to recover all over again... so delete the backup pieces
+        for backup_file in prev_backups:
+            os.remove(backup_file)
+
         # in recovered data, files get re-named
         recovered_acqdata = HDF5Data(original_filename, filemode='r')
-        original_acqdata = HDF5Data(original_filename+'_corrupted', filemode='r')
+        base_fname, ext = os.path.splitext(original_filename)
+        original_acqdata = HDF5Data(base_fname+'_compromised0'+ext, filemode='r')
 
         # now check that all the data is the same
         assert recovered_acqdata.dataset_names() == original_acqdata.dataset_names() == original_set_names
 
+        # check attrs got copied over
+        assert_attrs_equal(original_acqdata.hdf5, recovered_acqdata.hdf5)
+        
+        recovered_acqdata.close()
+        original_acqdata.close()
+
+    def test_recover_from_constructor(self):
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+        acq_data = self.setup_finite(fakedata, nsets)
+
+        # add another group to make sure we have multiple backup files we are collecting
+        acq_data.init_data('segment0', (nsets, npoints))
+        # data is only backed up when it is filled so...
+        for iset in range(nsets):
+            acq_data.append('segment0', fakedata)
+
+        acq_data.init_data('segment0', (nsets, npoints))
+        for iset in range(nsets):
+            acq_data.append('segment0', fakedata)
+
+        original_set_names = acq_data.dataset_names()
+        original_filename =  acq_data.hdf5.filename
+        # if AcquisitionData object is closed normally, it will clean up the
+        # backup files, so close the HDF5 file ourselves to by-pass this
+        acq_data.hdf5.close()
+
+        recovered_acqdata = HDF5Data(original_filename, filemode='r')
+        # recovering the data will move the original file to _compromised
+        base_fname, ext = os.path.splitext(original_filename)
+        original_acqdata = HDF5Data(base_fname+'_compromised0'+ext, filemode='r')
+
+        # now check that all the data is the same
+        assert recovered_acqdata.dataset_names() == original_acqdata.dataset_names() == original_set_names
+
+        # check attrs got copied over
+        assert_attrs_equal(original_acqdata.hdf5, recovered_acqdata.hdf5)
+
+        recovered_acqdata.close()
+        original_acqdata.close()
+
+    def test_data_apocalyse(self):
+        # multiple crashes on same file
+        nsets = 3
+        npoints = 10
+        fakedata = np.ones((npoints,))
+        acq_data = self.setup_finite(fakedata, nsets)
+
+        # add another group to make sure we have multiple backup files we are collecting
+        acq_data.init_data('segment0', (nsets, npoints))
+        # data is only backed up when it is filled so...
+        for iset in range(nsets):
+            acq_data.append('segment0', fakedata)
+
+        acq_data.init_data('segment0', (nsets, npoints))
+        for iset in range(nsets):
+            acq_data.append('segment0', fakedata)
+
+        original_set_names = acq_data.dataset_names()
+        original_filename =  acq_data.hdf5.filename
+
+        for crash_num in range(12):
+            # if AcquisitionData object is closed normally, it will clean up the
+            # backup files, so close the HDF5 file ourselves to by-pass this
+            acq_data.hdf5.close()
+            acq_data = HDF5Data(original_filename, filemode='a')
+            assert acq_data.dataset_names() == original_set_names
+
+        acq_data.close()
 
     def setup_calibration(self, calname, caldata):
 
@@ -515,3 +608,26 @@ class TestHDF5Data():
                 acq_data.insert(groupname, [iset], fakedata*iset)
 
         return acq_data
+
+# def assert_attrs_equal(original_acqdata, recovered_acqdata):
+#     recovered_attrs = recovered_acqdata.get_info('')
+#     for attr, val in original_acqdata.get_info('').items():
+#         assert attr in recovered_attrs
+#         assert recovered_attrs[attr] == val
+
+#     # check group attrs
+#     for key in original_acqdata.keys():
+#         recovered_attrs = recovered_acqdata.get_info(key)
+#         for attr, val in original_acqdata.get_info(key).items():
+#             assert attr in recovered_attrs
+#             print 'attr', attr, recovered_attrs[attr], val, type(val)
+#             assert recovered_attrs[attr] == val
+
+def assert_attrs_equal(ref_group, compare_group):
+    for attr in ref_group.attrs:
+        # print 'attr0:', ref_group.attrs[attr]
+        # print 'attr1', compare_group.attrs[attr]
+        assert ref_group.attrs[attr] == compare_group.attrs[attr]
+    if hasattr(ref_group, 'keys'):
+        for key in ref_group.keys():
+            assert_attrs_equal(ref_group[key], compare_group[key])

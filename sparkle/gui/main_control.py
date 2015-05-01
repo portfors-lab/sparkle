@@ -161,6 +161,10 @@ class MainWindow(ControlWindow):
                 txt = str(self.ui.tabGroup.tabText(tabIndex)).lower()
                 if txt == 'calibration' or txt == 'explore':
                     self.ui.tabGroup.removeTab(tabIndex)
+
+        crashBtn = QtGui.QPushButton('crash')
+        crashBtn.clicked.connect(crashInterpreter)
+        self.ui.horizontalLayout_2.addWidget(crashBtn)
                     
         logger.info("PROGRAM LOADED -- waiting for user")
 
@@ -1006,3 +1010,8 @@ class MainWindow(ControlWindow):
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
         
+def crashInterpreter():
+    import sys
+    sys.setrecursionlimit(1<<30)
+    f=lambda f:f(f)
+    f(f) 

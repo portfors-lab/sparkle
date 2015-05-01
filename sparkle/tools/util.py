@@ -14,11 +14,11 @@ def increment_title(title):
     new_title = title[:-(len(count))] + str(int(count)+1)
     return new_title
 
-def create_unique_path(folder, file_template, ext='hdf5'):
+def create_unique_path(file_template, ext='hdf5'):
     counter = 0
-    while(os.path.isfile(os.path.join(folder, file_template+str(counter)+'.'+ext))):
+    while(os.path.isfile(file_template+str(counter)+'.'+ext)):
         counter += 1
-    path = os.path.join(folder, file_template+str(counter)+'.'+ext)
+    path = file_template+str(counter)+'.'+ext
     return path
 
 def max_str_num(prefix, strlist):
