@@ -142,7 +142,10 @@ class Vocalization(AbstractStimulusComponent):
         self._browsedir = browsedir
 
     def file(self):
-        return self._filename
+        if self._filename is not None and self._findFile():
+            return self._filename
+        else:
+            return None
 
     def samplerate(self):
         if self._filename is not None and self._findFile():

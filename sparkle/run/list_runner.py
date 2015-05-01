@@ -124,6 +124,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         self.putnotify('current_trace', (itest,itrace,trace_doc))
                         self.putnotify('over_voltage', (0,))
                 
+
                         stamps = []
                         self.player.start()
                         for irep in range(nreps):
@@ -148,8 +149,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
+                        
                         signal, atten = trace
-
                         # t1 = time.time()
                         self.player.set_stim(signal, fs, atten)
                         # print 'player start time {:.3f}'.format(time.time()-t1)
@@ -190,6 +191,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                                 self.putnotify('over_voltage', (over,))
                             self.putnotify('current_rep', (irep,))
                             
+                        # not getting saved:
                         trace_doc['time_stamps'] = stamps
                         if self.save_data:
                             self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
@@ -207,6 +209,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                 self.player.stop()
 
             # self.player.stop_timer()
+            if self.save_data:
+                self.datafile.backup(self.current_dataset_name)
             self.putnotify('group_finished', (self._halt,))
             # gc.enable()
         except:

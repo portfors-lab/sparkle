@@ -10,7 +10,6 @@ from sparkle.run.microphone_calibration_runner import MphoneCalibrationRunner
 from sparkle.run.protocol_runner import ProtocolRunner
 from sparkle.run.search_runner import SearchRunner
 from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.tools.util import create_unique_path
 
 
 class AcquisitionManager():

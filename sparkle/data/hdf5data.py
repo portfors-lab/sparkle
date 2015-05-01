@@ -1,3 +1,4 @@
+import ctypes
 import glob
 import json
 import logging
@@ -11,14 +12,27 @@ import numpy as np
 from sparkle.data.acqdata import AcquisitionData, increment
 from sparkle.tools.exceptions import DataIndexError, DisallowedFilemodeError, \
     OverwriteFileError, ReadOnlyError
-from sparkle.tools.util import convert2native, max_str_num, increment_title
+from sparkle.tools.util import convert2native, max_str_num, create_unique_path
 from sparkle.tools.doc_inherit import doc_inherit
 
 class HDF5Data(AcquisitionData):
     def __init__(self, filename, user='unknown', filemode='w-'):
         super(HDF5Data, self).__init__(filename, user, filemode)
 
-        self.hdf5 = h5py.File(filename, filemode)
+        logger = logging.getLogger('main')
+        try:
+            # reload backup files, if present -- it means the program crashed
+            # If the data file is corrupted it may still load, but the previously
+            # gathered data could be inaccessible, so load from backup to be safe.
+            backup_dir, backup_filename, prev_backups = autosave_filenames(filename)
+            if len(prev_backups) > 0:
+                # reassemble data from pieces
+                self.hdf5 = recover_data_from_backup(filename, prev_backups)
+                logger.info('Recovered data file %s' % filename)
+            else:
+                self.hdf5 = h5py.File(filename, filemode)
+        except:
+            raise
 
         if filemode == 'w-':
             self.hdf5.attrs['date'] = time.strftime('%Y-%m-%d')
@@ -27,10 +41,9 @@ class HDF5Data(AcquisitionData):
             self.hdf5.attrs['computername'] = socket.gethostname()
             self.test_count = 0
 
-            logger = logging.getLogger('main')
             logger.info('Created data file %s' % filename)
         else:
-            # find highets numbered test.. tight coupling to acquisition classes
+            # find highet numbered test.. tight coupling to acquisition classes
             # print 'data file keys', self.hdf5.keys()
             group_prefix = 'segment_'
             dset_prefix = 'test_'
@@ -40,10 +53,10 @@ class HDF5Data(AcquisitionData):
             else:
                 self.test_count = 0
 
-            logger = logging.getLogger('main')
             logger.info('Opened data file %s' % filename)
 
-            #immediately make a backup, since we have data present
+        if filemode != 'r':
+            # immediately make a backup, even if no data data (save attributes)
             copy_backup(self.hdf5)
 
     @doc_inherit
@@ -160,9 +173,6 @@ class HDF5Data(AcquisitionData):
             self.hdf5[key][setname][tuple(index)] = data[:]
             dims = self.hdf5[key][setname].shape
             increment(current_location, dims, data.shape)
-            if current_location[0] >= dims[0]:
-                # dataset filled, save data to safety file
-                copy_backup(self.hdf5)
 
         elif mode =='open':
             current_index = self.meta[key]['cursor']
@@ -207,6 +217,9 @@ class HDF5Data(AcquisitionData):
             self.hdf5[key][setname][index] = data[:]
         else:
             print "insert not supported for mode: ", mode
+
+    def backup(self, key):
+        backup(self.hdf5, key)
 
     @doc_inherit
     def get_data(self, key, index=None):
@@ -357,7 +370,7 @@ class HDF5Data(AcquisitionData):
                     self.hdf5[setname].attrs[attr] = val
                 else:
                     self.hdf5[key].attrs[attr] = val
- 
+
     @doc_inherit
     def append_trace_info(self, key, stim_data):
         if self.hdf5.mode == 'r':
@@ -437,13 +450,9 @@ def hasparent(key):
 
 def copy_backup(h5file):
     # assemble backup file filename
-    nameparts = os.path.splitext(h5file.filename)
-    prev_backup_file = glob.glob(nameparts[0] + '_autosave*')
-    if len(prev_backup_file) > 0:
-        prev_fileparts = os.path.splitext(prev_backup_file[0])
-        backup_filename = increment_title(prev_fileparts[0]) + prev_fileparts[1]
-    else: 
-        backup_filename = nameparts[0] + '_autosave0' + nameparts[1]
+    backup_dir, backup_filename, prev_backups = autosave_filenames(h5file.filename)
+    logger = logging.getLogger('main')
+    logger.debug('Backing up data: %s' % backup_filename)
     
     # open a new hdf5 file for backup
     backup_file = h5py.File(backup_filename, 'w')
@@ -455,18 +464,100 @@ def copy_backup(h5file):
     for attr in h5file.attrs:
         backup_file.attrs[attr] = h5file.attrs[attr]
 
-    # importantly, close the file, so it is save from corruption
+    # importantly, close the file, so it is safe from corruption
     backup_file.close()
     
-    # delete any previous backups to free up space
-    if len(prev_backup_file) > 0:
-        os.remove(prev_backup_file[0])
+    logger.debug('Backup safe %s' % backup_filename)        
+    #  whole file is backed up, so delete any previous backups to free up space
+    for prevf in prev_backups:
+        os.remove(prevf)
+
+def autosave_filenames(data_file_name):
+    parent_dir, filename = os.path.split(data_file_name)
+    backup_dir = os.path.join(parent_dir, '.backup')
+    nameparts = os.path.splitext(filename)
+    prev_backup_files = glob.glob(os.path.join(backup_dir, nameparts[0] + '_autosave*'))
+    basefname, ext = os.path.splitext(filename)
+    backup_filename = create_unique_path(os.path.join(backup_dir, basefname + '_autosave'), ext)
+    
+    if not os.path.exists(backup_dir):
+        os.mkdir(backup_dir)
+        if os.name == 'nt':
+            # mark as hidden in windows
+            FILE_ATTRIBUTE_HIDDEN = 0x02
+            ret = ctypes.windll.kernel32.SetFileAttributesW(backup_dir,
+                                                        FILE_ATTRIBUTE_HIDDEN)
+
+    return backup_dir, backup_filename, prev_backup_files  
+
+def backup(from_h5file, dataset_key):
+    backup_dir, backup_filename, prevs = autosave_filenames(from_h5file.filename)
+    logger = logging.getLogger('main')
+    logger.debug('Backing up data: %s, data set: %s' % (backup_filename, dataset_key))
+    backup_file = h5py.File(backup_filename, 'w')
+    from_h5file.copy(dataset_key, backup_file, dataset_key)
+    
+    # copy over any group attrs
+    dataset_path = dataset_key.split('/')
+    current_path = ''
+    for parent in dataset_path[:-1]:
+        current_path += '/' + parent
+        for attr in from_h5file[current_path].attrs:
+            backup_file[current_path].attrs[attr] = from_h5file[current_path].attrs[attr]
+    
+    backup_file.close()
 
 def remove_backup(filename):
-    nameparts = os.path.splitext(filename)
-    backup_files = glob.glob(nameparts[0] + '_autosave*')
+    backup_dir, xx, backup_files = autosave_filenames(filename)
+
     for backup in backup_files:
         os.remove(backup)
+
+    logger = logging.getLogger('main')
+    logger.debug('Removed backup data files: %d' % len(backup_files))
+
+    if os.path.exists(backup_dir) and not os.listdir(backup_dir):
+        os.rmdir(backup_dir)
+
+def recover_data_from_backup(filename, backup_files):
+    new_data = h5py.File(filename+'tmp', 'w-')
+    for backup_fname in backup_files:
+        backup = h5py.File(backup_fname, 'r')
+        for key in backup.keys():
+            # copy with overwrite or ignore existing doesn't exist,
+            # in h5py, so create our own
+            copy_group(backup, new_data, key)            
+
+        # copy file attributes too
+        for attr in backup.attrs:
+            new_data.attrs[attr] = backup.attrs[attr]
+        backup.close()
+
+    # close this file, so we can change the name
+    new_data.close()
+    # do some filename shuffling
+    basefname, ext = os.path.splitext(filename)
+    compromised_fname = create_unique_path(basefname + '_compromised')
+    os.rename(filename, compromised_fname)
+    os.rename(filename+'tmp', filename)
+
+    new_data = h5py.File(filename, 'a')
+    return new_data
+
+def copy_group(from_file, to_file, key):
+    """Recursively copy all groups/datasets/attributes from from_file[key] to
+    to_file. Datasets are not overwritten, attributes are.
+    """
+    if not key in to_file:
+        from_file.copy(key, to_file, key)
+    else:
+        # also make sure any additional attributes are copied
+        for attr in from_file[key].attrs:
+            to_file.attrs[attr] = from_file[key].attrs[attr]
+            
+        if hasattr(from_file[key], 'keys'):
+            for subkey in from_file[key].keys():
+                copy_group(from_file, to_file, '/'.join([key,subkey]))
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':

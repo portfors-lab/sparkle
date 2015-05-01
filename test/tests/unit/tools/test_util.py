@@ -63,10 +63,10 @@ def test_next_str_num_numbers():
     assert next_str == 'Mouse4974'
 
 def test_create_unique_path_no_existing():
-    path = create_unique_path(tempfolder, 'test_file')
+    path = create_unique_path(os.path.join(tempfolder,'test_file'))
     assert path == os.path.join(tempfolder,'test_file0.hdf5')
 
 def test_create_unique_path_with_existing():
     open(os.path.join(tempfolder,'test_file0.hdf5'), 'a').close()
-    path = create_unique_path(tempfolder, 'test_file')
+    path = create_unique_path(os.path.join(tempfolder, 'test_file'))
     assert path == os.path.join(tempfolder,'test_file1.hdf5')

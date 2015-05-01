@@ -1,4 +1,6 @@
+import getpass
 import logging
+import time
 import traceback
 import sys
 
@@ -20,6 +22,9 @@ def log_uncaught(*exc_info):
 
 def main():
     # this is the entry point for the whole application
+    logger = logging.getLogger('main')
+    logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
+    
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(icons.windowicon())
     sys.excepthook = log_uncaught
@@ -70,6 +75,7 @@ def main():
         QtGui.QMessageBox.critical(None, "Unexpected Error", msg)
         status = 0
 
+    logger.info("== Program finished with exit code {} ==".format(status))
     sys.exit(status)
 
 if __name__ == "__main__":
