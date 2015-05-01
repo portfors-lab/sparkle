@@ -173,9 +173,6 @@ class HDF5Data(AcquisitionData):
             self.hdf5[key][setname][tuple(index)] = data[:]
             dims = self.hdf5[key][setname].shape
             increment(current_location, dims, data.shape)
-            if current_location[0] >= dims[0]:
-                # dataset filled, save data to safety file
-                backup_dataset(self.hdf5, '/'.join([key, setname]))
 
         elif mode =='open':
             current_index = self.meta[key]['cursor']
@@ -220,6 +217,9 @@ class HDF5Data(AcquisitionData):
             self.hdf5[key][setname][index] = data[:]
         else:
             print "insert not supported for mode: ", mode
+
+    def backup(self, key):
+        backup(self.hdf5, key)
 
     @doc_inherit
     def get_data(self, key, index=None):
@@ -490,7 +490,7 @@ def autosave_filenames(data_file_name):
 
     return backup_dir, backup_filename, prev_backup_files  
 
-def backup_dataset(from_h5file, dataset_key):
+def backup(from_h5file, dataset_key):
     backup_dir, backup_filename, prevs = autosave_filenames(from_h5file.filename)
     logger = logging.getLogger('main')
     logger.debug('Backing up data: %s, data set: %s' % (backup_filename, dataset_key))
@@ -554,9 +554,10 @@ def copy_group(from_file, to_file, key):
         # also make sure any additional attributes are copied
         for attr in from_file[key].attrs:
             to_file.attrs[attr] = from_file[key].attrs[attr]
-
-        for subkey in from_file[key].keys():
-            copy_group(from_file, to_file, '/'.join([key,subkey]))
+            
+        if hasattr(from_file[key], 'keys'):
+            for subkey in from_file[key].keys():
+                copy_group(from_file, to_file, '/'.join([key,subkey]))
 
 def _append_stim(container, key, stim_data):
     if container[key].attrs['stim'] == '[]':

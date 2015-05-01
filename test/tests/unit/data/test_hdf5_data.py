@@ -424,6 +424,7 @@ class TestHDF5Data():
         # data is only backed up when it is filled so...
         for iset in range(nsets):
             acq_data.append('segment0', fakedata)
+        acq_data.backup('segment0')
 
 
         # add another segments with > 10 tests:
@@ -433,6 +434,7 @@ class TestHDF5Data():
             acq_data.set_metadata('segment1', {'just': 'dont', 'crash':'!!!!!'})
             for iset in range(nsets):
                 acq_data.append('segment1', fakedata)
+        acq_data.backup('segment1')
 
         original_set_names = acq_data.dataset_names()
         original_filename =  acq_data.hdf5.filename
@@ -450,6 +452,7 @@ class TestHDF5Data():
         # data is only backed up when it is filled so...
         for iset in range(nsets):
             acq_data.append('segment0', fakedata)
+        acq_data.backup('segment0')
 
         # close this data object normally, existing back up files should get cleaned up
         original_filename =  acq_data.hdf5.filename
@@ -462,11 +465,13 @@ class TestHDF5Data():
         acq_data.init_data('segment1', (nsets, npoints))
         for iset in range(nsets):
             acq_data.append('segment1', fakedata)
+        acq_data.backup('segment1')
 
         # have two tests under the same segment
         acq_data.init_data('segment1', (nsets, npoints))
         for iset in range(nsets):
             acq_data.append('segment1', fakedata)
+        acq_data.backup('segment1')
 
         original_set_names = acq_data.dataset_names()
 
@@ -522,6 +527,7 @@ class TestHDF5Data():
         acq_data.init_data('segment0', (nsets, npoints))
         for iset in range(nsets):
             acq_data.append('segment0', fakedata)
+        acq_data.backup('segment0')
 
         original_set_names = acq_data.dataset_names()
         original_filename =  acq_data.hdf5.filename
@@ -559,6 +565,7 @@ class TestHDF5Data():
         acq_data.init_data('segment0', (nsets, npoints))
         for iset in range(nsets):
             acq_data.append('segment0', fakedata)
+        acq_data.backup('segment0')
 
         original_set_names = acq_data.dataset_names()
         original_filename =  acq_data.hdf5.filename
@@ -568,6 +575,7 @@ class TestHDF5Data():
             # backup files, so close the HDF5 file ourselves to by-pass this
             acq_data.hdf5.close()
             acq_data = HDF5Data(original_filename, filemode='a')
+            print acq_data.dataset_names(), original_set_names
             assert acq_data.dataset_names() == original_set_names
 
         acq_data.close()
@@ -607,6 +615,7 @@ class TestHDF5Data():
             else:
                 acq_data.insert(groupname, [iset], fakedata*iset)
 
+        acq_data.backup(groupname)
         return acq_data
 
 # def assert_attrs_equal(original_acqdata, recovered_acqdata):

@@ -316,7 +316,7 @@ class TestAcquisitionManager():
 
         hfile.close()
 
-    @unittest.skip("Grrrrrr")
+    # @unittest.skip("Grrrrrr")
     def test_protocol_timing(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
@@ -351,7 +351,7 @@ class TestAcquisitionManager():
 
         hfile.close()
 
-    @unittest.skip("Grrrrrr")
+    # @unittest.skip("Grrrrrr")
     def test_protocol_timing_vocal_batlab(self):
         winsz = 0.280 #seconds
         acq_rate = 100000
@@ -720,7 +720,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
 
     for stim_info in stim_doc:
-        # assert len(stim_info['time_stamps']) == test_data.attrs['reps']
+        assert len(stim_info['time_stamps']) == test_data.attrs['reps']
         assert stim_info['overloaded_attenuation'] == 0
         assert stim_info['samplerate_da'] == test_stim.samplerate()
         for component_info in stim_info['components']:
