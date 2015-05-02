@@ -132,6 +132,32 @@ All of the display widgets separate their component plot widgets using QSplitter
 
 .. _pyqtgraph: http://www.pyqtgraph.org/documentation
 
+Data Files
+-----------
+All types of data files are accessed using the abstract :class:`AcquisitionData<sparkle.data.acqdata.AcquisitionData>` class as a base class to serve as a common interface. The :func:`open_acqdata<sparkle.data.open.open_acqdata>` function will take a filename and open the appropriate class (which is subclass of AcquisitionData) for that file. This allows us to interact with our data in a uniform way regardless of storage method.
+
+The file format chosen to save data to is HDF5. Reasons for choosing this file format:
+  * Ability to load a file without having to load all it's contents in memory
+  * self-describing: can save metadata/stimulus info along data
+  * popular among scientists : not developed in house means anyone can access it without custom code
+  * Mature, been around a while and has 2 sets of python bindings
+  * Heirachial structure matches our data needs well
+
+To support data already existing the lab, Batlab format data can also be read (but not written to) with Sparkle.
+
+Data backup
++++++++++++
+In :class:`HDF5Data<sparkle.data.acqdata.HDF5Data>`, the class which handles data writing in Sparkle, backup data methods exist to save backup copies of datasets and metadata. This is important because if a program has an HDF5 file open and crashes it can corrupt the entire data file. The backup methods must be called manually. Sparkle calls the data backup methods after each segment has finished being collected; this allows us to make sure we capture all metadata that got saved with the dataset/group.
+
+Explaination of implementation:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Upon file opening (new or load), a copy of the entire file is made and saved to a (hidden) backup folder created in the directory where the data file is. Each time a test segment finishes, that segment gets saved to it's own backup file in the same folder. These files have incrementing filenames based off of the original data filename. If the program exits normally and closes the original datafile successfully, these backup data files are deleted. If the program crashes, this will not happen, and thus they will be present next time sparkle is started.
+
+When an HDF5File is opened it checks for the presence of these backup files, and it if finds them rebuilds the datafile from these pieces. It renames the original file, to get it out of the way, and renames the re-built data file with the original name. It then carries on with the normal backup procedure. That the File checks for backups before loading the original is important... if a file is corrupted it may still be able to be opened, but data may still be missing; it is then harmful to backup this corrupted data, as it will clean up the previous backup in the process. Therefore, if there is evidence of a crash we do not trust the original data by default.
+
+If a file is opened read-only, backups are not made. This allows multiple readers, and the user would have had a chance to make their own backup.
+
 Logging
 -------
 
