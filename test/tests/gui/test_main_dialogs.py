@@ -35,7 +35,8 @@ class TestMainDialogs():
     def test_save_dlg(self):
         # modal dialog will block qt methods in main thread
         qtbot.handle_dialog()
-        self.form.launchSaveDlg()
+        t = self.form.launchSaveDlg()
+        t.join()
         assert self.form.ui.dataFileLbl.text() == os.path.basename(self.form.acqmodel.current_data_file())
 
     def test_calibration_dlg(self):

@@ -835,11 +835,16 @@ class MainWindow(ControlWindow):
             # loading a file may take a while... background to seprate thread,
             # and display a window asking the user to wait
             self.lf = LoadFrame(x=self.x() + (self.width()/2), y=self.y() + (self.height()/2))
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
             QtGui.QApplication.processEvents()
             load_thread = threading.Thread(target=self.loadDataFile,
                                            args=(fname, fmode))
             load_thread.start()
+        else:
+            # return value only used for testing
+            load_thread = None
         dlg.deleteLater()
+        return load_thread
 
     def loadDataFile(self, fname, fmode):
         # meant to be run in thread only by save dialog call
@@ -861,6 +866,7 @@ class MainWindow(ControlWindow):
         self.lf.close()
         self.lf.deleteLater()
         self.lf = None
+        QtGui.QApplication.restoreOverrideCursor()
 
     def launchCalibrationDlg(self):
         dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
