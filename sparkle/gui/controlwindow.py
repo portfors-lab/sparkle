@@ -8,20 +8,20 @@ import yaml
 import sparkle.tools.systools as systools
 from main_control_form import Ui_ControlWindow
 from QtWrapper import QtCore, QtGui
+from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.auto_parameter_view import SmartDelegate
 from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox
 from sparkle.gui.stim.stimulusview import StimulusView
+from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.abstract_component import AbstractStimulusComponent
 from sparkle.stim.types.stimuli_classes import Vocalization
-from sparkle.tools.systools import get_src_directory
 from sparkle.tools.util import convert2native
 
-with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
+with open(os.path.join(systools.get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-USE_ATTEN = config['use_attenuator']
 MPHONE_CALDB = config['microphone_calibration_db']
 
 class ControlWindow(QtGui.QMainWindow):
@@ -142,7 +142,7 @@ class ControlWindow(QtGui.QMainWindow):
                     failmsg = failmsg.replace('Generation', 'Recording')
                     QtGui.QMessageBox.warning(self, "Invalid Input", failmsg)
                     return False
-            if USE_ATTEN and not self.acqmodel.attenuator_connection():
+            if self.advanced_options['use_attenuator'] and not self.acqmodel.attenuator_connection():
                 failmsg = "Error Connection to attenuator, make sure it it turned on and connected, and try again"
                 QtGui.QMessageBox.warning(self, "Connection Error", failmsg)
                 return False
@@ -190,7 +190,22 @@ class ControlWindow(QtGui.QMainWindow):
         for field in frequency_inputs:
             field.setScale(fscale)
 
-            
+    def reset_device_channels(self):
+        """Updates the input channel selection boxes based on the current
+        device name stored in this object"""
+        # clear boxes first
+        devname = self.advanced_options['device_name']
+        self.ui.aochanBox.clear()
+        self.ui.aichanBox.clear()
+        cnames = get_ao_chans(devname)
+        self.ui.aochanBox.addItems(cnames)
+        cnames = get_ai_chans(devname)
+        self.ui.aichanBox.addItems(cnames)
+        
+        # can't find a function in DAQmx that gets the trigger
+        # channel names, so add manually
+        self.ui.trigchanBox.addItems(['/'+devname+'/PFI0', '/'+devname+'/PFI1'])
+
     def saveInputs(self, fname):
         """Save the values in the input fields so they can be loaded
         next time the GUI is run
@@ -229,6 +244,8 @@ class ControlWindow(QtGui.QMainWindow):
 
         # parameter settings -- save all tracks present
         savedict['explorestims'] = self.ui.exploreStimEditor.saveTemplate()
+
+        savedict['advanced_options'] = self.advanced_options
 
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
@@ -310,7 +327,21 @@ class ControlWindow(QtGui.QMainWindow):
             logger = logging.getLogger('main')
             logger.debug('No saved explore stimului inputs')
 
-        # self.ui.aofsSpnbx.setValue(self.acqmodel.explore_genrate()/self.fscale)
+        # set defaults then merge
+        self.advanced_options = {'device_name':'', 
+                                 'max_voltage':1.5,
+                                 'device_max_voltage': 10.0,
+                                 'volt_amp_conversion': 0.1,
+                                 'use_attenuator': False }
+        if 'advanced_options' in inputsdict:
+            self.advanced_options.update(inputsdict['advanced_options'])
+        StimulusModel.setMaxVoltage(self.advanced_options['max_voltage'], self.advanced_options['device_max_voltage'])
+        self.display.setAmpConversionFactor(self.advanced_options['volt_amp_conversion'])
+        if self.advanced_options['use_attenuator']:
+            self.acqmodel.attenuator_connection(True)
+        else:
+            self.acqmodel.attenuator_connection(False)
+        self.reset_device_channels()
 
     def closeEvent(self, event):
         """Closes listening threads and saves GUI data for later use.

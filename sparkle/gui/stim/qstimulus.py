@@ -17,12 +17,6 @@ from sparkle.stim.types import get_stimuli_models
 from sparkle.tools.audiotools import convolve_filter, impulse_response
 from sparkle.tools.systools import get_src_directory
 
-src_dir = get_src_directory()
-# print 'src_dir', src_dir
-with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
-    config = yaml.load(yf)
-DEFAULT_SAMPLERATE = config['default_genrate']
-MAXV = config['max_voltage']
 
 class QStimulusModel(QtCore.QAbstractItemModel):
     """Qt wrapper for :class:`StimulusModel<sparkle.stim.stimulus_model.StimulusModel>`"""

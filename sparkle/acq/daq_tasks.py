@@ -310,7 +310,7 @@ def get_ao_chans(dev):
     """
     buf = create_string_buffer(256)
     buflen = c_uint32(sizeof(buf))
-    DAQmxGetDevAOPhysicalChans(dev, buf, buflen)
+    DAQmxGetDevAOPhysicalChans(dev.encode(), buf, buflen)
     pybuf = buf.value
     chans = pybuf.decode(u'utf-8').split(u",")
     return chans  
@@ -323,7 +323,16 @@ def get_ai_chans(dev):
     """
     buf = create_string_buffer(512)
     buflen = c_uint32(sizeof(buf))
-    DAQmxGetDevAIPhysicalChans(dev, buf, buflen)
+    DAQmxGetDevAIPhysicalChans(dev.encode(), buf, buflen)
     pybuf = buf.value
     chans = pybuf.decode(u'utf-8').split(u",")
     return chans
+
+def get_devices():
+    """Discover and return a list of the names of all NI devices on this system"""
+    buf = create_string_buffer(512)
+    buflen = c_uint32(sizeof(buf))
+    DAQmxGetSysDevNames(buf, buflen)
+    pybuf = buf.value
+    devices = pybuf.decode(u'utf-8').split(u",")
+    return devices

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Tue Apr  7 11:18:32 2015
+# Created: Fri May  1 23:20:44 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -594,12 +594,15 @@ class Ui_ControlWindow(object):
         self.actionResponse_SPL.setObjectName(_fromUtf8("actionResponse_SPL"))
         self.actionVocalization_paths = QtGui.QAction(ControlWindow)
         self.actionVocalization_paths.setObjectName(_fromUtf8("actionVocalization_paths"))
+        self.actionAdvanced = QtGui.QAction(ControlWindow)
+        self.actionAdvanced.setObjectName(_fromUtf8("actionAdvanced"))
         self.menuOptions.addAction(self.actionSave_Options)
         self.menuOptions.addAction(self.actionSet_Calibration)
         self.menuOptions.addAction(self.actionSet_Scale)
         self.menuOptions.addAction(self.actionSpectrogram_Parameters)
         self.menuOptions.addAction(self.actionSet_Cell_ID)
         self.menuOptions.addAction(self.actionVocalization_paths)
+        self.menuOptions.addAction(self.actionAdvanced)
         self.menuShow.addAction(self.actionData_Display)
         self.menuShow.addAction(self.actionPSTH)
         self.menuShow.addAction(self.actionProgress)
@@ -639,6 +642,7 @@ class Ui_ControlWindow(object):
         QtCore.QObject.connect(self.actionResponse_SPL, QtCore.SIGNAL(_fromUtf8("triggered()")), self.responseSpl.showNormal)
         QtCore.QObject.connect(self.psthMaxBox, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.psthStopField.setDisabled)
         QtCore.QObject.connect(self.actionVocalization_paths, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchVocalPaths)
+        QtCore.QObject.connect(self.actionAdvanced, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchAdvancedDlg)
         QtCore.QMetaObject.connectSlotsByName(ControlWindow)
 
     def retranslateUi(self, ControlWindow):
@@ -749,6 +753,7 @@ class Ui_ControlWindow(object):
         self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
         self.actionResponse_SPL.setText(_translate("ControlWindow", "response SPL", None))
         self.actionVocalization_paths.setText(_translate("ControlWindow", "Vocalization paths...", None))
+        self.actionAdvanced.setText(_translate("ControlWindow", "Advanced", None))
 
 from sparkle.gui.calibration_widget import CalibrationWidget
 from sparkle.gui.plotdock import PlotDockWidget

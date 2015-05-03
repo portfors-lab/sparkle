@@ -21,6 +21,7 @@ class TestStimulusEditor():
     def setUp(self):
         self.tempfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp", 'testsave.json')
         model = StimulusModel()
+        model.setMaxVoltage(1.5, 10.0)
         model.setReferenceVoltage(100, 0.1)
         model.setRepCount(7)
         # add tone, vocalization, and silence components

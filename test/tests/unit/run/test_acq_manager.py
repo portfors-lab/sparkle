@@ -26,6 +26,8 @@ from sparkle.tools.systools import rand_id
 class TestAcquisitionManager():
 
     def setUp(self):
+        StimulusModel.setMaxVoltage(1.5, 10.0)
+        StimulusModel.setMinVoltage(0.005)
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         self.done = True
 
@@ -57,6 +59,22 @@ class TestAcquisitionManager():
 
         manager.close_data()
 
+    def tone_protocol(self, manager, intensity=70):
+        #insert some stimuli
+
+        tone = PureTone()
+        tone.setDuration(0.02)
+        tone.setIntensity(intensity)
+        stim = StimulusModel()
+        stim.insertComponent(tone)
+        manager.protocol_model().insert(stim,0)
+
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        t.join()
+        
+        return stim
+
     def test_tone_protocol(self):
         """Test a protocol with a single tone stimulus"""
         winsz = 0.2 #seconds
@@ -64,18 +82,8 @@ class TestAcquisitionManager():
         manager, fname = self.create_acqmodel(winsz, acq_rate)
         self.fake_calibration(manager)
 
-        #insert some stimuli
-
-        tone0 = PureTone()
-        tone0.setDuration(0.02)
-        stim0 = StimulusModel()
-        stim0.insertComponent(tone0)
-        manager.protocol_model().insert(stim0,0)
-        gen_rate = stim0.samplerate()
-
-        manager.setup_protocol(0.1)
-        t = manager.run_protocol()
-        t.join()
+        # create and run tone protocol
+        stim = self.tone_protocol(manager)
 
         manager.close_data()
 
@@ -83,7 +91,7 @@ class TestAcquisitionManager():
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
 
-        check_result(test, stim0, winsz, acq_rate)
+        check_result(test, stim, winsz, acq_rate)
 
         assert 'calibration_' in hfile['segment_1'].attrs['calibration_used']
 
@@ -95,17 +103,8 @@ class TestAcquisitionManager():
         acq_rate = 50000
         manager, fname = self.create_acqmodel(winsz, acq_rate)
 
-        #insert some stimuli
-        tone0 = PureTone()
-        tone0.setDuration(0.02)
-        stim0 = StimulusModel()
-        stim0.insertComponent(tone0)
-        manager.protocol_model().insert(stim0,0)
-        gen_rate = stim0.samplerate()
-
-        manager.setup_protocol(0.1)
-        t = manager.run_protocol()
-        t.join()
+        # create and run tone protocol
+        self.tone_protocol(manager)
 
         # close without backup clean up
         manager.datafile.hdf5.close()
@@ -122,6 +121,62 @@ class TestAcquisitionManager():
 
         original_hfile.close()
         backup_hfile.close()
+
+    def test_tone_protocol_no_attenuator(self):
+        """Test a protocol with a single tone stimulus and no
+        attenution for small amplitude"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        self.fake_calibration(manager)
+
+        manager.attenuator_connection(False)
+        # create and run tone protocol
+        stim = self.tone_protocol(manager, intensity=10)
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim, winsz, acq_rate)
+
+        assert 'calibration_' in hfile['segment_1'].attrs['calibration_used']
+
+        assert stim.signal()[0].max() < 0.005
+
+        hfile.close()
+
+    def test_tone_protocol_with_attenuator(self):
+        """Test a protocol with a single tone stimulus and no
+        attenution for small amplitude"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        self.fake_calibration(manager)
+
+        connected = manager.attenuator_connection(True)
+        # create and run tone protocol
+        stim = self.tone_protocol(manager, intensity=10)
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim, winsz, acq_rate)
+
+        assert 'calibration_' in hfile['segment_1'].attrs['calibration_used']
+
+        # print stim.signal()[0].max()
+        if connected:
+            assert stim.signal()[0].max() == 0.005
+        else:
+            assert stim.signal()[0].max() < 0.005
+            
+        hfile.close()
 
     def test_tone_protocol_uncalibrated(self):
         """Test a protocol with a single tone stimulus"""
@@ -461,7 +516,7 @@ class TestAcquisitionManager():
 
         # now check saved data
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
-        print hfile.keys()
+        # print hfile.keys()
         test = hfile['explore_1']
 
         # check_result(test, manager.explorer.stimulus, winsz, acq_rate)
@@ -557,7 +612,7 @@ class TestAcquisitionManager():
         test = hfile['chart_1']
         stim = json.loads(test.attrs['stim'])
 
-        print 'stim', stim
+        # print 'stim', stim
         # assert_in('components', stim[0])
         # assert_equal(stim[0]['samplerate_da'], gen_rate)
         assert len(test.shape) == 1
@@ -606,7 +661,7 @@ class TestAcquisitionManager():
         manager.close_data()
 
         # now check saved data
-        print 'calname', calname
+        # print 'calname', calname
         hfile = h5py.File(fname, 'r')
         signals = hfile[calname]['signal']
         stim = json.loads(signals.attrs['stim'])
@@ -620,7 +675,7 @@ class TestAcquisitionManager():
         assert cal_vector.shape == ((npts/2+1),)
 
         reftone = hfile[calname]['reference_tone']
-        print 'reftone', reftone.attrs.keys()
+        # print 'reftone', reftone.attrs.keys()
         stim = json.loads(reftone.attrs['stim'])
         tone = stim[0]['components'][0]
         assert tone['stim_type'] == 'Pure Tone'
@@ -732,7 +787,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
 
 
     stim_doc = stim_doc[1:] # remove control stim
-    print stim_doc
+    # print stim_doc
     # to keep these tests simple, assume the altered component is at 
     # index 0,0 and there is only a single auto parameter
     if len(test_stim.autoParams().allData()) > 0:

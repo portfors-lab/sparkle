@@ -453,23 +453,33 @@ class AcquisitionManager():
         """
         self.protocoler.set_comment(self.current_cellid, comment)
 
-    def attenuator_connection(self):
+    def attenuator_connection(self, connect=True):
         """Checks the connection to the attenuator, and attempts to connect if not connected.
+        Will also set an appropriate ouput minimum for stimuli, if connection successful 
 
         :returns: bool - whether there is a connection
         """
         # all or none will be connected
         acquisition_modules = [self.explorer, self.protocoler, self.bs_calibrator, self.tone_calibrator, self.charter]
-        if not acquisition_modules[0].player.attenuator_connected():
-            #attempt to re-connect first
-            for module in acquisition_modules:
-                success = module.player.connect_attenuator()
-            if success is None:
-                return False
+        if connect:
+            if not acquisition_modules[0].player.attenuator_connected():
+                #attempt to re-connect first
+                for module in acquisition_modules:
+                    success = module.player.connect_attenuator()
+                if success is None:
+                    StimulusModel.setMinVoltage(0.0)
+                    return False
+                else:
+                    StimulusModel.setMinVoltage(0.005)
+                    return True
             else:
+                StimulusModel.setMinVoltage(0.005)
                 return True
         else:
-            return True
+            for module in acquisition_modules:
+                module.player.connect_attenuator(False)
+            StimulusModel.setMinVoltage(0.0)
+            return False
 
     def mphone_calibration_reps(self):
         return self.mphone_calibrator.reps()

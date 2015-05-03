@@ -22,7 +22,6 @@ pg.setConfigOptions(useWeave=False)
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-VOLT2AMPS = config['volt_amp_conversion']
 
 class BasePlot(pg.PlotWidget):
     """Abstract class meant to be subclassed by other plot types.
@@ -96,7 +95,7 @@ class TraceWidget(BasePlot):
     thresholdUpdated = QtCore.Signal(float)
     polarityInverted = QtCore.Signal(int)
     _polarity = 1
-    _ampScalar = VOLT2AMPS
+    _ampScalar = None
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
@@ -310,6 +309,11 @@ class TraceWidget(BasePlot):
             pol = 1
         self._polarity = pol
         self.polarityInverted.emit(pol)
+
+    def setAmpConversionFactor(self, scalar):
+        """Set the scalar for converting volts to amps when the trace
+        plot is set to plot Amps"""
+        self._ampScalar = scalar
 
 def _doSpectrogram(signal, *args, **kwargs):
     spec, f, bins, dur = audiotools.spectrogram(*args, **kwargs)

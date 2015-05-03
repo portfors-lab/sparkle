@@ -7,6 +7,7 @@ from nose.tools import assert_equal
 
 import qtbot
 from QtWrapper import QtGui, QtTest
+from sparkle.acq.daq_tasks import get_devices
 from sparkle.gui.main_control import MainWindow
 
 
@@ -70,3 +71,12 @@ class TestMainDialogs():
         qtbot.handle_dialog()
         self.form.launchCellDlg()
         assert cid == self.form.acqmodel.current_cellid
+
+    def test_advanced_options_dlg(self):
+        options = self.form.advanced_options.copy()
+        device_name = get_devices()
+        if len(device_name) > 0:
+            options['device_name'] = device_name[0]
+        qtbot.handle_dialog()
+        self.form.launchAdvancedDlg()
+        assert_equal(self.form.advanced_options, options)

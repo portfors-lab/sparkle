@@ -5,3 +5,4 @@ from specgram_dlg import SpecDialog
 from comment_dlg import CellCommentDialog
 from view_dlg import ViewSettingsDialog
 from vocal_path_dlg import VocalPathDialog
+from advanced_dlg import AdvancedOptionsDialog

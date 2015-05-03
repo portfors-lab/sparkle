@@ -18,7 +18,6 @@ from sparkle.tools.systools import get_src_directory
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-MAXV = config['max_voltage']
 USE_RMS = config['use_rms']
 
 class TestQStimModel():

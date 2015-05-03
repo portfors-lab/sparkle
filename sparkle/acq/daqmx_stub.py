@@ -94,5 +94,9 @@ def DAQmxGetDevAOPhysicalChans(dev, buf, buflen):
 def DAQmxGetDevIsSimulated(devname, answerbuf):
 	answerbuf.value = True
 
+def DAQmxGetSysDevNames(buf, buflen):
+	fakedev = 'PCI-6259'
+	buf[0:len(fakedev)] = fakedev
+
 def bool32():
 	return c_bool()

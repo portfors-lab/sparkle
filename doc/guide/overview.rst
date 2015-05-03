@@ -108,5 +108,5 @@ Recorded data is saved to data files in HDF5 format. Each protcol list is a grou
 
 Other Settings
 ===============
-Semi-permanent settings loaded once at program start are located in the :ref:`settings`.
+Details for the Advanced settings and Semi-permanent settings loaded once at program start are located in the :ref:`settings`.
 

@@ -8,10 +8,9 @@ import yaml
 
 from controlwindow import ControlWindow
 from QtWrapper import QtCore, QtGui
-from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
-    VocalPathDialog
+    VocalPathDialog, AdvancedOptionsDialog
 from sparkle.gui.load_frame import LoadFrame
 from sparkle.gui.plotting.pyqtgraph_widgets import ProgressWidget, \
     SimplePlotWidget, SpecWidget
@@ -42,7 +41,6 @@ REDSS = "QLabel { background-color : transparent; color : red; }"
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-DEVNAME = config['device_name']
 REFFREQ = config['reference_frequency']
 REFVOLTAGE = config['reference_voltage']
 
@@ -73,14 +71,6 @@ class MainWindow(ControlWindow):
         self.ui.stopBtn.clicked.connect(self.onStop)
         self.ui.startChartBtn.clicked.connect(self.onStartChart)
         self.ui.stopChartBtn.clicked.connect(self.onStopChart)
-
-        cnames = get_ao_chans(DEVNAME.encode())
-        self.ui.aochanBox.addItems(cnames)
-        cnames = get_ai_chans(DEVNAME.encode())
-        self.ui.aichanBox.addItems(cnames)
-        # can't find a function in DAQmx that gets the trigger
-        # channel names, so add manually
-        self.ui.trigchanBox.addItems(['/'+DEVNAME+'/PFI0', '/'+DEVNAME+'/PFI1'])
 
         self.ui.runningLabel.setStyleSheet(REDSS)
 
@@ -920,6 +910,21 @@ class MainWindow(ControlWindow):
         dlg = VocalPathDialog(Vocalization.paths)
         if dlg.exec_():
             Vocalization.paths = dlg.paths()
+        dlg.deleteLater()
+
+    def launchAdvancedDlg(self):
+        dlg = AdvancedOptionsDialog(self.advanced_options)
+        if dlg.exec_():
+            self.advanced_options = dlg.getValues()
+            StimulusModel.setMaxVoltage(self.advanced_options['max_voltage'], self.advanced_options['device_max_voltage'])
+            self.display.setAmpConversionFactor(self.advanced_options['volt_amp_conversion'])
+            if self.advanced_options['use_attenuator']:
+                # could check for return value here? It will try
+                # to re-connect every time start is pressed anyway
+                self.acqmodel.attenuator_connection(True)
+            else:
+                self.acqmodel.attenuator_connection(False)
+            self.reset_device_channels()
         dlg.deleteLater()
 
     def recordingSelected(self, modelIndex):
