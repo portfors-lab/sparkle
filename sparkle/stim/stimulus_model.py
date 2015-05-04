@@ -603,6 +603,8 @@ class StimulusModel():
         # if there is only square waves in stimulus, do not apply calibration --
         # it is assumed to not be a signal for the speaker
         component_names = list(set([comp.name for track in self._segments for comp in track]))
+        if 'silence' in component_names:
+            component_names.remove('silence')
         if len(component_names) > 1 or component_names[0] != "Square Wave":
             total_signal = convolve_filter(total_signal, self.impulseResponse)
             maxv = self.voltage_limits[0]
