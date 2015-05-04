@@ -605,7 +605,7 @@ class StimulusModel():
         component_names = list(set([comp.name for track in self._segments for comp in track]))
         if 'silence' in component_names:
             component_names.remove('silence')
-        if len(component_names) > 1 or component_names[0] != "Square Wave":
+        if len(component_names) > 1 or (len(component_names) == 1 and component_names[0] != "Square Wave"):
             total_signal = convolve_filter(total_signal, self.impulseResponse)
             maxv = self.voltage_limits[0]
             to_speaker = True

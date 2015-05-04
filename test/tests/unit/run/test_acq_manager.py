@@ -172,7 +172,7 @@ class TestAcquisitionManager():
 
         # print stim.signal()[0].max()
         if connected:
-            assert stim.signal()[0].max() == 0.005
+            assert np.around(stim.signal()[0].max(),5) == 0.005
         else:
             assert stim.signal()[0].max() < 0.005
             
