@@ -9,9 +9,7 @@ The system will generate synthesized signals (tones, chrips, etc), as well as pl
 Running
 -------
 
-To get up and running, first install the requirements:
-
-    $ pip install -r requirements.txt
+To get up and running, first install the requirements. Anaconda distribution of python is recommended, but there is a requirements file in this repo if you want a list of libraries to install (for example in a virtualenv). In addition to Anaconda libraries, you will need pyqtgraph, and also pydaqmx if you want to record data.
 
 Then run the main GUI module:
 

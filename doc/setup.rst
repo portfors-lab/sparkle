@@ -4,7 +4,12 @@ Installation / Setup
 If you know what you are doing, the source is on Github_.
 
 
+Installing to Record data
+--------------------------
+If you are instally Sparkle on a machine where you want to record, not just review data, you must have the hardware `DAQmx drivers`_ installed from National Instruments. Download and install according to their directions.
 
+.. _DAQmx drivers: http://search.ni.com/nisearch/app/main/p/bot/no/ap/tech/lang/en/pg/1/sn/catnav:du,n8:3478.41,ssnav:sup/
+    
 Install on Windows
 --------------------
 
@@ -26,9 +31,13 @@ Download Python and packages
 
 It is strongly recommended to install the free Anaconda_ python distribution instead of the download from python.org. This is because it comes with a lot of the 3rd party scientific packages you need in one easy download and install process. It will save a lot of headaches when installing packages on windows.
 
-In fact, you will only need one additional package, which you can get by the command (Git bash or powershell)::
+In fact, you will only need one or two (if recording) additional packages, which you can get by the command (Git bash or powershell)::
 
     $ pip install pyqtgraph
+
+If you installed the device driver to record data, also install the python wrappers via the command::
+
+    $ pip install pydaqmx
 
 Otherwise, if you did not install Anaconda you can run (after installing pip yourself)::
 
