@@ -38,6 +38,7 @@ class AbstractPlayerBase(object):
 
         self.stim_changed = False
 
+        self.attenuator = None
         self.connect_attenuator(False)
 
         self.trigger_src = None #"PCI-6259/port0/line1"  
@@ -169,6 +170,9 @@ class AbstractPlayerBase(object):
 
             self.attenuator = pa5
         else:
+            # if there is an attenuator, make sure it is set to 0 before disconnecting
+            if self.attenuator:
+                self.attenuator.setAtten(0)
             self.attenuator = None
         return self.attenuator
 
