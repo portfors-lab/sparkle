@@ -496,6 +496,11 @@ class StimulusView(AbstractDragView, QtGui.QAbstractItemView):
         # keep all defaults the same across instances
         StimulusView._componentDefaults[str(sender)] = state
 
+    @staticmethod
+    def getDefaults():
+        """Returns a dict of all the latest default settings that have been set in all views"""
+        return StimulusView._componentDefaults
+
     def updateGeometries(self,a=None, b=None):
         self.horizontalScrollBar().setSingleStep(self.pixelsPerms)
         self.horizontalScrollBar().setPageStep(self.viewport().width())

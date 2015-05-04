@@ -254,6 +254,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['explorestims'] = self.ui.exploreStimEditor.saveTemplate()
 
         savedict['advanced_options'] = self.advanced_options
+        savedict['stim_view_defaults'] = StimulusView.getDefaults()
 
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
@@ -350,6 +351,10 @@ class ControlWindow(QtGui.QMainWindow):
         else:
             self.acqmodel.attenuator_connection(False)
         self.reset_device_channels()
+
+        stim_defaults = inputsdict.get('stim_view_defaults', {})
+        for name, state in stim_defaults.items():
+            StimulusView.updateDefaults(name, state)
 
     def closeEvent(self, event):
         """Closes listening threads and saves GUI data for later use.
