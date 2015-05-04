@@ -8,7 +8,7 @@ import yaml
 import sparkle.tools.systools as systools
 from main_control_form import Ui_ControlWindow
 from QtWrapper import QtCore, QtGui
-from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
+from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans, get_devices
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.auto_parameter_view import SmartDelegate
@@ -194,14 +194,22 @@ class ControlWindow(QtGui.QMainWindow):
         """Updates the input channel selection boxes based on the current
         device name stored in this object"""
         # clear boxes first
-        devname = self.advanced_options['device_name']
         self.ui.aochanBox.clear()
         self.ui.aichanBox.clear()
-        cnames = get_ao_chans(devname)
-        self.ui.aochanBox.addItems(cnames)
-        cnames = get_ai_chans(devname)
-        self.ui.aichanBox.addItems(cnames)
-        
+        devname = self.advanced_options['device_name']
+        device_list = get_devices()
+        if devname in device_list:
+            cnames = get_ao_chans(devname)
+            self.ui.aochanBox.addItems(cnames)
+            cnames = get_ai_chans(devname)
+            self.ui.aichanBox.addItems(cnames)
+        elif devname == '' and len(device_list) > 0:
+            devname = device_list[0]
+            cnames = get_ao_chans(devname)
+            self.ui.aochanBox.addItems(cnames)
+            cnames = get_ai_chans(devname)
+            self.ui.aichanBox.addItems(cnames)
+            
         # can't find a function in DAQmx that gets the trigger
         # channel names, so add manually
         self.ui.trigchanBox.addItems(['/'+devname+'/PFI0', '/'+devname+'/PFI1'])

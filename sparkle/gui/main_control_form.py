@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_control.ui'
+# Form implementation generated from reading ui file '.\main_control.ui'
 #
-# Created: Fri May  1 23:20:44 2015
+# Created: Mon May 04 10:29:09 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -365,7 +365,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -753,7 +753,7 @@ class Ui_ControlWindow(object):
         self.actionTimer.setText(_translate("ControlWindow", "Timer", None))
         self.actionResponse_SPL.setText(_translate("ControlWindow", "response SPL", None))
         self.actionVocalization_paths.setText(_translate("ControlWindow", "Vocalization paths...", None))
-        self.actionAdvanced.setText(_translate("ControlWindow", "Advanced", None))
+        self.actionAdvanced.setText(_translate("ControlWindow", "Advanced...", None))
 
 from sparkle.gui.calibration_widget import CalibrationWidget
 from sparkle.gui.plotdock import PlotDockWidget
