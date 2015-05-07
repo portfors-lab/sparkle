@@ -257,3 +257,28 @@ intersphinx_mapping = {'pyqtgraph': ('http://www.pyqtgraph.org/documentation', N
 
 inheritance_graph_attrs = dict(rankdir="TB")
 inheritance_edge_attrs = dict(dir='back')
+
+class Mock(object):
+    """
+    Mock modules.
+    Taken from https://github.com/pyudev/pyudev/blob/develop/doc/conf.py#L37
+    with some slight changes.
+    """
+
+    @classmethod
+    def mock_modules(cls, *modules):
+        for module in modules:
+            sys.modules[module] = cls()
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return self.__class__()
+
+    def __getattr__(self, attribute):
+        return Mock()
+
+# mock out non-pip installable modules to enable Sphinx autodoc even
+# if these modules are unavailable, as on readthedocs.org
+Mock('PyQt4')

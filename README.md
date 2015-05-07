@@ -9,11 +9,17 @@ The system will generate synthesized signals (tones, chrips, etc), as well as pl
 Running
 -------
 
-To get up and running, first install the requirements. Anaconda distribution of python is recommended, but there is a requirements file in this repo if you want a list of libraries to install (for example in a virtualenv). In addition to Anaconda libraries, you will need pyqtgraph, and also pydaqmx if you want to record data.
+To get up and running, first install the requirements. Anaconda distribution of python is recommended, but if you want to do it manually (for example to use a virtualenv), you will need to install HDF5, and Qt (and the python bindings PyQt) yourself.
 
-Then run the main GUI module:
+If you want to record data with sparkle you must also download the National Instruments device drivers separately.
 
-    $ python sparkle/gui/run.py
+To install the rest of the dependencies, and create an executable script run:
+
+    $ python setup.py install
+
+If this is successful, you can now run sparkle:
+
+    $ sparkle
 
 To build the documentation:
 
@@ -31,16 +37,3 @@ Submit bug reports by creating an issue, please provide as much detail as possib
 Contributions are welcome, you can email me if you have any questions before submitting a pull request.
 
 Maintained by Amy Boyle amy@amyboyle.ninja
-
-
-Setting the PYTHONPATH
------------------------
-To run sparkle with python from anywhere outside of the sparkle root directory you will need to set the pythonpath.
-
-e.g. for Mac/Linux:
-
-    $ export PYTHONPATH="$PYTHONPATH:/absolute/path/to/sparkle"
-
-or for Windows (on Git bash):
-
-    $ export PYTHONPATH="$PYTHONPATH;C:\absolute\path\to\sparkle"

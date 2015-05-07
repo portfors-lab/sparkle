@@ -109,7 +109,7 @@ This should launch a dialog asking you to choose a data file. See the :doc:`guid
 
 Creating a shortcut (Windows):
 -------------------------------
-To create a shortcut on the desktop (or anywhere really) to launch Sparkle, first create a plain text file, and let's call it 'sparkle.bat'. In this file add the following two lines, replacing as necessary::
+To create a shortcut on the desktop (or anywhere really) to launch Sparkle from source, first create a plain text file, and let's call it 'sparkle.bat'. In this file add the following two lines, replacing as necessary::
 
     set PYTHONPATH=<path to sparkle>
     <path to python executable> <path to sparkle\sparkle\gui\run.py>
