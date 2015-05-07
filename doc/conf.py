@@ -281,4 +281,4 @@ class Mock(object):
 
 # mock out non-pip installable modules to enable Sphinx autodoc even
 # if these modules are unavailable, as on readthedocs.org
-Mock('PyQt4')
+Mock.mock_modules('PyQt4')
