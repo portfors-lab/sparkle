@@ -6,10 +6,12 @@ Sparkle is a data acquisition system designed for auditory neuroscience research
 
 The system will generate synthesized signals (tones, chrips, etc), as well as play recording files (.wavs). Data is saved to HDF5 format.
 
+Installation notes, user guide and developer docs are available on [Read the Docs](http://sparkle.readthedocs.org/en/latest/index.html)
+
 Running
 -------
 
-To get up and running, first install the requirements. Anaconda distribution of python is recommended, but if you want to do it manually (for example to use a virtualenv), you will need to install HDF5, and Qt (and the python bindings PyQt) yourself.
+To get up and running, first install the requirements. Anaconda distribution of python is recommended, but if you want to do it manually (for example to use a virtualenv), you will need to install [HDF5][hdf5] and [PyQt][pyqt] yourself.
 
 If you want to record data with sparkle you must also download the National Instruments device drivers separately.
 
@@ -21,13 +23,11 @@ If this is successful, you can now run sparkle:
 
     $ sparkle
 
-To build the documentation:
+See [the documentation][setupdoc] for more in-depth details on setup
 
-    $ cd doc
-    $ sphinx-apidoc -f -o ref/auto ../sparkle
-    $ make html
-
-See the documentation for more in-depth details on setup
+[pyqt]: http://www.riverbankcomputing.com/software/pyqt/download
+[hdf5]: http://www.hdfgroup.org/downloads
+[setupdoc]: http://sparkle.readthedocs.org/en/latest/setup.html
 
 Contributions/ bugs
 -------------------
