@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.datatree import DataTree
 from sparkle.gui.stim.component_detail import ComponentsDetailWidget
 from sparkle.gui.stim_table import StimTable

@@ -10,7 +10,7 @@ import time
 import numpy as np
 import pyqtgraph as pg
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.acq.players import FinitePlayer
 from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget, \
     StackedPlot

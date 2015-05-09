@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 
 
 class PlotMenuBar(QtGui.QMenuBar):

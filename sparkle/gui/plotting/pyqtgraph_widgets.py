@@ -7,7 +7,7 @@ import pyqtgraph as pg
 import yaml
 
 import sparkle.tools.audiotools as audiotools
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 from sparkle.gui.plotting.viewbox import SpikeyViewBox
 from sparkle.tools import spikestats

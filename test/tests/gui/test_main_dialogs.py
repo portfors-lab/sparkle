@@ -6,7 +6,7 @@ import time
 from nose.tools import assert_equal
 
 import qtbot
-from QtWrapper import QtGui, QtTest
+from sparkle.QtWrapper import QtGui, QtTest
 from sparkle.acq.daq_tasks import get_devices
 from sparkle.gui.main_control import MainWindow
 

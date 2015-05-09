@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget, \
     TraceWidget
 

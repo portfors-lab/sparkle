@@ -1,5 +1,5 @@
 import qtbot
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.stim_table import StimTable
 from test import sample

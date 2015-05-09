@@ -1,7 +1,7 @@
 import json
 import os
 
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 
 

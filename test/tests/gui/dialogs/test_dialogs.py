@@ -3,9 +3,9 @@ import os
 from nose.tools import assert_equal
 
 import test.sample as sample
-from QtWrapper.QtCore import Qt
-from QtWrapper.QtGui import QApplication, QLineEdit
-from QtWrapper.QtTest import QTest
+from sparkle.QtWrapper.QtCore import Qt
+from sparkle.QtWrapper.QtGui import QApplication, QLineEdit
+from sparkle.QtWrapper.QtTest import QTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog
@@ -102,7 +102,7 @@ class TestSavingDialog():
     def test_create_new_file_with_default(self):
         dlg = SavingDialog(sample.datafile())
         dlg.show()
-        QTest.qWait(100)
+        QTest.qWait(200)
         self.hack_filename(dlg, 'newfile')
         fname, mode = dlg.getfile()
         # case insensitive for windows sake

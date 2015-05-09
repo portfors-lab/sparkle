@@ -10,7 +10,7 @@ import h5py
 
 import qtbot
 import test.sample as sample
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.gui.control import MainWindow
 from sparkle.gui.stim.factory import TCFactory
 from sparkle.stim.stimulus_model import StimulusModel

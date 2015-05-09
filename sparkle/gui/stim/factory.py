@@ -5,7 +5,7 @@ and assigning editors to them
 import json
 import os
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.stimulus_editor import StimulusEditor
 from sparkle.gui.stim.tuning_curve import TuningCurveEditor
 from sparkle.stim import get_stimulus_editor

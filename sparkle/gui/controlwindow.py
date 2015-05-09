@@ -7,7 +7,7 @@ import yaml
 
 import sparkle.tools.systools as systools
 from main_control_form import Ui_ControlWindow
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans, get_devices
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget

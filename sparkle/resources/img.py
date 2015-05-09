@@ -1,6 +1,6 @@
 import os
 
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 
 thisfolder = os.path.dirname(os.path.realpath(__file__))
 

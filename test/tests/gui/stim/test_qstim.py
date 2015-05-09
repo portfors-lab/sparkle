@@ -5,7 +5,7 @@ import yaml
 from nose.tools import assert_equal, raises
 
 import test.sample as sample
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.factory import CCFactory, TCFactory
 from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.gui.stim.stimulus_editor import StimulusEditor

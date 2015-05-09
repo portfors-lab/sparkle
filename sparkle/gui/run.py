@@ -4,7 +4,7 @@ import time
 import traceback
 import sys
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.dialogs import SavingDialog
 from sparkle.gui.main_control import MainWindow
 from sparkle.resources import icons

@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
 from sparkle.gui.drag_label import DragLabel
 from sparkle.gui.qconstants import AutoParamMode, BuildMode, CursorRole

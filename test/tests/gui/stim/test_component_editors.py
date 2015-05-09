@@ -1,7 +1,7 @@
 import os
 
 import qtbot
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.components.vocal_parameters import VocalParameterWidget
 from sparkle.stim.types import get_stimuli_models

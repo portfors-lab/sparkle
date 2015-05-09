@@ -1,6 +1,6 @@
 from os.path import dirname
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
 from sparkle.gui.stim.components.order_dlg import OrderDialog
 from sparkle.tools.audiotools import spectrogram

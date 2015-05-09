@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from sparkle.gui.stim.tuning_curve_form import Ui_TuningCurveEditor
 

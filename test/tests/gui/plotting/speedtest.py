@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from QtWrapper.QtGui import QApplication
+from sparkle.QtWrapper.QtGui import QApplication
 from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget
 
 

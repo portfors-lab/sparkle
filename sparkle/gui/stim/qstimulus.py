@@ -5,7 +5,7 @@ import uuid
 import numpy as np
 import yaml
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.qconstants import AutoParamMode, BuildMode, CursorRole
 from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel

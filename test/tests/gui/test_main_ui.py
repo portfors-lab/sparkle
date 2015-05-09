@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_in
 
 import qtbot
 import test.sample as sample
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.main_control import MainWindow
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget

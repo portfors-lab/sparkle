@@ -1,5 +1,5 @@
 from auto_parameters_editor import Parametizer
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from stimulus_editor_form import Ui_StimulusEditor
@@ -116,7 +116,7 @@ class StimulusEditor(AbstractStimulusWidget):
 
 if __name__ == "__main__":
     import sys, os
-    from QtWrapper import QtGui
+    from sparkle.QtWrapper import QtGui
     from sparkle.gui.stim.qstimulus import QStimulusModel
     from sparkle.stim.stimulus_model import StimulusModel
     from sparkle.stim.types.stimuli_classes import *

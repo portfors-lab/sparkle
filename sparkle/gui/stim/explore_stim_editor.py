@@ -1,5 +1,5 @@
 from explore_stim_editor_form import Ui_ExploreStimEditor
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.explore_component_editor import ExploreComponentEditor

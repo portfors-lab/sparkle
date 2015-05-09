@@ -1,5 +1,5 @@
 
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.tools.util import clearLayout
 
 

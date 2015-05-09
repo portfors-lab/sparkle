@@ -4,9 +4,9 @@ import unittest
 
 import qtbot
 import test.sample as sample
-from QtWrapper.QtCore import Qt, QTimer
-from QtWrapper.QtGui import QApplication
-from QtWrapper.QtTest import QTest
+from sparkle.QtWrapper.QtCore import Qt, QTimer
+from sparkle.QtWrapper.QtGui import QApplication
+from sparkle.QtWrapper.QtTest import QTest
 from sparkle.gui.stim.factory import BuilderFactory
 from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.gui.stim.stimulus_editor import StimulusEditor

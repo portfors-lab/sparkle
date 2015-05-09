@@ -1,5 +1,5 @@
 from advanced_dlg_form import Ui_AdvancedOptionsDialog
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.acq.daq_tasks import get_devices
 
 class AdvancedOptionsDialog(QtGui.QDialog):

@@ -1,6 +1,6 @@
 import os
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from vocal_path_dlg_form import Ui_VocalPathDialog
 
 

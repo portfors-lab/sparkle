@@ -3,7 +3,7 @@ import re
 
 import numpy as np
 
-from QtWrapper import QtCore
+from sparkle.QtWrapper import QtCore
 
 
 def increment_title(title):

@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 class LoadFrame(QtGui.QFrame):
   """Just a plain frame to display to the User when you want their patience to 

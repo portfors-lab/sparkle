@@ -1,5 +1,5 @@
 import sparkle
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
 from sparkle.gui.qconstants import CursorRole
 from sparkle.gui.stim.factory import StimFactory

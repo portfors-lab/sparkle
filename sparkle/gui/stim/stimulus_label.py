@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.gui.drag_label import DragLabel
 from sparkle.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory
 from sparkle.gui.trashcan import TrashWidget

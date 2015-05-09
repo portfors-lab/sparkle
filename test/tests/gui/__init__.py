@@ -4,7 +4,7 @@ sip.setdestroyonexit(0)
 import os, shutil
 import numpy as np
 
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 
 tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 app = None

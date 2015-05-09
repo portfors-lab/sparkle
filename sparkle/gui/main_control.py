@@ -7,7 +7,7 @@ import numpy as np
 import yaml
 
 from controlwindow import ControlWindow
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
     VocalPathDialog, AdvancedOptionsDialog

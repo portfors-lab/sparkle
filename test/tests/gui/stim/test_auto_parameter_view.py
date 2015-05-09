@@ -1,5 +1,5 @@
 import qtbot
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.gui.stim.auto_parameter_view import AutoParameterTableView
 from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
 from sparkle.stim.auto_parameter_model import AutoParameterModel

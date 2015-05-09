@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from scale_dlg_form import Ui_ScaleDlg
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox
 

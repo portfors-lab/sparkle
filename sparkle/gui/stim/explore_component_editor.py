@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.dynamic_stacker import DynamicStackedWidget
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox

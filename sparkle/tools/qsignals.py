@@ -1,6 +1,6 @@
 import numpy
 
-from QtWrapper import QtCore
+from sparkle.QtWrapper import QtCore
 
 
 class ProtocolSignals(QtCore.QObject):

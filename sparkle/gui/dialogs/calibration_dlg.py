@@ -1,7 +1,7 @@
 import re
 
 from calibration_dlg_form import Ui_CalibrationDialog
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 
 

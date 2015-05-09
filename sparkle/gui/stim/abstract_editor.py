@@ -1,6 +1,6 @@
 import sip
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class AbstractEditorWidget(QtGui.QFrame):

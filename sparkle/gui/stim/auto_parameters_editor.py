@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.drag_label import DragLabel
 from sparkle.gui.hidden_widget import WidgetHider
 from sparkle.gui.stim.auto_parameter_view import AddLabel, \

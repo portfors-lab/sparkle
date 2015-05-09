@@ -1,7 +1,7 @@
 import os
 
 import test.sample as sample
-from QtWrapper.QtGui import QApplication
+from sparkle.QtWrapper.QtGui import QApplication
 from sparkle.gui.main_control import MainWindow
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 

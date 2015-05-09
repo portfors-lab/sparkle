@@ -1,6 +1,6 @@
 import time
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.plotmenubar import PlotMenuBar
 from sparkle.gui.plotting.calibration_display import CalibrationDisplay
 from sparkle.gui.plotting.calibration_explore_display import \
