@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name="sparkle",
-      version='0.0.1',
+      version='0.0.2',
       description="Sound Presentation And Recording Kit for Laboratories of Electrophysiology",
       url="https://github.com/portfors-lab/sparkle",
       author='Amy Boyle',

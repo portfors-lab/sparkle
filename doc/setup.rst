@@ -7,11 +7,36 @@ If you are installing Sparkle on a machine where you want to record, not just re
 
 .. _DAQmx drivers: http://search.ni.com/nisearch/app/main/p/bot/no/ap/tech/lang/en/pg/1/sn/catnav:du,n8:3478.41,ssnav:sup/
 
+Install from PyPI
+>>>>>>>>>>>>>>>>>>
 
-Install from source
+The easiest way to get sparkle, and to get more stable releases, is to download it from PyPI (i.e. use pip, as below).
+
+Install Python + Tools
+++++++++++++++++++++++
+It is strongly recommended to install the free Anaconda_ python distribution instead of the download from python.org. This is because it comes with a lot of the 3rd party scientific packages you need in one easy download and install process. If you are on Windows, it will save a lot of headaches when installing packages. 
+
+Install Sparkle
+++++++++++++++++
+After you install Anaconda, open up a command terminal and enter:
+
+Windows (need admin rights):
+
+    $ pip install sparkle
+
+Unix:
+
+    $ sudo pip install sparkle
+
+Then you should be able to call sparkle from the command line:
+
+    $ sparkle
+
+
+Install from Github
 >>>>>>>>>>>>>>>>>>>>
 
-To get the bleeding-edge version of sparkle, or to help with development, you need to get a copy of the source code repositiory.
+To get the bleeding-edge version of sparkle, or to help with development, you need to get a copy of the source code repository.
 
 If you know what you are doing, the source is on Github_.
 
@@ -49,6 +74,7 @@ If you installed the device drivers to record data, also install the python wrap
 
 You can now move on to :ref:`running`
 
+.. _manual dependencies:
 
 Install Dependencies Manually
 -----------------------------
@@ -102,7 +128,7 @@ Running SPARKLE
     
 Setting the PYTHONPATH
 -----------------------
-To run sparkle with python from anywhere outside of the sparkle root irectory you will need to set the pythonpath.
+To run sparkle with python from anywhere outside of the sparkle root directory you will need to set the pythonpath.
 
 e.g. for Mac/Linux:
 
@@ -143,4 +169,4 @@ Building the documentation locally
     $ sphinx-apidoc -f -o ref/auto ../sparkle
     $ make html
 
-You may need additional packages to build the doc, install via pip as neccessary.
+You may need additional packages to build the doc, install via pip as necessary.

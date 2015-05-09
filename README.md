@@ -8,18 +8,22 @@ The system will generate synthesized signals (tones, chrips, etc), as well as pl
 
 Installation notes, user guide and developer docs are available on [Read the Docs](http://sparkle.readthedocs.org/en/latest/index.html)
 
-Running
--------
+Installing 
+-----------
 
 To get up and running, first install the requirements. Anaconda distribution of python is recommended, but if you want to do it manually (for example to use a virtualenv), you will need to install [HDF5][hdf5] and [PyQt][pyqt] yourself.
 
 If you want to record data with sparkle you must also download the National Instruments device drivers separately.
 
-To install the rest of the dependencies, and create an executable script run:
+If you don't want the development version of sparkle, you can download it with pip:
+
+    $ pip install sparkle
+
+Otherwise, to install the rest of the dependencies, and create an executable script run:
 
     $ python setup.py install
 
-If this is successful, you can now run sparkle:
+If you are successful, you can now run sparkle:
 
     $ sparkle
 
