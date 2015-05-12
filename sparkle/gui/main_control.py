@@ -536,12 +536,12 @@ class MainWindow(ControlWindow):
             raise
 
     def processResponse(self, times, response, test_num, trace_num, rep_num, extra_info={}):
-        """Calulate spike times from raw response data"""
+        """Calculate spike times from raw response data"""
         if self.activeOperation == 'calibration' or self.activeOperation == 'caltone':
             # all this is only meaningful for spike recordings
             return
 
-        # not actually guaranteed to happend in order :/
+        # not actually guaranteed to happen in order :/
         if rep_num == 0:
             # reset
             self.spike_counts = []
@@ -552,7 +552,7 @@ class MainWindow(ControlWindow):
 
         fs = 1./(times[1] - times[0])
         count, latency, rate, response_bins = self.do_spike_stats(response, fs)
-        # bad news if this changes mid protcol, bin centers are only updated
+        # bad news if this changes mid protocol, bin centers are only updated
         # at start of protocol
         binsz = float(self.ui.binszSpnbx.value())
         if len(response_bins) > 0:
@@ -567,7 +567,7 @@ class MainWindow(ControlWindow):
         if rep_num == self.nreps - 1:
             total_spikes = sum(self.spike_counts)
             avg_count = np.mean(self.spike_counts)
-            avg_latency = np.mean(self.spike_latencies)
+            avg_latency = np.nanmean(self.spike_latencies)
             avg_rate = np.mean(self.spike_rates)
             self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
             if 'f' in extra_info:
