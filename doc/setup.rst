@@ -1,16 +1,24 @@
 Installation / Setup
 ========================
 
-Installing to Record data
+The easiest way to get sparkle, and to get more stable releases, is to :ref:`download from PyPI using pip<PyPI>`.
+
+Alternatively, to get the bleeding-edge version of sparkle, or to help with development, you need to :ref:`get a copy of the source code<install_from_github>` repository from Github.
+
+Either way, if applicable, also see :ref:`Installing to Record Data<recording>`. (You can do this before or after installing sparkle)
+
+.. _recording:
+
+Installing to Record Data
 >>>>>>>>>>>>>>>>>>>>>>>>>>
 If you are installing Sparkle on a machine where you want to record, not just review data, you must have the hardware `DAQmx drivers`_ installed from National Instruments. Download and install according to their directions.
 
 .. _DAQmx drivers: http://search.ni.com/nisearch/app/main/p/bot/no/ap/tech/lang/en/pg/1/sn/catnav:du,n8:3478.41,ssnav:sup/
 
+.. _PyPI:
+
 Install from PyPI
 >>>>>>>>>>>>>>>>>>
-
-The easiest way to get sparkle, and to get more stable releases, is to download it from PyPI (i.e. use pip, as below).
 
 Install Python + Tools
 ++++++++++++++++++++++
@@ -28,15 +36,22 @@ Unix:
 
     $ sudo pip install sparkle
 
+Run Sparkle
+++++++++++++
+
 Then you should be able to call sparkle from the command line:
 
     $ sparkle
 
+Creating a shortcut (Windows 7):
+---------------------------------
+
+You can also find sparkle under the start menu, type sparkle into the search bar, and it should come up. You can run it from here. To create a shortcut, drag the start menu entry onto the desktop.
+
+.. _install_from_github:
 
 Install from Github
 >>>>>>>>>>>>>>>>>>>>
-
-To get the bleeding-edge version of sparkle, or to help with development, you need to get a copy of the source code repository.
 
 If you know what you are doing, the source is on Github_.
 
@@ -51,11 +66,13 @@ Downloading SPARKLE
 +++++++++++++++++++
 Once you have git, use your command line (Git bash recommended for Windows) to navigate to where you want the SPARKLE source code to live.
 
-Copy the url from Github_, and clone it to your local machine, e.g. for HTTPS (recommended)::
+Copy the url from Github_, and clone it to your local machine, (or, if you want to contribute, you can fork_ sparkle, and clone your fork) e.g. for HTTPS (recommended)::
 
     $ git clone https://github.com/portfors-lab/sparkle.git
 
 This will create a directory :code:`sparkle` in your current directory.
+
+.. _fork: https://help.github.com/articles/fork-a-repo/
 
 Install Python and packages
 +++++++++++++++++++++++++++++
@@ -136,7 +153,7 @@ e.g. for Mac/Linux:
 
 or for Windows (on Git bash):
 
-    $ export PYTHONPATH="$PYTHONPATH;C:\absolute\path\to\sparkle" 
+    $ export PYTHONPATH="$PYTHONPATH;C:\\absolute\\path\\to\\sparkle" 
 
 Run
 -----
