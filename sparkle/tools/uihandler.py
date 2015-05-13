@@ -1,7 +1,7 @@
 import logging
 import traceback
 
-from QtWrapper import QtCore
+from sparkle.QtWrapper import QtCore
 
 
 class LogSignal(QtCore.QObject):

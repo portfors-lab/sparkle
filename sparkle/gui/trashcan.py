@@ -1,6 +1,6 @@
 import os
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class TrashWidget(QtGui.QPushButton):
@@ -8,7 +8,7 @@ class TrashWidget(QtGui.QPushButton):
     itemTrashed = QtCore.Signal()
     """Signal_ sent when an item has dropped over this widget
 
-    .. _Signal: http://pyqt.sourceforge.net/Docs/QtWrapper/new_style_signals_slots.html#PyQt4.QtCore.Signal
+    .. _Signal: http://pyqt.sourceforge.net/Docs/sparkle.QtWrapper/new_style_signals_slots.html#PyQt4.QtCore.Signal
     """
     def __init__(self,parent=None):
         super(TrashWidget, self).__init__(parent)

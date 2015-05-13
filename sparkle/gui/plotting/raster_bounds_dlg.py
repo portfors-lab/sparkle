@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from raster_bounds_dlg_form import Ui_RasterBoundsDialog
 
 

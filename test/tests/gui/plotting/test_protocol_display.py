@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-from QtWrapper.QtGui import QApplication
+from sparkle.QtWrapper.QtGui import QApplication
 from sparkle.gui.plotting.protocoldisplay import ProtocolDisplay
 from test.sample import samplewav
 

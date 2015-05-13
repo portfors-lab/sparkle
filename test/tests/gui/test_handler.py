@@ -5,7 +5,7 @@ import sys
 
 import yaml
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle import tools
 from sparkle.tools.log import init_logging
 from sparkle.tools.uihandler import TextEditHandler, assign_uihandler_slot

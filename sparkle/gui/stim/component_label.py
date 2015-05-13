@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.gui.drag_label import DragLabel
 from sparkle.gui.trashcan import TrashWidget
 from sparkle.stim.types import get_stimuli_models

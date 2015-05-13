@@ -2,7 +2,7 @@ import re
 
 from numpy import floor
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class SmartSpinBox(QtGui.QDoubleSpinBox):

@@ -5,7 +5,7 @@ import yaml
 from nose.tools import assert_equal, raises
 
 import test.sample as sample
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.factory import CCFactory, TCFactory
 from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.gui.stim.stimulus_editor import StimulusEditor
@@ -18,7 +18,6 @@ from sparkle.tools.systools import get_src_directory
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-MAXV = config['max_voltage']
 USE_RMS = config['use_rms']
 
 class TestQStimModel():

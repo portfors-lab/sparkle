@@ -5,7 +5,7 @@ import shutil
 from nose.tools import assert_equal
 
 import qtbot
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.gui.drag_label import DragLabel
 from sparkle.gui.qprotocol import ProtocolView, QProtocolTabelModel
 from sparkle.gui.stim.factory import BuilderFactory, TCFactory, TemplateFactory

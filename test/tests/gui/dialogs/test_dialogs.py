@@ -3,9 +3,9 @@ import os
 from nose.tools import assert_equal
 
 import test.sample as sample
-from QtWrapper.QtCore import Qt
-from QtWrapper.QtGui import QApplication, QLineEdit
-from QtWrapper.QtTest import QTest
+from sparkle.QtWrapper.QtCore import Qt
+from sparkle.QtWrapper.QtGui import QApplication, QLineEdit
+from sparkle.QtWrapper.QtTest import QTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog
@@ -16,14 +16,15 @@ class TestCalibrationDialog():
         self.fscale = 'kHz'
         self.defaults = {'calf':20000, 'caldb':100,  'calv':0.1, 'calname':'calibration_1', 
                          'use_calfile':False, 'frange':(5000, 1e5)}
-        cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
+        self.cal_data_file = open_acqdata(sample.calibration_filename(), filemode='r')
         self.dlg = CalibrationDialog(fscale=self.fscale, defaultVals=self.defaults,
-                                     datafile=cal_data_file)
+                                     datafile=self.cal_data_file)
         self.dlg.show()
 
     def tearDown(self):
         self.dlg.close()
         self.dlg.deleteLater()
+        self.cal_data_file.close()
 
     def test_no_calfile_accept(self):
         assert self.dlg.ui.noneRadio.isChecked() == True
@@ -101,7 +102,7 @@ class TestSavingDialog():
     def test_create_new_file_with_default(self):
         dlg = SavingDialog(sample.datafile())
         dlg.show()
-        QTest.qWait(100)
+        QTest.qWait(200)
         self.hack_filename(dlg, 'newfile')
         fname, mode = dlg.getfile()
         # case insensitive for windows sake

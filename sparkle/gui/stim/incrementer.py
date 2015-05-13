@@ -1,7 +1,7 @@
 from numpy import floor
 
 from incrementer_form import Ui_IncrementInput
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.resources.icons import arrowdown, arrowup
 
 

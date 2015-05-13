@@ -3,7 +3,7 @@ import sys
 
 from pyqtgraph import GradientEditorItem
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.components import square_parameters, vocal_parameters
 from sparkle.gui.stim.generic_parameters import GenericParameterWidget
 from sparkle.resources import img

@@ -1,6 +1,6 @@
 import cPickle
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.border import QBorder
 from sparkle.gui.qconstants import CursorRole
 

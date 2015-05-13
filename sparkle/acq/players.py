@@ -38,7 +38,8 @@ class AbstractPlayerBase(object):
 
         self.stim_changed = False
 
-        self.connect_attenuator()
+        self.attenuator = None
+        self.connect_attenuator(False)
 
         self.trigger_src = None #"PCI-6259/port0/line1"  
         self.trigger_dest = None #"/PCI-6259/PFI0"
@@ -149,25 +150,30 @@ class AbstractPlayerBase(object):
         """
         self.aichan = aichan
 
-    def connect_attenuator(self):
+    def connect_attenuator(self, connect=True):
         """Establish a connection to the TDT PA5 attenuator"""
-        try:
-            pa5 = win32com.client.Dispatch("PA5.x")
-            success = pa5.ConnectPA5('GB', 1)
-            if success == 1:
-                # print 'Connection to PA5 attenuator established'
-                pass
-            else:
-                print 'Connection to PA5 attenuator failed'
-                errmsg = pa5.GetError()
-                print u"Error: ", errmsg
-                raise Exception(u"Attenuator connection failed")
-        except:
-            print "Error connecting to attenuator"
-            pa5 = None
+        if connect:
+            try:
+                pa5 = win32com.client.Dispatch("PA5.x")
+                success = pa5.ConnectPA5('GB', 1)
+                if success == 1:
+                    print 'Connection to PA5 attenuator established'
+                    pass
+                else:
+                    print 'Connection to PA5 attenuator failed'
+                    errmsg = pa5.GetError()
+                    print u"Error: ", errmsg
+                    raise Exception(u"Attenuator connection failed")
+            except:
+                print "Error connecting to attenuator"
+                pa5 = None
 
-        self.attenuator = pa5
-        
+            self.attenuator = pa5
+        else:
+            # if there is an attenuator, make sure it is set to 0 before disconnecting
+            if self.attenuator:
+                self.attenuator.setAtten(0)
+            self.attenuator = None
         return self.attenuator
 
     def attenuator_connected(self):

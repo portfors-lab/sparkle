@@ -1,6 +1,6 @@
 import sip
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class AbstractEditorWidget(QtGui.QFrame):
@@ -39,3 +39,4 @@ class AbstractEditorWidget(QtGui.QFrame):
     def updateScales(tscale, fscale):
         AbstractEditorWidget._scales[0] = tscale
         AbstractEditorWidget._scales[1] = fscale
+        

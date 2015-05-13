@@ -4,9 +4,9 @@ import unittest
 
 import qtbot
 import test.sample as sample
-from QtWrapper.QtCore import Qt, QTimer
-from QtWrapper.QtGui import QApplication
-from QtWrapper.QtTest import QTest
+from sparkle.QtWrapper.QtCore import Qt, QTimer
+from sparkle.QtWrapper.QtGui import QApplication
+from sparkle.QtWrapper.QtTest import QTest
 from sparkle.gui.stim.factory import BuilderFactory
 from sparkle.gui.stim.qstimulus import QStimulusModel
 from sparkle.gui.stim.stimulus_editor import StimulusEditor
@@ -21,6 +21,7 @@ class TestStimulusEditor():
     def setUp(self):
         self.tempfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp", 'testsave.json')
         model = StimulusModel()
+        model.setMaxVoltage(1.5, 10.0)
         model.setReferenceVoltage(100, 0.1)
         model.setRepCount(7)
         # add tone, vocalization, and silence components

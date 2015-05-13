@@ -162,6 +162,7 @@ class AITaskFinite(Task):
         :returns: numpy.ndarray -- the acquired data
         """
         r = c_int32()
+        print 'npts, nchans', self.npts, self.nchans
         bufsize = self.npts*self.nchans
         inbuffer = np.zeros(bufsize)
         self.ReadAnalogF64(self.npts, 10.0, DAQmx_Val_GroupByChannel, inbuffer,
@@ -334,3 +335,12 @@ def get_ai_chans(dev):
     pybuf = buf.value
     chans = pybuf.decode(u'utf-8').split(u",")
     return chans
+
+def get_devices():
+    """Discover and return a list of the names of all NI devices on this system"""
+    buf = create_string_buffer(512)
+    buflen = c_uint32(sizeof(buf))
+    DAQmxGetSysDevNames(buf, buflen)
+    pybuf = buf.value
+    devices = pybuf.decode(u'utf-8').split(u",")
+    return devices

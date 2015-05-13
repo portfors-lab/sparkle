@@ -6,7 +6,7 @@ import sys
 
 import numpy as np
 
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.acq.players import FinitePlayer
 from sparkle.gui.plotting.pyqtgraph_widgets import SimplePlotWidget
 from sparkle.stim.types.stimuli_classes import FMSweep

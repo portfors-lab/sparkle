@@ -3,11 +3,11 @@
 # Form implementation generated from reading ui file '.\view_dlg.ui'
 #
 # Created: Thu Jun 19 11:22:09 2014
-#      by: QtWrapper UI code generator 4.9.6
+#      by: sparkle.QtWrapper UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

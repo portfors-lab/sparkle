@@ -17,8 +17,6 @@ src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 DEFAULT_SAMPLERATE = config['default_genrate']
-MAXV = config['max_voltage']
-DEVICE_MAXV = config['device_max_voltage']
 
 class StimulusModel():
     """
@@ -26,6 +24,9 @@ class StimulusModel():
     Holds all relevant parameters
     """
     kernelCache = {} # persistent across all existing StimulusModels
+    # these should always be the same application wide, so
+    # use class variables
+    voltage_limits = [None, None, 0.0] # speaker max, device max, device min
     def __init__(self):
         self._nreps = 1 # reps of each unique stimulus
         self._nloops = 1 # reps of entire expanded list of autoparams
@@ -39,7 +40,6 @@ class StimulusModel():
         self.calv = None
         self.caldb = None
         self.impulseResponse = None
-        self.minv = 0.005
 
         self._attenuationVector = None
         self._calFrequencies = None
@@ -603,11 +603,15 @@ class StimulusModel():
         # if there is only square waves in stimulus, do not apply calibration --
         # it is assumed to not be a signal for the speaker
         component_names = list(set([comp.name for track in self._segments for comp in track]))
-        if len(component_names) > 1 or component_names[0] != "Square Wave":
+        if 'silence' in component_names:
+            component_names.remove('silence')
+        if len(component_names) > 1 or (len(component_names) == 1 and component_names[0] != "Square Wave"):
             total_signal = convolve_filter(total_signal, self.impulseResponse)
-            maxv = MAXV
+            maxv = self.voltage_limits[0]
+            to_speaker = True
         else:
-            maxv = DEVICE_MAXV
+            maxv = self.voltage_limits[1]
+            to_speaker = False
 
         # last sample should always go to 0, so output isn't stuck on some
         # other value when stim ends
@@ -623,7 +627,7 @@ class StimulusModel():
         #     total_signal = total_signal/scalev
         #     print 'sigmax {}, over_db {}, allowance {}, scalev {}'.format(sig_max, over_db, allowance, scalev)
         #     atten -= allowance
-
+        minv = self.voltage_limits[2]
         sig_max = np.max(abs(total_signal))
         if sig_max > maxv:
             # scale stim down to outputable max
@@ -638,9 +642,9 @@ class StimulusModel():
                 logger = logging.getLogger('main')
                 logger.warning("STIMULUS AMPLTIUDE {:.2f}V EXCEEDS MAXIMUM({}V), RESCALING. \
                     UNDESIRED ATTENUATION {:.2f}dB".format(sig_max, maxv, undesired_attenuation))
-        elif sig_max < self.minv and sig_max !=0:
+        elif sig_max < minv and sig_max !=0 and to_speaker:
             before_rms = np.sqrt(np.mean(pow(total_signal,2)))
-            total_signal = (total_signal/sig_max)*self.minv
+            total_signal = (total_signal/sig_max)*minv
             after_rms = np.sqrt(np.mean(pow(total_signal,2)))
             attenuated = -20 * np.log10(before_rms/after_rms)
             # print 'signal below min, adding {} attenuation'.format(attenuated)
@@ -773,6 +777,17 @@ class StimulusModel():
         if self.caldb is None or self.calv is None:
             return "Test reference voltage not set"
         return 0
+
+    @staticmethod
+    def setMaxVoltage(maxv, device_maxv):
+        StimulusModel.voltage_limits[0] = maxv
+        StimulusModel.voltage_limits[1] = device_maxv
+
+    @staticmethod
+    def setMinVoltage(minv):
+        if minv is None:
+            minv = 0.0
+        StimulusModel.voltage_limits[2] = minv
 
     def __eq__(self, other):
         if self.stimid == other.stimid:

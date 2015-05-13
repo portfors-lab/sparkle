@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.resources.icons import arrowdown, arrowup
 
 

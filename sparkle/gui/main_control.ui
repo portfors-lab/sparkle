@@ -684,7 +684,7 @@
      <x>0</x>
      <y>0</y>
      <width>1223</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -697,6 +697,7 @@
     <addaction name="actionSpectrogram_Parameters"/>
     <addaction name="actionSet_Cell_ID"/>
     <addaction name="actionVocalization_paths"/>
+    <addaction name="actionAdvanced"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -1143,6 +1144,11 @@
   <action name="actionVocalization_paths">
    <property name="text">
     <string>Vocalization paths...</string>
+   </property>
+  </action>
+  <action name="actionAdvanced">
+   <property name="text">
+    <string>Advanced...</string>
    </property>
   </action>
  </widget>
@@ -1608,29 +1614,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAdvanced</sender>
+   <signal>triggered()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>launchAdvancedDlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>611</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>launch_save_dlg()</slot>
-  <slot>launch_calibration_dlg()</slot>
-  <slot>change_exp_input()</slot>
-  <slot>wavdir_selected()</slot>
-  <slot>browse_wavdirs()</slot>
-  <slot>wavfile_selected()</slot>
-  <slot>wavfile_clicked()</slot>
-  <slot>launch_scale_dlg()</slot>
-  <slot>show_display()</slot>
-  <slot>show_psth()</slot>
-  <slot>add_protocol_stim()</slot>
-  <slot>set_explore_samplerate()</slot>
-  <slot>launch_specgram_dlg()</slot>
-  <slot>mode_toggled(QString)</slot>
-  <slot>save_explore_toggled(bool)</slot>
-  <slot>show_progress()</slot>
-  <slot>tab_changed(int)</slot>
-  <slot>show_log()</slot>
-  <slot>grab_cal()</slot>
-  <slot>clear_protocol()</slot>
-  <slot>launch_view_dlg()</slot>
   <slot>launchViewDlg()</slot>
   <slot>launchSaveDlg()</slot>
   <slot>launchCalibrationDlg()</slot>
@@ -1661,5 +1662,6 @@
   <slot>setTriggerEnable()</slot>
   <slot>launchVocalPaths()</slot>
   <slot>launchChannelDlg()</slot>
+  <slot>launchAdvancedDlg()</slot>
  </slots>
 </ui>

@@ -1,7 +1,7 @@
 from nose.tools import assert_in
 
 import test.sample as sample
-from QtWrapper import QtCore
+from sparkle.QtWrapper import QtCore
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.auto_parameter_view import SmartDelegate
 from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel

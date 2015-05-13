@@ -1,4 +1,4 @@
-from QtWrapper import QtCore
+from sparkle.QtWrapper import QtCore
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 
 

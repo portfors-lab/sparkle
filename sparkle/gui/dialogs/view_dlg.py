@@ -1,4 +1,4 @@
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.stim.types import get_stimuli_models
 from view_dlg_form import Ui_ViewSettingsDialog
 

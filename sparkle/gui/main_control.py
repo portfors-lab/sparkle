@@ -1,17 +1,17 @@
-import getpass
 import logging
 import os
 import time
+import threading
 
 import numpy as np
 import yaml
 
 from controlwindow import ControlWindow
-from QtWrapper import QtCore, QtGui
-from sparkle.acq.daq_tasks import get_ai_chans, get_ao_chans
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
-    VocalPathDialog, ChannelDialog
+    VocalPathDialog, ChannelDialog, AdvancedOptionsDialog
+from sparkle.gui.load_frame import LoadFrame
 from sparkle.gui.plotting.pyqtgraph_widgets import ProgressWidget, \
     SimplePlotWidget, SpecWidget
 from sparkle.gui.qprotocol import QProtocolTabelModel
@@ -41,7 +41,6 @@ REDSS = "QLabel { background-color : transparent; color : red; }"
 
 with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
-DEVNAME = config['device_name']
 REFFREQ = config['reference_frequency']
 REFVOLTAGE = config['reference_voltage']
 
@@ -50,6 +49,7 @@ class MainWindow(ControlWindow):
     _polarity = 1
     _threshold = 10
     _aichans = []
+    fileLoaded = QtCore.Signal(str)
     def __init__(self, inputsFilename='', datafile=None, filemode='w-', hidetabs=False):
         # set up model and stimlui first, 
         # as saved configuration relies on this
@@ -72,12 +72,6 @@ class MainWindow(ControlWindow):
         self.ui.stopBtn.clicked.connect(self.onStop)
         self.ui.startChartBtn.clicked.connect(self.onStartChart)
         self.ui.stopChartBtn.clicked.connect(self.onStopChart)
-
-        cnames = get_ao_chans(DEVNAME)
-        self.ui.aochanBox.addItems(cnames)
-        # can't find a function in DAQmx that gets the trigger
-        # channel names, so add manually
-        self.ui.trigchanBox.addItems(['/'+DEVNAME+'/PFI0', '/'+DEVNAME+'/PFI1'])
 
         self.ui.runningLabel.setStyleSheet(REDSS)
 
@@ -131,7 +125,6 @@ class MainWindow(ControlWindow):
         logger = logging.getLogger('main')
         assign_uihandler_slot(logger, self.ui.logTxedt.appendHtml)
 
-        logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
 
         self.calvals['calf'] = REFFREQ
         self.calvals['calv'] = REFVOLTAGE
@@ -154,6 +147,9 @@ class MainWindow(ControlWindow):
 
         self.display.spiketracePlot.polarityInverted.connect(self.setPolarity)
 
+        # connect file load dialog to update ui
+        self.fileLoaded.connect(self.updateDataFileStuffs)
+
         if hidetabs:
             print "Hiding search and calibrate operations"
             for tabIndex in reversed(range(self.ui.tabGroup.count())):
@@ -163,8 +159,7 @@ class MainWindow(ControlWindow):
 
         # self.ui.addInputChannelBtn.clicked.connect(self.addInputChannel)
                     
-    # def update_ui_log(self, message):
-    #     self.ui.logTxedt.appendPlainText(message)
+        logger.info("PROGRAM LOADED -- waiting for user")
 
     def addInputChannel(self):
         newChannelCmbx = QtGui.QComboBox()
@@ -552,11 +547,12 @@ class MainWindow(ControlWindow):
             raise
 
     def processResponse(self, times, response, test_num, trace_num, rep_num, extra_info={}):
-        """Calulate spike times from raw response data"""
+        """Calculate spike times from raw response data"""
         if self.activeOperation == 'calibration' or self.activeOperation == 'caltone':
             # all this is only meaningful for spike recordings
             return
 
+        # not actually guaranteed to happen in order :/
         if rep_num == 0:
             # reset
             self.spike_counts = []
@@ -567,7 +563,7 @@ class MainWindow(ControlWindow):
 
         fs = 1./(times[1] - times[0])
         count, latency, rate, response_bins = self.do_spike_stats(response, fs)
-        # bad news if this changes mid protcol, bin centers are only updated
+        # bad news if this changes mid protocol, bin centers are only updated
         # at start of protocol
         binsz = float(self.ui.binszSpnbx.value())
         if len(response_bins) > 0:
@@ -582,7 +578,7 @@ class MainWindow(ControlWindow):
         if rep_num == self.nreps - 1:
             total_spikes = sum(self.spike_counts)
             avg_count = np.mean(self.spike_counts)
-            avg_latency = np.mean(self.spike_latencies)
+            avg_latency = np.nanmean(self.spike_latencies)
             avg_rate = np.mean(self.spike_rates)
             self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
             if 'f' in extra_info:
@@ -837,14 +833,41 @@ class MainWindow(ControlWindow):
         dlg = SavingDialog(defaultFile = self.acqmodel.current_data_file())
         if dlg.exec_():
             fname, fmode = dlg.getfile()
-            self.acqmodel.load_data_file(fname, fmode)
-            # calibration clears on data file load
-            self.ui.currentCalLbl.setText('None')
-            fname = os.path.basename(fname)
-            self.ui.dataFileLbl.setText(fname)
-            self.ui.reviewer.setDataObject(self.acqmodel.datafile)
-            self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
+            # loading a file may take a while... background to seprate thread,
+            # and display a window asking the user to wait
+            self.lf = LoadFrame(x=self.x() + (self.width()/2), y=self.y() + (self.height()/2))
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            QtGui.QApplication.processEvents()
+            load_thread = threading.Thread(target=self.loadDataFile,
+                                           args=(fname, fmode))
+            load_thread.start()
+        else:
+            # return value only used for testing
+            load_thread = None
         dlg.deleteLater()
+        return load_thread
+
+    def loadDataFile(self, fname, fmode):
+        # meant to be run in thread only by save dialog call
+
+        # this is really dumb, but processEvents doesn't cut it for getting
+        # the patience ("Loading") window to appear, so we sleep for a bit
+        time.sleep(0.1)
+        self.acqmodel.load_data_file(fname, fmode)
+        self.fileLoaded.emit(fname)
+
+    def updateDataFileStuffs(self, fname):
+        # this is meant to be called only my fileLoaded signal!!!
+        # calibration clears on data file load
+        self.ui.currentCalLbl.setText('None')
+        fname = os.path.basename(str(fname))
+        self.ui.dataFileLbl.setText(fname)
+        self.ui.reviewer.setDataObject(self.acqmodel.datafile)
+        self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
+        self.lf.close()
+        self.lf.deleteLater()
+        self.lf = None
+        QtGui.QApplication.restoreOverrideCursor()
 
     def launchCalibrationDlg(self):
         dlg = CalibrationDialog(defaultVals = self.calvals, fscale=self.fscale, datafile=self.acqmodel.datafile)
@@ -895,7 +918,7 @@ class MainWindow(ControlWindow):
         self.acqmodel.current_cellid = cid[0]
 
     def launchChannelDlg(self):
-        dlg = ChannelDialog(DEVNAME)
+        dlg = ChannelDialog(self.advanced_options['device_name'])
         dlg.setSelectedChannels(self._aichans)
         if dlg.exec_():
             self._aichans = dlg.getSelectedChannels()
@@ -905,6 +928,21 @@ class MainWindow(ControlWindow):
         dlg = VocalPathDialog(Vocalization.paths)
         if dlg.exec_():
             Vocalization.paths = dlg.paths()
+        dlg.deleteLater()
+
+    def launchAdvancedDlg(self):
+        dlg = AdvancedOptionsDialog(self.advanced_options)
+        if dlg.exec_():
+            self.advanced_options = dlg.getValues()
+            StimulusModel.setMaxVoltage(self.advanced_options['max_voltage'], self.advanced_options['device_max_voltage'])
+            self.display.setAmpConversionFactor(self.advanced_options['volt_amp_conversion'])
+            if self.advanced_options['use_attenuator']:
+                # could check for return value here? It will try
+                # to re-connect every time start is pressed anyway
+                self.acqmodel.attenuator_connection(True)
+            else:
+                self.acqmodel.attenuator_connection(False)
+            self.reset_device_channels()
         dlg.deleteLater()
 
     def recordingSelected(self, modelIndex):
@@ -1013,7 +1051,10 @@ class MainWindow(ControlWindow):
 
     def closeEvent(self,event):
         # stop any tasks that may be running
+        lf = LoadFrame("Saving Stuff and Things", x=self.x() + (self.width()/2), y=self.y() + (self.height()/2))
+        QtGui.QApplication.processEvents()
         self.onStop()
         self.acqmodel.close_data()
         super(MainWindow, self).closeEvent(event)
-        
+        lf.close()
+        lf.deleteLater()

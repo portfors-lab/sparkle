@@ -1,6 +1,6 @@
 import copy
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class StimTable(QtGui.QTableWidget):

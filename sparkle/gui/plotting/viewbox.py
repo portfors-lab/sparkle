@@ -1,7 +1,7 @@
 import pyqtgraph as pg
 from pyqtgraph.Point import Point
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class SpikeyViewBox(pg.ViewBox):

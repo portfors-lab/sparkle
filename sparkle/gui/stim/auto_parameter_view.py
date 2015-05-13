@@ -1,6 +1,6 @@
 import re
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.abstract_drag_view import AbstractDragView
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox, trim
 

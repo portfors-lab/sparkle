@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 from sparkle.gui.stim.dynamic_stacker import DynamicStackedWidget
 from sparkle.gui.stim.smart_spinbox import SmartSpinBox
@@ -19,7 +19,7 @@ class ExploreComponentEditor(AbstractEditorWidget):
         self.closeBtn = QtGui.QPushButton('x')
         self.closeBtn.setFixedSize(25,25)
         self.closeBtn.setFlat(True)
-        self.closeBtn.clicked.connect(lambda : self.closePlease.emit(self))
+        self.closeBtn.clicked.connect(self.closeRequest) 
         headerLayout.addWidget(self.exploreStimTypeCmbbx)
         headerLayout.addWidget(self.closeBtn)
 
@@ -90,3 +90,6 @@ class ExploreComponentEditor(AbstractEditorWidget):
             comp_editor.setComponent(stim)
         delay = template.get('delay', 0)
         self.delaySpnbx.setValue(delay)
+
+    def closeRequest(self):
+        self.closePlease.emit(self)

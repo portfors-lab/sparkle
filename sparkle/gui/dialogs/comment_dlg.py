@@ -1,5 +1,5 @@
 from comment_dlg_form import Ui_CellCommentDialog
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 
 
 class CellCommentDialog(QtGui.QDialog):

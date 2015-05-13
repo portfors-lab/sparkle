@@ -1,6 +1,6 @@
 import numpy as np
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget, \
     TraceWidget
 
@@ -152,6 +152,8 @@ class ProtocolDisplay(QtGui.QWidget):
         vb.autoRange(padding=0)
         self.specPlot.setXlim(trace_range)
 
+    def setAmpConversionFactor(self, scalar):
+        self.spiketracePlot.setAmpConversionFactor(scalar)
 
 if __name__ == "__main__":
     import random, time, os, sys

@@ -1,6 +1,6 @@
 import logging
 
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.stim.types.stimuli_classes import FMSweep, WhiteNoise
 
 from .calibration_widget_form import Ui_CalibrationWidget

@@ -6,24 +6,32 @@ Sparkle is a data acquisition system designed for auditory neuroscience research
 
 The system will generate synthesized signals (tones, chrips, etc), as well as play recording files (.wavs). Data is saved to HDF5 format.
 
-Running
--------
+Installation notes, user guide and developer docs are available on [Read the Docs](http://sparkle.readthedocs.org/en/latest/index.html)
 
-To get up and running, first install the requirements:
+Installing 
+-----------
 
-    $ pip install -r requirements.txt
+To get up and running, first install the requirements. Anaconda distribution of python is recommended, but if you want to do it manually (for example to use a virtualenv), you will need to install [HDF5][hdf5] and [PyQt][pyqt] yourself.
 
-Then run the main GUI module:
+If you want to record data with sparkle you must also download the National Instruments device drivers separately.
 
-    $ python sparkle/gui/run.py
+If you don't want the development version of sparkle, you can download it with pip:
 
-To build the documentation:
+    $ pip install sparkle
 
-    $ cd doc
-    $ sphinx-apidoc -f -o ref/auto ../sparkle
-    $ make html
+Otherwise, to install the rest of the dependencies, and create an executable script run:
 
-See the documentation for more in-depth details on setup
+    $ python setup.py install
+
+If you are successful, you can now run sparkle:
+
+    $ sparkle
+
+See [the documentation][setupdoc] for more in-depth details on setup
+
+[pyqt]: http://www.riverbankcomputing.com/software/pyqt/download
+[hdf5]: http://www.hdfgroup.org/downloads
+[setupdoc]: http://sparkle.readthedocs.org/en/latest/setup.html
 
 Contributions/ bugs
 -------------------
@@ -33,16 +41,3 @@ Submit bug reports by creating an issue, please provide as much detail as possib
 Contributions are welcome, you can email me if you have any questions before submitting a pull request.
 
 Maintained by Amy Boyle amy@amyboyle.ninja
-
-
-Setting the PYTHONPATH
------------------------
-To run sparkle with python from anywhere outside of the sparkle root directory you will need to set the pythonpath.
-
-e.g. for Mac/Linux:
-
-    $ export PYTHONPATH="$PYTHONPATH:/absolute/path/to/sparkle"
-
-or for Windows (on Git bash):
-
-    $ export PYTHONPATH="$PYTHONPATH;C:\absolute\path\to\sparkle"

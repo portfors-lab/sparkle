@@ -1,6 +1,6 @@
 from nose.tools import assert_equal
 
-from QtWrapper import QtCore
+from sparkle.QtWrapper import QtCore
 from sparkle.gui.qprotocol import QProtocolTabelModel
 from sparkle.run.protocol_model import ProtocolTabelModel
 from sparkle.stim.stimulus_model import StimulusModel

@@ -21,6 +21,8 @@ tmp/
 /doc/ref/auto/
 /spikeylab/build/
 /spikeylab/dist/
+/build
+/dist
 
 # testing
 cover/

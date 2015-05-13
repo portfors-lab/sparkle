@@ -11,8 +11,8 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal
 import robouser
 import sparkle.tools.audiotools as audiotools
 import test.sample as sample
-from QtWrapper.QtCore import Qt, QTimer
-from QtWrapper.QtGui import QApplication
+from sparkle.QtWrapper.QtCore import Qt, QTimer
+from sparkle.QtWrapper.QtGui import QApplication
 from sparkle.gui.plotting.pyqtgraph_widgets import ChartWidget, FFTWidget, \
     ProgressWidget, PSTHWidget, SimplePlotWidget, SpecWidget, StackedPlot, \
     TraceWidget

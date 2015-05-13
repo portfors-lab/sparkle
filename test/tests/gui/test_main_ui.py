@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_in
 
 import qtbot
 import test.sample as sample
-from QtWrapper import QtCore, QtGui, QtTest
+from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.main_control import MainWindow
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
@@ -44,6 +44,8 @@ class TestMainUI():
         fname = os.path.join(self.tempfolder, 'testdatafile' +rand_id()+'.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w-')
         self.form.ui.reprateSpnbx.setValue(10)
+        # cheat and set AI chan w/o dialog
+        self.form._aichans = ['PCI-6259/ai0']
         self.form.show()
         # so that the data display doesn't get in the way of out
         # mouse movements

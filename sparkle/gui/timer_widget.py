@@ -1,6 +1,6 @@
 import time
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 
 class TimerWidget(QtGui.QWidget):

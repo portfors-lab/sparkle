@@ -4,7 +4,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.acq.players import FinitePlayer
 from sparkle.stim.types.stimuli_classes import PureTone
 from sparkle.tools.audiotools import calc_db, calc_spectrum, calc_summed_db, \

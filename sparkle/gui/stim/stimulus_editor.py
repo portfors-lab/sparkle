@@ -1,5 +1,5 @@
 from auto_parameters_editor import Parametizer
-from QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui
 from sparkle.gui.plotting.pyqtgraph_widgets import SpecWidget
 from sparkle.gui.stim.abstract_stim_editor import AbstractStimulusWidget
 from stimulus_editor_form import Ui_StimulusEditor
@@ -34,6 +34,14 @@ class StimulusEditor(AbstractStimulusWidget):
 
     def setModel(self, model):
         """Sets the QStimulusModel *model* for the StimulusView"""
+        # disconnect old signals
+        try:
+            self.ui.parametizer.randomizeCkbx.toggled.disconnect()
+            self.ui.parametizer.randomizeCkbx.disconnect()
+        except TypeError:
+            # disconnecting without any current connections throws error
+            pass
+
         self.ui.trackview.setModel(model)
         self.ui.nrepsSpnbx.setValue(model.repCount())
 
@@ -92,11 +100,23 @@ class StimulusEditor(AbstractStimulusWidget):
         else:
             self.ui.modeLbl.setText("AUTO-PARAMETER MODE")
 
+    def closeEvent(self, event):
+        super(StimulusEditor, self).closeEvent(event)
+        model = self.ui.trackview.model()
+        autoParamModel = model.autoParams()
+
+        # disconnect model signals
+        try:
+            autoParamModel.emptied.disconnect()
+            autoParamModel.countChanged.disconnect()
+        except TypeError:
+            pass
+
 
 
 if __name__ == "__main__":
     import sys, os
-    from QtWrapper import QtGui
+    from sparkle.QtWrapper import QtGui
     from sparkle.gui.stim.qstimulus import QStimulusModel
     from sparkle.stim.stimulus_model import StimulusModel
     from sparkle.stim.types.stimuli_classes import *
