@@ -45,7 +45,9 @@ class TestMainUI():
         self.form = MainWindow(datafile=fname, filemode='w-')
         self.form.ui.reprateSpnbx.setValue(10)
         # cheat and set AI chan w/o dialog
-        self.form._aichans = ['PCI-6259/ai0']
+        self.form._aichans = ['ai0']
+        self.form._aichan_details = {'ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form.reset_device_channels()
         self.form.show()
         # so that the data display doesn't get in the way of out
         # mouse movements

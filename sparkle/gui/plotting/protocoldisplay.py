@@ -7,30 +7,34 @@ from sparkle.gui.plotting.pyqtgraph_widgets import FFTWidget, SpecWidget, \
 
 class ProtocolDisplay(QtGui.QWidget):
     """Data display intended for use during brain recording"""
-    def __init__(self, parent=None):
+    thresholdUpdated = QtCore.Signal(float, str)
+    polarityInverted = QtCore.Signal(float, str)
+    rasterBoundsUpdated = QtCore.Signal(tuple, str)
+    def __init__(self, response_chan_name='chan0', parent=None):
         super(ProtocolDisplay, self).__init__(parent)
 
+        self.responsePlots = {}
         self.fftPlot = FFTWidget(self, rotation=90)
-        self.spiketracePlot = TraceWidget(self)
+        spiketracePlot = TraceWidget(self)
+        self.responsePlots[response_chan_name] = spiketracePlot
         self.specPlot = SpecWidget(self)
 
         self.fftPlot.setToolTip('Stimulus Spectrum')
-        self.spiketracePlot.setToolTip('Spike Trace')
+        spiketracePlot.setToolTip('Spike Trace')
         self.specPlot.setToolTip('Stimulus Spectrogram')
-        
 
         # custom behaviour for spec view all option
-        vb = self.specPlot.getViewBox()
+        vb = self.specPlot.getViewBox() 
         vb.menu.viewAll.triggered.disconnect()
         vb.menu.viewAll.triggered.connect(self.specAutoRange)
         # self.fftPlot.set_title("Stimulus FFT")
-        # self.spiketracePlot.set_title("Response Trace")
+        # spiketracePlot.set_title("Response Trace")
         # self.specPlot.set_title("Stimulus Spectrogram")
 
-        self.specPlot.setXLink(self.spiketracePlot)
+        self.specPlot.setXLink(spiketracePlot)
         self.specPlot.setMinimumHeight(100)
-        self.spiketracePlot.setMinimumWidth(100)
-        self.spiketracePlot.setMinimumHeight(100)
+        spiketracePlot.setMinimumWidth(100)
+        spiketracePlot.setMinimumHeight(100)
         self.fftPlot.setMinimumWidth(100)
         self.fftPlot.setMinimumHeight(100)
 
@@ -38,7 +42,7 @@ class ProtocolDisplay(QtGui.QWidget):
         splitterse = QtGui.QSplitter(QtCore.Qt.Horizontal)
 
         splittersw.addWidget(self.specPlot)
-        splittersw.addWidget(self.spiketracePlot)
+        splittersw.addWidget(spiketracePlot)
         splitterse.addWidget(splittersw)
         splitterse.addWidget(self.fftPlot)
 
@@ -52,7 +56,9 @@ class ProtocolDisplay(QtGui.QWidget):
         self.setLayout(layout)
 
         #relay threshold signal
-        self.thresholdUpdated = self.spiketracePlot.thresholdUpdated
+        spiketracePlot.thresholdUpdated.connect(self.thresholdUpdated.emit)
+        spiketracePlot.polarityInverted.connect(self.polarityInverted.emit)
+        spiketracePlot.rasterBoundsUpdated.connect(self.rasterBoundsUpdated.emit)
         self.colormapChanged = self.specPlot.colormapChanged
 
         # for the purposes of splitter not updating contents...
@@ -84,7 +90,34 @@ class ProtocolDisplay(QtGui.QWidget):
         """
         self.fftPlot.updateData(*args, **kwargs)
 
-    def updateSpiketrace(self, xdata, ydata):
+    def addResponsePlot(self, *names):
+        for name in names:
+            plot = TraceWidget(self)
+            plot.setTitle(name)
+            self.specPlot.setXLink(plot)
+            self.splittersw.addWidget(plot)
+            plot.thresholdUpdated.connect(self.thresholdUpdated.emit)
+            plot.polarityInverted.connect(self.polarityInverted.emit)
+            plot.rasterBoundsUpdated.connect(self.rasterBoundsUpdated.emit)
+            self.responsePlots[name] = plot
+
+    def removeResponsePlot(self, *names):
+        for name in names:
+            if name in self.responsePlots:
+                plot = self.responsePlots.pop(name)
+                plot.thresholdUpdated.disconnect()
+                plot.polarityInverted.disconnect()
+                plot.rasterBoundsUpdated.disconnect()
+                plot.close()
+                plot.deleteLater()
+
+    def responseNameList(self):
+        return self.responsePlots.keys()
+
+    def responsePlotCount(self):
+        return len(self.responsePlots)
+
+    def updateSpiketrace(self, xdata, ydata, plotname=None):
         """Updates the spike trace
 
         :param xdata: index values
@@ -92,32 +125,40 @@ class ProtocolDisplay(QtGui.QWidget):
         :param ydata: values to plot
         :type ydata: numpy.ndarray
         """
+        if plotname is None:
+            plotname = self.responsePlots.keys()[0]
+
         if len(ydata.shape) == 1 or ydata.shape[0] == 1:
-            self.spiketracePlot.updateData(axeskey='response', x=xdata, y=ydata)
+            self.responsePlots[plotname].updateData(axeskey='response', x=xdata, y=ydata)
         else:
-            self.spiketracePlot.addTraces(xdata, ydata)
+            self.responsePlots[plotname].addTraces(xdata, ydata)
 
     def clearRaster(self):
-        """Clears data from the raster plot"""
-        self.spiketracePlot.clearData('raster')
+        """Clears data from the raster plots"""
+        for plot in self.responsePlots.values():
+            plot.clearData('raster')
 
-    def addRasterPoints(self, xdata, repnum):
+    def addRasterPoints(self, xdata, repnum, plotname=None):
         """Add a list (or numpy array) of points to raster plot, 
-       in any order.
+        in any order.
 
-       :param xdata: bin centers
-       :param ydata: rep number 
+        :param xdata: bin centers
+        :param ydata: rep number 
         """
+        if plotname is None:
+            plotname = self.responsePlots.keys()[0]
         ydata = np.ones_like(xdata)*repnum
-        self.spiketracePlot.appendData('raster', xdata, ydata)
+        self.responsePlots[plotname].appendData('raster', xdata, ydata)
 
-    def updateSignal(self, xdata, ydata):
+    def updateSignal(self, xdata, ydata, plotname=None):
         """Updates the trace of the outgoing signal
 
         :param xdata: time points of recording
         :param ydata: brain potential at time points
         """
-        self.spiketracePlot.updateData(axeskey='stim', x=xdata, y=ydata)
+        if plotname is None:
+            plotname = self.responsePlots.keys()[0]
+        self.responsePlots[plotname].updateData(axeskey='stim', x=xdata, y=ydata)
 
     def setXlimits(self, lims):
         """Sets the X axis limits of the trace plot
@@ -125,7 +166,8 @@ class ProtocolDisplay(QtGui.QWidget):
         :param lims: (min, max) of x axis, in same units as data
         :type lims: (float, float)
         """
-        self.spiketracePlot.setXlim(lims)
+        # all traces x limits should be linked, so only have to update one to get them all
+        self.responsePlots.values()[0].setXlim(lims)
         # ridiculous...
         sizes = self.splittersw.sizes()
         if self.badbadbad:
@@ -139,21 +181,31 @@ class ProtocolDisplay(QtGui.QWidget):
 
     def setNreps(self, nreps):
         """Sets the number of reps before the raster plot resets"""
-        self.spiketracePlot.setNreps(nreps)
+        for plot in self.responsePlots.values():
+            plot.setNreps(nreps)
 
     def sizeHint(self):
         """default size?"""
         return QtCore.QSize(500,300)
 
     def specAutoRange(self):
-        """Auto adjusts the visable range of the spectrogram"""
-        trace_range = self.spiketracePlot.viewRange()[0]
+        """Auto adjusts the visible range of the spectrogram"""
+        trace_range = self.responsePlots.values()[0].viewRange()[0]
         vb = self.specPlot.getViewBox()
         vb.autoRange(padding=0)
         self.specPlot.setXlim(trace_range)
 
     def setAmpConversionFactor(self, scalar):
-        self.spiketracePlot.setAmpConversionFactor(scalar)
+        for plot in self.responsePlots.values():
+            plot.setAmpConversionFactor(scalar)
+
+    def setThreshold(self, thresh, plotname):
+        self.responsePlots[plotname].setThreshold(thresh)
+
+    def setRasterBounds(self, bounds, plotname):
+        self.responsePlots[plotname].setRasterBounds(bounds)
+
+
 
 if __name__ == "__main__":
     import random, time, os, sys

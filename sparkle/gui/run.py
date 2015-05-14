@@ -74,6 +74,7 @@ def main():
             msg += line
         QtGui.QMessageBox.critical(None, "Unexpected Error", msg)
         status = 0
+        raise
 
     logger.info("== Program finished with exit code {} ==".format(status))
     sys.exit(status)

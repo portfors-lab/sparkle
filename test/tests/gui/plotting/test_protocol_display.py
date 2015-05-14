@@ -57,3 +57,42 @@ class TestProtocolDisplay():
         time.sleep(PAUSE)
 
         display.close()
+
+    def test_multiple_recordings_display(self):
+
+        display = ProtocolDisplay('chan0')
+        display.show()
+
+        display.addResponsePlot('chan1', 'chan2')
+
+        display.setNreps(5)
+        data = self.data_func(3)
+
+        display.updateSpiketrace(self.t, data, 'chan0')
+        display.updateSpiketrace(self.t, data, 'chan1')
+        display.updateSpiketrace(self.t, data, 'chan2')
+
+    def test_add_remove_plots(self):
+
+        display = ProtocolDisplay('chan0')
+        display.show()
+
+        display.addResponsePlot('chan1', 'chan2')
+        assert display.responsePlotCount() == 3
+
+        display.removeResponsePlot('chan1', 'chan2')
+        assert display.responsePlotCount() == 1
+
+        display.addResponsePlot('chan1')
+        assert display.responsePlotCount() == 2
+
+        display.removeResponsePlot('chan0', 'chan1')
+        assert display.responsePlotCount() == 0
+        
+    def test_remove_non_existant_plot(self):
+
+        display = ProtocolDisplay('chan0')
+        display.show()
+
+        display.removeResponsePlot('chan1')
+        assert display.responseNameList() == ['chan0']

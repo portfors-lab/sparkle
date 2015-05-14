@@ -89,6 +89,15 @@ class TestDAQPlayers():
         if not self.devmode:
             assert np.round(np.amax(response0), 2) == np.amax(stim)
 
+    def test_finite_multichannel(self):
+        fs = 500000
+        dur = 0.01
+        stim, response0 = self.run_finite(fs, dur, fs, dur, nchans=2)
+
+        assert len(response0.shape) == 2
+        assert stim.shape[-1] == response0.shape[-1]
+        assert response0.shape[0] == 2
+
     @unittest.skip("No longer having acq module check out voltage")
     def test_stim_over_max_voltage(self):
         fs = 500000
@@ -128,14 +137,18 @@ class TestDAQPlayers():
         assert nstims == 1
         assert len(self.data) > 1
 
-    def run_finite(self, infs, indur, outfs, outdur, amp=2.0):
+    def run_finite(self, infs, indur, outfs, outdur, amp=2.0, nchans=1):
         player = FinitePlayer()
 
         tone = data_func(outfs*outdur, 5, amp)
         player.set_stim(tone, outfs)
         player.set_aidur(indur)
         player.set_aifs(infs)
-        player.set_aichan(DEVNAME+"/ai16")
+        if nchans == 1:
+            player.set_aichan(DEVNAME+"/ai16")
+        else:
+            chans = [DEVNAME+"/ai"+str(i) for i in range(nchans)]
+            player.set_aichan(chans)
         player.set_aochan(DEVNAME+"/ao2")
         # player.start_timer(10)
         player.start()

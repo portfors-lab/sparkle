@@ -200,12 +200,30 @@ class ControlWindow(QtGui.QMainWindow):
         if devname in device_list:
             cnames = get_ao_chans(devname)
             self.ui.aochanBox.addItems(cnames)
+            cnames = get_ai_chans(devname)
+            # filter list for channels that are present in current device
+            self._aichans = [chan for chan in self._aichans if chan in cnames]
+            self._aichan_details = {chan: deets for chan, deets in self._aichan_details.items() if chan in cnames}
         elif devname == '' and len(device_list) > 0:
             devname = device_list[0]
             cnames = get_ao_chans(devname)
             self.ui.aochanBox.addItems(cnames)
             self.advanced_options['device_name'] = devname
-            
+            self._aichans = []
+            self._aichan_details = {}
+        else:
+            self._aichans = []
+            self._aichan_details = {}
+
+        self.ui.chanNumLbl.setText(str(len(self._aichans)))
+        # remove all plots and re-add from new list
+        self.display.removeResponsePlot(*self.display.responseNameList())
+        self.display.addResponsePlot(*self._aichans)
+        # update details on plots
+        for name, deets in self._aichan_details.items():
+            self.display.setThreshold(deets['threshold'], name)
+            self.display.setRasterBounds(deets['raster_bounds'], name)
+
         # can't find a function in DAQmx that gets the trigger
         # channel names, so add manually
         self.ui.trigchanBox.addItems(['/'+devname+'/PFI0', '/'+devname+'/PFI1'])
@@ -227,7 +245,6 @@ class ControlWindow(QtGui.QMainWindow):
         fname = os.path.join(appdir, fname)
 
         savedict = {}
-        savedict['threshold'] = self.display.spiketracePlot.getThreshold()
         savedict['binsz'] = self.ui.binszSpnbx.value()
         savedict['aifs'] = self.ui.aifsSpnbx.value()
         savedict['tscale'] = self.tscale
@@ -236,7 +253,6 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['ex_nreps'] = self.ui.exploreStimEditor.repCount()
         savedict['reprate'] = self.ui.reprateSpnbx.value()
         savedict['windowsz'] = self.ui.windowszSpnbx.value()
-        savedict['raster_bounds'] = self.display.spiketracePlot.getRasterBounds()
         savedict['specargs'] = self.specArgs
         savedict['viewSettings'] = self.viewSettings
         savedict['calvals'] = self.calvals
@@ -245,6 +261,8 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['mphonesens'] = self.ui.mphoneSensSpnbx.value()
         savedict['mphonedb'] = self.ui.mphoneDBSpnbx.value()
         savedict['vocalpaths'] = Vocalization.paths
+        savedict['aichans'] = self._aichans
+        savedict['aichan_details'] = self._aichan_details
 
         # parameter settings -- save all tracks present
         savedict['explorestims'] = self.ui.exploreStimEditor.saveTemplate()
@@ -276,7 +294,8 @@ class ControlWindow(QtGui.QMainWindow):
             logger.exception("Unable to load app data from file: {}".format(inputsfname))
             inputsdict = {}
 
-        self.display.spiketracePlot.setThreshold(inputsdict.get('threshold', 0.5))
+        # self.display.spiketracePlot.setThreshold(inputsdict.get('threshold', 0.5))
+        self._thesholds = inputsdict.get('threshold', {})
         self.stashedAisr = inputsdict.get('aifs', 100000)
         self.ui.aifsSpnbx.setValue(self.stashedAisr)
         self.ui.windowszSpnbx.setValue(inputsdict.get('windowsz', 0.1))
@@ -284,7 +303,7 @@ class ControlWindow(QtGui.QMainWindow):
         self.saveformat = inputsdict.get('saveformat', 'hdf5')
         self.ui.exploreStimEditor.setReps((inputsdict.get('ex_nreps', 5)))
         self.ui.reprateSpnbx.setValue(inputsdict.get('reprate', 1))
-        self.display.spiketracePlot.setRasterBounds(inputsdict.get('raster_bounds', (0.5,1)))
+        # self.display.spiketracePlot.setRasterBounds(inputsdict.get('raster_bounds', (0.5,1)))
         self.specArgs = inputsdict.get('specargs',{u'nfft':512, u'window':u'hanning', u'overlap':90, 'colormap':{'lut':None, 'state':None, 'levels':None}})
         # self.display.setSpecArgs(**self.specArgs)  
         SpecWidget.setSpecArgs(**self.specArgs)
@@ -346,6 +365,8 @@ class ControlWindow(QtGui.QMainWindow):
             self.acqmodel.attenuator_connection(True)
         else:
             self.acqmodel.attenuator_connection(False)
+        self._aichans = inputsdict.get('aichans', [])
+        self._aichan_details = inputsdict.get('aichan_details', {})
         self.reset_device_channels()
 
         stim_defaults = inputsdict.get('stim_view_defaults', {})

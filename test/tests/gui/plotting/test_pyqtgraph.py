@@ -83,7 +83,6 @@ class TestTraceWidget():
             QApplication.processEvents()
             time.sleep(PAUSE)
 
-
     def test_raster(self):
         self.fig.setNreps(5)
         self.fig.setWindowTitle(inspect.stack()[0][3])

@@ -72,6 +72,9 @@ class BasePlot(pg.PlotWidget):
         """
         self.getPlotItem().setTitle(title)
 
+    def getTitle(self):
+        return str(self.getPlotItem().titleLabel.text)
+
     def getLabel(self, key):
         """Gets the label assigned to an axes
 
@@ -93,8 +96,9 @@ class TraceWidget(BasePlot):
     rasterBottom = 0.5 # bottom of raster plot
     # this will be set automatically
     rasterYslots = None
-    thresholdUpdated = QtCore.Signal(float)
-    polarityInverted = QtCore.Signal(int)
+    thresholdUpdated = QtCore.Signal(float, str)
+    polarityInverted = QtCore.Signal(int, str)
+    rasterBoundsUpdated = QtCore.Signal(tuple, str)
     _polarity = 1
     _ampScalar = None
     def __init__(self, parent=None):
@@ -265,6 +269,7 @@ class TraceWidget(BasePlot):
         rmax = self.rasterTop*yrange_size + yrange[0]
         rmin = self.rasterBottom*yrange_size + yrange[0]
         self.rasterYslots = np.linspace(rmin, rmax, self.nreps)
+        self.rasterBoundsUpdated.emit((self.rasterBottom, self.rasterTop), self.getTitle())
 
     def askRasterBounds(self):
         """Prompts the user to provide the raster bounds with a dialog. 
@@ -328,7 +333,7 @@ class TraceWidget(BasePlot):
         """Emits a Qt signal thresholdUpdated with the current threshold value"""
         thresh_val = self.threshLine.value()
         self.threshold_field.setValue(thresh_val)
-        self.thresholdUpdated.emit(thresh_val)
+        self.thresholdUpdated.emit(thresh_val, self.getTitle())
 
     def invertPolarity(self, inverted):
         if inverted:
@@ -336,12 +341,12 @@ class TraceWidget(BasePlot):
         else:
             pol = 1
         self._polarity = pol
-        self.polarityInverted.emit(pol)
+        self.polarityInverted.emit(pol, self.getTitle())
 
     def _setThresholdFromField(self):
         thresh_val = self.threshold_field.value()
         self.setThreshold(thresh_val)
-        self.thresholdUpdated.emit(thresh_val)
+        self.thresholdUpdated.emit(thresh_val, self.getTitle())
 
     def setAmpConversionFactor(self, scalar):
         """Set the scalar for converting volts to amps when the trace

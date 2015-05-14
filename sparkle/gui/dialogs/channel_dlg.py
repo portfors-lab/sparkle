@@ -38,7 +38,7 @@ class ChannelDialog(QtGui.QDialog):
         chosen_channel_names = []
         for channel in self.channel_switches:
             if channel.isChecked():
-                chosen_channel_names.append(channel.text())
+                chosen_channel_names.append(str(channel.text()))
         return chosen_channel_names
 
     def setSelectedChannels(self, chosen_channel_names):
