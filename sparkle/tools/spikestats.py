@@ -1,6 +1,14 @@
 """ Here is a doc string for spikestats :)"""
 import numpy as np
 
+def Refractory(times, refract=0.002):
+	times_refract = []
+	times_refract.append(times[0])
+	for i in range(1,len(times)):
+		if times_refract[-1]+refract <= times[i]:
+			times_refract.append(times[i])        
+	return times_refract
+
 
 def spike_times(signal, threshold, fs, mint=None):
     """Detect spikes from a given signal
@@ -14,7 +22,7 @@ def spike_times(signal, threshold, fs, mint=None):
     For every continuous set of points over given threshold, 
     returns the time of the maximum"""
     times = []
-    over, = np.where(signal>threshold)
+    over, = np.where(np.abs(signal)>threshold)
     segments, = np.where(np.diff(over) > 1)
 
     if len(over) > 1:
@@ -47,7 +55,10 @@ def spike_times(signal, threshold, fs, mint=None):
     elif len(over) == 1:
         times.append(float(over[0])/fs)
         
-    return times
+    if len(times)>0:
+    	return Refractory(times)
+    else:
+    	return times
 
 def bin_spikes(spike_times, binsz):
     """Sort spike times into bins
