@@ -147,7 +147,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
                                     dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
 
     def _initialize_test(self, test):
-        return
+        assert test.samplerate() == self.player.aifs
 
     def _process_response(self, response, trace_info, irep):
         if self.save_data:

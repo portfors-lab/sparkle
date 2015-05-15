@@ -162,7 +162,6 @@ class AITaskFinite(Task):
         :returns: numpy.ndarray -- the acquired data
         """
         r = c_int32()
-        print 'npts, nchans', self.npts, self.nchans
         bufsize = self.npts*self.nchans
         inbuffer = np.zeros(bufsize)
         self.ReadAnalogF64(self.npts, 10.0, DAQmx_Val_GroupByChannel, inbuffer,

@@ -1,7 +1,9 @@
 import glob
 import json
+import logging
 import os
 import Queue
+import StringIO
 import sys
 import threading
 import time
@@ -31,6 +33,13 @@ class TestAcquisitionManager():
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         self.done = True
 
+        log = logging.getLogger('main')
+        log.setLevel(logging.DEBUG)
+        self.stream = StringIO.StringIO()
+        self.handler = logging.StreamHandler(self.stream)
+        log.addHandler(self.handler)
+
+
     def tearDown(self):
         # bit of a hack to wait for chart acquisition to finish
         while not self.done:
@@ -41,23 +50,11 @@ class TestAcquisitionManager():
         for f in files:
             os.remove(f)
 
-    def test_cal_tone_settings(self):
-        winsz = 0.2 #seconds
-        acq_rate = 50000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        assert "Error:" not in self.stream.getvalue()
+        log = logging.getLogger('main')
+        log.removeHandler(self.handler)
+        self.handler.close()
 
-        manager.set(caldb=100, calf=15000)
-        manager.set_calibration_duration(winsz)
-        manager.set_calibration_by_index(1)
-
-        t = manager.run_calibration(0.1, False)
-        t.join()
-
-        reftone = manager.bs_calibrator.reftone
-        assert reftone.duration() == winsz
-        assert reftone.frequency()
-
-        manager.close_data()
 
     def tone_protocol(self, manager, intensity=70):
         #insert some stimuli
@@ -702,20 +699,32 @@ class TestAcquisitionManager():
         acq_rate = manager.calibration_genrate()
 
         manager.set_calibration_by_index(2)
+        manager.set_mphone_calibration(0.004, 94)
         tc = manager.calibration_stimulus('tone')
         ntraces = tc.traceCount()
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
         manager.set_calibration_duration(winsz)
+        # collect response
+        manager.set_queue_callback('average_response', self.collect_avg_resp)
+        manager.start_listening()
+        self.results = []
         t = manager.run_calibration(0.1, False)
         t.join()
+        manager.stop_listening()
+        
         # calname = manager.process_calibration(False)
         fname = manager.datafile.filename
         manager.close_data()
 
+        assert len(self.results) == ntraces * nreps
+
         # tone calibration should never save -- datafile is deleted on close if empty
         assert not os.path.isfile(fname)
+
+    def collect_avg_resp(self, f, db, resultdb):
+        self.results.append((f, db, resultdb))
 
     def test_noise_calibration_protocol(self):
         winsz = 0.1 #seconds
@@ -740,14 +749,22 @@ class TestAcquisitionManager():
         # print 'calname', calname
         hfile = h5py.File(fname, 'r')
         signals = hfile[calname]['signal']
+
         stim = json.loads(signals.attrs['stim'])
         cal_vector = hfile[calname]['calibration_intensities']
 
         assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        # assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        assert len(stim) == 1
+        assert stim[0]['samplerate_da'] == tc.samplerate() == acq_rate == hfile[calname].attrs['samplerate_ad']
         npts =  winsz*acq_rate
         assert_equal(signals.shape,(nreps, npts))
-        
+        assert len(stim[0]['components']) == 1
+        tone = stim[0]['components'][0]
+        print tone['stim_type']
+        assert tone['stim_type'] == 'FM Sweep'
+
+
         assert cal_vector.shape == ((npts/2+1),)
 
         reftone = hfile[calname]['reference_tone']
@@ -837,8 +854,8 @@ def check_result(test_data, test_stim, winsz, acq_rate, nchans=1):
     nreps = test_stim.repCount()
     stim_doc = json.loads(test_data.attrs['stim'])
 
-    print 'test_data', test_data, test_data.shape
-    print 'stim doc', stim_doc[0]
+    # print 'test_data', test_data, test_data.shape
+    # print 'stim doc', stim_doc[0]
 
     # check everthing we can here
     assert test_data.attrs['user_tag'] == ''
