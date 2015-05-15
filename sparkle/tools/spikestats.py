@@ -65,7 +65,7 @@ def spike_times(signal, threshold, fs, mint=None):
         times.append(float(over[0])/fs)
         
     if len(times)>0:
-    	return Refractory(times)
+    	return refractory(times)
     else:
     	return times
 
