@@ -291,7 +291,7 @@ class ControlWindow(QtGui.QMainWindow):
                 inputsdict = json.load(jf)
         except:
             logger = logging.getLogger('main')
-            logger.exception("Unable to load app data from file: {}".format(inputsfname))
+            logger.warning("Unable to load app data from file: {}".format(inputsfname))
             inputsdict = {}
 
         # self.display.spiketracePlot.setThreshold(inputsdict.get('threshold', 0.5))

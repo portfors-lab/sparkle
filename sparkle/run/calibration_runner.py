@@ -302,6 +302,8 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         db = trace_info['components'][0]['intensity']
         # print 'f', f, 'db', db
         
+        response = np.squeeze(response)
+        assert len(response.shape) == 1, 'calibration only supported for single output channel'
         # target frequency amplitude
         freq, spectrum = calc_spectrum(response, self.player.get_aifs())
         peak_fft = spectrum[(np.abs(freq-f)).argmin()]

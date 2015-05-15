@@ -1,6 +1,8 @@
 import glob
 import json
+import logging
 import os
+import StringIO
 
 import h5py
 from nose.tools import assert_equal, assert_in
@@ -23,6 +25,12 @@ class TestMainSetup():
     def setUp(self):
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 
+        log = logging.getLogger('main')
+        log.setLevel(logging.DEBUG)
+        self.stream = StringIO.StringIO()
+        self.handler = logging.StreamHandler(self.stream)
+        log.addHandler(self.handler)
+
     def tearDown(self):
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
@@ -36,7 +44,12 @@ class TestMainSetup():
         self.form.ui.plotDock.close()
         self.form.close()
         QtTest.QTest.qWait(ALLOW)
-        # so no errors?
+
+        # check for any errors
+        assert "Error:" not in self.stream.getvalue()
+        log = logging.getLogger('main')
+        log.removeHandler(self.handler)
+        self.handler.close()
 
 class TestMainUI():
     def setUp(self):
@@ -478,10 +491,22 @@ class TestMainUI():
         calname = self.form.calvals['calname']
         assert self.form.calvals['use_calfile'] == withcal
 
+        # connect signal to catch results
+        self.results = []
+        if self.form.ui.calibrationWidget.ui.calTypeCmbbx.currentText() == 'Tone Curve':
+            self.form.signals.calibration_response_collected.connect(self.collect_cal_data)
+
         self.start_acq()
 
         self.wait_until_done()
 
+        if self.form.ui.calibrationWidget.ui.calTypeCmbbx.currentText() == 'Tone Curve':
+            nfreqsteps = int(self.form.ui.calibrationWidget.ui.curveWidget.ui.freqNstepsLbl.text())
+            ndbsteps = int(self.form.ui.calibrationWidget.ui.curveWidget.ui.dbNstepsLbl.text())
+            nreps = self.form.ui.calibrationWidget.ui.nrepsSpnbx.value()
+            assert len(self.results) == nfreqsteps*ndbsteps*nreps
+            self.form.signals.calibration_response_collected.disconnect(self.collect_cal_data)
+           
         # make sure no calibration is present
         assert self.form.calvals['use_calfile'] == withcal
         assert self.form.calvals['calname'] == calname
@@ -490,6 +515,10 @@ class TestMainUI():
         data_groups = self.form.acqmodel.datafile.keys()
         print 'keys', data_groups
         assert len(data_groups) == 0
+
+
+    def collect_cal_data(self, spectrum, freq, vamp):
+        self.results.append(spectrum)
 
     def add_edit_builder(self):
         # add a custom stimulus and opens its editor

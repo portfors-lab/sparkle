@@ -43,7 +43,7 @@ class TestStimTable():
 
         # vocalization auto-test entry
         qtbot.doubleclick(self.table, self.table.model().index(4,1))        
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(PAUSE)
 
         assert self.table.trace_table.rowCount() == 10
 
