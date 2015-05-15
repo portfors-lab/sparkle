@@ -2,23 +2,22 @@
 import numpy as np
 
 def refractory(times, refract=0.002):
-    """Removes spikes in times list that do not satisfy refractor period
+	"""Removes spikes in times list that do not satisfy refractor period
 
-    :param times: list(float) of spike times in seconds
-    :type times: list(float)
-    :param refract: Refractory period in seconds
-    :type refract: float
-    :returns: list(float) of spike times in seconds
+	:param times: list(float) of spike times in seconds
+	:type times: list(float)
+	:param refract: Refractory period in seconds
+	:type refract: float
+	:returns: list(float) of spike times in seconds
 
-    For every interspike interval < refract, 
-    removes the second spike time in list and returns the result"""
+	For every interspike interval < refract, 
+	removes the second spike time in list and returns the result"""
 	times_refract = []
 	times_refract.append(times[0])
 	for i in range(1,len(times)):
 		if times_refract[-1]+refract <= times[i]:
 			times_refract.append(times[i])        
 	return times_refract
-
 
 def spike_times(signal, threshold, fs, mint=None):
     """Detect spikes from a given signal
