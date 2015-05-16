@@ -1,6 +1,23 @@
 """ Here is a doc string for spikestats :)"""
 import numpy as np
 
+def refractory(times, refract=0.002):
+	"""Removes spikes in times list that do not satisfy refractor period
+
+	:param times: list(float) of spike times in seconds
+	:type times: list(float)
+	:param refract: Refractory period in seconds
+	:type refract: float
+	:returns: list(float) of spike times in seconds
+
+	For every interspike interval < refract, 
+	removes the second spike time in list and returns the result"""
+	times_refract = []
+	times_refract.append(times[0])
+	for i in range(1,len(times)):
+		if times_refract[-1]+refract <= times[i]:
+			times_refract.append(times[i])        
+	return times_refract
 
 def spike_times(signal, threshold, fs, mint=None):
     """Detect spikes from a given signal
@@ -11,10 +28,10 @@ def spike_times(signal, threshold, fs, mint=None):
     :type threshold: float
     :returns: list(float) of spike times in seconds
 
-    For every continuous set of points over given threshold, 
+    For every continuous set of points with absolute value over given threshold, 
     returns the time of the maximum"""
     times = []
-    over, = np.where(signal>threshold)
+    over, = np.where(np.abs(signal)>threshold)
     segments, = np.where(np.diff(over) > 1)
 
     if len(over) > 1:
@@ -47,7 +64,10 @@ def spike_times(signal, threshold, fs, mint=None):
     elif len(over) == 1:
         times.append(float(over[0])/fs)
         
-    return times
+    if len(times)>0:
+    	return refractory(times)
+    else:
+    	return times
 
 def bin_spikes(spike_times, binsz):
     """Sort spike times into bins
