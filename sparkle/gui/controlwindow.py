@@ -125,6 +125,10 @@ class ControlWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, "Invalid Input", failure)
                     return False
             elif self.ui.tabGroup.currentWidget().objectName() == 'tabCalibrate':
+                if len(self._aichans) > 1:
+                    failmsg = "Speaker calibration only supported for single channel, currently {} channels selected; select 1 input channel.".format(len(self._aichans))
+                    QtGui.QMessageBox.warning(self, "Invalid Setting", failmsg)
+                    return False
                 # get what stimulus is about to be presented
                 if self.ui.calibrationWidget.ui.savecalCkbx.isChecked() or not self.ui.calibrationWidget.currentSelection() == 'Tone Curve':
                     calibration_stimulus = self.acqmodel.calibration_stimulus('noise')
