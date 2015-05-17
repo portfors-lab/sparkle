@@ -2,14 +2,12 @@
 Sparkle API
 =================
 
-This document is intented for maintainers, and people who wish to expand Sparkle. For a description of how I set up the development environment see :doc:`dev_env`
-
 The program can be divided into two parts: 
 
 * The GUI which interacts with the user to get inputs and presents results. Saves user input values.
 * The back-end which takes inputs and communicates with hardware to present stimuli and record results. Holds all state information related to stimuli and data. Handles all data file operations. Can be run without the GUI interface, but designed to be used with it.
 
-The top-level class for the buisness logic is :class:`AcquisitionManager<sparkle.run.acquisition_manager>`. This class divvies up tasks it recieves from the Main UI class to the different acquisition runner modules.
+The top-level class for the business logic is :class:`AcquisitionManager<sparkle.run.acquisition_manager>`. This class divvies up tasks it receives from the Main UI class to the different acquisition runner modules.
 
 The top-level class for the GUI is :class:`MainWindow<sparkle.gui.control.MainWindow>`. To run this with a data file dialog (recommended) run the main method of :mod:`sparkle.gui.run`.
 
@@ -18,14 +16,14 @@ Backend Structure
 
 Runner classes
 +++++++++++++++
-The :class:`AcquisitionManager<sparkle.run.acquisition_manager>` contains runner classes for the different types of data acquisition that the system is capable of. It also contains some shared state and resources between the different acqusition runner classes such as communication queues. Only one acqusition operation may be in progress at any time.
+The :class:`AcquisitionManager<sparkle.run.acquisition_manager>` contains runner classes for the different types of data acquisition that the system is capable of. It also contains some shared state and resources between the different acquisition runner classes such as communication queues. Only one acquisition operation may be in progress at any time.
 
 The different acquisition operations that the program runs are:
 
-* Explore (a.k.a Search) mode, run by :class:`SearchRunner<sparkle.run.search_runner.SearchRunner>`. Allows on going, on-the-fly, windowed, acquisition. I.e. the stimulus may be changed in the after acquistion has begun. Data gathered in this mode is not currently saved to file.
-* Protocol (a.k.a Experimental) mode, run by :class:`ProtocolRunner<sparkle.run.protocol_runner.ProtocolRunner>`. Allows for a pre-defined list of stimlui to be presented for windowed acquisition. Stimuli cannot be changed once acquisition has begun, although it may be interrupted and halted before finishing.
+* Explore (a.k.a Search) mode, run by :class:`SearchRunner<sparkle.run.search_runner.SearchRunner>`. Allows on going, on-the-fly, windowed, acquisition. I.e. the stimulus may be changed in the after acquisition has begun. Data gathered in this mode is not currently saved to file.
+* Protocol (a.k.a Experimental) mode, run by :class:`ProtocolRunner<sparkle.run.protocol_runner.ProtocolRunner>`. Allows for a pre-defined list of stimuli to be presented for windowed acquisition. Stimuli cannot be changed once acquisition has begun, although it may be interrupted and halted before finishing.
 * Calibration mode, consists of two types: a tone curve, or a single stimulus, which are run separately by :class:`CalibrationCurveRunner<sparkle.run.calibration_runner.CalibrationCurveRunner>` and :class:`CalibrationRunner<sparkle.run.calibration_runner.CalibrationRunner>` respectively. Both are predefined, windowed acquisition, for the purpose of speaker calibration, intended to be run before the start of any other operation, but may be run at any time. Also associated is microphone calibration which is run by :class:`MphoneCalibrationRunner<sparkle.run.microphone_calibration_runner.MphoneCalibrationRunner>`.
-* Chart mode, run by :class:`ChartRunner<sparkle.run.chart_runner.ChartRunner>`. Allows for continuous, on-going, acqusition. For future development.
+* Chart mode, run by :class:`ChartRunner<sparkle.run.chart_runner.ChartRunner>`. Allows for continuous, on-going, acquisition. For future development.
 
 All of these runner classes share a common superclass :class:`AbstractAcquisitionRunner<sparkle.run.abstract_acquisition.AbstractAcquisitionRunner>`:
 
@@ -50,7 +48,7 @@ Stimulus Classes
 
 The main container for an individual stimulus is the :class:`StimulusModel<sparkle.stim.stimulus_model>`. Internally, the stimulus is composed of a 2D array (nested lists) of components which are any subclass of :class:`AbstractStimulusComponent<sparkle.stim.abstract_component>`. These classes are required to implement a `signal` function (not to be confused with signals/slots of Qt), which is used by StimulusModel to sum its components to get the total signal for the desired stimulus. This allows for creation of any stimulus imaginable through the ability to overlap components, and to define custom component classes.
 
-On its own, a StimulusModel represents a single stimlulus signal (the sum of it's components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The StimlulusModel uses the information held in its :class:`AutoParameterModel<sparkle.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
+On its own, a StimulusModel represents a single stimulus signal (the sum of it's components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The StimlulusModel uses the information held in its :class:`AutoParameterModel<sparkle.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
 
 Any number of StimulusModels can be collected in a list via a :class:`ProtocolModel<sparkle.run.protocol_model>`, to be generated independent of each other, in sequence.
 
@@ -77,7 +75,7 @@ Thus, after stimuli are prepared, but before they are generated, the StimulusMod
 
 To see the effect of a calibration, the calibration procedure, or the calibration curve that :class:`CalibrationCurveRunner<sparkle.run.calibration_runner.CalibrationCurveRunner>` runs will a calibration vector in place, will show stimuli with thier component frequencies corrected. Of course, it is also possible to see this in search mode with any stimuli. When using the GUI, a special interface is provided to examine the outgoing and recorded signal. Note that the CalibrationCurveRunner is used for testing only, it does not save a calibration.
 
-To compare calibration performance and effectiveness test scripts `calibration_performance.py` and `calibration_eval.py` generate tables to compare run times and error between desired and acheived output signals. These scripts can be found in the test/scripts project folder.
+To compare calibration performance and effectiveness test scripts `calibration_performance.py` and `calibration_eval.py` generate tables to compare run times and error between desired and achieved output signals. These scripts can be found in the test/scripts project folder.
 
 For a more in depth narrative on how this procedure was developed, see this post_, and especially this post__
 
@@ -87,7 +85,7 @@ There are scripts that were used in aid of evaluating the calibration procedure 
 
     * `calibration_performance.py` : Compares the execution time taken primarily for differing filter length
 
-    * `hardware_attenuation.py` : This simple script just compares the output signal to the input to determine amplitude loss across pure tone frequencies. Intended to be used so that we may determine the signal loss from a signal piece of harware such as an attenuator or amplifier. Another way to investigate this is to analyze the output vs input of a FM sweep signal.
+    * `hardware_attenuation.py` : This simple script just compares the output signal to the input to determine amplitude loss across pure tone frequencies. Intended to be used so that we may determine the signal loss from a signal piece of hardware such as an attenuator or amplifier. Another way to investigate this is to analyze the output vs input of a FM sweep signal.
 
 Filter length turned out to be the most influential factor on both filter effectiveness and performance. It is possible to choose a filter length that executes in a shorter amount of time, that still has very good ability to properly adjust signals.
 
@@ -96,7 +94,7 @@ __ http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers-Cont/
 
 GUI Structure
 -------------
-The Qt_ framework was chosen to build the GUI for this project. The project was developed using the PyQt package for the Python bindings. The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. These files have the extention .ui. By convention, all the auto-generated python UI files end in "_form.py". The main UI class :class:`MainWindow<sparkle.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<sparkle.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
+The Qt_ framework was chosen to build the GUI for this project. The project was developed using the PyQt package for the Python bindings. The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. These files have the extension .ui. By convention, all the auto-generated python UI files end in "_form.py". The main UI class :class:`MainWindow<sparkle.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<sparkle.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
 
 The views noted above are often contained in editor widgets. There is also an inheritance hierarchy for these editor widgets. (Discussed in the next section)
 
@@ -141,7 +139,7 @@ The file format chosen to save data to is HDF5. Reasons for choosing this file f
   * self-describing: can save metadata/stimulus info along data
   * popular among scientists : not developed in house means anyone can access it without custom code
   * Mature, been around a while and has 2 sets of python bindings
-  * Heirachial structure matches our data needs well
+  * Hierarchical structure matches our data needs well
 
 To support data already existing the lab, Batlab format data can also be read (but not written to) with Sparkle.
 
@@ -165,7 +163,7 @@ This program uses the python :py:mod:`logging` module. The logging configuration
 
 Testing
 --------
-Everying that can be tested, should be tested. There is a testing utility package, originally wrote for this project, but that has been split off, qtbot_. This package simulates user interaction with the GUI, to allow for testing GUI components themselves, and that the appropriate results from using them happen. New functionality should be accompanied by tests.
+Everything that can be tested, should be tested. There is a testing utility package, originally wrote for this project, but that has been split off, qtbot_. This package simulates user interaction with the GUI, to allow for testing GUI components themselves, and that the appropriate results from using them happen. New functionality should be accompanied by tests.
 
 .. _qtbot : https://github.com/boylea/qtbot
 
