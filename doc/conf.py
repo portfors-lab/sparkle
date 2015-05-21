@@ -269,7 +269,11 @@ class Mock(object):
     @classmethod
     def mock_modules(cls, *modules):
         for module in modules:
-            sys.modules[module] = cls()
+            try:
+                __import__(module)
+            except:
+                print 'MOCKING', module
+                sys.modules[module] = cls()
 
     def __init__(self, *args, **kwargs):
         pass
@@ -278,11 +282,15 @@ class Mock(object):
         return self.__class__()
 
     def __getattr__(self, attribute):
-        return Mock()
+        if attribute in ('__file__', '__path__'):
+            return os.devnull
+        else:
+            return Mock()
 
 # mock out non-pip installable modules to enable Sphinx autodoc even
 # if these modules are unavailable, as on readthedocs.org
-Mock.mock_modules('PyQt4')
+Mock.mock_modules('PyQt4', 'sip', 'matplotlib', 'scipy', 'h5py', 'PyYAML', 'numpy')
+
 
 from sphinx.apidoc import main
 
