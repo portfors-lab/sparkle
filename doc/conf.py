@@ -283,3 +283,11 @@ class Mock(object):
 # mock out non-pip installable modules to enable Sphinx autodoc even
 # if these modules are unavailable, as on readthedocs.org
 Mock.mock_modules('PyQt4')
+
+from sphinx.apidoc import main
+
+# build the auto-generated API doc using sphinx-apidoc
+auto_doc_dir = os.path.join(proj_root_dir, 'doc', 'ref','auto')
+source_dir = os.path.join(proj_root_dir, 'sparkle')
+argv = ['sphinx-apidoc', '-f', '-o', auto_doc_dir, source_dir]
+main(argv=argv)

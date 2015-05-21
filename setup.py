@@ -37,20 +37,3 @@ setup(name="sparkle",
         "Topic :: Scientific/Engineering",
         ]
     )
-
-# we have just installed sphinx, but we will need to update the system
-# path to be able to import it.
-site_packages = [path for path in sys.path if path.endswith('site-packages')]
-for path in site_packages:
-    if len(glob.glob(os.path.join(path, 'Sphinx*'))) > 0:
-        sys.path.append(glob.glob(os.path.join(path, 'Sphinx*'))[0])
-
-# now we should be able to import
-from sphinx.apidoc import main
-
-# build the auto-generated API doc using sphinx-apidoc
-proj_root_dir = os.path.abspath(os.path.dirname(__file__))
-auto_doc_dir = os.path.join(proj_root_dir, 'ref',' auto')
-source_dir = os.path.join(proj_root_dir, 'sparkle')
-argv = ['sphinx-apidoc', '-f', '-o', auto_doc_dir, source_dir]
-main(argv=argv)
