@@ -12,7 +12,7 @@ setup(name="sparkle",
       author_email="amy@amyboyle.ninja",
       license="GPLv3",
       packages=find_packages(exclude=['test', 'doc']),
-      install_requires=['Cython',
+      install_requires=[
                         'numpy',
                         'matplotlib',
                         'scipy',

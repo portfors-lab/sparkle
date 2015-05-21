@@ -157,6 +157,8 @@ class MainWindow(ControlWindow):
                 txt = str(self.ui.tabGroup.tabText(tabIndex)).lower()
                 if txt == 'calibration' or txt == 'explore':
                     self.ui.tabGroup.removeTab(tabIndex)
+            self.ui.reviewLbl.setText(' - REVIEW MODE')
+            self.ui.startBtn.setEnabled(False)
                     
         logger.info("PROGRAM LOADED -- waiting for user")
 

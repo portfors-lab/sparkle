@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\main_control.ui'
+# Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Mon May 04 10:29:09 2015
+# Created: Thu May 21 11:03:49 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,6 +41,10 @@ class Ui_ControlWindow(object):
         self.horizontalLayout_4.addWidget(self.label_3)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.reviewLbl = QtGui.QLabel(self.centralwidget)
+        self.reviewLbl.setText(_fromUtf8(""))
+        self.reviewLbl.setObjectName(_fromUtf8("reviewLbl"))
+        self.horizontalLayout.addWidget(self.reviewLbl)
         self.runningLabel = QtGui.QLabel(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -365,7 +369,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
