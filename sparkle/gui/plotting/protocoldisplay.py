@@ -31,7 +31,8 @@ class ProtocolDisplay(QtGui.QWidget):
         # spiketracePlot.set_title("Response Trace")
         # self.specPlot.set_title("Stimulus Spectrogram")
 
-        self.specPlot.setXLink(spiketracePlot)
+        self.specPlot.plotItem.vb.sigXRangeChanged.connect(self.updateXRange)
+        spiketracePlot.plotItem.vb.sigXRangeChanged.connect(self.updateXRange)
         self.specPlot.setMinimumHeight(100)
         spiketracePlot.setMinimumWidth(100)
         spiketracePlot.setMinimumHeight(100)
@@ -64,6 +65,7 @@ class ProtocolDisplay(QtGui.QWidget):
         # for the purposes of splitter not updating contents...
         self.splittersw = splittersw
         self.badbadbad = 0
+        self._ignore_range_signal = False    
 
     def updateSpec(self, *args, **kwargs):
         """Updates the spectrogram. First argument can be a filename, 
@@ -94,7 +96,7 @@ class ProtocolDisplay(QtGui.QWidget):
         for name in names:
             plot = TraceWidget(self)
             plot.setTitle(name)
-            self.specPlot.setXLink(plot)
+            plot.plotItem.vb.sigXRangeChanged.connect(self.updateXRange)
             self.splittersw.addWidget(plot)
             plot.thresholdUpdated.connect(self.thresholdUpdated.emit)
             plot.polarityInverted.connect(self.polarityInverted.emit)
@@ -108,6 +110,7 @@ class ProtocolDisplay(QtGui.QWidget):
                 plot.thresholdUpdated.disconnect()
                 plot.polarityInverted.disconnect()
                 plot.rasterBoundsUpdated.disconnect()
+                plot.plotItem.vb.sigXRangeChanged.disconnect()
                 plot.close()
                 plot.deleteLater()
 
@@ -166,8 +169,10 @@ class ProtocolDisplay(QtGui.QWidget):
         :param lims: (min, max) of x axis, in same units as data
         :type lims: (float, float)
         """
-        # all traces x limits should be linked, so only have to update one to get them all
-        self.responsePlots.values()[0].setXlim(lims)
+        # update all "linked", plots
+        self.specPlot.setXlim(lims)
+        for plot in self.responsePlots.values():
+            plot.setXlim(lims)
         # ridiculous...
         sizes = self.splittersw.sizes()
         if self.badbadbad:
@@ -178,6 +183,14 @@ class ProtocolDisplay(QtGui.QWidget):
             sizes[1] +=1
         self.badbadbad = not self.badbadbad
         self.splittersw.setSizes(sizes)
+
+        self._ignore_range_signal = False
+
+    def updateXRange(self, view, lims):
+        if not self._ignore_range_signal:
+            # avoid crazy recursion, as we update the other plots
+            self._ignore_range_signal = True
+            self.setXlimits(lims)
 
     def setNreps(self, nreps):
         """Sets the number of reps before the raster plot resets"""

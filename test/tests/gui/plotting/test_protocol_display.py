@@ -72,6 +72,15 @@ class TestProtocolDisplay():
         display.updateSpiketrace(self.t, data, 'chan1')
         display.updateSpiketrace(self.t, data, 'chan2')
 
+        # check range matching
+        lims = [0.11, 0.66]
+        display.responsePlots['chan1'].setXlim(lims)
+
+        # print 'lims', lims, display.responsePlots['chan0'].viewRange()[0], display.responsePlots['chan2'].viewRange()[0], display.specPlot.viewRange()[0]
+        assert lims == display.responsePlots['chan0'].viewRange()[0] \
+                    == display.responsePlots['chan2'].viewRange()[0] \
+                    == display.specPlot.viewRange()[0]
+
     def test_add_remove_plots(self):
 
         display = ProtocolDisplay('chan0')
