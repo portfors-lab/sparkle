@@ -168,6 +168,7 @@ class AITaskFinite(Task):
                            bufsize, byref(r), None)
         self.WaitUntilTaskDone(10.0)
 
+
         return inbuffer.reshape(self.nchans, self.npts)
 
     def stop(self):
@@ -332,7 +333,7 @@ def get_ai_chans(dev):
     buflen = c_uint32(sizeof(buf))
     DAQmxGetDevAIPhysicalChans(dev.encode(), buf, buflen)
     pybuf = buf.value
-    chans = pybuf.decode(u'utf-8').split(u",")
+    chans = pybuf.decode(u'utf-8').split(u", ")
     return chans
 
 def get_devices():

@@ -9,6 +9,7 @@ from nose.tools import assert_equal, assert_in
 
 import qtbot
 import test.sample as sample
+from sparkle.acq.daq_tasks import get_devices
 from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.main_control import MainWindow
@@ -57,9 +58,11 @@ class TestMainUI():
         fname = os.path.join(self.tempfolder, 'testdatafile' +rand_id()+'.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w-')
         self.form.ui.reprateSpnbx.setValue(10)
-        # cheat and set AI chan w/o dialog
-        self.form._aichans = ['ai0']
-        self.form._aichan_details = {'ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        # set AI chan w/o dialog
+        devname = get_devices()[0]
+        self.form.advanced_options['device_name'] = devname
+        self.form._aichans = [devname+'/ai0']
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
         self.form.reset_device_channels()
         self.form.show()
         # so that the data display doesn't get in the way of out
@@ -72,6 +75,12 @@ class TestMainUI():
         QtGui.QApplication.setFont(font)
         QtGui.QApplication.processEvents()
 
+        log = logging.getLogger('main')
+        log.setLevel(logging.DEBUG)
+        self.stream = StringIO.StringIO()
+        self.handler = logging.StreamHandler(self.stream)
+        log.addHandler(self.handler)
+
     def tearDown(self):
         self.form.close()
         QtGui.QApplication.closeAllWindows()
@@ -81,6 +90,12 @@ class TestMainUI():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
+
+        # check for any errors
+        assert "Error:" not in self.stream.getvalue()
+        log = logging.getLogger('main')
+        log.removeHandler(self.handler)
+        self.handler.close()
 
     # =====================================
     # Test explore functions
@@ -95,6 +110,16 @@ class TestMainUI():
 
     def test_explore_stim_off(self):
         self.explore_run('off')
+
+    def test_explore_multichannel(self):
+        devname = get_devices()[0]
+        self.form._aichans = [devname+'/ai0', devname+'/ai1']
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)},
+                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form.reset_device_channels()
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.display.responsePlotCount() == 2
+        self.explore_run('pure tone')
 
     # =====================================
     # Test calibration functions
@@ -215,6 +240,16 @@ class TestMainUI():
     def test_auto_parameter_protocol(self):
         self.protocol_run([('pure tone',{'duration': 66, 'frequency': 22}), ('pure tone',{'duration': 33})],
             [['duration', 10, 50, 10]])
+
+    def test_tone_protocol_multichannel(self):
+        devname = get_devices()[0]
+        self.form._aichans = [devname+'/ai0', devname+'/ai1']
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)},
+                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form.reset_device_channels()
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.display.responsePlotCount() == 2
+        self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
 
     def xtest_stim_detail_sharing(self):
         # disabled... took away this feature.
@@ -587,6 +622,9 @@ class TestMainUI():
         qtbot.keypress('enter')
         QtGui.QApplication.processEvents()
         QtTest.QTest.qWait(PAUSE)
+
+        stimEditor.ui.nrepsSpnbx.setValue(3)
+        
         # just use default tone settings, for now at least
         qtbot.click(stimEditor.ui.okBtn)
         QtTest.QTest.qWait(ALLOW)
@@ -610,6 +648,20 @@ class TestMainUI():
         # modal dialog will block qt methods in main thread
         # qtbot.handle_modal_widget(wait=True, press_enter=False)
         qtbot.handle_modal_widget(wait=True)
+
+        # check that data reviewer updated
+        nrows = self.form.ui.reviewer.datatable.rowCount()
+        assert nrows == 1
+        assert 'segment_1/test_1' in str(self.form.ui.reviewer.datatable.item(0,0).text())
+
+        # check that our saved data has the correct dimensions according
+        # to current settings on the UI
+        nchans = int(self.form.ui.chanNumLbl.text())
+        nsamples = int(self.form.ui.aifsSpnbx.value() * self.form.ui.windowszSpnbx.value())
+        # gross, reach into model to get # of reps and traces
+        nreps = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,2,QtCore.QModelIndex()), QtCore.Qt.DisplayRole)
+        ntraces = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,3,QtCore.QModelIndex()), QtCore.Qt.DisplayRole) + 1 #+1 for control
+        assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
