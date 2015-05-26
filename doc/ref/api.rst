@@ -169,7 +169,14 @@ Everything that can be tested, should be tested. There is a testing utility pack
 
 Documentation
 -------------
-This documentation was built using Sphinx_, which uses reStructuredText to generate HTML pages. To build this documentation, go to the *doc* directory and run `make html`. Any time a change is made to the source code, it should be made sure that the documentation, including the docstrings, API reference, and user guide, is up to date in the same commit. General improvements to the documentation are always welcome.
+This documentation was built using Sphinx_, which uses reStructuredText to generate HTML pages. To build this documentation, go to the *doc* directory in the sparkle source, then build:
+
+  $ cd doc
+  $ make html
+
+The documentation can now be viewed by opening `_build\html\index.html` with your browser.
+
+Any time a change is made to the source code, it should be made sure that the documentation, including the docstrings, API reference, and user guide, is up to date in the same commit. General improvements to the documentation are always welcome.
 
 .. _Sphinx: http://sphinx-doc.org/index.html
 
