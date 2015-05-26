@@ -130,13 +130,9 @@ Installing in a Virtualenv
 
 Virtualenv is not necessary to run SPARKLE. If you don't know what it is, don't worry about it for now.
 
-For the most part, all these instructions still apply if you want to use a virtualenv. Windows is a pain in my experience. Installing anaconda will give you the virtualenv package, but you will need to find out how to install things via pip or easy_install to get the correct packages into the virtualenv. Unix should be straight forward, noting the following paragraph about PyQt.
+For the most part, the above instructions still apply if you want to use a virtualenv. Windows is a pain in my experience. Installing anaconda will give you the virtualenv and pip packages, but you will need to find out how to install things via pip or easy_install to get the correct packages into the virtualenv.
 
-The trickiest part is installing PyQt in a virtualenv. I actually wrote a couple blog posts about how to do this in both Linux_ and Windows_.
-
-.. _Linux : http://amyboyle.ninja/Python-Qt-and-virtualenv-in-linux/
-.. _Windows : http://amyboyle.ninja/Python-Qt-and-virtualenv-in-windows/
-
+For notes on setting this up in windows, and for installing the non-pip installable packages, see :doc:`Virtualenv notes<dev_env>`.
 
 .. _running:
 

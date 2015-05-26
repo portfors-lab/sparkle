@@ -1,3 +1,7 @@
+import sys
+import os
+import glob
+
 from setuptools import setup, find_packages
 
 setup(name="sparkle",
@@ -8,16 +12,17 @@ setup(name="sparkle",
       author_email="amy@amyboyle.ninja",
       license="GPLv3",
       packages=find_packages(exclude=['test', 'doc']),
-      install_requires=['Cython',
+      install_requires=[
                         'numpy',
                         'matplotlib',
                         'scipy',
                         'PyYAML',
                         'h5py',
                         'pyqtgraph',
+                        'Sphinx',
+                        'sphinx-rtd-theme',
+                        'pydaqmx',
                         ],
-      extras_require={'record': ['pydaqmx'],
-                      'doc': ['sphinx-rtd-theme','Sphinx']},
       package_data={'':['*.conf', '*.jpg', '*.png']},
       entry_points={'console_scripts':['sparkle=sparkle.gui.run:main']},
       classifiers = [
