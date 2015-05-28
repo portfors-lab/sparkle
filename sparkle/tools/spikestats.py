@@ -31,7 +31,8 @@ def spike_times(signal, threshold, fs, mint=None):
     For every continuous set of points with absolute value over given threshold, 
     returns the time of the maximum"""
     times = []
-    over, = np.where(np.abs(signal)>threshold)
+    signal = np.abs(signal)
+    over, = np.where(signal>threshold)
     segments, = np.where(np.diff(over) > 1)
 
     if len(over) > 1:
