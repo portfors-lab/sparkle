@@ -175,14 +175,15 @@ class ProtocolDisplay(QtGui.QWidget):
             plot.setXlim(lims)
         # ridiculous...
         sizes = self.splittersw.sizes()
-        if self.badbadbad:
-            sizes[0] +=1
-            sizes[1] -=1
-        else:
-            sizes[0] -=1
-            sizes[1] +=1
-        self.badbadbad = not self.badbadbad
-        self.splittersw.setSizes(sizes)
+        if len(sizes) > 1:
+            if self.badbadbad:
+                sizes[0] +=1
+                sizes[1] -=1
+            else:
+                sizes[0] -=1
+                sizes[1] +=1
+            self.badbadbad = not self.badbadbad
+            self.splittersw.setSizes(sizes)
 
         self._ignore_range_signal = False
 

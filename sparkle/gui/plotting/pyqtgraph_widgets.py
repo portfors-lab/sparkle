@@ -655,17 +655,20 @@ class ProgressWidget(BasePlot):
             self.setLabel('left', "Spike Count (mean)", units='')
 
     @staticmethod
-    def loadCurve(data, groups, threshold, fs, xlabels):
+    def loadCurve(data, groups, thresholds, fs, xlabels):
         """Accepts a data set from a whole test, averages reps and re-creates the 
-        progress plot as the same as it was during live plotting"""
+        progress plot as the same as it was during live plotting. Number of thresholds
+        must match the size of the channel dimension"""
         xlims = (xlabels[0], xlabels[-1])
         pw = ProgressWidget(groups, xlims)
         spike_counts = []
         # skip control
         for itrace in range(data.shape[0]):
-            flat_reps = data[itrace].flatten()
-            spike_times = spikestats.spike_times(flat_reps, threshold, fs)
-            spike_counts.append(len(spike_times)/data.shape[1]) #mean spikes per rep
+            count = 0
+            for ichan in range(data.shape[2]):
+                flat_reps = data[itrace,:,ichan,:].flatten()
+                count += len(spikestats.spike_times(flat_reps, thresholds[ichan], fs))
+            spike_counts.append(count/(data.shape[1]*data.shape[2])) #mean spikes per rep
 
         i = 0
         for g in groups:

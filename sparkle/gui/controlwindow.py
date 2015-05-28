@@ -98,6 +98,10 @@ class ControlWindow(QtGui.QMainWindow):
         :type mode: str
         :returns: bool -- Whether all inputs and stimuli are valid
         """
+        if len(self._aichans) < 1:
+            failmsg = "Must have at least one input channel selected"
+            QtGui.QMessageBox.warning(self, "Invalid Setting", failmsg)
+            return False
         if mode == 'chart':
             if self.ui.aifsSpnbx.value()*self.fscale > 100000:
                 QtGui.QMessageBox.warning(self, "Invalid Input", "Recording samplerate cannot exceed 100kHz for chart acquisition")

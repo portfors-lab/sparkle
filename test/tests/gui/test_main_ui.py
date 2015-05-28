@@ -47,10 +47,8 @@ class TestMainSetup():
         QtTest.QTest.qWait(ALLOW)
 
         # check for any errors
-        assert "Error:" not in self.stream.getvalue()
-        log = logging.getLogger('main')
-        log.removeHandler(self.handler)
-        self.handler.close()
+        log = self.stream.getvalue()
+        assert 'PROGRAM LOADED' in log
 
 class TestMainUI():
     def setUp(self):
@@ -82,6 +80,7 @@ class TestMainUI():
         log.addHandler(self.handler)
 
     def tearDown(self):
+        QtGui.QApplication.processEvents()
         self.form.close()
         QtGui.QApplication.closeAllWindows()
 
@@ -92,7 +91,9 @@ class TestMainUI():
             os.remove(f)
 
         # check for any errors
-        assert "Error:" not in self.stream.getvalue()
+        errlog = self.stream.getvalue()
+        assert "Error:" not in errlog
+        assert "Exception:" not in errlog
         log = logging.getLogger('main')
         log.removeHandler(self.handler)
         self.handler.close()
@@ -662,6 +663,31 @@ class TestMainUI():
         nreps = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,2,QtCore.QModelIndex()), QtCore.Qt.DisplayRole)
         ntraces = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,3,QtCore.QModelIndex()), QtCore.Qt.DisplayRole) + 1 #+1 for control
         assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
+
+        # clear data out of current plots, so we know that the review data is showing
+        # not left-overs from acquisition
+        self._aichans = []
+        self.form.reset_device_channels()
+
+        # check that review data is browseable
+        self.form.ui.tabGroup.setCurrentIndex(3)
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.click(self.form.ui.reviewer.btngrp.button(1))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.click(self.form.ui.reviewer.datatable, self.form.ui.reviewer.datatable.model().index(0,0, QtCore.QModelIndex()))
+        QtTest.QTest.qWait(ALLOW)
+
+        assert self.form.ui.reviewer.tracetable.rowCount() > 0
+        qtbot.click(self.form.ui.reviewer.tracetable, self.form.ui.reviewer.tracetable.model().index(0,0,QtCore.QModelIndex()))
+
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.display.responsePlotCount() == nchans
+
+        # cheat, intimate knowledge of plot structure
+        for plot in self.form.display.responsePlots.values():
+            x, y = plot.tracePlot.getData()
+            assert x.shape == (nsamples,)
+            assert max(y) > 0
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":

@@ -1,13 +1,16 @@
 import logging
-import os
+import os, sys
 import time
 import threading
+import traceback
+import inspect
 
 import numpy as np
 import yaml
 
 from controlwindow import ControlWindow
 from sparkle.QtWrapper import QtCore, QtGui
+from sparkle.acq.daq_tasks import get_ai_chans
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
     SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, \
     VocalPathDialog, ChannelDialog, AdvancedOptionsDialog
@@ -44,6 +47,32 @@ with open(os.path.join(get_src_directory(),'settings.conf'), 'r') as yf:
 REFFREQ = config['reference_frequency']
 REFVOLTAGE = config['reference_voltage']
 
+
+def log_handle(func):
+    def handle(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+
+        except Exception, e:
+            msg = str(e) + '\nTraceback:\n\n'
+            tb = traceback.format_tb(sys.exc_info()[2])
+            for line in tb:
+                msg += line
+            logger = logging.getLogger('main')
+            logger.exception(msg)
+            raise
+
+    return handle
+
+def decorate_all_methods(decorator):
+    def decorate(cls):
+        for name, meth in inspect.getmembers(cls, inspect.ismethod):
+            if '__' not in name:
+                setattr(cls, name, decorator(getattr(cls, name)))
+        return cls
+    return decorate
+
+@decorate_all_methods(log_handle)
 class MainWindow(ControlWindow):
     """Main GUI for the application. Run the main fucntion of this file"""
     _polarity = 1
@@ -154,7 +183,7 @@ class MainWindow(ControlWindow):
                     self.ui.tabGroup.removeTab(tabIndex)
 
             self.ui.reviewLbl.setText(' - REVIEW MODE')
-            self.ui.startBtn.setEnabled(False)
+            # self.ui.startBtn.setEnabled(False)
                     
         logger.info("PROGRAM LOADED -- waiting for user")
 
@@ -283,8 +312,8 @@ class MainWindow(ControlWindow):
         if self.currentMode == 'chart':
             return winsz, acq_rate
             
-    def onStop(self):
-        self.acqmodel.halt() # stops generation, and acquistion if linked
+    def onStop(self, foo=False):
+        self.acqmodel.halt() # stops generation, and acquisition if linked
         if self.currentMode == 'windowed':
             self.activeOperation = None
             self.liveLock.unlock()
@@ -487,7 +516,7 @@ class MainWindow(ControlWindow):
 
         self.acqmodel.run_mphone_calibration(interval)
 
-    def displayResponse(self, times, response, test_num, trace_num, rep_num):
+    def displayResponse(self, times, response, test_num, trace_num, rep_num, trace_info={}):
         assert len(times) != len(response), "times and response not equal"
         assert len(self._aichans) == response.shape[0], 'number of channels does not agree with data dimensions'
         # print 'response signal', response.shape
@@ -589,7 +618,7 @@ class MainWindow(ControlWindow):
                     self.displayTuningCurve(trace_num, 'all traces', avg_count)
             
     def do_spike_stats(self, response, fs):
-        winsz = float(response.shape[1])/fs
+        winsz = float(response.shape[-1])/fs
 
          # use time subwindow of trace, specified by user
         start_time = self.ui.psthStartField.value()
@@ -720,11 +749,11 @@ class MainWindow(ControlWindow):
                 showall = True
                 response = self.acqmodel.datafile.get_data(path, (tracenum,))
                 repnum = response.shape[0] -1
-                npoints = response.shape[1]
+                npoints = response.shape[-1]
             else:
                 showall = False
                 response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
-                npoints = response.shape[0]            
+                npoints = response.shape[-1]            
 
             winsz = float(npoints)/aifs
             times = np.linspace(0, winsz, npoints)
@@ -732,7 +761,14 @@ class MainWindow(ControlWindow):
             # plot response signal
             self.ui.plotDock.switchDisplay('standard')
             self.display.setXlimits((0,winsz))
-            self.display.updateSpiketrace(times, response)
+
+            nchans = response.shape[-2]
+            if len(self._aichans) != nchans:
+                cnames = get_ai_chans(devname)
+                self.setNewChannels(cnames[:nchans])
+
+            for chan, name in enumerate(self._aichans):
+                self.display.updateSpiketrace(times, response[chan,:], name)
 
             stimuli = self.acqmodel.datafile.get_trace_stim(path)
 
@@ -766,7 +802,7 @@ class MainWindow(ControlWindow):
             self.display.setNreps(tracedata.shape[0])
 
             binsz = float(self.ui.binszSpnbx.value())
-            winsz = float(tracedata.shape[1])/aifs
+            winsz = float(tracedata.shape[-1])/aifs
             # set the max of the PSTH subwindow to the size of this data
             self.ui.psthStopField.setMaximum(winsz)
             self.ui.psthStartField.setMaximum(winsz)
@@ -781,15 +817,14 @@ class MainWindow(ControlWindow):
             spike_rates = []
             for irep in range(repnum+1):
                 count, latency, rate, response_bins = self.do_spike_stats(tracedata[irep], aifs)
-                
-                spike_counts.append(count)
-                spike_latencies.append(latency)
-                spike_rates.append(rate)
-
-                # build raster for current rep in trace
-                bin_times = (np.array(response_bins)*binsz)+(binsz/2)
-                self.display.addRasterPoints(bin_times, irep)
-                self.ui.psth.appendData(response_bins, repnum)
+                spike_counts.extend(count)
+                spike_latencies.extend(latency)
+                spike_rates.extend(rate)
+                for chan, name in enumerate(self._aichans):
+                    # build raster for current rep in trace
+                    bin_times = (np.array(response_bins[chan])*binsz)+(binsz/2)
+                    self.display.addRasterPoints(bin_times, irep, name)
+                    self.ui.psth.appendData(response_bins[chan])
 
             total_spikes = sum(spike_counts)
             avg_count = np.mean(spike_counts)
@@ -830,8 +865,9 @@ class MainWindow(ControlWindow):
                 xlabels = range(testdata.shape[0])
                 groups = ['all traces']
                 plottype = 'other'
+            thresholds = [self._aichan_details[chan]['threshold'] for chan in self._aichans]
             # a not-so-live curve
-            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, self._threshold, aifs, xlabels)
+            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, thresholds, aifs, xlabels)
             self.comatosecurve.setLabels(plottype)
             self.ui.progressDock.setWidget(self.comatosecurve)
 
@@ -929,23 +965,25 @@ class MainWindow(ControlWindow):
         if dlg.exec_():
             cnames = dlg.getSelectedChannels()
             self.ui.chanNumLbl.setText(str(len(cnames)))
-            # remove all plots and re-add from new list
-            self.display.removeResponsePlot(*self.display.responseNameList())
-            self.display.addResponsePlot(*cnames)
-            self._aichans = cnames
-            # remove channels no longer present
-            self._aichan_details = {chan: deets for chan, deets in self._aichan_details.items() if chan in cnames}
-            for name in cnames:
-                # add new channels
-                self._aichan_details[name] = self._aichan_details.get(name, {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)})
-
-            self.display.removeResponsePlot(*self.display.responseNameList())
-            self.display.addResponsePlot(*self._aichans)
-            # update details on plots
-            for name, deets in self._aichan_details.items():
-                self.display.setThreshold(deets['threshold'], name)
-                self.display.setRasterBounds(deets['raster_bounds'], name)
+            self.setNewChannels(cnames)
         dlg.deleteLater()
+
+    def setNewChannels(self, cnames):
+        self._aichans = cnames
+        # remove channels no longer present
+        self._aichan_details = {chan: deets for chan, deets in self._aichan_details.items() if chan in cnames}
+        for name in cnames:
+            # add new channels
+            self._aichan_details[name] = self._aichan_details.get(name, {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)})
+
+        # remove all plots and re-add from new list
+        self.display.removeResponsePlot(*self.display.responseNameList())
+        self.display.addResponsePlot(*self._aichans)
+        # update details on plots
+        for name, deets in self._aichan_details.items():
+            self.display.setThreshold(deets['threshold'], name)
+            self.display.setRasterBounds(deets['raster_bounds'], name)
+        
 
     def launchVocalPaths(self):
         dlg = VocalPathDialog(Vocalization.paths)
@@ -1049,7 +1087,7 @@ class MainWindow(ControlWindow):
     def clearProtocol(self):
         self.ui.protocolView.model().clearTests()
 
-    def updateCalDb(self):
+    def updateCalDb(self, val):
         self.calvals['caldb'] = self.ui.refDbSpnbx.value()
         self.acqmodel.set(caldb=self.calvals['caldb'])
 
