@@ -31,6 +31,9 @@ def datafile():
 def batlabfile():
     return os.path.join(sampledir(), 'batlab')
 
+def tutorialdata():
+    return os.path.join(sampledir(), 'tutorial_data.hdf5')
+
 def test_template():
     return os.path.join(sampledir(), 'multitone.json')
 
