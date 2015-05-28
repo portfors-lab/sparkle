@@ -1,3 +1,4 @@
+import gc
 import glob
 import json
 import logging
@@ -81,7 +82,8 @@ class TestMainUI():
 
     def tearDown(self):
         QtGui.QApplication.processEvents()
-        self.form.close()
+        if self.form.isVisible():
+            self.form.close()
         QtGui.QApplication.closeAllWindows()
 
         # delete all data files in temp folder -- this will also clear out past
@@ -97,6 +99,10 @@ class TestMainUI():
         log = logging.getLogger('main')
         log.removeHandler(self.handler)
         self.handler.close()
+
+        # in a effort to improve test isolation, 
+        # manually garbage collect after each test
+        gc.collect()
 
     # =====================================
     # Test explore functions
@@ -145,7 +151,7 @@ class TestMainUI():
 
         # close the UI, and the datafile also closes
         self.form.close()
-        # give it a change to clean up
+        # give it a chance to clean up
         QtTest.QTest.qWait(1000)
 
         # now check saved data
