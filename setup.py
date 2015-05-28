@@ -5,7 +5,7 @@ import glob
 from setuptools import setup, find_packages
 
 setup(name="sparkle",
-      version='0.0.2',
+      version='0.1.0',
       description="Sound Presentation And Recording Kit for Laboratories of Electrophysiology",
       url="https://github.com/portfors-lab/sparkle",
       author='Amy Boyle',
@@ -29,7 +29,7 @@ setup(name="sparkle",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Natural Language :: English",
