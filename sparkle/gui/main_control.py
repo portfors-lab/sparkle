@@ -183,8 +183,15 @@ class MainWindow(ControlWindow):
                     self.ui.tabGroup.removeTab(tabIndex)
 
             self.ui.reviewLbl.setText(' - REVIEW MODE')
-            # self.ui.startBtn.setEnabled(False)
-                    
+            self.ui.startBtn.setEnabled(False)
+
+        # hide trigger channel - not currently supported, maybe later
+        self.ui.trigCkbx.setVisible(False)
+        self.ui.trigchanBox.setVisible(False)
+        # also hide chart ability, until that is working
+        self.ui.label_17.setVisible(False)
+        self.ui.modeCmbx.setVisible(False)
+
         logger.info("PROGRAM LOADED -- waiting for user")
 
     def addInputChannel(self):
