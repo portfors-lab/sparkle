@@ -9,7 +9,7 @@ The program can be divided into two parts:
 
 The top-level class for the business logic is :class:`AcquisitionManager<sparkle.run.acquisition_manager>`. This class divvies up tasks it receives from the Main UI class to the different acquisition runner modules.
 
-The top-level class for the GUI is :class:`MainWindow<sparkle.gui.control.MainWindow>`. To run this with a data file dialog (recommended) run the main method of :mod:`sparkle.gui.run`.
+The top-level class for the GUI is :class:`MainWindow<sparkle.gui.main_control.MainWindow>`. To run this with a data file dialog (recommended) run the main method of :mod:`sparkle.gui.run`.
 
 Backend Structure
 ------------------
@@ -46,19 +46,19 @@ NI provides simulated devices so that it is possible to develop applications wit
 Stimulus Classes
 ++++++++++++++++
 
-The main container for an individual stimulus is the :class:`StimulusModel<sparkle.stim.stimulus_model>`. Internally, the stimulus is composed of a 2D array (nested lists) of components which are any subclass of :class:`AbstractStimulusComponent<sparkle.stim.abstract_component>`. These classes are required to implement a `signal` function (not to be confused with signals/slots of Qt), which is used by StimulusModel to sum its components to get the total signal for the desired stimulus. This allows for creation of any stimulus imaginable through the ability to overlap components, and to define custom component classes.
+The main container for an individual stimulus is the :class:`StimulusModel<sparkle.stim.stimulus_model>`. Internally, the stimulus is composed of a 2D array (nested lists) of components which are any subclass of :class:`AbstractStimulusComponent<sparkle.stim.abstract_component>`. These classes are required to implement a ``signal`` function (not to be confused with signals/slots of Qt), which is used by StimulusModel to sum its components to get the total signal for the desired stimulus. This allows for creation of any stimulus imaginable through the ability to overlap components, and to define custom component classes.
 
-On its own, a StimulusModel represents a single stimulus signal (the sum of it's components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The StimlulusModel uses the information held in its :class:`AutoParameterModel<sparkle.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
+On its own, a StimulusModel represents a single stimulus signal (the sum of it's components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The ``StimlulusModel`` uses the information held in its :class:`AutoParameterModel<sparkle.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
 
-Any number of StimulusModels can be collected in a list via a :class:`ProtocolModel<sparkle.run.protocol_model>`, to be generated independent of each other, in sequence.
+Any number of ``StimulusModel`s` can be collected in a list via a :class:`ProtocolModel<sparkle.run.protocol_model>`, to be generated independent of each other, in sequence.
 
 Visually, the hierarchy of Stimulus Assembly is as follows:
 
 .. image:: stimulusUML.png
 
-The list of StimlusModels inside of a ProtocolModel, and the list of Components inside of a SimulusModel can, in fact, be empty (and are upon initialization), but cannot be when run by a runner class; i.e. an empty stimulus is considered an error. 
+The list of ``StimlusModel`s` inside of a ``ProtocolModel``, and the list of components inside of a stimulus, can, in fact, be empty (and are upon initialization), but cannot be when run by a runner class; i.e. an empty stimulus is considered an error. 
 
-Discovery of the stimulus components classes, by the UI, is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `sparkle/stim/types` are searched for subclasses of :code:`AbstractStimulusComponent`. Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations by the UI.
+Discovery of the stimulus components classes, by the UI, is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `sparkle/stim/types` are searched for subclasses of ``AbstractStimulusComponent`.` Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations by the UI.
 
 For further information related to adding additional Stimulus Component classes see :doc:`Extending spikey<extending>`
 
@@ -69,23 +69,23 @@ This program uses a digital filter to compensate for high frequency speaker roll
 
 The frequency response for the system is derived via :func:`attenuation_curve<sparkle.tools.audiotools.attenuation_curve>` function. The result of this is also presented to the user as an 'attenuation curve'. This frequency response is saved to file, and can be used later to generate a new filter kernel. 
 
-The frequency response is given to the different acquisition runner classes which will pass it on to their :meth:`StimulusModel<sparkle.stim.stimulus_model.StimulusModel.setCalibration>`. The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<sparkle.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals. This step is done in each `StimulusModel` class, and not more globally like the attenuation curve, becuase the filter kernel will need to be regenerated depending on output sample rate, and this may change between stimulus instances.
+The frequency response is given to the different acquisition runner classes which will pass it on to their :meth:`StimulusModel<sparkle.stim.stimulus_model.StimulusModel.setCalibration>`. The StimulusModel class uses the frequency response vector, together with a vector of respective frequencies, to generate a filter kernel using :func:`impulse_response<sparkle.tools.audiotools.impulse_response>`. This is saved to be used against output stimulus signals. This step is done in each ``StimulusModel`` class, and not more globally like the attenuation curve, because the filter kernel will need to be regenerated depending on output sample rate, and this may change between stimulus instances.
 
 Thus, after stimuli are prepared, but before they are generated, the StimulusModel applies the calibration to the signal by convolving the filter with the output signal using :func:`convolve_filter<sparkle.tools.audiotools.convolve_filter>`.
 
-To see the effect of a calibration, the calibration procedure, or the calibration curve that :class:`CalibrationCurveRunner<sparkle.run.calibration_runner.CalibrationCurveRunner>` runs will a calibration vector in place, will show stimuli with thier component frequencies corrected. Of course, it is also possible to see this in search mode with any stimuli. When using the GUI, a special interface is provided to examine the outgoing and recorded signal. Note that the CalibrationCurveRunner is used for testing only, it does not save a calibration.
+To see the effect of a calibration, the calibration runner classes can also be run with a calibration applied. This can be done with the same stimuli that was used to create the calibration, or a calibration curve (:class:`CalibrationCurveRunner<sparkle.run.calibration_runner.CalibrationCurveRunner>`) that will run through different pure tones. It is also possible to see this in search mode with any stimuli. When using the GUI, a special interface is provided to examine the outgoing and recorded signal. Note that the ``CalibrationCurveRunner`` is used for testing only, it does not save a calibration.
 
-To compare calibration performance and effectiveness test scripts `calibration_performance.py` and `calibration_eval.py` generate tables to compare run times and error between desired and achieved output signals. These scripts can be found in the test/scripts project folder.
+To compare calibration performance and effectiveness, test scripts ``calibration_performance.py`` and ``calibration_eval.py`` generate tables to compare run times and error between desired and achieved output signals. These scripts can be found in the `test/scripts` project folder.
 
 For a more in depth narrative on how this procedure was developed, see this post_, and especially this post__
 
 There are scripts that were used in aid of evaluating the calibration procedure that can be found in the source under *test/scripts*:
 
-    * `calibration_eval.py` : Compares the efficacy of the calibration with varying parameters, such as filter length or smoothing points
+    * ``calibration_eval.py`` : Compares the efficacy of the calibration with varying parameters, such as filter length or smoothing points
 
-    * `calibration_performance.py` : Compares the execution time taken primarily for differing filter length
+    * ``calibration_performance.py`` : Compares the execution time taken primarily for differing filter length
 
-    * `hardware_attenuation.py` : This simple script just compares the output signal to the input to determine amplitude loss across pure tone frequencies. Intended to be used so that we may determine the signal loss from a signal piece of hardware such as an attenuator or amplifier. Another way to investigate this is to analyze the output vs input of a FM sweep signal.
+    * ``hardware_attenuation.py`` : This simple script just compares the output signal to the input to determine amplitude loss across pure tone frequencies. Intended to be used so that we may determine the signal loss from a signal piece of hardware such as an attenuator or amplifier. Another way to investigate this is to analyze the output vs input of a FM sweep signal.
 
 Filter length turned out to be the most influential factor on both filter effectiveness and performance. It is possible to choose a filter length that executes in a shorter amount of time, that still has very good ability to properly adjust signals.
 
@@ -94,7 +94,7 @@ __ http://amyboyle.ninja/Calibrating-Ultrasonic-Speakers-Cont/
 
 GUI Structure
 -------------
-The Qt_ framework was chosen to build the GUI for this project. The project was developed using the PyQt package for the Python bindings. The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. These files have the extension .ui. By convention, all the auto-generated python UI files end in "_form.py". The main UI class :class:`MainWindow<sparkle.gui.control.MainWindow>` holds a reference to an :class:`AcquisitionManager<sparkle.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
+The Qt_ framework was chosen to build the GUI for this project. The project was developed using the PyQt package for the Python bindings. The layout of the main GUI window, as well as dialogs and other pieces, were created using Qt Designer. This creates a XML file that can be used to automatically generate the python code using a script that comes with the PyQt package. These files have the extension .ui. By convention, all the auto-generated python UI files end in "_form.py". The main UI class :class:`MainWindow<sparkle.gui.main_control.MainWindow>` holds a reference to an :class:`AcquisitionManager<sparkle.run.acquisition_manager>`, and the GUI gathers inputs from the user to feed to this main backend class. The Main GUI window mostly contains a lot of widgets that serve as editors for underlying stimuli classes or for plotting data. It also contains inputs to set the acquisition parameters, such as window size, samplerate, channel number, etc.
 
 The views noted above are often contained in editor widgets. There is also an inheritance hierarchy for these editor widgets. (Discussed in the next section)
 
@@ -135,24 +135,25 @@ Data Files
 All types of data files are accessed using the abstract :class:`AcquisitionData<sparkle.data.acqdata.AcquisitionData>` class as a base class to serve as a common interface. The :func:`open_acqdata<sparkle.data.open.open_acqdata>` function will take a filename and open the appropriate class (which is subclass of AcquisitionData) for that file. This allows us to interact with our data in a uniform way regardless of storage method.
 
 The file format chosen to save data to is HDF5. Reasons for choosing this file format:
-  * Ability to load a file without having to load all it's contents in memory
-  * self-describing: can save metadata/stimulus info along data
-  * popular among scientists : not developed in house means anyone can access it without custom code
-  * Mature, been around a while and has 2 sets of python bindings
-  * Hierarchical structure matches our data needs well
+
+    * Ability to load a file without having to load all it's contents in memory
+    * self-describing: can save metadata/stimulus info along data
+    * popular among scientists : not developed in house means anyone can access it without custom code
+    * Mature, been around a while and has 2 sets of python bindings
+    * Hierarchical structure matches our data needs well
 
 To support data already existing the lab, Batlab format data can also be read (but not written to) with Sparkle.
 
 Data backup
 +++++++++++
-In :class:`HDF5Data<sparkle.data.acqdata.HDF5Data>`, the class which handles data writing in Sparkle, backup data methods exist to save backup copies of datasets and metadata. This is important because if a program has an HDF5 file open and crashes it can corrupt the entire data file. The backup methods must be called manually. Sparkle calls the data backup methods after each segment has finished being collected; this allows us to make sure we capture all metadata that got saved with the dataset/group.
+In :class:`HDF5Data<sparkle.data.hdf5data.HDF5Data>`, the class which handles data writing in Sparkle, backup data methods exist to save backup copies of datasets and metadata. This is important because if a program has an HDF5 file open and crashes, it can corrupt the entire data file. The backup methods must be called manually. Sparkle calls the data backup methods after each segment has finished being collected; this allows us to make sure we capture all metadata that got saved with the dataset/group.
 
-Explaination of implementation:
+Explanation of implementation:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 Upon file opening (new or load), a copy of the entire file is made and saved to a (hidden) backup folder created in the directory where the data file is. Each time a test segment finishes, that segment gets saved to it's own backup file in the same folder. These files have incrementing filenames based off of the original data filename. If the program exits normally and closes the original datafile successfully, these backup data files are deleted. If the program crashes, this will not happen, and thus they will be present next time sparkle is started.
 
-When an HDF5File is opened it checks for the presence of these backup files, and it if finds them rebuilds the datafile from these pieces. It renames the original file, to get it out of the way, and renames the re-built data file with the original name. It then carries on with the normal backup procedure. That the File checks for backups before loading the original is important... if a file is corrupted it may still be able to be opened, but data may still be missing; it is then harmful to backup this corrupted data, as it will clean up the previous backup in the process. Therefore, if there is evidence of a crash we do not trust the original data by default.
+When an HDF5File is opened it checks for the presence of these backup files, and it if finds them, it rebuilds the datafile from these pieces. It renames the original file, to get it out of the way, and renames the re-built data file with the original name. It then carries on with the normal backup procedure. That the File checks for backups before loading the original is important... if a file is corrupted it may still be able to be opened, but data may still be missing; it is then harmful to backup this corrupted data, as it will clean up the previous backup in the process. Therefore, if there is evidence of a crash we do not trust the original data by default.
 
 If a file is opened read-only, backups are not made. This allows multiple readers, and the user would have had a chance to make their own backup.
 
@@ -169,10 +170,10 @@ Everything that can be tested, should be tested. There is a testing utility pack
 
 Documentation
 -------------
-This documentation was built using Sphinx_, which uses reStructuredText to generate HTML pages. To build this documentation, go to the *doc* directory in the sparkle source, then build:
+This documentation was built using Sphinx_, which uses reStructuredText to generate HTML pages. To build this documentation, go to the *doc* directory in the sparkle source, then build::
 
-  $ cd doc
-  $ make html
+    $ cd doc
+    $ make html
 
 The documentation can now be viewed by opening `_build\html\index.html` with your browser.
 
