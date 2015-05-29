@@ -3,6 +3,7 @@ import glob
 import json
 import logging
 import os
+import re
 import StringIO
 
 import h5py
@@ -443,6 +444,33 @@ class TestMainUI():
         assert stim_info[1]['components'][0]['duration'] == 0.02
 
     # =====================================
+    # Test review of loaded data
+    # =====================================
+    
+    def test_load_data_and_review(self):
+        self.form.lf = QtGui.QWidget()
+        self.form.loadDataFile(sample.tutorialdata(), 'r')
+        
+        QtTest.QTest.qWait(PAUSE)
+
+        assert self.form.ui.reviewer.datatable.rowCount() == 5
+        
+        # 3 should be the index of the first test (after calibration stuff)
+        self.check_review_plotting(3,0)
+
+    def test_load_data_and_review_backwards_compatable(self):
+        # old data files do not have a channel dimension
+        self.form.lf = QtGui.QWidget()
+        self.form.loadDataFile(sample.datafile(), 'r')
+        
+        QtTest.QTest.qWait(PAUSE)
+
+        assert self.form.ui.reviewer.datatable.rowCount() > 0
+        
+        # 3 should be the index of the first test (after calibration stuff)
+        self.check_review_plotting(3,0)
+
+    # =====================================
     # Test other UI stuffs
     # =====================================
 
@@ -670,6 +698,16 @@ class TestMainUI():
         ntraces = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,3,QtCore.QModelIndex()), QtCore.Qt.DisplayRole) + 1 #+1 for control
         assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
 
+        self.check_review_plotting(0,0)
+        
+        # clear data out of current plots, so we know that the review data is showing
+        # not left-overs from acquisition
+        self._aichans = []
+        self.form.reset_device_channels()
+
+        assert self.form.display.responsePlotCount() == nchans
+
+    def check_review_plotting(self, row, col):
         # clear data out of current plots, so we know that the review data is showing
         # not left-overs from acquisition
         self._aichans = []
@@ -680,8 +718,22 @@ class TestMainUI():
         QtTest.QTest.qWait(ALLOW)
         qtbot.click(self.form.ui.reviewer.btngrp.button(1))
         QtTest.QTest.qWait(ALLOW)
-        qtbot.click(self.form.ui.reviewer.datatable, self.form.ui.reviewer.datatable.model().index(0,0, QtCore.QModelIndex()))
+        qtbot.click(self.form.ui.reviewer.datatable, self.form.ui.reviewer.datatable.model().index(row,col, QtCore.QModelIndex()))
         QtTest.QTest.qWait(ALLOW)
+
+        test_info = self.form.ui.reviewer.derivedtxt.toPlainText()
+        # pull out text dimension string from attributes text
+        dim_match = re.search('Dataset dimensions : \(([\d, ]+)\)', test_info)
+        assert dim_match is not None
+        dims = [int(x) for x in dim_match.groups(0)[0].split(', ')]
+        if len(dims) == 3:
+            nchans = 1
+        elif len(dims) == 4:
+            nchans = dims[2]
+        else:
+            assert False, 'invalid number of data dimensions'
+
+        nsamples = dims[-1]
 
         assert self.form.ui.reviewer.tracetable.rowCount() > 0
         qtbot.click(self.form.ui.reviewer.tracetable, self.form.ui.reviewer.tracetable.model().index(0,0,QtCore.QModelIndex()))

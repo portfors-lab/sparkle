@@ -584,7 +584,8 @@ class MainWindow(ControlWindow):
 
     def processResponse(self, times, response, test_num, trace_num, rep_num, extra_info={}):
         """Calculate spike times from raw response data"""
-        if self.activeOperation == 'calibration' or self.activeOperation == 'caltone':
+        if self.activeOperation == 'calibration' or self.activeOperation == 'caltone' or \
+                (self.activeOperation is None and self.ui.tabGroup.currentWidget().objectName() == 'tabCalibrate'):
             # all this is only meaningful for spike recordings
             return
 
@@ -761,6 +762,10 @@ class MainWindow(ControlWindow):
                 showall = False
                 response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
                 npoints = response.shape[-1]            
+                if len(response.shape) == 1:
+                    # backwards compatibility: reshape old data to have channel dimension
+                    response = response.reshape((1, response.shape[0]))
+                nchans = response.shape[-2]
 
             winsz = float(npoints)/aifs
             times = np.linspace(0, winsz, npoints)
@@ -769,9 +774,8 @@ class MainWindow(ControlWindow):
             self.ui.plotDock.switchDisplay('standard')
             self.display.setXlimits((0,winsz))
 
-            nchans = response.shape[-2]
             if len(self._aichans) != nchans:
-                cnames = get_ai_chans(devname)
+                cnames = get_ai_chans(self.advanced_options['device_name'])
                 self.setNewChannels(cnames[:nchans])
 
             for chan, name in enumerate(self._aichans):
@@ -784,7 +788,6 @@ class MainWindow(ControlWindow):
             # show the stimulus details
             self.reportProgress(-1, tracenum, stimulus)
             self.reportRep(repnum)
-
 
             # need to also recreate the stim
             if repnum == 0:
@@ -806,6 +809,10 @@ class MainWindow(ControlWindow):
 
             # recreate PSTH for current threshold and current rep
             tracedata = self.acqmodel.datafile.get_data(path, (tracenum,))
+            if len(tracedata.shape) == 2:
+                # backwards compatibility: reshape old data to have channel dimension
+                tracedata = tracedata.reshape((tracedata.shape[0], 1, tracedata.shape[1]))
+
             self.display.setNreps(tracedata.shape[0])
 
             binsz = float(self.ui.binszSpnbx.value())
@@ -872,6 +879,16 @@ class MainWindow(ControlWindow):
                 xlabels = range(testdata.shape[0])
                 groups = ['all traces']
                 plottype = 'other'
+
+            if len(testdata.shape) == 3:
+                # backwards compatibility: reshape old data to have channel dimension
+                testdata = testdata.reshape((testdata.shape[0], testdata.shape[1], 1, testdata.shape[-1]))
+            nchans = testdata.shape[-2]
+
+            if len(self._aichans) != nchans:
+                cnames = get_ai_chans(self.advanced_options['device_name'])
+                self.setNewChannels(cnames[:nchans])
+
             thresholds = [self._aichan_details[chan]['threshold'] for chan in self._aichans]
             # a not-so-live curve
             self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, thresholds, aifs, xlabels)
@@ -1032,7 +1049,7 @@ class MainWindow(ControlWindow):
         # self.exvocal.update_colormap()
         self.specArgs['colormap'] = cmap
 
-    def setCalibrationDuration(self):
+    def setCalibrationDuration(self, foo=None):
         winsz = float(self.ui.windowszSpnbx.value())
         self.ui.calibrationWidget.setDuration(winsz)
 
