@@ -757,15 +757,17 @@ class MainWindow(ControlWindow):
                 showall = True
                 response = self.acqmodel.datafile.get_data(path, (tracenum,))
                 repnum = response.shape[0] -1
-                npoints = response.shape[-1]
+                if len(response.shape) == 2:
+                    # backwards compatibility: reshape old data to have channel dimension
+                    response = response.reshape((response.shape[0], 1, response.shape[1]))
             else:
                 showall = False
                 response = self.acqmodel.datafile.get_data(path, (tracenum, repnum))
-                npoints = response.shape[-1]            
                 if len(response.shape) == 1:
                     # backwards compatibility: reshape old data to have channel dimension
                     response = response.reshape((1, response.shape[0]))
-                nchans = response.shape[-2]
+            npoints = response.shape[-1]            
+            nchans = response.shape[-2]
 
             winsz = float(npoints)/aifs
             times = np.linspace(0, winsz, npoints)
@@ -779,7 +781,11 @@ class MainWindow(ControlWindow):
                 self.setNewChannels(cnames[:nchans])
 
             for chan, name in enumerate(self._aichans):
-                self.display.updateSpiketrace(times, response[chan,:], name)
+                if len(response.shape) == 3:
+                    # overlay plot
+                    self.display.updateSpiketrace(times, response[:,chan,:], name)
+                else:
+                    self.display.updateSpiketrace(times, response[chan,:], name)
 
             stimuli = self.acqmodel.datafile.get_trace_stim(path)
 

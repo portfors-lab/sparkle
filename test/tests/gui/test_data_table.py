@@ -17,6 +17,7 @@ class TestStimTable():
 
     def tearDown(self):
         self.table.close()
+        QtGui.QApplication.processEvents()
 
     def test_assert_load(self):
         assert self.table.rowCount() == 6

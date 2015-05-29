@@ -470,6 +470,7 @@ class TestMainUI():
         # 3 should be the index of the first test (after calibration stuff)
         self.check_review_plotting(3,0)
 
+
     # =====================================
     # Test other UI stuffs
     # =====================================
@@ -734,6 +735,7 @@ class TestMainUI():
             assert False, 'invalid number of data dimensions'
 
         nsamples = dims[-1]
+        nreps = dims[1]
 
         assert self.form.ui.reviewer.tracetable.rowCount() > 0
         qtbot.click(self.form.ui.reviewer.tracetable, self.form.ui.reviewer.tracetable.model().index(0,0,QtCore.QModelIndex()))
@@ -746,6 +748,13 @@ class TestMainUI():
             x, y = plot.tracePlot.getData()
             assert x.shape == (nsamples,)
             assert max(y) > 0
+
+        # check overlay of spikes functionality
+        qtbot.click(self.form.ui.reviewer.overlayButton)
+        QtTest.QTest.qWait(ALLOW)
+
+        for plot in self.form.display.responsePlots.values():
+            assert len(plot.trace_stash) == nreps
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
