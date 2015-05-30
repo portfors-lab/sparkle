@@ -281,7 +281,7 @@ class MainWindow(ControlWindow):
         self.ui.stopChartBtn.setEnabled(True)
         self.ui.windowszSpnbx.valueChanged.connect(self.updateScollingWindowsize)
 
-    def onUpdate(self):
+    def onUpdate(self, foo=None):
         if not self.verifyInputs(self.activeOperation):
             return
 

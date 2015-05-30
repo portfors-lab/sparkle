@@ -116,9 +116,6 @@ class TestMainUI():
     def test_vocal_explore(self):
         self.explore_run('vocalization')
 
-    def test_explore_stim_off(self):
-        self.explore_run('off')
-
     def test_explore_multichannel(self):
         devname = get_devices()[0]
         self.form._aichans = [devname+'/ai0', devname+'/ai1']
@@ -508,13 +505,16 @@ class TestMainUI():
     def explore_setup(self, comptype):
         self.form.ui.tabGroup.setCurrentIndex(0)
         stimuli = [str(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.count())]
-        tone_idx = stimuli.index(comptype)
+        stim_idx = stimuli.index(comptype)
         QtTest.QTest.qWait(ALLOW)
         qtbot.move(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx)
 
+        # reset the box to the first item
+        self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.setCurrentIndex(0)
+
         # scroll the mouse the number of ticks equal to it's index
         QtTest.QTest.qWait(PAUSE)
-        qtbot.wheel(-1*tone_idx)
+        qtbot.wheel(-1*stim_idx)
 
         if comptype == 'vocalization':
             # We are going to cheat and set the vocal folders directly
@@ -535,6 +535,12 @@ class TestMainUI():
         self.start_acq()
 
         QtTest.QTest.qWait(1000)
+
+        # test ability to switch to off
+        self.explore_setup('off')
+        self.start_acq()
+        QtTest.QTest.qWait(200)
+
         qtbot.click(self.form.ui.stopBtn)
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "OFF"
