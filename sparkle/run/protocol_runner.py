@@ -39,7 +39,7 @@ class ProtocolRunner(ListAcquisitionRunner):
             recording_length = self.aitimes.shape[0]
             # +1 to trace count for silence window
             self.datafile.init_data(self.current_dataset_name, 
-                                    dims=(test.traceCount()+1, test.repCount(), recording_length),
+                                    dims=(test.traceCount()+1, test.repCount(), len(self.aichan), recording_length),
                                     mode='finite')
         # check for special condition -- replace this with a generic
         # if test.editor is not None and test.editor.name == "Tuning Curve":

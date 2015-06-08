@@ -1,7 +1,9 @@
 import glob
 import json
+import logging
 import os
 import Queue
+import StringIO
 import sys
 import threading
 import time
@@ -31,6 +33,13 @@ class TestAcquisitionManager():
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
         self.done = True
 
+        log = logging.getLogger('main')
+        log.setLevel(logging.DEBUG)
+        self.stream = StringIO.StringIO()
+        self.handler = logging.StreamHandler(self.stream)
+        log.addHandler(self.handler)
+
+
     def tearDown(self):
         # bit of a hack to wait for chart acquisition to finish
         while not self.done:
@@ -41,23 +50,11 @@ class TestAcquisitionManager():
         for f in files:
             os.remove(f)
 
-    def test_cal_tone_settings(self):
-        winsz = 0.2 #seconds
-        acq_rate = 50000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        assert "Error:" not in self.stream.getvalue()
+        log = logging.getLogger('main')
+        log.removeHandler(self.handler)
+        self.handler.close()
 
-        manager.set(caldb=100, calf=15000)
-        manager.set_calibration_duration(winsz)
-        manager.set_calibration_by_index(1)
-
-        t = manager.run_calibration(0.1, False)
-        t.join()
-
-        reftone = manager.bs_calibrator.reftone
-        assert reftone.duration() == winsz
-        assert reftone.frequency()
-
-        manager.close_data()
 
     def tone_protocol(self, manager, intensity=70):
         #insert some stimuli
@@ -242,7 +239,7 @@ class TestAcquisitionManager():
         # stim 0 is control window
         assert_in('components', stim[1])
         assert_equal(stim[1]['samplerate_da'], gen_rate)
-        assert_equal(test.shape,(2,1,winsz*acq_rate))
+        assert_equal(test.shape,(2,1,1,winsz*acq_rate))
         assert stim[1]['overloaded_attenuation'] > 0
         hfile.close()
 
@@ -338,6 +335,30 @@ class TestAcquisitionManager():
         test = hfile['segment_1']['test_1']
 
         check_result(test, stim_model, winsz, acq_rate)
+
+        hfile.close()
+
+    def test_multichannel_protocol(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        nreps = 3
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set(aichan=[u"PCI-6259/ai0", u"PCI-6259/ai1"])
+
+        stim_model = create_vocal_stim(nreps)
+
+        manager.protocol_model().insert(stim_model,0)
+
+        manager.setup_protocol(0.1)
+        t = manager.run_protocol()
+        t.join()
+
+        manager.close_data()
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim_model, winsz, acq_rate, 2)
 
         hfile.close()
 
@@ -447,7 +468,12 @@ class TestAcquisitionManager():
         """Run search operation with tone stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        self.data = []
+        # set a callback to gather and assert for data
+        manager.set_queue_callback('response_collected', self.collect_response)
+        manager.start_listening()        
 
         manager.set(nreps=2)
         stim = manager.explore_stimulus()
@@ -461,13 +487,23 @@ class TestAcquisitionManager():
         t.join()
         manager.close_data()
 
+        assert len(self.data) > 1
+        times, dset = self.data[0]
+        assert times.shape == (int(acq_rate*winsz),)
+        assert dset.shape == (1, int(acq_rate*winsz))
         # should check that it did not save data!
+
 
     def test_vocal_explore(self):
         """Run search operation with vocal wav stimulus"""
         winsz = 0.2 #seconds
         acq_rate = 50000
-        manager, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+
+        self.data = []
+        # set a callback to gather and assert for data
+        manager.set_queue_callback('response_collected', self.collect_response)
+        manager.start_listening()        
 
         manager.set(nreps=2)
 
@@ -484,6 +520,43 @@ class TestAcquisitionManager():
 
         t.join()
         manager.close_data()
+
+        assert len(self.data) > 1
+        times, dset = self.data[0]
+        assert times.shape == (int(acq_rate*winsz),)
+        assert dset.shape == (1, int(acq_rate*winsz))
+
+    def test_multichannel_explore(self):
+        """Run search operation with tone stimulus"""
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)        
+        manager.set(aichan=[u"PCI-6259/ai0", u"PCI-6259/ai1"])
+
+        self.data = []
+        # set a callback to gather and assert for data
+        manager.set_queue_callback('response_collected', self.collect_response)
+        manager.start_listening()
+
+        manager.set(nreps=2)
+        stim = manager.explore_stimulus()
+        stim.insertComponent(PureTone())
+        t = manager.run_explore(0.25)
+
+        time.sleep(1)
+
+        manager.halt()
+
+        t.join()
+        manager.close_data()
+
+        assert len(self.data) > 1
+        times, dset = self.data[0]
+        assert times.shape == (int(acq_rate*winsz),)
+        assert dset.shape == (2, int(acq_rate*winsz))
+
+    def collect_response(self, times, response, test_num, trace_num, rep_num, extra_info={}):
+        self.data.append((times, response))
 
     def test_tone_vocal_explore_save(self):
         """Run search operation with tone and vocal stimulus, and save results"""
@@ -626,20 +699,32 @@ class TestAcquisitionManager():
         acq_rate = manager.calibration_genrate()
 
         manager.set_calibration_by_index(2)
+        manager.set_mphone_calibration(0.004, 94)
         tc = manager.calibration_stimulus('tone')
         ntraces = tc.traceCount()
         nreps = tc.repCount()
         # tc.autoParameters()
         # use tuning curve defaults?
         manager.set_calibration_duration(winsz)
+        # collect response
+        manager.set_queue_callback('average_response', self.collect_avg_resp)
+        manager.start_listening()
+        self.results = []
         t = manager.run_calibration(0.1, False)
         t.join()
+        manager.stop_listening()
+        
         # calname = manager.process_calibration(False)
         fname = manager.datafile.filename
         manager.close_data()
 
+        assert len(self.results) == ntraces * nreps
+
         # tone calibration should never save -- datafile is deleted on close if empty
         assert not os.path.isfile(fname)
+
+    def collect_avg_resp(self, f, db, resultdb):
+        self.results.append((f, db, resultdb))
 
     def test_noise_calibration_protocol(self):
         winsz = 0.1 #seconds
@@ -664,14 +749,22 @@ class TestAcquisitionManager():
         # print 'calname', calname
         hfile = h5py.File(fname, 'r')
         signals = hfile[calname]['signal']
+
         stim = json.loads(signals.attrs['stim'])
         cal_vector = hfile[calname]['calibration_intensities']
 
         assert_in('components', stim[0])
-        assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        # assert_equal(stim[0]['samplerate_da'], tc.samplerate())
+        assert len(stim) == 1
+        assert stim[0]['samplerate_da'] == tc.samplerate() == acq_rate == hfile[calname].attrs['samplerate_ad']
         npts =  winsz*acq_rate
         assert_equal(signals.shape,(nreps, npts))
-        
+        assert len(stim[0]['components']) == 1
+        tone = stim[0]['components'][0]
+        print tone['stim_type']
+        assert tone['stim_type'] == 'FM Sweep'
+
+
         assert cal_vector.shape == ((npts/2+1),)
 
         reftone = hfile[calname]['reference_tone']
@@ -737,7 +830,7 @@ class TestAcquisitionManager():
         manager.load_data_file(fname, 'w-')
         if acq_rate is None:
             acq_rate = manager.calibration_genrate()
-        manager.set(aochan=u"PCI-6259/ao0", aichan=u"PCI-6259/ai0",
+        manager.set(aochan=u"PCI-6259/ao0", aichan=[u"PCI-6259/ai0"],
                            acqtime=winsz, aifs=acq_rate, caldb=100,
                            calv=1.0)
         return manager, fname
@@ -756,12 +849,13 @@ class TestAcquisitionManager():
         manager.bs_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
         manager.tone_calibrator.stash_calibration(calibration_vector, calibration_freqs, frange, calname)
 
-def check_result(test_data, test_stim, winsz, acq_rate):
+def check_result(test_data, test_stim, winsz, acq_rate, nchans=1):
     ntraces = test_stim.traceCount()+1
     nreps = test_stim.repCount()
     stim_doc = json.loads(test_data.attrs['stim'])
 
-    print 'stim doc', stim_doc[0]
+    # print 'test_data', test_data, test_data.shape
+    # print 'stim doc', stim_doc[0]
 
     # check everthing we can here
     assert test_data.attrs['user_tag'] == ''
@@ -772,7 +866,7 @@ def check_result(test_data, test_stim, winsz, acq_rate):
     if t is None: t = ''
     assert test_data.attrs['testtype'] == t
     
-    assert_equal(test_data.shape,(ntraces, nreps, winsz*acq_rate))
+    assert_equal(test_data.shape,(ntraces, nreps, nchans, winsz*acq_rate))
 
     for stim_info in stim_doc:
         assert len(stim_info['time_stamps']) == test_data.attrs['reps']

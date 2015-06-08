@@ -1,12 +1,17 @@
+import gc
 import glob
 import json
+import logging
 import os
+import re
+import StringIO
 
 import h5py
 from nose.tools import assert_equal, assert_in
 
 import qtbot
 import test.sample as sample
+from sparkle.acq.daq_tasks import get_devices
 from sparkle.QtWrapper import QtCore, QtGui, QtTest
 from sparkle.data.open import open_acqdata
 from sparkle.gui.main_control import MainWindow
@@ -23,6 +28,12 @@ class TestMainSetup():
     def setUp(self):
         self.tempfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)), u"tmp")
 
+        log = logging.getLogger('main')
+        log.setLevel(logging.DEBUG)
+        self.stream = StringIO.StringIO()
+        self.handler = logging.StreamHandler(self.stream)
+        log.addHandler(self.handler)
+
     def tearDown(self):
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
@@ -36,7 +47,10 @@ class TestMainSetup():
         self.form.ui.plotDock.close()
         self.form.close()
         QtTest.QTest.qWait(ALLOW)
-        # so no errors?
+
+        # check for any errors
+        log = self.stream.getvalue()
+        assert 'PROGRAM LOADED' in log
 
 class TestMainUI():
     def setUp(self):
@@ -44,6 +58,12 @@ class TestMainUI():
         fname = os.path.join(self.tempfolder, 'testdatafile' +rand_id()+'.hdf5')
         self.form = MainWindow(datafile=fname, filemode='w-')
         self.form.ui.reprateSpnbx.setValue(10)
+        # set AI chan w/o dialog
+        devname = get_devices()[0]
+        self.form.advanced_options['device_name'] = devname
+        self.form._aichans = [devname+'/ai0']
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form.reset_device_channels()
         self.form.show()
         # so that the data display doesn't get in the way of out
         # mouse movements
@@ -55,8 +75,16 @@ class TestMainUI():
         QtGui.QApplication.setFont(font)
         QtGui.QApplication.processEvents()
 
+        log = logging.getLogger('main')
+        log.setLevel(logging.DEBUG)
+        self.stream = StringIO.StringIO()
+        self.handler = logging.StreamHandler(self.stream)
+        log.addHandler(self.handler)
+
     def tearDown(self):
-        self.form.close()
+        QtGui.QApplication.processEvents()
+        if self.form.isVisible():
+            self.form.close()
         QtGui.QApplication.closeAllWindows()
 
         # delete all data files in temp folder -- this will also clear out past
@@ -64,6 +92,18 @@ class TestMainUI():
         files = glob.glob(self.tempfolder + os.sep + '[a-zA-Z0-9_]*.hdf5')
         for f in files:
             os.remove(f)
+
+        # check for any errors
+        errlog = self.stream.getvalue()
+        assert "Error:" not in errlog
+        assert "Exception:" not in errlog
+        log = logging.getLogger('main')
+        log.removeHandler(self.handler)
+        self.handler.close()
+
+        # in a effort to improve test isolation, 
+        # manually garbage collect after each test
+        gc.collect()
 
     # =====================================
     # Test explore functions
@@ -76,8 +116,15 @@ class TestMainUI():
     def test_vocal_explore(self):
         self.explore_run('vocalization')
 
-    def test_explore_stim_off(self):
-        self.explore_run('off')
+    def test_explore_multichannel(self):
+        devname = get_devices()[0]
+        self.form._aichans = [devname+'/ai0', devname+'/ai1']
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)},
+                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form.reset_device_channels()
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.display.responsePlotCount() == 2
+        self.explore_run('pure tone')
 
     # =====================================
     # Test calibration functions
@@ -102,7 +149,7 @@ class TestMainUI():
 
         # close the UI, and the datafile also closes
         self.form.close()
-        # give it a change to clean up
+        # give it a chance to clean up
         QtTest.QTest.qWait(1000)
 
         # now check saved data
@@ -198,6 +245,16 @@ class TestMainUI():
     def test_auto_parameter_protocol(self):
         self.protocol_run([('pure tone',{'duration': 66, 'frequency': 22}), ('pure tone',{'duration': 33})],
             [['duration', 10, 50, 10]])
+
+    def test_tone_protocol_multichannel(self):
+        devname = get_devices()[0]
+        self.form._aichans = [devname+'/ai0', devname+'/ai1']
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)},
+                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form.reset_device_channels()
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.display.responsePlotCount() == 2
+        self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
 
     def xtest_stim_detail_sharing(self):
         # disabled... took away this feature.
@@ -384,6 +441,34 @@ class TestMainUI():
         assert stim_info[1]['components'][0]['duration'] == 0.02
 
     # =====================================
+    # Test review of loaded data
+    # =====================================
+    
+    def test_load_data_and_review(self):
+        self.form.lf = QtGui.QWidget()
+        self.form.loadDataFile(sample.tutorialdata(), 'r')
+        
+        QtTest.QTest.qWait(PAUSE)
+
+        assert self.form.ui.reviewer.datatable.rowCount() == 5
+        
+        # 3 should be the index of the first test (after calibration stuff)
+        self.check_review_plotting(3,0)
+
+    def test_load_data_and_review_backwards_compatable(self):
+        # old data files do not have a channel dimension
+        self.form.lf = QtGui.QWidget()
+        self.form.loadDataFile(sample.datafile(), 'r')
+        
+        QtTest.QTest.qWait(PAUSE)
+
+        assert self.form.ui.reviewer.datatable.rowCount() > 0
+        
+        # 3 should be the index of the first test (after calibration stuff)
+        self.check_review_plotting(3,0)
+
+
+    # =====================================
     # Test other UI stuffs
     # =====================================
 
@@ -420,13 +505,16 @@ class TestMainUI():
     def explore_setup(self, comptype):
         self.form.ui.tabGroup.setCurrentIndex(0)
         stimuli = [str(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.itemText(i)).lower() for i in xrange(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.count())]
-        tone_idx = stimuli.index(comptype)
+        stim_idx = stimuli.index(comptype)
         QtTest.QTest.qWait(ALLOW)
         qtbot.move(self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx)
 
+        # reset the box to the first item
+        self.form.ui.exploreStimEditor.ui.trackStack.widget(0).exploreStimTypeCmbbx.setCurrentIndex(0)
+
         # scroll the mouse the number of ticks equal to it's index
         QtTest.QTest.qWait(PAUSE)
-        qtbot.wheel(-1*tone_idx)
+        qtbot.wheel(-1*stim_idx)
 
         if comptype == 'vocalization':
             # We are going to cheat and set the vocal folders directly
@@ -447,6 +535,12 @@ class TestMainUI():
         self.start_acq()
 
         QtTest.QTest.qWait(1000)
+
+        # test ability to switch to off
+        self.explore_setup('off')
+        self.start_acq()
+        QtTest.QTest.qWait(200)
+
         qtbot.click(self.form.ui.stopBtn)
         QtTest.QTest.qWait(ALLOW)
         assert self.form.ui.runningLabel.text() == "OFF"
@@ -474,10 +568,22 @@ class TestMainUI():
         calname = self.form.calvals['calname']
         assert self.form.calvals['use_calfile'] == withcal
 
+        # connect signal to catch results
+        self.results = []
+        if self.form.ui.calibrationWidget.ui.calTypeCmbbx.currentText() == 'Tone Curve':
+            self.form.signals.calibration_response_collected.connect(self.collect_cal_data)
+
         self.start_acq()
 
         self.wait_until_done()
 
+        if self.form.ui.calibrationWidget.ui.calTypeCmbbx.currentText() == 'Tone Curve':
+            nfreqsteps = int(self.form.ui.calibrationWidget.ui.curveWidget.ui.freqNstepsLbl.text())
+            ndbsteps = int(self.form.ui.calibrationWidget.ui.curveWidget.ui.dbNstepsLbl.text())
+            nreps = self.form.ui.calibrationWidget.ui.nrepsSpnbx.value()
+            assert len(self.results) == nfreqsteps*ndbsteps*nreps
+            self.form.signals.calibration_response_collected.disconnect(self.collect_cal_data)
+           
         # make sure no calibration is present
         assert self.form.calvals['use_calfile'] == withcal
         assert self.form.calvals['calname'] == calname
@@ -486,6 +592,10 @@ class TestMainUI():
         data_groups = self.form.acqmodel.datafile.keys()
         print 'keys', data_groups
         assert len(data_groups) == 0
+
+
+    def collect_cal_data(self, spectrum, freq, vamp):
+        self.results.append(spectrum)
 
     def add_edit_builder(self):
         # add a custom stimulus and opens its editor
@@ -554,6 +664,9 @@ class TestMainUI():
         qtbot.keypress('enter')
         QtGui.QApplication.processEvents()
         QtTest.QTest.qWait(PAUSE)
+
+        stimEditor.ui.nrepsSpnbx.setValue(3)
+        
         # just use default tone settings, for now at least
         qtbot.click(stimEditor.ui.okBtn)
         QtTest.QTest.qWait(ALLOW)
@@ -577,6 +690,77 @@ class TestMainUI():
         # modal dialog will block qt methods in main thread
         # qtbot.handle_modal_widget(wait=True, press_enter=False)
         qtbot.handle_modal_widget(wait=True)
+
+        # check that data reviewer updated
+        nrows = self.form.ui.reviewer.datatable.rowCount()
+        assert nrows == 1
+        assert 'segment_1/test_1' in str(self.form.ui.reviewer.datatable.item(0,0).text())
+
+        # check that our saved data has the correct dimensions according
+        # to current settings on the UI
+        nchans = int(self.form.ui.chanNumLbl.text())
+        nsamples = int(self.form.ui.aifsSpnbx.value() * self.form.ui.windowszSpnbx.value())
+        # gross, reach into model to get # of reps and traces
+        nreps = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,2,QtCore.QModelIndex()), QtCore.Qt.DisplayRole)
+        ntraces = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,3,QtCore.QModelIndex()), QtCore.Qt.DisplayRole) + 1 #+1 for control
+        assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
+
+        self.check_review_plotting(0,0)
+        
+        # clear data out of current plots, so we know that the review data is showing
+        # not left-overs from acquisition
+        self._aichans = []
+        self.form.reset_device_channels()
+
+        assert self.form.display.responsePlotCount() == nchans
+
+    def check_review_plotting(self, row, col):
+        # clear data out of current plots, so we know that the review data is showing
+        # not left-overs from acquisition
+        self._aichans = []
+        self.form.reset_device_channels()
+
+        # check that review data is browseable
+        self.form.ui.tabGroup.setCurrentIndex(3)
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.click(self.form.ui.reviewer.btngrp.button(1))
+        QtTest.QTest.qWait(ALLOW)
+        qtbot.click(self.form.ui.reviewer.datatable, self.form.ui.reviewer.datatable.model().index(row,col, QtCore.QModelIndex()))
+        QtTest.QTest.qWait(ALLOW)
+
+        test_info = self.form.ui.reviewer.derivedtxt.toPlainText()
+        # pull out text dimension string from attributes text
+        dim_match = re.search('Dataset dimensions : \(([\d, ]+)\)', test_info)
+        assert dim_match is not None
+        dims = [int(x) for x in dim_match.groups(0)[0].split(', ')]
+        if len(dims) == 3:
+            nchans = 1
+        elif len(dims) == 4:
+            nchans = dims[2]
+        else:
+            assert False, 'invalid number of data dimensions'
+
+        nsamples = dims[-1]
+        nreps = dims[1]
+
+        assert self.form.ui.reviewer.tracetable.rowCount() > 0
+        qtbot.click(self.form.ui.reviewer.tracetable, self.form.ui.reviewer.tracetable.model().index(0,0,QtCore.QModelIndex()))
+
+        QtTest.QTest.qWait(ALLOW)
+        assert self.form.display.responsePlotCount() == nchans
+
+        # cheat, intimate knowledge of plot structure
+        for plot in self.form.display.responsePlots.values():
+            x, y = plot.tracePlot.getData()
+            assert x.shape == (nsamples,)
+            assert max(y) > 0
+
+        # check overlay of spikes functionality
+        qtbot.click(self.form.ui.reviewer.overlayButton)
+        QtTest.QTest.qWait(ALLOW)
+
+        for plot in self.form.display.responsePlots.values():
+            assert len(plot.trace_stash) == nreps
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":

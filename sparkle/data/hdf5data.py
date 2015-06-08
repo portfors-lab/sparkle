@@ -380,7 +380,6 @@ class HDF5Data(AcquisitionData):
             stim_data = json.dumps(convert2native(stim_data))
         mode = self.meta[key]['mode']
         if mode == 'open':
-            print 'appending stim in open'
             _append_stim(self.hdf5, key, stim_data)
         if mode == 'finite':
             setname = key + '/' + 'test_'+str(self.test_count)

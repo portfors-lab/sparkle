@@ -3,12 +3,13 @@ import os
 from nose.tools import assert_equal
 
 import test.sample as sample
+from sparkle.data.open import open_acqdata
 from sparkle.QtWrapper.QtCore import Qt
 from sparkle.QtWrapper.QtGui import QApplication, QLineEdit
 from sparkle.QtWrapper.QtTest import QTest
-from sparkle.data.open import open_acqdata
+from sparkle.acq.daq_tasks import get_devices
 from sparkle.gui.dialogs import CalibrationDialog, CellCommentDialog, \
-    SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog
+    SavingDialog, ScaleDialog, SpecDialog, ViewSettingsDialog, ChannelDialog
 
 
 class TestCalibrationDialog():
@@ -209,3 +210,13 @@ class TestViewDialog():
 
         dlg.close()
         dlg.deleteLater()
+
+class TestChannelDialog():
+    def test_select_channels(self):
+        devname = get_devices()[0]
+        dlg = ChannelDialog(devname)
+        dlg.channel_switches[0].setChecked(True)
+        dlg.channel_switches[2].setChecked(True)
+        cnames = dlg.getSelectedChannels()
+
+        assert len(cnames) == 2

@@ -130,6 +130,7 @@ class TestProtocolView():
         model = QProtocolTabelModel(tests)
         view.setModel(model)
         stim = TCFactory.create()
+        StimulusModel.setMaxVoltage(5.0, 5.0)
         model.insertTest(stim, 0)
         return view, stim
 

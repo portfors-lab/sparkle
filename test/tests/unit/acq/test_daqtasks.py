@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from sparkle.acq.daq_tasks import AITask, AITaskFinite, AOTask, AOTaskFinite, \
-    DigitalOutTask, get_ai_chans, get_ao_chans
+    DigitalOutTask, get_ai_chans, get_ao_chans, get_devices
 
 try:
     from PyDAQmx import *
@@ -13,7 +13,7 @@ except:
 
 
 DEBUG = False
-DEVNAME = "PCI-6259"
+DEVNAME = get_devices()[0]
 
 class TestDAQTasks():
     def setup(self):
@@ -50,14 +50,18 @@ class TestDAQTasks():
             aot.stop()
             ait.stop()
 
+            # squeeze single channel into single dimension
+            response = np.squeeze(response)
+            assert stim.shape == response.shape
+
             response = np.roll(response, -1)
-            response[-1] = stim[-1] # free pass on first point
+            response[-1] = stim[-1] # free pass on last point
+
             if DEBUG:
                 import matplotlib.pyplot as plt
                 plt.plot(x, stim, x, response)
                 plt.show()
 
-            assert stim.shape == response.shape
 
             if not self.devmode:
                 tolerance = max(amp*0.1, 0.005) #noise floor
@@ -183,6 +187,16 @@ class TestDAQTasks():
         # print "response shape", response1.shape
         # print "duration", duration
         assert len(response1) == npts
+
+    def test_multichannel_acq(self):
+        npts = 10000
+        fs = 10000
+        ait = AITaskFinite([DEVNAME+"/ai16", DEVNAME+"/ai17"], fs, npts)
+        ait.StartTask()
+        response = ait.read()
+        ait.stop()
+
+        assert response.shape == (2, npts)
 
     def stashacq(self, data):
         self.data.extend(data.tolist())

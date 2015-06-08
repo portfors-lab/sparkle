@@ -147,7 +147,7 @@ class CalibrationRunner(AbstractCalibrationRunner):
                                     dims=(self.stimulus.repCount(), self.stimulus.duration()*self.stimulus.samplerate()))
 
     def _initialize_test(self, test):
-        return
+        assert test.samplerate() == self.player.aifs
 
     def _process_response(self, response, trace_info, irep):
         if self.save_data:
@@ -302,6 +302,8 @@ class CalibrationCurveRunner(AbstractCalibrationRunner):
         db = trace_info['components'][0]['intensity']
         # print 'f', f, 'db', db
         
+        response = np.squeeze(response)
+        assert len(response.shape) == 1, 'calibration only supported for single output channel'
         # target frequency amplitude
         freq, spectrum = calc_spectrum(response, self.player.get_aifs())
         peak_fft = spectrum[(np.abs(freq-f)).argmin()]

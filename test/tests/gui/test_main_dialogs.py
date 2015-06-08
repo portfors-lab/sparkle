@@ -80,3 +80,11 @@ class TestMainDialogs():
         qtbot.handle_dialog()
         self.form.launchAdvancedDlg()
         assert_equal(self.form.advanced_options, options)
+
+    def test_channel_dlg(self):
+        chans = self.form._aichans[:]
+        deets = self.form._aichan_details.copy()
+        qtbot.handle_dialog()
+        self.form.launchChannelDlg()
+        assert chans == self.form._aichans
+        assert_equal(self.form._aichan_details, deets)

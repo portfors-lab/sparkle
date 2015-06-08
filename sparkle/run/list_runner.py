@@ -98,7 +98,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
                     self._initialize_test(test)
                     if self.save_data:
-                        print test.testDoc()
                         self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), signal=True)
                     # profiler = cProfile.Profile()
                     # print 'profiling....'
@@ -160,7 +159,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             if self._halt:
                                 raise Broken
                             elapsed = time.time()-t0
-                            print 'down time {:.3f}'.format(elapsed),
+                            # print 'down time {:.3f}'.format(elapsed),
                             # timecollection.append(elapsed)
                             response = self.player.run()
                             s = time.time()
@@ -169,7 +168,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                             looplen = t0 - oldt
                             self.player.reset()
                             # print 'reset time {:.3f}'.format(time.time()-s)
-                            print 'loop duration {:.3f}'.format(looplen)
+                            # print 'loop duration {:.3f}'.format(looplen)
                             timecollection.append(looplen)
                             stamps.append(s)
 

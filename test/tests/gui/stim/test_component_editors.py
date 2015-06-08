@@ -23,7 +23,8 @@ class TestVocalizationEditor():
 
     def tearDown(self):
         self.editor.close()
-        self.editor.deleteLater()        
+        self.editor.deleteLater()
+        QtGui.QApplication.processEvents()     
 
     def xtest_file_order(self):
         # these methods of selecting files, won't work in testing (only)

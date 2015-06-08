@@ -4,7 +4,7 @@ from sparkle.data.open import open_acqdata
 from sparkle.gui.stim_table import StimTable
 from test import sample
 
-PAUSE = 200
+PAUSE = 250
 ALLOW = 20
 
 class TestStimTable():
@@ -17,6 +17,7 @@ class TestStimTable():
 
     def tearDown(self):
         self.table.close()
+        QtGui.QApplication.processEvents()
 
     def test_assert_load(self):
         assert self.table.rowCount() == 6
@@ -41,9 +42,10 @@ class TestStimTable():
 
         self.table.trace_table.close()
 
+        QtTest.QTest.qWait(PAUSE)
         # vocalization auto-test entry
         qtbot.doubleclick(self.table, self.table.model().index(4,1))        
-        QtTest.QTest.qWait(ALLOW)
+        QtTest.QTest.qWait(PAUSE)
 
         assert self.table.trace_table.rowCount() == 10
 

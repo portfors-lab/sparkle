@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1223</width>
-    <height>656</height>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,7 +73,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -378,33 +378,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="aochanBox">
-            <property name="toolTip">
-             <string>Output channel (AO#)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_30">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Recording channel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="aichanBox">
-            <property name="toolTip">
-             <string>Input channel (AI#)</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_29">
             <property name="sizePolicy">
@@ -415,6 +388,34 @@
             </property>
             <property name="text">
              <string>Stimulus channel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="chanNumLbl">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="QComboBox" name="aochanBox">
+            <property name="toolTip">
+             <string>Output channel (AO#)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Recording channels :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="aichanBtn">
+            <property name="text">
+             <string>choose...</string>
             </property>
            </widget>
           </item>
@@ -437,13 +438,6 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Threshold</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
            <widget class="QLabel" name="label_43">
             <property name="text">
              <string>Spike bin size</string>
@@ -463,7 +457,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="3" column="1">
            <widget class="SmartSpinBox" name="binszSpnbx">
             <property name="toolTip">
              <string>Time bin duration for detected spikes for raster and PSTH</string>
@@ -482,7 +476,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="4" column="1">
            <widget class="QDoubleSpinBox" name="reprateSpnbx">
             <property name="toolTip">
              <string>Rate of recording window repetitions</string>
@@ -492,6 +486,9 @@
             </property>
             <property name="prefix">
              <string/>
+            </property>
+            <property name="suffix">
+             <string> reps/s</string>
             </property>
             <property name="minimum">
              <double>0.100000000000000</double>
@@ -504,7 +501,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_35">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -514,38 +511,6 @@
             </property>
             <property name="text">
              <string>Rep rate</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QLabel" name="label_36">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>reps/s</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="threshSpnbx">
-            <property name="toolTip">
-             <string>Spike detection threshold</string>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::NoButtons</enum>
-            </property>
-            <property name="suffix">
-             <string> V</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>500.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -1316,7 +1281,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>386</x>
-     <y>600</y>
+     <y>717</y>
     </hint>
    </hints>
   </connection>
@@ -1359,8 +1324,8 @@
    <slot>modeToggled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>864</x>
-     <y>374</y>
+     <x>893</x>
+     <y>337</y>
     </hint>
     <hint type="destinationlabel">
      <x>705</x>
@@ -1380,7 +1345,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>1222</x>
-     <y>362</y>
+     <y>481</y>
     </hint>
    </hints>
   </connection>
@@ -1423,8 +1388,8 @@
    <slot>clearProtocol()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>161</y>
+     <x>633</x>
+     <y>600</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
@@ -1444,7 +1409,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>1222</x>
-     <y>600</y>
+     <y>717</y>
     </hint>
    </hints>
   </connection>
@@ -1471,8 +1436,8 @@
    <slot>updateCalDb()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>159</y>
+     <x>519</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>866</x>
@@ -1487,8 +1452,8 @@
    <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>164</y>
+     <x>351</x>
+     <y>559</y>
     </hint>
     <hint type="destinationlabel">
      <x>788</x>
@@ -1503,8 +1468,8 @@
    <slot>mphoneCalibrate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>164</y>
+     <x>633</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel">
      <x>749</x>
@@ -1519,8 +1484,8 @@
    <slot>updateMicrophoneCalibration()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>164</y>
+     <x>478</x>
+     <y>559</y>
     </hint>
     <hint type="destinationlabel">
      <x>807</x>
@@ -1571,8 +1536,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1080</x>
-     <y>504</y>
+     <x>1222</x>
+     <y>658</y>
     </hint>
    </hints>
   </connection>
@@ -1583,8 +1548,8 @@
    <slot>setTriggerEnable()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>864</x>
-     <y>374</y>
+     <x>893</x>
+     <y>337</y>
     </hint>
     <hint type="destinationlabel">
      <x>882</x>
@@ -1615,12 +1580,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1173</x>
-     <y>292</y>
+     <x>1194</x>
+     <y>347</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1126</x>
-     <y>294</y>
+     <x>1132</x>
+     <y>351</y>
     </hint>
    </hints>
   </connection>
@@ -1637,6 +1602,22 @@
     <hint type="destinationlabel">
      <x>611</x>
      <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aichanBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>launchChannelDlg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>842</x>
+     <y>130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>901</x>
+     <y>90</y>
     </hint>
    </hints>
   </connection>
@@ -1687,6 +1668,7 @@
   <slot>showComment()</slot>
   <slot>setTriggerEnable()</slot>
   <slot>launchVocalPaths()</slot>
+  <slot>launchChannelDlg()</slot>
   <slot>launchAdvancedDlg()</slot>
  </slots>
 </ui>

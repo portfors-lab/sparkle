@@ -10,6 +10,7 @@ import sparkle.tools.audiotools as audiotools
 from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.plotting.raster_bounds_dlg import RasterBoundsDialog
 from sparkle.gui.plotting.viewbox import SpikeyViewBox
+from sparkle.gui.stim.smart_spinbox import SmartSpinBox
 from sparkle.tools import spikestats
 from sparkle.tools.systools import get_src_directory
 
@@ -71,6 +72,9 @@ class BasePlot(pg.PlotWidget):
         """
         self.getPlotItem().setTitle(title)
 
+    def getTitle(self):
+        return str(self.getPlotItem().titleLabel.text)
+
     def getLabel(self, key):
         """Gets the label assigned to an axes
 
@@ -92,8 +96,9 @@ class TraceWidget(BasePlot):
     rasterBottom = 0.5 # bottom of raster plot
     # this will be set automatically
     rasterYslots = None
-    thresholdUpdated = QtCore.Signal(float)
-    polarityInverted = QtCore.Signal(int)
+    thresholdUpdated = QtCore.Signal(float, str)
+    polarityInverted = QtCore.Signal(int, str)
+    rasterBoundsUpdated = QtCore.Signal(tuple, str)
     _polarity = 1
     _ampScalar = None
     def __init__(self, parent=None):
@@ -136,6 +141,30 @@ class TraceWidget(BasePlot):
         self.hideButtons() # hides the 'A' Auto-scale button
         self.updateRasterBounds()
         self.trace_stash = []
+
+        # add spinbox for threshold number display/edit
+        self.threshold_field = SmartSpinBox()
+        label = QtGui.QLabel("threshold")
+        label.setAutoFillBackground(True)
+        label.setBackgroundRole(QtGui.QPalette.Base)
+
+        self.proxy_threshold_field = QtGui.QGraphicsProxyWidget()
+        self.proxy_threshold_field.setWidget(self.threshold_field)
+        self.proxy_label = QtGui.QGraphicsProxyWidget()
+        self.proxy_label.setWidget(label)
+
+        self.centralWidget.layout.addItem(self.proxy_label, 4, 0)
+        self.centralWidget.layout.addItem(self.proxy_threshold_field, 4,1)
+        
+        self.threshold_field.setMinimumSize(QtCore.QSize(100,10))
+        self.threshold_field.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum))
+        self.threshold_field.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.threshold_field.setAlignment(QtCore.Qt.AlignRight)
+
+        self.threshold_field.setMinimum(-20)
+        self.threshold_field.setMaximum(20)
+        self.threshold_field.setSuffix(' V')
+        self.threshold_field.editingFinished.connect(self._setThresholdFromField)
 
     def updateData(self, axeskey, x, y):
         """Replaces the currently displayed data
@@ -209,7 +238,8 @@ class TraceWidget(BasePlot):
         :param threshold: the y value to set the threshold line at
         :type threshold: float
         """
-        self.threshLine.setValue(threshold) 
+        self.threshLine.setValue(threshold)
+        self.threshold_field.setValue(threshold)
 
     def setNreps(self, nreps):
         """Sets the number of reps user by raster plot to determine where to 
@@ -239,6 +269,7 @@ class TraceWidget(BasePlot):
         rmax = self.rasterTop*yrange_size + yrange[0]
         rmin = self.rasterBottom*yrange_size + yrange[0]
         self.rasterYslots = np.linspace(rmin, rmax, self.nreps)
+        self.rasterBoundsUpdated.emit((self.rasterBottom, self.rasterTop), self.getTitle())
 
     def askRasterBounds(self):
         """Prompts the user to provide the raster bounds with a dialog. 
@@ -300,7 +331,9 @@ class TraceWidget(BasePlot):
 
     def update_thresh(self):
         """Emits a Qt signal thresholdUpdated with the current threshold value"""
-        self.thresholdUpdated.emit(self.threshLine.value())
+        thresh_val = self.threshLine.value()
+        self.threshold_field.setValue(thresh_val)
+        self.thresholdUpdated.emit(thresh_val, self.getTitle())
 
     def invertPolarity(self, inverted):
         if inverted:
@@ -308,7 +341,12 @@ class TraceWidget(BasePlot):
         else:
             pol = 1
         self._polarity = pol
-        self.polarityInverted.emit(pol)
+        self.polarityInverted.emit(pol, self.getTitle())
+
+    def _setThresholdFromField(self):
+        thresh_val = self.threshold_field.value()
+        self.setThreshold(thresh_val)
+        self.thresholdUpdated.emit(thresh_val, self.getTitle())
 
     def setAmpConversionFactor(self, scalar):
         """Set the scalar for converting volts to amps when the trace
@@ -617,17 +655,20 @@ class ProgressWidget(BasePlot):
             self.setLabel('left', "Spike Count (mean)", units='')
 
     @staticmethod
-    def loadCurve(data, groups, threshold, fs, xlabels):
+    def loadCurve(data, groups, thresholds, fs, xlabels):
         """Accepts a data set from a whole test, averages reps and re-creates the 
-        progress plot as the same as it was during live plotting"""
+        progress plot as the same as it was during live plotting. Number of thresholds
+        must match the size of the channel dimension"""
         xlims = (xlabels[0], xlabels[-1])
         pw = ProgressWidget(groups, xlims)
         spike_counts = []
         # skip control
         for itrace in range(data.shape[0]):
-            flat_reps = data[itrace].flatten()
-            spike_times = spikestats.spike_times(flat_reps, threshold, fs)
-            spike_counts.append(len(spike_times)/data.shape[1]) #mean spikes per rep
+            count = 0
+            for ichan in range(data.shape[2]):
+                flat_reps = data[itrace,:,ichan,:].flatten()
+                count += len(spikestats.spike_times(flat_reps, thresholds[ichan], fs))
+            spike_counts.append(count/(data.shape[1]*data.shape[2])) #mean spikes per rep
 
         i = 0
         for g in groups:

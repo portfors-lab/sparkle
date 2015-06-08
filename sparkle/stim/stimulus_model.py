@@ -573,6 +573,7 @@ class StimulusModel():
         :type force_fs: int
         :returns: numpy.ndarray -- voltage signal for this stimulus
         """
+        assert None not in self.voltage_limits, 'Max voltage level not set'
         if force_fs:
             samplerate = force_fs
         else:

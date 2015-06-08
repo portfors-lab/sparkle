@@ -83,12 +83,12 @@ class Task(object):
 		pass	
 
 def DAQmxGetDevAIPhysicalChans(dev, buf, buflen):
-	fakechanlist = ['ai'+str(x) for x in range(32)]
-	fakechans = ','.join(fakechanlist)
+	fakechanlist = ['WOPR/ai'+str(x) for x in range(32)]
+	fakechans = ', '.join(fakechanlist)
 	buf[0:len(fakechans)] = fakechans
 
 def DAQmxGetDevAOPhysicalChans(dev, buf, buflen):
-	fakechans = 'ao0,ao1,ao2,ao3'
+	fakechans = 'ao0, ao1, ao2, ao3'
 	buf[0:len(fakechans)] = fakechans
 
 def DAQmxGetDevIsSimulated(devname, answerbuf):

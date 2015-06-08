@@ -29,7 +29,7 @@ class TestDAQPlayers():
 
         amp = np.max(stim)
         tolerance = max(amp*0.1, 0.005) #noise floor
-        assert stim.shape == response0.shape
+        assert stim.shape[-1] == response0.shape[-1]
         if not self.devmode:
             assert np.allclose(stim, response0, rtol=0, atol=tolerance)
 
@@ -38,7 +38,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs/4, dur)
 
-        assert len(stim) == len(response0)/4
+        assert stim.shape[-1] == response0.shape[-1]/4
         if not self.devmode:
             # assert np.round(np.amax(response0), 2) == np.amax(stim)
             pass
@@ -48,7 +48,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs/4, dur, fs, dur)
 
-        assert len(stim)/4 == len(response0)
+        assert stim.shape[-1]/4 == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == np.amax(stim)
 
@@ -57,7 +57,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs, dur/4)
 
-        assert len(stim) == len(response0)/4
+        assert stim.shape[-1] == response0.shape[-1]/4
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == np.amax(stim)
 
@@ -66,7 +66,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs/4, dur/2)
 
-        assert len(stim) == len(response0)/4/2
+        assert stim.shape[-1] == response0.shape[-1]/4/2
         if not self.devmode:
             pass
             # assert np.round(np.amax(response0), 2) == np.round(np.amax(stim), 2)
@@ -76,7 +76,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur/2, fs, dur)
 
-        assert len(stim)/2 == len(response0)
+        assert stim.shape[-1]/2 == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == np.amax(stim)
 
@@ -85,9 +85,18 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs/4, dur/2, fs, dur)
 
-        assert len(stim)/4/2 == len(response0)
+        assert stim.shape[-1]/4/2 == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 2) == np.amax(stim)
+
+    def test_finite_multichannel(self):
+        fs = 500000
+        dur = 0.01
+        stim, response0 = self.run_finite(fs, dur, fs, dur, nchans=2)
+
+        assert len(response0.shape) == 2
+        assert stim.shape[-1] == response0.shape[-1]
+        assert response0.shape[0] == 2
 
     @unittest.skip("No longer having acq module check out voltage")
     def test_stim_over_max_voltage(self):
@@ -95,7 +104,7 @@ class TestDAQPlayers():
         dur = 0.02
         stim, response0 = self.run_finite(fs, dur, fs, dur, 11.0)
 
-        assert len(stim) == len(response0)
+        assert stim.shape[-1] == response0.shape[-1]
         if not self.devmode:
             assert np.round(np.amax(response0), 1) == MAXV
 
@@ -128,14 +137,18 @@ class TestDAQPlayers():
         assert nstims == 1
         assert len(self.data) > 1
 
-    def run_finite(self, infs, indur, outfs, outdur, amp=2.0):
+    def run_finite(self, infs, indur, outfs, outdur, amp=2.0, nchans=1):
         player = FinitePlayer()
 
         tone = data_func(outfs*outdur, 5, amp)
         player.set_stim(tone, outfs)
         player.set_aidur(indur)
         player.set_aifs(infs)
-        player.set_aichan(DEVNAME+"/ai16")
+        if nchans == 1:
+            player.set_aichan(DEVNAME+"/ai16")
+        else:
+            chans = [DEVNAME+"/ai"+str(i) for i in range(nchans)]
+            player.set_aichan(chans)
         player.set_aochan(DEVNAME+"/ao2")
         # player.start_timer(10)
         player.start()
