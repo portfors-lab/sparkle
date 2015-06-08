@@ -126,6 +126,12 @@ class TestMainUI():
         assert self.form.display.responsePlotCount() == 2
         self.explore_run('pure tone')
 
+        # test setting things on the plots
+        for chan in self.form._aichans:
+            self.form.display.responsePlots[chan].invertPolarity(True)
+            QtTest.QTest.qWait(ALLOW)
+            assert self.form._aichan_details[chan]['polarity'] == -1
+
     # =====================================
     # Test calibration functions
     # ===================================== 

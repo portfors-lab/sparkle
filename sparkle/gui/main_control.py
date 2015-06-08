@@ -1063,7 +1063,7 @@ class MainWindow(ControlWindow):
         self._aichan_details[str(chan_name)]['threshold'] = thresh
         self.reloadReview()
 
-    def setPolarity(self, pol):
+    def setPolarity(self, pol, chan_name):
         self._aichan_details[str(chan_name)]['polarity'] = pol
         self.reloadReview()
 

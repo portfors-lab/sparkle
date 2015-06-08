@@ -1,4 +1,4 @@
-from QtWrapper import QtCore, QtGui
+from sparkle.QtWrapper import QtCore, QtGui
 
 from sparkle.acq.daq_tasks import get_ai_chans
 
