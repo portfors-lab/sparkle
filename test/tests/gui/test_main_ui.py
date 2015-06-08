@@ -62,7 +62,7 @@ class TestMainUI():
         devname = get_devices()[0]
         self.form.advanced_options['device_name'] = devname
         self.form._aichans = [devname+'/ai0']
-        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9), 'abs': True}}
         self.form.reset_device_channels()
         self.form.show()
         # so that the data display doesn't get in the way of out
@@ -119,8 +119,8 @@ class TestMainUI():
     def test_explore_multichannel(self):
         devname = get_devices()[0]
         self.form._aichans = [devname+'/ai0', devname+'/ai1']
-        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)},
-                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9), 'abs': True},
+                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9), 'abs': True}}
         self.form.reset_device_channels()
         QtTest.QTest.qWait(ALLOW)
         assert self.form.display.responsePlotCount() == 2
@@ -255,8 +255,8 @@ class TestMainUI():
     def test_tone_protocol_multichannel(self):
         devname = get_devices()[0]
         self.form._aichans = [devname+'/ai0', devname+'/ai1']
-        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)},
-                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)}}
+        self.form._aichan_details = {devname+'/ai0': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9), 'abs': True},
+                                     devname+'/ai1': {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9), 'abs': True}}
         self.form.reset_device_channels()
         QtTest.QTest.qWait(ALLOW)
         assert self.form.display.responsePlotCount() == 2

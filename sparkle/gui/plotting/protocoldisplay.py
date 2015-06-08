@@ -10,6 +10,7 @@ class ProtocolDisplay(QtGui.QWidget):
     thresholdUpdated = QtCore.Signal(float, str)
     polarityInverted = QtCore.Signal(float, str)
     rasterBoundsUpdated = QtCore.Signal(tuple, str)
+    absUpdated = QtCore.Signal(bool, str)
     def __init__(self, response_chan_name='chan0', parent=None):
         super(ProtocolDisplay, self).__init__(parent)
 
@@ -60,6 +61,7 @@ class ProtocolDisplay(QtGui.QWidget):
         spiketracePlot.thresholdUpdated.connect(self.thresholdUpdated.emit)
         spiketracePlot.polarityInverted.connect(self.polarityInverted.emit)
         spiketracePlot.rasterBoundsUpdated.connect(self.rasterBoundsUpdated.emit)
+        spiketracePlot.absUpdated.connect(self.absUpdated.emit)
         self.colormapChanged = self.specPlot.colormapChanged
 
         # for the purposes of splitter not updating contents...
@@ -101,6 +103,7 @@ class ProtocolDisplay(QtGui.QWidget):
             plot.thresholdUpdated.connect(self.thresholdUpdated.emit)
             plot.polarityInverted.connect(self.polarityInverted.emit)
             plot.rasterBoundsUpdated.connect(self.rasterBoundsUpdated.emit)
+            plot.absUpdated.connect(self.absUpdated.emit)
             self.responsePlots[name] = plot
 
     def removeResponsePlot(self, *names):
@@ -110,6 +113,7 @@ class ProtocolDisplay(QtGui.QWidget):
                 plot.thresholdUpdated.disconnect()
                 plot.polarityInverted.disconnect()
                 plot.rasterBoundsUpdated.disconnect()
+                plot.absUpdated.disconnect()
                 plot.plotItem.vb.sigXRangeChanged.disconnect()
                 plot.close()
                 plot.deleteLater()
@@ -219,6 +223,8 @@ class ProtocolDisplay(QtGui.QWidget):
     def setRasterBounds(self, bounds, plotname):
         self.responsePlots[plotname].setRasterBounds(bounds)
 
+    def setAbs(self, bounds, plotname):
+        self.responsePlots[plotname].setAbs(bounds)
 
 
 if __name__ == "__main__":

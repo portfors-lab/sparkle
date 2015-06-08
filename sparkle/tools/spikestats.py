@@ -19,19 +19,22 @@ def refractory(times, refract=0.002):
 			times_refract.append(times[i])        
 	return times_refract
 
-def spike_times(signal, threshold, fs, mint=None):
+def spike_times(signal, threshold, fs, absval=True):
     """Detect spikes from a given signal
 
     :param signal: Spike trace recording (vector)
     :type signal: numpy array
     :param threshold: Threshold value to determine spikes
     :type threshold: float
+    :param absval: Whether to apply absolute value to signal before thresholding
+    :type absval: bool
     :returns: list(float) of spike times in seconds
 
-    For every continuous set of points with absolute value over given threshold, 
+    For every continuous set of points over given threshold, 
     returns the time of the maximum"""
     times = []
-    signal = np.abs(signal)
+    if absval:
+        signal = np.abs(signal)
     over, = np.where(signal>threshold)
     segments, = np.where(np.diff(over) > 1)
 

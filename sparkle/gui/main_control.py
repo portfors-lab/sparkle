@@ -111,6 +111,7 @@ class MainWindow(ControlWindow):
         self.display.colormapChanged.connect(self.relayCMapChange)
         self.display.polarityInverted.connect(self.setPolarity)
         self.display.rasterBoundsUpdated.connect(self.updateRasterBounds)
+        self.display.absUpdated.connect(self.updateAbsThreshold)
 
         self.ui.protocolView.setModel(QProtocolTabelModel(self.acqmodel.protocol_model()))
         self.ui.calibrationWidget.setCurveModel(QStimulusModel(self.acqmodel.calibration_stimulus('tone')))
@@ -648,7 +649,8 @@ class MainWindow(ControlWindow):
             # invert polarity affects spike counting
             channel_data = response[chan,:] * self._aichan_details[name]['polarity']
             threshold = self._aichan_details[name]['threshold']
-            spike_times = spikestats.spike_times(channel_data[start_index:stop_index], threshold, fs)
+            useabs = self._aichan_details[name]['abs']
+            spike_times = spikestats.spike_times(channel_data[start_index:stop_index], threshold, fs, useabs)
             
             count.append(len(spike_times))
             if len(spike_times) > 0:
@@ -896,8 +898,9 @@ class MainWindow(ControlWindow):
                 self.setNewChannels(cnames[:nchans])
 
             thresholds = [self._aichan_details[chan]['threshold'] for chan in self._aichans]
+            useabs = [self._aichan_details[chan]['abs'] for chan in self._aichans]
             # a not-so-live curve
-            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, thresholds, aifs, xlabels)
+            self.comatosecurve = ProgressWidget.loadCurve(testdata, groups, thresholds, useabs, aifs, xlabels)
             self.comatosecurve.setLabels(plottype)
             self.ui.progressDock.setWidget(self.comatosecurve)
 
@@ -1004,7 +1007,7 @@ class MainWindow(ControlWindow):
         self._aichan_details = {chan: deets for chan, deets in self._aichan_details.items() if chan in cnames}
         for name in cnames:
             # add new channels
-            self._aichan_details[name] = self._aichan_details.get(name, {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9)})
+            self._aichan_details[name] = self._aichan_details.get(name, {'threshold': 5, 'polarity': 1, 'raster_bounds':(0.5,0.9), 'abs': True})
 
         # remove all plots and re-add from new list
         self.display.removeResponsePlot(*self.display.responseNameList())
@@ -1013,8 +1016,8 @@ class MainWindow(ControlWindow):
         for name, deets in self._aichan_details.items():
             self.display.setThreshold(deets['threshold'], name)
             self.display.setRasterBounds(deets['raster_bounds'], name)
+            self.display.setAbs(deets['abs'], name)
         
-
     def launchVocalPaths(self):
         dlg = VocalPathDialog(Vocalization.paths)
         if dlg.exec_():
@@ -1069,6 +1072,9 @@ class MainWindow(ControlWindow):
 
     def updateRasterBounds(self, lims, chan_name):
         self._aichan_details[str(chan_name)]['raster_bounds'] = lims
+
+    def updateAbsThreshold(self, absval, chan_name):
+        self._aichan_details[str(chan_name)]['abs'] = absval
 
     def reloadReview(self):
         # reload data, if user is currently reviewing stuffz
