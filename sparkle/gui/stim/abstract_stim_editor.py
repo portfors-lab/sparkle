@@ -58,7 +58,7 @@ class AbstractStimulusWidget(AbstractEditorWidget):
         if not msg:
             msg = self.model().warning()
         if msg:
-            answer = QtGui.QMessageBox( QtGui.QMessageBox.Warning, ' ', 'Warning: {}. Do you want to change this?'.format(msg) )
+            answer = QtGui.QMessageBox( QtGui.QMessageBox.Warning, 'Warning - Invalid Settings', '{}. Do you want to change this?'.format(msg) )
             yesButton = answer.addButton(self.tr('Edit'), QtGui.QMessageBox.YesRole)
             noButton = answer.addButton(self.tr('Ignore'), QtGui.QMessageBox.NoRole)
             answer.exec_()
