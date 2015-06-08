@@ -990,7 +990,6 @@ class MainWindow(ControlWindow):
             self.ui.aifsSpnbx.setValue(self.acqmodel.calibration_genrate())
             self.ui.aifsSpnbx.setEnabled(False)
             self.setCalibrationDuration()
-            self.ui.mphoneCalBtn.setText('Calibrate Mic')
             self.ui.startBtn.setText('Calibrate Speaker')
         elif self.prevTab == 'calibration':
             self.ui.aifsSpnbx.setEnabled(True)
