@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Thu May 21 11:03:49 2015
+# Created: Mon Jun  8 17:27:22 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -350,7 +350,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -602,7 +602,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tabGroup.setCurrentIndex(1)
+        self.tabGroup.setCurrentIndex(2)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchSaveDlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCalibrationDlg)
         QtCore.QObject.connect(self.actionSet_Scale, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchScaleDlg)
@@ -658,7 +658,7 @@ class Ui_ControlWindow(object):
         self.mphoneDBSpnbx.setToolTip(_translate("ControlWindow", "intensity of microphone calibration device", None))
         self.label_22.setText(_translate("ControlWindow", "dB SPL", None))
         self.mphoneCalBtn.setToolTip(_translate("ControlWindow", "Start recording microphone calibration tone", None))
-        self.mphoneCalBtn.setText(_translate("ControlWindow", "calibrate", None))
+        self.mphoneCalBtn.setText(_translate("ControlWindow", "Calibrate Mic", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabCalibrate), _translate("ControlWindow", "Calibration", None))
         self.tabGroup.setTabText(self.tabGroup.indexOf(self.tabReview), _translate("ControlWindow", "Review", None))
         self.label_29.setText(_translate("ControlWindow", "Stimulus channel", None))
