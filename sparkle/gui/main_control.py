@@ -336,6 +336,8 @@ class MainWindow(ControlWindow):
 
         if str(self.ui.tabGroup.tabText(self.ui.tabGroup.currentIndex())).lower() != 'calibration':
             self.ui.aifsSpnbx.setEnabled(True)
+        else:
+            self.ui.startBtn.setText('Calibrate Speaker')
         self.ui.aochanBox.setEnabled(True)
         reprate = self.ui.reprateSpnbx.setEnabled(True)
         self.ui.stopBtn.setEnabled(False)
@@ -1084,9 +1086,11 @@ class MainWindow(ControlWindow):
             self.ui.aifsSpnbx.setValue(self.acqmodel.calibration_genrate())
             self.ui.aifsSpnbx.setEnabled(False)
             self.setCalibrationDuration()
+            self.ui.startBtn.setText('Calibrate Speaker')
         elif self.prevTab == 'calibration':
             self.ui.aifsSpnbx.setEnabled(True)
             self.ui.aifsSpnbx.setValue(self.stashedAisr)
+            self.ui.startBtn.setText('Start')
         
         if str(self.ui.tabGroup.tabText(tabIndex)).lower() == 'review' and self.activeOperation != 'explore':
             self.ui.startBtn.setEnabled(False)
