@@ -42,7 +42,7 @@ class TCFactory(StimFactory):
      and intensity autoparameters"""
     name = 'Tuning Curve' #name that shows up on drag label
     defaultInputs = { 'duration':0.05, 'risefall':0.003, 'reps':10, 'freqStart':1000, 'freqStop':100000, 'freqStep':10000, 
-        'intenStart':99, 'intenStop':70, 'intenStep':10 }
+        'intenStart':60, 'intenStop':70, 'intenStep':10 }
     @staticmethod
     def create():
         stim = StimulusModel()
@@ -74,8 +74,8 @@ class CCFactory(StimFactory):
     """Intializes stimulus to have a single tone with frequency
      and intensity autoparameters"""
     name = 'Calibration Curve'
-    defaultInputs = { 'duration':0.1, 'risefall':0.003, 'reps':1, 'freqStart':1000, 'freqStop':100000, 'freqStep':20000, 
-        'intenStart':80, 'intenStop':90, 'intenStep':10 }
+    defaultInputs = { 'duration':0.05, 'risefall':0.003, 'reps':10, 'freqStart':1000, 'freqStop':100000, 'freqStep':20000, 
+        'intenStart':90, 'intenStop':100, 'intenStep':10 }
     @staticmethod
     def create():
         stim = StimulusModel()
