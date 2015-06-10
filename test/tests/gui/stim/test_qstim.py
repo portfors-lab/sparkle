@@ -14,6 +14,7 @@ from sparkle.stim.reorder import order_function
 from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.types.stimuli_classes import PureTone, Vocalization
 from sparkle.tools.systools import get_src_directory
+from sparkle.gui.stim.factory import get_stimulus_editor, get_stimulus_factory
 
 src_dir = get_src_directory()
 with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
@@ -91,7 +92,7 @@ class TestQStimModel():
         model.insertComponent(model.createIndex(0, 0, component), component)
         self.add_auto_param(data) 
 
-        model.setEditor(StimulusEditor)
+        model.setEditor('Tuning Curve')
         template = model.templateDoc()
 
         clone = QStimulusModel.loadFromTemplate(template)
@@ -103,7 +104,7 @@ class TestQStimModel():
         tcf = TCFactory()
         data = tcf.create()
         model = QStimulusModel(data)
-        model.setEditor(tcf.editor())
+        model.setEditor(tcf.name)
 
         template = model.templateDoc()
 

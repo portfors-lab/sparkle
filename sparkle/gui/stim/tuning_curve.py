@@ -114,6 +114,22 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         """Gets the input widget that handles duration"""
         return self.ui.durSpnbx
 
+    def closeEvent(self, event):
+        super(TuningCurveEditor, self).closeEvent(event)
+        inputDict = {}
+        inputDict['duration'] = self.ui.durSpnbx.value()
+        inputDict['risefall'] = self.ui.risefallSpnbx.value()
+        inputDict['reps'] = self.ui.nrepsSpnbx.value()
+        inputDict['freqStart'] = self.ui.freqStartSpnbx.value()
+        inputDict['freqStop'] = self.ui.freqStopSpnbx.value()
+        inputDict['freqStep'] = self.ui.freqStepSpnbx.value()
+        inputDict['intenStart'] = self.ui.dbStartSpnbx.value()
+        inputDict['intenStop'] = self.ui.dbStopSpnbx.value()
+        inputDict['intenStep'] = self.ui.dbStepSpnbx.value()
+        self.editingFinished.emit(inputDict)
+
+
+
 if __name__ == "__main__":
     import sys
     from sparkle.stim.auto_parameter_model import AutoParameterModel

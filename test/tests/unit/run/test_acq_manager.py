@@ -371,7 +371,7 @@ class TestAcquisitionManager():
 
         hfile.close()
 
-    # @unittest.skip("Grrrrrr")
+    @unittest.skip("Grrrrrr")
     def test_protocol_timing(self):
         winsz = 0.2 #seconds
         acq_rate = 50000
@@ -406,7 +406,7 @@ class TestAcquisitionManager():
 
         hfile.close()
 
-    # @unittest.skip("Grrrrrr")
+    @unittest.skip("Grrrrrr")
     def test_protocol_timing_vocal_batlab(self):
         winsz = 0.280 #seconds
         acq_rate = 100000

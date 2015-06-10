@@ -1,7 +1,7 @@
 import json
 import os
 
-from sparkle.QtWrapper import QtGui
+from sparkle.QtWrapper import QtGui, QtCore
 from sparkle.gui.stim.abstract_editor import AbstractEditorWidget
 
 
@@ -9,6 +9,7 @@ class AbstractStimulusWidget(AbstractEditorWidget):
     """Abstract class for editors for :class:`QStimulusModels<sparkle.gui.stim.qstimulus.QStimulusModel>`"""
     saveFolder = os.path.expanduser('~')
     ok = None # must be implemented as a QPushButton to accept the edits
+    editingFinished = QtCore.Signal(dict)
     def saveStimulus(self):
         # manually instead of static function for testing purposes
         self.dialog = QtGui.QFileDialog(self, u"Save Stimulus Setup to File", 
