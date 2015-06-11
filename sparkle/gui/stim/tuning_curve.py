@@ -37,7 +37,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.funit_fields.append(self.ui.freqStepSpnbx)
 
     def setModel(self, model):
-        """Sets the StimulusModel for this editor"""
+        """Sets the QStimulusModel for this editor"""
         self.stimModel = model
         self.parameterModel = model.autoParams()
         tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole+1)

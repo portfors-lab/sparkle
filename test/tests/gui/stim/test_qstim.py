@@ -22,6 +22,9 @@ with open(os.path.join(src_dir,'settings.conf'), 'r') as yf:
 USE_RMS = config['use_rms']
 
 class TestQStimModel():
+    def setup(self):
+        StimulusModel.setMaxVoltage(1.5, 10.0)
+
     def test_insert_data(self):
         data = StimulusModel()
         model = QStimulusModel(data)

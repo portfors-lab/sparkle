@@ -167,7 +167,7 @@ class TestDataReviewer():
         self.ui.datatable.setCurrentCell(3,0)
         self.ui.tracetable.setCurrentCell(1,0)
 
-        wait_time = 3*200*23 + 50
+        wait_time = 3*200*23 + 1000
 
         self.ui.playTest()
         QtTest.QTest.qWait(wait_time)

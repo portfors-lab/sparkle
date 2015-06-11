@@ -306,7 +306,7 @@ class TestMainUI():
         qtbot.drag_view(pv, (0,1), (1,1))
         stims = pv.model().stimulusList()
         print stims[1].stimType()
-        assert stims[1].stimType() == 'Custom'
+        assert stims[1].stimType() == 'Builder'
 
     def test_reorder_protocol_multivocal(self):
         # I was recieving a pickling error from wrapping the 
@@ -342,7 +342,7 @@ class TestMainUI():
 
         assert self.form.acqmodel.protocol_model().rowCount() == 2
         stims = self.form.acqmodel.protocol_model().allTests()
-        assert stims[1].stimType() == 'Custom'
+        assert stims[1].stimType() == 'Builder'
         assert stims[1].traceCount() > 1
 
     def test_edit_stim_after_start(self):
@@ -538,6 +538,7 @@ class TestMainUI():
         QtTest.QTest.qWait(PAUSE)
 
         pztr = stimEditor.ui.parametizer.parametizer
+        stimEditor.ui.nrepsSpnbx.setValue(2)
 
         for i, param in enumerate(autoparams):
             qtbot.drag(pztr.addLbl,pztr.paramList)

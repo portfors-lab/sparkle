@@ -237,7 +237,6 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
             if index.isValid():
                 selectedStimModel = self.model().data(index, QtCore.Qt.UserRole)
                 self.stimEditor = selectedStimModel.showEditor()
-                # self.stimEditor.editingFinished.connect()                
                 self.stimEditor.show()
 
     def indexXY(self, index):

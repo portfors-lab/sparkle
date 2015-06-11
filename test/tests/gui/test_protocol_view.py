@@ -20,6 +20,7 @@ class TestProtocolView():
     def setUp(self):
         if not os.path.exists(tempfolder):
             os.mkdir(tempfolder)
+        StimulusModel.setMaxVoltage(5,5)
 
     def tearDown(self):
         shutil.rmtree(tempfolder, ignore_errors=True)

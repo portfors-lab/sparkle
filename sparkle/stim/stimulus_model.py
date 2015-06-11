@@ -776,6 +776,8 @@ class StimulusModel():
             return msg
         if self.caldb is None or self.calv is None:
             return "Test reference voltage not set"
+        if None in self.voltage_limits:
+            return "Device voltage limits not set"
         return 0
 
     @staticmethod
