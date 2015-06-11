@@ -54,7 +54,7 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         self.interval = interval
 
     def run(self):
-        """Runs the acquisiton"""
+        """Runs the acquisition"""
         self._initialize_run()
 
         stimuli = self.protocol_model.allTests()

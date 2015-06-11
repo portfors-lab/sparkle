@@ -844,6 +844,26 @@ class TestAcquisitionManager():
 
         hfile.close()
 
+    def test_protocol_with_averaging_multichannel(self):
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set(average=True, aichan=[u"PCI-6259/ai0", u"PCI-6259/ai1"])
+
+        # create and run tone protocol
+        stim = self.tone_protocol(manager)
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+        assert hfile['segment_1'].attrs['averaged'] == True
+        test = hfile['segment_1']['test_1']
+
+        check_result(test, stim, winsz, acq_rate, nchans=2, averaged=True)
+
+        hfile.close()
+
     #==============================
     # helper functions
     #==============================

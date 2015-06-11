@@ -42,7 +42,7 @@ class ProtocolRunner(ListAcquisitionRunner):
                 self.datafile.init_data(self.current_dataset_name, 
                                         dims=(test.traceCount()+1, 1, len(self.aichan), recording_length),
                                         mode='finite')
-                self.avg_buffer = np.zeros((test.repCount(), recording_length))
+                self.avg_buffer = np.zeros((test.repCount(), len(self.aichan), recording_length))
             else:
                 self.datafile.init_data(self.current_dataset_name, 
                                     dims=(test.traceCount()+1, test.repCount(), len(self.aichan), recording_length),

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_control.ui'
 #
-# Created: Mon Jun  8 17:27:22 2015
+# Created: Thu Jun 11 10:31:39 2015
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -285,7 +285,7 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
         self.trigchanBox = QtGui.QComboBox(self.centralwidget)
         self.trigchanBox.setObjectName(_fromUtf8("trigchanBox"))
-        self.gridLayout_5.addWidget(self.trigchanBox, 1, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.trigchanBox, 2, 1, 1, 1)
         self.label_17 = QtGui.QLabel(self.centralwidget)
         self.label_17.setObjectName(_fromUtf8("label_17"))
         self.gridLayout_5.addWidget(self.label_17, 0, 0, 1, 1)
@@ -296,7 +296,10 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.addWidget(self.modeCmbx, 0, 1, 1, 1)
         self.trigCkbx = QtGui.QCheckBox(self.centralwidget)
         self.trigCkbx.setObjectName(_fromUtf8("trigCkbx"))
-        self.gridLayout_5.addWidget(self.trigCkbx, 1, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.trigCkbx, 2, 0, 1, 1)
+        self.averageChbx = QtGui.QCheckBox(self.centralwidget)
+        self.averageChbx.setObjectName(_fromUtf8("averageChbx"))
+        self.gridLayout_5.addWidget(self.averageChbx, 1, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_5)
         self.frame = QtGui.QFrame(self.centralwidget)
         self.frame.setFrameShape(QtGui.QFrame.HLine)
@@ -350,7 +353,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -679,6 +682,7 @@ class Ui_ControlWindow(object):
         self.modeCmbx.setItemText(0, _translate("ControlWindow", "Windowed", None))
         self.modeCmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
         self.trigCkbx.setText(_translate("ControlWindow", "Trigger", None))
+        self.averageChbx.setText(_translate("ControlWindow", "Average response", None))
         self.label_8.setText(_translate("ControlWindow", "Calibration:", None))
         self.currentCalLbl.setText(_translate("ControlWindow", "None", None))
         self.dataFileLbl.setText(_translate("ControlWindow", "None", None))
