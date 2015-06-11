@@ -25,20 +25,26 @@ class ProtocolRunner(ListAcquisitionRunner):
 
             self.datafile.init_group(self.current_dataset_name)
 
-            info = {'samplerate_ad': self.player.aifs}
+            info = {'samplerate_ad': self.player.aifs, 'averaged': self.average}
             self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
         self.player.set_aichan(self.aichan)    
 
     def _initialize_test(self, test):      
-        # override defualt trace_counter intialization to make space for silence window
+        # override default trace_counter initialization to make space for silence window
         self.trace_counter = -1
           
         if self.save_data:
             recording_length = self.aitimes.shape[0]
             # +1 to trace count for silence window
-            self.datafile.init_data(self.current_dataset_name, 
+            if self.average:
+                self.datafile.init_data(self.current_dataset_name, 
+                                        dims=(test.traceCount()+1, 1, len(self.aichan), recording_length),
+                                        mode='finite')
+                self.avg_buffer = np.zeros((test.repCount(), recording_length))
+            else:
+                self.datafile.init_data(self.current_dataset_name, 
                                     dims=(test.traceCount()+1, test.repCount(), len(self.aichan), recording_length),
                                     mode='finite')
         # check for special condition -- replace this with a generic
@@ -52,7 +58,14 @@ class ProtocolRunner(ListAcquisitionRunner):
     def _process_response(self, response, trace_info, irep):
 
         if self.save_data:
-            self.datafile.append(self.current_dataset_name, response)
+            if self.average:
+                self.avg_buffer[irep,:] = response
+                if irep == self.nreps -1:
+                    avg_response = self.avg_buffer.mean(axis=0)
+                    self.datafile.append(self.current_dataset_name, response)
+                    self.avg_buffer = np.zeros_like(self.avg_buffer)
+            else:
+                self.datafile.append(self.current_dataset_name, response)
 
     def set_comment(self, cellid, comment):
         """Saves the provided comment to the current dataset.

@@ -11,6 +11,7 @@ class AbstractAcquisitionRunner(object):
         self.threshold = None
 
         self.player = None
+        self.average = False
 
         self.datafile = None
 
@@ -81,6 +82,8 @@ class AbstractAcquisitionRunner(object):
         :type calv: float
         :param datafile: a reference to an open file to save data to
         :type datafile: :class:`AcquisitionData<sparkle.data.dataobjects.AcquisitionData>`
+        :param average: whether to average repetitions of a trace, saving only the averaged signal
+        :type average: bool
         """
         self.player_lock.acquire()
         if 'acqtime' in kwargs:
@@ -118,6 +121,8 @@ class AbstractAcquisitionRunner(object):
             self.reprate = kwargs['reprate']
         if 'save' in kwargs:
             self.save_data = kwargs['save']
+        if 'average' in kwargs:
+            self.average = kwargs['average']
 
     def run(self, interval, **kwargs):
         """Runs the acquisiton

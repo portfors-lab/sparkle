@@ -16,7 +16,7 @@ from sparkle.tools.util import next_str_num
 
 
 class AbstractCalibrationRunner(ListAcquisitionRunner):
-    """Provides some common fucntionality for calibration presentation"""
+    """Provides some common functionality for calibration presentation"""
     def stash_calibration(self, attenuations, freqs, frange, calname):
         """Save it for later"""
         self.calibration_vector = attenuations
