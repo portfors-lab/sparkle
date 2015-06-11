@@ -37,7 +37,7 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
         self.funit_fields.append(self.ui.freqStepSpnbx)
 
     def setModel(self, model):
-        """Sets the StimulusModel for this editor"""
+        """Sets the QStimulusModel for this editor"""
         self.stimModel = model
         self.parameterModel = model.autoParams()
         tone = self.stimModel.data(self.stimModel.index(0,0), QtCore.Qt.UserRole+1)
@@ -113,6 +113,22 @@ class TuningCurveEditor(AbstractStimulusWidget, Ui_TuningCurveEditor):
     def durationInputWidget(self):
         """Gets the input widget that handles duration"""
         return self.ui.durSpnbx
+
+    def closeEvent(self, event):
+        super(TuningCurveEditor, self).closeEvent(event)
+        inputDict = {}
+        inputDict['duration'] = self.ui.durSpnbx.value()
+        inputDict['risefall'] = self.ui.risefallSpnbx.value()
+        inputDict['reps'] = self.ui.nrepsSpnbx.value()
+        inputDict['freqStart'] = self.ui.freqStartSpnbx.value()
+        inputDict['freqStop'] = self.ui.freqStopSpnbx.value()
+        inputDict['freqStep'] = self.ui.freqStepSpnbx.value()
+        inputDict['intenStart'] = self.ui.dbStartSpnbx.value()
+        inputDict['intenStop'] = self.ui.dbStopSpnbx.value()
+        inputDict['intenStep'] = self.ui.dbStepSpnbx.value()
+        self.editingFinished.emit(inputDict)
+
+
 
 if __name__ == "__main__":
     import sys

@@ -235,8 +235,8 @@ class ProtocolView(AbstractDragView, QtGui.QTableView):
         if event.button() == QtCore.Qt.LeftButton:
             index = self.indexAt(event.pos())
             if index.isValid():
-                selected = self.model().data(index, QtCore.Qt.UserRole)
-                self.stimEditor = selected.showEditor()
+                selectedStimModel = self.model().data(index, QtCore.Qt.UserRole)
+                self.stimEditor = selectedStimModel.showEditor()
                 self.stimEditor.show()
 
     def indexXY(self, index):

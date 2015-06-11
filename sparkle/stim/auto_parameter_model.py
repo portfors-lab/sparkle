@@ -142,12 +142,12 @@ class AutoParameterModel():
                     return 0
                 # print 'range', param['start'] - param['stop']
                 nsteps = np.around(abs(param['start'] - param['stop']), 4) / float(param['step'])
-                item = int(np.ceil(nsteps)+1)
+                nsteps = int(np.ceil(nsteps)+1)
             elif param['start'] == param['stop']:
-                item = 1
+                nsteps = 1
             else:
-                item = 0
-            return item
+                nsteps = 0
+            return nsteps
         
     def getDetail(self, row, detail_field):
         """Gets the value of the detail *detail_field* of paramter

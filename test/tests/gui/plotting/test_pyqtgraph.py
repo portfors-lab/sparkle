@@ -134,7 +134,7 @@ class TestSpecWidget():
             t, y = data_func(i)
             self.fig.updateData(y, 32)
             QApplication.processEvents()
-            time.sleep(PAUSE)
+            time.sleep(PAUSE*4)
             assert self.fig.hasImg()
 
         self.fig.clearImg()
