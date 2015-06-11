@@ -99,8 +99,10 @@ class TraceWidget(BasePlot):
     thresholdUpdated = QtCore.Signal(float, str)
     polarityInverted = QtCore.Signal(int, str)
     rasterBoundsUpdated = QtCore.Signal(tuple, str)
+    absUpdated = QtCore.Signal(bool, str)
     _polarity = 1
     _ampScalar = None
+    _abs = True
     def __init__(self, parent=None):
         super(TraceWidget, self).__init__(parent)
 
@@ -131,6 +133,12 @@ class TraceWidget(BasePlot):
         self.zeroAction = QtGui.QAction('Zero recording start', None)
         self.zeroAction.setCheckable(True)
         self.scene().contextMenu.append(self.zeroAction)
+
+        self.absAction = QtGui.QAction('Abs threshold', None)
+        self.absAction.setCheckable(True)
+        self.absAction.setChecked(self._abs)
+        self.scene().contextMenu.append(self.absAction)
+        self.absAction.triggered.connect(self.toggleAbs)
 
         self.threshLine = pg.InfiniteLine(pos=0.5, angle=0, pen='r', movable=True)
         self.addItem(self.threshLine)
@@ -296,7 +304,6 @@ class TraceWidget(BasePlot):
             self._traceUnit = 'V'
             self.unitsAction.setText("Plot Amps")
 
-
     def rangeChange(self, pw, ranges):
         """Adjusts the stimulus signal to keep it at the top of a plot,
         after any ajustment to the axes ranges takes place.
@@ -342,6 +349,14 @@ class TraceWidget(BasePlot):
             pol = 1
         self._polarity = pol
         self.polarityInverted.emit(pol, self.getTitle())
+
+    def setAbs(self, absval):
+        self._abs = absval
+        self.absAction.setChecked(absval)
+
+    def toggleAbs(self, absval):
+        self._abs = absval
+        self.absUpdated.emit(self._abs, self.getTitle())
 
     def _setThresholdFromField(self):
         thresh_val = self.threshold_field.value()
@@ -655,7 +670,7 @@ class ProgressWidget(BasePlot):
             self.setLabel('left', "Spike Count (mean)", units='')
 
     @staticmethod
-    def loadCurve(data, groups, thresholds, fs, xlabels):
+    def loadCurve(data, groups, thresholds, absvals, fs, xlabels):
         """Accepts a data set from a whole test, averages reps and re-creates the 
         progress plot as the same as it was during live plotting. Number of thresholds
         must match the size of the channel dimension"""
@@ -667,7 +682,7 @@ class ProgressWidget(BasePlot):
             count = 0
             for ichan in range(data.shape[2]):
                 flat_reps = data[itrace,:,ichan,:].flatten()
-                count += len(spikestats.spike_times(flat_reps, thresholds[ichan], fs))
+                count += len(spikestats.spike_times(flat_reps, thresholds[ichan], fs, absvals[ichan]))
             spike_counts.append(count/(data.shape[1]*data.shape[2])) #mean spikes per rep
 
         i = 0

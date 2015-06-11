@@ -231,6 +231,7 @@ class ControlWindow(QtGui.QMainWindow):
         for name, deets in self._aichan_details.items():
             self.display.setThreshold(deets['threshold'], name)
             self.display.setRasterBounds(deets['raster_bounds'], name)
+            self.display.setAbs(deets['abs'], name)
 
         # can't find a function in DAQmx that gets the trigger
         # channel names, so add manually
@@ -375,6 +376,13 @@ class ControlWindow(QtGui.QMainWindow):
             self.acqmodel.attenuator_connection(False)
         self._aichans = inputsdict.get('aichans', [])
         self._aichan_details = inputsdict.get('aichan_details', {})
+        for name, deets in self._aichan_details.items():
+            # make sure all field as present in details for each channel
+            self._aichan_details[name]['threshold'] = deets.get('threshold', 5)
+            self._aichan_details[name]['polarity'] = deets.get('polarity', 1)
+            self._aichan_details[name]['raster_bounds'] = deets.get('raster_bounds', (0.5,0.9))
+            self._aichan_details[name]['abs'] = deets.get('abs', True)
+
         self.reset_device_channels()
 
         stim_defaults = inputsdict.get('stim_view_defaults', {})

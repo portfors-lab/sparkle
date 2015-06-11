@@ -17,22 +17,25 @@ def test_spike_times_sin():
     threshold = 0.7
     fs = 10
 
-    times = spike_times(y, threshold, fs)
+    times_abs = spike_times(y, threshold, fs)
+    times_orginal = spike_times(y, threshold, fs, False)
 
     # abs when detecting spikes, gets both humps of sine wave
-    assert len(times) == fq*2
+    assert len(times_abs) == fq*2
+    assert len(times_orginal) == fq
 
     # calculate where the peaks will be for sin wave
     period = (float(n)/10)/16
     peak_time = period/4
-    print period, peak_time
-    sin_peak_times = np.arange(0,102.4,period/2)+peak_time
+    # print period, peak_time
+    sin_peak_times_all = np.arange(0,102.4,period/2)+peak_time
+    sin_peak_times_max = np.arange(0,102.4,period)+peak_time
 
-    print sin_peak_times, times
+    # print sin_peak_times_all, times_abs
     # very small rounding errors different for different calc methods
-    assert np.allclose(sin_peak_times, times, atol=0.00000001)
+    assert np.allclose(sin_peak_times_all, times_abs, atol=0.00000001)
+    assert np.allclose(sin_peak_times_max, times_orginal, atol=0.00000001)
 
-@unittest.skip("messed up with spike detection using abs")
 def test_spike_times_sample_syl():
     """ Not realistic, but complex"""
     sylpath = sample.samplewav()
@@ -40,13 +43,10 @@ def test_spike_times_sample_syl():
     wavdata = wavdata.astype(float)/np.max(wavdata)
     threshold = 0.8
 
-    times = spike_times(wavdata, threshold, fs)
+    times = spike_times(wavdata, threshold, fs, absval=False)
 
-    # manually found outwith
-    control_times = [ 0.039461,  0.039704,  0.039717,  0.039819,  0.039896,  0.039933,
-        0.039984,  0.039997,  0.040048,  0.04024,   0.040304,  0.040507,  0.04052,
-        0.040597,  0.040712,  0.040763,  0.040776,  0.040968,  0.041005,  0.04144,
-        0.043683,  0.043824]
+    # manually found outwith -- with 2ms refractory
+    control_times = [0.039461, 0.043683]
 
     assert np.allclose(control_times, times, atol=0.00000001)
 
