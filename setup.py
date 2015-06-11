@@ -5,7 +5,7 @@ import glob
 from setuptools import setup, find_packages
 
 setup(name="sparkle",
-      version='0.1.0',
+      version='0.2.0',
       description="Sound Presentation And Recording Kit for Laboratories of Electrophysiology",
       url="https://github.com/portfors-lab/sparkle",
       author='Amy Boyle',
