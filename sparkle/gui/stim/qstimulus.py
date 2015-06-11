@@ -10,7 +10,7 @@ from sparkle.gui.qconstants import AutoParamMode, BuildMode, CursorRole
 from sparkle.gui.stim.components.qcomponents import wrapComponent
 from sparkle.gui.stim.qauto_parameter_model import QAutoParameterModel
 from sparkle.resources import cursors
-from sparkle.stim import get_stimulus_editor
+from sparkle.gui.stim.factory import get_stimulus_editor, get_stimulus_factory
 from sparkle.stim.reorder import order_function
 from sparkle.stim.stimulus_model import StimulusModel
 from sparkle.stim.types import get_stimuli_models
@@ -27,7 +27,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         self._autoParams = QAutoParameterModel(stim.autoParams()) # ?!
         self._stim = stim #StimulusModel
         if stim.stimType() is not None:
-            self.setEditor(get_stimulus_editor(stim.stimType()))
+            self.setEditor(stim.stimType())
         else:
             self.editor = None
 
@@ -187,16 +187,19 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         """
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-    def setEditor(self, editor):
+    def setEditor(self, name):
         """Sets the editor class for this Stimulus"""
+        editor = get_stimulus_editor(name)
         self.editor = editor
-        self._stim.setStimType(editor.name)
+        self._stim.setStimType(name)
 
     def showEditor(self):
         """Creates and shows an editor for this Stimulus"""
         if self.editor is not None:
             editor = self.editor()
             editor.setModel(self)
+            factory = get_stimulus_factory(self._stim.stimType())
+            editor.editingFinished.connect(factory.update)
             return editor
         else:
             logger = logging.getLogger('main')
@@ -241,7 +244,7 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         """
         stim = StimulusModel.loadFromTemplate(template, stim=stim)
         qstim = QStimulusModel(stim)
-        qstim.setEditor(get_stimulus_editor(template['testtype']))
+        qstim.setEditor(template['testtype'])
         return qstim
 
     def templateDoc(self):

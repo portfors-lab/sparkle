@@ -20,6 +20,8 @@ from sparkle.stim.abstract_component import AbstractStimulusComponent
 from sparkle.stim.types.stimuli_classes import Vocalization
 from sparkle.tools.util import convert2native
 
+from sparkle.gui.stim.factory import TCFactory
+
 with open(os.path.join(systools.get_src_directory(),'settings.conf'), 'r') as yf:
     config = yaml.load(yf)
 MPHONE_CALDB = config['microphone_calibration_db']
@@ -279,6 +281,8 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['advanced_options'] = self.advanced_options
         savedict['stim_view_defaults'] = StimulusView.getDefaults()
 
+        savedict['tuning_curve'] = TCFactory.defaultInputs
+
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)
         try:
@@ -359,6 +363,9 @@ class ControlWindow(QtGui.QMainWindow):
         else:
             logger = logging.getLogger('main')
             logger.debug('No saved explore stimului inputs')
+
+        # load the previous session's Tuning Curve defaults
+        TCFactory.defaultInputs.update(inputsdict.get('tuning_curve', TCFactory.defaultInputs))
 
         # set defaults then merge
         self.advanced_options = {'device_name':'', 

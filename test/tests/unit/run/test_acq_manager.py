@@ -413,6 +413,8 @@ class TestAcquisitionManager():
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
         stims = json.loads(test.attrs['stim'])
+        
+        hfile.close()
 
         # aggregate all time intervals
         intervals = []
@@ -423,9 +425,8 @@ class TestAcquisitionManager():
         print 'all intervals', intervals.shape, intervals
 
         # ms tolerance, not as good as I would like
-        assert all(map(lambda x: x < 10, intervals))
+        assert all(map(lambda x: x < 20, intervals))
 
-        hfile.close()
 
     # @unittest.skip("Grrrrrr")
     def test_protocol_timing_vocal_batlab(self):
@@ -450,6 +451,8 @@ class TestAcquisitionManager():
         hfile = h5py.File(os.path.join(self.tempfolder, fname))
         test = hfile['segment_1']['test_1']
         stims = json.loads(test.attrs['stim'])
+        
+        hfile.close()
 
         # aggregate all time intervals
         intervals = []
@@ -460,9 +463,8 @@ class TestAcquisitionManager():
         print 'all intervals', intervals.shape, intervals
 
         # ms tolerance, not as good as I would like
-        assert all(map(lambda x: x < 10, intervals))
+        assert all(map(lambda x: x < 20, intervals))
 
-        hfile.close()
 
     def test_tone_explore(self):
         """Run search operation with tone stimulus"""
