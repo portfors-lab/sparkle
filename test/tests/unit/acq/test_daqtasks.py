@@ -67,7 +67,7 @@ class TestDAQTasks():
                 tolerance = max(amp*0.1, 0.005) #noise floor
                 assert np.allclose(stim[10:],response[10:],rtol=0,atol=tolerance)
             
-    @unittest.skip("WHATEVER no hardware")
+    @unittest.skip("Chart function for future development")
     def test_sync_continuous(self):
 
         npts = 10000
@@ -96,7 +96,7 @@ class TestDAQTasks():
         expected = acqtime*self.fs
         assert expected*0.85 <= len(self.data) <= expected*1.1
 
-    @unittest.skip("WHATEVER no hardware")
+    @unittest.skip("Chart function for future development")
     def test_asynch_continuous_finite(self):
         ainpts = 1000
 

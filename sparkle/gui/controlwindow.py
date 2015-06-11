@@ -281,7 +281,7 @@ class ControlWindow(QtGui.QMainWindow):
         savedict['advanced_options'] = self.advanced_options
         savedict['stim_view_defaults'] = StimulusView.getDefaults()
 
-        savedict['tuning_curve'] = TCFactory.defaultInputs.copy() 
+        savedict['tuning_curve'] = TCFactory.defaultInputs
 
         # filter out and non-native python types that are not json serializable
         savedict = convert2native(savedict)

@@ -189,7 +189,6 @@ class QStimulusModel(QtCore.QAbstractItemModel):
 
     def setEditor(self, name):
         """Sets the editor class for this Stimulus"""
-        print 'NAME', name
         editor = get_stimulus_editor(name)
         self.editor = editor
         self._stim.setStimType(name)
@@ -245,7 +244,6 @@ class QStimulusModel(QtCore.QAbstractItemModel):
         """
         stim = StimulusModel.loadFromTemplate(template, stim=stim)
         qstim = QStimulusModel(stim)
-        print 'TEST NAME', template['testtype']
         qstim.setEditor(template['testtype'])
         return qstim
 
