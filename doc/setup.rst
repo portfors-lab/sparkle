@@ -28,18 +28,22 @@ Install Sparkle
 ++++++++++++++++
 After you install Anaconda, open up a command terminal and enter:
 
-Windows (need admin rights):
+Windows (need admin rights)::
 
     $ pip install sparkle
 
-Unix:
+Unix::
 
     $ sudo pip install sparkle
+
+To update Sparkle to a new version (use sudo, as appropriate, for Unix)::
+
+    $ pip install -U --no-deps sparkle
 
 Run Sparkle
 ++++++++++++
 
-Then you should be able to call sparkle from the command line:
+Then you should be able to call sparkle from the command line::
 
     $ sparkle
 
@@ -71,6 +75,10 @@ Copy the url from Github_, and clone it to your local machine, (or, if you want 
     $ git clone https://github.com/portfors-lab/sparkle.git
 
 This will create a directory :code:`sparkle` in your current directory.
+
+When you need to update sparkle, navigate your terminal current directory to be somewhere in the code repository and run::
+
+    $ git pull
 
 .. _fork: https://help.github.com/articles/fork-a-repo/
 
@@ -143,11 +151,11 @@ Setting the PYTHONPATH
 -----------------------
 To run sparkle with python from anywhere outside of the sparkle root directory you will need to set the pythonpath.
 
-e.g. for Mac/Linux:
+e.g. for Mac/Linux::
 
     $ export PYTHONPATH="$PYTHONPATH:/absolute/path/to/sparkle"
 
-or for Windows (on Git bash):
+or for Windows (on Git bash)::
 
     $ export PYTHONPATH="$PYTHONPATH;C:\\absolute\\path\\to\\sparkle" 
 
@@ -177,6 +185,8 @@ Then you can create a shortcut to that script by right clicking and selecting `C
 
 Building the documentation locally
 +++++++++++++++++++++++++++++++++++
+
+From the sparkle project directory::
 
     $ cd doc
     $ sphinx-apidoc -f -o ref/auto ../sparkle

@@ -23,7 +23,7 @@ setup(name="sparkle",
                         'sphinx-rtd-theme',
                         'pydaqmx',
                         ],
-      package_data={'':['*.conf', '*.jpg', '*.png']},
+      package_data={'':['*.conf', '*.jpg', '*.png', "*.ico"]},
       entry_points={'console_scripts':['sparkle=sparkle.gui.run:main']},
       classifiers = [
         "Programming Language :: Python",
