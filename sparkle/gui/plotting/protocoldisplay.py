@@ -135,7 +135,7 @@ class ProtocolDisplay(QtGui.QWidget):
         if plotname is None:
             plotname = self.responsePlots.keys()[0]
 
-        if len(ydata.shape) == 1 or ydata.shape[0] == 1:
+        if len(ydata.shape) == 1:
             self.responsePlots[plotname].updateData(axeskey='response', x=xdata, y=ydata)
         else:
             self.responsePlots[plotname].addTraces(xdata, ydata)

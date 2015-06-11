@@ -534,7 +534,7 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QComboBox" name="trigchanBox"/>
           </item>
           <item row="0" column="0">
@@ -561,10 +561,17 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QCheckBox" name="trigCkbx">
             <property name="text">
              <string>Trigger</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="averageChbx">
+            <property name="text">
+             <string>Average response</string>
             </property>
            </widget>
           </item>
@@ -691,7 +698,7 @@
      <x>0</x>
      <y>0</y>
      <width>1223</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">

@@ -251,7 +251,7 @@ class MainWindow(ControlWindow):
         self.plotProgress = False
         self.ui.protocolProgressBar.setValue(0)
 
-        self.acqmodel.set(reprate=self.ui.reprateSpnbx.value())
+        self.acqmodel.set(reprate=self.ui.reprateSpnbx.value()) 
 
         if self.currentMode == 'windowed':
             self.ui.aichanBtn.setEnabled(False)
@@ -301,8 +301,10 @@ class MainWindow(ControlWindow):
             trigger = str(self.ui.trigchanBox.currentText())
         else:
             trigger = None
+        avg = self.ui.averageChbx.isChecked()
         self.acqmodel.set(aochan=aochan, aichan=self._aichans, acqtime=winsz,
-                          aifs=acq_rate, binsz=binsz, trigger=trigger)
+                          aifs=acq_rate, binsz=binsz, trigger=trigger,
+                          average=avg)
         self.binsz = binsz
 
         self.display.setXlimits((0,winsz))
@@ -342,6 +344,7 @@ class MainWindow(ControlWindow):
         self.ui.aochanBox.setEnabled(True)
         reprate = self.ui.reprateSpnbx.setEnabled(True)
         self.ui.stopBtn.setEnabled(False)
+        self.ui.averageChbx.setEnabled(True)
         self.ui.protocolProgressBar.setStyleSheet("QProgressBar { text-align: center; } QProgressBar::chunk {background-color: grey; width: 10px; margin-top: 1px; margin-bottom: 1px}")
 
     def stopCalTone(self):
@@ -437,6 +440,7 @@ class MainWindow(ControlWindow):
         self.ui.stopBtn.setText("Abort")
         self.activeOperation = 'protocol'
         self.ui.plotDock.switchDisplay('standard')
+        self.ui.averageChbx.setEnabled(False)
 
         reprate = self.ui.reprateSpnbx.value()
         interval = (1/reprate)*1000
@@ -531,10 +535,20 @@ class MainWindow(ControlWindow):
         assert len(self._aichans) == response.shape[0], 'number of channels does not agree with data dimensions'
         # print 'response signal', response.shape
 
+        # not actually guaranteed to happen in order :/
+        if rep_num == 0:
+            self.response_reps_stash = {chan: [] for chan in self._aichans}
+
         fs = self.ui.aifsSpnbx.value()
             
         for chan, name in enumerate(self._aichans):
             channel_data = response[chan,:]
+
+            if self.ui.averageChbx.isChecked():
+                self.response_reps_stash[name].append(channel_data)
+                if rep_num > 0:
+                    channel_data = np.vstack(self.response_reps_stash[name]).mean(axis=0)
+
             # convert voltage amplitudes into dB SPL    
             # amp = signal_amplitude(channel_data, fs)
             mphonesens = self.ui.mphoneSensSpnbx.value()
@@ -1110,9 +1124,11 @@ class MainWindow(ControlWindow):
         if self.currentMode == "windowed":
             self.ui.startChartBtn.hide()
             self.ui.stopChartBtn.hide()
+            self.ui.averageChbx.show()
         elif self.currentMode == "chart":
             self.ui.stopChartBtn.show()
             self.ui.startChartBtn.show()
+            self.ui.averageChbx.hide()
         else:
             raise Exception('unknown acquisition mode '+mode)
 

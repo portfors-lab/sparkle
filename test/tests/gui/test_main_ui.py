@@ -248,6 +248,10 @@ class TestMainUI():
     def test_tone_protocol(self):
         self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
 
+    def test_tone_protocol_averaged(self):
+        self.form.ui.averageChbx.setChecked(True)
+        self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
+
     def test_auto_parameter_protocol(self):
         self.protocol_run([('pure tone',{'duration': 66, 'frequency': 22}), ('pure tone',{'duration': 33})],
             [['duration', 10, 50, 10]])
@@ -710,7 +714,10 @@ class TestMainUI():
         # gross, reach into model to get # of reps and traces
         nreps = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,2,QtCore.QModelIndex()), QtCore.Qt.DisplayRole)
         ntraces = self.form.ui.protocolView.model().data(self.form.ui.protocolView.model().index(0,3,QtCore.QModelIndex()), QtCore.Qt.DisplayRole) + 1 #+1 for control
-        assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
+        if self.form.ui.averageChbx.isChecked():
+            assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, 1, nchans, nsamples)
+        else:
+            assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
 
         self.check_review_plotting(0,0)
         
@@ -766,8 +773,12 @@ class TestMainUI():
         qtbot.click(self.form.ui.reviewer.overlayButton)
         QtTest.QTest.qWait(ALLOW)
 
+        averaged = 'averaged : True' in self.form.ui.reviewer.attrtxt.toPlainText()
         for plot in self.form.display.responsePlots.values():
-            assert len(plot.trace_stash) == nreps
+            if averaged:
+                assert len(plot.trace_stash) == 1
+            else:
+                assert len(plot.trace_stash) == nreps
 
     def wait_until_done(self):
         while self.form.ui.runningLabel.text() == "RECORDING":
