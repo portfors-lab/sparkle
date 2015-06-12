@@ -1,7 +1,7 @@
 Setting Up The Development Environment
 =======================================
 
-This program was developed to work on the windows platform. However, it has also been successfully installed to review data on Linux and Mac machines. The following describes my process for setting up the necessary packages to workon on the project in a virtualenv.
+This program was developed to work on the windows platform. However, it has also been successfully installed to review data on Linux and Mac machines. The following describes my process for setting up the necessary packages to work on on the project in a virtualenv.
 
 Of course, you will want to install Python 2.7, pip and virtualenv first.
 
@@ -46,7 +46,7 @@ The rest of the necessary packages are installable via pip:
 * pydaqmx
 * pyaml
 * pyqtgraph
-* pyuserinput
+* qtbot
 
 I also used IPython notebook during the development process, for that you will need (via pip):
 
