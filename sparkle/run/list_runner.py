@@ -86,7 +86,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
         timecollection = []
         try:
             logger = logging.getLogger('main')
-            # self.player.start_timer(self.reprate)
             # incase of early abortion...
             itest = 0
             itrace = -1
@@ -99,20 +98,13 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                     self._initialize_test(test)
                     if self.save_data:
                         self.datafile.set_metadata(self.current_dataset_name, test.testDoc(), signal=True)
-                    # profiler = cProfile.Profile()
-                    # print 'profiling....'
-                    # profiler.enable()
-                    # traces, docs, overs = self._cached_stims[itest]
                     traces, docs, overs = test.expandedStim()
-                    # profiler.disable()
-                    # print 'finished profiling'
-                    # profiler.dump_stats('stim_gen_cal.profile')
                     nreps = test.repCount()
-                    self.nreps = test.repCount() # not sure I like this
-                    # print 'profiling....'
-                    # profiler.enable()
+                    self.nreps = test.repCount() # not sure I like this -- subclasses use this variable
                     fs = test.samplerate()
+                    
                     if self.silence_window:
+                        # generate control period of silence
                         self.player.set_stim(np.array([0., 0.]), fs, 0)
                         trace_doc = {'samplerate_da':fs, 'components': [{'start_s':0, 'index':(0,0),
                         'stim_type':'silence', 'duration':0, 'risefall':0, 'intensity':0}], 'overloaded_attenuation':0}
@@ -120,7 +112,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         self.putnotify('stim_generated', (np.array([0, 0]), fs))
                         self.putnotify('current_trace', (itest,itrace,trace_doc))
                         self.putnotify('over_voltage', (0,))
-                
 
                         stamps = []
                         self.player.start()
@@ -137,7 +128,6 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                                 extra_info = {'all traces': True}
                             self.putnotify('response_collected', (self.aitimes, response, itest, -1, irep, extra_info))
 
-                            # print 'size of response len: {} bytes: {}'.format(len(response), response.nbytes)
                             self.putnotify('current_rep', (irep,))
                             self.player.reset()
 
@@ -145,6 +135,8 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
                         if self.save_data:
                             self.datafile.append_trace_info(self.current_dataset_name, trace_doc)
                         self.player.stop()
+
+                    # now present the "real" stimuli
                     for itrace, (trace, trace_doc, over) in enumerate(zip(traces, docs, overs)):
                         
                         signal, atten = trace
@@ -196,16 +188,12 @@ class ListAcquisitionRunner(AbstractAcquisitionRunner):
 
                     # log as well, test type and user tag will be the same across traces
                     # logger.info("Finished test type: {}, tag: {}".format(trace_doc['testtype'], trace_doc['user_tag']))
-                    # profiler.disable()
-                    # print 'finished profiling'
-                    # profiler.dump_stats('test_run.profile')
             except Broken:
                 # save some abortion message
                 if self.save_data:
                     self.datafile.set_metadata(self.current_dataset_name, {'aborted': 'test {}, trace {}, rep {}'.format(itest+1, itrace+1, irep+1)})
                 self.player.stop()
 
-            # self.player.stop_timer()
             if self.save_data:
                 self.datafile.backup(self.current_dataset_name)
             self.putnotify('group_finished', (self._halt,))
