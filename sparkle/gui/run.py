@@ -4,6 +4,8 @@ import time
 import traceback
 import sys
 
+import os
+
 from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.dialogs import SavingDialog
 from sparkle.gui.main_control import MainWindow
@@ -20,7 +22,21 @@ def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
     logger.error("Uncaught exception: ", exc_info=exc_info)
 
+def debug_mode():
+    sparkle_develop = os.environ.get('SPARKLE_DEVELOP')
+    if (sparkle_develop.upper() != 'TRUE'):
+        #print 'Not in develop mode'
+        return True
+    else:
+        print 'Entering Developer Mode'
+        return False
+
 def main():
+    #print 'results: ', debug_mode()
+    global REVIEWMODE
+    if (REVIEWMODE):
+        REVIEWMODE = debug_mode()
+
     # this is the entry point for the whole application
     logger = logging.getLogger('main')
     logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
