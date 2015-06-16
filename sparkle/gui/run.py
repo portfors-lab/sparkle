@@ -24,6 +24,8 @@ def log_uncaught(*exc_info):
 
 def debug_mode():
     sparkle_develop = os.environ.get('SPARKLE_DEVELOP')
+    if sparkle_develop is None:
+        sparkle_develop = ''
     if (sparkle_develop.upper() != 'TRUE'):
         #print 'Not in develop mode'
         return True
@@ -32,7 +34,6 @@ def debug_mode():
         return False
 
 def main():
-    #print 'results: ', debug_mode()
     global REVIEWMODE
     if (REVIEWMODE):
         REVIEWMODE = debug_mode()
