@@ -22,20 +22,26 @@ def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
     logger.error("Uncaught exception: ", exc_info=exc_info)
 
-def debug_mode():
+def enable_review_mode():
+    ''' Checks if there is an environment variable named SPARKLE_DEVELOP. 
+        If SPARKLE_DEVELOP exists and is equal to true, enable_review_mode() will
+        return false.
+        Is SPARKLE_DEVELOP exists and is not equal to true, enable_review_mode()
+        will return true.
+        If SPARKLE_DEVELOP does not exist enable_review_mode() will return True.'''
     sparkle_develop = os.environ.get('SPARKLE_DEVELOP')
+    if sparkle_develop is None:
+        sparkle_develop = 'False'
     if (sparkle_develop.upper() != 'TRUE'):
-        #print 'Not in develop mode'
         return True
     else:
         print 'Entering Developer Mode'
         return False
 
 def main():
-    #print 'results: ', debug_mode()
     global REVIEWMODE
     if (REVIEWMODE):
-        REVIEWMODE = debug_mode()
+        REVIEWMODE = enable_review_mode()
 
     # this is the entry point for the whole application
     logger = logging.getLogger('main')
