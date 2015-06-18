@@ -63,7 +63,7 @@ def main():
                 plenty_space.append((drive, space))
         if len(low_space) > 0:
             if len(plenty_space) > 0:
-                msg = "Waring: At least one Hard disk has low free space:\n\nDrives with low space:\n"
+                msg = "Warning: At least one Hard disk has low free space:\n\nDrives with low space:\n"
                 for drive in low_space:
                     msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
                 msg = msg + "\nDrives with more space:\n"
@@ -72,7 +72,7 @@ def main():
                 msg = msg + "\nYou are advised to only save data to a drive with enough available space"
                 QtGui.QMessageBox.warning(None, "Drive space low", msg)
             else:
-                msg = "Waring: All Hard disks have low free space:\n\n"
+                msg = "Warning: All Hard disks have low free space:\n\n"
                 for drive in low_space:
                     msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
                 msg = msg + "\nIt is recommended that you free up space on a drive before conducting experiments"
