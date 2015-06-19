@@ -182,15 +182,15 @@ If you are on Windows you can run the following from command prompt::
 
 The documentation can now be viewed by opening `_build\html\index.html` with your browser.
 
-In order to properly generate graphics used in the documenation, Graphviz_ will need to be installed on your computer.
+In order to properly generate graphics used in the documenation, Graphviz_ will need to be installed on your computer. Be sure to add the path to Graphviz's dot.exe to your PATH
 
 If unable to build from either the makefile or make.bat, the following command will build the documentation::
 
-    $ sphinx-build -b html -D graphiviz_dot='<path to dot.exe>' . _build
+    $ sphinx-build -b html -D graphviz_dot='<path to dot.exe>' . _build
 
 e.g. ::
 
-    $ sphinx-build -b html -D graphiviz_dot='C:\GraphvizX.XX\bin\dot.exe' . _build
+    $ sphinx-build -b html -D graphviz_dot='C:\GraphvizX.XX\bin\dot.exe' . _build
 
 Any time a change is made to the source code, it should be made sure that the documentation, including the docstrings, API reference, and user guide, is up to date in the same commit. General improvements to the documentation are always welcome.
 
