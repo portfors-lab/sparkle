@@ -4,6 +4,8 @@ import time
 import traceback
 import sys
 
+import os
+
 from sparkle.QtWrapper import QtCore, QtGui
 from sparkle.gui.dialogs import SavingDialog
 from sparkle.gui.main_control import MainWindow
@@ -20,7 +22,27 @@ def log_uncaught(*exc_info):
     logger = logging.getLogger('main')
     logger.error("Uncaught exception: ", exc_info=exc_info)
 
+def enable_review_mode():
+    ''' Checks if there is an environment variable named SPARKLE_DEVELOP. 
+        If SPARKLE_DEVELOP exists and is equal to true, enable_review_mode() will
+        return false.
+        Is SPARKLE_DEVELOP exists and is not equal to true, enable_review_mode()
+        will return true.
+        If SPARKLE_DEVELOP does not exist enable_review_mode() will return True.'''
+    sparkle_develop = os.environ.get('SPARKLE_DEVELOP')
+    if sparkle_develop is None:
+        sparkle_develop = 'False'
+    if (sparkle_develop.upper() != 'TRUE'):
+        return True
+    else:
+        print 'Entering Developer Mode'
+        return False
+
 def main():
+    global REVIEWMODE
+    if (REVIEWMODE):
+        REVIEWMODE = enable_review_mode()
+
     # this is the entry point for the whole application
     logger = logging.getLogger('main')
     logger.info("{} Program Started {}, user: {} {}".format('*'*8, time.strftime("%d-%m-%Y"), getpass.getuser(), '*'*8))
@@ -41,7 +63,7 @@ def main():
                 plenty_space.append((drive, space))
         if len(low_space) > 0:
             if len(plenty_space) > 0:
-                msg = "Waring: At least one Hard disk has low free space:\n\nDrives with low space:\n"
+                msg = "Warning: At least one Hard disk has low free space:\n\nDrives with low space:\n"
                 for drive in low_space:
                     msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
                 msg = msg + "\nDrives with more space:\n"
@@ -50,7 +72,7 @@ def main():
                 msg = msg + "\nYou are advised to only save data to a drive with enough available space"
                 QtGui.QMessageBox.warning(None, "Drive space low", msg)
             else:
-                msg = "Waring: All Hard disks have low free space:\n\n"
+                msg = "Warning: All Hard disks have low free space:\n\n"
                 for drive in low_space:
                     msg = msg + "{} : {} MB\n".format(drive[0], drive[1])
                 msg = msg + "\nIt is recommended that you free up space on a drive before conducting experiments"
