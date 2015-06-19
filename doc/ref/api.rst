@@ -37,7 +37,7 @@ This application was built using National Instruments (NI) hardware and drivers.
 
 Custom :mod:`task classes<sparkle.acq.daq_tasks>` exist for calling the NI drivers, these classes are based off of the C examples provided by NI.
 
-Higher level :mod:`player classes<sparkle.acq.players>` faciliate the repetitive and windowed nature of the recording this program is intended to execute. That said, continuous acquisition is also a goal, and there is a separate player class for this type of task.
+Higher level :mod:`player classes<sparkle.acq.players>` facilitate the repetitive and windowed nature of the recording this program is intended to execute. That said, continuous acquisition is also a goal, and there is a separate player class for this type of task.
 
 NI provides simulated devices so that it is possible to develop applications without needing the actual hardware connected to the computer. However, this is only for the windows platform, so the module :mod:`daqmx_stub<sparkle.acq.daqmx_stub>` stands in to allow development on the rest of the program without errors being thrown.
 
@@ -48,7 +48,7 @@ Stimulus Classes
 
 The main container for an individual stimulus is the :class:`StimulusModel<sparkle.stim.stimulus_model>`. Internally, the stimulus is composed of a 2D array (nested lists) of components which are any subclass of :class:`AbstractStimulusComponent<sparkle.stim.abstract_component>`. These classes are required to implement a ``signal`` function (not to be confused with signals/slots of Qt), which is used by StimulusModel to sum its components to get the total signal for the desired stimulus. This allows for creation of any stimulus imaginable through the ability to overlap components, and to define custom component classes.
 
-On its own, a StimulusModel represents a single stimulus signal (the sum of it's components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The ``StimlulusModel`` uses the information held in its :class:`AutoParameterModel<sparkle.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
+On its own, a StimulusModel represents a single stimulus signal (the sum of its components). To create auto-tests (automatic component manipulation, e.g. a tuning curve), The ``StimlulusModel`` uses the information held in its :class:`AutoParameterModel<sparkle.stim.auto_parameter_model>` attribute to modify itself in a loop, and collect all the resultant signals, yielding a list of signals to generate.
 
 Any number of ``StimulusModel`s` can be collected in a list via a :class:`ProtocolModel<sparkle.run.protocol_model>`, to be generated independent of each other, in sequence.
 
@@ -60,7 +60,7 @@ The list of ``StimlusModel`s` inside of a ``ProtocolModel``, and the list of com
 
 Discovery of the stimulus components classes, by the UI, is automatic, with the intention to make it easier to add new component classes. The modules under the source folder `sparkle/stim/types` are searched for subclasses of ``AbstractStimulusComponent`.` Depending on flags set in each class, the component class will be pulled in to be available for explore, protocol or both operations by the UI.
 
-For further information related to adding additional Stimulus Component classes see :doc:`Extending spikey<extending>`
+For further information related to adding additional Stimulus Component classes see :doc:`Extending sparkle<extending>`
 
 Speaker Calibration
 ++++++++++++++++++++
@@ -122,7 +122,7 @@ The plotting is built upon the pyqtgraph_ library. All custom plots widgets are 
 
 The plot widgets are arranged into displays: 
 
-    * :class:`ProtocolDisplay<sparkle.gui.plotting.protocoldisplay.ProtocolDisplay>`: Main display for visualizing the the auditory stimulus and brain recording. Stimulus is shown in spectrogram, time signal, and FFT plots. Brain recording trace includes a raster plot of spike detection, which has an adjustable threshold.
+    * :class:`ProtocolDisplay<sparkle.gui.plotting.protocoldisplay.ProtocolDisplay>`: Main display for visualizing the auditory stimulus and brain recording. Stimulus is shown in spectrogram, time signal, and FFT plots. Brain recording trace includes a raster plot of spike detection, which has an adjustable threshold.
     * :class:`CalibrationDisplay<sparkle.gui.plotting.calibration_display.CalibrationDisplay>` : Has two plots that show the generated and recorded signals as FFT plots.
     * :class:`ExtendedCalibrationDisplay<sparkle.gui.plotting.calibration_explore_display.ExtendedCalibrationDisplay>` : Shows the generated and recorded signals each as a spectrogram, time signal and FFT plot.
 
@@ -136,7 +136,7 @@ All types of data files are accessed using the abstract :class:`AcquisitionData<
 
 The file format chosen to save data to is HDF5. Reasons for choosing this file format:
 
-    * Ability to load a file without having to load all it's contents in memory
+    * Ability to load a file without having to load all its contents in memory
     * self-describing: can save metadata/stimulus info along data
     * popular among scientists : not developed in house means anyone can access it without custom code
     * Mature, been around a while and has 2 sets of python bindings
@@ -151,7 +151,7 @@ In :class:`HDF5Data<sparkle.data.hdf5data.HDF5Data>`, the class which handles da
 Explanation of implementation:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-Upon file opening (new or load), a copy of the entire file is made and saved to a (hidden) backup folder created in the directory where the data file is. Each time a test segment finishes, that segment gets saved to it's own backup file in the same folder. These files have incrementing filenames based off of the original data filename. If the program exits normally and closes the original datafile successfully, these backup data files are deleted. If the program crashes, this will not happen, and thus they will be present next time sparkle is started.
+Upon file opening (new or load), a copy of the entire file is made and saved to a (hidden) backup folder created in the directory where the data file is. Each time a test segment finishes, that segment gets saved to its own backup file in the same folder. These files have incrementing filenames based off of the original data filename. If the program exits normally and closes the original datafile successfully, these backup data files are deleted. If the program crashes, this will not happen, and thus they will be present next time sparkle is started.
 
 When an HDF5File is opened it checks for the presence of these backup files, and it if finds them, it rebuilds the datafile from these pieces. It renames the original file, to get it out of the way, and renames the re-built data file with the original name. It then carries on with the normal backup procedure. That the File checks for backups before loading the original is important... if a file is corrupted it may still be able to be opened, but data may still be missing; it is then harmful to backup this corrupted data, as it will clean up the previous backup in the process. Therefore, if there is evidence of a crash we do not trust the original data by default.
 
@@ -164,7 +164,7 @@ This program uses the python :py:mod:`logging` module. The logging configuration
 
 Testing
 --------
-Everything that can be tested, should be tested. There is a testing utility package, originally wrote for this project, but that has been split off, qtbot_. This package simulates user interaction with the GUI, to allow for testing GUI components themselves, and that the appropriate results from using them happen. New functionality should be accompanied by tests.
+Everything that can be tested should be tested. There is a testing utility package, originally wrote for this project, but that has been split off, qtbot_. This package simulates user interaction with the GUI, to allow for testing GUI components themselves, and that the appropriate results from using them happen. New functionality should be accompanied by tests.
 
 .. _qtbot : https://github.com/boylea/qtbot
 
@@ -200,7 +200,12 @@ Any time a change is made to the source code, it should be made sure that the do
 Extending
 ---------
 
-See :doc:`Extending spikey<extending>`
+See :doc:`Extending sparkle<extending>`
+
+Develop Mode
+------------
+
+While running Sparkle, it is not uncommon that you may be running without any hardware connected. If this is the case and pydaqmx is not installed, Sparkle will run in Review Mode. Review Mode hides the explore and calibration tabs on the main interface. While this may be convenient for users, programmers developing new features may need to access this. To accommodate, Sparkle will check for the environment variable SPARKLE_DEBUG. If SPARKLE_DEBUG is set to “true” (not case sensitive) Sparkle will not run in Review Mode. This way the explore and calibration tabs will always display, even if pydaqmx is not installed on your machine. 
 
 Reference API
 -------------
