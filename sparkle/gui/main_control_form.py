@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_control.ui'
+# Form implementation generated from reading ui file 'c:/users/j.uyesugi/documents/sparkle/sparkle/gui/main_control.ui'
 #
-# Created: Thu Jun 11 10:31:39 2015
-#      by: PyQt4 UI code generator 4.11.1
+# Created: Thu Jun 18 16:47:10 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -285,7 +285,7 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
         self.trigchanBox = QtGui.QComboBox(self.centralwidget)
         self.trigchanBox.setObjectName(_fromUtf8("trigchanBox"))
-        self.gridLayout_5.addWidget(self.trigchanBox, 2, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.trigchanBox, 3, 1, 1, 1)
         self.label_17 = QtGui.QLabel(self.centralwidget)
         self.label_17.setObjectName(_fromUtf8("label_17"))
         self.gridLayout_5.addWidget(self.label_17, 0, 0, 1, 1)
@@ -296,10 +296,20 @@ class Ui_ControlWindow(object):
         self.gridLayout_5.addWidget(self.modeCmbx, 0, 1, 1, 1)
         self.trigCkbx = QtGui.QCheckBox(self.centralwidget)
         self.trigCkbx.setObjectName(_fromUtf8("trigCkbx"))
-        self.gridLayout_5.addWidget(self.trigCkbx, 2, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.trigCkbx, 3, 0, 1, 1)
         self.averageChbx = QtGui.QCheckBox(self.centralwidget)
         self.averageChbx.setObjectName(_fromUtf8("averageChbx"))
         self.gridLayout_5.addWidget(self.averageChbx, 1, 1, 1, 1)
+        self.artifacRejectSpnbx = SmartSpinBox(self.centralwidget)
+        self.artifacRejectSpnbx.setEnabled(False)
+        self.artifacRejectSpnbx.setDecimals(3)
+        self.artifacRejectSpnbx.setMaximum(500000.0)
+        self.artifacRejectSpnbx.setObjectName(_fromUtf8("artifacRejectSpnbx"))
+        self.gridLayout_5.addWidget(self.artifacRejectSpnbx, 2, 1, 1, 1)
+        self.label_44 = QtGui.QLabel(self.centralwidget)
+        self.label_44.setEnabled(False)
+        self.label_44.setObjectName(_fromUtf8("label_44"))
+        self.gridLayout_5.addWidget(self.label_44, 2, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_5)
         self.frame = QtGui.QFrame(self.centralwidget)
         self.frame.setFrameShape(QtGui.QFrame.HLine)
@@ -353,7 +363,7 @@ class Ui_ControlWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         ControlWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ControlWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1223, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -605,7 +615,7 @@ class Ui_ControlWindow(object):
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(ControlWindow)
-        self.tabGroup.setCurrentIndex(2)
+        self.tabGroup.setCurrentIndex(0)
         QtCore.QObject.connect(self.actionSave_Options, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchSaveDlg)
         QtCore.QObject.connect(self.actionSet_Calibration, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchCalibrationDlg)
         QtCore.QObject.connect(self.actionSet_Scale, QtCore.SIGNAL(_fromUtf8("triggered()")), ControlWindow.launchScaleDlg)
@@ -683,6 +693,8 @@ class Ui_ControlWindow(object):
         self.modeCmbx.setItemText(1, _translate("ControlWindow", "Chart", None))
         self.trigCkbx.setText(_translate("ControlWindow", "Trigger", None))
         self.averageChbx.setText(_translate("ControlWindow", "Average response", None))
+        self.artifacRejectSpnbx.setToolTip(_translate("ControlWindow", "Recording sampling rate", None))
+        self.label_44.setText(_translate("ControlWindow", "Artifact Rejection", None))
         self.label_8.setText(_translate("ControlWindow", "Calibration:", None))
         self.currentCalLbl.setText(_translate("ControlWindow", "None", None))
         self.dataFileLbl.setText(_translate("ControlWindow", "None", None))

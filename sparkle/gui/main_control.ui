@@ -73,7 +73,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -534,7 +534,7 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QComboBox" name="trigchanBox"/>
           </item>
           <item row="0" column="0">
@@ -561,7 +561,7 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QCheckBox" name="trigCkbx">
             <property name="text">
              <string>Trigger</string>
@@ -572,6 +572,32 @@
            <widget class="QCheckBox" name="averageChbx">
             <property name="text">
              <string>Average response</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="SmartSpinBox" name="artifacRejectSpnbx">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Recording sampling rate</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>500000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_44">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Artifact Rejection</string>
             </property>
            </widget>
           </item>
@@ -698,7 +724,7 @@
      <x>0</x>
      <y>0</y>
      <width>1223</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
