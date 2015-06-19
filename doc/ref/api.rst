@@ -202,10 +202,10 @@ Extending
 
 See :doc:`Extending sparkle<extending>`
 
-Develop Mode
-------------
+Developer Mode
+--------------
 
-While running Sparkle, it is not uncommon that you may be running without any hardware connected. If this is the case and pydaqmx is not installed, Sparkle will run in Review Mode. Review Mode hides the explore and calibration tabs on the main interface. While this may be convenient for users, programmers developing new features may need to access this. To accommodate, Sparkle will check for the environment variable SPARKLE_DEBUG. If SPARKLE_DEBUG is set to “true” (not case sensitive) Sparkle will not run in Review Mode. This way the explore and calibration tabs will always display, even if pydaqmx is not installed on your machine. 
+While running Sparkle, it is not uncommon that you may be running without any hardware connected. If this is the case and pydaqmx is not installed, Sparkle will run in Review Mode. Review Mode hides the explore and calibration tabs on the main interface. While this may be convenient for users, programmers developing new features may need to access this. To accommodate, Sparkle will check for the environment variable SPARKLE_DEVELOP. If SPARKLE_DEVELOP is set to “true” (not case sensitive) Sparkle will not run in Review Mode. This way the explore and calibration tabs will always display, even if pydaqmx is not installed on your machine. 
 
 Reference API
 -------------
