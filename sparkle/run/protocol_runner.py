@@ -62,7 +62,7 @@ class ProtocolRunner(ListAcquisitionRunner):
                 self.avg_buffer[irep,:] = response
                 if irep == self.nreps -1:
                     avg_response = self.avg_buffer.mean(axis=0)
-                    self.datafile.append(self.current_dataset_name, response)
+                    self.datafile.append(self.current_dataset_name, avg_response)
                     self.avg_buffer = np.zeros_like(self.avg_buffer)
             else:
                 self.datafile.append(self.current_dataset_name, response)
