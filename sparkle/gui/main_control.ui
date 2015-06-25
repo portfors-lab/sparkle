@@ -534,7 +534,7 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="3" column="1">
+          <item row="6" column="1">
            <widget class="QComboBox" name="trigchanBox"/>
           </item>
           <item row="0" column="0">
@@ -561,22 +561,22 @@
             </item>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="6" column="0">
            <widget class="QCheckBox" name="trigCkbx">
             <property name="text">
              <string>Trigger</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="0">
            <widget class="QCheckBox" name="averageChbx">
             <property name="text">
-             <string>Average response</string>
+             <string>Avg response</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="SmartSpinBox" name="artifacRejectSpnbx">
+          <item row="5" column="1">
+           <widget class="SmartSpinBox" name="artifactRejectSpnbx">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -591,13 +591,13 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_44">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="artifactRejectChbx">
             <property name="text">
              <string>Artifact Rejection</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -1667,6 +1667,54 @@
     <hint type="destinationlabel">
      <x>611</x>
      <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>artifactRejectChbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>artifactRejectSpnbx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>772</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>871</x>
+     <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>averageChbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>artifactRejectChbx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>772</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>772</x>
+     <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>averageChbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>artifactRejectSpnbx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>772</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>871</x>
+     <y>287</y>
     </hint>
    </hints>
   </connection>
