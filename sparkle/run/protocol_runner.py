@@ -1,9 +1,9 @@
 import numpy as np
 
+from itertools import islice, count
+
 from sparkle.acq.players import FinitePlayer
 from sparkle.run.list_runner import ListAcquisitionRunner
-from sparkle.stim.stimulus_model import StimulusModel
-from sparkle.tools import spikestats
 from sparkle.tools.util import next_str_num
 
 
@@ -25,7 +25,8 @@ class ProtocolRunner(ListAcquisitionRunner):
 
             self.datafile.init_group(self.current_dataset_name)
 
-            info = {'samplerate_ad': self.player.aifs, 'averaged': self.average}
+            info = {'samplerate_ad': self.player.aifs, 'averaged': self.average,
+                    'artifact_reject': self.reject, 'reject_rate': self.rejectrate}
             self.datafile.set_metadata(self.current_dataset_name, info)
 
         self.player.set_aochan(self.aochan)
@@ -56,14 +57,25 @@ class ProtocolRunner(ListAcquisitionRunner):
             self.putnotify('tuning_curve_started', (range(test.traceCount()), ['all traces'], 'generic'))
     
     def _process_response(self, response, trace_info, irep):
-
         if self.save_data:
             if self.average:
-                self.avg_buffer[irep,:] = response
-                if irep == self.nreps -1:
-                    avg_response = self.avg_buffer.mean(axis=0)
+                self.avg_buffer[irep, :] = response
+                if irep == self.nreps - 1:
+
+                    # Checks if any values are higher than the Artifact Rejection
+                    # value for each sample and if so converts to nan
+                    if self.reject:
+                        # print 'rejectrate:', self.rejectrate
+                        for i in islice(count(), self.avg_buffer.shape[0]):
+                            for j in islice(count(), self.avg_buffer.shape[2]):
+                                if self.avg_buffer[i][0][j] >= self.rejectrate:
+                                    self.avg_buffer[i][0][j] = np.nan
+                            # print '[', i, ']: ', self.avg_buffer[i][0]
+
+                    avg_response = np.nanmean(self.avg_buffer, axis=0)
+                    # print '\navg_response: ', avg_response
                     self.datafile.append(self.current_dataset_name, avg_response)
-                    self.avg_buffer = np.zeros_like(self.avg_buffer)
+                    self.avg_buffer = np.zeros_like(self.avg_buffer)  # Zero's out the array
             else:
                 self.datafile.append(self.current_dataset_name, response)
 

@@ -295,6 +295,7 @@ class MainWindow(ControlWindow):
 
         winsz = float(self.ui.windowszSpnbx.value())
         binsz = float(self.ui.binszSpnbx.value())
+        rejectrate = float(self.ui.artifactRejectSpnbx.value())
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
@@ -306,9 +307,10 @@ class MainWindow(ControlWindow):
         else:
             trigger = None
         avg = self.ui.averageChbx.isChecked()
+        reject = self.ui.artifactRejectChbx.isChecked()
         self.acqmodel.set(aochan=aochan, aichan=self._aichans, acqtime=winsz,
                           aifs=acq_rate, binsz=binsz, trigger=trigger,
-                          average=avg)
+                          average=avg, reject=reject, rejectrate=rejectrate)
         self.binsz = binsz
 
         self.display.setXlimits((0,winsz))
