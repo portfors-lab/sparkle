@@ -463,10 +463,15 @@ class MainWindow(ControlWindow):
                 # first acquisition, don't ask if it's a new cell
                 self.acqmodel.increment_cellid()
             else:
-                answer = QtGui.QMessageBox.question(self, 'Cell ID', 'New cell?',
-                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-                if answer == QtGui.QMessageBox.Yes:
+                question_box = QtGui.QMessageBox(QtGui.QMessageBox.Question, 'Cell ID',
+                                                 'Do you wish to start a new cell?')
+                yes_button = question_box.addButton(self.tr('New Cell'), QtGui.QMessageBox.YesRole)
+                no_button = question_box.addButton(self.tr('No'), QtGui.QMessageBox.NoRole)
+                question_box.exec_()
+                if question_box.clickedButton() == yes_button:
                     self.acqmodel.increment_cellid()
+                if question_box.clickedButton() == no_button:
+                    pass
             self.ui.cellIDLbl.setText(str(self.acqmodel.current_cellid))
             
             self.acqmodel.run_protocol()
