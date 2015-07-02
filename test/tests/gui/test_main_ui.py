@@ -17,6 +17,7 @@ from sparkle.data.open import open_acqdata
 from sparkle.gui.main_control import MainWindow
 from sparkle.gui.stim.abstract_component_editor import AbstractComponentWidget
 from sparkle.tools.systools import rand_id
+import numpy as np
 
 PAUSE = 200
 ALLOW = 15
@@ -246,11 +247,17 @@ class TestMainUI():
         qtbot.handle_modal_widget(wait=True)
 
     def test_tone_protocol(self):
-        self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
+        self.protocol_run([('pure tone', {'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
 
     def test_tone_protocol_averaged(self):
         self.form.ui.averageChbx.setChecked(True)
-        self.protocol_run([('pure tone',{'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
+        self.protocol_run([('pure tone', {'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
+
+    def test_tone_protocol_average_threshold(self):
+        self.form.ui.averageChbx.setChecked(True)
+        self.form.ui.artifactRejectChbx.setChecked(True)
+        self.form.ui.artifactRejectSpnbx.setValue(1.5)
+        self.protocol_run([('pure tone', {'duration': 10, 'frequency': 22}), ('silence',{'duration': 15})])
 
     def test_auto_parameter_protocol(self):
         self.protocol_run([('pure tone',{'duration': 66, 'frequency': 22}), ('pure tone',{'duration': 33})],
@@ -718,6 +725,15 @@ class TestMainUI():
             assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, 1, nchans, nsamples)
         else:
             assert self.form.acqmodel.datafile.get_data('segment_1/test_1').shape == (ntraces, nreps, nchans, nsamples)
+
+        # check if all values are less than stated earlier in test_tone_protocol_average_threshold(self)
+        if self.form.ui.artifactRejectChbx.isChecked():
+            print self.form.acqmodel.datafile.get_data('segment_1/test_1')
+            for x in range(0, self.form.acqmodel.datafile.get_data('segment_1/test_1')[0][0][0].size):
+                assert (self.form.acqmodel.datafile.get_data('segment_1/test_1')[0][0][0][x] < 1.5) or \
+                       np.isnan(self.form.acqmodel.datafile.get_data('segment_1/test_1')[0][0][0][x])
+        else:
+            pass
 
         self.check_review_plotting(0,0)
         
