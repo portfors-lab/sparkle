@@ -866,6 +866,35 @@ class TestAcquisitionManager():
 
         hfile.close()
 
+    def test_protocol_with_averaging_artifact_rejection(self):
+        print '\ntesting Average Reject Rate'
+        winsz = 0.2 #seconds
+        acq_rate = 50000
+        reject = 1.5
+        manager, fname = self.create_acqmodel(winsz, acq_rate)
+        manager.set(average=True, reject=True, rejectrate=reject)
+
+        # create and run tone protocol
+        stim = self.tone_protocol(manager)
+
+        manager.close_data()
+
+        # now check saved data
+        hfile = h5py.File(os.path.join(self.tempfolder, fname))
+
+        assert hfile['segment_1'].attrs['averaged'] == True
+
+        test = hfile['segment_1']['test_1']
+
+        # make sure no value is greater or equal to the reject rate
+        for x in range(0, test.value.shape[3]):
+            print test.value[0][0][0][x]
+            assert test.value[0][0][0][x] < np.float32(reject) or np.isnan(test.value[0][0][0][x])
+
+        check_result(test, stim, winsz, acq_rate, averaged=True)
+
+        hfile.close()
+
     #==============================
     # helper functions
     #==============================

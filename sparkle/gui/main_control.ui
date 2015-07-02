@@ -73,7 +73,7 @@
         <item>
          <widget class="QTabWidget" name="tabGroup">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabExplore">
            <attribute name="title">
@@ -534,8 +534,12 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="2" column="1">
-           <widget class="QComboBox" name="trigchanBox"/>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="averageChbx">
+            <property name="text">
+             <string>Avg response</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_17">
@@ -561,17 +565,54 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="trigCkbx">
-            <property name="text">
-             <string>Trigger</string>
+          <item row="6" column="1">
+           <widget class="QComboBox" name="trigchanBox"/>
+          </item>
+          <item row="5" column="1">
+           <widget class="SmartSpinBox" name="artifactRejectSpnbx">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Artifact Rejection Value</string>
+            </property>
+            <property name="suffix">
+             <string> V</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="value">
+             <double>5.000000000000000</double>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="averageChbx">
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="artifactRejectChbx">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>Average response</string>
+             <string>Artifact Rejection</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="trigCkbx">
+            <property name="text">
+             <string>Trigger</string>
             </property>
            </widget>
           </item>
@@ -698,7 +739,7 @@
      <x>0</x>
      <y>0</y>
      <width>1223</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -1325,22 +1366,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>modeCmbx</sender>
-   <signal>currentIndexChanged(QString)</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>modeToggled()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>893</x>
-     <y>337</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>705</x>
-     <y>407</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionProgress</sender>
    <signal>triggered()</signal>
    <receiver>progressDock</receiver>
@@ -1549,22 +1574,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>modeCmbx</sender>
-   <signal>currentIndexChanged(QString)</signal>
-   <receiver>ControlWindow</receiver>
-   <slot>setTriggerEnable()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>893</x>
-     <y>337</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>882</x>
-     <y>362</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionResponse_SPL</sender>
    <signal>triggered()</signal>
    <receiver>responseSpl</receiver>
@@ -1641,6 +1650,86 @@
     <hint type="destinationlabel">
      <x>611</x>
      <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modeCmbx</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>modeToggled()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>893</x>
+     <y>337</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>705</x>
+     <y>407</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modeCmbx</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>ControlWindow</receiver>
+   <slot>setTriggerEnable()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>893</x>
+     <y>337</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>882</x>
+     <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>artifactRejectChbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>artifactRejectSpnbx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>772</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>871</x>
+     <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>averageChbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>artifactRejectChbx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>772</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>772</x>
+     <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>averageChbx</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>artifactRejectSpnbx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>772</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>871</x>
+     <y>287</y>
     </hint>
    </hints>
   </connection>

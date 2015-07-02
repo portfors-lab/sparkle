@@ -12,6 +12,8 @@ class AbstractAcquisitionRunner(object):
 
         self.player = None
         self.average = False
+        self.reject = False
+        self.rejectrate = 0
 
         self.datafile = None
 
@@ -84,6 +86,10 @@ class AbstractAcquisitionRunner(object):
         :type datafile: :class:`AcquisitionData<sparkle.data.dataobjects.AcquisitionData>`
         :param average: whether to average repetitions of a trace, saving only the averaged signal
         :type average: bool
+        :param reject: whether to reject values higher than a defined threshold. Only used while average is true
+        :type reject: bool
+        :param rejectrate: the value to base artifact rejection on
+        :type rejectrate: float
         """
         self.player_lock.acquire()
         if 'acqtime' in kwargs:
@@ -123,6 +129,10 @@ class AbstractAcquisitionRunner(object):
             self.save_data = kwargs['save']
         if 'average' in kwargs:
             self.average = kwargs['average']
+        if 'reject' in kwargs:
+            self.reject = kwargs['reject']
+        if 'rejectrate' in kwargs:
+            self.rejectrate = kwargs['rejectrate']
 
     def run(self, interval, **kwargs):
         """Runs the acquisiton

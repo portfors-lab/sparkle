@@ -77,6 +77,7 @@ class MainWindow(ControlWindow):
     """Main GUI for the application. Run the main fucntion of this file"""
     _polarity = 1
     fileLoaded = QtCore.Signal(str)
+
     def __init__(self, inputsFilename='', datafile=None, filemode='w-', hidetabs=False):
         # set up model and stimlui first, 
         # as saved configuration relies on this
@@ -153,7 +154,6 @@ class MainWindow(ControlWindow):
         logger = logging.getLogger('main')
         assign_uihandler_slot(logger, self.ui.logTxedt.appendHtml)
 
-
         self.calvals['calf'] = REFFREQ
         self.calvals['calv'] = REFVOLTAGE
         if self.fscale == 'kHz':
@@ -166,7 +166,7 @@ class MainWindow(ControlWindow):
         self.calpeak = None
         self.ui.tabGroup.setCurrentIndex(0)
         
-        #updates the microphone calibration in the acquisition model
+        # updates the microphone calibration in the acquisition model
         self.updateMicrophoneCalibration(0) # arg is place holder
 
         # connect data reviewer to data display
@@ -185,6 +185,10 @@ class MainWindow(ControlWindow):
 
             self.ui.reviewLbl.setText(' - REVIEW MODE')
             self.ui.startBtn.setEnabled(False)
+
+        # hide artifact rejection until average checkbox is checked
+        self.ui.artifactRejectChbx.setEnabled(False)
+        self.ui.artifactRejectSpnbx.setEnabled(False)
 
         # hide trigger channel - not currently supported, maybe later
         self.ui.trigCkbx.setVisible(False)
@@ -291,6 +295,7 @@ class MainWindow(ControlWindow):
 
         winsz = float(self.ui.windowszSpnbx.value())
         binsz = float(self.ui.binszSpnbx.value())
+        rejectrate = float(self.ui.artifactRejectSpnbx.value())
 
         nbins = np.ceil(winsz/binsz)
         bin_centers = (np.arange(nbins)*binsz)+(binsz/2)
@@ -302,9 +307,10 @@ class MainWindow(ControlWindow):
         else:
             trigger = None
         avg = self.ui.averageChbx.isChecked()
+        reject = self.ui.artifactRejectChbx.isChecked()
         self.acqmodel.set(aochan=aochan, aichan=self._aichans, acqtime=winsz,
                           aifs=acq_rate, binsz=binsz, trigger=trigger,
-                          average=avg)
+                          average=avg, reject=reject, rejectrate=rejectrate)
         self.binsz = binsz
 
         self.display.setXlimits((0,winsz))
@@ -368,7 +374,7 @@ class MainWindow(ControlWindow):
 
     def onGroupDone(self, halted):
         if self.activeOperation == 'calibration':
-            #maybe don't call this at all if save is false?
+            # maybe don't call this at all if save is false?
             save = self.ui.calibrationWidget.saveChecked() and not halted
             if save:
                 calname, db = self.acqmodel.process_calibration(save)
@@ -645,7 +651,7 @@ class MainWindow(ControlWindow):
     def do_spike_stats(self, response, fs):
         winsz = float(response.shape[-1])/fs
 
-         # use time subwindow of trace, specified by user
+        # use time subwindow of trace, specified by user
         start_time = self.ui.psthStartField.value()
         if self.ui.psthMaxBox.isChecked():
             stop_time = winsz
