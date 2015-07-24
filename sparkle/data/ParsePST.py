@@ -14,8 +14,8 @@ def parse_pst(filename):
 
     # windows adds carriage returns in addition to newlines
     file_contents = file_contents.translate(None, '\r')
-    lines = file_contents.split('\n')
-    # print lines
+    lines = file_contents.split('\n')	
+#     print lines
 
     # %Static strings
     test_aborted = 'Test aborted.'
@@ -85,11 +85,11 @@ def parse_pst(filename):
         
         test['trace'] = []
         for trace_num in range(num_traces):
-            trace_data = [int(x) for x in lines[line_num].split()]
-            num_sweeps = trace_data[0]
-            samplerate_da = trace_data[1];
-            samplerate_ad = trace_data[3];
-            duration = trace_data[4];
+            trace_data = [x for x in lines[line_num].split()]   # PDR: changed int(x) -> x to avoid error when repetition rate < 1Hz
+            num_sweeps = int(trace_data[0])						# PDR: inserted int()
+            samplerate_da = int(trace_data[1]);					# PDR: inserted int()
+            samplerate_ad = int(trace_data[3]);					# PDR: inserted int()
+            duration = int(trace_data[4]);						# PDR: inserted int()
             points = int((samplerate_ad/1000.)*duration)
             trace = {}
             trace['record_duration'] = duration
