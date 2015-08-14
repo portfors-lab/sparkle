@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:/users/j.uyesugi/documents/sparkle/sparkle/gui/main_control.ui'
+# Form implementation generated from reading ui file 'c:/Users/Joel/Documents/sparkle/sparkle/gui/main_control.ui'
 #
-# Created: Thu Jun 25 17:53:39 2015
+# Created: Fri Aug 14 15:04:02 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -453,6 +453,29 @@ class Ui_ControlWindow(object):
         self.gridLayout_9.addWidget(self.spikeTotalLbl, 0, 1, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_9.addItem(spacerItem2, 0, 2, 1, 1)
+        self.label_12 = QtGui.QLabel(self.PSTHContainer)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_12.setFont(font)
+        self.label_12.setObjectName(_fromUtf8("label_12"))
+        self.gridLayout_9.addWidget(self.label_12, 2, 0, 1, 1)
+        self.spikeStandardDeviationLbl = QtGui.QLabel(self.PSTHContainer)
+        self.spikeStandardDeviationLbl.setObjectName(_fromUtf8("spikeStandardDeviationLbl"))
+        self.gridLayout_9.addWidget(self.spikeStandardDeviationLbl, 2, 1, 1, 1)
+        self.spikeNanLbl = QtGui.QLabel(self.PSTHContainer)
+        self.spikeNanLbl.setObjectName(_fromUtf8("spikeNanLbl"))
+        self.gridLayout_9.addWidget(self.spikeNanLbl, 2, 4, 1, 1)
+        self.label_25 = QtGui.QLabel(self.PSTHContainer)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_25.sizePolicy().hasHeightForWidth())
+        self.label_25.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_25.setFont(font)
+        self.label_25.setObjectName(_fromUtf8("label_25"))
+        self.gridLayout_9.addWidget(self.label_25, 2, 3, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_9)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
@@ -721,7 +744,7 @@ class Ui_ControlWindow(object):
         self.label_11.setText(_translate("ControlWindow", "Total :", None))
         self.label_16.setToolTip(_translate("ControlWindow", "Mean no. of spikes per unique stimulus", None))
         self.label_16.setText(_translate("ControlWindow", "Average : ", None))
-        self.label_5.setToolTip(_translate("ControlWindow", "Mean time of first spike", None))
+        self.label_5.setToolTip(_translate("ControlWindow", "Mean time of first spike (ignoring NaNs)", None))
         self.label_5.setText(_translate("ControlWindow", "Latency (ms) : ", None))
         self.spikeLatencyLbl.setText(_translate("ControlWindow", "0", None))
         self.label_7.setToolTip(_translate("ControlWindow", "Mean no. spikes per window", None))
@@ -729,6 +752,12 @@ class Ui_ControlWindow(object):
         self.spikeRateLbl.setText(_translate("ControlWindow", "0", None))
         self.spikeAvgLbl.setText(_translate("ControlWindow", "0", None))
         self.spikeTotalLbl.setText(_translate("ControlWindow", "0", None))
+        self.label_12.setToolTip(_translate("ControlWindow", "First Spike Standard Deviation", None))
+        self.label_12.setText(_translate("ControlWindow", "Latency (SD) :", None))
+        self.spikeStandardDeviationLbl.setText(_translate("ControlWindow", "0", None))
+        self.spikeNanLbl.setText(_translate("ControlWindow", "0", None))
+        self.label_25.setToolTip(_translate("ControlWindow", "Total number of NaNs", None))
+        self.label_25.setText(_translate("ControlWindow", "NaNs :", None))
         self.groupBox.setTitle(_translate("ControlWindow", "subwindow", None))
         self.label_6.setText(_translate("ControlWindow", "start:", None))
         self.label_13.setText(_translate("ControlWindow", "end:", None))

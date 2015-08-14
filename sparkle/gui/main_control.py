@@ -647,7 +647,11 @@ class MainWindow(ControlWindow):
                 avg_count = np.mean(self.spike_counts)
                 avg_latency = np.nanmean(self.spike_latencies)
                 avg_rate = np.mean(self.spike_rates)
-                self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
+                sd_latency = np.nanstd(self.spike_latencies)
+                total_nan = np.isnan(self.spike_latencies).sum()
+                percent_nan = ' ({:.2%})'.format(total_nan/float(len(self.spike_latencies)))
+                nan = str(total_nan) + percent_nan
+                self.traceDone(total_spikes, avg_count, avg_latency, avg_rate, sd_latency, nan)
                 if 'f' in extra_info:
                     self.displayTuningCurve(extra_info['f'], extra_info['db'], avg_count)
                 elif 'all traces' in extra_info:
@@ -680,10 +684,7 @@ class MainWindow(ControlWindow):
             spike_times = spikestats.spike_times(channel_data[start_index:stop_index], threshold, fs, useabs)
             
             count.append(len(spike_times))
-            if len(spike_times) > 0:
-                latency.append(spike_times[0])
-            else:
-                latency.append(np.nan)
+            latency.append(spikestats.spike_latency(channel_data[start_index:stop_index], threshold, fs))
             rate.append(spikestats.firing_rate(spike_times, subwinsz))
 
             response_bins.append(spikestats.bin_spikes(spike_times, binsz) + binshift)
@@ -764,11 +765,13 @@ class MainWindow(ControlWindow):
             self.ui.overAttenLbl.setNum(overdb)
             self.ui.overAttenLbl.setPalette(pal)
 
-    def traceDone(self, totalSpikes, avgCount, avgLatency, avgRate):
+    def traceDone(self, totalSpikes, avgCount, avgLatency, avgRate, sdLatency, nan):
         self.ui.spikeTotalLbl.setText(str(totalSpikes))
         self.ui.spikeAvgLbl.setText(str(avgCount))
         self.ui.spikeLatencyLbl.setText(str(avgLatency*1000))
         self.ui.spikeRateLbl.setText(str(avgRate))
+        self.ui.spikeStandardDeviationLbl.setText(str(sdLatency))
+        self.ui.spikeNanLbl.setText(nan)
 
     def displayOldData(self, path, tracenum, repnum=0):
         if self.activeOperation is None:
@@ -877,11 +880,15 @@ class MainWindow(ControlWindow):
 
             total_spikes = sum(spike_counts)
             avg_count = np.mean(spike_counts)
-            avg_latency = sum(spike_latencies)/len(spike_latencies)
+            # avg_latency = sum(spike_latencies)/len(spike_latencies)
+            avg_latency = np.nanmean(spike_latencies)
             avg_rate = sum(spike_rates)/len(spike_rates)
-
+            sd_latency = np.nanstd(spike_latencies)
+            total_nan = np.isnan(spike_latencies).sum()
+            percent_nan = ' ({:.2%})'.format(total_nan/float(len(spike_latencies)))
+            nan = str(total_nan) + percent_nan
             # update UI
-            self.traceDone(total_spikes, avg_count, avg_latency, avg_rate)
+            self.traceDone(total_spikes, avg_count, avg_latency, avg_rate, sd_latency, nan)
 
     def displayOldProgressPlot(self, path):
         if self.activeOperation is None:

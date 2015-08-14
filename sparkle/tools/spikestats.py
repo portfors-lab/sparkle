@@ -116,7 +116,7 @@ def spike_latency(signal, threshold, fs):
     elif len(over) > 0:
         latency = float(over[0])/fs
     else:
-        latency = None
+        latency = np.nan
 
     return latency
 
