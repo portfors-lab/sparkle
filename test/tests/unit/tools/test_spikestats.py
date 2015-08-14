@@ -355,7 +355,7 @@ def test_spike_latency_empty():
     fs = 10
 
     latency = spike_latency(y, threshold, fs)
-    assert latency is None
+    assert latency is np.nan
 
 
 #--------------------------------
