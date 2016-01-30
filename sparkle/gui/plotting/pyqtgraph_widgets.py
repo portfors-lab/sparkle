@@ -165,7 +165,7 @@ class TraceWidget(BasePlot):
         self.centralWidget.layout.addItem(self.proxy_threshold_field, 4,1)
         
         self.threshold_field.setMinimumSize(QtCore.QSize(100,10))
-        self.threshold_field.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum))
+        self.threshold_field.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
         self.threshold_field.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.threshold_field.setAlignment(QtCore.Qt.AlignRight)
 
