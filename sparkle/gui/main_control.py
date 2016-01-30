@@ -770,7 +770,7 @@ class MainWindow(ControlWindow):
         self.ui.spikeAvgLbl.setText(str(avgCount))
         self.ui.spikeLatencyLbl.setText(str(avgLatency*1000))
         self.ui.spikeRateLbl.setText(str(avgRate))
-        self.ui.spikeStandardDeviationLbl.setText(str(sdLatency))
+        self.ui.spikeStandardDeviationLbl.setText(str(sdLatency*1000))
         self.ui.spikeNanLbl.setText(nan)
 
     def displayOldData(self, path, tracenum, repnum=0):
