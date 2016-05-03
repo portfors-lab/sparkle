@@ -485,7 +485,7 @@ class SpecWidget(BasePlot):
         self.editor = pg.ImageView()
         # remove the ROI and Norm buttons
         self.editor.ui.roiBtn.setVisible(False)
-        self.editor.ui.normBtn.setVisible(False)
+        self.editor.ui.menuBtn.setVisible(False)
         self.editor.setImage(self.imageArray)
         if self.imgArgs['state'] is not None:
             self.editor.getHistogramWidget().item.gradient.restoreState(self.imgArgs['state'])
