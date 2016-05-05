@@ -52,28 +52,72 @@ class SquareWave(PureTone):
     name = "Square Wave"
     _frequency = 50
     _amplitude = 1
+    _risefall = 0
+    _transition = 0
+
+    def transition(self):
+        return self._transition
+
+    def setTransition(self, transition):
+        self._transition = transition
 
     def signal(self, fs, atten, caldb, calv):
         npts = int(self._duration * fs)
-        t = np.linspace(0, self._duration, npts)
-        sig = square(2 * np.pi * self._frequency * t)
+
+        if self._transition == 0:
+            t = np.linspace(0, self._duration, npts)
+            sig = square(2 * np.pi * self._frequency * t)
+        else:
+            transitionpts = int(self._transition * fs)
+            transition = np.linspace(1, -1, transitionpts)
+            halfperiod = np.ones(int(round(((1 / self._frequency) * fs)/2)))
+
+            sig = []
+            count = 0
+
+            while len(sig) < npts:
+                if np.mod(count, 4) == 0:
+                    sig = np.append(sig, -transition)
+                elif np.mod(count, 4) == 1:
+                    sig = np.append(sig, halfperiod)
+                elif np.mod(count, 4) == 2:
+                    sig = np.append(sig, transition)
+                elif np.mod(count, 4) == 3:
+                    sig = np.append(sig, -halfperiod)
+                else:
+                    pass
+                count += 1
+
+            # Remove extra signal
+            sig = sig[:npts]
+
+        # Scale sig to proper amplitude
         sig = sig * (self._amplitude/2) + (self._amplitude/2)
+
+        if self._risefall > 0:
+            rf_npts = int(self._risefall * fs) / 2
+            wnd = hann(rf_npts*2)  # cosine taper
+            sig[:rf_npts] = sig[:rf_npts] * wnd[:rf_npts]
+            sig[-rf_npts:] = sig[-rf_npts:] * wnd[rf_npts:]
         return sig
 
     def auto_details(self):
         details = super(SquareWave, self).auto_details()
-        del details['risefall']
+        # del details['risefall']
         del details['intensity']
         details['amplitude'] = {'unit': 'V', 'min': -10, 'max': 10.}
+        details['transition'] = {'unit': 's', 'min': 0, 'max': 0.1}
         return details
 
     def loadState(self, state):
         super(SquareWave,self).loadState(state)
         self._amplitude = state['amplitude']
+        self._transition = state['transition']
 
     def stateDict(self):
         state = super(SquareWave, self).stateDict()
         state['amplitude'] = self._amplitude
+        state['transition'] = self._transition
         return state
 
 class FMSweep(AbstractStimulusComponent):
@@ -375,6 +419,7 @@ class SquareWaveModulation(Modulation):
     name = "squaremod"
 
 class SFM(AbstractStimulusComponent):
+    """Sinusodal Frequency Modulation"""
     name = "sfm"
 
 class Ripples(AbstractStimulusComponent):

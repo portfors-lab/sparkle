@@ -25,9 +25,27 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
         self.tunit_fields.append(self.duration_input)
         self.duration_input.valueChanged.connect(self.valueChanged.emit)
 
-        layout.addWidget(QtGui.QLabel('frequency'), 1, 0)
+        layout.addWidget(QtGui.QLabel('risefall'), 1, 0)
+        self.risefall_input = SmartSpinBox()
+        layout.addWidget(self.risefall_input, 1, 1)
+        self.risefall_input.setMinimum(details['risefall']['min'])
+        self.risefall_input.setMaximum(details['risefall']['max'])
+        self.risefall_input.setScale(self._scales[0])
+        self.tunit_fields.append(self.risefall_input)
+        self.risefall_input.valueChanged.connect(self.valueChanged.emit)
+
+        layout.addWidget(QtGui.QLabel('transition'), 2, 0)
+        self.transition_input = SmartSpinBox()
+        layout.addWidget(self.transition_input, 2, 1)
+        self.transition_input.setMinimum(details['transition']['min'])
+        self.transition_input.setMaximum(details['transition']['max'])
+        self.transition_input.setScale(self._scales[0])
+        self.tunit_fields.append(self.transition_input)
+        self.transition_input.valueChanged.connect(self.valueChanged.emit)
+
+        layout.addWidget(QtGui.QLabel('frequency'), 3, 0)
         self.freq_input = IncrementInput()
-        layout.addWidget(self.freq_input, 1, 1)
+        layout.addWidget(self.freq_input, 3, 1)
         self.freq_input.setMinimum(details['frequency']['min'])
         self.freq_input.setMaximum(details['frequency']['max'])
         self.freq_input.setScale(self._scales[1])
@@ -85,12 +103,16 @@ class SquareWaveParameterWidget(AbstractComponentWidget):
     def setComponent(self, component):
         values = component.stateDict()
         self.duration_input.setValue(values['duration'])
+        self.risefall_input.setValue(values['risefall'])
+        self.transition_input.setValue(values['transition'])
         self.freq_input.setValue(values['frequency'])
         self.amp_input.setValue(values['amplitude'])
         self._component = component
 
     def saveToObject(self):
         self._component.set('duration', self.duration_input.value())
+        self._component.set('risefall', self.risefall_input.value())
+        self._component.set('transition', self.transition_input.value())
         self._component.set('frequency', self.freq_input.value())
         self._component.set('amplitude', self.amp_input.value())
         self.attributesSaved.emit(self._component.__class__.__name__, self._component.stateDict())
