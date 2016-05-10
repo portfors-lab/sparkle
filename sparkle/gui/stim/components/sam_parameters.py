@@ -40,7 +40,7 @@ class SAMParametersWidget(AbstractComponentWidget):
         self.intensity_input.setScale('dB SPL')
         self.intensity_input.valueChanged.connect(self.valueChanged.emit)
 
-        layout.addWidget(QtGui.QLabel('frequency'), 3, 0)
+        layout.addWidget(QtGui.QLabel('carrier frequency'), 3, 0)
         self.freq_input = IncrementInput()
         layout.addWidget(self.freq_input, 3, 1)
         self.freq_input.setMinimum(details['frequency']['min'])
@@ -56,7 +56,7 @@ class SAMParametersWidget(AbstractComponentWidget):
         self.mod_freq_input.setScale(self._scales[1])
         self.mod_freq_input.valueChanged.connect(self.valueChanged.emit)
 
-        layout.addWidget(QtGui.QLabel('modulation index'), 5, 0)
+        layout.addWidget(QtGui.QLabel('depth'), 5, 0)
         self.modulation_input = SmartSpinBox()
         layout.addWidget(self.modulation_input, 5, 1)
         self.modulation_input.setMinimum(details['modulation']['min'])
