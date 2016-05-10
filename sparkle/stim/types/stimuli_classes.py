@@ -7,8 +7,7 @@ import yaml
 from scipy.signal import chirp, hann, square, butter, lfilter, buttord
 
 from sparkle.stim.abstract_component import AbstractStimulusComponent
-from sparkle.tools.audiotools import audiorate, audioread, make_tone, \
-    signal_amplitude
+from sparkle.tools.audiotools import audiorate, audioread, make_tone, make_carrier_tone, signal_amplitude
 from sparkle.tools.exceptions import FileDoesNotExistError
 
 
@@ -17,6 +16,7 @@ class PureTone(AbstractStimulusComponent):
     explore = True
     protocol = True
     _frequency = 5000
+
     def frequency(self):
         return self._frequency
 
@@ -24,7 +24,9 @@ class PureTone(AbstractStimulusComponent):
         self._frequency = freq
 
     def signal(self, fs, atten, caldb, calv):
-        tone = make_tone(self._frequency, self._intensity+atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[0]
+        tone = \
+        make_tone(self._frequency, self._intensity + atten, self._duration, self._risefall, fs, caldb=caldb, calv=calv)[
+            0]
         return tone
 
     def stateDict(self):
@@ -34,19 +36,20 @@ class PureTone(AbstractStimulusComponent):
         return state
 
     def loadState(self, state):
-        super(PureTone,self).loadState(state)
+        super(PureTone, self).loadState(state)
         self._frequency = state['frequency']
 
     def auto_details(self):
         details = super(PureTone, self).auto_details()
-        details['frequency'] = {'unit':'Hz', 'min':0, 'max':200000}
+        details['frequency'] = {'unit': 'Hz', 'min': 0, 'max': 200000}
         return details
 
     def verify(self, **kwargs):
         if 'samplerate' in kwargs:
-            if kwargs['samplerate']/2 < self._frequency:
+            if kwargs['samplerate'] / 2 < self._frequency:
                 return "Generation sample rate must be at least twice the stimulus frequency"
         return super(PureTone, self).verify(**kwargs)
+
 
 class SquareWave(PureTone):
     name = "Square Wave"
@@ -70,7 +73,7 @@ class SquareWave(PureTone):
         else:
             transitionpts = int(self._transition * fs)
             transition = np.linspace(1, -1, transitionpts)
-            halfperiod = np.ones(int(round(((1 / self._frequency) * fs)/2)))
+            halfperiod = np.ones(int(round(((1 / self._frequency) * fs) / 2)))
 
             sig = []
             count = 0
@@ -92,11 +95,11 @@ class SquareWave(PureTone):
             sig = sig[:npts]
 
         # Scale sig to proper amplitude
-        sig = sig * (self._amplitude/2) + (self._amplitude/2)
+        sig = sig * (self._amplitude / 2) + (self._amplitude / 2)
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
-            wnd = hann(rf_npts*2)  # cosine taper
+            wnd = hann(rf_npts * 2)  # cosine taper
             sig[:rf_npts] = sig[:rf_npts] * wnd[:rf_npts]
             sig[-rf_npts:] = sig[-rf_npts:] * wnd[rf_npts:]
         return sig
@@ -110,7 +113,7 @@ class SquareWave(PureTone):
         return details
 
     def loadState(self, state):
-        super(SquareWave,self).loadState(state)
+        super(SquareWave, self).loadState(state)
         self._amplitude = state['amplitude']
         self._transition = state['transition']
 
@@ -119,6 +122,7 @@ class SquareWave(PureTone):
         state['amplitude'] = self._amplitude
         state['transition'] = self._transition
         return state
+
 
 class FMSweep(AbstractStimulusComponent):
     name = "FM Sweep"
@@ -141,27 +145,27 @@ class FMSweep(AbstractStimulusComponent):
 
     def signal(self, fs, atten, caldb, calv):
         amp = self.amplitude(caldb, calv)
-        npts = self._duration*fs
-        t = np.arange(npts).astype(float)/fs
+        npts = self._duration * fs
+        t = np.arange(npts).astype(float) / fs
         signal = chirp(t, f0=self._start_f, f1=self._stop_f, t1=self._duration)
         amp_scale = signal_amplitude(signal, fs)
-        signal = ((signal/amp_scale)*amp)
+        signal = ((signal / amp_scale) * amp)
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
-            wnd = hann(rf_npts*2) # cosine taper
+            wnd = hann(rf_npts * 2)  # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
         return signal
 
     def auto_details(self):
         details = super(FMSweep, self).auto_details()
-        details['start_f'] = { 'unit':'Hz', 'min':0, 'max':200000, 'text': "Start Frequency"}
-        details['stop_f'] = {'unit':'Hz', 'min':0, 'max':200000, 'text': "Stop Frequency"}
+        details['start_f'] = {'unit': 'Hz', 'min': 0, 'max': 200000, 'text': "Start Frequency"}
+        details['stop_f'] = {'unit': 'Hz', 'min': 0, 'max': 200000, 'text': "Stop Frequency"}
         return details
 
     def loadState(self, state):
-        super(FMSweep,self).loadState(state)
+        super(FMSweep, self).loadState(state)
         self._start_f = state['start_f']
         self._stop_f = state['stop_f']
 
@@ -170,6 +174,7 @@ class FMSweep(AbstractStimulusComponent):
         state['start_f'] = self._start_f
         state['stop_f'] = self._stop_f
         return state
+
 
 class Vocalization(AbstractStimulusComponent):
     name = "Vocalization"
@@ -202,7 +207,7 @@ class Vocalization(AbstractStimulusComponent):
         return state
 
     def loadState(self, state):
-        super(Vocalization,self).loadState(state)
+        super(Vocalization, self).loadState(state)
 
         browsedir = state['browsedir']
         fname = state['filename']
@@ -214,13 +219,13 @@ class Vocalization(AbstractStimulusComponent):
         if fname is None:
             logger = logging.getLogger('main')
             logger.warn('Vocalization loaded with no file defined')
-        # if not os.path.isdir(browsedir):
-        #     raise FileDoesNotExistError(browsedir)
-        # self._browsedir = browsedir
+            # if not os.path.isdir(browsedir):
+            #     raise FileDoesNotExistError(browsedir)
+            # self._browsedir = browsedir
 
-        # if not os.path.isfile(fname):
-        #     raise FileDoesNotExistError(fname)
-        # self._filename = fname
+            # if not os.path.isfile(fname):
+            #     raise FileDoesNotExistError(fname)
+            # self._filename = fname
 
     def setFile(self, fname):
         if fname is not None:
@@ -229,7 +234,7 @@ class Vocalization(AbstractStimulusComponent):
             fs, wavdata = audioread(self._filename)
 
             # round to the nearest ms
-            duration = np.trunc((float(len(wavdata))/fs)*1000)/1000
+            duration = np.trunc((float(len(wavdata)) / fs) * 1000) / 1000
 
             self._duration = duration
 
@@ -253,39 +258,39 @@ class Vocalization(AbstractStimulusComponent):
             # allow lack of file to not cause error, catch in GUI when necessary?
             logger = logging.getLogger('main')
             logger.warn('Vocalization signal request without a file')
-            return np.array([0,0])
+            return np.array([0, 0])
 
         if not self._findFile():
-            return np.array([0,0])
+            return np.array([0, 0])
 
         fs, wavdata = audioread(self._filename)
         if fs != fs:
             print 'specified', fs, 'wav file', fs
             raise Exception("specified samplerate does not match wav stimulus")
 
-        #truncate to nears ms
-        duration = float(len(wavdata))/fs
+        # truncate to nears ms
+        duration = float(len(wavdata)) / fs
         # print 'duration {}, desired {}'.format(duration, np.trunc(duration*1000)/1000)
-        desired_npts = int((np.trunc(duration*1000)/1000)*fs)
+        desired_npts = int((np.trunc(duration * 1000) / 1000) * fs)
         # print 'npts. desired', len(wavdata), desired_npts
         wavdata = wavdata[:desired_npts]
 
         amp_scale = signal_amplitude(wavdata, fs)
 
-        signal = ((wavdata/amp_scale)*self.amplitude(caldb, calv))
+        signal = ((wavdata / amp_scale) * self.amplitude(caldb, calv))
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
-            wnd = hann(rf_npts*2) # cosine taper
+            wnd = hann(rf_npts * 2)  # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
-            
+
         return signal
 
     def auto_details(self):
         details = super(Vocalization, self).auto_details()
         del details['duration']
-        details['filename'] = {'label':'Edit from component dialog'}
+        details['filename'] = {'label': 'Edit from component dialog'}
         return details
 
     def verify(self, **kwargs):
@@ -301,6 +306,7 @@ class Vocalization(AbstractStimulusComponent):
             raise Exception("Duration not settable on recordings")
         super(Vocalization, self).set(param, value)
 
+
 class WhiteNoise(AbstractStimulusComponent):
     name = "White Noise"
     explore = True
@@ -309,23 +315,24 @@ class WhiteNoise(AbstractStimulusComponent):
     _noise = np.random.normal(0, 1.0, (15e5,))
 
     def signal(self, fs, atten, caldb, calv):
-        npts = self._duration*fs
+        npts = self._duration * fs
 
         signal = self._noise[:npts]
-        
+
         amp = self.amplitude(caldb, calv)
         amp_scale = signal_amplitude(signal, fs)
 
-        signal = ((signal/amp_scale)*amp)
+        signal = ((signal / amp_scale) * amp)
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
-            wnd = hann(rf_npts*2) # cosine taper
+            wnd = hann(rf_npts * 2)  # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
-            
+
         # print 'signal max', np.amax(abs(signal)), amp, amp_scale, 'rms', np.sqrt(np.mean(signal**2))
         return signal
+
 
 class Silence(AbstractStimulusComponent):
     name = "silence"
@@ -340,16 +347,19 @@ class Silence(AbstractStimulusComponent):
 
     def signal(self, *args, **kwargs):
         fs = kwargs['fs']
-        return np.zeros((self._duration*fs,))
+        return np.zeros((self._duration * fs,))
+
 
 class NoStim(AbstractStimulusComponent):
     name = "OFF"
     explore = True
+
     def signal(self, fs, atten, caldb, calv):
-        return [0,0]
+        return [0, 0]
 
     def auto_details(self):
         return {}
+
 
 class BandNoise(AbstractStimulusComponent):
     name = "Band noise"
@@ -358,24 +368,24 @@ class BandNoise(AbstractStimulusComponent):
     # keeps signal same to subsequent signal() calls
     _noise = np.random.normal(0, 1.0, (15e5,))
     _center_frequency = 20000
-    _width = 1.0 # octave = 1/_width
+    _width = 1.0  # octave = 1/_width
 
     def signal(self, fs, atten, caldb, calv):
-        npts = self._duration*fs
+        npts = self._duration * fs
         # start with full spectrum white noise and band-pass to get desired 
         # frequency range
         signal = self._noise[:npts]
-        
+
         # band frequency cutoffs
-        delta = 10**(3./(10.*(2*self._width)))
+        delta = 10 ** (3. / (10. * (2 * self._width)))
         low_freq = self._center_frequency / delta
         high_freq = self._center_frequency * delta
         # scipy butter function wants frequencies normalized between 0. and 1.
-        nyquist = fs/2.
+        nyquist = fs / 2.
         low_normed = low_freq / nyquist
         high_normed = high_freq / nyquist
 
-        order, wn = buttord([low_normed, high_normed], [low_normed-0.05, high_normed+0.05], 1, 40)
+        order, wn = buttord([low_normed, high_normed], [low_normed - 0.05, high_normed + 0.05], 1, 40)
 
         # print 'CUTOFFS', low_freq, high_freq
         # print 'ORDER WN', order, wn, low_normed, high_normed
@@ -385,7 +395,7 @@ class BandNoise(AbstractStimulusComponent):
 
         if self._risefall > 0:
             rf_npts = int(self._risefall * fs) / 2
-            wnd = hann(rf_npts*2) # cosine taper
+            wnd = hann(rf_npts * 2)  # cosine taper
             signal[:rf_npts] = signal[:rf_npts] * wnd[:rf_npts]
             signal[-rf_npts:] = signal[-rf_npts:] * wnd[rf_npts:]
 
@@ -393,12 +403,12 @@ class BandNoise(AbstractStimulusComponent):
 
     def auto_details(self):
         details = super(BandNoise, self).auto_details()
-        details['center_frequency'] = { 'unit':'Hz', 'min':0, 'max':200000, 'text': "Center Frequency"}
-        details['width'] = { 'unit':'Ocatve', 'min':0.001, 'max':100, 'text': "Band Width 1/"}
+        details['center_frequency'] = {'unit': 'Hz', 'min': 0, 'max': 200000, 'text': "Center Frequency"}
+        details['width'] = {'unit': 'Ocatve', 'min': 0.001, 'max': 100, 'text': "Band Width 1/"}
         return details
 
     def loadState(self, state):
-        super(BandNoise,self).loadState(state)
+        super(BandNoise, self).loadState(state)
         self._center_frequency = state['center_frequency']
         self._width = state['width']
 
@@ -408,19 +418,81 @@ class BandNoise(AbstractStimulusComponent):
         state['width'] = self._width
         return state
 
-class Modulation(AbstractStimulusComponent):
-    modulation_frequency = None
+
+class Modulation(PureTone):
+    name = "modulations"
+    explore = False
+    protocol = False
+    _modulation = 0
+    _mod_frequency = 0
+
+    def modulation(self):
+        return self._modulation
+
+    def setModulation(self, modulation):
+        self._modulation = modulation
+
+    def mod_frequency(self):
+        return self._mod_frequency
+
+    def setModFrequency(self, mod_frequency):
+        self._mod_frequency = mod_frequency
+
+    def auto_details(self):
+        details = super(Modulation, self).auto_details()
+        details['mod_frequency'] = {'unit': 'Hz', 'min': 0, 'max': 200000}
+        details['modulation'] = {'unit': '%', 'min': 0, 'max': 100}
+        return details
+
+    def loadState(self, state):
+        super(Modulation, self).loadState(state)
+        self._mod_frequency = state['mod_frequency']
+        self._modulation = state['modulation']
+
+    def stateDict(self):
+        state = super(Modulation, self).stateDict()
+        state['mod_frequency'] = self._mod_frequency
+        state['modulation'] = self._modulation
+        return state
+
 
 class SAM(Modulation):
-    """Sinusodal Amplitude Modulation"""
-    name = "sam"
+    """Sinusoidal Amplitude Modulation"""
+    name = "S.A.M."
+    explore = True
+    protocol = True
+    _mod_frequency = 0
+    _modulation = 0
+
+    def signal(self, fs, atten, caldb, calv):
+        npts = int(self._duration * fs)
+        t = np.linspace(0, self._duration, npts) \
+ \
+        # test = (1 + (self._modulation/100) * np.cos(2 * np.pi * self._mod_frequency * t)) * np.sin(2 * np.pi * self._frequency * t)
+
+        carrier_tone = \
+        make_carrier_tone(self._frequency, self._intensity + atten, self._duration, fs, caldb=caldb, calv=calv)[0]
+        modulation_tone = np.sin(2 * np.pi * self._mod_frequency * t)
+
+        sig = (1 + (self._modulation / 100) * modulation_tone) * carrier_tone
+
+        if self._risefall > 0:
+            rf_npts = int(self._risefall * fs) / 2
+            wnd = hann(rf_npts * 2)  # cosine taper
+            sig[:rf_npts] = sig[:rf_npts] * wnd[:rf_npts]
+            sig[-rf_npts:] = sig[-rf_npts:] * wnd[rf_npts:]
+
+        return sig
+
 
 class SquareWaveModulation(Modulation):
     name = "squaremod"
 
+
 class SFM(AbstractStimulusComponent):
-    """Sinusodal Frequency Modulation"""
+    """Sinusoidal Frequency Modulation"""
     name = "sfm"
+
 
 class Ripples(AbstractStimulusComponent):
     name = "ripples"
