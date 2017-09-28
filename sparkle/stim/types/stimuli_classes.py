@@ -472,7 +472,7 @@ class SAM(Modulation):
 
         carrier_tone = \
         make_carrier_tone(self._frequency, self._intensity + atten, self._duration, fs, caldb=caldb, calv=calv)[0]
-        modulation_tone = np.sin(2 * np.pi * self._mod_frequency * t)
+        modulation_tone = np.cos(2 * np.pi * self._mod_frequency * t + np.pi)
 
         sig = (1 + (self._modulation / 100) * modulation_tone) * carrier_tone
 
